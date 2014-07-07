@@ -28,10 +28,12 @@ endif()
 
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec )
 
-ADD_EXECUTABLE ( ${TESTS_MODULE}  ${${TESTS_MODULE}_SRC} )
+LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
+
+ADD_EXECUTABLE ( ${TESTS_MODULE} ${${TESTS_MODULE}_SRC} )
 
 # TODO: Library names should be taken from variables
-TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} )
+TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} )
 
 # Installation instructions for the test module
 # Please specify the installation instructions sprcific
