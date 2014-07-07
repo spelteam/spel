@@ -5,6 +5,10 @@
 
 class HogDetector : public Detector
 {
+  public:
+    void train(vector <Frame> frames, int id);
+    vector <LimbLabel> detect(Frame frame, vector <float> params);
+  private:
 };
 
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

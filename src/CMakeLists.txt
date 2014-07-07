@@ -70,7 +70,7 @@ ENDIF()
 # Recurse into subdirectory
 # Compile Google Test Framework
 IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
-  ADD_DEFINITIONS ( "-DATOM_TEST" )
+  ADD_DEFINITIONS ( "-DPOSE_TEST" )
   IF ( MSVC )
     ADD_DEFINITIONS ( -D_VARIADIC_MAX=10 )
   ENDIF ()
