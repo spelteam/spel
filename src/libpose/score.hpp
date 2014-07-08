@@ -1,25 +1,24 @@
-#ifndef SCORE_H
-#define SCORE_H
+#ifndef _SCORE_HPP_
+#define _SCORE_HPP_
 
-#include <string.h>
+#include <string>
 
-class LimbLabel
+using namespace std;
+
+class Score
 {
-
-public:
-
+  public:
     Score();
-    Score(float sc, string name)
-
+    Score(float sc, string name);
     Score & operator=(const Score &s);
     bool operator<(const Score &s) const;
     bool operator>(const Score &s) const;
     bool operator==(const Score &s) const;
     bool operator!=(const Score &s) const;
-
-private:
+  private:
     float score; //detection score
     string detName; //detector name
+};
 
-
-}
+#endif  // _SCORE_HPP_
+ 

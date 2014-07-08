@@ -6,3 +6,4 @@ class Skeleton
 };
 
 #endif  // _LIBPOSE_SKELETON_HPP_
+

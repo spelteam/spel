@@ -12,3 +12,4 @@ class HogDetector : public Detector
 };
 
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_
+

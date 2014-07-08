@@ -23,7 +23,7 @@ LIST ( APPEND ${LIBPOSE_MODULE}_SRC frame)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC colorHistDetector)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC surfDetector)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC hogDetector)
-
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC score)
 
 
 # Create a static library

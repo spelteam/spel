@@ -12,3 +12,4 @@ class ColorHistDetector : public Detector
 };
 
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_
+

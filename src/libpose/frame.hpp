@@ -19,3 +19,4 @@ class Frame
 };
 
 #endif  // _LIBPOSE_FRAME_HPP_
+

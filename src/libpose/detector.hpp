@@ -16,3 +16,4 @@ class Detector
 };
 
 #endif  // _LIBPOSE_DETECTOR_HPP_
+

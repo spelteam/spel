@@ -1,5 +1,13 @@
 #include <gtest/gtest.h>
+#ifdef WINDOWS
+#include <conio.h>
+#endif  // WINDOWS
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  int res = RUN_ALL_TESTS();
+#ifdef WINDOWS
+  getch();
+#endif  // WINDOWS
+  return res;
 }
+
