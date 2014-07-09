@@ -11,11 +11,13 @@ using namespace cv;
 class Frame
 {
   public:
-    vector <Point2f> getPartPolygon(int partID);
+    virtual vector <Point2f> getPartPolygon(int partID);
   private:
+    int id;
     Mat image;
     Mat mask;
     Skeleton skeleton;
+    Point2f groundPoint;
 };
 
 #endif  // _LIBPOSE_FRAME_HPP_

@@ -8,7 +8,7 @@ using namespace std;
 class Score
 {
   public:
-    Score();
+    Score(void);
     Score(float sc, string name);
     Score & operator=(const Score &s);
     bool operator<(const Score &s) const;
