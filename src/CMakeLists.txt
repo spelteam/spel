@@ -26,6 +26,11 @@ SET ( ${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME
 # Add definition of project version
 ADD_DEFINITIONS ( -D_POSE_VERSION_="${${PROJECT_NAME}_VERSION}" )
 
+SET ( CMAKE_MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/cmake" )
+
+# Move this to the destination project
+FIND_PACKAGE ( OpenGM REQUIRED )
+
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
 
 # Command line options, their defaults and checks
