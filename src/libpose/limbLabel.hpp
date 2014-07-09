@@ -28,7 +28,7 @@ class LimbLabel
     void addScore(Score detectionScore);
   private:
 // identifier representing what bone this label belongs to
-    int limbId;
+    int limbID;
 // Label center 
     Point2f center;
 // degrees rotation from y=0 (horizontal line)

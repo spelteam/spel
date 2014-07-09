@@ -29,7 +29,13 @@ else()
   ADD_DEFINITIONS ( -DGTEST_HAS_PTHREAD=0 )
 endif()
 
+# main test file
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec )
+
+# libpose tests
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyPart_get_and_set_tests )
+
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )
