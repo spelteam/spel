@@ -11,6 +11,19 @@ class BodyPart
   public:
     BodyPart(void);
     BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint);
+// get and set
+    int getPartID(void);
+    void setPartID(int _partID);
+    string getPartName(void);
+    void setPartName(string _partName);
+    BodyJoint *getParentJoint(void);
+    void setParentJoint(BodyJoint *_parentJoint);
+    BodyJoint *getChildJoint(void);
+    void setChildJoint(BodyJoint *_childJoint);
+    bool getIsOccluded(void);
+    void setIsOccluded(bool _isOccluded);
+    float getSpaceLength(void);
+    void setSpaceLength(float _spaceLength);
   private:
     int partID;
     string partName;
