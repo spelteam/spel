@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="12.2">
+  <zoom_level>9</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>657</x>
+      <y>189</y>
+      <w>486</w>
+      <h>270</h>
+    </coordinates>
+    <panel_attributes>LimbLabel
+--
++limbId: int
++center: cv:Point2f
++angle: float
++polygon: vector&lt;Point2f&gt;
++scores: vector&lt;Score&gt;
++isWeak: bool
++isOccluded: bool
+--
++LimbLabel()
++LimbLabel(id:int, centre: Point2f, angle: float, polygon: vector&lt;Point2f&gt;, scores: vector&lt;Score&gt;)
++addScore(detectionScore: Score)
++getEndPoints(p0: Point2f&amp;, p1: Point2f)
++operator=: Score&amp;
++operator==: bool
++operator!=: bool
++operator&gt;: bool
++operator&lt;: bool</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>918</x>
+      <y>0</y>
+      <w>261</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>Notes:
+ 
+* cv: refers to  OpenCV
+ 
+* "polygon" in generated LimbLabel 
+  can consist of any number of 
+  points, but the generated LimbLabels 
+  should have the same number of 
+  points in polygon as the polygon 
+  returned by getPartPolygon operation
+  
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>657</x>
+      <y>468</y>
+      <w>216</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>Score
+--
++score: float
++detName: string
+--
++Score()
++Score(sc: float, name: string)
++operator=: Score&amp;
++operator&lt;: bool
++operator&gt;: bool
++operator==: bool
++operator!=: bool
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>99</x>
+      <y>342</y>
+      <w>459</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>BodyPart
+--
++partId: int
++partName: string
++parentJoint: BodyJoint*
++childJoint: BodyJoint*
++isOccluded: bool
++spaceLength: float 
+--
+BodyPart()
+BodyPart(id: int, name: string, pJoint: BodyJoint*, cJoint: BodyJoint*)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>99</x>
+      <y>522</y>
+      <w>324</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>BodyJoint
+--
++limbId: int
++jointName: string
++imageLocation: cv:Point2f
++spaceLocation: cv:Point3f
++depthSign: bool
+--
+BodyJoint()
+BodyJoint(id: int, name: string, imgLoc: Point2f)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>81</x>
+      <y>315</y>
+      <w>495</w>
+      <h>360</h>
+    </coordinates>
+    <panel_attributes>*Skeletal Structure*
+bg=orange</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>81</x>
+      <y>90</y>
+      <w>207</w>
+      <h>189</h>
+    </coordinates>
+    <panel_attributes>Skeleton
+--
++name: string
++partTree: tree&lt;BodyPart&gt;
++jointTree: tree&lt;BodyJoint&gt;
++scale: float
+--
++toString(): string
++learnDepth(skel: Skeleton&amp;)
++infer2D()
++operator=: Skeleton&amp;
++operator==: bool
++operator!=: bool</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>639</x>
+      <y>162</y>
+      <w>540</w>
+      <h>495</h>
+    </coordinates>
+    <panel_attributes>*Part Labelling*
+bg=orange</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>648</x>
+        <y>702</y>
+        <w>450</w>
+        <h>99</h>
+      </coordinates>
+      <panel_attributes>/Detector/
+--
++id: int
+-model: &lt;T&gt;
+--
+/+train(frames: vector&lt;Frame&gt;, id: int)/
+/+detect(frame: Frame, params: vector&lt;float&gt;): vector&lt;LimbLabel&gt;/</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>522</x>
+        <y>855</y>
+        <w>198</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>ColorHistDetector
+--
+
+--
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>585</x>
+        <y>774</y>
+        <w>170</w>
+        <h>98</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>153;27;27;81</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>972</x>
+        <y>855</y>
+        <w>198</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>HogDetector
+--
+
+--
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>936</x>
+        <y>774</y>
+        <w>152</w>
+        <h>98</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>27;27;135;81</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>747</x>
+        <y>855</y>
+        <w>198</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>SurfDetector
+--
+
+--
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>819</x>
+        <y>774</y>
+        <w>44</w>
+        <h>98</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>27;27;27;81</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Note</type>
+      <coordinates>
+        <x>531</x>
+        <y>891</y>
+        <w>162</w>
+        <h>63</h>
+      </coordinates>
+      <panel_attributes>Implement
+bg=green</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Note</type>
+      <coordinates>
+        <x>954</x>
+        <y>684</y>
+        <w>162</w>
+        <h>63</h>
+      </coordinates>
+      <panel_attributes>Implement
+bg=green</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>81</x>
+        <y>702</y>
+        <w>324</w>
+        <h>117</h>
+      </coordinates>
+      <panel_attributes>/Frame/
+--
++id: int
++image: cv:Mat 
++mask: cv:Mat
++skeleton: Skeleton
++groundPoint: Point2f
+--
+/+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;/
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>81</x>
+        <y>864</y>
+        <w>108</w>
+        <h>63</h>
+      </coordinates>
+      <panel_attributes>Keyframe
+--
+ 
+--</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>198</x>
+        <y>864</y>
+        <w>99</w>
+        <h>63</h>
+      </coordinates>
+      <panel_attributes>Interpolation
+--
+ 
+--</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>306</x>
+        <y>864</y>
+        <w>99</w>
+        <h>63</h>
+      </coordinates>
+      <panel_attributes>Lockframe
+--
+ 
+--</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>99</x>
+        <y>792</y>
+        <w>143</w>
+        <h>89</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>126;27;27;72</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>216</x>
+        <y>792</y>
+        <w>44</w>
+        <h>89</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>27;27;27;72</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>243</x>
+        <y>792</y>
+        <w>134</w>
+        <h>89</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>27;27;117;72</additional_attributes>
+    </element>
+  </group>
+</diagram>
