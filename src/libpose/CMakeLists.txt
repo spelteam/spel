@@ -13,6 +13,7 @@ IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH )
 ENDIF()
 FIND_PACKAGE ( OpenCV REQUIRED )
 INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
 
 # Command line options, their defaults and checks
 
