@@ -87,5 +87,5 @@ ADD_SUBDIRECTORY ( libpose )
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
-SET ( GOOGLE_TEST_PATH "../googletest" CACHE STRING "Path to Google Test Framework" )
+SET ( GOOGLE_TEST_PATH "../thirdparty/googletest" CACHE STRING "Path to Google Test Framework" )
 
