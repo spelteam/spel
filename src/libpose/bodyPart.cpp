@@ -1,14 +1,22 @@
 #include "bodyPart.hpp"
 BodyPart::BodyPart(void)
 {
+  setPartID(0);
+  setPartName("");
+  setParentJoint(0);
+  setChildJoint(0);
+  setIsOccluded(false);
+  setSpaceLength(0);
 }
 
-BodyPart::BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint)
+BodyPart::BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint, bool isOcc, float spaceLen)
 {
   setPartID(id);
   setPartName(name);
   setParentJoint(pJoint);
   setChildJoint(cJoint);
+  setIsOccluded(isOcc);
+  setSpaceLength(spaceLen);
 }
 
 int BodyPart::getPartID(void)

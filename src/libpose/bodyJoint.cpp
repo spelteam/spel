@@ -2,13 +2,20 @@
 
 BodyJoint::BodyJoint(void)
 {
+  setLimbID(0);
+  setJointName("");
+  setImageLocation({0.0, 0.0});
+  setSpaceLocation({0.0, 0.0, 0.0});
+  setDepthSign(false);
 }
 
-BodyJoint::BodyJoint(int id, string name, Point2f imgLoc)
+BodyJoint::BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc, bool depth)
 {
   setLimbID(id);
   setJointName(name);
   setImageLocation(imgLoc);
+  setSpaceLocation(spaceLoc);
+  setDepthSign(depth);
 }
 
 int BodyJoint::getLimbID(void)

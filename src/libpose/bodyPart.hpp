@@ -10,7 +10,7 @@ class BodyPart
 {
   public:
     BodyPart(void);
-    BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint);
+    BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint, bool isOcc = false, float spaceLen = 0);
 // get and set
     int getPartID(void);
     void setPartID(int _partID);

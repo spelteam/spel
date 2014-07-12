@@ -11,7 +11,7 @@ class Skeleton
 {
   public:
     Skeleton(void);
-    void fromXml(string filename)
+    void fromXml(string filename);
     string toString(void);
     void learnDepth(Skeleton &skel);
     void infer2D(void);
