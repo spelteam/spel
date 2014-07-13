@@ -13,15 +13,15 @@ class BodyJoint
     BodyJoint(void);
     BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc = {0.0, 0.0, 0.0}, bool depth = false);
 // get and set
-    int getLimbID(void);
+    int getLimbID(void) const;
     void setLimbID(int _limbID);
-    string getJointName(void);
+    string getJointName(void) const;
     void setJointName(string _jointName);
-    Point2f getImageLocation(void);
+    Point2f getImageLocation(void) const;
     void setImageLocation(Point2f _imageLocation);
-    Point3f getSpaceLocation(void);
+    Point3f getSpaceLocation(void) const;
     void setSpaceLocation(Point3f _spaceLocation);
-    bool getDepthSign(void);
+    bool getDepthSign(void) const;
     void setDepthSign(bool _depthSign);
   private:
     int limbID;

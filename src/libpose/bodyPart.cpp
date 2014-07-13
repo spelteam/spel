@@ -19,7 +19,7 @@ BodyPart::BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint, bo
   setSpaceLength(spaceLen);
 }
 
-int BodyPart::getPartID(void)
+int BodyPart::getPartID(void) const
 {
   return partID;
 }
@@ -29,7 +29,7 @@ void BodyPart::setPartID(int _partID)
   partID = _partID;
 }
 
-string BodyPart::getPartName(void)
+string BodyPart::getPartName(void) const
 {
   return partName;
 }
@@ -39,7 +39,7 @@ void BodyPart::setPartName(string _partName)
   partName = _partName;
 }
 
-BodyJoint *BodyPart::getParentJoint(void)
+BodyJoint *BodyPart::getParentJoint(void) const
 {
   return parentJoint;
 }
@@ -49,7 +49,7 @@ void BodyPart::setParentJoint(BodyJoint *_parentJoint)
   parentJoint = _parentJoint;
 }
 
-BodyJoint *BodyPart::getChildJoint(void)
+BodyJoint *BodyPart::getChildJoint(void) const
 {
   return childJoint;
 }
@@ -59,7 +59,7 @@ void BodyPart::setChildJoint(BodyJoint *_childJoint)
   childJoint = _childJoint;
 }
 
-bool BodyPart::getIsOccluded(void)
+bool BodyPart::getIsOccluded(void) const
 {
   return isOccluded;
 }
@@ -69,7 +69,7 @@ void BodyPart::setIsOccluded(bool _isOccluded)
   isOccluded = _isOccluded;
 }
 
-float BodyPart::getSpaceLength(void)
+float BodyPart::getSpaceLength(void) const
 {
   return spaceLength;
 }
@@ -77,5 +77,15 @@ float BodyPart::getSpaceLength(void)
 void BodyPart::setSpaceLength(float _spaceLength)
 {
   spaceLength = _spaceLength;
+}
+
+bool BodyPart::operator==(const BodyPart &bp) const
+{
+  return this->getPartID() == bp.getPartID();
+}
+
+bool BodyPart::operator!=(const BodyPart &bp) const
+{
+  return !(*this == bp);
 }
 

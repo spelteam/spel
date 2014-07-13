@@ -11,6 +11,7 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${LIBPOSE_MODULE}" )
 
 FIND_PACKAGE ( OpenCV REQUIRED )
 INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
 
 OPTION ( DISABLE_PTHREADS "Do not use pthreads" OFF )
 
@@ -35,6 +36,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PA
 # libpose tests
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyPart_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/frame_get_and_set_tests )
 
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
