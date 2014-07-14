@@ -15,5 +15,8 @@ TEST(bodyPartTest, OperatorsTest)
 
   EXPECT_TRUE(bp1 == bp2);
   EXPECT_FALSE(bp1 != bp2);
+
+  delete parentJoint;
+  delete childJoint;
 }
 
