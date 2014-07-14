@@ -4,7 +4,7 @@
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>800</x>
+      <x>816</x>
       <y>40</y>
       <w>232</w>
       <h>152</h>
@@ -26,7 +26,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>0</x>
+      <x>16</x>
       <y>248</y>
       <w>184</w>
       <h>184</h>
@@ -39,6 +39,14 @@ bg=blue</panel_attributes>
 +scale: float
 --
 +Skeleton()
++getName(): string
++setName(_name: string)
++getPartTree(): tree&lt;BodyPart&gt;
++setPartTree(_partTree: tree&lt;BodyPart&gt;)
++getJointTree(): tree&lt;JointTree&gt;
++setJointTree(_jointTree: tree&lt;BodyJoint&gt;)
++getScale(): float
++setScale(_scale: float)
 +fromXml(filename: string)
 +toString(): string
 +learnDepth(skel: Skeleton&amp;)
@@ -51,7 +59,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>216</x>
+      <x>232</x>
       <y>272</y>
       <w>392</w>
       <h>88</h>
@@ -71,7 +79,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>632</x>
+      <x>648</x>
       <y>272</y>
       <w>392</w>
       <h>88</h>
@@ -91,7 +99,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>0</x>
+      <x>16</x>
       <y>0</y>
       <w>424</w>
       <h>232</h>
@@ -120,7 +128,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Package</type>
     <coordinates>
-      <x>200</x>
+      <x>216</x>
       <y>248</y>
       <w>832</w>
       <h>120</h>
@@ -132,7 +140,7 @@ bg=red</panel_attributes>
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>512</x>
+      <x>528</x>
       <y>208</y>
       <w>112</w>
       <h>56</h>
@@ -146,113 +154,7 @@ bg=yellow</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>0</x>
-        <y>1112</y>
-        <w>288</w>
-        <h>240</h>
-      </coordinates>
-      <panel_attributes>/Frame/
---
-+id: int
-+image: cv:Mat 
-+mask: cv:Mat
-+skeleton: Skeleton
-+groundPoint: Point2f
---
-/+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;/
-+getID(): int
-+setID(_id: int)
-+getImage(): Mat
-+setImage(_image: Mat)
-+getMask(): Mat
-+setMask(_mask: Mat)
-+getSkeleton(): Skeleton
-+setSkeleton(_skeleton: Skeleton)
-+getGroundPoint(): Point2f
-+setGroundPoint(_groundPoint: Point2f)</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>0</x>
-        <y>1392</y>
-        <w>96</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>Keyframe
---
- 
---</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>104</x>
-        <y>1392</y>
-        <w>88</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>Interpolation
---
- 
---</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>200</x>
-        <y>1392</y>
-        <w>88</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>Lockframe
---
- 
---</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>136</x>
-        <y>1328</y>
-        <w>120</w>
-        <h>80</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;104;64</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>112</x>
-        <y>1328</y>
-        <w>40</w>
-        <h>80</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;24;64</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>8</x>
-        <y>1328</y>
-        <w>128</w>
-        <h>80</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>112;24;24;64</additional_attributes>
-    </element>
-  </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>592</x>
+        <x>608</x>
         <y>664</y>
         <w>192</w>
         <h>152</h>
@@ -273,7 +175,7 @@ bg=yellow</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>592</x>
+        <x>608</x>
         <y>416</y>
         <w>568</w>
         <h>240</h>
@@ -300,7 +202,7 @@ bg=yellow</panel_attributes>
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>584</x>
+        <x>600</x>
         <y>392</y>
         <w>592</w>
         <h>432</h>
@@ -312,21 +214,9 @@ bg=orange</panel_attributes>
   </group>
   <group>
     <element>
-      <type>com.umlet.element.Note</type>
-      <coordinates>
-        <x>880</x>
-        <y>992</y>
-        <w>144</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>Implement
-bg=green</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>592</x>
+        <x>608</x>
         <y>1000</y>
         <w>432</w>
         <h>128</h>
@@ -338,36 +228,26 @@ bg=green</panel_attributes>
 +getId(): int
 +setId(int _id) 
 +train(frames: vector&lt;Frame&gt;, id: int)
-+detect(frame: Frame, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
++detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
 </panel_attributes>
       <additional_attributes/>
     </element>
     <element>
-      <type>com.umlet.element.Relation</type>
+      <type>com.umlet.element.Note</type>
       <coordinates>
-        <x>616</x>
-        <y>944</y>
-        <w>592</w>
-        <h>72</h>
+        <x>896</x>
+        <y>992</y>
+        <w>144</w>
+        <h>56</h>
       </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>576;24;24;56</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>1080</x>
-        <y>944</y>
-        <w>248</w>
-        <h>72</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>232;24;24;56</additional_attributes>
+      <panel_attributes>Implement
+bg=green</panel_attributes>
+      <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>1048</x>
+        <x>1064</x>
         <y>1000</y>
         <w>424</w>
         <h>128</h>
@@ -379,14 +259,32 @@ bg=green</panel_attributes>
 +getId(): int
 +setId(int _id) 
 +train(frames: vector&lt;Frame&gt;, id: int)
-+detect(frame: Frame, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
++detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
 </panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>1144</x>
+        <x>1504</x>
+        <y>1000</y>
+        <w>416</w>
+        <h>128</h>
+      </coordinates>
+      <panel_attributes>HogDetector
+--
+
+--
++getId(): int
++setId(int _id) 
++train(frames: vector&lt;Frame&gt;, id: int)
++detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1160</x>
         <y>856</y>
         <w>456</w>
         <h>112</h>
@@ -399,42 +297,13 @@ bg=green</panel_attributes>
 /+getId(): int/
 /+setId(int _id)/
 /+train(frames: vector&lt;Frame&gt;, id: int)/
-/+detect(frame: Frame, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;/</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>1368</x>
-        <y>944</y>
-        <w>192</w>
-        <h>72</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;176;56</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>1488</x>
-        <y>1000</y>
-        <w>416</w>
-        <h>128</h>
-      </coordinates>
-      <panel_attributes>HogDetector
---
-
---
-+getId(): int
-+setId(int _id) 
-+train(frames: vector&lt;Frame&gt;, id: int)
-+detect(frame: Frame, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;</panel_attributes>
+/+detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;/</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Note</type>
       <coordinates>
-        <x>1392</x>
+        <x>1408</x>
         <y>840</y>
         <w>144</w>
         <h>56</h>
@@ -443,15 +312,48 @@ bg=green</panel_attributes>
 bg=green</panel_attributes>
       <additional_attributes/>
     </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>1384</x>
+        <y>944</y>
+        <w>192</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>24;24;176;56</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>1096</x>
+        <y>944</y>
+        <w>248</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>232;24;24;56</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>632</x>
+        <y>944</y>
+        <w>592</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>576;24;24;56</additional_attributes>
+    </element>
   </group>
   <group>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>16</x>
-        <y>824</y>
+        <x>32</x>
+        <y>848</y>
         <w>288</w>
-        <h>248</h>
+        <h>272</h>
       </coordinates>
       <panel_attributes>BodyJoint
 --
@@ -472,16 +374,18 @@ bg=green</panel_attributes>
 +getSpaceLocation(): Point3f
 +setSpaceLocation(_spaceLocation: Point3f)
 +getDepthSign(): bool
-+setDepthSign(_depthSign: bool)</panel_attributes>
++setDepthSign(_depthSign: bool)
++operator==: bool
++operator!=: bool</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>16</x>
+        <x>32</x>
         <y>528</y>
         <w>544</w>
-        <h>288</h>
+        <h>312</h>
       </coordinates>
       <panel_attributes>BodyPart
 --
@@ -506,20 +410,133 @@ bg=green</panel_attributes>
 +setIsOccluded(_isOccluded: bool)
 +getSpaceLength(): float
 +setSpaceLength(_spaceLength: float)
++operator==: bool
++operator!=: bool
 </panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>0</x>
+        <x>16</x>
         <y>504</y>
         <w>568</w>
-        <h>576</h>
+        <h>624</h>
       </coordinates>
       <panel_attributes>*Skeletal Structure*
 bg=orange</panel_attributes>
       <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>264</x>
+        <y>1144</y>
+        <w>288</w>
+        <h>240</h>
+      </coordinates>
+      <panel_attributes>/Frame/
+--
++id: int
++image: cv:Mat 
++mask: cv:Mat
++skeleton: Skeleton
++groundPoint: Point2f
+--
++Frame()
++~Frame()
+/+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;/
++getID(): int
++setID(_id: int)
++getImage(): Mat
++setImage(_image: Mat)
++getMask(): Mat
++setMask(_mask: Mat)
++getSkeleton(): Skeleton
++setSkeleton(_skeleton: Skeleton)
++getGroundPoint(): Point2f
++setGroundPoint(_groundPoint: Point2f)</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>16</x>
+        <y>1416</y>
+        <w>248</w>
+        <h>56</h>
+      </coordinates>
+      <panel_attributes>Keyframe
+--
+ 
+--
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>272</x>
+        <y>1416</y>
+        <w>248</w>
+        <h>56</h>
+      </coordinates>
+      <panel_attributes>Interpolation
+--
+ 
+--
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>528</x>
+        <y>1416</y>
+        <w>248</w>
+        <h>56</h>
+      </coordinates>
+      <panel_attributes>Lockframe
+--
+ 
+--
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>400</x>
+        <y>1360</y>
+        <w>184</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>24;24;168;56</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>376</x>
+        <y>1360</y>
+        <w>104</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>24;24;88;56</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>24</x>
+        <y>1360</y>
+        <w>376</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>360;24;24;56</additional_attributes>
     </element>
   </group>
 </diagram>
