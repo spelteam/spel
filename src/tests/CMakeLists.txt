@@ -35,8 +35,19 @@ LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PA
 
 # libpose tests
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_constructor_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_operators_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyPart_get_and_set_tests )
-LIST ( APPEND ${TESTS_MODULE}_SRC libpose/frame_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyPart_constructor_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyPart_operators_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/keyframe_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/lockframe_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/interpolation_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_operators_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/colorHistDetector_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/hogDetector_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/surfDetector_get_and_set_tests )
 
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )

@@ -13,7 +13,7 @@ class Frame
   public:
     Frame(void);
     virtual ~Frame(void);
-    virtual vector <Point2f> getPartPolygon(int partID);
+    virtual vector <Point2f> getPartPolygon(int partID) = 0;
     int getID(void);
     void setID(int _id); 
     Mat getImage(void);

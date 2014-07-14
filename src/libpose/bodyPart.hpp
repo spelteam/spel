@@ -13,7 +13,6 @@ class BodyPart
     BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint, bool isOcc = false, float spaceLen = 0);
     bool operator==(const BodyPart &bp) const;
     bool operator!=(const BodyPart &bp) const;
-
 // get and set
     int getPartID(void) const;
     void setPartID(int _partID);

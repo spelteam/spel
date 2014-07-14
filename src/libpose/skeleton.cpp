@@ -6,15 +6,61 @@ Skeleton::Skeleton(void)
 
 Skeleton &Skeleton::operator=(const Skeleton &s)
 {
-  //this->setName() =   
+  this->setName(s.getName());
+  this->setPartTree(s.getPartTree());
+  this->setJointTree(s.getJointTree());
+  this->setScale(s.getScale());
 }
 
 bool Skeleton::operator==(const Skeleton &s) const
 {
-  return equal(this->partTree.begin(), this->partTree.end(), s.partTree.begin());
+  tree <BodyPart> src1 = this->getPartTree();
+  tree <BodyPart> src2 = s.getPartTree();
+  return equal(src1.begin(), src1.end(), src2.begin());
 }
 
 bool Skeleton::operator!=(const Skeleton &s) const
 {
   return !(*this == s);
 }
+
+string Skeleton::getName(void) const
+{
+  return name;
+}
+
+void Skeleton::setName(string _name)
+{
+  name = _name;
+}
+
+tree <BodyPart> Skeleton::getPartTree(void) const
+{
+  return partTree;
+}
+
+void Skeleton::setPartTree(tree <BodyPart> _partTree)
+{
+  partTree = _partTree;
+}
+
+tree <BodyJoint> Skeleton::getJointTree(void) const
+{
+  return jointTree;
+}
+
+void Skeleton::setJointTree(tree <BodyJoint> _jointTree)
+{
+  jointTree = _jointTree;
+}
+
+float Skeleton::getScale(void) const
+{
+  return scale;
+}
+
+void Skeleton::setScale(float _scale)
+{
+  scale = _scale;
+}
+

@@ -59,10 +59,10 @@ void Frame::setGroundPoint(Point2f _groundPoint)
 }
 
 //TODO(Vitaliy Koshura): write real implementation
-vector <Point2f> Frame::getPartPolygon(int partID)
+/*vector <Point2f> Frame::getPartPolygon(int partID)
 {
   vector <Point2f> result;
 
   return result;
-}
+}*/
 

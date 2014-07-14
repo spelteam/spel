@@ -68,3 +68,13 @@ void BodyJoint::setDepthSign(bool _depthSign)
   depthSign = _depthSign;
 }
 
+bool BodyJoint::operator==(const BodyJoint &bj) const
+{
+  return this->getLimbID() == bj.getLimbID();
+}
+
+bool BodyJoint::operator!=(const BodyJoint &bj) const
+{
+  return !(*this == bj);
+}
+

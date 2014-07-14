@@ -18,6 +18,14 @@ class Skeleton
     Skeleton & operator=(const Skeleton &s);
     bool operator==(const Skeleton &s) const;
     bool operator!=(const Skeleton &s) const;
+    string getName(void) const;
+    void setName(string _name);
+    tree <BodyPart> getPartTree(void) const;
+    void setPartTree(tree <BodyPart> _partTree);
+    tree <BodyJoint> getJointTree(void) const;
+    void setJointTree(tree <BodyJoint> _jointTree);
+    float getScale(void) const;
+    void setScale(float _scale);
   private:
     string name;
     tree <BodyPart> partTree;

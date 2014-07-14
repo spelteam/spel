@@ -6,6 +6,7 @@
 class Interpolation : public Frame
 {
   public:
+    vector <Point2f> getPartPolygon(int partID);
   private:
 };
 
