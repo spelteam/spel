@@ -8,6 +8,13 @@
 using namespace std;
 using namespace cv;
 
+enum FRAMETYPE
+{
+  KEYFRAME = 0x00,
+  LOCKFRAME = 0x01,
+  INTERPOLATIONFRAME = 0x02
+};
+
 class Frame
 {
   public:
@@ -24,6 +31,7 @@ class Frame
     void setSkeleton(Skeleton _skeleton);
     Point2f getGroundPoint(void);
     void setGroundPoint(Point2f _groundPoint);
+    virtual FRAMETYPE getFrametype(void) = 0;
   private:
     int id;
     Mat image;
