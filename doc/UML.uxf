@@ -433,9 +433,9 @@ bg=orange</panel_attributes>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>264</x>
-        <y>1144</y>
+        <y>1160</y>
         <w>288</w>
-        <h>240</h>
+        <h>272</h>
       </coordinates>
       <panel_attributes>/Frame/
 --
@@ -457,59 +457,66 @@ bg=orange</panel_attributes>
 +getSkeleton(): Skeleton
 +setSkeleton(_skeleton: Skeleton)
 +getGroundPoint(): Point2f
-+setGroundPoint(_groundPoint: Point2f)</panel_attributes>
++setGroundPoint(_groundPoint: Point2f)
+/+getFrametype(): FRAMETYPE/</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>16</x>
-        <y>1416</y>
+        <y>1464</y>
         <w>248</w>
-        <h>56</h>
+        <h>88</h>
       </coordinates>
       <panel_attributes>Keyframe
 --
- 
++frameType: FRAMETYPE
 --
-+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;</panel_attributes>
+Keyframe()
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
++getFrametype(): FRAMETYPE</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>272</x>
-        <y>1416</y>
+        <y>1464</y>
         <w>248</w>
-        <h>56</h>
+        <h>88</h>
       </coordinates>
       <panel_attributes>Interpolation
 --
- 
++frameType: FRAMETYPE
 --
-+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;</panel_attributes>
+Interpolation()
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
++getFrametype(): FRAMETYPE</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>528</x>
-        <y>1416</y>
+        <y>1464</y>
         <w>248</w>
-        <h>56</h>
+        <h>88</h>
       </coordinates>
       <panel_attributes>Lockframe
 --
- 
++frameType: FRAMETYPE
 --
-+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;</panel_attributes>
+Lovkframe()
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
++getFrametype(): FRAMETYPE</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
         <x>400</x>
-        <y>1360</y>
+        <y>1408</y>
         <w>184</w>
         <h>72</h>
       </coordinates>
@@ -520,7 +527,7 @@ bg=orange</panel_attributes>
       <type>com.umlet.element.Relation</type>
       <coordinates>
         <x>376</x>
-        <y>1360</y>
+        <y>1408</y>
         <w>104</w>
         <h>72</h>
       </coordinates>
@@ -531,7 +538,7 @@ bg=orange</panel_attributes>
       <type>com.umlet.element.Relation</type>
       <coordinates>
         <x>24</x>
-        <y>1360</y>
+        <y>1408</y>
         <w>376</w>
         <h>72</h>
       </coordinates>
