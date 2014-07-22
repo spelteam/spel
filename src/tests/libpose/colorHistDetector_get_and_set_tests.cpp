@@ -8,5 +8,7 @@ TEST(colorHistDetectorTest, GetAndSetTest)
   chd.setID(id);
   
   EXPECT_EQ(id, chd.getID());
+// get a constant
+  EXPECT_EQ(8, chd.getNBins());
 }
 
