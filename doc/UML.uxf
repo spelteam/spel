@@ -218,11 +218,13 @@ bg=orange</panel_attributes>
       <x>608</x>
       <y>1000</y>
       <w>432</w>
-      <h>128</h>
+      <h>192</h>
     </coordinates>
     <panel_attributes>ColorHistDetector
 --
 +nBins: byte
++partHistogramm: vector&lt;vector&lt;vector&lt;float\&gt;&gt;&gt;
++sizeFG: int
 --
 +ColorHistDetector()
 +getId(): int
@@ -230,7 +232,10 @@ bg=orange</panel_attributes>
 +train(frames: vector&lt;Frame&gt;, id: int)
 +detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
 +getNBins(): byte
-+computePixelBelongingLikelihood(r: byte, g: byte, b: byte): float</panel_attributes>
++computePixelBelongingLikelihood(r: byte, g: byte, b: byte): float
++getSizeFG(): int
++setSizeFG(_sizeFG: int)
++setPartHistogramm(partColors: vector &lt;Point3i&gt;&amp;)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -473,10 +478,21 @@ bg=orange</panel_attributes>
 --
 +frameType: FRAMETYPE
 --
-Keyframe()
++Keyframe()
 +getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
 +getFrametype(): FRAMETYPE</panel_attributes>
       <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>24</x>
+        <y>1440</y>
+        <w>376</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>360;24;24;56</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
@@ -490,38 +506,10 @@ Keyframe()
 --
 +frameType: FRAMETYPE
 --
-Interpolation()
++Interpolation()
 +getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
 +getFrametype(): FRAMETYPE</panel_attributes>
       <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>528</x>
-        <y>1496</y>
-        <w>248</w>
-        <h>88</h>
-      </coordinates>
-      <panel_attributes>Lockframe
---
-+frameType: FRAMETYPE
---
-Lovkframe()
-+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
-+getFrametype(): FRAMETYPE</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>400</x>
-        <y>1440</y>
-        <w>184</w>
-        <h>72</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;168;56</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Relation</type>
@@ -537,13 +525,30 @@ Lovkframe()
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>24</x>
+        <x>400</x>
         <y>1440</y>
-        <w>376</w>
+        <w>184</w>
         <h>72</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>360;24;24;56</additional_attributes>
+      <additional_attributes>24;24;168;56</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>528</x>
+        <y>1496</y>
+        <w>248</w>
+        <h>88</h>
+      </coordinates>
+      <panel_attributes>Lockframe
+--
++frameType: FRAMETYPE
+--
++Lockframe()
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
++getFrametype(): FRAMETYPE</panel_attributes>
+      <additional_attributes/>
     </element>
   </group>
 </diagram>
