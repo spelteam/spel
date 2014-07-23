@@ -2,24 +2,37 @@
 #define _LIBPOSE_COLORHISTDETECTOR_HPP_
 
 #include <vector>
+#include <opencv2/opencv.hpp>
 #include "detector.hpp"
 
 using namespace std;
+using namespace cv;
 
 class ColorHistDetector : public Detector
 {
   public:
-    ColorHistDetector(void);
+    ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
     int getID(void);
     void setID(int _id);
     void train(vector <Frame> frames, int id);
     vector <vector <LimbLabel> > detect(Frame *frame, vector <float> params);
     uint8_t getNBins(void);
-    float computePixelBelongingLikelihood(uint8_t r, uint8_t g, uint8_t b);
+    uint32_t getSizeFG(void);
   private:
     int id;
     const uint8_t nBins;
     vector <vector <vector <float>>> partHistogramm;
+    uint32_t sizeFG;
+    bool uniqueExists;
+    uint32_t fgNumSamples;
+    vector <uint32_t> fgSampleSizes;
+    vector <uint32_t> fgBlankSizes;
+
+// sizeFG should never be changed from outside
+    void setSizeFG(uint32_t _sizeFG);
+    float computePixelBelongingLikelihood(uint8_t r, uint8_t g, uint8_t b);
+    void setPartHistogramm(const vector <Point3i> &partColors);
+    void addPartHistogramm(const vector <Point3i> &partColors, uint32_t nBlankPixels);
 };
 
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

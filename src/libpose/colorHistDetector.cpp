@@ -1,13 +1,13 @@
 #include "colorHistDetector.hpp"
 
 //TODO (Vitaliy Koshura): Need unit test
-ColorHistDetector::ColorHistDetector(void) : nBins(8)  // for 32 bit colourspace
+ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
 {
   partHistogramm.resize(nBins);
-  for (int r = 0; r < nBins; r++)
+  for (uint8_t r = 0; r < nBins; r++)
   {
     partHistogramm[r].resize(nBins);
-    for (int g = 0; g < nBins; g++)
+    for (uint8_t g = 0; g < nBins; g++)
     {
       partHistogramm[r][g].resize(nBins);
       for (int b = 0; b < nBins; b++)
@@ -16,6 +16,8 @@ ColorHistDetector::ColorHistDetector(void) : nBins(8)  // for 32 bit colourspace
       }
     }
   }
+  setSizeFG(0);
+  uniqueExists = false;
 }
 
 int ColorHistDetector::getID(void)
@@ -53,3 +55,103 @@ float ColorHistDetector::computePixelBelongingLikelihood(uint8_t r, uint8_t g, u
   return isFG;
 }
 
+void ColorHistDetector::setSizeFG(uint32_t _sizeFG)
+{
+  sizeFG = _sizeFG;
+}
+
+uint32_t ColorHistDetector::getSizeFG(void)
+{
+  return sizeFG;
+}
+
+//TODO (Vitaliy Koshura>: need unit test
+void ColorHistDetector::setPartHistogramm(const vector <Point3i> &partColors)
+{
+  // do not add sample if the number of pixels is zero
+  if (partColors.size() == 0)
+    return;
+  uniqueExists = false;
+  uint8_t factor = ceil(pow(2, 8)/getNBins());  // divide the color space into bins
+  setSizeFG(partColors.size());
+  fgNumSamples = 1;
+  fgSampleSizes.clear();
+  fgSampleSizes.push_back(partColors.size());
+
+// clear histogram first
+  for(uint8_t r = 0; r < getNBins(); r++)
+  {
+    for(uint8_t g = 0; g < getNBins(); g++)
+    {
+      for(uint8_t b = 0; b < getNBins(); b++)
+      {
+        partHistogramm[r][g][b] = 0.0;
+      }
+    }
+  }
+  for(int i = 0; i < partColors.size(); i++)
+  {
+    uint8_t r = partColors[i].x / factor;
+    uint8_t g = partColors[i].y / factor;
+    uint8_t b = partColors[i].z / factor;
+    partHistogramm[r][g][b]++;
+  }
+  for(uint8_t r = 0; r < getNBins(); r++)
+  {
+    for(uint8_t g = 0; g < getNBins(); g++)
+    {
+      for(uint8_t b = 0; b < getNBins(); b++)
+      {
+// normalise the histograms
+        partHistogramm[r][g][b] /= getSizeFG();
+      }
+    }
+  }
+}
+
+//TODO (Vitaliy Koshura>: need unit test
+void ColorHistDetector::addPartHistogramm(const vector <Point3i> &partColors, uint32_t nBlankPixels)
+{
+  if(partColors.size()==0) //do not add sample if the number of pixels is zero
+    return;
+  uniqueExists = false;
+//un-normalise
+  for(uint8_t r = 0; r < getNBins(); r++)
+  {
+    for(uint8_t g = 0; g < getNBins(); g++)
+    {
+      for(uint8_t b = 0; b < getNBins(); b++)
+      {
+        partHistogramm[r][g][b] *= getSizeFG();
+      }
+    }
+  }
+
+  int factor = ceil(pow(2, 8)/getNBins());//divide the color space into bins
+  setSizeFG(getSizeFG() + partColors.size());
+  fgNumSamples++;
+  fgSampleSizes.push_back(partColors.size());
+
+  for(int i = 0; i < partColors.size(); i++)
+  {
+    uint8_t r = partColors[i].x / factor;
+    uint8_t g = partColors[i].y / factor;
+    uint8_t b = partColors[i].z / factor;
+    partHistogramm[r][g][b]++;
+  }
+
+//renormalise
+  for(uint8_t r = 0; r < getNBins(); r++)
+  {
+    for(uint8_t g = 0; g < getNBins(); g++)
+    {
+      for(uint8_t b = 0; b < getNBins(); b++)
+      {
+//normalise the histograms
+        partHistogramm[r][g][b] /= getSizeFG();
+      }
+    }
+  }
+
+  fgBlankSizes.push_back(nBlankPixels); //add the number of blank pixels for this model
+}
