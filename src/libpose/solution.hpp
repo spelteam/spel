@@ -3,8 +3,8 @@
 
 #include <string>
 #include <vector>
-#include "limbLabel.hpp"
-#include "skeleton.hpp"
+#include "solvlet.hpp"
+#include "solution.hpp"
 
 using namespace std;
 
@@ -12,7 +12,7 @@ class Solution
 {
   public:
     Solution(void);
-    Solution(int id, string sName, vector<float> params, vector<LimbLabel> sol);
+    Solution(int id, int solverId, int seqId, vector<float> params, vector<Solvlet> solvlets);
     
     Solution &operator=(const Solution &s);
     bool operator==(const Solution &s) const;
@@ -21,16 +21,16 @@ class Solution
     int getId(void);
     void setId(int _id);
 
-    vector <LimbLabel> getLabels(void);
-    void setLabels(vector <LimbLabel> _labels);
-
-    Skeleton toSkeleton(void);
+    vector<Solvlet> getSolvlets(void);
+    void setSolvlets(vector<Solvlet> _solvlets);
   
   private:
+    int id;
     int solverId; //id of the solver solution was obtained from
+    int sequenceId;
     string solverName; //name of the solver
     vector <float> solverParams;
-    vector <LimbLabel> labels;
+    vector <Solvlet> solvlets;
 };
 
 #endif  // _SOLUTION_HPP_
