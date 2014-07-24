@@ -14,8 +14,8 @@ class Solver
   public:
   	virtual Solver();
   	virtual ~Solver();
-  	Solution solve(vector<Frame>);
-  	Solution solve(vector<Frame>, vector<float> params);
+  	Solution solve(vector<Frame*>);
+  	Solution solve(vector<Frame*>, vector<float> params);
   	string getName(); //get the solver name. Every class inheriting solver has its own Name
   	string getId(); //get the solver Id. Every class inheriting solver has is own ID
   
