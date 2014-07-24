@@ -17,7 +17,6 @@ class ColorHistDetector : public Detector
     void train(vector <Frame> frames, int id);
     vector <vector <LimbLabel> > detect(Frame *frame, vector <float> params);
     uint8_t getNBins(void);
-    uint32_t getSizeFG(void);
   private:
     int id;
     const uint8_t nBins;
@@ -28,11 +27,11 @@ class ColorHistDetector : public Detector
     vector <uint32_t> fgSampleSizes;
     vector <uint32_t> fgBlankSizes;
 
-// sizeFG should never be changed from outside
-    void setSizeFG(uint32_t _sizeFG);
     float computePixelBelongingLikelihood(uint8_t r, uint8_t g, uint8_t b);
     void setPartHistogramm(const vector <Point3i> &partColors);
     void addPartHistogramm(const vector <Point3i> &partColors, uint32_t nBlankPixels);
+    float getAvgSampleSizeFg(void);
+    float getAvgSampleSizeFgBetween(uint32_t s1, uint32_t s2);
 };
 
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

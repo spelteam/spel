@@ -16,7 +16,7 @@ ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
       }
     }
   }
-  setSizeFG(0);
+  sizeFG = 0;
   uniqueExists = false;
 }
 
@@ -55,16 +55,6 @@ float ColorHistDetector::computePixelBelongingLikelihood(uint8_t r, uint8_t g, u
   return isFG;
 }
 
-void ColorHistDetector::setSizeFG(uint32_t _sizeFG)
-{
-  sizeFG = _sizeFG;
-}
-
-uint32_t ColorHistDetector::getSizeFG(void)
-{
-  return sizeFG;
-}
-
 //TODO (Vitaliy Koshura>: need unit test
 void ColorHistDetector::setPartHistogramm(const vector <Point3i> &partColors)
 {
@@ -73,7 +63,7 @@ void ColorHistDetector::setPartHistogramm(const vector <Point3i> &partColors)
     return;
   uniqueExists = false;
   uint8_t factor = ceil(pow(2, 8)/getNBins());  // divide the color space into bins
-  setSizeFG(partColors.size());
+  sizeFG = partColors.size();
   fgNumSamples = 1;
   fgSampleSizes.clear();
   fgSampleSizes.push_back(partColors.size());
@@ -103,7 +93,7 @@ void ColorHistDetector::setPartHistogramm(const vector <Point3i> &partColors)
       for(uint8_t b = 0; b < getNBins(); b++)
       {
 // normalise the histograms
-        partHistogramm[r][g][b] /= getSizeFG();
+        partHistogramm[r][g][b] /= sizeFG;
       }
     }
   }
@@ -122,13 +112,13 @@ void ColorHistDetector::addPartHistogramm(const vector <Point3i> &partColors, ui
     {
       for(uint8_t b = 0; b < getNBins(); b++)
       {
-        partHistogramm[r][g][b] *= getSizeFG();
+        partHistogramm[r][g][b] *= sizeFG;
       }
     }
   }
 
   int factor = ceil(pow(2, 8)/getNBins());//divide the color space into bins
-  setSizeFG(getSizeFG() + partColors.size());
+  sizeFG += partColors.size();
   fgNumSamples++;
   fgSampleSizes.push_back(partColors.size());
 
@@ -148,10 +138,28 @@ void ColorHistDetector::addPartHistogramm(const vector <Point3i> &partColors, ui
       for(uint8_t b = 0; b < getNBins(); b++)
       {
 //normalise the histograms
-        partHistogramm[r][g][b] /= getSizeFG();
+        partHistogramm[r][g][b] /= sizeFG;
       }
     }
   }
 
   fgBlankSizes.push_back(nBlankPixels); //add the number of blank pixels for this model
+}
+
+float ColorHistDetector::getAvgSampleSizeFg(void)
+{
+  float sum = 0;
+  for(uint32_t i = 0; i < fgSampleSizes.size(); i++)
+  {
+    sum += fgSampleSizes[i];
+  }
+  sum /= fgNumSamples;
+  return sum;
+}
+
+float ColorHistDetector::getAvgSampleSizeFgBetween(uint32_t s1, uint32_t s2)
+{
+  if(s1 >= fgSampleSizes.size() || s2 >= fgSampleSizes.size())
+    return 0;
+  return (fgSampleSizes[s1] + fgSampleSizes[s2]) / 2.0;
 }
