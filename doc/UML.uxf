@@ -218,13 +218,12 @@ bg=orange</panel_attributes>
       <x>592</x>
       <y>1000</y>
       <w>432</w>
-      <h>224</h>
+      <h>200</h>
     </coordinates>
     <panel_attributes>ColorHistDetector
 --
 +nBins: byte
-+partHistogramm: vector&lt;vector&lt;vector&lt;float\&gt;&gt;&gt;
-+sizeFG: int
+partModels: vector &lt;PartModel&gt;
 --
 +ColorHistDetector()
 +getId(): int
@@ -232,12 +231,11 @@ bg=orange</panel_attributes>
 +train(frames: vector&lt;Frame&gt;, id: int)
 +detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
 +getNBins(): byte
-+computePixelBelongingLikelihood(r: byte, g: byte, b: byte): float
-+getSizeFG(): int
-+setSizeFG(_sizeFG: int)
-+setPartHistogramm(partColors: vector &lt;Point3i&gt;&amp;)
-+getAvgSampleSizeFg(): float
-+getAvgSampleSizeFgBetween(): float</panel_attributes>
++computePixelBelongingLikelihood(nPartModel: int, r: byte, g: byte, b: byte): float
++setPartHistogramm(nPartModel: int, partColors: vector &lt;Point3i&gt;&amp;)
++addPartHistogramm(nPartModel: int, partColors: vector &lt;Point3i&gt;&amp;, nBlankPixels: int)
++getAvgSampleSizeFg(nPartModel: int): float
++getAvgSampleSizeFgBetween(nPartModel: int, s1: int, s2: int): float</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -549,9 +547,30 @@ bg=yellow</panel_attributes>
       <x>576</x>
       <y>880</y>
       <w>464</w>
-      <h>360</h>
+      <h>528</h>
     </coordinates>
     <panel_attributes>bg=orange</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>592</x>
+      <y>1208</y>
+      <w>432</w>
+      <h>112</h>
+    </coordinates>
+    <panel_attributes>PartModel
+--
++nBins: byte
++partHistogramm: vector&lt;vector&lt;vector&lt;float\&gt;&gt;&gt;
++sizeFg: int
++uniqueExists: bool
++fgNumSamples: int
++fgSampleSizes: vector&lt;int&gt;
++gfBlankSizes: vector&lt;int&gt;
+
+</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
