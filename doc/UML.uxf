@@ -4,7 +4,7 @@
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>816</x>
+      <x>800</x>
       <y>40</y>
       <w>232</w>
       <h>152</h>
@@ -26,7 +26,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>16</x>
+      <x>0</x>
       <y>248</y>
       <w>184</w>
       <h>288</h>
@@ -59,7 +59,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>232</x>
+      <x>216</x>
       <y>272</y>
       <w>392</w>
       <h>88</h>
@@ -79,7 +79,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>648</x>
+      <x>632</x>
       <y>272</y>
       <w>392</w>
       <h>88</h>
@@ -99,7 +99,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>16</x>
+      <x>0</x>
       <y>0</y>
       <w>424</w>
       <h>232</h>
@@ -128,7 +128,7 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Package</type>
     <coordinates>
-      <x>216</x>
+      <x>200</x>
       <y>248</y>
       <w>832</w>
       <h>120</h>
@@ -140,7 +140,7 @@ bg=red</panel_attributes>
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>528</x>
+      <x>512</x>
       <y>208</y>
       <w>112</w>
       <h>56</h>
@@ -154,7 +154,7 @@ bg=yellow</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>608</x>
+        <x>592</x>
         <y>664</y>
         <w>192</w>
         <h>152</h>
@@ -175,7 +175,7 @@ bg=yellow</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>608</x>
+        <x>592</x>
         <y>416</y>
         <w>568</w>
         <h>240</h>
@@ -202,7 +202,7 @@ bg=yellow</panel_attributes>
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>600</x>
+        <x>584</x>
         <y>392</y>
         <w>592</w>
         <h>432</h>
@@ -215,10 +215,10 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>608</x>
+      <x>592</x>
       <y>1000</y>
       <w>432</w>
-      <h>192</h>
+      <h>224</h>
     </coordinates>
     <panel_attributes>ColorHistDetector
 --
@@ -235,25 +235,15 @@ bg=orange</panel_attributes>
 +computePixelBelongingLikelihood(r: byte, g: byte, b: byte): float
 +getSizeFG(): int
 +setSizeFG(_sizeFG: int)
-+setPartHistogramm(partColors: vector &lt;Point3i&gt;&amp;)</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Note</type>
-    <coordinates>
-      <x>896</x>
-      <y>992</y>
-      <w>144</w>
-      <h>56</h>
-    </coordinates>
-    <panel_attributes>Implement
-bg=green</panel_attributes>
++setPartHistogramm(partColors: vector &lt;Point3i&gt;&amp;)
++getAvgSampleSizeFg(): float
++getAvgSampleSizeFgBetween(): float</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1064</x>
+      <x>1048</x>
       <y>1000</y>
       <w>424</w>
       <h>128</h>
@@ -272,7 +262,7 @@ bg=green</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1504</x>
+      <x>1488</x>
       <y>1000</y>
       <w>416</w>
       <h>128</h>
@@ -290,7 +280,7 @@ bg=green</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1160</x>
+      <x>1144</x>
       <y>856</y>
       <w>456</w>
       <h>112</h>
@@ -307,21 +297,9 @@ bg=green</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Note</type>
-    <coordinates>
-      <x>1408</x>
-      <y>840</y>
-      <w>144</w>
-      <h>56</h>
-    </coordinates>
-    <panel_attributes>Implement
-bg=green</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>1384</x>
+      <x>1368</x>
       <y>944</y>
       <w>192</w>
       <h>72</h>
@@ -332,7 +310,7 @@ bg=green</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>1096</x>
+      <x>1080</x>
       <y>944</y>
       <w>248</w>
       <h>72</h>
@@ -343,19 +321,19 @@ bg=green</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>632</x>
+      <x>704</x>
       <y>944</y>
-      <w>592</w>
+      <w>504</w>
       <h>72</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>576;24;24;56</additional_attributes>
+    <additional_attributes>488;24;24;56</additional_attributes>
   </element>
   <group>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>32</x>
+        <x>16</x>
         <y>888</y>
         <w>288</w>
         <h>272</h>
@@ -387,7 +365,7 @@ bg=green</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>32</x>
+        <x>16</x>
         <y>568</y>
         <w>544</w>
         <h>312</h>
@@ -423,7 +401,7 @@ bg=green</panel_attributes>
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>16</x>
+        <x>0</x>
         <y>544</y>
         <w>568</w>
         <h>624</h>
@@ -437,7 +415,7 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>264</x>
+        <x>248</x>
         <y>1192</y>
         <w>288</w>
         <h>272</h>
@@ -469,7 +447,7 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>16</x>
+        <x>0</x>
         <y>1496</y>
         <w>248</w>
         <h>88</h>
@@ -486,7 +464,7 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>24</x>
+        <x>8</x>
         <y>1440</y>
         <w>376</w>
         <h>72</h>
@@ -497,7 +475,7 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>272</x>
+        <x>256</x>
         <y>1496</y>
         <w>248</w>
         <h>88</h>
@@ -514,7 +492,7 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>376</x>
+        <x>360</x>
         <y>1440</y>
         <w>104</w>
         <h>72</h>
@@ -525,7 +503,7 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>400</x>
+        <x>384</x>
         <y>1440</y>
         <w>184</w>
         <h>72</h>
@@ -536,7 +514,7 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>528</x>
+        <x>512</x>
         <y>1496</y>
         <w>248</w>
         <h>88</h>
@@ -551,4 +529,29 @@ bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>592</x>
+      <y>912</y>
+      <w>432</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>*Potentially to remove *
+-- fgNumSamples contain duplicated data that can be accessed 
+   from fgSampleSizes.size()
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>576</x>
+      <y>880</y>
+      <w>464</w>
+      <h>360</h>
+    </coordinates>
+    <panel_attributes>bg=orange</panel_attributes>
+    <additional_attributes/>
+  </element>
 </diagram>
