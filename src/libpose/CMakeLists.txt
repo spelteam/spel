@@ -31,7 +31,8 @@ LIST ( APPEND ${LIBPOSE_MODULE}_SRC keyframe)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC interpolation)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC lockframe)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC solution)
-
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC solvlet)
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC solver)
 
 
 # Create a static library

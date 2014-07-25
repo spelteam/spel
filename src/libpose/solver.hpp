@@ -12,7 +12,7 @@ using namespace std;
 class Solver
 {
   public:
-  	virtual Solver();
+  	Solver();
   	virtual ~Solver();
   	Solution solve(vector<Frame*>);
   	Solution solve(vector<Frame*>, vector<float> params);
