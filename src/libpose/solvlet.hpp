@@ -15,7 +15,7 @@ class Solvlet
     Solvlet(void);
     Solvlet(int id, vector<LimbLabel> labels);
     
-    Solution &operator=(const Solvlet &s);
+    Solvlet &operator=(const Solvlet &s);
     bool operator==(const Solvlet &s) const;
     bool operator!=(const Solvlet &s) const;
 
