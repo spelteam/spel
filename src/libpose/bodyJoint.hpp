@@ -33,5 +33,5 @@ class BodyJoint
     bool depthSign;
 };
 
-#endif  // _BODYJOINT_HPP_
+#endif  //_BODYJOINT_HPP_
 

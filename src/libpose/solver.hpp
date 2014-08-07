@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "solver.hpp"
 #include "solution.hpp"
 #include "frame.hpp"
 
@@ -14,8 +13,8 @@ class Solver
   public:
   	Solver();
   	virtual ~Solver();
-  	Solution solve(vector<Frame*>);
-  	Solution solve(vector<Frame*>, vector<float> params);
+  	virtual Solution solve(vector<Frame*>);
+  	virtual Solution solve(vector<Frame*>, vector<float> params);
   	string getName(); //get the solver name. Every class inheriting solver has its own Name
   	string getId(); //get the solver Id. Every class inheriting solver has is own ID
   private:

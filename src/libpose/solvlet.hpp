@@ -5,7 +5,6 @@
 #include <vector>
 #include "limbLabel.hpp"
 #include "skeleton.hpp"
-#include "solvlet.hpp"
 
 using namespace std;
 

@@ -4,30 +4,23 @@
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>928</x>
-      <y>264</y>
+      <x>1120</x>
+      <y>16</y>
       <w>232</w>
       <h>152</h>
     </coordinates>
     <panel_attributes>Notes:
  
-* cv: refers to  OpenCV
- 
-* "polygon" in generated LimbLabel 
-  can consist of any number of 
-  points, but the generated LimbLabels 
-  should have the same number of 
-  points in polygon as the polygon 
-  returned by getPartPolygon operation
-  
+* cv: refers to  OpenCV 3.x
+* gm: OpenGM 2.x
 bg=blue</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>0</x>
-      <y>536</y>
+      <x>16</x>
+      <y>832</y>
       <w>280</w>
       <h>288</h>
     </coordinates>
@@ -56,16 +49,15 @@ bg=blue</panel_attributes>
 +operator!=: bool</panel_attributes>
     <additional_attributes/>
   </element>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>592</x>
-        <y>952</y>
-        <w>192</w>
-        <h>152</h>
-      </coordinates>
-      <panel_attributes>Score
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>608</x>
+      <y>1248</y>
+      <w>192</w>
+      <h>152</h>
+    </coordinates>
+    <panel_attributes>Score
 --
 +score: float
 +detName: string
@@ -76,17 +68,17 @@ bg=blue</panel_attributes>
 +operator==: bool
 +operator!=: bool
 </panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>592</x>
-        <y>704</y>
-        <w>568</w>
-        <h>240</h>
-      </coordinates>
-      <panel_attributes>LimbLabel
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>608</x>
+      <y>1000</y>
+      <w>568</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>LimbLabel
 --
 +limbId: int
 +center: cv:Point2f
@@ -99,30 +91,30 @@ bg=blue</panel_attributes>
 +LimbLabel()
 +LimbLabel(id:int, centre: Point2f, angle: float, polygon: vector&lt;Point2f&gt;, scores: vector&lt;Score&gt;)
 +addScore(detectionScore: Score)
++getScore(): vector&lt;Score&gt;
 +getEndPoints(p0: Point2f&amp;, p1: Point2f&amp;)
 +operator=: Score&amp;
 +operator==: bool
 +operator!=: bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>584</x>
-        <y>680</y>
-        <w>592</w>
-        <h>432</h>
-      </coordinates>
-      <panel_attributes>*Part Labelling*
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>600</x>
+      <y>976</y>
+      <w>592</w>
+      <h>432</h>
+    </coordinates>
+    <panel_attributes>*Part Labelling*
 bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
+    <additional_attributes/>
+  </element>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>592</x>
-      <y>1288</y>
+      <x>608</x>
+      <y>1584</y>
       <w>432</w>
       <h>200</h>
     </coordinates>
@@ -134,7 +126,7 @@ partModels: vector &lt;PartModel&gt;
 +ColorHistDetector()
 +getId(): int
 +setId(int _id) 
-+train(frames: vector&lt;Frame&gt;, id: int)
++train(frames: vector&lt;Frame*&gt;, id: int)
 +detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
 +getNBins(): byte
 +computePixelBelongingLikelihood(nPartModel: int, r: byte, g: byte, b: byte): float
@@ -147,8 +139,8 @@ partModels: vector &lt;PartModel&gt;
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1048</x>
-      <y>1288</y>
+      <x>1064</x>
+      <y>1584</y>
       <w>424</w>
       <h>128</h>
     </coordinates>
@@ -158,7 +150,7 @@ partModels: vector &lt;PartModel&gt;
 --
 +getId(): int
 +setId(int _id) 
-+train(frames: vector&lt;Frame&gt;, id: int)
++train(frames: vector&lt;Frame*&gt;, id: int)
 +detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
 </panel_attributes>
     <additional_attributes/>
@@ -166,8 +158,8 @@ partModels: vector &lt;PartModel&gt;
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1488</x>
-      <y>1288</y>
+      <x>1504</x>
+      <y>1584</y>
       <w>416</w>
       <h>128</h>
     </coordinates>
@@ -184,8 +176,8 @@ partModels: vector &lt;PartModel&gt;
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1144</x>
-      <y>1144</y>
+      <x>1160</x>
+      <y>1440</y>
       <w>456</w>
       <h>112</h>
     </coordinates>
@@ -196,15 +188,15 @@ partModels: vector &lt;PartModel&gt;
 --
 /+getId(): int/
 /+setId(int _id)/
-/+train(frames: vector&lt;Frame&gt;, id: int)/
+/+train(frames: vector&lt;Frame*&gt;, id: int)/
 /+detect(frame: Frame*, params: vector&lt;float&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;/</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>1368</x>
-      <y>1232</y>
+      <x>1384</x>
+      <y>1528</y>
       <w>192</w>
       <h>72</h>
     </coordinates>
@@ -214,8 +206,8 @@ partModels: vector &lt;PartModel&gt;
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>1080</x>
-      <y>1232</y>
+      <x>1096</x>
+      <y>1528</y>
       <w>248</w>
       <h>72</h>
     </coordinates>
@@ -225,8 +217,8 @@ partModels: vector &lt;PartModel&gt;
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>704</x>
-      <y>1232</y>
+      <x>720</x>
+      <y>1528</y>
       <w>504</w>
       <h>72</h>
     </coordinates>
@@ -237,8 +229,8 @@ partModels: vector &lt;PartModel&gt;
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>16</x>
-        <y>1176</y>
+        <x>32</x>
+        <y>1472</y>
         <w>288</w>
         <h>272</h>
       </coordinates>
@@ -269,8 +261,8 @@ partModels: vector &lt;PartModel&gt;
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>16</x>
-        <y>856</y>
+        <x>32</x>
+        <y>1152</y>
         <w>544</w>
         <h>312</h>
       </coordinates>
@@ -305,8 +297,8 @@ partModels: vector &lt;PartModel&gt;
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>0</x>
-        <y>832</y>
+        <x>16</x>
+        <y>1128</y>
         <w>568</w>
         <h>624</h>
       </coordinates>
@@ -318,8 +310,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>240</x>
-      <y>1488</y>
+      <x>256</x>
+      <y>1784</y>
       <w>288</w>
       <h>272</h>
     </coordinates>
@@ -350,8 +342,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>0</x>
-      <y>1784</y>
+      <x>16</x>
+      <y>2080</y>
       <w>248</w>
       <h>88</h>
     </coordinates>
@@ -367,8 +359,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>8</x>
-      <y>1736</y>
+      <x>24</x>
+      <y>2032</y>
       <w>368</w>
       <h>64</h>
     </coordinates>
@@ -378,8 +370,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>256</x>
-      <y>1784</y>
+      <x>272</x>
+      <y>2080</y>
       <w>248</w>
       <h>88</h>
     </coordinates>
@@ -395,8 +387,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>352</x>
-      <y>1736</y>
+      <x>368</x>
+      <y>2032</y>
       <w>112</w>
       <h>64</h>
     </coordinates>
@@ -406,8 +398,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>376</x>
-      <y>1736</y>
+      <x>392</x>
+      <y>2032</y>
       <w>192</w>
       <h>64</h>
     </coordinates>
@@ -417,8 +409,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>512</x>
-      <y>1784</y>
+      <x>528</x>
+      <y>2080</y>
       <w>248</w>
       <h>88</h>
     </coordinates>
@@ -434,8 +426,8 @@ bg=orange</panel_attributes>
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>592</x>
-      <y>1200</y>
+      <x>608</x>
+      <y>1496</y>
       <w>432</w>
       <h>56</h>
     </coordinates>
@@ -448,8 +440,8 @@ bg=yellow</panel_attributes>
   <element>
     <type>com.umlet.element.Package</type>
     <coordinates>
-      <x>584</x>
-      <y>1160</y>
+      <x>600</x>
+      <y>1456</y>
       <w>464</w>
       <h>528</h>
     </coordinates>
@@ -459,8 +451,8 @@ bg=yellow</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>592</x>
-      <y>1512</y>
+      <x>608</x>
+      <y>1808</y>
       <w>432</w>
       <h>112</h>
     </coordinates>
@@ -530,7 +522,7 @@ bg=yellow</panel_attributes>
       <w>152</w>
       <h>96</h>
     </coordinates>
-    <panel_attributes>Solver1
+    <panel_attributes>NSKPSolver
 --
 
 --</panel_attributes>
@@ -558,7 +550,7 @@ bg=yellow</panel_attributes>
       <w>152</w>
       <h>96</h>
     </coordinates>
-    <panel_attributes>Solver2
+    <panel_attributes>TLPSSolver
 --
 
 --</panel_attributes>
@@ -623,18 +615,6 @@ bg=yellow</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.Note</type>
-    <coordinates>
-      <x>336</x>
-      <y>48</y>
-      <w>120</w>
-      <h>48</h>
-    </coordinates>
-    <panel_attributes>*Изменено!!*
-bg=red</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
       <x>8</x>
@@ -668,11 +648,61 @@ bg=red</panel_attributes>
     <coordinates>
       <x>0</x>
       <y>0</y>
-      <w>896</w>
+      <w>968</w>
       <h>520</h>
     </coordinates>
     <panel_attributes>Solving
 bg=orange</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>416</x>
+      <y>528</y>
+      <w>560</w>
+      <h>112</h>
+    </coordinates>
+    <panel_attributes>MinSpanningTree
+--
+mst: tree&lt;int&gt;
+--
+MinSpanningTree()
+MinSpanningTree(mst: MinSpanningTree&amp;)
+MinSpanningTree(ism: const ImageSimilarityMatrix&amp;, rootNode: int, treeSize: int, threshold: float)
+size(): int
+getMST(): tree&lt;int&gt;
+build(ism: const ImageSimilarityMatrix&amp;, rootNode: int, treeSize:int, threshold: float)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>0</x>
+      <y>528</y>
+      <w>408</w>
+      <h>232</h>
+    </coordinates>
+    <panel_attributes>ImageSimilarityMatrix
+--
+imageSimilarityMatrix: Mat
+--
+ImageSimilarityMatrix()
+ImageSimilarityMatrix(m: const ImageSimilarityMatrix&amp;)
+ImageSimilarityMatrix(frames: const vector&lt;Frame*&gt;&amp;)
+
+buildImageSimilarityMatrix(frames: const vector&lt;Frame*&gt;&amp;)
+buildMaskSimilarityMatrix(frames: const vector&lt;Frame*&gt;&amp;)
+
+size(): int
+min(): float
+max(): float
+mean(): float
+at(row: int, col: int): float
+getPathCost(path: vector&lt;int&gt;): float
+operator==(s: const ImageSimilarityMatrix&amp;): bool
+operator!=(s: const ImageSimilarityMatrix&amp;): bool
+operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
