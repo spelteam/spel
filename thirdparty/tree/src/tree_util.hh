@@ -1,13 +1,13 @@
-/* 
+/*
 
-	A collection of miscellaneous utilities that operate on the templated 
-	tree.hh class.
+    A collection of miscellaneous utilities that operate on the templated
+    tree.hh class.
 
 
-	Copyright (C) 2001-2009  Kasper Peeters <kasper.peeters@aei.mpg.de>
+    Copyright (C) 2001-2009  Kasper Peeters <kasper.peeters@aei.mpg.de>
 
-	(At the moment this only contains a printing utility, thanks to Linda
-	Buisman <linda.buisman@studentmail.newcastle.edu.au>)
+    (At the moment this only contains a printing utility, thanks to Linda
+    Buisman <linda.buisman@studentmail.newcastle.edu.au>)
 
    This program is free software: you can redistribute it and/or
    modify it under the terms of the GNU General Public License as
@@ -21,13 +21,14 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 
 #ifndef tree_util_hh_
 #define tree_util_hh_
 
 #include <iostream>
+#include <vector>
 #include "tree.hh"
 
 namespace kptree {
@@ -36,57 +37,111 @@ template<class T>
 void print_tree_bracketed(const tree<T>& t, std::ostream& str=std::cout);
 
 template<class T>
-void print_subtree_bracketed(const tree<T>& t, typename tree<T>::iterator iRoot, 
-									  std::ostream& str=std::cout);
+void print_subtree_bracketed(const tree<T>& t, typename tree<T>::iterator iRoot,
+                                      std::ostream& str=std::cout);
 
-
+template<class T>
+std::vector<T> find_path_nodes(const tree<T>& t, typename tree<T>::iterator nodeA,
+                                      typename tree<T>::iterator nodeB);
 
 // Iterate over all roots (the head) and print each one on a new line
 // by calling printSingleRoot.
 
 template<class T>
-void print_tree_bracketed(const tree<T>& t, std::ostream& str) 
-	{
-	int headCount = t.number_of_siblings(t.begin());
-	int headNum = 0;
-	for(typename tree<T>::sibling_iterator iRoots = t.begin(); iRoots != t.end(); ++iRoots, ++headNum) {
-		print_subtree_bracketed(t,iRoots,str);
-		if (headNum != headCount) {
-			str << std::endl;
-			}
-		}
-	}
+void print_tree_bracketed(const tree<T>& t, std::ostream& str)
+    {
+    int headCount = t.number_of_siblings(t.begin());
+    int headNum = 0;
+    for(typename tree<T>::sibling_iterator iRoots = t.begin(); iRoots != t.end(); ++iRoots, ++headNum) {
+        print_subtree_bracketed(t,iRoots,str);
+        if (headNum != headCount) {
+            str << std::endl;
+            }
+        }
+    }
 
 
 // Print everything under this root in a flat, bracketed structure.
 
 template<class T>
-void print_subtree_bracketed(const tree<T>& t, typename tree<T>::iterator iRoot, std::ostream& str) 
-	{
-	if(t.empty()) return;
-	if (t.number_of_children(iRoot) == 0) {
-		str << *iRoot;	
-		}
-	else {
-		// parent
-		str << *iRoot;
-		str << "(";
-		// child1, ..., childn
-		int siblingCount = t.number_of_siblings(t.begin(iRoot));
-		int siblingNum;
-		typename tree<T>::sibling_iterator iChildren;
-		for (iChildren = t.begin(iRoot), siblingNum = 0; iChildren != t.end(iRoot); ++iChildren, ++siblingNum) {
-			// recursively print child
-			print_subtree_bracketed(t,iChildren,str);
-			// comma after every child except the last one
-			if (siblingNum != siblingCount ) {
-				str << ", ";
-				}
-			}
-		str << ")";
-		}
-	}
+void print_subtree_bracketed(const tree<T>& t, typename tree<T>::iterator iRoot, std::ostream& str)
+    {
+    if(t.empty()) return;
+    if (t.number_of_children(iRoot) == 0) {
+        str << *iRoot;
+        }
+    else {
+        // parent
+        str << *iRoot;
+        str << "(";
+        // child1, ..., childn
+        int siblingCount = t.number_of_siblings(t.begin(iRoot));
+        int siblingNum;
+        typename tree<T>::sibling_iterator iChildren;
+        for (iChildren = t.begin(iRoot), siblingNum = 0; iChildren != t.end(iRoot); ++iChildren, ++siblingNum) {
+            // recursively print child
+            print_subtree_bracketed(t,iChildren,str);
+            // comma after every child except the last one
+            if (siblingNum != siblingCount ) {
+                str << ", ";
+                }
+            }
+        str << ")";
+        }
+    }
 
+//return a vector with all nodes in path for A to B in three t (including A and B)
+template<class T>
+std::vector<T> find_path_nodes(const tree<T>& t, typename tree<T>::iterator nodeA, typename tree<T>::iterator nodeB)
+{
+    std::vector<T> pathA, pathB;
+    int depthA, depthB;
+
+    pathA.push_back(*nodeA);
+    pathB.push_back(*nodeB);
+
+    depthA = tree<T>::depth(nodeA);
+    depthB = tree<T>::depth(nodeB);
+
+    //first euqalise the depths
+    while(depthA>depthB)
+    {
+        nodeA = t.parent(nodeA); //go up one
+        pathA.push_back(*nodeA); //add to path of A
+        depthA = tree<T>::depth(nodeA);
+    }
+
+    while(depthB>depthA)
+    {
+        nodeB = t.parent(nodeB); //go up one
+        pathB.push_back(*nodeB); //add to path of B
+        depthB = tree<T>::depth(nodeB);
+    }
+
+    //now depths are equal so keep going up until the nodes are then same
+    while(nodeA!=t.begin()) //while the iterators are not equal to start of tree
+    {
+        nodeA = t.parent(nodeA);
+        nodeB = t.parent(nodeB);
+
+        pathA.push_back(*nodeA);
+        if(*nodeA!=*nodeB) //if not a duplicate add to second node's path as well
+        {
+            pathB.push_back(*nodeB);
+        }
+    }
+
+    //now merge the two lists pushing items from end of B into end of A
+    for(int i=pathB.size()-2; i>=0; --i)
+    {
+        pathA.push_back(pathB[i]);
+    }
+
+    return pathA; //return the vector
 }
+
+};
+
+
 
 #endif

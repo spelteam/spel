@@ -34,6 +34,10 @@ LIST ( APPEND ${LIBPOSE_MODULE}_SRC solution)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC solvlet)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC solver)
 
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC imagesimilaritymatrix)
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC minspanningtree)
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC nskpsolver)
+
 
 # Create a static library
 ADD_LIBRARY ( ${LIBPOSE_MODULE} STATIC ${${LIBPOSE_MODULE}_SRC})

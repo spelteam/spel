@@ -1,16 +1,20 @@
 #include "minspanningtree.hpp"
+#include <tree_util.hh>
+#include <tree.hh>
 
-MinSpanningTree()
+using namespace kptree;
+
+MinSpanningTree::MinSpanningTree(void)
 {
 	//constructor
 }
 
-MinSpanningTree(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold)
+MinSpanningTree::MinSpanningTree(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold)
 {
 	build(ism, rootNode, treeSize, threshold);
 }
 
-MinSpanningTree(const MinSpanningTree& _MST)
+MinSpanningTree::MinSpanningTree(const MinSpanningTree& _MST)
 {
     mst = _MST.mst;
 }
@@ -18,15 +22,15 @@ MinSpanningTree(const MinSpanningTree& _MST)
 MinSpanningTree& MinSpanningTree::operator=(const MinSpanningTree& _MST)
 {
     mst=_MST.mst;
-    return this;
+    return *this;
 }
 
-~MinSpanningTree()
+MinSpanningTree::~MinSpanningTree(void)
 {
 	//destructor
 }
 
-tree<int> MinSpanningTree::getMST()
+tree<int> MinSpanningTree::getMST(void) const
 {
 	return mst;
 }
@@ -42,7 +46,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
     graphNodes.push_back(rootNode);
     mst.insert(imgLoc, rootNode); //insert root node
     float absoluteMin = ism.mean();
-    while(mst.size() != treeSize && mst.size()<ism.rows) //do this until the tree is complete
+    while(mst.size() != treeSize && mst.size()<ism.size()) //do this until the tree is complete
     {
         //cout << "in..." << endl;
         Point2i minLoc(-1,-1);
@@ -50,7 +54,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
         //for each node currently in the graph
         for(int i=0; i<graphNodes.size(); ++i)
         {
-            for(int j=0; j<ism.rows; ++j)
+            for(int j=0; j<ism.size(); ++j)
             {
                 int x=graphNodes[i];
                 int y=j;
@@ -80,8 +84,9 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
                 if(*imgLoc==minLoc.x)
                     break;
             }
+            //check the path cost condition
             vector<int> path;
-    		path = find_path_nodes(mst, nodeA, nodeB);
+    		path = kptree::find_path_nodes(mst, mst.begin(), imgLoc);
             if(ism.getPathCost(path) > absoluteMin*threshold) //stop building tree if we reach threshold
                 break;
             mst.append_child(imgLoc, minLoc.y);
@@ -90,7 +95,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
     }
 }
 
-int MinSpanningTree::size()
+int MinSpanningTree::size() const
 {
 	
 }

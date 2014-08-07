@@ -9,21 +9,24 @@
 
 using namespace std;
 using namespace cv;
+using namespace kptree;
 
 class MinSpanningTree
 {
   public:
-    MinSpanningTree();
+    MinSpanningTree(void);
     MinSpanningTree(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
     MinSpanningTree(const MinSpanningTree& mst);
-    ~MinSpanningTree();
+    ~MinSpanningTree(void);
 
     void build(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold); //build the MST
 
-    tree<int> getMST();
+    MinSpanningTree& operator=(const MinSpanningTree& _MST);
+
+    tree<int> getMST(void) const;
 
     //get size
-    int size();
+    int size(void) const;
 
   private:
     tree<int> mst;
