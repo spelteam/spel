@@ -1,16 +1,20 @@
 #include "nskpsolver.hpp"
 #include <tree.hh>
 #include <opengm/graphicalmodel/space/discretespace.hxx>
+#include <opengm/inference/messagepassing/messagepassing.hxx>
+#include <opengm/operations/minimizer.hxx>
+#include "lockframe.hpp"
+#include "colorHistDetector.hpp"
 
 using namespace opengm;
 
-NSKPSolver::Solver()
+NSKPSolver::NSKPSolver()
 {
 	id = 1; //this should be unique
-	name = "NSKP" //this should be unique
+	name = "NSKP"; //this should be unique
 }
 
-NSKPSolver::~Solver() //inherited virtual
+NSKPSolver::~NSKPSolver() //inherited virtual
 {
 
 }
@@ -64,13 +68,13 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 	vector<Frame*> lockframes;
 
 	//build frame MSTs by ID's as in ISM
-	vector<MinSpanningTree> trees = buildFrameMSTs(ism, mst_max_size, mst_thresm_multiplier, ism.mean());
+	vector<MinSpanningTree> trees = buildFrameMSTs(ism, mst_max_size, mst_thresm_multiplier);
 	//now add variables to the space, with number of detections
 	for(int frameId=0; frameId<frames.size(); ++frameId)
 	{
 		if(frames[frameId]->getFrametype()!=0x02) //as long as it's not an interpolated frame, try to propagate from it
 		{
-			tree<int> mst = trees[frames[frameId]->getId()].getMST(); //get the MST, by ID, as in ISM
+			tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
 			tree<int>::iterator mstIter;
 			//do OpenGM solve for single factor graph
 			ColorHistDetector chDetector;
@@ -78,14 +82,15 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 			trainingFrames.push_back(frames[frameId]); //set training frame by index
 			
 			vector<float> trainingParams; //@PARAM this is a param, not static
-			chDetector.train(trainingFrames)
+			chDetector.train(trainingFrames, 0);
 			vector<float> detectionParams; //@PARAM this is a param, not static
+
 
 			for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
 			{
-				vector<vector<LimbLabel> > labels = detect(frames[frameId], detectionParams); //detect labels based on keyframe training
+				vector<vector<LimbLabel> > labels = chDetector.detect(frames[*mstIter], detectionParams); //detect labels based on keyframe training
 
-				vector<int> numbersOfLabels; //numbers of labels per part
+				vector<size_t> numbersOfLabels; //numbers of labels per part
 
 				for(int i=0; i<labels.size(); ++i)
 				{
@@ -106,9 +111,9 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 					size_t scoreCostShape[]={numbersOfLabels[partIter->getPartID()]}; //number of labels
 					ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-					for(int i=0; i<labels[partIter->getPartId()]) //for each label in for this part
+					for(int i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
-						scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartId()][i]); //compute the label score cost
+						scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i)); //compute the label score cost
 					}
 
 					Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
@@ -116,9 +121,9 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 
 					ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-					for(int i=0; i<labels[partIter->getPartId()]) //for each label in for this part
+					for(int i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
-						priorCostFunc(i) = computePriorCost(labels[partIter->getPartId()][i], *partIter);
+						priorCostFunc(i) = computePriorCost(labels[partIter->getPartID()].at(i), *partIter);
 					}
 
 					Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
@@ -126,18 +131,18 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 					
 					if(partIter!=partTree.begin()) //if iterator is not on root node, there is always a parent body part
 					{
-						parentPartIter=partTree.parent(parIter); //find the parent of this part
+						parentPartIter=partTree.parent(partIter); //find the parent of this part
 						varIndices.push_back(partIter->getPartID()); //push back parent partID as the second variable index
 
 						size_t jointCostShape[]={numbersOfLabels[partIter->getPartID()], numbersOfLabels[parentPartIter->getPartID()]}; //number of labels
 						ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
 
-						for(int i=0; i<labels[partIter->getPartId()]) //for each label in for this part
+						for(int i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 						{
-							for(int j=0; j<labels[parentPartIter->getPartId()]; ++j)
+							for(int j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
 							{
 								//for every child/parent pair, compute score
-								priorCostFunc(i, j) = computePriorCost(labels[partIter->getPartId()][i], labels[parentPartIter->getPartId()][i]);
+								jointCostFunc(i, j) = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j));
 							}
 						}
 
@@ -169,20 +174,21 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 					solutionLabels.push_back(labels[i][labeling[i]]); //pupulate solution vector
 				}
 				//labeling now contains the approximately optimal labels for this problem
-				float solutionScore = evaluateSolution(solutionLabels);
+				float solutionScore = evaluateSolution(frames[frameId], solutionLabels, true);
 				//evaluate the solution, and decide whether it should be added to keyframes
 
 				float acceptLockframeThreshold; //@PARAM this is a parameter, not a static value
-				if(solutionSocre<=acceptLockframeThreshold)
+				if(solutionScore<=acceptLockframeThreshold)
 				{
 					//set up the lockframe
 					Solvlet solvlet(*mstIter, solutionLabels);
 					Skeleton skel(solvlet.toSkeleton());
-					Lockframe lockframe();
+					Lockframe lockframe;
+
 					lockframe.setImage(frames[frameId]->getImage());
 					lockframe.setMask(frames[frameId]->getMask());
-					lockframe.setSkeleton(Skeleton);
-					lockframe.setId(frames[frameId]->getId());
+					lockframe.setSkeleton(skel);
+					lockframe.setID(frames[frameId]->getID());
 
 					//create a frame pointer and push to the return vector
 					Frame * ptr = &lockframe;
@@ -196,7 +202,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 	//look at lockframes and frames, and put together the return frames
 	for(int i=0; i<frames.size(); ++i)
 	{
-		int lockframeIndex = findFrameIndexById(frames[i]->getId());
+		int lockframeIndex = findFrameIndexById(frames[i]->getID(), frames);
 		if(lockframeIndex>=0) //if a new lockframe exists at this id
 		{
 			//push it into the sequence
@@ -216,7 +222,7 @@ int NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 {
 	for(int i=0; i<frames.size(); ++i)
 	{
-		if(frames[i]->getId()==id)
+		if(frames[i]->getID()==id)
 			return i;
 	}
 	return -1;
@@ -229,7 +235,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label)
 	//for now, just return the first available score
 	vector<Score> scores = label.getScores();
 	if(scores.size()>0)
-		return scores[0];
+		return scores[0].val();
 	else //if no scores present return -1
 		return -1;
 }
@@ -284,7 +290,7 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, i
 vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec)
 {
 	vector<vector<int> > orderedList;
-	for(int i=0; i<mstVec; ++i)
+	for(int i=0; i<mstVec.size(); ++i)
 	{
 	    tree<int>::iterator iter;
         tree<int> MST = mstVec[i].getMST();	
@@ -341,160 +347,161 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec)
 
 float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, bool debug)
 {
-    /*
-      There should clearly be several factors that affect the outcome of an evaluation:
-      1) Mask coverage
-      2) Parts falling outside mask range
-      3) ?
+//     /*
+//       There should clearly be several factors that affect the outcome of an evaluation:
+//       1) Mask coverage
+//       2) Parts falling outside mask range
+//       3) ?
 
-      */
-    float numPixels=0;
-    float numHitPixels=0; //number of pixels in polygon that are inside the mask
-    float numMissPixels=0; //number of pixels in polygons that are outside of the mask
-    Mat maskMat = frame->getMask();
-    //we are at some frame with the image already loaded (currentFrameNumber)    
+//       */
+//     float numPixels=0;
+//     float numHitPixels=0; //number of pixels in polygon that are inside the mask
+//     float numMissPixels=0; //number of pixels in polygons that are outside of the mask
+//     Mat maskMat = frame->getMask();
+//     //we are at some frame with the image already loaded (currentFrameNumber)    
 
-    //count the total number of mask pixels
-    for(int x=0; x<maskMat.rows(); ++x)
-    {
-        for(int y=0; y<maskMat.cols(); ++y)
-        {
-            int intensity = maskMat.at<uchar>(y, x);
-            bool blackPixel=intensity<10; //if all intensities are zero
+//     //count the total number of mask pixels
+//     for(int x=0; x<maskMat.rows(); ++x)
+//     {
+//         for(int y=0; y<maskMat.cols(); ++y)
+//         {
+//             int intensity = maskMat.at<uchar>(y, x);
+//             bool blackPixel=intensity<10; //if all intensities are zero
 
-            //QColor maskCol = mask.pixel(x,y);
-            if(!blackPixel) //only take in pixels that are in the mask
-            {
-                numPixels++; //count the total number of pixels
-            }
-        }
-    }
+//             //QColor maskCol = mask.pixel(x,y);
+//             if(!blackPixel) //only take in pixels that are in the mask
+//             {
+//                 numPixels++; //count the total number of pixels
+//             }
+//         }
+//     }
 
-    vector<float> limbScores;
-    for(int numLabel=0; numLabel<labels.size(); ++numLabel)
-    {
-        float pixHit=0;
-        float pixTotal=0;
+//     vector<float> limbScores;
+//     for(int numLabel=0; numLabel<labels.size(); ++numLabel)
+//     {
+//         float pixHit=0;
+//         float pixTotal=0;
 
-        LimbLabel label = labels[numLabel];
-        QPolygon poly = label.p;
-
-
-        for(int x=0; x<maskMat.rows(); ++x)
-        {
-            for(int y=0; y<maskMat.cols(); ++y)
-            {
-            	//@NEEDS FIXING
-                if(poly.containsPoint(QPoint(x,y), Qt::OddEvenFill)) //polygon from label) //only take in pixels that are in the mask
-                {
-                    pixTotal++;
-
-                    int intensity = maskMat.at<uchar>(y, x);
-
-                    bool blackPixel=intensity<10; //if all intensities are zero
-
-                    //QColor maskCol = mask.pixel(x,y);
-                    if(!blackPixel)
-                    {
-                        pixHit++;
-                    }
-                }
-            }
-        }
-
-        limbScores.push_back(pixHit/pixTotal);
-    }
+//         LimbLabel label = labels[numLabel];
+//         QPolygon poly = label.p;
 
 
-    for(int x=0; x<mask.width(); ++x)
-    {
-        for(int y=0; y<mask.height(); ++y)
-        {
+//         for(int x=0; x<maskMat.rows(); ++x)
+//         {
+//             for(int y=0; y<maskMat.cols(); ++y)
+//             {
+//             	//@NEEDS FIXING
+//                 if(poly.containsPoint(QPoint(x,y), Qt::OddEvenFill)) //polygon from label) //only take in pixels that are in the mask
+//                 {
+//                     pixTotal++;
 
-            int intensity = maskMat.at<uchar>(y, x);
+//                     int intensity = maskMat.at<uchar>(y, x);
 
-            bool blackPixel=intensity<10; //if all intensities are zero
-            //QColor maskCol = mask.pixel(x,y);
+//                     bool blackPixel=intensity<10; //if all intensities are zero
 
-            if(!blackPixel) //only take in pixels that are in the mask
-            {
-                numPixels++; //count the total numbe rf pixels
-                bool hit=false;
-                for(int i=0; i<labels.size(); ++i)
-                {
+//                     //QColor maskCol = mask.pixel(x,y);
+//                     if(!blackPixel)
+//                     {
+//                         pixHit++;
+//                     }
+//                 }
+//             }
+//         }
 
-                    LimbLabel label = labels[i];
-                    QPolygon poly = label.p;
-                    if(poly.containsPoint(QPoint(x,y), Qt::OddEvenFill)) //polygon from label
-                    {
-                        hit = true;
-                        if(debug)
-                            this->ui->imageViewer->drawDot(Point2i(x, y), 1, QColor(0,255,0)); //draw a green point wherever it hits
-                        break;
-                    }
-                }
-                if(hit)
-                {
-                    //colour this pixel in as hit
-                    numHitPixels++;
-                }
-                else
-                {
-                    if(debug)
-                        this->ui->imageViewer->drawDot(Point2i(x, y), 1, QColor(255,0,0)); //draw a green point wherever it hits
-                }
-            }
-            else
-            {
-                bool hit=false;
-                for(int i=0; i<labels.size(); ++i)
-                {
-                    LimbLabel label = labels[i];
-                    QPolygon poly = label.p;
-                    if(poly.containsPoint(QPoint(x,y), Qt::OddEvenFill)) //polygon from label
-                    {
-                        hit = true;
-                        if(debug)
-                            this->ui->imageViewer->drawDot(Point2i(x, y), 1, QColor(0,0,0)); //draw a green point wherever it hits
-                        break;
-                    }
-                }
-                if(hit)
-                {
-                    //colour this pixel in as hit
-                    numMissPixels++;
-                }
-            }
-        }
-    }
+//         limbScores.push_back(pixHit/pixTotal);
+//     }
 
-    float avgSuppScore=0;
 
-    for(int i=0; i<labels.size();++i)
-    {
-        if(i==0 || i>5) //count only the real labels
-            avgSuppScore+=labels[i].supportScore;
-    }
-    avgSuppScore=avgSuppScore/(labels.size()-5);
+//     for(int x=0; x<mask.width(); ++x)
+//     {
+//         for(int y=0; y<mask.height(); ++y)
+//         {
 
-    //show the worst half of labels
-    //    cerr << "Poorly localised labels: ";
-    //    for(int i=0; i<labels.size(); ++i)
-    //    {
-    //        if((i==0 || i>5) && labels[i].supportScore>avgSuppScore) //high is bad
-    //            cerr << limbName(i).toStdString() << " (" <<labels[i].supportScore<<") ";
-    //    }
-    //    cerr << endl;
+//             int intensity = maskMat.at<uchar>(y, x);
 
-    cerr << "Poorly localised labels (by hit/total pixels ratio): ";
-    for(int i=0; i<labels.size(); ++i)
-    {
-        if((i==0 || i>5) && limbScores[i]<0.4) //high is bad
-            cerr << limbName(i).toStdString() << " (" <<limbScores[i]<<") ";
-    }
-    cerr << endl;
+//             bool blackPixel=intensity<10; //if all intensities are zero
+//             //QColor maskCol = mask.pixel(x,y);
 
-    //also, if there are any completely broken limbs, this should lower the score
+//             if(!blackPixel) //only take in pixels that are in the mask
+//             {
+//                 numPixels++; //count the total numbe rf pixels
+//                 bool hit=false;
+//                 for(int i=0; i<labels.size(); ++i)
+//                 {
 
-    return (numHitPixels-numMissPixels)/numPixels;
+//                     LimbLabel label = labels[i];
+//                     QPolygon poly = label.p;
+//                     if(poly.containsPoint(QPoint(x,y), Qt::OddEvenFill)) //polygon from label
+//                     {
+//                         hit = true;
+//                         if(debug)
+//                             this->ui->imageViewer->drawDot(Point2i(x, y), 1, QColor(0,255,0)); //draw a green point wherever it hits
+//                         break;
+//                     }
+//                 }
+//                 if(hit)
+//                 {
+//                     //colour this pixel in as hit
+//                     numHitPixels++;
+//                 }
+//                 else
+//                 {
+//                     if(debug)
+//                         this->ui->imageViewer->drawDot(Point2i(x, y), 1, QColor(255,0,0)); //draw a green point wherever it hits
+//                 }
+//             }
+//             else
+//             {
+//                 bool hit=false;
+//                 for(int i=0; i<labels.size(); ++i)
+//                 {
+//                     LimbLabel label = labels[i];
+//                     QPolygon poly = label.p;
+//                     if(poly.containsPoint(QPoint(x,y), Qt::OddEvenFill)) //polygon from label
+//                     {
+//                         hit = true;
+//                         if(debug)
+//                             this->ui->imageViewer->drawDot(Point2i(x, y), 1, QColor(0,0,0)); //draw a green point wherever it hits
+//                         break;
+//                     }
+//                 }
+//                 if(hit)
+//                 {
+//                     //colour this pixel in as hit
+//                     numMissPixels++;
+//                 }
+//             }
+//         }
+//     }
+
+//     float avgSuppScore=0;
+
+//     for(int i=0; i<labels.size();++i)
+//     {
+//         if(i==0 || i>5) //count only the real labels
+//             avgSuppScore+=labels[i].supportScore;
+//     }
+//     avgSuppScore=avgSuppScore/(labels.size()-5);
+
+//     //show the worst half of labels
+//     //    cerr << "Poorly localised labels: ";
+//     //    for(int i=0; i<labels.size(); ++i)
+//     //    {
+//     //        if((i==0 || i>5) && labels[i].supportScore>avgSuppScore) //high is bad
+//     //            cerr << limbName(i).toStdString() << " (" <<labels[i].supportScore<<") ";
+//     //    }
+//     //    cerr << endl;
+
+//     cerr << "Poorly localised labels (by hit/total pixels ratio): ";
+//     for(int i=0; i<labels.size(); ++i)
+//     {
+//         if((i==0 || i>5) && limbScores[i]<0.4) //high is bad
+//             cerr << limbName(i).toStdString() << " (" <<limbScores[i]<<") ";
+//     }
+//     cerr << endl;
+
+//     //also, if there are any completely broken limbs, this should lower the score
+
+//     return (numHitPixels-numMissPixels)/numPixels;
+	return 1.0;
 }

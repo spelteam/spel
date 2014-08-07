@@ -15,6 +15,7 @@ class Score
     bool operator>(const Score &s) const;
     bool operator==(const Score &s) const;
     bool operator!=(const Score &s) const;
+    float val(void);
   private:
     float score; //detection score
     string detName; //detector name

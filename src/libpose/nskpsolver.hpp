@@ -8,7 +8,7 @@
 #include "imagesimilaritymatrix.hpp"
 #include "minspanningtree.hpp"
 #include <opencv2/opencv.hpp>
-#include <opengm/graphicalmodel/space/discreetespace.hxx>
+#include <opengm/graphicalmodel/space/discretespace.hxx>
 #include <opengm/graphicalmodel/graphicalmodel.hxx>
 #include <opengm/operations/adder.hxx>
 #include <opengm/functions/explicit_function.hxx>
@@ -22,13 +22,13 @@ using namespace opengm;
 class NSKPSolver: Solver
 {
   //define the space
-  typedef opengm::DiscreeteSpace<> Space;
+  typedef opengm::DiscreteSpace<> Space;
   //define the model
   typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
 
   public:
-    Solver();
-    ~Solver(); //inherited virtual
+    NSKPSolver();
+    ~NSKPSolver(); //inherited virtual
     Solution solve(const vector<Frame*>& frames); //inherited virtual
     Solution solve(const vector<Frame*>& frames, const vector<float>& params); //inherited virtual
     Solution solve(const vector<Frame*>& frames, const vector<float>& params, const ImageSimilarityMatrix& ISM); //inherited virtual
@@ -37,7 +37,7 @@ class NSKPSolver: Solver
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
   private:
-    vector<Frame*> propagateKeyframes(const vectr<Frame*>& frames, const vector<float>& params, const ImageSimilarityMatrix& ism);
+    vector<Frame*> propagateKeyframes(const vector<Frame*>& frames, const vector<float>& params, const ImageSimilarityMatrix& ism);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, int treeSize, float threshold);
     vector<Point2i> suggestKeyframes(vector<MinSpanningTree>& mstVec);
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, bool debug);

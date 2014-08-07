@@ -22,10 +22,10 @@ class LimbLabel
     bool operator==(const LimbLabel &ll) const;
     bool operator!=(const LimbLabel &ll) const;
 // compute the endpoints of the limb that this label would produce
-    void getEndpoints(Point2f &p0, Point2f &p1); 
+    void getEndpoints(Point2f &p0, Point2f &p1) const; 
     void addScore(Score detectionScore);
 
-    vector<Score> getScores(); //get the label scores
+    vector<Score> getScores() const; //get the label scores
   private:
 // identifier representing what bone this label belongs to
     int limbID;
