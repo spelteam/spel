@@ -36,7 +36,7 @@ void ColorHistDetector::setID(int _id)
 }
 
 //TODO (Vitaliy Koshura): Write real implementation here
-void ColorHistDetector::train(vector <Frame> frames, int id)
+void ColorHistDetector::train(vector <Frame*> frames, int id)
 {
 }
 

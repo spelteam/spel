@@ -14,7 +14,7 @@ class ColorHistDetector : public Detector
     ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
     int getID(void);
     void setID(int _id);
-    void train(vector <Frame> frames, int id);
+    void train(vector <Frame*> frames, int id);
     vector <vector <LimbLabel> > detect(Frame *frame, vector <float> params);
     uint8_t getNBins(void);
   private:

@@ -1,6 +1,5 @@
 #include "minspanningtree.hpp"
 #include <tree_util.hh>
-#include <tree.hh>
 
 using namespace kptree;
 
