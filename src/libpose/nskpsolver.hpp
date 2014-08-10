@@ -1,6 +1,14 @@
 #ifndef _NSKPSOLVER_HPP_
 #define _NSKPSOLVER_HPP_
 
+//OpenGM
+#include <opengm/graphicalmodel/graphicalmodel.hxx>
+#include <opengm/graphicalmodel/space/discretespace.hxx>
+#include <opengm/operations/adder.hxx>
+#include <opengm/functions/explicit_function.hxx>
+#include <opengm/inference/messagepassing/messagepassing.hxx>
+#include <opengm/operations/minimizer.hxx>
+
 #include <vector>
 #include "solver.hpp"
 #include "solution.hpp"
@@ -8,10 +16,6 @@
 #include "imagesimilaritymatrix.hpp"
 #include "minspanningtree.hpp"
 #include <opencv2/opencv.hpp>
-#include <opengm/graphicalmodel/space/discretespace.hxx>
-#include <opengm/graphicalmodel/graphicalmodel.hxx>
-#include <opengm/operations/adder.hxx>
-#include <opengm/functions/explicit_function.hxx>
 
 
 using namespace std;
@@ -26,6 +30,11 @@ class NSKPSolver: Solver
   //define the model
   typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
 
+  //define the update rules
+  typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
+  //define the inference algorithm
+  typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
+
   public:
     NSKPSolver();
     ~NSKPSolver(); //inherited virtual
@@ -39,6 +48,7 @@ class NSKPSolver: Solver
   private:
     vector<Frame*> propagateKeyframes(const vector<Frame*>& frames, const vector<float>& params, const ImageSimilarityMatrix& ism);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, int treeSize, float threshold);
+    
     vector<Point2i> suggestKeyframes(vector<MinSpanningTree>& mstVec);
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, bool debug);
 

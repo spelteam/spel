@@ -15,6 +15,10 @@ FIND_PACKAGE ( OpenCV REQUIRED )
 INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
 
+#use OpenGM
+FIND_PACKAGE ( OpenGM REQUIRED )
+INCLUDE_DIRECTORIES ( ${OpenGM_INCLUDE_DIR} )
+
 # Command line options, their defaults and checks
 
 # Set correct defines and include correct files
@@ -37,6 +41,7 @@ LIST ( APPEND ${LIBPOSE_MODULE}_SRC solver)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC imagesimilaritymatrix)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC minspanningtree)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC nskpsolver)
+
 
 
 # Create a static library
