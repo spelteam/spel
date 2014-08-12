@@ -13,14 +13,16 @@ class LimbLabel
 {
   public:
     LimbLabel();
-    LimbLabel(const LimbLabel& ll);
-    LimbLabel(int id, Point2f centre, float angle, vector<Point2f> polygon, vector<Score> scores);
+    LimbLabel(const LimbLabel& ll) {};
+    LimbLabel(int id, Point2f centre, float angle, vector<Point2f> polygon, vector<Score> scores) {};
+// Label center 
+    Point2f center;
 
 // output labels as printable string
     string toString();
     LimbLabel & operator=(const LimbLabel &ll);
-    bool operator==(const LimbLabel &ll) const;
-    bool operator!=(const LimbLabel &ll) const;
+    bool operator==(const LimbLabel &ll) const {};
+    bool operator!=(const LimbLabel &ll) const {};
 // compute the endpoints of the limb that this label would produce
     void getEndpoints(Point2f &p0, Point2f &p1) const; 
     void addScore(Score detectionScore);
@@ -29,8 +31,6 @@ class LimbLabel
   private:
 // identifier representing what bone this label belongs to
     int limbID;
-// Label center 
-    Point2f center;
 // degrees rotation from y=0 (horizontal line)
     float angle;
 // detector scores

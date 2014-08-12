@@ -9,7 +9,7 @@ class Score
 {
   public:
     Score(void);
-    Score(float sc, string name);
+    Score(float sc, string name) {};
     Score & operator=(const Score &s);
     bool operator<(const Score &s) const;
     bool operator>(const Score &s) const;

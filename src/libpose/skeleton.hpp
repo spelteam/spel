@@ -26,6 +26,7 @@ class Skeleton
     void setJointTree(tree <BodyJoint> _jointTree);
     float getScale(void) const;
     void setScale(float _scale);
+    uint32_t getPartTreeCount(void) const;
   private:
     string name;
     tree <BodyPart> partTree;

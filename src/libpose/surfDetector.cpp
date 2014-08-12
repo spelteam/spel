@@ -11,7 +11,7 @@ void SurfDetector::setID(int _id)
 }
 
 //TODO (Vitaliy Koshura): Write real implementation here
-void SurfDetector::train(vector <Frame> frames, int id)
+void SurfDetector::train(vector <Frame*> frames)
 {
 }
 

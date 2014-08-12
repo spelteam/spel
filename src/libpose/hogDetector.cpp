@@ -11,7 +11,7 @@ void HogDetector::setID(int _id)
 }
 
 //TODO (Vitaliy Koshura): Write real implementation here
-void HogDetector::train(vector <Frame> frames, int id)
+void HogDetector::train(vector <Frame*> frames)
 {
 }
 
