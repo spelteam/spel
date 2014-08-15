@@ -11,6 +11,7 @@ class Skeleton
 {
   public:
     Skeleton(void);
+//TODO (Vitaliy Koshura): Write implementation
     void fromXml(string filename);
     string toString(void);
     void learnDepth(Skeleton &skel);

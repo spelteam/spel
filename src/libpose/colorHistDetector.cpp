@@ -35,9 +35,16 @@ void ColorHistDetector::setID(int _id)
   id = _id;
 }
 
-//TODO (Vitaliy Koshura): Write real implementation here
-void ColorHistDetector::train(vector <Frame*> _frames)
+void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
+  const float scaleParam = 1;
+  const string sScaleParam = "scaleParam";
+// first we need to check all used params
+  if (params.find(sScaleParam) == params.end())
+  {
+    params[sScaleParam] = scaleParam;
+  }
+
   if (_frames.size() == 0)
     return;
   partModels.clear();
@@ -69,7 +76,7 @@ void ColorHistDetector::train(vector <Frame*> _frames)
     skeleton = _frames.at(frameNum)->getSkeleton();
     vector <POSERECT <Point2f>> polygons;  // polygons for this frame
     vector <bool> polyDepth;
-    for (int i = 0; i < skeleton.getPartTreeCount(); i++)
+    for (uint32_t i = 0; i < skeleton.getPartTreeCount(); i++)
     {
       blankPixels.push_back(0);
       partPixelColours.push_back(vector <Point3i>());
@@ -100,7 +107,7 @@ void ColorHistDetector::train(vector <Frame*> _frames)
       j1 = joint->getImageLocation();
       float boneLength = sqrt(distSquared(j0, j1));
 //TODO (Vitaliy Koshura): Check this!
-      float boneWidth = skeleton.getScale() / iteratorBodyPart->getSpaceLength();
+      float boneWidth = skeleton.getScale() * iteratorBodyPart->getSpaceLength() * params.at(sScaleParam);
       Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
       c1 = Point2f(0, 0.5 * boneWidth);
       c2 = Point2f(boneLength, 0.5 * boneWidth);
@@ -121,9 +128,9 @@ void ColorHistDetector::train(vector <Frame*> _frames)
     }
     Mat maskMat = _frames.at(frameNum)->getMask();
     Mat imgMat = _frames.at(frameNum)->getImage();
-    for (uint32_t i = 0; i < imgMat.cols; i++)
+    for (int32_t i = 0; i < imgMat.cols; i++)
     {
-      for (uint32_t j = 0; j < imgMat.rows; j++)
+      for (int32_t j = 0; j < imgMat.rows; j++)
       {
         Vec4b intensity = imgMat.at<Vec4b>(j, i);
         uint8_t blue = intensity.val[0];
@@ -157,7 +164,7 @@ void ColorHistDetector::train(vector <Frame*> _frames)
             partPixelColours[partHit].push_back(Point3i(red, green, blue));
             for (uint32_t p = 0; p < skeleton.getPartTreeCount(); ++p)
             {
-              if (p != partHit)
+              if ((int32_t)p != partHit)
               {
                 bgPixelColours[p].push_back(Point3i(red, green, blue));
               }
@@ -190,13 +197,52 @@ void ColorHistDetector::train(vector <Frame*> _frames)
 }
 
 //TODO (Vitaliy Koshura): Write real implementation here
-vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, vector <float> params)
+vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params)
 {
   const float searchDistCoeff = 0.5;
+  const string sSearchDistCoeff = "searchDistCoeff";
+
   const float minTheta = 90;
+  const string sMinTheta = "minTheta";
+
   const float maxTheta = 100;
+  const string sMaxTheta = "maxTheta";
+
   const float stepTheta = 10;
+  const string sStepTheta = "stepTheta";
+
   const uint32_t uniqueLocationCandidates = 4;
+  const string sUniqueLocationCandidates = "uniqueLocationCandidates";
+
+  const float scaleParam = 1;
+  const string sScaleParam = "scaleParam";
+
+// first we need to check all used params
+  if (params.find(sSearchDistCoeff) == params.end())
+  {
+    params[sSearchDistCoeff] = searchDistCoeff;
+  }
+  if (params.find(sMinTheta) == params.end())
+  {
+    params[sMinTheta] = minTheta;
+  }
+  if (params.find(sMaxTheta) == params.end())
+  {
+    params[sMaxTheta] = maxTheta;
+  }
+  if (params.find(sStepTheta) == params.end())
+  {
+    params[sStepTheta] = stepTheta;
+  }
+  if (params.find(sUniqueLocationCandidates) == params.end())
+  {
+    params[sUniqueLocationCandidates] = uniqueLocationCandidates;
+  }
+  if (params.find(sScaleParam) == params.end())
+  {
+    params[sScaleParam] = scaleParam;
+  }
+   
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
@@ -214,13 +260,13 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, vector <flo
     Point2f j1 = childJoint->getImageLocation();
     Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
     float boneLength = (j0 == j1) ? 1.0 : sqrt(distSquared(j0, j1));
-    float boxWidth = skeleton.getScale() / iteratorBodyPart->getSpaceLength();
+    float boxWidth = skeleton.getScale() * iteratorBodyPart->getSpaceLength() * params.at(sScaleParam);
     Point2f direction = j1 - j0;
     float theta = angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
     float minDist = boxWidth * 0.2;
     if (minDist < 2) minDist = 2;
     Mat maskMat = frame->getMask();
-    float searchDistance = boneLength * searchDistCoeff;
+    float searchDistance = boneLength * params.at(sSearchDistCoeff);
     for (float x = 0; x < searchDistance * 0.5; x += minDist)
     {
       for (float y = 0; y < searchDistance * 0.5; y += minDist)
@@ -232,7 +278,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, vector <flo
           if (!blackPixel)
           {
             vector <LimbLabel> locationLabels;
-            for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+            for (float rot = theta - params.at(sMinTheta); rot < theta + params.at(sMaxTheta); rot += params.at(sStepTheta))
             {
               LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, _pixelDistributions, pixelLabels);
               sortedLabels.push_back(generatedLabel);
@@ -243,20 +289,20 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, vector <flo
     }
     if (sortedLabels.size() > 0)
     {
-//      sort(sortedLabels.begin(), sortedLabels.end());
+      sort(sortedLabels.begin(), sortedLabels.end());
       Mat locations(frame->getImage().cols, frame->getImage().rows, DataType<int>::type);
-      for (uint32_t i = 0; i < frame->getImage().cols; i++)
+      for (int32_t i = 0; i < frame->getImage().cols; i++)
       {
-        for (uint32_t j = 0; j < frame->getImage().rows; j++)
+        for (int32_t j = 0; j < frame->getImage().rows; j++)
         {
           locations.at<int>(i, j) = 0;
         }
       }
       for (uint32_t i = 0; i < sortedLabels.size(); i++)
       {
-        uint32_t x = sortedLabels.at(i).center.x;
-        uint32_t y = sortedLabels.at(i).center.y;
-        if (locations.at<uint32_t>(x, y) < uniqueLocationCandidates)
+        uint32_t x = sortedLabels.at(i).getCenter().x;
+        uint32_t y = sortedLabels.at(i).getCenter().y;
+        if (locations.at<uint32_t>(x, y) < params.at(sUniqueLocationCandidates))
         {
           labels.push_back(sortedLabels.at(i));
           locations.at<uint32_t>(x, y) += 1;
@@ -305,7 +351,7 @@ void ColorHistDetector::setPartHistogramm(uint32_t nPartModel, const vector <Poi
       }
     }
   }
-  for(int i = 0; i < partColors.size(); i++)
+  for(uint32_t i = 0; i < partColors.size(); i++)
   {
     uint8_t r = partColors[i].x / factor;
     uint8_t g = partColors[i].y / factor;
@@ -348,7 +394,7 @@ void ColorHistDetector::addPartHistogramm(uint32_t nPartModel, const vector <Poi
   partModels.at(nPartModel).fgNumSamples++;
   partModels.at(nPartModel).fgSampleSizes.push_back(partColors.size());
 
-  for(int i = 0; i < partColors.size(); i++)
+  for(uint32_t i = 0; i < partColors.size(); i++)
   {
     uint8_t r = partColors[i].x / factor;
     uint8_t g = partColors[i].y / factor;
@@ -590,9 +636,9 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, vect
     vector <Score> v;
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), v);
   }
-  for (uint32_t i = x - boneLength * 0.5; i < x + boneLength * 0.5; i++)
+  for (int32_t i = x - boneLength * 0.5; i < x + boneLength * 0.5; i++)
   {
-    for (uint32_t j = y - boneLength * 0.5; j < y + boneLength * 0.5; j++)
+    for (int32_t j = y - boneLength * 0.5; j < y + boneLength * 0.5; j++)
     {
       if (i < maskMat.cols && j < maskMat.rows)
       {

@@ -1,8 +1,6 @@
 #ifndef _LIBPOSE_COLORHISTDETECTOR_HPP_
 #define _LIBPOSE_COLORHISTDETECTOR_HPP_
 
-//#include <cmath>
-#include <vector>
 #include <opencv2/opencv.hpp>
 #include "detector.hpp"
 
@@ -15,8 +13,8 @@ class ColorHistDetector : public Detector
     ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
     int getID(void);
     void setID(int _id);
-    void train(vector <Frame*> _frames);
-    vector <vector <LimbLabel> > detect(Frame *frame, vector <float> params);
+    void train(vector <Frame*> _frames, map <string, float> params);
+    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params);
     uint8_t getNBins(void);
   private:
     struct PartModel

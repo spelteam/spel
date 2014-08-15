@@ -12,23 +12,37 @@ using namespace cv;
 class LimbLabel
 {
   public:
+//TODO (Vitaliy Koshura): Need implementation
     LimbLabel();
-    LimbLabel(const LimbLabel& ll) {};
-    LimbLabel(int id, Point2f centre, float angle, vector<Point2f> polygon, vector<Score> scores) {};
-// Label center 
-    Point2f center;
+    LimbLabel(const LimbLabel& ll);
+    LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores);
 
 // output labels as printable string
+//TODO (Vitaliy Koshura): Need implementation
     string toString();
-    LimbLabel & operator=(const LimbLabel &ll);
-    bool operator==(const LimbLabel &ll) const {};
-    bool operator!=(const LimbLabel &ll) const {};
+    LimbLabel & operator = (const LimbLabel &ll);
+//TODO (Vitaliy Koshura): Need implementation
+    bool operator == (const LimbLabel &ll) const;
+//TODO (Vitaliy Koshura): Need implementation
+    bool operator != (const LimbLabel &ll) const;
+    bool operator < (const LimbLabel &ll) const;
+    bool operator > (const LimbLabel &ll) const;
 // compute the endpoints of the limb that this label would produce
+//TODO (Vitaliy Koshura): Need implementation
     void getEndpoints(Point2f &p0, Point2f &p1) const; 
-    void addScore(Score detectionScore);
-
-    vector<Score> getScores() const; //get the label scores
+//TODO (Vitaliy Koshura): Need implementation
+    void addScore(Score detectionScore) const; 
+    Point2f getCenter(void) const;
+    vector<Score> getScores(void) const; //get the label scores
+    int getLimbID(void) const;
+    float getAngle(void) const;
+    vector <Point2f> getPolygon(void) const;
+    bool getIsOccluded(void) const;
+    bool getIsWeak(void) const;
+    float getSumScore(void) const;
   private:
+// Label center 
+    Point2f center;
 // identifier representing what bone this label belongs to
     int limbID;
 // degrees rotation from y=0 (horizontal line)

@@ -8,8 +8,8 @@ class SurfDetector : public Detector
   public:
     int getID(void);
     void setID(int _id);
-    void train(vector <Frame*> frames);
-    vector <vector <LimbLabel> > detect(Frame *frame, vector <float> params);
+    void train(vector <Frame*> frames, map <string, float>);
+    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params);
   private:
     int id;
 };
