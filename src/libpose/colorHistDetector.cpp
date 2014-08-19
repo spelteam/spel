@@ -187,11 +187,15 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
 // init partModels
     for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart) 
     {
-      uint32_t partNumber = 0;
-      PartModel model(nBins);
-      addPartHistogramm(partModels.size(), partPixelColours[partNumber], blankPixels[partNumber]);
-      addBackgroundHistogramm(partModels.size(), bgPixelColours[partNumber]);
-      partModels.push_back(model);
+      int32_t partNumber = iteratorBodyPart->getPartID();
+      if (partModels.find(partNumber) == partModels.end())
+      {
+        PartModel model(nBins);
+        partModels.insert(std::pair <int32_t, PartModel> (partNumber, model));
+      }
+      PartModel &partModel = partModels.at(partNumber);
+      addPartHistogramm(partModel, partPixelColours[partNumber], blankPixels[partNumber]);
+      addBackgroundHistogramm(partModel, bgPixelColours[partNumber]);
     }
   }
 }
@@ -320,34 +324,34 @@ uint8_t ColorHistDetector::getNBins(void)
 }
 
 //TODO (Vitaliy Koshura): Need unit test
-float ColorHistDetector::computePixelBelongingLikelihood(uint32_t nPartModel, uint8_t r, uint8_t g, uint8_t b)
+float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b)
 {
-  uint8_t factor = ceil(pow(2, 8)/partModels.at(nPartModel).nBins);
-  float isFG = partModels.at(nPartModel).partHistogramm[r/factor][g/factor][b/factor];
+  uint8_t factor = ceil(pow(2, 8)/partModel.nBins);
+  float isFG = partModel.partHistogramm[r/factor][g/factor][b/factor];
   return isFG;
 }
 
 //TODO (Vitaliy Koshura>: need unit test
-void ColorHistDetector::setPartHistogramm(uint32_t nPartModel, const vector <Point3i> &partColors)
+void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors)
 {
   // do not add sample if the number of pixels is zero
   if (partColors.size() == 0)
     return;
-  partModels.at(nPartModel).uniqueExists = false;
-  uint8_t factor = ceil(pow(2, 8)/partModels.at(nPartModel).nBins);  // divide the color space into bins
-  partModels.at(nPartModel).sizeFG = partColors.size();
-  partModels.at(nPartModel).fgNumSamples = 1;
-  partModels.at(nPartModel).fgSampleSizes.clear();
-  partModels.at(nPartModel).fgSampleSizes.push_back(partColors.size());
+  partModel.uniqueExists = false;
+  uint8_t factor = ceil(pow(2, 8)/partModel.nBins);  // divide the color space into bins
+  partModel.sizeFG = partColors.size();
+  partModel.fgNumSamples = 1;
+  partModel.fgSampleSizes.clear();
+  partModel.fgSampleSizes.push_back(partColors.size());
 
 // clear histogram first
-  for(uint8_t r = 0; r < partModels.at(nPartModel).nBins; r++)
+  for(uint8_t r = 0; r < partModel.nBins; r++)
   {
-    for(uint8_t g = 0; g < partModels.at(nPartModel).nBins; g++)
+    for(uint8_t g = 0; g < partModel.nBins; g++)
     {
-      for(uint8_t b = 0; b < partModels.at(nPartModel).nBins; b++)
+      for(uint8_t b = 0; b < partModel.nBins; b++)
       {
-        partModels.at(nPartModel).partHistogramm[r][g][b] = 0.0;
+        partModel.partHistogramm[r][g][b] = 0.0;
       }
     }
   }
@@ -356,104 +360,104 @@ void ColorHistDetector::setPartHistogramm(uint32_t nPartModel, const vector <Poi
     uint8_t r = partColors[i].x / factor;
     uint8_t g = partColors[i].y / factor;
     uint8_t b = partColors[i].z / factor;
-    partModels.at(nPartModel).partHistogramm[r][g][b]++;
+    partModel.partHistogramm[r][g][b]++;
   }
-  for(uint8_t r = 0; r < partModels.at(nPartModel).nBins; r++)
+  for(uint8_t r = 0; r < partModel.nBins; r++)
   {
-    for(uint8_t g = 0; g < partModels.at(nPartModel).nBins; g++)
+    for(uint8_t g = 0; g < partModel.nBins; g++)
     {
-      for(uint8_t b = 0; b < partModels.at(nPartModel).nBins; b++)
+      for(uint8_t b = 0; b < partModel.nBins; b++)
       {
 // normalise the histograms
-        partModels.at(nPartModel).partHistogramm[r][g][b] /= partModels.at(nPartModel).sizeFG;
+        partModel.partHistogramm[r][g][b] /= partModel.sizeFG;
       }
     }
   }
 }
 
 //TODO (Vitaliy Koshura>: need unit test
-void ColorHistDetector::addPartHistogramm(uint32_t nPartModel, const vector <Point3i> &partColors, uint32_t nBlankPixels)
+void ColorHistDetector::addPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels)
 {
   if(partColors.size()==0) //do not add sample if the number of pixels is zero
     return;
-  partModels.at(nPartModel).uniqueExists = false;
+  partModel.uniqueExists = false;
 //un-normalise
-  for(uint8_t r = 0; r < partModels.at(nPartModel).nBins; r++)
+  for(uint8_t r = 0; r < partModel.nBins; r++)
   {
-    for(uint8_t g = 0; g < partModels.at(nPartModel).nBins; g++)
+    for(uint8_t g = 0; g < partModel.nBins; g++)
     {
-      for(uint8_t b = 0; b < partModels.at(nPartModel).nBins; b++)
+      for(uint8_t b = 0; b < partModel.nBins; b++)
       {
-        partModels.at(nPartModel).partHistogramm[r][g][b] *= partModels.at(nPartModel).sizeFG;
+        partModel.partHistogramm[r][g][b] *= partModel.sizeFG;
       }
     }
   }
 
-  int factor = ceil(pow(2, 8)/partModels.at(nPartModel).nBins);//divide the color space into bins
-  partModels.at(nPartModel).sizeFG += partColors.size();
-  partModels.at(nPartModel).fgNumSamples++;
-  partModels.at(nPartModel).fgSampleSizes.push_back(partColors.size());
+  int factor = ceil(pow(2, 8)/partModel.nBins);//divide the color space into bins
+  partModel.sizeFG += partColors.size();
+  partModel.fgNumSamples++;
+  partModel.fgSampleSizes.push_back(partColors.size());
 
   for(uint32_t i = 0; i < partColors.size(); i++)
   {
     uint8_t r = partColors[i].x / factor;
     uint8_t g = partColors[i].y / factor;
     uint8_t b = partColors[i].z / factor;
-    partModels.at(nPartModel).partHistogramm[r][g][b]++;
+    partModel.partHistogramm[r][g][b]++;
   }
 
 //renormalise
-  for(uint8_t r = 0; r < partModels.at(nPartModel).nBins; r++)
+  for(uint8_t r = 0; r < partModel.nBins; r++)
   {
-    for(uint8_t g = 0; g < partModels.at(nPartModel).nBins; g++)
+    for(uint8_t g = 0; g < partModel.nBins; g++)
     {
-      for(uint8_t b = 0; b < partModels.at(nPartModel).nBins; b++)
+      for(uint8_t b = 0; b < partModel.nBins; b++)
       {
 //normalise the histograms
-        partModels.at(nPartModel).partHistogramm[r][g][b] /= partModels.at(nPartModel).sizeFG;
+        partModel.partHistogramm[r][g][b] /= partModel.sizeFG;
       }
     }
   }
 
-  partModels.at(nPartModel).fgBlankSizes.push_back(nBlankPixels); //add the number of blank pixels for this model
+  partModel.fgBlankSizes.push_back(nBlankPixels); //add the number of blank pixels for this model
 }
 
-float ColorHistDetector::getAvgSampleSizeFg(uint32_t nPartModel)
+float ColorHistDetector::getAvgSampleSizeFg(const PartModel &partModel)
 {
   float sum = 0;
-  for(uint32_t i = 0; i < partModels.at(nPartModel).fgSampleSizes.size(); i++)
+  for(uint32_t i = 0; i < partModel.fgSampleSizes.size(); i++)
   {
-    sum += partModels.at(nPartModel).fgSampleSizes[i];
+    sum += partModel.fgSampleSizes[i];
   }
-  sum /= partModels.at(nPartModel).fgNumSamples;
+  sum /= partModel.fgNumSamples;
   return sum;
 }
 
-float ColorHistDetector::getAvgSampleSizeFgBetween(uint32_t nPartModel, uint32_t s1, uint32_t s2)
+float ColorHistDetector::getAvgSampleSizeFgBetween(const PartModel &partModel, uint32_t s1, uint32_t s2)
 {
-  if(s1 >= partModels.at(nPartModel).fgSampleSizes.size() || s2 >= partModels.at(nPartModel).fgSampleSizes.size())
+  if(s1 >= partModel.fgSampleSizes.size() || s2 >= partModel.fgSampleSizes.size())
     return 0;
-  return (partModels.at(nPartModel).fgSampleSizes[s1] + partModels.at(nPartModel).fgSampleSizes[s2]) / 2.0;
+  return (partModel.fgSampleSizes[s1] + partModel.fgSampleSizes[s2]) / 2.0;
 }
 
 //TODO (Vitaliy Koshura): Need unit test
 // Euclidean distance between part histograms
-float ColorHistDetector::matchPartHistogramsED(uint32_t nPartModelPrev, uint32_t nPartModel, uint32_t prevSizeIndex, uint32_t nextSizeIndex) 
+float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel, uint32_t prevSizeIndex, uint32_t nextSizeIndex) 
 {
-    float avgSample = getAvgSampleSizeFg(nPartModel);
-    float pAvgSample = getAvgSampleSizeFgBetween(nPartModelPrev, prevSizeIndex, nextSizeIndex);
+    float avgSample = getAvgSampleSizeFg(partModel);
+    float pAvgSample = getAvgSampleSizeFgBetween(partModelPrev, prevSizeIndex, nextSizeIndex);
     float avgRatio = avgSample / (avgSample + pAvgSample);
     float alpha = 0.15;  // the impact factor of size difference
     float diff = exp((-1.0 / alpha) * fabs(avgRatio - 0.5)); 
     float distance = 0;
-    for(uint8_t r = 0; r < partModels.at(nPartModel).nBins; r++)
+    for(uint8_t r = 0; r < partModel.nBins; r++)
     {
-        for(uint8_t g = 0; g < partModels.at(nPartModel).nBins; g++)
+        for(uint8_t g = 0; g < partModel.nBins; g++)
         {
-            for(uint8_t b = 0; b < partModels.at(nPartModel).nBins; b++)
+            for(uint8_t b = 0; b < partModel.nBins; b++)
             {
                 //normalise the histograms
-                distance += pow(partModels.at(nPartModel).partHistogramm[r][g][b] - partModels.at(nPartModelPrev).partHistogramm[r][g][b], 2);
+                distance += pow(partModel.partHistogramm[r][g][b] - partModel.partHistogramm[r][g][b], 2);
             }
         }
     }
@@ -461,37 +465,37 @@ float ColorHistDetector::matchPartHistogramsED(uint32_t nPartModelPrev, uint32_t
     return score;
 }
 
-void ColorHistDetector::addBackgroundHistogramm(uint32_t nPartModel, const vector <Point3i> &bgColors)
+void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vector <Point3i> &bgColors)
 {
   if (bgColors.size() == 0)
     return;
 // unnormalise
-  for (uint8_t r = 0; r < partModels.at(nPartModel).nBins; r++)
+  for (uint8_t r = 0; r < partModel.nBins; r++)
   {
-    for (uint8_t g = 0; g < partModels.at(nPartModel).nBins; g++)
+    for (uint8_t g = 0; g < partModel.nBins; g++)
     {
-      for (uint8_t b = 0; b < partModels.at(nPartModel).nBins; b++)
+      for (uint8_t b = 0; b < partModel.nBins; b++)
       {
-        partModels.at(nPartModel).bgHistogramm[r][g][b] *= partModels.at(nPartModel).sizeBG;
+        partModel.bgHistogramm[r][g][b] *= partModel.sizeBG;
       }
     }
   }
-  uint32_t factor = ceil(pow(2, 8) / partModels.at(nPartModel).nBins);
-  partModels.at(nPartModel).sizeBG += bgColors.size();
-  partModels.at(nPartModel).bgNumSamples++;
-  partModels.at(nPartModel).bgSampleSizes.push_back(bgColors.size());
+  uint32_t factor = ceil(pow(2, 8) / partModel.nBins);
+  partModel.sizeBG += bgColors.size();
+  partModel.bgNumSamples++;
+  partModel.bgSampleSizes.push_back(bgColors.size());
   for (uint32_t i = 0; i < bgColors.size(); i++)
   {
-    partModels.at(nPartModel).bgHistogramm[bgColors[i].x / factor][bgColors[i].y / factor][bgColors[i].z / factor]++;
+    partModel.bgHistogramm[bgColors[i].x / factor][bgColors[i].y / factor][bgColors[i].z / factor]++;
   }
 // renormalise
-  for (uint8_t r = 0; r < partModels.at(nPartModel).nBins; r++)
+  for (uint8_t r = 0; r < partModel.nBins; r++)
   {
-    for (uint8_t g = 0; g < partModels.at(nPartModel).nBins; g++)
+    for (uint8_t g = 0; g < partModel.nBins; g++)
     {
-      for (uint8_t b = 0; b < partModels.at(nPartModel).nBins; b++)
+      for (uint8_t b = 0; b < partModel.nBins; b++)
       {
-        partModels.at(nPartModel).bgHistogramm[r][g][b] /= (float)partModels.at(nPartModel).sizeBG;
+        partModel.bgHistogramm[r][g][b] /= (float)partModel.sizeBG;
       }
     }
   }
@@ -543,7 +547,7 @@ vector <Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
       for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
       {
         pixelDistributions.at(iteratorBodyPart->getPartID()).at<float>(x, y) = blackPixel ? 0 :
-          computePixelBelongingLikelihood(iteratorBodyPart->getPartID(), red, green, blue);
+          computePixelBelongingLikelihood(partModels.at(iteratorBodyPart->getPartID()), red, green, blue);
       }
     }
   } 
@@ -703,12 +707,10 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, vect
     supportScore = (float)totalPixelLabelScore / (float)totalPixels;
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     sizeScore = 1.0;
-    PartModel model(8);
-    partModels.push_back(model);
+    PartModel model(nBins);
     uint32_t n = partModels.size() - 1;
-    setPartHistogramm(n, partPixelColours);
-    colScore = matchPartHistogramsED(n, bodyPart.getPartID(), 0, 0);
-    partModels.pop_back();
+    setPartHistogramm(model, partPixelColours);
+    colScore = matchPartHistogramsED(model, partModels.at(bodyPart.getPartID()), 0, 0);
     interpolationSimilarityScore = distSquared(Point2f(x, y), boxCenter);
     vector <Score> s;
     Score sc(1.0 - (supportScore + inMaskSupportScore), "");
