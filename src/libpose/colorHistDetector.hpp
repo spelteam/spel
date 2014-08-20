@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "detector.hpp"
+#include "poseHelper.hpp"
 
 using namespace std;
 using namespace cv;
@@ -46,24 +47,6 @@ class ColorHistDetector : public Detector
     vector <Mat> buildPixelDistributions(Frame *frame);
     vector <Mat> buildPixelLabels(Frame *frame);
     LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, vector <Mat> pixelDistributions, vector <Mat> pixelLabels);
-//TODO (Vitaliy Koshura)
-// Seems to be common functions. Need to move it somewhere
-    template <typename T> double distSquared(T one, T two) { return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0); }
-    double angle2D(double x1, double y1, double x2, double y2);
-    template <typename T> T rotatePoint2D(const T point, const T pivot, const float degrees)
-    {
-      double radians = degrees * M_PI / 180.0;
-      Point2f pt, cnt;
-      pt = point;
-      cnt = pivot;
-      pt = pt - cnt;
-      Point2f result;
-      result.x = pt.x * cosf(radians) - pt.y * sinf(radians);
-      result.y = pt.x * sinf(radians) + pt.y * cosf(radians);
-      result = result + cnt;
-      T res = result;
-      return res;
-    }
 };
 
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

@@ -105,7 +105,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         break;
       }
       j1 = joint->getImageLocation();
-      float boneLength = sqrt(distSquared(j0, j1));
+      float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
 //TODO (Vitaliy Koshura): Check this!
       float boneWidth = skeleton.getScale() * iteratorBodyPart->getSpaceLength() * params.at(sScaleParam);
       Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
@@ -115,12 +115,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       c4 = Point2f(0, -0.5 * boneWidth);
       Point2f polyCenter = Point2f(boneLength * 0.5, 0);
       Point2f direction = j1 - j0;
-      float rotationAngle = angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
+      float rotationAngle = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
 // rotate polygon and translate
-      c1 = rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
-      c2 = rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
-      c3 = rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
-      c4 = rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
+      c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
+      c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
+      c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
+      c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
       POSERECT <Point2f> poserect(c1, c2, c3, c4);
       polygons[i] = poserect;
       polyDepth[i] = iteratorBodyPart->getParentJoint()->getDepthSign();
@@ -263,10 +263,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     Point2f j0 = parentJoint->getImageLocation();
     Point2f j1 = childJoint->getImageLocation();
     Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-    float boneLength = (j0 == j1) ? 1.0 : sqrt(distSquared(j0, j1));
+    float boneLength = (j0 == j1) ? 1.0 : sqrt(PoseHelper::distSquared(j0, j1));
     float boxWidth = skeleton.getScale() * iteratorBodyPart->getSpaceLength() * params.at(sScaleParam);
     Point2f direction = j1 - j0;
-    float theta = angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
+    float theta = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
     float minDist = boxWidth * 0.2;
     if (minDist < 2) minDist = 2;
     Mat maskMat = frame->getMask();
@@ -501,25 +501,6 @@ void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vect
   }
 }
 
-/*
-   Return the angle between two vectors on a plane
-   The angle is from vector 1 to vector 2, positive anticlockwise
-   The result is between -pi -> pi
-*/
-//TODO (Vitaliy Koshura): Need unit test
-double ColorHistDetector::angle2D(double x1, double y1, double x2, double y2)
-{
-    double dtheta, theta1, theta2;
-    theta1 = atan2(y1, x1);
-    theta2 = atan2(y2, x2);
-    dtheta = theta2 - theta1;
-    while (dtheta > M_PI)
-        dtheta -= (M_PI * 2.0);
-    while (dtheta < -M_PI)
-        dtheta += (M_PI * 2.0);
-    return(dtheta);
-}
-
 vector <Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
 {
   Skeleton skeleton = frame->getSkeleton();
@@ -612,9 +593,9 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, vect
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
   float x = boxCenter.x;
   float y = boxCenter.y;
-  float boneLength = sqrt(distSquared(j0, j1));
+  float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
   float boxWidth = frame->getSkeleton().getScale() / bodyPart.getSpaceLength();
-  float rot = angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
+  float rot = PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
   vector <Point3i> partPixelColours;
   Point2f c1, c2, c3, c4, polyCenter;
   c1 = Point2f(0, 0.5 * boxWidth);
@@ -622,10 +603,10 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, vect
   c3 = Point2f(boneLength, -0.5 * boxWidth);
   c4 = Point2f(0, -0.5 * boxWidth);
   polyCenter = Point2f(boneLength * 0.5, 0);
-  c1 = rotatePoint2D(c1, polyCenter, rot) + boxCenter - polyCenter;
-  c2 = rotatePoint2D(c2, polyCenter, rot) + boxCenter - polyCenter;
-  c3 = rotatePoint2D(c3, polyCenter, rot) + boxCenter - polyCenter;
-  c4 = rotatePoint2D(c4, polyCenter, rot) + boxCenter - polyCenter;
+  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rot) + boxCenter - polyCenter;
+  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rot) + boxCenter - polyCenter;
+  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rot) + boxCenter - polyCenter;
+  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rot) + boxCenter - polyCenter;
   POSERECT <Point2f> rect(c1, c2, c3, c4);
   uint32_t totalPixels = 0;
   uint32_t pixelsInMask = 0;
@@ -711,7 +692,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, vect
     uint32_t n = partModels.size() - 1;
     setPartHistogramm(model, partPixelColours);
     colScore = matchPartHistogramsED(model, partModels.at(bodyPart.getPartID()), 0, 0);
-    interpolationSimilarityScore = distSquared(Point2f(x, y), boxCenter);
+    interpolationSimilarityScore = PoseHelper::distSquared(Point2f(x, y), boxCenter);
     vector <Score> s;
     Score sc(1.0 - (supportScore + inMaskSupportScore), "");
     s.push_back(sc);
