@@ -56,7 +56,7 @@ LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )
 ADD_EXECUTABLE ( ${TESTS_MODULE} ${${TESTS_MODULE}_SRC} )
 
 # TODO: Library names should be taken from variables
-TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} )
+TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} ${CMAKE_THREAD_LIBS_INIT} )
 
 # Installation instructions for the test module
 # Please specify the installation instructions sprcific
