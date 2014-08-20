@@ -26,6 +26,7 @@ endif()
 
 IF ( CMAKE_USE_PTHREADS_INIT )  # The pthreads library is available and allowed.
   ADD_DEFINITIONS ( -DGTEST_HAS_PTHREAD=1 )
+  LIST ( APPEND ${TESTS_MODULE}_LNK ${CMAKE_THREAD_LIBS_INIT} )
 else()
   ADD_DEFINITIONS ( -DGTEST_HAS_PTHREAD=0 )
 endif()
@@ -53,10 +54,11 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/surfDetector_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )
 
+
 ADD_EXECUTABLE ( ${TESTS_MODULE} ${${TESTS_MODULE}_SRC} )
 
 # TODO: Library names should be taken from variables
-TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} ${CMAKE_THREAD_LIBS_INIT} )
+TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} )
 
 # Installation instructions for the test module
 # Please specify the installation instructions sprcific
