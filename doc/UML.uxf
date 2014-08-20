@@ -160,8 +160,8 @@ bg=blue</panel_attributes>
     <coordinates>
       <x>24</x>
       <y>2032</y>
-      <w>368</w>
-      <h>64</h>
+      <w>360</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>352;24;24;48</additional_attributes>
@@ -188,8 +188,8 @@ bg=blue</panel_attributes>
     <coordinates>
       <x>368</x>
       <y>2032</y>
-      <w>112</w>
-      <h>64</h>
+      <w>104</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>24;24;96;48</additional_attributes>
@@ -199,8 +199,8 @@ bg=blue</panel_attributes>
     <coordinates>
       <x>392</x>
       <y>2032</y>
-      <w>192</w>
-      <h>64</h>
+      <w>184</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>24;24;176;48</additional_attributes>
@@ -414,7 +414,7 @@ bg=orange</panel_attributes>
       <x>416</x>
       <y>528</y>
       <w>560</w>
-      <h>112</h>
+      <h>232</h>
     </coordinates>
     <panel_attributes>MinSpanningTree
 --
@@ -545,8 +545,8 @@ bg=orange</panel_attributes>
     <coordinates>
       <x>880</x>
       <y>1208</y>
-      <w>592</w>
-      <h>280</h>
+      <w>584</w>
+      <h>272</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>576;24;24;264</additional_attributes>
@@ -556,8 +556,8 @@ bg=orange</panel_attributes>
     <coordinates>
       <x>1440</x>
       <y>1208</y>
-      <w>48</w>
-      <h>392</h>
+      <w>40</w>
+      <h>384</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>24;24;32;376</additional_attributes>
@@ -567,8 +567,8 @@ bg=orange</panel_attributes>
     <coordinates>
       <x>1456</x>
       <y>1208</y>
-      <w>448</w>
-      <h>392</h>
+      <w>440</w>
+      <h>384</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>24;24;432;376</additional_attributes>
@@ -646,32 +646,23 @@ bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>992</x>
+      <y>200</y>
+      <w>400</w>
+      <h>128</h>
+    </coordinates>
+    <panel_attributes>PoseHelper
+--
+--
++distSquared(one: T, two: T): double
++angle2D(x1: double, y1: double, x2: double, y2: double): double;
++rotatePoint2D(point: T, pivot: T, degrees: float): T</panel_attributes>
+    <additional_attributes/>
+  </element>
   <group>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>600</x>
-        <y>1456</y>
-        <w>648</w>
-        <h>608</h>
-      </coordinates>
-      <panel_attributes>bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Note</type>
-      <coordinates>
-        <x>608</x>
-        <y>1496</y>
-        <w>552</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>*Potentially to remove *
--- fgNumSamples contain duplicated data that can be accessed 
-   from fgSampleSizes.size()
-bg=yellow</panel_attributes>
-      <additional_attributes/>
-    </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
@@ -698,12 +689,23 @@ bg=yellow</panel_attributes>
 +getAvgSampleSizeFg(partModel: PartModel&amp;): float
 +getAvgSampleSizeFgBetween(partModel: PartModel&amp;, s1: int, s2: int): float
 +matchPartHistogramsED(partModelPrev: PartModel&amp;, partModel: PartModel&amp;, prevSizeIndex: int, nextSizeIndex: int): float
-+distSquared(one: T, two: T): double
-+angle2D(x1: double, y1: double, x2: double, y2: double): double;
-+rotatePoint2D(point: T, pivot: T, degrees: float): T
 +buildPixelDistributions(frame: Frame*): vector &lt;Mat&gt;
 +buildPixelLabels(frame: Frame*): vector &lt;Mat&gt;
 +generateLabel(bodyPart: BodyPart, frame: Frame, pixelDistributions: vector &lt;Mat&gt;, pixelLabels: vector &lt;Mat&gt;): LimbLabel</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Note</type>
+      <coordinates>
+        <x>608</x>
+        <y>1496</y>
+        <w>552</w>
+        <h>56</h>
+      </coordinates>
+      <panel_attributes>*Potentially to remove *
+-- fgNumSamples contain duplicated data that can be accessed 
+   from fgSampleSizes.size()
+bg=yellow</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
@@ -725,6 +727,17 @@ bg=yellow</panel_attributes>
 +gfBlankSizes: vector&lt;int&gt;
 
 </panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>600</x>
+        <y>1456</y>
+        <w>648</w>
+        <h>608</h>
+      </coordinates>
+      <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
