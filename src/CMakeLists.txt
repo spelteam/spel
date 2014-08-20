@@ -91,6 +91,7 @@ IF ( NOT GOOGLE_TEST )
   SET ( GOOGLE_TEST:BOOL OFF )
 ENDIF()
 
+
 # Recurse into subdirectory
 # Compile Google Test Framework
 IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
@@ -98,6 +99,14 @@ IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
   IF ( MSVC )
     ADD_DEFINITIONS ( -D_VARIADIC_MAX=10 )
   ENDIF ()
+# If we are using gcc under linux in debug mode - lets add code coverage test
+  IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+    IF ( UNIX )
+      IF ( CMAKE_COMPILER_IS_GNUCXX )
+        SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -fPIC -O0" )
+      ENDIF()
+    ENDIF()
+  ENDIF()
   ADD_SUBDIRECTORY ( tests )
 ENDIF()
 
