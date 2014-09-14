@@ -89,3 +89,13 @@ bool BodyPart::operator!=(const BodyPart &bp) const
   return !(*this == bp);
 }
 
+POSERECT <Point2f> BodyPart::getPartPolygon(void)
+{
+  return partPolygon;
+}
+
+void BodyPart::setPartPolygon(POSERECT <Point2f> _partPolygon)
+{
+  partPolygon = _partPolygon;
+}
+

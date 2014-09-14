@@ -58,11 +58,17 @@ void Frame::setGroundPoint(Point2f _groundPoint)
   groundPoint = _groundPoint;
 }
 
-//TODO(Vitaliy Koshura): write real implementation
-/*vector <Point2f> Frame::getPartPolygon(int partID)
+vector <Point2f> Frame::getPartPolygon(int partID)
 {
-  vector <Point2f> result;
-
-  return result;
-}*/
+  tree <BodyPart> partTree = getSkeleton().getPartTree();
+  tree <BodyPart>::iterator i;
+  for (i = partTree.begin(); i != partTree.end(); i++)
+  {
+    if (i->getPartID() == partID)
+    {
+      return i->getPartPolygon().asVector();
+    }
+  }
+  return vector <Point2f> ();
+}
 

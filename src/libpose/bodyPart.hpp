@@ -3,6 +3,7 @@
 
 #include <string>
 #include "bodyJoint.hpp"
+#include "poseHelper.hpp"
 
 using namespace std;
 
@@ -26,6 +27,8 @@ class BodyPart
     void setIsOccluded(bool _isOccluded);
     float getSpaceLength(void) const;
     void setSpaceLength(float _spaceLength);
+    POSERECT <Point2f> getPartPolygon(void);
+    void setPartPolygon(POSERECT <Point2f> _partPolygon);
   private:
     int partID;
     string partName;
@@ -33,6 +36,7 @@ class BodyPart
     BodyJoint *childJoint;
     bool isOccluded;
     float spaceLength;
+    POSERECT <Point2f> partPolygon;
 };
 
 #endif  // _BODYPART_HPP_

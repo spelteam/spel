@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${LIBPOSE_MODULE}" )
 FIND_PACKAGE ( OpenCV REQUIRED )
 INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}" )
 
 OPTION ( DISABLE_PTHREADS "Do not use pthreads" OFF )
 
@@ -34,6 +35,9 @@ endif()
 # main test file
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec )
 
+# additional files
+LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}/tinyxml2 )
+
 # libpose tests
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_constructor_tests )
@@ -49,7 +53,10 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_operators_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/colorHistDetector_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/hogDetector_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/surfDetector_get_and_set_tests )
-
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/score_get_and_set_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/score_constructor_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/score_operators_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_poserect_tests )
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )

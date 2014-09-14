@@ -37,5 +37,8 @@ TEST(lockframeTest, GetAndSetTest)
   EXPECT_EQ(0, countNonZero(mask != lockframe.getMask()));
   EXPECT_EQ(skeleton, lockframe.getSkeleton());
   EXPECT_EQ(groundPoint, lockframe.getGroundPoint());
+
+  EXPECT_EQ(LOCKFRAME, lockframe.getFrametype());
+
 }
 

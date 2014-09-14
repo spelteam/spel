@@ -292,7 +292,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label)
 	//for now, just return the first available score
 	vector<Score> scores = label.getScores();
 	if(scores.size()>0)
-		return scores[0].val();
+		return scores[0].getScore();
 	else //if no scores present return -1
 		return -1;
 }

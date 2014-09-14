@@ -9,7 +9,7 @@ TEST(bodyJointTest, GetAndSetTest)
   Point2f imageLocation(2.534, -1.635);
   Point3f spaceLocation(1.231, -2.0, -1.5);
   bool depthSign = true;  
-  
+    
   bj1.setLimbID(limbID);
   bj1.setJointName(jointName);
   bj1.setImageLocation(imageLocation);

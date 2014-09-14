@@ -48,7 +48,6 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
 
 # Command line options, their defaults and checks
 
-OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
 
 # Project configuration types
 SET ( CMAKE_CONFIGURATION_TYPES Release; Debug )
@@ -57,6 +56,14 @@ SET ( CMAKE_CONFIGURATION_TYPES Release; Debug )
 IF ( NOT CMAKE_BUILD_TYPE )
     SET ( CMAKE_BUILD_TYPE Debug )
 ENDIF()
+
+SET ( GOOGLE_TEST_PATH "../thirdparty/googletest" CACHE STRING "Path to Google Test Framework" )
+
+IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+  OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" ON )
+ELSE ()
+  OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
+ENDIF ()
 
 # Check for appropriate build parameters
 # If ok BUILD_OK is set to ON
@@ -91,6 +98,10 @@ IF ( NOT GOOGLE_TEST )
   SET ( GOOGLE_TEST:BOOL OFF )
 ENDIF()
 
+SET ( TINYXML2_PATH "../thirdparty/tinyxml2" CACHE STRING "Path to TinyXml2 library" )
+IF ( NOT TINYXML2_PATH )
+  MESSAGE ( FATAL_ERROR "TimyXml was not found" )
+ENDIF()
 
 # Recurse into subdirectory
 # Compile Google Test Framework
@@ -115,4 +126,4 @@ ADD_SUBDIRECTORY ( libpose )
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
 SET ( GOOGLE_TEST_PATH "../thirdparty/googletest" CACHE STRING "Path to Google Test Framework" )
-
+SET ( TINYXML2_PATH "../thirdparty/tinyxml2" CACHE STRING "Path to TinyXml2 library" )

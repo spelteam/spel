@@ -37,5 +37,7 @@ TEST(interpolationTest, GetAndSetTest)
   EXPECT_EQ(0, countNonZero(mask != interpolation.getMask()));
   EXPECT_EQ(skeleton, interpolation.getSkeleton());
   EXPECT_EQ(groundPoint, interpolation.getGroundPoint());
+
+  EXPECT_EQ(INTERPOLATIONFRAME, interpolation.getFrametype());
 }
 

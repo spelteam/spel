@@ -28,5 +28,6 @@ TEST(skeletonTest, GetAndSetTest)
   tree <BodyJoint> jt1 = s.getJointTree();
   EXPECT_TRUE(equal(jt1.begin(), jt1.end(), jointTree.begin()));
   EXPECT_EQ(scale, s.getScale());
+  EXPECT_EQ(1, s.getPartTreeCount());
 }
 

@@ -5,6 +5,57 @@
 
 using namespace cv;
 
+template <class T>
+struct TPOSERECT
+{
+  T p1;
+  T p2;
+  T p3;
+  T p4;
+};
+
+template <class T>
+struct POSERECT
+{
+  POSERECT() : point1(), point2(), point3(), point4() {}
+  POSERECT(T _point1, T _point2, T _point3, T _point4) : point1(_point1), point2(_point2), point3(_point3), point4(_point4) {}
+  T point1;
+  T point2;
+  T point3;
+  T point4;
+
+//TODO (Vitaliy Koshura): Need unit test
+  int8_t containsPoint(T point)
+  {
+    vector <T> contour;
+    contour.push_back(point1);
+    contour.push_back(point2);
+    contour.push_back(point3);
+    contour.push_back(point4);
+    return pointPolygonTest(contour, point, false);
+  }
+
+  vector <T> asVector()
+  {
+    vector <T> contour;
+    contour.push_back(point1);
+    contour.push_back(point2);
+    contour.push_back(point3);
+    contour.push_back(point4);
+    return contour;
+  }
+
+  bool operator==(const POSERECT <T> &rect) const
+  {
+    return (this->point1 == rect.point1 && this->point2 == rect.point2 && this->point3 == rect.point3 && this->point4 == rect.point4);
+  }
+
+  bool operator!=(const POSERECT <T> &rect) const
+  {
+    return !(*this == rect);
+  }
+};
+
 // class with common functions
 class PoseHelper
 {
@@ -17,16 +68,15 @@ class PoseHelper
     template <typename T> static T rotatePoint2D(const T point, const T pivot, const float degrees)
     {
       double radians = degrees * M_PI / 180.0;
-      Point2f pt, cnt;
+      T pt, cnt;
       pt = point;
       cnt = pivot;
-      pt = pt - cnt;
-      Point2f result;
+      pt -= cnt;
+      T result;
       result.x = pt.x * cosf(radians) - pt.y * sinf(radians);
       result.y = pt.x * sinf(radians) + pt.y * cosf(radians);
       result = result + cnt;
-      T res = result;
-      return res;
+      return result;
     }
 };
 

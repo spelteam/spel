@@ -11,10 +11,11 @@ class Skeleton
 {
   public:
     Skeleton(void);
-//TODO (Vitaliy Koshura): Write implementation
-    void fromXml(string filename);
+//TODO (Vitaliy Koshura): Need implementation
     string toString(void);
+//TODO (Vitaliy Koshura): Need implementation
     void learnDepth(Skeleton &skel);
+//TODO (Vitaliy Koshura): Need implementation
     void infer2D(void);
     Skeleton & operator=(const Skeleton &s);
     bool operator==(const Skeleton &s) const;

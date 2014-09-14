@@ -63,7 +63,7 @@ void Skeleton::setScale(float _scale)
 {
   scale = _scale;
 }
-//TODO (Vitaliy Koshura): Need unit test
+
 uint32_t Skeleton::getPartTreeCount(void) const
 {
   return partTree.size();

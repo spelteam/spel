@@ -37,5 +37,7 @@ TEST(keyframeTest, GetAndSetTest)
   EXPECT_EQ(0, countNonZero(mask != keyframe.getMask()));
   EXPECT_EQ(skeleton, keyframe.getSkeleton());
   EXPECT_EQ(groundPoint, keyframe.getGroundPoint());
+
+  EXPECT_EQ(KEYFRAME, keyframe.getFrametype());
 }
 

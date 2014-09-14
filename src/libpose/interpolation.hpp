@@ -7,7 +7,6 @@ class Interpolation : public Frame
 {
   public:
     Interpolation(void);
-    vector <Point2f> getPartPolygon(int partID);
     FRAMETYPE getFrametype(void);
   private:
     const FRAMETYPE frameType;
