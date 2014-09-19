@@ -122,6 +122,7 @@ IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
 ENDIF()
 
 ADD_SUBDIRECTORY ( libpose )
+ADD_SUBDIRECTORY ( utils )
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )

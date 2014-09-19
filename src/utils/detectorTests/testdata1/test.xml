@@ -1,0 +1,29 @@
+<project>
+  <BodyJoints>
+    <BodyJoint id="" name=""/>
+    <BodyJoint id="" name=""/>
+    <BodyJoint id="" name=""/>
+  </BodyJoints>
+  <BodyParts>
+    <BodyPart id="" name="" parentJointId="" childJointId="" depthSign=""/>
+    <BodyPart id="" name="" parentJointId="" childJointId="" depthSign=""/>
+    <BodyPart id="" name="" parentJointId="" childJointId="" depthSign=""/>
+  </BodyParts>
+  <Frames>
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="">
+      <BodyJoint id="" x="" y="">
+      <BodyJoint id="" x="" y="">
+      <BodyJoint id="" x="" y="">
+    </Frame>
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="">
+      <BodyJoint id="" x="" y="">
+      <BodyJoint id="" x="" y="">
+      <BodyJoint id="" x="" y="">
+    </Frame>
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="">
+      <BodyJoint id="" x="" y="">
+      <BodyJoint id="" x="" y="">
+      <BodyJoint id="" x="" y="">
+    </Frame>
+  </Frames>
+</project>
