@@ -1,6 +1,9 @@
 #include <iostream>
+#include <fstream>
+
 #include <tinyxml2.h>
 #include <opencv2/opencv.hpp>
+
 #include <colorHistDetector.hpp>
 #include <keyframe.hpp>
 #include <interpolation.hpp>
@@ -32,9 +35,9 @@ const string bodyJointYParam = "y";
 
 int main (int argc, char **argv)
 {
-  if (argc == 1) 
+  if (argc != 3) 
   {
-    cout << "Usage colorHistDetectorTest [project.xml]" << endl;
+    cout << "Usage colorHistDetectorTest [project.xml] [out directory]" << endl;
     return -1;
   }
   XMLDocument project;
@@ -227,6 +230,46 @@ int main (int argc, char **argv)
   ColorHistDetector detector;
   map <string, float> params;
   detector.train(vFrames, params);
+
+  vector <vector <LimbLabel> >::iterator lls;
+  vector <LimbLabel>::iterator ls;
+
+  vector <Frame*>::iterator i;
+  map <string, float> detectParams;
+  for (i = vFrames.begin(); i != vFrames.end(); ++i)
+  {
+    Frame *f = *i;
+    if (f->getFrametype() == INTERPOLATIONFRAME)
+    {
+      vector <vector <LimbLabel> > labels = detector.detect(f, detectParams);
+      uint32_t count = 0;
+      for (lls = labels.begin(); lls != labels.end(); ++lls)
+      {
+        ofstream outFile;
+        string outFileName = argv[2];
+        if (outFileName[outFileName.size()] != '/')
+          outFileName += "/";
+        stringstream ss;
+        ss << count;
+        outFileName += ss.str();
+        outFile.open(outFileName);
+        for (ls = lls->begin(); ls != lls->end(); ++ls)
+        {
+          outFile << ls->getLimbID() << " ";
+          outFile << ls->getCenter().x << " ";
+          outFile << ls->getCenter().y << " ";
+          outFile << ls->getAngle() << " ";
+          outFile << PoseHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2]) << " ";
+          outFile << ls->getSumScore() << " ";
+          outFile << "0" << " ";
+          outFile << "0" << " ";
+          outFile << ((ls->getIsOccluded() == true) ? 0 : 1) << std::endl;
+        }
+        outFile.close();
+        count++;
+      }
+    }
+  }
   return 0;
 }
 
