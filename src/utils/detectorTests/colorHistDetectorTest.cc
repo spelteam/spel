@@ -270,6 +270,12 @@ int main (int argc, char **argv)
       }
     }
   }
+  for (i = vFrames.begin(); i != vFrames.end(); ++i)
+  {
+    Frame *f = *i;
+    if (f != 0)
+      delete f;
+  }
   return 0;
 }
 
