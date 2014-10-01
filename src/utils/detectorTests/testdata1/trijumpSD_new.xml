@@ -1,4 +1,4 @@
-<!DOCTYPE Pose_Solver_Project>
+<?xml version="1.0"?>
 <Project name="trijumpSDfull" imgFolderPath="./seq/" maskFolderPath="./mask/" camFolderPath="./cam/" allowScaling="True"  simMatPath="" exportPath="">
  <BodyJoints>
   <BodyJoint id="0" name="Lower Back" />
@@ -196,7 +196,7 @@
   <Frame id="31" imgPath="0031.png" maskPath="mask0031.pgm" camPath="0031.camu" isKeyframe="no" gpX="" gpY=""/>
   <Frame id="32" imgPath="0032.png" maskPath="mask0032.pgm" camPath="0032.camu" isKeyframe="no" gpX="" gpY=""/>
   <Frame id="33" imgPath="0033.png" maskPath="mask0033.pgm" camPath="0033.camu" isKeyframe="no" gpX="" gpY=""/>
-  <Frame id="34" imgPath="0034.png" maskPath="mask0034.pgm" camPath="0034.camu" isKeyframe="yes" gpX="" gpY=""/>
+  <Frame id="34" imgPath="0034.png" maskPath="mask0034.pgm" camPath="0034.camu" isKeyframe="yes" gpX="" gpY="">
    <BodyJoints>
     <BodyJoint x="466" y="121" depthSign="false" id="0"/>
     <BodyJoint x="463" y="85" depthSign="false" id="1"/>
