@@ -11,6 +11,25 @@
 using namespace std;
 using namespace tinyxml2;
 
+struct ProjectParams
+{
+  string name;
+  string imgFolderPath;
+  string maskFolderPath;
+  string camFolderPath;
+  bool allowScaling;
+  string simMathPath;
+  string exportPath;
+};
+
+const string projectNode = "Project";
+const string projectName = "name";
+const string projectImgFolderPath = "imgFolderPath";
+const string projectMaskFolderPath = "maskFolderPath";
+const string projectCamFolderPath = "camFolderPath";
+const string projectAllowScaling = "allowScaling";
+const string projectSimMathPath = "simMatPath";
+const string projectExportPath = "exportPath";
 const string bodyJointsNode = "BodyJoints";
 const string bodyPartsNode = "BodyParts";
 const string framesNode = "Frames";
@@ -23,13 +42,16 @@ const string bodyPartNameParam = "name";
 const string bodyPartIdParam = "id";
 const string bodyPartParentJointIdParam = "parentJointId";
 const string bodyPartChildJointIdParam = "childJointId";
-const string bodyPartDepthSignParam = "depthSign";
+const string bodyJointDepthSignParam = "depthSign";
 const string bodyPartExpectedDistanceParam = "expectedDistance";
+const string bodyPartIsOccludedParam = "isOccluded";
 const string frameIdParam = "id";
 const string frameImgPathParam = "imgPath";
 const string frameMaskPathParam = "maskPath";
 const string frameCamPathParam = "camPath";
 const string frameIsKeyframeParam = "isKeyframe";
+const string frameGPX = "gpX";
+const string frameGPY = "gpY";
 const string bodyJointXParam = "x";
 const string bodyJointYParam = "y";
 
@@ -46,6 +68,20 @@ int main (int argc, char **argv)
     cerr << "Could not load the project from " << argv[1] << endl;
   }
   XMLElement *root = project.RootElement();
+  if (root == 0 || root->Name() != projectNode)
+  {
+    cerr << "Incorrect xml structure" << endl;
+    if (root == 0)
+    {
+      cerr << "Empry xml" << endl;
+    }
+    else
+    {
+       cerr << "Expect: " << projectNode << endl;
+       cerr << "Got: " << root->Name() << endl;
+    }
+      return -1;
+  }
   XMLNode *bodyJoints = root->FirstChildElement(bodyJointsNode.c_str());
   if (bodyJoints != 0)
   {
@@ -53,12 +89,14 @@ int main (int argc, char **argv)
     if (bodyJoints == 0)
     {
       cerr << "Incorrect xml structure" << endl;
+      cerr << "Couldn't find BodyJoint structure" << endl;
       return -1;
     }
   }
   else
   {
     cerr << "Incorrect xml structure" << endl;
+    cerr << "Couldn't find BodyJoints structure" << endl;
     return -1;
   }
   XMLNode *bodyParts = root->FirstChildElement(bodyPartsNode.c_str());
@@ -68,12 +106,14 @@ int main (int argc, char **argv)
     if (bodyParts == 0)
     {
       cerr << "Incorrect xml structure" << endl;
+      cerr << "Couldn't find BodyPart structure" << endl;
       return -1;
     }
   }
   else
   {
     cerr << "Incorrect xml structure" << endl;
+    cerr << "Couldn't find BodyParts strunture" << endl;
     return -1;
   }
   XMLNode *frames = root->FirstChildElement(framesNode.c_str());
@@ -83,13 +123,43 @@ int main (int argc, char **argv)
     if (frames == 0)
     {
       cerr << "Incorrect xml structure" << endl;
+      cerr << "Couldn't find Frame structure" << endl;
       return -1;
     }
   }
   else
   {
     cerr << "Incorrect xml structure" << endl;
+    cerr << "Couldn't find Frames structure" << endl;
     return -1;
+  }
+  ProjectParams projectParams;
+  projectParams.name = root->Attribute(projectName.c_str());
+  projectParams.imgFolderPath = root->Attribute(projectImgFolderPath.c_str());
+  if (projectParams.imgFolderPath.back() != '/')
+  {
+    projectParams.imgFolderPath += '/';
+  }
+  projectParams.maskFolderPath = root->Attribute(projectMaskFolderPath.c_str());
+  if (projectParams.maskFolderPath.back() != '/')
+  {
+     projectParams.maskFolderPath += '/';
+  }
+  projectParams.camFolderPath = root->Attribute(projectCamFolderPath.c_str());
+  if (projectParams.camFolderPath.back() != '/')
+  {
+    projectParams.camFolderPath += '/';
+  }
+  projectParams.allowScaling = root->BoolAttribute(projectAllowScaling.c_str());
+  projectParams.simMathPath = root->Attribute(projectSimMathPath.c_str());
+  if (projectParams.simMathPath.back() != '/')
+  {
+    projectParams.simMathPath += '/';
+  }
+  projectParams.exportPath = root->Attribute(projectExportPath.c_str());
+  if (projectParams.exportPath.back() != '/')
+  {
+    projectParams.exportPath += '/';
   }
   tree <BodyJoint> trBodyJoints, trBodyJointsCopy;
   tree <BodyJoint>::iterator topBodyJoints;
@@ -108,7 +178,7 @@ int main (int argc, char **argv)
     trBodyJoints.insert(topBodyJoints, joint);
     bodyJoints = bodyJoints->NextSiblingElement();
   }
-  tree <BodyPart> trBodyParts;
+  tree <BodyPart> trBodyParts, trBodyPartsCopy;
   tree <BodyPart>::iterator topBodyParts;
   topBodyParts = trBodyParts.begin();
   while (true)
@@ -119,12 +189,10 @@ int main (int argc, char **argv)
     string parentJointId, childJointId, name;
     int id;
     float expectedDistance;
-    bool depthSign;
     id = e->IntAttribute(bodyPartIdParam.c_str());
     name = e->Attribute(bodyPartNameParam.c_str());
     parentJointId = e->Attribute(bodyPartParentJointIdParam.c_str());
     childJointId = e->Attribute(bodyPartChildJointIdParam.c_str());
-    depthSign = e->BoolAttribute(bodyPartDepthSignParam.c_str());
     expectedDistance = e->FloatAttribute(bodyPartExpectedDistanceParam.c_str());
     BodyJoint *parentJoint = 0, *childJoint = 0;
     for (topBodyJoints = trBodyJoints.begin(); topBodyJoints != trBodyJoints.end(); ++topBodyJoints)
@@ -148,7 +216,6 @@ int main (int argc, char **argv)
     part.setPartName(name);
     part.setParentJoint(parentJoint);
     part.setChildJoint(childJoint);
-    part.setIsOccluded(depthSign);
     part.setSpaceLength(expectedDistance);
     trBodyParts.insert(topBodyParts, part);
     bodyParts = bodyParts->NextSiblingElement();
@@ -162,11 +229,14 @@ int main (int argc, char **argv)
     string imgPath, maskPath, camPath;
     int id;
     bool isKeyFrame;
+    Point2f gp;
     id = e->IntAttribute(frameIdParam.c_str());
     imgPath = e->Attribute(frameImgPathParam.c_str());
     maskPath = e->Attribute(frameMaskPathParam.c_str());
     camPath = e->Attribute(frameCamPathParam.c_str());
     isKeyFrame = e->BoolAttribute(frameIsKeyframeParam.c_str());
+    gp.x = e->FloatAttribute(frameGPX.c_str());
+    gp.y = e->FloatAttribute(frameGPY.c_str());
     if (isKeyFrame == true)
     {
       f = new Keyframe();
@@ -176,21 +246,23 @@ int main (int argc, char **argv)
       f = new Interpolation();
     }
     f->setID(id);
-    Mat image = imread(imgPath, CV_LOAD_IMAGE_COLOR);
+    Mat image = imread(projectParams.imgFolderPath + imgPath, CV_LOAD_IMAGE_COLOR);
     if (!image.data)
     {
-      cerr << "Could not find file " << imgPath << endl;
+      cerr << "Could not find file " << projectParams.imgFolderPath + imgPath << endl;
       return -1;
     }
     f->setImage(image);
-    Mat mask = imread(maskPath, CV_LOAD_IMAGE_COLOR);
+    Mat mask = imread(projectParams.maskFolderPath + maskPath, CV_LOAD_IMAGE_COLOR);
     if (!mask.data)
     {
-      cerr << "Could not find file " << maskPath << endl;
+      cerr << "Could not find file " <<projectParams.maskFolderPath + maskPath << endl;
       return -1;
     }
     f->setMask(mask);
-    bodyJoints = frames->FirstChildElement(bodyJointNode.c_str());
+    f->setGroundPoint(gp);
+    bodyJoints = frames->FirstChildElement(bodyJointsNode.c_str());
+    bodyJoints = bodyJoints->FirstChildElement(bodyJointNode.c_str());
     copy(trBodyJoints.begin(), trBodyJoints.end(), trBodyJointsCopy.begin());
     topBodyJoints = trBodyJointsCopy.begin();
     while (true)
@@ -199,10 +271,12 @@ int main (int argc, char **argv)
       XMLElement *e = bodyJoints->ToElement();
       string id;
       float x, y;
+      bool depthSign;
       id = e->Attribute(bodyJointIdParam.c_str());
       x = e->FloatAttribute(bodyJointXParam.c_str());
       y = e->FloatAttribute(bodyJointYParam.c_str());
-      BodyJoint *joint;
+      depthSign = e->BoolAttribute(bodyJointDepthSignParam.c_str());
+      BodyJoint *joint = 0;
       for (topBodyJoints = trBodyJointsCopy.begin(); topBodyJoints != trBodyJointsCopy.end(); ++topBodyJoints)
       {
         if (joint == 0 && topBodyJoints->getJointName() == id)
@@ -218,11 +292,42 @@ int main (int argc, char **argv)
       }
       Point2f imgLocation = Point2f(x, y);
       joint->setImageLocation(imgLocation);
+      joint->setDepthSign(depthSign);
       bodyJoints = bodyJoints->NextSiblingElement();
     }
+    bodyParts = frames->FirstChildElement(bodyPartsNode.c_str());
+    bodyParts = bodyParts->FirstChildElement(bodyPartNode.c_str());
+    copy(trBodyParts.begin(), trBodyParts.end(), trBodyPartsCopy.begin());
+    topBodyParts = trBodyPartsCopy.begin();
+    while(true)
+    {
+      if (bodyParts == 0) break;
+      XMLElement *e = bodyParts->ToElement();
+      string id;
+      bool isOccluded;
+      id = e->Attribute(bodyPartIdParam.c_str());
+      isOccluded = e->Attribute(bodyPartIsOccludedParam.c_str());
+      BodyPart *part = 0;
+      for (topBodyParts = trBodyPartsCopy.begin(); topBodyParts != trBodyPartsCopy.end(); ++topBodyParts)
+      {
+        if (part == 0 && topBodyParts->getPartName() == id)
+        {
+          part = &*topBodyParts;
+        }
+        if (part != 0) break;
+      }
+      if (part == 0)
+      {
+        cerr << "Could not find BodyPart " << id;
+        return -1;
+      }
+      part->setIsOccluded(isOccluded);
+      bodyParts = bodyParts->NextSiblingElement();
+    }
+
     Skeleton skeleton;
-    skeleton.setPartTree(trBodyParts);
-    skeleton.setJointTree(trBodyJoints);
+    skeleton.setPartTree(trBodyPartsCopy);
+    skeleton.setJointTree(trBodyJointsCopy);
     f->setSkeleton(skeleton);
     vFrames.push_back(f);
     frames = frames->NextSiblingElement();
