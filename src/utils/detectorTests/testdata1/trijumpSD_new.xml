@@ -22,23 +22,23 @@
  </BodyJoints>
 
  <BodyParts>
-  <BodyPart id="0" name="Root" parentJointID="0" childJointID="1" expectedDistance="0"/>
-  <BodyPart id="1" name="Left Hip" parentJointID="0" childJointID="2" expectedDistance="0"/>
-  <BodyPart id="2" name="Right Hip" parentJointID="0" childJointID="3" expectedDistance="0"/>
-  <BodyPart id="3" name="Neck" parentJointID="1" childJointID="4" expectedDistance="0"/>
-  <BodyPart id="4" name="Left Clavicle" parentJointID="1" childJointID="5" expectedDistance="0"/>
-  <BodyPart id="5" name="Right Clavicle" parentJointID="1" childJointID="6" expectedDistance="0"/>
-  <BodyPart id="6" name="Left Femur" parentJointID="2" childJointID="7" expectedDistance="0"/>
-  <BodyPart id="7" name="Right Femur" parentJointID="3" childJointID="8" expectedDistance="0"/>
-  <BodyPart id="8" name="Head=" parentJointID="4" childJointID="9" expectedDistance="0"/>
-  <BodyPart id="9" name="Left Humerus" parentJointID="5" childJointID="10" expectedDistance="0"/>
-  <BodyPart id="10" name="Right Humerus" parentJointID="6" childJointID="11" expectedDistance="0"/>
-  <BodyPart id="11" name="Left Tibia" parentJointID="7" childJointID="12" expectedDistance="0"/>
-  <BodyPart id="12" name="Right Tibia" parentJointID="8" childJointID="13" expectedDistance="0"/>
-  <BodyPart id="13" name="Left Radius" parentJointID="10" childJointID="14" expectedDistance="0"/>
-  <BodyPart id="14" name="Right Radius" parentJointID="11" childJointID="15" expectedDistance="0"/>
-  <BodyPart id="15" name="Left Metatarsal" parentJointID="12" childJointID="16" expectedDistance="0"/>
-  <BodyPart id="16" name="Right Metatarsal" parentJointID="13" childJointID="17" expectedDistance="0"/>
+  <BodyPart id="0" name="Root" parentJointId="0" childJointId="1" expectedDistance="0"/>
+  <BodyPart id="1" name="Left Hip" parentJointId="0" childJointId="2" expectedDistance="0"/>
+  <BodyPart id="2" name="Right Hip" parentJointId="0" childJointId="3" expectedDistance="0"/>
+  <BodyPart id="3" name="Neck" parentJointId="1" childJointId="4" expectedDistance="0"/>
+  <BodyPart id="4" name="Left Clavicle" parentJointId="1" childJointId="5" expectedDistance="0"/>
+  <BodyPart id="5" name="Right Clavicle" parentJointId="1" childJointId="6" expectedDistance="0"/>
+  <BodyPart id="6" name="Left Femur" parentJointId="2" childJointId="7" expectedDistance="0"/>
+  <BodyPart id="7" name="Right Femur" parentJointId="3" childJointId="8" expectedDistance="0"/>
+  <BodyPart id="8" name="Head=" parentJointId="4" childJointId="9" expectedDistance="0"/>
+  <BodyPart id="9" name="Left Humerus" parentJointId="5" childJointId="10" expectedDistance="0"/>
+  <BodyPart id="10" name="Right Humerus" parentJointId="6" childJointId="11" expectedDistance="0"/>
+  <BodyPart id="11" name="Left Tibia" parentJointId="7" childJointId="12" expectedDistance="0"/>
+  <BodyPart id="12" name="Right Tibia" parentJointId="8" childJointId="13" expectedDistance="0"/>
+  <BodyPart id="13" name="Left Radius" parentJointId="10" childJointId="14" expectedDistance="0"/>
+  <BodyPart id="14" name="Right Radius" parentJointId="11" childJointId="15" expectedDistance="0"/>
+  <BodyPart id="15" name="Left Metatarsal" parentJointId="12" childJointId="16" expectedDistance="0"/>
+  <BodyPart id="16" name="Right Metatarsal" parentJointId="13" childJointId="17" expectedDistance="0"/>
  </BodyParts>
 
  <Frames>

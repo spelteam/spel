@@ -1,4 +1,4 @@
-<!DOCTYPE Pose_Solver_Project>
+<?xml version="1.0"?>
 <Project name="" imgFolderPath="" maskFolderPath="" camFolderPath="" allowScaling=""  simMatPath="" exportPath="">
   <BodyJoints>
     <BodyJoint id="" name=""/>
@@ -11,7 +11,7 @@
     <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance=""/>
   </BodyParts>
   <Frames>
-    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY = "">
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY="">
       <BodyJoints>
         <BodyJoint id="" x="" y="" depthSign="">
         <BodyJoint id="" x="" y="" depthSign="">
@@ -23,7 +23,7 @@
          <BodyPart id="" isOccluded="">
       </BodyParts>
     </Frame>
-    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY = "">
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY="">
       <BodyJoints>
         <BodyJoint id="" x="" y="" depthSign="">
         <BodyJoint id="" x="" y="" depthSign="">
@@ -35,7 +35,7 @@
          <BodyPart id="" isOccluded="">
       </BodyParts>
     </Frame>
-    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY = "">
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY="">
       <BodyJoints>
         <BodyJoint id="" x="" y="" depthSign="">
         <BodyJoint id="" x="" y="" depthSign="">

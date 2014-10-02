@@ -62,10 +62,20 @@ int main (int argc, char **argv)
     cout << "Usage colorHistDetectorTest [project.xml] [out directory]" << endl;
     return -1;
   }
+  string curFolder = argv[1];
+  curFolder = curFolder.substr(0, curFolder.find_last_of("/"));
+  if (curFolder.back() != '/')
+  {
+    curFolder += '/';
+  }
+  cout << "Loading project..." << endl;
   XMLDocument project;
-  if (!project.LoadFile(argv[1]))
+  XMLError status = project.LoadFile(argv[1]);
+  if (status != 0)
   {
     cerr << "Could not load the project from " << argv[1] << endl;
+    cerr << "Error code: " << status << endl;
+    return -1;
   }
   XMLElement *root = project.RootElement();
   if (root == 0 || root->Name() != projectNode)
@@ -186,22 +196,23 @@ int main (int argc, char **argv)
     if (bodyParts == 0) break;
     BodyPart part;
     XMLElement *e = bodyParts->ToElement();
-    string parentJointId, childJointId, name;
+    int parentJointId, childJointId;
+    string  name;
     int id;
     float expectedDistance;
     id = e->IntAttribute(bodyPartIdParam.c_str());
     name = e->Attribute(bodyPartNameParam.c_str());
-    parentJointId = e->Attribute(bodyPartParentJointIdParam.c_str());
-    childJointId = e->Attribute(bodyPartChildJointIdParam.c_str());
+    parentJointId = e->IntAttribute(bodyPartParentJointIdParam.c_str());
+    childJointId = e->IntAttribute(bodyPartChildJointIdParam.c_str());
     expectedDistance = e->FloatAttribute(bodyPartExpectedDistanceParam.c_str());
     BodyJoint *parentJoint = 0, *childJoint = 0;
     for (topBodyJoints = trBodyJoints.begin(); topBodyJoints != trBodyJoints.end(); ++topBodyJoints)
     {
-      if (parentJoint == 0 && topBodyJoints->getJointName() == parentJointId)
+      if (parentJoint == 0 && topBodyJoints->getLimbID() == parentJointId)
       {
         parentJoint = &*topBodyJoints;
       }
-      else if (childJoint == 0 && topBodyJoints->getJointName() == childJointId)
+      else if (childJoint == 0 && topBodyJoints->getLimbID() == childJointId)
       {
         childJoint = &*topBodyJoints;
       }
@@ -246,85 +257,92 @@ int main (int argc, char **argv)
       f = new Interpolation();
     }
     f->setID(id);
-    Mat image = imread(projectParams.imgFolderPath + imgPath, CV_LOAD_IMAGE_COLOR);
+    Mat image = imread(curFolder + projectParams.imgFolderPath + imgPath, CV_LOAD_IMAGE_COLOR);
     if (!image.data)
     {
       cerr << "Could not find file " << projectParams.imgFolderPath + imgPath << endl;
       return -1;
     }
     f->setImage(image);
-    Mat mask = imread(projectParams.maskFolderPath + maskPath, CV_LOAD_IMAGE_COLOR);
+    Mat mask = imread(curFolder + projectParams.maskFolderPath + maskPath, CV_LOAD_IMAGE_COLOR);
     if (!mask.data)
     {
-      cerr << "Could not find file " <<projectParams.maskFolderPath + maskPath << endl;
+      cerr << "Could not find file " << projectParams.maskFolderPath + maskPath << endl;
       return -1;
     }
     f->setMask(mask);
     f->setGroundPoint(gp);
-    bodyJoints = frames->FirstChildElement(bodyJointsNode.c_str());
-    bodyJoints = bodyJoints->FirstChildElement(bodyJointNode.c_str());
-    copy(trBodyJoints.begin(), trBodyJoints.end(), trBodyJointsCopy.begin());
-    topBodyJoints = trBodyJointsCopy.begin();
-    while (true)
+    PoseHelper::copyTree(trBodyJointsCopy, trBodyJoints);
+    //copy(trBodyJoints.begin(), trBodyJoints.end(), trBodyJointsCopy.begin());
+    if (isKeyFrame)
     {
-      if (bodyJoints == 0) break;
-      XMLElement *e = bodyJoints->ToElement();
-      string id;
-      float x, y;
-      bool depthSign;
-      id = e->Attribute(bodyJointIdParam.c_str());
-      x = e->FloatAttribute(bodyJointXParam.c_str());
-      y = e->FloatAttribute(bodyJointYParam.c_str());
-      depthSign = e->BoolAttribute(bodyJointDepthSignParam.c_str());
-      BodyJoint *joint = 0;
-      for (topBodyJoints = trBodyJointsCopy.begin(); topBodyJoints != trBodyJointsCopy.end(); ++topBodyJoints)
+      bodyJoints = frames->FirstChildElement(bodyJointsNode.c_str());
+      bodyJoints = bodyJoints->FirstChildElement(bodyJointNode.c_str());
+      topBodyJoints = trBodyJointsCopy.begin();
+      while (true)
       {
-        if (joint == 0 && topBodyJoints->getJointName() == id)
+        if (bodyJoints == 0) break;
+        XMLElement *e = bodyJoints->ToElement();
+        int id;
+        float x, y;
+        bool depthSign;
+        id = e->IntAttribute(bodyJointIdParam.c_str());
+        x = e->FloatAttribute(bodyJointXParam.c_str());
+        y = e->FloatAttribute(bodyJointYParam.c_str());
+        depthSign = e->BoolAttribute(bodyJointDepthSignParam.c_str());
+        BodyJoint *joint = 0;
+        for (topBodyJoints = trBodyJointsCopy.begin(); topBodyJoints != trBodyJointsCopy.end(); ++topBodyJoints)
         {
-          joint = &*topBodyJoints;
+          if (joint == 0 && topBodyJoints->getLimbID() == id)
+          {
+            joint = &*topBodyJoints;
+          }
+          if (joint != 0) break;
         }
-        if (joint != 0) break;
+        if (joint == 0)
+        {
+          cerr << "Could not find BodyJoint " << id;
+          return -1;
+        }
+        Point2f imgLocation = Point2f(x, y);
+        joint->setImageLocation(imgLocation);
+        joint->setDepthSign(depthSign);
+        bodyJoints = bodyJoints->NextSiblingElement();
       }
-      if (joint == 0)
-      {
-        cerr << "Could not find BodyJoint " << id;
-        return -1;
-      }
-      Point2f imgLocation = Point2f(x, y);
-      joint->setImageLocation(imgLocation);
-      joint->setDepthSign(depthSign);
-      bodyJoints = bodyJoints->NextSiblingElement();
     }
-    bodyParts = frames->FirstChildElement(bodyPartsNode.c_str());
-    bodyParts = bodyParts->FirstChildElement(bodyPartNode.c_str());
-    copy(trBodyParts.begin(), trBodyParts.end(), trBodyPartsCopy.begin());
-    topBodyParts = trBodyPartsCopy.begin();
-    while(true)
+    PoseHelper::copyTree(trBodyPartsCopy, trBodyParts);
+    //copy(trBodyParts.begin(), trBodyParts.end(), trBodyPartsCopy.begin());
+    if (isKeyFrame)
     {
-      if (bodyParts == 0) break;
-      XMLElement *e = bodyParts->ToElement();
-      string id;
-      bool isOccluded;
-      id = e->Attribute(bodyPartIdParam.c_str());
-      isOccluded = e->Attribute(bodyPartIsOccludedParam.c_str());
-      BodyPart *part = 0;
-      for (topBodyParts = trBodyPartsCopy.begin(); topBodyParts != trBodyPartsCopy.end(); ++topBodyParts)
+      bodyParts = frames->FirstChildElement(bodyPartsNode.c_str());
+      bodyParts = bodyParts->FirstChildElement(bodyPartNode.c_str());
+      topBodyParts = trBodyPartsCopy.begin();
+      while(true)
       {
-        if (part == 0 && topBodyParts->getPartName() == id)
+        if (bodyParts == 0) break;
+        XMLElement *e = bodyParts->ToElement();
+        int id;
+        bool isOccluded;
+        id = e->IntAttribute(bodyPartIdParam.c_str());
+        isOccluded = e->Attribute(bodyPartIsOccludedParam.c_str());
+        BodyPart *part = 0;
+        for (topBodyParts = trBodyPartsCopy.begin(); topBodyParts != trBodyPartsCopy.end(); ++topBodyParts)
         {
-          part = &*topBodyParts;
+          if (part == 0 && topBodyParts->getPartID() == id)
+          {
+            part = &*topBodyParts;
+          }
+          if (part != 0) break;
         }
-        if (part != 0) break;
+        if (part == 0)
+        {
+          cerr << "Could not find BodyPart " << id;
+          return -1;
+        }
+        part->setIsOccluded(isOccluded);
+        bodyParts = bodyParts->NextSiblingElement();
       }
-      if (part == 0)
-      {
-        cerr << "Could not find BodyPart " << id;
-        return -1;
-      }
-      part->setIsOccluded(isOccluded);
-      bodyParts = bodyParts->NextSiblingElement();
     }
-
     Skeleton skeleton;
     skeleton.setPartTree(trBodyPartsCopy);
     skeleton.setJointTree(trBodyJointsCopy);
@@ -332,15 +350,20 @@ int main (int argc, char **argv)
     vFrames.push_back(f);
     frames = frames->NextSiblingElement();
   }
+
+  cout << "Project was successfully loaded" << endl;
+
   ColorHistDetector detector;
   map <string, float> params;
+  cout << "Training..." << endl;
   detector.train(vFrames, params);
-
+  cout << "Training complete" << endl;
   vector <vector <LimbLabel> >::iterator lls;
   vector <LimbLabel>::iterator ls;
 
   vector <Frame*>::iterator i;
   map <string, float> detectParams;
+  cout << "Detecting..." << endl;
   for (i = vFrames.begin(); i != vFrames.end(); ++i)
   {
     Frame *f = *i;
@@ -351,7 +374,7 @@ int main (int argc, char **argv)
       for (lls = labels.begin(); lls != labels.end(); ++lls)
       {
         ofstream outFile;
-        string outFileName = argv[2];
+        string outFileName = curFolder + argv[2];
         if (outFileName[outFileName.size()] != '/')
           outFileName += "/";
         stringstream ss;
@@ -375,6 +398,7 @@ int main (int argc, char **argv)
       }
     }
   }
+  cout << "Detecting complete" << endl;
   for (i = vFrames.begin(); i != vFrames.end(); ++i)
   {
     Frame *f = *i;

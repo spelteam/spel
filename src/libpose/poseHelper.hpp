@@ -2,6 +2,7 @@
 #define _POSEHELPER_HPP_
 
 #include <opencv2/opencv.hpp>
+#include <tree.hh>
 
 using namespace cv;
 
@@ -77,6 +78,28 @@ class PoseHelper
       result.y = pt.x * sinf(radians) + pt.y * cosf(radians);
       result = result + cnt;
       return result;
+    }
+    template <class T, class tree_node_allocator>
+    static void copyTree(tree <T, tree_node_allocator> &dst, const tree <T, tree_node_allocator> &src) 
+    {
+      dst.clear();
+      auto it = src.begin(), to = dst.begin();
+      while(it != src.end())
+      {
+        to = dst.insert(to, (*it));
+        it.skip_children();
+        ++it;
+      }
+      to = dst.begin();
+      it = src.begin();
+      while(it != src.end())
+      {
+        to = dst.replace(to, it);
+        to.skip_children();
+        it.skip_children();
+        ++to;
+        ++it;
+      }
     }
 };
 
