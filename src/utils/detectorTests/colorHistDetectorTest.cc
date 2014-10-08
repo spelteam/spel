@@ -273,7 +273,6 @@ int main (int argc, char **argv)
     f->setMask(mask);
     f->setGroundPoint(gp);
     PoseHelper::copyTree(trBodyJointsCopy, trBodyJoints);
-    //copy(trBodyJoints.begin(), trBodyJoints.end(), trBodyJointsCopy.begin());
     if (isKeyFrame)
     {
       bodyJoints = frames->FirstChildElement(bodyJointsNode.c_str());
@@ -311,7 +310,6 @@ int main (int argc, char **argv)
       }
     }
     PoseHelper::copyTree(trBodyPartsCopy, trBodyParts);
-    //copy(trBodyParts.begin(), trBodyParts.end(), trBodyPartsCopy.begin());
     if (isKeyFrame)
     {
       bodyParts = frames->FirstChildElement(bodyPartsNode.c_str());

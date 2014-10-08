@@ -6,6 +6,8 @@ Frame::Frame(void)
 
 Frame::~Frame(void)
 {
+  image.release();
+  mask.release();
 }
 
 int Frame::getID(void)
