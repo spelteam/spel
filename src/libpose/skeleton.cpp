@@ -6,10 +6,15 @@ Skeleton::Skeleton(void)
 
 Skeleton &Skeleton::operator=(const Skeleton &s)
 {
+  if (this == &s)
+  {
+    return *this;
+  }
   this->setName(s.getName());
   this->setPartTree(s.getPartTree());
   this->setJointTree(s.getJointTree());
   this->setScale(s.getScale());
+  return *this;
 }
 
 bool Skeleton::operator==(const Skeleton &s) const

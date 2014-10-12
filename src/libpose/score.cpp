@@ -12,10 +12,15 @@ Score::Score(float sc, string name)
   detName = name;
 }
 
-Score & Score::operator=(const Score &s)
+Score &Score::operator=(const Score &s)
 {
-  detName = s.getDetName();
-  score = s.getScore();
+  if (this == &s)
+  {
+    return *this;
+  }
+  this->detName = s.getDetName();
+  this->score = s.getScore();
+  return *this;
 }
 
 float Score::getScore(void) const

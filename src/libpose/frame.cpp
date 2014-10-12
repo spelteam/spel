@@ -27,6 +27,7 @@ Mat Frame::getImage(void)
 
 void Frame::setImage(Mat _image)
 {
+  image.release();
   image = _image;
 }
 
@@ -37,6 +38,7 @@ Mat Frame::getMask(void)
 
 void Frame::setMask(Mat _mask)
 {
+  mask.release();
   mask = _mask; 
 }
 

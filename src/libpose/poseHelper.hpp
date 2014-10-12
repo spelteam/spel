@@ -25,7 +25,6 @@ struct POSERECT
   T point3;
   T point4;
 
-//TODO (Vitaliy Koshura): Need unit test
   int8_t containsPoint(T point)
   {
     vector <T> contour;

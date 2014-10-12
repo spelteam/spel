@@ -197,10 +197,11 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       addPartHistogramm(partModel, partPixelColours[partNumber], blankPixels[partNumber]);
       addBackgroundHistogramm(partModel, bgPixelColours[partNumber]);
     }
+    maskMat.release();
+    imgMat.release();
   }
 }
 
-//TODO (Vitaliy Koshura): Write real implementation here
 vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params)
 {
   const float searchDistCoeff = 0.5;
@@ -251,25 +252,25 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   Skeleton skeleton = frame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
   tree <BodyPart>::iterator iteratorBodyPart;
+  vector <Mat> pixelDistributions = buildPixelDistributions(frame);
+  vector <Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions);
+  Mat maskMat = frame->getMask();
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     vector <LimbLabel> labels;
     BodyJoint *parentJoint = iteratorBodyPart->getParentJoint();
     BodyJoint *childJoint = iteratorBodyPart->getChildJoint();
-    vector <Mat> pixelLabels = buildPixelLabels(frame);
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
     Point2f j0 = parentJoint->getImageLocation();
     Point2f j1 = childJoint->getImageLocation();
-    Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
     float boneLength = (j0 == j1) ? 1.0 : sqrt(PoseHelper::distSquared(j0, j1));
     float boxWidth = skeleton.getScale() * iteratorBodyPart->getSpaceLength() * params.at(sScaleParam);
     Point2f direction = j1 - j0;
     float theta = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
     float minDist = boxWidth * 0.2;
     if (minDist < 2) minDist = 2;
-    Mat maskMat = frame->getMask();
     float searchDistance = boneLength * params.at(sSearchDistCoeff);
     for (float x = 0; x < searchDistance * 0.5; x += minDist)
     {
@@ -284,7 +285,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
             vector <LimbLabel> locationLabels;
             for (float rot = theta - params.at(sMinTheta); rot < theta + params.at(sMaxTheta); rot += params.at(sStepTheta))
             {
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, _pixelDistributions, pixelLabels);
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -312,9 +313,16 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           locations.at<uint32_t>(x, y) += 1;
         }
       }
+      locations.release();
     }
-  t.push_back(labels);
+    t.push_back(labels);
   }
+  vector <Mat>::iterator i;
+  for (i = pixelDistributions.begin(); i != pixelDistributions.end(); ++i)
+  {
+    i->release();
+  }
+  maskMat.release();
   return t;
 }
 
@@ -442,27 +450,22 @@ float ColorHistDetector::getAvgSampleSizeFgBetween(const PartModel &partModel, u
 
 //TODO (Vitaliy Koshura): Need unit test
 // Euclidean distance between part histograms
-float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel, uint32_t prevSizeIndex, uint32_t nextSizeIndex) 
+float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel) 
 {
-    float avgSample = getAvgSampleSizeFg(partModel);
-    float pAvgSample = getAvgSampleSizeFgBetween(partModelPrev, prevSizeIndex, nextSizeIndex);
-    float avgRatio = avgSample / (avgSample + pAvgSample);
-    float alpha = 0.15;  // the impact factor of size difference
-    float diff = exp((-1.0 / alpha) * fabs(avgRatio - 0.5)); 
-    float distance = 0;
-    for(uint8_t r = 0; r < partModel.nBins; r++)
+  float distance = 0;
+  for(uint8_t r = 0; r < partModel.nBins; r++)
+  {
+    for(uint8_t g = 0; g < partModel.nBins; g++)
     {
-        for(uint8_t g = 0; g < partModel.nBins; g++)
-        {
-            for(uint8_t b = 0; b < partModel.nBins; b++)
-            {
-                //normalise the histograms
-                distance += pow(partModel.partHistogramm[r][g][b] - partModel.partHistogramm[r][g][b], 2);
-            }
-        }
+      for(uint8_t b = 0; b < partModel.nBins; b++)
+      {
+        //normalise the histograms
+        distance += pow(partModel.partHistogramm[r][g][b] - partModelPrev.partHistogramm[r][g][b], 2);
+      }
     }
-    float score = sqrt(distance);
-    return score;
+  }
+  float score = sqrt(distance);
+  return score;
 }
 
 void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vector <Point3i> &bgColors)
@@ -510,35 +513,42 @@ vector <Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
   Mat maskMat = frame->getMask();
   uint32_t width = imgMat.cols;
   uint32_t height = imgMat.rows;
+  uint32_t mwidth = maskMat.cols;
+  uint32_t mheight = maskMat.rows;
   vector <Mat> pixelDistributions;
+  if (width != mwidth || height != mheight)
+  {
+    cerr << "Mask size not equal image size. Calculations are incorrect" << endl;
+    return pixelDistributions;
+  }
   for (uint32_t nPartCount = 0; nPartCount < skeleton.getPartTreeCount(); nPartCount++)
   {
-    pixelDistributions.push_back(Mat(width, height, DataType <float>::type));
-  }
-  for (uint32_t x = 0; x < width; x++)
-  {
-    for (uint32_t y = 0; y < height; y++)
+    Mat t = Mat(width, height, DataType <float>::type);
+    for (uint32_t x = 0; x < width; x++)
     {
-      Vec4b intensity = imgMat.at<Vec4b>(y, x);
-      uint8_t blue = intensity.val[0];
-      uint8_t green = intensity.val[1];
-      uint8_t red = intensity.val[2];
-      uint8_t mintensity = maskMat.at<uint8_t>(y, x);
-      bool blackPixel = mintensity < 10;
-      for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+      for (uint32_t y = 0; y < height; y++)
       {
-        pixelDistributions.at(iteratorBodyPart->getPartID()).at<float>(x, y) = blackPixel ? 0 :
-          computePixelBelongingLikelihood(partModels.at(iteratorBodyPart->getPartID()), red, green, blue);
+        Vec4b intensity = imgMat.at<Vec4b>(y, x);
+        uint8_t blue = intensity.val[0];
+        uint8_t green = intensity.val[1];
+        uint8_t red = intensity.val[2];
+        uint8_t mintensity = maskMat.at<uint8_t>(y, x);
+        bool blackPixel = mintensity < 10;
+        for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+        {
+          t.at<float>(x, y) = blackPixel ? 0 : computePixelBelongingLikelihood(partModels.at(iteratorBodyPart->getPartID()), red, green, blue);
+        }
       }
-    }
-  } 
-  _pixelDistributions = pixelDistributions;
+    } 
+    pixelDistributions.push_back(t);
+  }
+  imgMat.release();
+  maskMat.release();
   return pixelDistributions;
 }
 
-vector <Mat> ColorHistDetector::buildPixelLabels(Frame *frame)
+vector <Mat> ColorHistDetector::buildPixelLabels(Frame *frame, vector <Mat> pixelDistributions)
 {
-  vector <Mat> pixelDistributions = buildPixelDistributions(frame);
   Mat maskMat = frame->getMask();
   uint32_t width = maskMat.cols;
   uint32_t height = maskMat.rows;
@@ -581,6 +591,12 @@ vector <Mat> ColorHistDetector::buildPixelLabels(Frame *frame)
       }
     }
   }
+  maskMat.release();
+  vector <Mat>::iterator i;
+  for (i = pixelDistributions.begin(); i != pixelDistributions.end(); ++i)
+  {
+    i->release();
+  }
   return pixelLabels;
 }
 
@@ -612,13 +628,13 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, vect
   uint32_t pixelsInMask = 0;
   uint32_t pixelsWithLabel = 0;
   float totalPixelLabelScore = 0;
-  float labelProduct = 1.0;
-  float labelAverage = 0;
   float pixDistAvg = 0;
   float pixDistNum = 0;
   if (getAvgSampleSizeFg(bodyPart.getPartID()) == 0)
   {
     vector <Score> v;
+    maskMat.release();
+    imgMat.release();
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), v);
   }
   for (int32_t i = x - boneLength * 0.5; i < x + boneLength * 0.5; i++)
@@ -674,25 +690,17 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, vect
       }
     }
   }
-  float maskScore = 0;
-  float colScore = 1;
-  float sizeScore = 0;
+  maskMat.release();
+  imgMat.release();
   float supportScore = 0;
-  float interpolationSimilarityScore = 0;
   float inMaskSupportScore = 0;
-  labelAverage = (float)totalPixelLabelScore / (float)pixelsWithLabel;
   pixDistAvg /= (float)pixDistNum;
   if (partPixelColours.size() > 0)
   {
-    maskScore = (float)pixelsInMask / (float)totalPixels;
     supportScore = (float)totalPixelLabelScore / (float)totalPixels;
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
-    sizeScore = 1.0;
     PartModel model(nBins);
-    uint32_t n = partModels.size() - 1;
     setPartHistogramm(model, partPixelColours);
-    colScore = matchPartHistogramsED(model, partModels.at(bodyPart.getPartID()), 0, 0);
-    interpolationSimilarityScore = PoseHelper::distSquared(Point2f(x, y), boxCenter);
     vector <Score> s;
     Score sc(1.0 - (supportScore + inMaskSupportScore), "");
     s.push_back(sc);

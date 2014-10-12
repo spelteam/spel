@@ -36,16 +36,15 @@ class ColorHistDetector : public Detector
     int id;
     const uint8_t nBins;
     map <int32_t, PartModel> partModels;
-    vector <Mat> _pixelDistributions;
     float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
     void setPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors);
     void addPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);
     void addBackgroundHistogramm(PartModel &partModel, const vector <Point3i> &bgColors);
     float getAvgSampleSizeFg(const PartModel &partModel);
     float getAvgSampleSizeFgBetween(const PartModel &partModel, uint32_t s1, uint32_t s2);
-    float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel, uint32_t prevSizeIndex, uint32_t nextSizeIndex);
+    float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel);
     vector <Mat> buildPixelDistributions(Frame *frame);
-    vector <Mat> buildPixelLabels(Frame *frame);
+    vector <Mat> buildPixelLabels(Frame *frame, vector <Mat> pixelDistributions);
     LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, vector <Mat> pixelDistributions, vector <Mat> pixelLabels);
 };
 

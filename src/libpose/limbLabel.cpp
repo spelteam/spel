@@ -20,15 +20,20 @@ LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _po
   scores = _scores;
 
 }
-LimbLabel & LimbLabel::operator = (const LimbLabel &ll)
+LimbLabel &LimbLabel::operator=(const LimbLabel &ll)
 {
-  limbID = ll.getLimbID();
-  center = ll.getCenter();
-  angle = ll.getAngle();
-  scores = ll.getScores();
-  polygon = ll.getPolygon();
-  isOccluded = ll.getIsOccluded();
-  isWeak = ll.getIsWeak();
+  if (this == &ll)
+  {
+    return *this;
+  }
+  this->limbID = ll.getLimbID();
+  this->center = ll.getCenter();
+  this->angle = ll.getAngle();
+  this->scores = ll.getScores();
+  this->polygon = ll.getPolygon();
+  this->isOccluded = ll.getIsOccluded();
+  this->isWeak = ll.getIsWeak();
+  return *this;
 }
 
 Point2f LimbLabel::getCenter(void) const
