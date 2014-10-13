@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<Project name="" imgFolderPath="" maskFolderPath="" camFolderPath="" allowScaling=""  simMatPath="" exportPath="">
+  <BodyJoints>
+    <BodyJoint id="" name=""/>
+    <BodyJoint id="" name=""/>
+    <BodyJoint id="" name=""/>
+  </BodyJoints>
+  <BodyParts>
+    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance=""/>
+    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance=""/>
+    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance=""/>
+  </BodyParts>
+  <Frames>
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY="">
+      <BodyJoints>
+        <BodyJoint id="" x="" y="" depthSign="">
+        <BodyJoint id="" x="" y="" depthSign="">
+        <BodyJoint id="" x="" y="" depthSign="">
+      </BodyJoints>
+      <BodyParts>
+         <BodyPart id="" isOccluded="">
+         <BodyPart id="" isOccluded="">
+         <BodyPart id="" isOccluded="">
+      </BodyParts>
+    </Frame>
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY="">
+      <BodyJoints>
+        <BodyJoint id="" x="" y="" depthSign="">
+        <BodyJoint id="" x="" y="" depthSign="">
+        <BodyJoint id="" x="" y="" depthSign="">
+      </BodyJoints>
+      <BodyParts>
+         <BodyPart id="" isOccluded="">
+         <BodyPart id="" isOccluded="">
+         <BodyPart id="" isOccluded="">
+      </BodyParts>
+    </Frame>
+    <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY="">
+      <BodyJoints>
+        <BodyJoint id="" x="" y="" depthSign="">
+        <BodyJoint id="" x="" y="" depthSign="">
+        <BodyJoint id="" x="" y="" depthSign="">
+      </BodyJoints>
+      <BodyParts>
+         <BodyPart id="" isOccluded="">
+         <BodyPart id="" isOccluded="">
+         <BodyPart id="" isOccluded="">
+      </BodyParts>
+   </Frame>
+  </Frames>
+</project>
