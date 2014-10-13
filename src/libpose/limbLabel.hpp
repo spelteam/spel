@@ -40,6 +40,8 @@ class LimbLabel
     bool getIsOccluded(void) const;
     bool getIsWeak(void) const;
     float getSumScore(void) const;
+
+    bool containsPoint(Point2f pt);
   private:
 // Label center 
     Point2f center;
