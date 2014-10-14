@@ -36,7 +36,7 @@ class TLPSSolver: Solver
     TLPSSolver();
     ~TLPSSolver(); //inherited virtual
     Solution solve(const vector<Frame*>& frames); //inherited virtual
-    Solution solve(const vector<Frame*>& frames, const vector<float>& params); //inherited virtual
+    Solution solve(const vector<Frame*>& frames, map<string, float> params); //inherited virtual
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
