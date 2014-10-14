@@ -39,23 +39,23 @@ class NSKPSolver: Solver
     NSKPSolver();
     ~NSKPSolver(); //inherited virtual
     Solution solve(const vector<Frame*>& frames); //inherited virtual
-    Solution solve(const vector<Frame*>& frames, const vector<float>& params); //inherited virtual
-    Solution solve(const vector<Frame*>& frames, const vector<float>& params, const ImageSimilarityMatrix& ISM); //inherited virtual
+    Solution solve(const vector<Frame*>& frames, map<string, float>  params); //inherited virtual
+    Solution solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM); //inherited virtual
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
   private:
-    vector<Frame*> propagateKeyframes(const vector<Frame*>& frames, const vector<float>& params, const ImageSimilarityMatrix& ism);
-    vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, int treeSize, float threshold);
+    vector<Frame*> propagateKeyframes(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism);
+    vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
     
-    vector<Point2i> suggestKeyframes(vector<MinSpanningTree>& mstVec);
-    float evaluateSolution(Frame* frame, vector<LimbLabel> labels, bool debug);
+    vector<Point2i> suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params);
+    float evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params);
 
     int findFrameIndexById(int id, vector<Frame*> frames);
-    float computeScoreCost(const LimbLabel& label);
-    float computeJointCost(const LimbLabel& child, const LimbLabel& parent);
-    float computePriorCost(const LimbLabel& label, const BodyPart& prior);
+    float computeScoreCost(const LimbLabel& label, map<string, float> params);
+    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params);
+    float computePriorCost(const LimbLabel& label, const BodyPart& prior, map<string, float> params);
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 
