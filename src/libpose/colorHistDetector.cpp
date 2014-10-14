@@ -631,6 +631,11 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
     catch(...)
     {
       cerr << __FILE__ << ":" << __LINE__ << ": " << "Maybe couldn't find partModel " << partID << endl;
+      cerr << "Available partmodels:" << endl;
+      for (map <int32_t, PartModel>::iterator partModel = partModels.begin(); partModel != partModels.end(); ++partModel)
+      {
+        cerr << partModel->first << endl;
+      }
       return pixelDistributions;
     }
     pixelDistributions.insert(std::pair <int32_t, Mat> (partID, t));
