@@ -2,7 +2,7 @@
 #include <tree.hh>
 #include "lockframe.hpp"
 #include "colorHistDetector.hpp"
-#include "tlpsSolver.hpp"
+#include "tlpssolver.hpp"
 
 //using namespace opengm;
 
@@ -93,9 +93,9 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, cons
 			vector<Frame*> trainingFrames;
 			trainingFrames.push_back(frames[frameId]); //set training frame by index
 			
-			vector<float> trainingParams; //@FIXME PARAM this is a param, not static
-			chDetector.train(trainingFrames, 0);
-			vector<float> detectionParams; //@FIXME PARAM this is a param, not static
+			map<string, float> trainingParams; //@FIXME PARAM this is a param, not static
+			chDetector.train(trainingFrames, trainingParams);
+			map<string, float> detectionParams; //@FIXME PARAM this is a param, not static
 
 
 			for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
@@ -246,7 +246,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label)
 	//for now, just return the first available score
 	vector<Score> scores = label.getScores();
 	if(scores.size()>0)
-		return scores[0].val();
+		return scores[0].getScore();
 	else //if no scores present return -1
 		return -1;
 }
@@ -358,151 +358,152 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec)
 
 float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, bool debug)
 {
-    /*
-      There should clearly be several factors that affect the outcome of an evaluation:
-      1) Mask coverage
-      2) Parts falling outside mask range
-      3) ?
+    // /*
+    //   There should clearly be several factors that affect the outcome of an evaluation:
+    //   1) Mask coverage
+    //   2) Parts falling outside mask range
+    //   3) ?
 
-      */
-    float numPixels=0; //total number of pixels in mask
-    float numHitPixels=0; //number of pixels in polygon that are inside the mask
-    float numMissPixels=0; //number of pixels in polygons that are outside of the mask
-    Mat maskMat = frame->getMask();
-    //we are at some frame with the image already loaded (currentFrameNumber)    
+    //   */
+    // float numPixels=0; //total number of pixels in mask
+    // float numHitPixels=0; //number of pixels in polygon that are inside the mask
+    // float numMissPixels=0; //number of pixels in polygons that are outside of the mask
+    // Mat maskMat = frame->getMask();
+    // //we are at some frame with the image already loaded (currentFrameNumber)    
 
-    //count the total number of mask pixels
-    for(int x=0; x<maskMat.rows(); ++x)
-    {
-        for(int y=0; y<maskMat.cols(); ++y)
-        {
-        	//@FIXME need check to see whether maskMat is really of type uchar
-            int intensity = maskMat.at<uchar>(y, x);
-            bool blackPixel=intensity<10; //mask pixel intensity threshold below which we consider it to be black
-
-            //QColor maskCol = mask.pixel(x,y);
-            if(!blackPixel) //only take in pixels that are in the mask
-            {
-                numPixels++; //count the total number of pixels
-            }
-        }
-    }
-
-    vector<float> limbScores;
-    for(int numLabel=0; numLabel<labels.size(); ++numLabel)
-    {
-        float pixHit=0;
-        float pixTotal=0;
-
-        LimbLabel label = labels[numLabel];
-
-        for(int x=0; x<maskMat.rows(); ++x)
-        {
-            for(int y=0; y<maskMat.cols(); ++y)
-            {
-            	//@NEEDS FIXING
-                if(label.containsPoint(Point2f(x,y))) //polygon from label) //only take in pixels that are in the mask
-                {
-                    pixTotal++;
-
-                    int intensity = maskMat.at<uchar>(y, x);
-
-                    bool blackPixel=intensity<10; //if all intensities are zero
-
-                    //QColor maskCol = mask.pixel(x,y);
-                    if(!blackPixel)
-                    {
-                        pixHit++;
-                    }
-                }
-            }
-        }
-
-        limbScores.push_back(pixHit/pixTotal);
-    }
-
-
-    for(int x=0; x<mask.width(); ++x)
-    {
-        for(int y=0; y<mask.height(); ++y)
-        {
-
-            int intensity = maskMat.at<uchar>(y, x);
-
-            bool blackPixel=intensity<10; //if all intensities are zero
-            //QColor maskCol = mask.pixel(x,y);
-
-            if(!blackPixel) //only take in pixels that are in the mask
-            {
-                numPixels++; //count the total numbe rf pixels
-                bool hit=false;
-                for(int i=0; i<labels.size(); ++i)
-                {
-
-                    LimbLabel label = labels[i];
-                    if(label.containsPoint(Point2f(x,y))) //polygon from label
-                    {
-                        hit = true;
-                        break;
-                    }
-                }
-                if(hit)
-                {
-                    numHitPixels++;
-                }
-            }
-            else
-            {
-                bool hit=false;
-                for(int i=0; i<labels.size(); ++i)
-                {
-                    LimbLabel label = labels[i];
-
-                    if(label.containsPoint(Point2f(x,y))) //polygon from label
-                    {
-                        hit = true;
-                        break;
-                    }
-                }
-                if(hit)
-                {
-                    //colour this pixel in as hit
-                    numMissPixels++;
-                }
-            }
-        }
-    }
-
-    float avgSuppScore=0;
-
-    for(int i=0; i<labels.size();++i)
-    {
-        if(i==0 || i>5) //count only the real labels
-            avgSuppScore+=labels[i].supportScore;
-    }
-
-    avgSuppScore=avgSuppScore/labels.size();
-
-    //show the worst half of labels
-    //    cerr << "Poorly localised labels: ";
-    //    for(int i=0; i<labels.size(); ++i)
-    //    {
-    //        if((i==0 || i>5) && labels[i].supportScore>avgSuppScore) //high is bad
-    //            cerr << limbName(i).toStdString() << " (" <<labels[i].supportScore<<") ";
-    //    }
-    //    cerr << endl;
-
-    // cerr << "Poorly localised labels (by hit/total pixels ratio): ";
-    // for(int i=0; i<labels.size(); ++i)
+    // //count the total number of mask pixels
+    // for(int x=0; x<maskMat.rows(); ++x)
     // {
-    //     if((i==0 || i>5) && limbScores[i]<0.4) //high is bad
-    //         cerr << limbName(i).toStdString() << " (" <<limbScores[i]<<") ";
+    //     for(int y=0; y<maskMat.cols(); ++y)
+    //     {
+    //     	//@FIXME need check to see whether maskMat is really of type uchar
+    //         int intensity = maskMat.at<uchar>(y, x);
+    //         bool blackPixel=intensity<10; //mask pixel intensity threshold below which we consider it to be black
+
+    //         //QColor maskCol = mask.pixel(x,y);
+    //         if(!blackPixel) //only take in pixels that are in the mask
+    //         {
+    //             numPixels++; //count the total number of pixels
+    //         }
+    //     }
     // }
-    // cerr << endl;
 
-    //also, if there are any completely broken limbs, this should lower the score
+    // vector<float> limbScores;
+    // for(int numLabel=0; numLabel<labels.size(); ++numLabel)
+    // {
+    //     float pixHit=0;
+    //     float pixTotal=0;
 
-    //@FIXME needs testing to establish that this scheme makes sense
-    return (numHitPixels-numMissPixels)/numPixels;
-	//return 1.0;
+    //     LimbLabel label = labels[numLabel];
+
+    //     for(int x=0; x<maskMat.rows(); ++x)
+    //     {
+    //         for(int y=0; y<maskMat.cols(); ++y)
+    //         {
+    //         	//@NEEDS FIXING
+    //             if(label.containsPoint(Point2f(x,y))) //polygon from label) //only take in pixels that are in the mask
+    //             {
+    //                 pixTotal++;
+
+    //                 int intensity = maskMat.at<uchar>(y, x);
+
+    //                 bool blackPixel=intensity<10; //if all intensities are zero
+
+    //                 //QColor maskCol = mask.pixel(x,y);
+    //                 if(!blackPixel)
+    //                 {
+    //                     pixHit++;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     limbScores.push_back(pixHit/pixTotal);
+    // }
+
+
+    // for(int x=0; x<mask.width(); ++x)
+    // {
+    //     for(int y=0; y<mask.height(); ++y)
+    //     {
+
+    //         int intensity = maskMat.at<uchar>(y, x);
+
+    //         bool blackPixel=intensity<10; //if all intensities are zero
+    //         //QColor maskCol = mask.pixel(x,y);
+
+    //         if(!blackPixel) //only take in pixels that are in the mask
+    //         {
+    //             numPixels++; //count the total numbe rf pixels
+    //             bool hit=false;
+    //             for(int i=0; i<labels.size(); ++i)
+    //             {
+
+    //                 LimbLabel label = labels[i];
+    //                 if(label.containsPoint(Point2f(x,y))) //polygon from label
+    //                 {
+    //                     hit = true;
+    //                     break;
+    //                 }
+    //             }
+    //             if(hit)
+    //             {
+    //                 numHitPixels++;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             bool hit=false;
+    //             for(int i=0; i<labels.size(); ++i)
+    //             {
+    //                 LimbLabel label = labels[i];
+
+    //                 if(label.containsPoint(Point2f(x,y))) //polygon from label
+    //                 {
+    //                     hit = true;
+    //                     break;
+    //                 }
+    //             }
+    //             if(hit)
+    //             {
+    //                 //colour this pixel in as hit
+    //                 numMissPixels++;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // float avgSuppScore=0;
+
+    // for(int i=0; i<labels.size();++i)
+    // {
+    //     if(i==0 || i>5) //count only the real labels
+    //         avgSuppScore+=labels[i].supportScore;
+    // }
+
+    // avgSuppScore=avgSuppScore/labels.size();
+
+    // //show the worst half of labels
+    // //    cerr << "Poorly localised labels: ";
+    // //    for(int i=0; i<labels.size(); ++i)
+    // //    {
+    // //        if((i==0 || i>5) && labels[i].supportScore>avgSuppScore) //high is bad
+    // //            cerr << limbName(i).toStdString() << " (" <<labels[i].supportScore<<") ";
+    // //    }
+    // //    cerr << endl;
+
+    // // cerr << "Poorly localised labels (by hit/total pixels ratio): ";
+    // // for(int i=0; i<labels.size(); ++i)
+    // // {
+    // //     if((i==0 || i>5) && limbScores[i]<0.4) //high is bad
+    // //         cerr << limbName(i).toStdString() << " (" <<limbScores[i]<<") ";
+    // // }
+    // // cerr << endl;
+
+    // //also, if there are any completely broken limbs, this should lower the score
+
+    // //@FIXME needs testing to establish that this scheme makes sense
+    // return (numHitPixels-numMissPixels)/numPixels;
+
+	return 1.0;
 }
