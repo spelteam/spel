@@ -80,7 +80,7 @@
     <BodyPart id="11" isOccluded="false"/>
     <BodyPart id="12" isOccluded="false"/>
     <BodyPart id="13" isOccluded="false"/>
-    <BodyPart id="14" isOccluded="false"/>
+    <BodyPart id="14" isOccluded="true"/>
     <BodyPart id="15" isOccluded="false"/>
     <BodyPart id="16" isOccluded="false"/>
    </BodyParts>
@@ -228,11 +228,11 @@
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
     <BodyPart id="9" isOccluded="false"/>
-    <BodyPart id="10" isOccluded="false"/>
+    <BodyPart id="10" isOccluded="true"/>
     <BodyPart id="11" isOccluded="false"/>
     <BodyPart id="12" isOccluded="false"/>
-    <BodyPart id="13" isOccluded="false"/>
-    <BodyPart id="14" isOccluded="false"/>
+    <BodyPart id="13" isOccluded="true"/>
+    <BodyPart id="14" isOccluded="true"/>
     <BodyPart id="15" isOccluded="false"/>
     <BodyPart id="16" isOccluded="false"/>
    </BodyParts>
@@ -285,7 +285,7 @@
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
     <BodyPart id="9" isOccluded="false"/>
-    <BodyPart id="10" isOccluded="false"/>
+    <BodyPart id="10" isOccluded="true"/>
     <BodyPart id="11" isOccluded="false"/>
     <BodyPart id="12" isOccluded="false"/>
     <BodyPart id="13" isOccluded="false"/>
