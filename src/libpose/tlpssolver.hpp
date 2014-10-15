@@ -36,7 +36,7 @@ class TLPSSolver: Solver
     TLPSSolver();
     ~TLPSSolver(); //inherited virtual
     Solution solve(const vector<Frame*>& frames); //inherited virtual
-    Solution solve(const vector<Frame*>& frames, const vector<float>& params); //inherited virtual
+    Solution solve(const vector<Frame*>& frames, map<string, float> params); //inherited virtual
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
@@ -49,10 +49,10 @@ class TLPSSolver: Solver
     float computeScoreCost(const LimbLabel& label);
     float computeJointCost(const LimbLabel& child, const LimbLabel& parent);
     float computePriorCost(const LimbLabel& label, const BodyPart& prior);
-    float computePastLinkCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel);
-    float computeFutureLinkCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel)
+    float computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel);
+    float computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel);
 
-    vector<vector<Frame*> > slice(const vector<Frame*>& frames);
+    vector<vector<Frame*> > slice(const vector<Frame*>& frames); //separate the sequence into slices, for temporal solve
 
     //INHERITED
     //int id;

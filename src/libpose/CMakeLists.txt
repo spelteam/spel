@@ -41,6 +41,7 @@ LIST ( APPEND ${LIBPOSE_MODULE}_SRC poseHelper)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC imagesimilaritymatrix)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC minspanningtree)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC nskpsolver)
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC tlpssolver)
 
 
 
