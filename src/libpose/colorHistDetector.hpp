@@ -26,7 +26,6 @@ class ColorHistDetector : public Detector
       vector <vector <vector <float>>> bgHistogramm;
       uint32_t sizeFG;
       uint32_t sizeBG;
-      bool uniqueExists;
       uint32_t fgNumSamples;
       uint32_t bgNumSamples;
       vector <uint32_t> fgSampleSizes;

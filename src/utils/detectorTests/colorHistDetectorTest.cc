@@ -376,9 +376,12 @@ int main (int argc, char **argv)
         if (outFileName[outFileName.size()] != '/')
           outFileName += "/";
         stringstream ss;
+        ss << f->getID();
+        ss << "-";
         ss << count;
         outFileName += ss.str();
         outFile.open(outFileName);
+        cerr << "Writing file: " << ss.str() << endl;
         for (ls = lls->begin(); ls != lls->end(); ++ls)
         {
           outFile << ls->getLimbID() << " ";
@@ -389,7 +392,8 @@ int main (int argc, char **argv)
           outFile << ls->getSumScore() << " ";
           outFile << "0" << " ";
           outFile << "0" << " ";
-          outFile << ((ls->getIsOccluded() == true) ? 0 : 1) << std::endl;
+          outFile << ((ls->getIsOccluded() == true) ? 0 : 1);
+          outFile << std::endl;
         }
         outFile.close();
         count++;
