@@ -42,6 +42,7 @@ void ColorHistDetector::setID(int _id)
 
 void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
+  frames = _frames;
   const float scaleParam = 1;
   const string sScaleParam = "scaleParam";
 // first we need to check all used params
@@ -50,13 +51,13 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     params[sScaleParam] = scaleParam;
   }
 
-  if (_frames.size() == 0)
+  if (frames.size() == 0)
     return;
   partModels.clear();
 // find skeleton from first keyframe or lockframe
   Skeleton skeleton;
   bool bFind = false;
-  for (vector <Frame*>::iterator i = _frames.begin(); i != _frames.end(); ++i)
+  for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
   {
     Frame *f = *i;
     if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
@@ -73,7 +74,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   }
   tree <BodyPart> partTree = skeleton.getPartTree();
   tree <BodyPart>::iterator iteratorBodyPart;
-  for (vector <Frame*>::iterator frameNum = _frames.begin(); frameNum != _frames.end(); ++frameNum)
+  for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
     {
@@ -373,6 +374,65 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   map <int32_t, Mat> pixelDistributions = buildPixelDistributions(frame);
   map <int32_t, Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions);
   Mat maskMat = frame->getMask();
+  Frame *prevFrame = 0, *nextFrame = 0;
+  uint32_t stepCount = 0;
+  uint32_t step = 0;
+  for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
+  {
+    Frame *f = *i;
+    if (f->getID() < frame->getID())
+    {
+      if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
+      {
+        prevFrame = f;
+        stepCount = 0;
+      }
+      else
+      {
+        stepCount++;
+      }
+    }
+    else if (f->getID() > frame->getID())
+    {
+      stepCount++;
+      if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
+      {
+        nextFrame = f;
+        break;
+      }
+    }
+    else // equal
+    {
+      stepCount++;
+      if (prevFrame == 0)
+      {
+        cerr << ERROR_HEADER << "Couldn't find previous keyframe to the frame " << frame->getID() << endl;
+        return t;
+      }
+      else
+      {
+        if (stepCount == 0)
+        {
+          cerr << ERROR_HEADER << "Invalid stepCount" << endl;
+          return t;
+        }
+        else
+        {
+          step = stepCount;
+        }
+      }
+    }
+  }
+  if (prevFrame == 0)
+  {
+    cerr << ERROR_HEADER << "Couldn't find previous keyframe to the frame " << frame->getID() << endl;
+    return t;
+  }
+  if (nextFrame == 0)
+  {
+    cerr << ERROR_HEADER << "Couldn't find next feyframe to the frame " << frame->getID() << endl;
+    return t;
+  }
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     vector <LimbLabel> labels;
@@ -381,8 +441,38 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
-    Point2f j0 = parentJoint->getImageLocation();
-    Point2f j1 = childJoint->getImageLocation();
+    Skeleton prevSkeleton = prevFrame->getSkeleton();
+    tree <BodyJoint> prevBodyJoints = prevSkeleton.getJointTree();
+    Skeleton nextSkeleton = nextFrame->getSkeleton();
+    tree <BodyJoint> nextBodyJoints = nextSkeleton.getJointTree();
+    Point2f pj0, nj0, pj1, nj1;
+    for (tree <BodyJoint>::iterator i = prevBodyJoints.begin(); i != prevBodyJoints.end(); ++i)
+    {
+      if (i->getLimbID() == parentJoint->getLimbID())
+      {
+        pj0 = i->getImageLocation();
+      }
+      if (i->getLimbID() == childJoint->getLimbID())
+      {
+        pj1 = i->getImageLocation();
+      }
+    }
+    for (tree <BodyJoint>:: iterator i = nextBodyJoints.begin(); i != nextBodyJoints.end(); ++i)
+    {
+      if (i->getLimbID() == parentJoint->getLimbID())
+      {
+        nj0 = i->getImageLocation();
+      }
+      if (i->getLimbID() == childJoint->getLimbID())
+      {
+        nj1 = i->getImageLocation();
+      }
+    }
+    float interpolateStep = (float)step / (float)stepCount;
+    Point2f j0 = pj0 * (1 - interpolateStep) + nj0 * interpolateStep;
+    Point2f j1 = pj1 * (1 - interpolateStep) + nj1 * interpolateStep;
+    cerr << "j0: [" << j0.x << "][" << j0.y << "]" << endl;
+    cerr << "j1: [" << j1.x << "][" << j1.y << "]" << endl;
     float boneLength = (j0 == j1) ? 1.0 : sqrt(PoseHelper::distSquared(j0, j1));
     float boxWidth = 0;
     try
@@ -436,9 +526,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       cerr << ERROR_HEADER << "Maybe there is no '" << sStepTheta << "' param" << endl;
       return t;
     }
-    for (float x = 0; x < searchDistance * 0.5; x += minDist)
+    Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
+    for (float x = suggestStart.x - searchDistance * 0.5; x < suggestStart.x + searchDistance * 0.5; x += minDist)
     {
-      for (float y = 0; y < searchDistance * 0.5; y += minDist)
+      for (float y = suggestStart.y - searchDistance * 0.5; y < suggestStart.y + searchDistance * 0.5; y += minDist)
       {
         if (x < maskMat.cols && y < maskMat.rows)
         {
