@@ -225,8 +225,8 @@ int main (int argc, char **argv)
     }
     part.setPartID(id);
     part.setPartName(name);
-    part.setParentJoint(parentJoint);
-    part.setChildJoint(childJoint);
+    part.setParentJoint(parentJoint->getLimbID());
+    part.setChildJoint(childJoint->getLimbID());
     part.setSpaceLength(expectedDistance);
     trBodyParts.insert(topBodyParts, part);
     bodyParts = bodyParts->NextSiblingElement();
@@ -306,7 +306,7 @@ int main (int argc, char **argv)
         Point2f imgLocation = Point2f(x, y);
         joint->setImageLocation(imgLocation);
         joint->setDepthSign(depthSign);
-        bodyJoints = bodyJoints->NextSiblingElement();
+        bodyJoints = bodyJoints->NextSiblingElement(); 
       }
     }
     PoseHelper::copyTree(trBodyPartsCopy, trBodyParts);
@@ -342,8 +342,10 @@ int main (int argc, char **argv)
       }
     }
     Skeleton skeleton;
-    skeleton.setPartTree(trBodyPartsCopy);
     skeleton.setJointTree(trBodyJointsCopy);
+    skeleton.setPartTree(trBodyPartsCopy);
+//TODO (Vitaliy Koshura): This need to be loaded!!!!!!
+    skeleton.setScale(100.0);    
     f->setSkeleton(skeleton);
     vFrames.push_back(f);
     frames = frames->NextSiblingElement();
@@ -384,16 +386,30 @@ int main (int argc, char **argv)
         cerr << "Writing file: " << ss.str() << endl;
         for (ls = lls->begin(); ls != lls->end(); ++ls)
         {
-          outFile << ls->getLimbID() << " ";
-          outFile << ls->getCenter().x << " ";
-          outFile << ls->getCenter().y << " ";
-          outFile << ls->getAngle() << " ";
-          outFile << PoseHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2]) << " ";
-          outFile << ls->getSumScore() << " ";
-          outFile << "0" << " ";
-          outFile << "0" << " ";
-          outFile << ((ls->getIsOccluded() == true) ? 0 : 1);
-          outFile << std::endl;
+          try
+          {
+            outFile << ls->getLimbID() << " ";
+            outFile << ls->getCenter().x << " ";
+            outFile << ls->getCenter().y << " ";
+            outFile << ls->getAngle() << " ";
+            if (ls->getPolygon().size() < 4)
+            {
+              outFile << "0" << " ";
+            }
+            else
+            {
+              outFile << PoseHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2]) << " ";
+            }
+            outFile << ls->getSumScore() << " ";
+            outFile << "0" << " ";
+            outFile << "0" << " ";
+            outFile << ((ls->getIsOccluded() == true) ? 0 : 1);
+            outFile << std::endl;
+          }
+          catch(...)
+          {
+            cerr << "Empty LimbLabel" << endl;
+          }
         }
         outFile.close();
         count++;

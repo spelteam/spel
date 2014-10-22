@@ -73,3 +73,16 @@ uint32_t Skeleton::getPartTreeCount(void) const
 {
   return partTree.size();
 }
+
+BodyJoint *Skeleton::getBodyJoint(int jointID)
+{
+  BodyJoint *joint = 0;
+  for(tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
+  {
+    if (i->getLimbID() == jointID)
+    {
+      joint = &*i;
+    }
+  }
+  return joint;
+}

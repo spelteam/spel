@@ -11,7 +11,7 @@ class BodyPart
 {
   public:
     BodyPart(void);
-    BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint, bool isOcc = false, float spaceLen = 0);
+    BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
     bool operator==(const BodyPart &bp) const;
     bool operator!=(const BodyPart &bp) const;
 // get and set
@@ -19,10 +19,10 @@ class BodyPart
     void setPartID(int _partID);
     string getPartName(void) const;
     void setPartName(string _partName);
-    BodyJoint *getParentJoint(void) const;
-    void setParentJoint(BodyJoint *_parentJoint);
-    BodyJoint *getChildJoint(void) const;
-    void setChildJoint(BodyJoint *_childJoint);
+    int getParentJoint(void) const;
+    void setParentJoint(int _parentJoint);
+    int getChildJoint(void) const;
+    void setChildJoint(int _childJoint);
     bool getIsOccluded(void) const;
     void setIsOccluded(bool _isOccluded);
     float getSpaceLength(void) const;
@@ -32,8 +32,8 @@ class BodyPart
   private:
     int partID;
     string partName;
-    BodyJoint *parentJoint;
-    BodyJoint *childJoint;
+    int parentJoint;
+    int childJoint;
     bool isOccluded;
     float spaceLength;
     POSERECT <Point2f> partPolygon;

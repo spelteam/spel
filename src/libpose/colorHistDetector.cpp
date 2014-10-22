@@ -25,6 +25,21 @@ ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
   sizeFG = 0;
 }
 
+ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(PartModel &model)
+{
+  this->nBins = model.nBins;
+  this->partHistogramm = model.partHistogramm;
+  this->bgHistogramm = model.bgHistogramm;
+  this->sizeFG = model.sizeFG;
+  this->sizeBG = model.sizeBG;
+  this->fgNumSamples = model.fgNumSamples;
+  this->bgNumSamples = model.bgNumSamples;
+  this->fgSampleSizes = model.fgSampleSizes;
+  this->bgSampleSizes = model.bgSampleSizes;
+  this->fgBlankSizes = model.fgBlankSizes;
+  return *this;
+}
+
 //TODO (Vitaliy Koshura): Need unit test
 ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
 {
@@ -72,7 +87,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     cerr << ERROR_HEADER << "No neither keyrames nor lockframes" << endl;
     return;
   }
-  tree <BodyPart> partTree = skeleton.getPartTree();
+  tree <BodyPart> partTree;
   tree <BodyPart>::iterator iteratorBodyPart;
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
@@ -86,6 +101,9 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     skeleton = (*frameNum)->getSkeleton();
     map <int32_t, POSERECT <Point2f>> polygons;  // polygons for this frame
     map <int32_t, bool> polyDepth;
+    partTree = skeleton.getPartTree();
+    tree <BodyJoint> jointTree;
+    tree <BodyJoint>::iterator iteratorBodyJoint;
     for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
     {
       partPixelColours.insert(pair <int32_t, vector <Point3i>> (iteratorBodyPart->getPartID(), vector <Point3i>()));
@@ -94,7 +112,8 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       Point2f j1, j0;  // the two joint for this bone
       Point2f c1, c2, c3, c4;  // the four corners of the rectangle
       BodyJoint *joint = 0;
-      joint = iteratorBodyPart->getParentJoint();
+      joint = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint());
+      
       if (joint == 0)
       {
         cerr << ERROR_HEADER << "Invalid parent joint" << endl;
@@ -102,7 +121,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       }
       j0 = joint->getImageLocation();
       joint = 0;
-      joint = iteratorBodyPart->getChildJoint();
+      joint = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint());
       if (joint == 0)
       {
         cerr << ERROR_HEADER << "Invalid child joint" << endl;
@@ -114,7 +133,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       float boneWidth = 0;
       try
       {
-        boneWidth = skeleton.getScale() * iteratorBodyPart->getSpaceLength() * params.at(sScaleParam);
+        boneWidth = skeleton.getScale() * boneLength * params.at(sScaleParam);
       }
       catch(...)
       {
@@ -136,7 +155,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
       POSERECT <Point2f> poserect(c1, c2, c3, c4);
       polygons.insert(pair <int32_t, POSERECT <Point2f>> (iteratorBodyPart->getPartID(), poserect));
-      polyDepth.insert(pair <int32_t, bool> (iteratorBodyPart->getPartID(), iteratorBodyPart->getParentJoint()->getDepthSign()));
+      polyDepth.insert(pair <int32_t, bool> (iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getDepthSign()));
     }
     Mat maskMat = (*frameNum)->getMask();
     Mat imgMat = (*frameNum)->getImage();
@@ -241,7 +260,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             }
             catch(...)
             {
-              cerr << ERROR_HEADER << "There is no suck blankPixels for body part " << partHit << endl;
+              cerr << ERROR_HEADER << "There is no such blankPixels for body part " << partHit << endl;
               return;
             }
           }
@@ -263,6 +282,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
       }
     }
+
 // init partModels
     for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart) 
     {
@@ -274,7 +294,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       }
       try
       {
-        PartModel &partModel = partModels.at(partNumber);
+        PartModel partModel = partModels.at(partNumber);
         vector <Point3i> partPixelColoursVector;
         vector <Point3i> bgPixelColoursVector;
         int blankPixelsCount;
@@ -307,6 +327,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
         addPartHistogramm(partModel, partPixelColoursVector, blankPixelsCount);
         addBackgroundHistogramm(partModel, bgPixelColoursVector);
+        partModels.at(partNumber) = partModel;
         cerr << "Found part model: " << partNumber << endl;
       }
       catch(...)
@@ -436,8 +457,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     vector <LimbLabel> labels;
-    BodyJoint *parentJoint = iteratorBodyPart->getParentJoint();
-    BodyJoint *childJoint = iteratorBodyPart->getChildJoint();
+    BodyJoint *parentJoint = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint());
+    BodyJoint *childJoint = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint());
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
@@ -471,13 +492,11 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     float interpolateStep = (float)step / (float)stepCount;
     Point2f j0 = pj0 * (1 - interpolateStep) + nj0 * interpolateStep;
     Point2f j1 = pj1 * (1 - interpolateStep) + nj1 * interpolateStep;
-    cerr << "j0: [" << j0.x << "][" << j0.y << "]" << endl;
-    cerr << "j1: [" << j1.x << "][" << j1.y << "]" << endl;
     float boneLength = (j0 == j1) ? 1.0 : sqrt(PoseHelper::distSquared(j0, j1));
     float boxWidth = 0;
     try
     {
-      boxWidth = skeleton.getScale() * iteratorBodyPart->getSpaceLength() * params.at(sScaleParam);
+      boxWidth = skeleton.getScale() * boneLength * params.at(sScaleParam);
     }
     catch (...)
     {
@@ -551,7 +570,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
             {
               Point2f p0 = Point2f(0, 0);
               Point2f p1 = Point2f(1.0, 0);
-              p1 *= iteratorBodyPart->getSpaceLength();
+              p1 *= boneLength;
               p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
@@ -891,11 +910,6 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
     catch(...)
     {
       cerr << ERROR_HEADER << "Maybe couldn't find partModel " << partID << endl;
-      cerr << "Available partmodels:" << endl;
-      for (map <int32_t, PartModel>::iterator partModel = partModels.begin(); partModel != partModels.end(); ++partModel)
-      {
-        cerr << partModel->first << endl;
-      }
       return pixelDistributions;
     }
     pixelDistributions.insert(pair <int32_t, Mat> (partID, t));
@@ -977,13 +991,14 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
 
 LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1)
 {
+  vector <Score> s;
   Mat maskMat = frame->getMask();
   Mat imgMat = frame->getImage();
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
   float x = boxCenter.x;
   float y = boxCenter.y;
   float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
-  float boxWidth = frame->getSkeleton().getScale() / bodyPart.getSpaceLength();
+  float boxWidth = frame->getSkeleton().getScale() / (boneLength * 1.0);
   float rot = PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
   vector <Point3i> partPixelColours;
   Point2f c1, c2, c3, c4, polyCenter;
@@ -1003,12 +1018,21 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float totalPixelLabelScore = 0;
   float pixDistAvg = 0;
   float pixDistNum = 0;
-  if (getAvgSampleSizeFg(bodyPart.getPartID()) == 0)
+  PartModel model;
+  try
   {
-    vector <Score> v;
+    model = partModels.at(bodyPart.getPartID());
+  }
+  catch(...)
+  {
+    cerr << ERROR_HEADER << "Couldn't get partModel of bodyPart " << bodyPart.getPartID() <<endl;
+    return LimbLabel();
+  }
+  if (getAvgSampleSizeFg(model) == 0)
+  {
     maskMat.release();
     imgMat.release();
-    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), v);
+    return LimbLabel();
   }
   for (int32_t i = x - boneLength * 0.5; i < x + boneLength * 0.5; i++)
   {
@@ -1039,7 +1063,16 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
           if (rect.containsPoint(Point2f(i,j)) > 0)
           {
             totalPixels++;
-            uint8_t mintensity = maskMat.at<uint8_t>(j, i);
+            uint8_t mintensity = 0;
+            try
+            {
+              mintensity = maskMat.at<uint8_t>(j, i);
+            }
+            catch(...)
+            {
+              cerr << ERROR_HEADER << "Couldn't get value of maskMat at " << "[" << j << "][" << i << "]" << endl;
+              return LimbLabel();
+            }
             bool blackPixel = mintensity < 10;
             if (!blackPixel)
             {
@@ -1090,12 +1123,10 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     PartModel model(nBins);
     setPartHistogramm(model, partPixelColours);
-    vector <Score> s;
     Score sc(1.0 - (supportScore + inMaskSupportScore), "");
     s.push_back(sc);
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
   }
-  vector <Score> s;
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
+  return LimbLabel();
 }
 

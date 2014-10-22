@@ -20,8 +20,8 @@ class ColorHistDetector : public Detector
   private:
     struct PartModel
     {
-      PartModel(uint8_t _nBins);
-      const uint8_t nBins;
+      PartModel(uint8_t _nBins = 8);
+      uint8_t nBins;
       vector <vector <vector <float>>> partHistogramm;
       vector <vector <vector <float>>> bgHistogramm;
       uint32_t sizeFG;
@@ -31,6 +31,7 @@ class ColorHistDetector : public Detector
       vector <uint32_t> fgSampleSizes;
       vector <uint32_t> bgSampleSizes;
       vector <uint32_t> fgBlankSizes;
+      PartModel &operator=(PartModel &model);
     };
     int id;
     const uint8_t nBins;

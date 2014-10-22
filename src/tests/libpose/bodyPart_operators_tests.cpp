@@ -5,8 +5,8 @@ TEST(bodyPartTest, OperatorsTest)
 {
   int partID = 3;
   string partName = "Part Name";
-  BodyJoint *parentJoint = new BodyJoint();
-  BodyJoint *childJoint = new BodyJoint();
+  int parentJoint = 0;
+  int childJoint = 0;
   bool isOccluded = true;
   float spaceLength = 1.343;
 
@@ -15,8 +15,5 @@ TEST(bodyPartTest, OperatorsTest)
 
   EXPECT_TRUE(bp1 == bp2);
   EXPECT_FALSE(bp1 != bp2);
-
-  delete parentJoint;
-  delete childJoint;
 }
 

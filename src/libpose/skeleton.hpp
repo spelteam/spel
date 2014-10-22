@@ -26,6 +26,8 @@ class Skeleton
     void setPartTree(tree <BodyPart> _partTree);
     tree <BodyJoint> getJointTree(void) const;
     void setJointTree(tree <BodyJoint> _jointTree);
+//TODO (Vitaliy Koshura): Need unit test
+    BodyJoint* getBodyJoint(int jointID);
     float getScale(void) const;
     void setScale(float _scale);
     uint32_t getPartTreeCount(void) const;

@@ -5,8 +5,8 @@ TEST(bodyPartTest, GetAndSetTest)
   BodyPart bp1;
   int partID = 3;
   string partName = "Part Name";
-  BodyJoint *parentJoint = new BodyJoint();
-  BodyJoint *childJoint = new BodyJoint();
+  int parentJoint = 0;
+  int childJoint = 0;
   bool isOccluded = false;
   float spaceLength = 1.343;
   POSERECT <Point2f> polygon (Point2f(1.0, 2.0), Point2f(2.0, 3.0), Point2f(3.0, 4.0), Point2f(4.0, 5.0));
@@ -26,8 +26,5 @@ TEST(bodyPartTest, GetAndSetTest)
   EXPECT_EQ(isOccluded, bp1.getIsOccluded());
   EXPECT_EQ(spaceLength, bp1.getSpaceLength());
   EXPECT_EQ(polygon, bp1.getPartPolygon());
-  
-  delete parentJoint;
-  delete childJoint;
 }
 

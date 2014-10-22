@@ -9,7 +9,7 @@ BodyPart::BodyPart(void)
   setSpaceLength(0);
 }
 
-BodyPart::BodyPart(int id, string name, BodyJoint *pJoint, BodyJoint *cJoint, bool isOcc, float spaceLen)
+BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, float spaceLen)
 {
   setPartID(id);
   setPartName(name);
@@ -39,22 +39,22 @@ void BodyPart::setPartName(string _partName)
   partName = _partName;
 }
 
-BodyJoint *BodyPart::getParentJoint(void) const
+int BodyPart::getParentJoint(void) const
 {
   return parentJoint;
 }
 
-void BodyPart::setParentJoint(BodyJoint *_parentJoint)
+void BodyPart::setParentJoint(int _parentJoint)
 {
   parentJoint = _parentJoint;
 }
 
-BodyJoint *BodyPart::getChildJoint(void) const
+int BodyPart::getChildJoint(void) const
 {
   return childJoint;
 }
 
-void BodyPart::setChildJoint(BodyJoint *_childJoint)
+void BodyPart::setChildJoint(int _childJoint)
 {
   childJoint = _childJoint;
 }
