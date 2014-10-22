@@ -38,6 +38,7 @@ bg=blue</panel_attributes>
 +setPartTree(_partTree: tree&lt;BodyPart&gt;)
 +getJointTree(): tree&lt;JointTree&gt;
 +setJointTree(_jointTree: tree&lt;BodyJoint&gt;)
++getBodyJoint(jointID: int): BodyJoint*
 +getScale(): float
 +setScale(_scale: float)
 +toString(): string
@@ -392,91 +393,6 @@ operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;</pane
   </element>
   <group>
     <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>16</x>
-        <y>1152</y>
-        <w>568</w>
-        <h>680</h>
-      </coordinates>
-      <panel_attributes>*Skeletal Structure*
-bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>32</x>
-        <y>1176</y>
-        <w>544</w>
-        <h>352</h>
-      </coordinates>
-      <panel_attributes>BodyPart
---
-+partId: int
-+partName: string
-+parentJoint: BodyJoint*
-+childJoint: BodyJoint*
-+isOccluded: bool
-+spaceLength: float 
-+partPolygon: POSERECT &lt;Point2f&gt;
---
-+BodyPart()
-+BodyPart(id: int, name: string, pJoint: BodyJoint*, cJoint: BodyJoint*, isOcc: bool, spaceLeng: float)
-+getPartID(): int
-+setPartID(_partID: int)
-+getPartName(): string;
-+setPartName(_partName: string)
-+getParentJoint(): BodyJoint*
-+setParentJoint(_parentJoint: BodyJoint*)
-+getChildJoint(): BodyJoint*
-+setChildJoint(_childJoint: BodyJoint*)
-+getIsOccluded(): bool
-+setIsOccluded(_isOccluded: bool)
-+getSpaceLength(): float
-+setSpaceLength(_spaceLength: float)
-+getPartPolygon(): POSERECT &lt;Point2f&gt;
-+setPartPolygon(_partPolygon: POSERECT &lt;Point2f&gt;)
-+operator==: bool
-+operator!=: bool
-</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>32</x>
-        <y>1544</y>
-        <w>544</w>
-        <h>272</h>
-      </coordinates>
-      <panel_attributes>BodyJoint
---
-+limbId: int
-+jointName: string
-+imageLocation: cv:Point2f
-+spaceLocation: cv:Point3f
-+depthSign: bool
---
-+BodyJoint()
-+BodyJoint(id: int, name: string, imgLoc: Point2f, spaceLoc: Point, depth: bool)
-+getLimbID(): int
-+setLimbID(_limbID: int)
-+getJointName(): string
-+setJointName(_jointName: string)
-+getImageLocation(): Point2f
-+setImageLocation(_imageLocation: Point2f)
-+getSpaceLocation(): Point3f
-+setSpaceLocation(_spaceLocation: Point3f)
-+getDepthSign(): bool
-+setDepthSign(_depthSign: bool)
-+operator==: bool
-+operator!=: bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>256</x>
@@ -668,16 +584,15 @@ bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>608</x>
-        <y>1912</y>
-        <w>552</w>
-        <h>112</h>
-      </coordinates>
-      <panel_attributes>PartModel
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>608</x>
+      <y>1912</y>
+      <w>552</w>
+      <h>112</h>
+    </coordinates>
+    <panel_attributes>PartModel
 --
 +nBins: byte
 +partHistogramm: vector&lt;vector&lt;vector&lt;float\&gt;&gt;&gt;
@@ -688,17 +603,17 @@ bg=orange</panel_attributes>
 +gfBlankSizes: vector&lt;int&gt;
 
 </panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>608</x>
-        <y>1584</y>
-        <w>624</w>
-        <h>304</h>
-      </coordinates>
-      <panel_attributes>ColorHistDetector
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>608</x>
+      <y>1584</y>
+      <w>624</w>
+      <h>304</h>
+    </coordinates>
+    <panel_attributes>ColorHistDetector
 --
 +nBins: byte
 +partModels: vector &lt;PartModel&gt;
@@ -719,31 +634,115 @@ bg=orange</panel_attributes>
 +buildPixelDistributions(frame: Frame*): map &lt;int, Mat&gt;
 +buildPixelLabels(frame: Frame*, pixelDistributions: map&lt;int, Mat&gt;): map &lt;int, Mat&gt;
 +generateLabel(bodyPart: BodyPart, frame: Frame, pixelDistributions: map &lt;int, Mat&gt;, pixelLabels: map &lt;int, Mat&gt;, j0: Point2f, j1 : Point2f): LimbLabel</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Note</type>
-      <coordinates>
-        <x>608</x>
-        <y>1496</y>
-        <w>552</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>*Potentially to remove *
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>608</x>
+      <y>1496</y>
+      <w>552</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>*Potentially to remove *
 -- fgNumSamples contain duplicated data that can be accessed 
    from fgSampleSizes.size()
 bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>600</x>
+      <y>1456</y>
+      <w>648</w>
+      <h>608</h>
+    </coordinates>
+    <panel_attributes>bg=orange</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>32</x>
+        <y>1176</y>
+        <w>544</w>
+        <h>352</h>
+      </coordinates>
+      <panel_attributes>BodyPart
+--
++partId: int
++partName: string
++parentJoint: int
++childJoint: int
++isOccluded: bool
++spaceLength: float 
++partPolygon: POSERECT &lt;Point2f&gt;
+--
++BodyPart()
++BodyPart(id: int, name: string, pJoint: int, cJoint: int, isOcc: bool, spaceLeng: float)
++getPartID(): int
++setPartID(_partID: int)
++getPartName(): string;
++setPartName(_partName: string)
++getParentJoint(): int
++setParentJoint(_parentJoint: int)
++getChildJoint(): int
++setChildJoint(_childJoint: int)
++getIsOccluded(): bool
++setIsOccluded(_isOccluded: bool)
++getSpaceLength(): float
++setSpaceLength(_spaceLength: float)
++getPartPolygon(): POSERECT &lt;Point2f&gt;
++setPartPolygon(_partPolygon: POSERECT &lt;Point2f&gt;)
++operator==: bool
++operator!=: bool
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>32</x>
+        <y>1544</y>
+        <w>544</w>
+        <h>272</h>
+      </coordinates>
+      <panel_attributes>BodyJoint
+--
++limbId: int
++jointName: string
++imageLocation: cv:Point2f
++spaceLocation: cv:Point3f
++depthSign: bool
+--
++BodyJoint()
++BodyJoint(id: int, name: string, imgLoc: Point2f, spaceLoc: Point, depth: bool)
++getLimbID(): int
++setLimbID(_limbID: int)
++getJointName(): string
++setJointName(_jointName: string)
++getImageLocation(): Point2f
++setImageLocation(_imageLocation: Point2f)
++getSpaceLocation(): Point3f
++setSpaceLocation(_spaceLocation: Point3f)
++getDepthSign(): bool
++setDepthSign(_depthSign: bool)
++operator==: bool
++operator!=: bool</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>600</x>
-        <y>1456</y>
-        <w>648</w>
-        <h>608</h>
+        <x>16</x>
+        <y>1152</y>
+        <w>568</w>
+        <h>680</h>
       </coordinates>
-      <panel_attributes>bg=orange</panel_attributes>
+      <panel_attributes>*Skeletal Structure*
+bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
