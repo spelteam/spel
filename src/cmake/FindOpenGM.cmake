@@ -1,0 +1,4 @@
+FIND_PATH ( OpenGM_INCLUDE_DIR opengm/opengm.hxx )
+INCLUDE ( FindPackageHandleStandardArgs )
+FIND_PACKAGE_HANDLE_STANDARD_ARGS ( OpenGM DEFAULT_MSG OpenGM_INCLUDE_DIR )
+
