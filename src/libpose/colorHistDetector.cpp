@@ -62,10 +62,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   const float scaleParam = 1;
   const string sScaleParam = "scaleParam";
 // first we need to check all used params
-  if (params.find(sScaleParam) == params.end())
-  {
-    params[sScaleParam] = scaleParam;
-  }
+  params.emplace(sScaleParam, scaleParam);
 
   if (frames.size() == 0)
     return;
@@ -364,31 +361,13 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const string sScaleParam = "scaleParam";
 
 // first we need to check all used params
-  if (params.find(sSearchDistCoeff) == params.end())
-  {
-    params[sSearchDistCoeff] = searchDistCoeff;
-  }
-  if (params.find(sMinTheta) == params.end())
-  {
-    params[sMinTheta] = minTheta;
-  }
-  if (params.find(sMaxTheta) == params.end())
-  {
-    params[sMaxTheta] = maxTheta;
-  }
-  if (params.find(sStepTheta) == params.end())
-  {
-    params[sStepTheta] = stepTheta;
-  }
-  if (params.find(sUniqueLocationCandidates) == params.end())
-  {
-    params[sUniqueLocationCandidates] = uniqueLocationCandidates;
-  }
-  if (params.find(sScaleParam) == params.end())
-  {
-    params[sScaleParam] = scaleParam;
-  }
-   
+  params.emplace(sSearchDistCoeff, searchDistCoeff);
+  params.emplace(sMinTheta, minTheta);
+  params.emplace(sMaxTheta, maxTheta);
+  params.emplace(sStepTheta, stepTheta);
+  params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
+  params.emplace(sScaleParam, scaleParam);
+
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
