@@ -58,6 +58,7 @@ void ColorHistDetector::setID(int _id)
 void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
   frames = _frames;
+  sort(frames.begin(), frames.end(), FramePointerComparer());
   const float scaleParam = 1;
   const string sScaleParam = "scaleParam";
 // first we need to check all used params

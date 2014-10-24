@@ -40,5 +40,14 @@ class Frame
     Point2f groundPoint;
 };
 
+class FramePointerComparer
+{
+  public:
+    bool operator () (Frame *frame1, Frame *frame2)
+    {
+      return frame1->getID() < frame2->getID();
+    }
+};
+
 #endif  // _LIBPOSE_FRAME_HPP_
 
