@@ -244,7 +244,7 @@ float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& pare
 }
 
 //compute distance to the body part prior
-float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, Skeleton& skeleton, map<string, float> params)
+float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params)
 {
 	Point2f p0,p1, pp0, pp1;
 	label.getEndpoints(p0,p1);

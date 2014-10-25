@@ -74,7 +74,7 @@ uint32_t Skeleton::getPartTreeCount(void) const
   return partTree.size();
 }
 
-BodyJoint *Skeleton::getBodyJoint(int jointID)
+BodyJoint *Skeleton::getBodyJoint(int jointID) const
 {
   BodyJoint *joint = 0;
   for(tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
