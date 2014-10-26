@@ -356,7 +356,16 @@ int main (int argc, char **argv)
   ColorHistDetector detector;
   map <string, float> params;
   cout << "Training..." << endl;
-  detector.train(vFrames, params);
+  try
+  {
+    detector.train(vFrames, params);
+  }
+  catch(exception &e)
+  {
+    cerr << e.what() << endl;
+    return -1;
+  }
+
   cout << "Training complete" << endl;
   vector <vector <LimbLabel> >::iterator lls;
   vector <LimbLabel>::iterator ls;
@@ -369,7 +378,16 @@ int main (int argc, char **argv)
     Frame *f = *i;
     if (f->getFrametype() == INTERPOLATIONFRAME)
     {
-      vector <vector <LimbLabel> > labels = detector.detect(f, detectParams);
+      vector <vector <LimbLabel> > labels;
+      try
+      {
+        labels = detector.detect(f, detectParams);
+      }
+      catch (exception &e)
+      {
+        cerr << e.what() << endl;
+        continue;
+      }
       uint32_t count = 0;
       for (lls = labels.begin(); lls != labels.end(); ++lls)
       {

@@ -65,7 +65,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   params.emplace(sScaleParam, scaleParam);
 
   if (frames.size() == 0)
-    return;
+    throw logic_error("No input frames");
   partModels.clear();
 // find skeleton from first keyframe or lockframe
   Skeleton skeleton;
@@ -82,8 +82,10 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   }
   if (bFind == false)
   {
-    cerr << ERROR_HEADER << "No neither keyrames nor lockframes" << endl;
-    return;
+#ifdef DEBUG
+    cerr << ERROR_HEADER << "No neither keyframes nor lockframes" << endl;
+#endif  // DEBUG
+    throw logic_error("No neither keyframes nor lockframes");
   }
   tree <BodyPart> partTree;
   tree <BodyPart>::iterator iteratorBodyPart;
@@ -114,7 +116,9 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       
       if (joint == 0)
       {
+#ifdef DEBUG
         cerr << ERROR_HEADER << "Invalid parent joint" << endl;
+#endif  // DEBUG
         break;
       }
       j0 = joint->getImageLocation();
@@ -122,7 +126,9 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       joint = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint());
       if (joint == 0)
       {
+#ifdef DEBUG
         cerr << ERROR_HEADER << "Invalid child joint" << endl;
+#endif  // DEBUG
         break;
       }
       j1 = joint->getImageLocation();
@@ -135,8 +141,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       }
       catch(...)
       {
-        cerr << ERROR_HEADER << "Maybe there is no '" << sScaleParam << "' param" << endl;
-        return;
+        stringstream ss;
+        ss << "Maybe there is no '" << sScaleParam << "' param";
+#ifdef DEBUG
+        cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+        throw logic_error(ss.str());
       }
       Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
       c1 = Point2f(0, 0.5 * boneWidth);
@@ -168,8 +178,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "Couldn't get imgMat value of indeces " << "[" << j << "][" << i << "]" << endl;
-          return;
+          stringstream ss;
+          ss << "Couldn't get imgMat value of indeces " << "[" << j << "][" << i << "]";
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
         uint8_t blue = intensity.val[0];
         uint8_t green = intensity.val[1];
@@ -181,8 +195,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "Couldn't get maskMat value of indeces " << "[" << j << "][" << i << "]" << endl;
-          return;
+          stringstream ss;
+          ss << "Couldn't get maskMat value of indeces " << "[" << j << "][" << i << "]";
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
         bool blackPixel = mintensity < 10;
         int partHit = -1;
@@ -197,8 +215,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           }
           catch(...)
           {
-            cerr << ERROR_HEADER << "There is no such polygon for body part " << partNumber << endl;
-            return;
+            stringstream ss;
+            ss << "There is no such polygon for body part " << partNumber;
+#ifdef DEBUG
+            cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+            throw logic_error(ss.str());
           }
           try
           {
@@ -215,8 +237,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           }
           catch(...)
           {
-            cerr << ERROR_HEADER << "There is no such polyDepth parameter for body part " << partNumber << endl;
-            return;
+            stringstream ss;
+            ss << "There is no such polyDepth parameter for body part " << partNumber;
+#ifdef DEBUG
+            cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+            throw logic_error(ss.str());
           }
 
           partNumber++;
@@ -231,8 +257,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             }
             catch(...)
             {
-              cerr << ERROR_HEADER << "There is no partPixelColours for body part " << partHit << endl;
-              return;
+              stringstream ss;
+              ss << "There is no partPixelColours for body part " << partHit;
+#ifdef DEBUG
+              cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+              throw logic_error(ss.str());
             }
             for (tree <BodyPart>::iterator p = partTree.begin(); p != partTree.end(); ++p)
             {
@@ -244,8 +274,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
                 }
                 catch(...)
                 {
-                  cerr << ERROR_HEADER << "There is no such bgPixelColours for body part " << p->getPartID() << endl;
-                  return;
+                  stringstream ss;
+                  ss << "There is no such bgPixelColours for body part " << p->getPartID();
+#ifdef DEBUG
+                  cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+                  throw logic_error(ss.str());
                 }
               }
             }
@@ -258,8 +292,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             }
             catch(...)
             {
-              cerr << ERROR_HEADER << "There is no such blankPixels for body part " << partHit << endl;
-              return;
+              stringstream ss;
+              ss << "There is no such blankPixels for body part " << partHit;
+#ifdef DEBUG
+              cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+              throw logic_error(ss.str());
             }
           }
         }
@@ -273,8 +311,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             }
             catch(...)
             {
-              cerr << ERROR_HEADER << "There is no such bgPixelColours for body part " << p->getPartID() << endl;
-              return;
+              stringstream ss;
+              ss << "There is no such bgPixelColours for body part " << p->getPartID();
+#ifdef DEBUG
+              cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+              throw logic_error(ss.str());
             }
           }
         }
@@ -302,8 +344,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "There is no such partPixelColours for body part " << partNumber << endl;
-          return;
+          stringstream ss;
+          ss << "There is no such partPixelColours for body part " << partNumber;
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
         try
         {
@@ -311,8 +357,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "There is no such blankPixels for body part " << partNumber << endl;
-          return;
+          stringstream ss;
+          ss << "There is no such blankPixels for body part " << partNumber;
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
         try
         {
@@ -320,18 +370,28 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "There is no such bgPixelColours for body part " << partNumber << endl;
-          return;
+          stringstream ss;
+          ss << "There is no such bgPixelColours for body part " << partNumber;
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
         addPartHistogramm(partModel, partPixelColoursVector, blankPixelsCount);
         addBackgroundHistogramm(partModel, bgPixelColoursVector);
         partModels.at(partNumber) = partModel;
+#ifdef DEBUG
         cerr << "Found part model: " << partNumber << endl;
+#endif  // DEBUG
       }
       catch(...)
       {
-        cerr << ERROR_HEADER << "Could not find part model " << partNumber << endl;
-        return;
+        stringstream ss;
+        ss << "Could not find part model " << partNumber;
+#ifdef DEBUG
+        cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+        throw logic_error(ss.str());
       }
       
     }
@@ -407,15 +467,23 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       stepCount++;
       if (prevFrame == 0)
       {
-        cerr << ERROR_HEADER << "Couldn't find previous keyframe to the frame " << frame->getID() << endl;
-        return t;
+        stringstream ss;
+        ss << "Couldn't find previous keyframe to the frame " << frame->getID();
+#ifdef DEBUG
+        cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+        throw logic_error(ss.str());
       }
       else
       {
         if (stepCount == 0)
         {
-          cerr << ERROR_HEADER << "Invalid stepCount" << endl;
-          return t;
+          stringstream ss;
+          ss << "Invalid stepCount";
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif // DEBUG
+          throw logic_error(ss.str());
         }
         else
         {
@@ -426,13 +494,21 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   }
   if (prevFrame == 0)
   {
-    cerr << ERROR_HEADER << "Couldn't find previous keyframe to the frame " << frame->getID() << endl;
-    return t;
+    stringstream ss;
+    ss << "Couldn't find previous keyframe to the frame " << frame->getID();
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
   }
   if (nextFrame == 0)
   {
-    cerr << ERROR_HEADER << "Couldn't find next feyframe to the frame " << frame->getID() << endl;
-    return t;
+    stringstream ss;
+    ss << "Couldn't find next feyframe to the frame " << frame->getID();
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
   }
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
@@ -480,8 +556,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     catch (...)
     {
-      cerr << ERROR_HEADER << "Maybe there is no '" << sScaleParam << "' param" << endl;
-      return t;
+      stringstream ss;
+      ss << "Maybe there is no '" << sScaleParam << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     Point2f direction = j1 - j0;
     float theta = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
@@ -494,8 +574,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Maybe there is no '" << sSearchDistCoeff << "' param" << endl;
-      return t;
+      stringstream ss;
+      ss << "Maybe there is no '" << sSearchDistCoeff << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     float minTheta = 0, maxTheta = 0, stepTheta = 0;
     try
@@ -504,8 +588,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Maybe there is no '" << sMinTheta << "' param" << endl;
-      return t;
+      stringstream ss;
+      ss << "Maybe there is no '" << sMinTheta << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     try
     {
@@ -513,8 +601,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Maybe there is no '" << sMaxTheta << "' param" << endl;
-      return t;
+      stringstream ss;
+      ss << "Maybe there is no '" << sMaxTheta << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
      try
     {
@@ -522,8 +614,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Maybe there is no '" << sStepTheta << "' param" << endl;
-      return t;
+      stringstream ss;
+      ss << "Maybe there is no '" << sStepTheta << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
     for (float x = suggestStart.x - searchDistance * 0.5; x < suggestStart.x + searchDistance * 0.5; x += minDist)
@@ -539,8 +635,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           }
           catch(...)
           {
-            cerr << ERROR_HEADER << "Can't get value in maskMat at " << "[" << y << "][" << x << "]" << endl;
-            return t;
+            stringstream ss;
+            ss << "Can't get value in maskMat at " << "[" << y << "][" << x << "]";
+#ifdef DEBUG
+            cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+            throw logic_error(ss.str());
           }
           bool blackPixel = mintensity < 10;
           if (!blackPixel)
@@ -569,8 +669,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Maybe there is no '" << sUniqueLocationCandidates << "' param" << endl;
-      return t;
+      stringstream ss;
+      ss << "Maybe there is no '" << sUniqueLocationCandidates << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     if (sortedLabels.size() > 0)
     {
@@ -586,8 +690,12 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           }
           catch(...)
           {
-            cerr << ERROR_HEADER << "There is no value of locations at " << "[" << i << "][" << j << "]" << endl;
-            return t;
+            stringstream ss;
+            ss << "There is no value of locations at " << "[" << i << "][" << j << "]";
+#ifdef DEBUG
+            cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+            throw logic_error(ss.str());
           }
         }
       }
@@ -605,16 +713,24 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
             }
             catch(...)
             {
-              cerr << ERROR_HEADER << "Maybe there is no value of sortedLabels at " << "[" << i << "]" << endl;
-              return t;
+              stringstream ss;
+              ss << "Maybe there is no value of sortedLabels at " << "[" << i << "]";
+#ifdef DEBUG
+              cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+              throw logic_error(ss.str());
             }
             locations.at<uint32_t>(x, y) += 1;
           }
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "Maybe there is no value of locations at " << "[" << x << "][" << y << "]" << endl;
-          return t;
+          stringstream ss;
+          ss << "Maybe there is no value of locations at " << "[" << x << "][" << y << "]";
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
       }
       locations.release();
@@ -646,8 +762,12 @@ float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partMo
   }
   catch(...)
   {
-    cerr << ERROR_HEADER << "Couldn't find partHistogramm " << "[" << (int)r/factor << "][" << (int)g/factor << "][" << (int)b/factor << "]" << endl;
-    return 0;
+    stringstream ss;
+    ss << "Couldn't find partHistogramm " << "[" << (int)r/factor << "][" << (int)g/factor << "][" << (int)b/factor << "]";
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
   }
   return isFG;
 }
@@ -677,8 +797,12 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "Couldn't find partHistogramm " << "[" << (int)r/factor << "][" << (int)g/factor << "][" << (int)b/factor << "]" << endl;
-          return;
+          stringstream ss;
+          ss << "Couldn't find partHistogramm " << "[" << (int)r/factor << "][" << (int)g/factor << "][" << (int)b/factor << "]";
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
       }
     }
@@ -694,8 +818,12 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Couldn't get partColors with index " << i << endl;
-      return;
+      stringstream ss;
+      ss << "Couldn't get partColors with index " << i;
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     try
     {
@@ -703,8 +831,12 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]" << endl;
-      return;
+      stringstream ss;
+      ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
   }
   for(uint8_t r = 0; r < partModel.nBins; r++)
@@ -720,8 +852,12 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
         }
         catch(...)
         {
-          cerr << ERROR_HEADER << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]" << endl;
-          return;
+          stringstream ss;
+          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
         }
       }
     }
@@ -862,8 +998,12 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
   map <int32_t, Mat> pixelDistributions;
   if (width != mwidth || height != mheight)
   {
-    cerr << ERROR_HEADER << "Mask size not equal image size. Calculations are incorrect" << endl;
-    return pixelDistributions;
+    stringstream ss;
+    ss << "Mask size not equal image size";
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
   }
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
@@ -889,8 +1029,12 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Maybe couldn't find partModel " << partID << endl;
-      return pixelDistributions;
+      stringstream ss;
+      ss << "Maybe couldn't find partModel " << partID;
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     pixelDistributions.insert(pair <int32_t, Mat> (partID, t));
     t.release();
@@ -919,8 +1063,12 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
     }
     catch(...)
     {
-      cerr << ERROR_HEADER << "Couldn't find distributions for body part " << iteratorBodyPart->getPartID() << endl;
-      return pixelLabels;
+      stringstream ss;
+      ss << "Couldn't find distributions for body part " << iteratorBodyPart->getPartID();
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
     }
     for (uint32_t x = 0; x < width; x++)
     {
@@ -941,8 +1089,12 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
             }
             catch(...)
             {
-              cerr << ERROR_HEADER << "Couldn't find pixel distributions for body part " << i->getPartID() << endl;
-              return pixelLabels;
+              stringstream ss;
+              ss << "Couldn't find pixel distributions for body part " << i->getPartID();
+#ifdef DEBUG
+              cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+              throw logic_error(ss.str());
             }
             if (temp.at<float>(x, y) > top)
               top = temp.at<float>(x, y);
@@ -1005,8 +1157,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   }
   catch(...)
   {
-    cerr << ERROR_HEADER << "Couldn't get partModel of bodyPart " << bodyPart.getPartID() <<endl;
-    return LimbLabel();
+    stringstream ss;
+    ss << "Couldn't get partModel of bodyPart " << bodyPart.getPartID();
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() <<endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
   }
   if (getAvgSampleSizeFg(model) == 0)
   {
@@ -1050,8 +1206,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
             }
             catch(...)
             {
-              cerr << ERROR_HEADER << "Couldn't get value of maskMat at " << "[" << j << "][" << i << "]" << endl;
-              return LimbLabel();
+              stringstream ss;
+              ss << "Couldn't get value of maskMat at " << "[" << j << "][" << i << "]";
+#ifdef DEBUG
+              cerr << ERROR_HEADER << ss.str() << endl;
+#endif // DEBUG
+              throw logic_error(ss.str());
             }
             bool blackPixel = mintensity < 10;
             if (!blackPixel)
@@ -1062,8 +1222,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               }
               catch(...)
               {
-                cerr << ERROR_HEADER << "Couldn't find pixel distribution for body part " << bodyPart.getPartID() << endl;
-                return LimbLabel();
+                stringstream ss;
+                ss << "Couldn't find pixel distribution for body part " << bodyPart.getPartID();
+#ifdef DEBUG
+                cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+                throw logic_error(ss.str());
               }
               pixDistNum++;
               try
@@ -1076,8 +1240,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               }
               catch(...)
               {
-                cerr << ERROR_HEADER << "Couldn't find pixel labels for body part " << bodyPart.getPartID() << endl;
-                return LimbLabel();
+                stringstream ss;
+                ss << "Couldn't find pixel labels for body part " << bodyPart.getPartID();
+#ifdef DEBUG
+                cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+                throw logic_error(ss.str());
               }
               Vec3b intensity = imgMat.at<Vec3b>(j, i);
               uint8_t blue = intensity.val[0];

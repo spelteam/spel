@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <exception>
 #include "frame.hpp"
 #include "limbLabel.hpp"
 #include "poseHelper.hpp"

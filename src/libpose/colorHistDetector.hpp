@@ -3,7 +3,6 @@
 
 #include <opencv2/opencv.hpp>
 #include "detector.hpp"
-#include "poseHelper.hpp"
 
 using namespace std;
 using namespace cv;
