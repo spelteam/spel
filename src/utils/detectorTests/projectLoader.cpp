@@ -454,6 +454,7 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       rectangle(image, p1, p2, color, lineWidth, CV_AA);
     }
   }
+  cerr << "Writing file " << outFileName << endl;
   return imwrite(outFileName, image);
 }
 
