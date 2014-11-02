@@ -57,7 +57,9 @@ int main (int argc, char **argv)
       vector <vector <LimbLabel> > labels;
       try
       {
-        projectLoader.Save(detector.detect(f, detectParams), argv[2], f->getID());
+        labels = detector.detect(f, detectParams);
+        projectLoader.Save(labels, argv[2], f->getID());
+        projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), 5);
       }
       catch (exception &e)
       {

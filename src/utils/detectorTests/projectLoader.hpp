@@ -21,6 +21,7 @@ class ProjectLoader
     void SetCurFolder(string _curFolder);
     bool Load(string fileName);
     bool Save(vector <vector <LimbLabel>> labels, string outFolder, int frameID);
+    bool Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, int lineWidth);
     vector <Frame*> getFrames(void);
   private:
     string projectTitle;

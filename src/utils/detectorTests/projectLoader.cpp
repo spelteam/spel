@@ -348,7 +348,15 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
     stringstream ss;
     ss << frameID;
     ss << "-";
-    ss << lls->begin()->getLimbID();
+    try
+    {
+      ss << lls->begin()->getLimbID();
+    }
+    catch(...)
+    {
+      cerr << "Can't get limb id" << endl;
+      continue;
+    }
     outFileName += ss.str();
     outFile.open(outFileName);
     cerr << "Writing file: " << ss.str() << endl;
@@ -382,5 +390,70 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
     outFile.close();
   }
   return true;
+}
+
+bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, int lineWidth)
+{
+  string outFileName = curFolder + outFolder;
+  if (outFileName[outFileName.size()] != '/')
+    outFileName += "/";
+  stringstream ss;
+  ss << frameID;
+  ss << ".png";
+  outFileName += ss.str();
+  Mat image;
+  try
+  {
+    image = frame->getImage();
+  }
+  catch(...)
+  {
+    cerr << "Can't get image from frame" << endl;
+    return false;
+  }
+
+  vector <vector <LimbLabel> >::iterator lls;
+  vector <LimbLabel>::iterator ls; 
+  for (lls = labels.begin(); lls != labels.end(); ++lls)
+  {
+    if (lls->size() == 0)
+    {
+      continue;
+    }
+    for (ls = lls->begin(); ls != lls->end(); ++ls)
+    {
+      Point2f p1, p2;
+      vector <Point2f> polygon;
+      try
+      {
+       polygon = ls->getPolygon();
+      }
+      catch(...)
+      {
+        cerr << "Can't get polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p1 = polygon.at(0);
+      }
+      catch (...)
+      {
+        cerr << "Can't get first point from polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p2 = polygon.at(2);
+      }
+      catch(...)
+      {
+        cerr << "Can't get second point from polygon" << endl;
+        continue;
+      }
+      rectangle(image, p1, p2, color, lineWidth, CV_AA);
+    }
+  }
+  return imwrite(outFileName, image);
 }
 
