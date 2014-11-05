@@ -95,6 +95,9 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     {
       continue;
     }
+#ifdef DEBUG
+    cerr << "Training on frame " << (*frameNum)->getID() << endl;
+#endif  // DEBUG
     map <int32_t, vector <Point3i>> partPixelColours;  // vector of vectors, by limb indeces
     map <int32_t, vector <Point3i>> bgPixelColours;
     map <int32_t, int> blankPixels;  // pixels outside the mask
@@ -545,14 +548,15 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         nj1 = i->getImageLocation();
       }
     }
-    float interpolateStep = (float)step / (float)stepCount;
+    float interpolateStep = (float)step / (float)stepCount;  // Interpolate2Ddisplacement
     Point2f j0 = pj0 * (1 - interpolateStep) + nj0 * interpolateStep;
     Point2f j1 = pj1 * (1 - interpolateStep) + nj1 * interpolateStep;
     float boneLength = (j0 == j1) ? 1.0 : sqrt(PoseHelper::distSquared(j0, j1));
     float boxWidth = 0;
     try
     {
-      boxWidth = skeleton.getScale() * boneLength * params.at(sScaleParam);
+      //TODO (Vitaliy Koshura): Need real implementation.
+      boxWidth = boneLength/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
     }
     catch (...)
     {
@@ -1130,7 +1134,8 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float x = boxCenter.x;
   float y = boxCenter.y;
   float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
-  float boxWidth = frame->getSkeleton().getScale() / (boneLength * 1.0);
+  //TODO (Vitaliy Koshura): Need real implementation here
+  float boxWidth = /*frame->getSkeleton().getScale() / */(boneLength * 1.0);
   float rot = PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
   vector <Point3i> partPixelColours;
   Point2f c1, c2, c3, c4, polyCenter;
@@ -1271,7 +1276,17 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     PartModel model(nBins);
     setPartHistogramm(model, partPixelColours);
-    Score sc(1.0 - (supportScore + inMaskSupportScore), "");
+    float score = 1.0 - (supportScore + inMaskSupportScore);
+    /*if (score < 0)
+    {
+      stringstream ss;
+      ss << "Score can't be less thah zero" << endl;
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }*/
+    Score sc(score, "");
     s.push_back(sc);
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
   }

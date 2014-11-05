@@ -374,7 +374,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
         }
         else
         {
-          outFile << PoseHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2]) << " ";
+          outFile << sqrt(PoseHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2])) << " ";
         }
         outFile << ls->getSumScore() << " ";
         outFile << "0" << " ";
