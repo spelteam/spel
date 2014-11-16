@@ -165,5 +165,33 @@ TEST(poseHelperTest, rotatepointTest)
   EXPECT_FLOAT_EQ(c8p3.y, t8p3.y);
   EXPECT_FLOAT_EQ(c8p4.x, t8p4.x);
   EXPECT_FLOAT_EQ(c8p4.y, t8p4.y);
+
+  Point2f p5 = Point2f(0.0, 2.5871);
+  Point2f p6 = Point2f(18.1097, 2.5871);
+  Point2f p7 = Point2f(18.1097, -2.5871);
+  Point2f p8 = Point2f(0.0, -2.5871);
+
+  Point2f center90 = Point2f(9.05485, 0.0);
+  double angle59 = -59.7705;
+
+  Point2f c1p5 = Point2f(6.7313461216324, 9.126046496688);
+  Point2f c1p6 = Point2f(15.848943894977, -6.5210185614465);
+  Point2f c1p7 = Point2f(11.378353878368, -9.126046496688);
+  Point2f c1p8 = Point2f(2.2607561050225, 6.5210185614465);
+
+  Point2f t1p5 = PoseHelper::rotatePoint2D(p5, center90, angle59);
+  Point2f t1p6 = PoseHelper::rotatePoint2D(p6, center90, angle59);
+  Point2f t1p7 = PoseHelper::rotatePoint2D(p7, center90, angle59);
+  Point2f t1p8 = PoseHelper::rotatePoint2D(p8, center90, angle59);
+
+  EXPECT_FLOAT_EQ(c1p5.x, t1p5.x);
+  EXPECT_FLOAT_EQ(c1p5.y, t1p5.y);
+  EXPECT_FLOAT_EQ(c1p6.x, t1p6.x);
+  EXPECT_FLOAT_EQ(c1p6.y, t1p6.y);
+  EXPECT_FLOAT_EQ(c1p7.x, t1p7.x);
+  EXPECT_FLOAT_EQ(c1p7.y, t1p7.y);
+  EXPECT_FLOAT_EQ(c1p8.x, t1p8.x);
+  EXPECT_FLOAT_EQ(c1p8.y, t1p8.y);
+
 }
 

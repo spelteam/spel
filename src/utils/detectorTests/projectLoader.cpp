@@ -427,7 +427,7 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
     bool bDrawOptimal = true;
     for (ls = lls->begin(); ls != lls->end(); ++ls)
     {
-      Point2f p1, p2;
+      Point2f p1, p2, p3, p4;
       vector <Point2f> polygon;
       try
       {
@@ -449,19 +449,43 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       }
       try
       {
-        p2 = polygon.at(2);
+        p2 = polygon.at(1);
       }
       catch(...)
       {
         cerr << "Can't get second point from polygon" << endl;
         continue;
       }
-      rectangle(image, p1, p2, color, lineWidth, CV_AA);
-      if (bDrawOptimal)
+      try
       {
-        rectangle(image, p1, p2, optimalColor, lineWidth, CV_AA);
-        bDrawOptimal = false;
+        p3 = polygon.at(2);
       }
+      catch(...)
+      {
+        cerr << "Can't get third point from polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p4 = polygon.at(3);
+      }
+      catch(...)
+      {
+        cerr << "Can't get fourth point from polygon" << endl;
+        continue;
+      }
+      line(image, p1, p2, color, lineWidth, CV_AA); 
+      line(image, p2, p3, color, lineWidth, CV_AA); 
+      line(image, p3, p4, color, lineWidth, CV_AA); 
+      line(image, p4, p1, color, lineWidth, CV_AA); 
+      /*if (bDrawOptimal)
+      {
+        line(image, p1, p2, optimalColor, lineWidth, CV_AA); 
+        line(image, p2, p3, optimalColor, lineWidth, CV_AA); 
+        line(image, p3, p4, optimalColor, lineWidth, CV_AA); 
+        line(image, p4, p1, optimalColor, lineWidth, CV_AA); 
+        bDrawOptimal = false;
+      }*/
     }
   }
   for (lls = labels.begin(); lls != labels.end(); ++lls)
@@ -472,7 +496,7 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
     }
     for (ls = lls->begin(); ls != lls->end(); ++ls)
     {
-      Point2f p1, p2;
+      Point2f p1, p2, p3, p4;
       vector <Point2f> polygon;
       try
       {
@@ -494,14 +518,35 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       }
       try
       {
-        p2 = polygon.at(2);
+        p2 = polygon.at(1);
       }
       catch(...)
       {
         cerr << "Can't get second point from polygon" << endl;
         continue;
       }
-      rectangle(image, p1, p2, optimalColor, lineWidth, CV_AA);
+      try
+      {
+        p3 = polygon.at(2);
+      }
+      catch (...)
+      {
+        cerr << "Can't get third point from polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p4 = polygon.at(3);
+      }
+      catch(...)
+      {
+        cerr << "Can't get fourth point from polygon" << endl;
+        continue;
+      }
+      line(image, p1, p2, optimalColor, lineWidth, CV_AA); 
+      line(image, p2, p3, optimalColor, lineWidth, CV_AA); 
+      line(image, p3, p4, optimalColor, lineWidth, CV_AA); 
+      line(image, p4, p1, optimalColor, lineWidth, CV_AA); 
       break;
     }
   }
