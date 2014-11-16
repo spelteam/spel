@@ -102,8 +102,8 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     map <int32_t, vector <Point3i>> bgPixelColours;
     map <int32_t, int> blankPixels;  // pixels outside the mask
     skeleton = (*frameNum)->getSkeleton();
-    map <int32_t, POSERECT <Point2f>> polygons;  // polygons for this frame
-    map <int32_t, bool> polyDepth;
+    multimap <int32_t, POSERECT <Point2f>> polygons;  // polygons for this frame
+    multimap <int32_t, bool> polyDepth;
     partTree = skeleton.getPartTree();
     tree <BodyJoint> jointTree;
     tree <BodyJoint>::iterator iteratorBodyJoint;
@@ -140,7 +140,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       float boneWidth = 0;
       try
       {
-        boneWidth = skeleton.getScale() * boneLength * params.at(sScaleParam);
+        boneWidth = boneLength / iteratorBodyPart->getLWRatio()/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
       }
       catch(...)
       {
@@ -214,7 +214,16 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           bool bContainsPoint = false;
           try
           {
-            bContainsPoint = polygons.at(partNumber).containsPoint(Point2f(i, j)) > 0;
+            vector <POSERECT <Point2f>> partPolygons;
+            multimap <int32_t, POSERECT <Point2f>>::iterator lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
+            transform(lower, upper, back_inserter(partPolygons), [] (std::pair <int32_t, POSERECT<Point2f>> const &pair) { return pair.second; });
+            for (vector <POSERECT <Point2f>>::iterator iteratorPartPolygons = partPolygons.begin(); iteratorPartPolygons != partPolygons.end(); ++iteratorPartPolygons)
+            {
+              if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f(i, j)) > 0) == true)
+              {
+                break;
+              }
+            }
           }
           catch(...)
           {
@@ -227,15 +236,26 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           }
           try
           {
+            bool tempDepthSign;
+            vector <bool> partDepthSigns;
+            multimap <int32_t, bool>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);
+            transform(lower, upper, back_inserter(partDepthSigns), [] (std::pair <int32_t, bool> const &pair) { return pair.second; });
+            for (vector <bool>::iterator iteratorPartDepthSigns = partDepthSigns.begin(); iteratorPartDepthSigns != partDepthSigns.end(); ++iteratorPartDepthSigns)
+            {
+              if ((tempDepthSign = *iteratorPartDepthSigns) == true)
+              {
+                break;
+              }
+            }
             if (bContainsPoint && partHit == -1)
             {
               partHit = partNumber;
-              depthSign = polyDepth.at(partNumber);
+              depthSign = tempDepthSign;
             }
-            else if (bContainsPoint && depthSign == false && polyDepth.at(partNumber) == true)
+            else if (bContainsPoint && depthSign == false && tempDepthSign == true)
             {
               partHit = partNumber;
-              depthSign = polyDepth.at(partNumber);
+              depthSign = tempDepthSign;
             }
           }
           catch(...)
@@ -556,7 +576,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     try
     {
       //TODO (Vitaliy Koshura): Need real implementation.
-      boxWidth = boneLength/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
+      boxWidth = boneLength / iteratorBodyPart->getLWRatio()/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
     }
     catch (...)
     {
@@ -1135,7 +1155,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float y = boxCenter.y;
   float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
   //TODO (Vitaliy Koshura): Need real implementation here
-  float boxWidth = /*frame->getSkeleton().getScale() / */(boneLength * 1.0);
+  float boxWidth = /*frame->getSkeleton().getScale() / */(boneLength / bodyPart.getLWRatio());
   float rot = PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
   vector <Point3i> partPixelColours;
   Point2f c1, c2, c3, c4, polyCenter;
@@ -1143,11 +1163,18 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   c2 = Point2f(boneLength, 0.5 * boxWidth);
   c3 = Point2f(boneLength, -0.5 * boxWidth);
   c4 = Point2f(0, -0.5 * boxWidth);
+  cerr << "=== BEGIN ===" << endl;
+  cerr << c1.x << ":" << c1.y << "\t" << c2.x << ":" << c2.y << "\t" << c3.x << ":" << c3.y << "\t" << c4.x << ":" << c4.y << endl;
   polyCenter = Point2f(boneLength * 0.5, 0);
+  cerr << x << ":" << y << endl;
+  cerr << polyCenter.x << ":" << polyCenter.y << endl;
+  cerr << rot << endl;
   c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rot) + boxCenter - polyCenter;
   c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rot) + boxCenter - polyCenter;
   c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rot) + boxCenter - polyCenter;
   c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rot) + boxCenter - polyCenter;
+  cerr << c1.x << ":" << c1.y << "\t" << c2.x << ":" << c2.y << "\t" << c3.x << ":" << c3.y << "\t" << c4.x << ":" << c4.y << endl;
+  cerr << "=== END ===" << endl;
   POSERECT <Point2f> rect(c1, c2, c3, c4);
   uint32_t totalPixels = 0;
   uint32_t pixelsInMask = 0;

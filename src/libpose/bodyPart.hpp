@@ -29,6 +29,8 @@ class BodyPart
     void setSpaceLength(float _spaceLength);
     POSERECT <Point2f> getPartPolygon(void);
     void setPartPolygon(POSERECT <Point2f> _partPolygon);
+    float getLWRatio(void);
+    void setLWRatio(float _lwRatio);
   private:
     int partID;
     string partName;
@@ -37,6 +39,7 @@ class BodyPart
     bool isOccluded;
     float spaceLength;
     POSERECT <Point2f> partPolygon;
+    float lwRatio;
 };
 
 #endif  // _BODYPART_HPP_

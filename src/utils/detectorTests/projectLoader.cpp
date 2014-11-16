@@ -39,6 +39,7 @@ bool ProjectLoader::Load(string fileName)
   const string bodyJointDepthSignParam = "depthSign";
   const string bodyPartExpectedDistanceParam = "expectedDistance";
   const string bodyPartIsOccludedParam = "isOccluded";
+  const string bodyPartLWRatioParam = "lwRatio";
   const string frameIdParam = "id";
   const string frameImgPathParam = "imgPath";
   const string frameMaskPathParam = "maskPath";
@@ -179,11 +180,13 @@ bool ProjectLoader::Load(string fileName)
     string name;
     int id;
     float expectedDistance;
+    float lwRatio;
     id = e->IntAttribute(bodyPartIdParam.c_str());
     name = e->Attribute(bodyPartNameParam.c_str());
     parentJointId = e->IntAttribute(bodyPartParentJointIdParam.c_str());
     childJointId = e->IntAttribute(bodyPartChildJointIdParam.c_str());
     expectedDistance = e->FloatAttribute(bodyPartExpectedDistanceParam.c_str());
+    lwRatio = e->FloatAttribute(bodyPartLWRatioParam.c_str());
     BodyJoint *parentJoint = 0, *childJoint = 0;
     for (topBodyJoints = trBodyJoints.begin(); topBodyJoints != trBodyJoints.end(); ++topBodyJoints)
     {
@@ -207,6 +210,7 @@ bool ProjectLoader::Load(string fileName)
     part.setParentJoint(parentJoint->getLimbID());
     part.setChildJoint(childJoint->getLimbID());
     part.setSpaceLength(expectedDistance);
+    part.setLWRatio(lwRatio);
     trBodyParts.insert(topBodyParts, part);
     bodyParts = bodyParts->NextSiblingElement();
   }
@@ -392,7 +396,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
   return true;
 }
 
-bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, int lineWidth)
+bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
 {
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
@@ -414,6 +418,52 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
 
   vector <vector <LimbLabel> >::iterator lls;
   vector <LimbLabel>::iterator ls; 
+  for (lls = labels.begin(); lls != labels.end(); ++lls)
+  {
+    if (lls->size() == 0)
+    {
+      continue;
+    }
+    bool bDrawOptimal = true;
+    for (ls = lls->begin(); ls != lls->end(); ++ls)
+    {
+      Point2f p1, p2;
+      vector <Point2f> polygon;
+      try
+      {
+       polygon = ls->getPolygon();
+      }
+      catch(...)
+      {
+        cerr << "Can't get polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p1 = polygon.at(0);
+      }
+      catch (...)
+      {
+        cerr << "Can't get first point from polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p2 = polygon.at(2);
+      }
+      catch(...)
+      {
+        cerr << "Can't get second point from polygon" << endl;
+        continue;
+      }
+      rectangle(image, p1, p2, color, lineWidth, CV_AA);
+      if (bDrawOptimal)
+      {
+        rectangle(image, p1, p2, optimalColor, lineWidth, CV_AA);
+        bDrawOptimal = false;
+      }
+    }
+  }
   for (lls = labels.begin(); lls != labels.end(); ++lls)
   {
     if (lls->size() == 0)
@@ -451,9 +501,11 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
         cerr << "Can't get second point from polygon" << endl;
         continue;
       }
-      rectangle(image, p1, p2, color, lineWidth, CV_AA);
+      rectangle(image, p1, p2, optimalColor, lineWidth, CV_AA);
+      break;
     }
   }
+  
   cerr << "Writing file " << outFileName << endl;
   return imwrite(outFileName, image);
 }

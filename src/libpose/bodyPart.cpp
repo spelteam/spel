@@ -7,6 +7,7 @@ BodyPart::BodyPart(void)
   setChildJoint(0);
   setIsOccluded(false);
   setSpaceLength(0);
+  setLWRatio(0);
 }
 
 BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, float spaceLen)
@@ -97,5 +98,15 @@ POSERECT <Point2f> BodyPart::getPartPolygon(void)
 void BodyPart::setPartPolygon(POSERECT <Point2f> _partPolygon)
 {
   partPolygon = _partPolygon;
+}
+
+float BodyPart::getLWRatio(void)
+{
+  return lwRatio;
+}
+
+void BodyPart::setLWRatio(float _lwRatio)
+{
+  lwRatio = _lwRatio;
 }
 

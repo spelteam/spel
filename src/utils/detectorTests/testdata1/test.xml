@@ -6,9 +6,9 @@
     <BodyJoint id="" name=""/>
   </BodyJoints>
   <BodyParts>
-    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance=""/>
-    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance=""/>
-    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance=""/>
+    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance="" lwRatio=""/>
+    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance="" lwRatio=""/>
+    <BodyPart id="" name="" parentJointId="" childJointId="" expectedDistance="" lwRatio=""/>
   </BodyParts>
   <Frames>
     <Frame id="" imgPath="" maskPath="" camPath="" isKeyframe="" gpX="" gpY="">
