@@ -454,6 +454,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
+
   tree <BodyPart>::iterator iteratorBodyPart;
   map <int32_t, Mat> pixelDistributions = buildPixelDistributions(frame);
   map <int32_t, Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions);
@@ -685,6 +686,18 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           }
         }
       }
+    }
+    if (sortedLabels.size() == 0)
+    {
+      Point2f p0 = Point2f(0, 0);
+      Point2f p1 = Point2f(1.0, 0);
+      p1 *= boneLength;
+      p1 = PoseHelper::rotatePoint2D(p1, p0, theta - minTheta);
+      Point2f mid = 0.5 * p1;
+      p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
+      p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
+      LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1);
+      sortedLabels.push_back(generatedLabel);
     }
     float uniqueLocationCandidates = 0;
     try
@@ -1185,7 +1198,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     stringstream ss;
     ss << "Couldn't get partModel of bodyPart " << bodyPart.getPartID();
 #ifdef DEBUG
-    cerr << ERROR_HEADER << ss.str() <<endl;
+    cerr << ERROR_HEADER << ss.str() << endl;
 #endif  // DEBUG
     throw logic_error(ss.str());
   }
@@ -1193,7 +1206,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   {
     maskMat.release();
     imgMat.release();
-    return LimbLabel();
+    stringstream ss;
+    ss << "getAvgSampleSizeFg(model) == 0";
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif
+    throw logic_error(ss.str());
   }
   for (int32_t i = x - boneLength * 0.5; i < x + boneLength * 0.5; i++)
   {
@@ -1310,6 +1328,9 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     s.push_back(sc);
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
   }
-  return LimbLabel();
+  cerr << "Dirty label!" << endl;
+  Score sc(1.0, "");
+  s.push_back(sc);
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }
 

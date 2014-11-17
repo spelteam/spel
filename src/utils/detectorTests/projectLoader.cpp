@@ -424,7 +424,6 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
     {
       continue;
     }
-    bool bDrawOptimal = true;
     for (ls = lls->begin(); ls != lls->end(); ++ls)
     {
       Point2f p1, p2, p3, p4;
