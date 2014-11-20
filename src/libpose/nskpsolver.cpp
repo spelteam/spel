@@ -93,7 +93,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 				Skeleton skeleton = frames[*mstIter]->getSkeleton();
 				tree<BodyPart> partTree = skeleton.getPartTree();
 				tree<BodyPart>::iterator partIter, parentPartIter;
-        Skeleton skeleton = frames[*mstIter]->getSkeleton();
+
 				//label score cost
 				for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for each of the detected parts
 				{
@@ -249,7 +249,7 @@ float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior
 {
 	Point2f p0,p1, pp0, pp1;
 	label.getEndpoints(p0,p1);
-	pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();1	
+	pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();	
 	pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
 
 
