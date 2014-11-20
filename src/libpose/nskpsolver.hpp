@@ -55,7 +55,7 @@ class NSKPSolver: Solver
     int findFrameIndexById(int id, vector<Frame*> frames);
     float computeScoreCost(const LimbLabel& label, map<string, float> params);
     float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params);
-    float computePriorCost(const LimbLabel& label, const BodyPart& prior, map<string, float> params);
+    float computePriorCost(const LimbLabel& label, const BodyPart& prior, Skeleton& skeleton, map<string, float> params);
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 
