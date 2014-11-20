@@ -63,7 +63,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 	//build frame MSTs by ID's as in ISM
 	vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);
 	//now add variables to the space, with number of detections
-	for(int frameId=0; frameId<frames.size(); ++frameId)
+	for(uint frameId=0; frameId<frames.size(); ++frameId)
 	{
 		if(frames[frameId]->getFrametype()!=0x02) //as long as it's not an interpolated frame, try to propagate from it
 		{
@@ -82,7 +82,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 				vector<size_t> numbersOfLabels; //numbers of labels per part
 
-				for(int i=0; i<labels.size(); ++i)
+				for(uint i=0; i<labels.size(); ++i)
 				{
 					numbersOfLabels.push_back(labels[i].size());
 				} //numbers of labels now contains the numbers
@@ -90,7 +90,8 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 				Space space(numbersOfLabels.begin(), numbersOfLabels.end());
 				Model gm(space);
 
-				tree<BodyPart> partTree = frames[*mstIter]->getSkeleton().getPartTree();
+				Skeleton skeleton = frames[*mstIter]->getSkeleton();
+				tree<BodyPart> partTree = skeleton.getPartTree();
 				tree<BodyPart>::iterator partIter, parentPartIter;
 				//label score cost
 				for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for each of the detected parts
@@ -101,7 +102,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 					size_t scoreCostShape[]={numbersOfLabels[partIter->getPartID()]}; //number of labels
 					ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-					for(int i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+					for(uint i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
 						scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
 					}
@@ -111,9 +112,9 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 					ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-					for(int i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+					for(uint i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
-						priorCostFunc(i) = computePriorCost(labels[partIter->getPartID()].at(i), *partIter, params);
+						priorCostFunc(i) = computePriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params);
 					}
 
 					Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
@@ -127,9 +128,9 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 						size_t jointCostShape[]={numbersOfLabels[partIter->getPartID()], numbersOfLabels[parentPartIter->getPartID()]}; //number of labels
 						ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
 
-						for(int i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+						for(uint i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 						{
-							for(int j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
+							for(uint j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
 							{
 								//for every child/parent pair, compute score
 								jointCostFunc(i, j) = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
@@ -158,7 +159,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 				bp.arg(labeling);
 
 				vector<LimbLabel> solutionLabels;
-				for(int i=0; i<labels.size();++i)
+				for(uint i=0; i<labels.size();++i)
 				{
 					solutionLabels.push_back(labels[i][labeling[i]]); //pupulate solution vector
 				}
@@ -189,7 +190,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 	vector<Frame*> returnFrames;
 	//look at lockframes and frames, and put together the return frames
-	for(int i=0; i<frames.size(); ++i)
+	for(uint i=0; i<frames.size(); ++i)
 	{
 		int lockframeIndex = findFrameIndexById(frames[i]->getID(), frames);
 		if(lockframeIndex>=0) //if a new lockframe exists at this id
@@ -209,7 +210,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 //if no matching id in vector, return -1
 int NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 {
-	for(int i=0; i<frames.size(); ++i)
+	for(uint i=0; i<frames.size(); ++i)
 	{
 		if(frames[i]->getID()==id)
 			return i;
@@ -243,12 +244,12 @@ float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& pare
 }
 
 //compute distance to the body part prior
-float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, map<string, float> params)
+float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, Skeleton& skeleton, map<string, float> params)
 {
 	Point2f p0,p1, pp0, pp1;
 	label.getEndpoints(p0,p1);
-	pp0 = prior.getParentJoint()->getImageLocation();
-	pp0 = prior.getChildJoint()->getImageLocation();
+	pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
+	pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
 
 	//return the sum of squared distances between the corresponding joints, prior to label
 	return pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2);
@@ -259,13 +260,14 @@ float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior
 //build an MST for every frame and return the vector
 vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params) //int treeSize, float threshold)
 {
+	//use emplace instead of setting some defaults?
 	int treeSize = params.at("treeSize");
 	float simThresh = params.at("simThresh");
     vector<MinSpanningTree> frameMST;
 
     vector<vector<int> > frameMSTvec;
 
-    for(int i=0; i<ism.size(); ++i)
+    for(uint i=0; i<ism.size(); ++i)
     {
     	//for each frame, build an MST
     	MinSpanningTree frameTree(ism, i, treeSize, simThresh);
@@ -281,7 +283,7 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params)
 {
 	vector<vector<int> > orderedList;
-	for(int i=0; i<mstVec.size(); ++i)
+	for(uint i=0; i<mstVec.size(); ++i)
 	{
 	    tree<int>::iterator iter;
         tree<int> MST = mstVec[i].getMST();	
@@ -302,7 +304,7 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
         //find the largest frame MST:
         int maxSize=0;
         int idx=-1;
-        for(int i=0; i<orderedList.size(); ++i)
+        for(uint i=0; i<orderedList.size(); ++i)
         {
             if(orderedList[i].size()> maxSize)
             {
@@ -323,10 +325,10 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
         orderedList.erase(orderedList.begin() + idx);
 
         //remove all values in that vector from all others
-        for(int i=0; i<orderedList.size(); ++i)
+        for(uint i=0; i<orderedList.size(); ++i)
         {
             //for each element in erasedVector
-            for(int j=0; j<erasedVector.size(); ++j)
+            for(uint j=0; j<erasedVector.size(); ++j)
             {
                 orderedList[i].erase(std::remove(orderedList[i].begin(), orderedList[i].end(), erasedVector[j]), orderedList[i].end());
             }
@@ -352,9 +354,9 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     // //we are at some frame with the image already loaded (currentFrameNumber)    
 
     // //count the total number of mask pixels
-    // for(int x=0; x<maskMat.rows(); ++x)
+    // for(uint x=0; x<maskMat.rows(); ++x)
     // {
-    //     for(int y=0; y<maskMat.cols(); ++y)
+    //     for(uint y=0; y<maskMat.cols(); ++y)
     //     {
     //     	//@FIXME need check to see whether maskMat is really of type uchar
     //         int intensity = maskMat.at<uchar>(y, x);
@@ -369,16 +371,16 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     // }
 
     // vector<float> limbScores;
-    // for(int numLabel=0; numLabel<labels.size(); ++numLabel)
+    // for(uint numLabel=0; numLabel<labels.size(); ++numLabel)
     // {
     //     float pixHit=0;
     //     float pixTotal=0;
 
     //     LimbLabel label = labels[numLabel];
 
-    //     for(int x=0; x<maskMat.rows(); ++x)
+    //     for(uint x=0; x<maskMat.rows(); ++x)
     //     {
-    //         for(int y=0; y<maskMat.cols(); ++y)
+    //         for(uint y=0; y<maskMat.cols(); ++y)
     //         {
     //         	//@NEEDS FIXING
     //             if(label.containsPoint(Point2f(x,y))) //polygon from label) //only take in pixels that are in the mask
@@ -402,9 +404,9 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     // }
 
 
-    // for(int x=0; x<mask.width(); ++x)
+    // for(uint x=0; x<mask.width(); ++x)
     // {
-    //     for(int y=0; y<mask.height(); ++y)
+    //     for(uint y=0; y<mask.height(); ++y)
     //     {
 
     //         int intensity = maskMat.at<uchar>(y, x);
@@ -416,7 +418,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     //         {
     //             numPixels++; //count the total numbe rf pixels
     //             bool hit=false;
-    //             for(int i=0; i<labels.size(); ++i)
+    //             for(uint i=0; i<labels.size(); ++i)
     //             {
 
     //                 LimbLabel label = labels[i];
@@ -434,7 +436,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     //         else
     //         {
     //             bool hit=false;
-    //             for(int i=0; i<labels.size(); ++i)
+    //             for(uint i=0; i<labels.size(); ++i)
     //             {
     //                 LimbLabel label = labels[i];
 
@@ -455,7 +457,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
     // float avgSuppScore=0;
 
-    // for(int i=0; i<labels.size();++i)
+    // for(uint i=0; i<labels.size();++i)
     // {
     //     if(i==0 || i>5) //count only the real labels
     //         avgSuppScore+=labels[i].supportScore;
@@ -465,7 +467,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
     // //show the worst half of labels
     // //    cerr << "Poorly localised labels: ";
-    // //    for(int i=0; i<labels.size(); ++i)
+    // //    for(uint i=0; i<labels.size(); ++i)
     // //    {
     // //        if((i==0 || i>5) && labels[i].supportScore>avgSuppScore) //high is bad
     // //            cerr << limbName(i).toStdString() << " (" <<labels[i].supportScore<<") ";
@@ -473,7 +475,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     // //    cerr << endl;
 
     // // cerr << "Poorly localised labels (by hit/total pixels ratio): ";
-    // // for(int i=0; i<labels.size(); ++i)
+    // // for(uint i=0; i<labels.size(); ++i)
     // // {
     // //     if((i==0 || i>5) && limbScores[i]<0.4) //high is bad
     // //         cerr << limbName(i).toStdString() << " (" <<limbScores[i]<<") ";
