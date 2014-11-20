@@ -15,9 +15,13 @@ FIND_PACKAGE ( OpenCV REQUIRED )
 INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
 
-#use OpenGM
+# use OpenGM
 FIND_PACKAGE ( OpenGM REQUIRED )
 INCLUDE_DIRECTORIES ( ${OpenGM_INCLUDE_DIR} )
+
+# use Eigen3
+FIND_PACKAGE ( Eigen3 REQUIRED )
+INCLUDE_DIRECTORIES (${Eigen3_INCLUDE_DIR} )
 
 # Command line options, their defaults and checks
 
