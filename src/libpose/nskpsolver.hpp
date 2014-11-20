@@ -57,6 +57,7 @@ class NSKPSolver: Solver
     float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params);
     float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params);
 
+
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 
     //INHERITED
