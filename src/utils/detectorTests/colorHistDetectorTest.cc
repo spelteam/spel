@@ -52,7 +52,9 @@ int main (int argc, char **argv)
   for (i = vFrames.begin(); i != vFrames.end(); ++i)
   {
     Frame *f = *i;
+#ifndef DEBUG
     if (f->getFrametype() == INTERPOLATIONFRAME)
+#endif  // DEBUG
     {
       vector <vector <LimbLabel> > labels;
       try
