@@ -214,6 +214,8 @@ bool ProjectLoader::Load(string fileName)
     trBodyParts.insert(topBodyParts, part);
     bodyParts = bodyParts->NextSiblingElement();
   }
+  int32_t firstFrameCols = -1;
+  int32_t firstFrameRows = -1;
   while (true)
   {
     if (frames == 0) break;
@@ -245,6 +247,7 @@ bool ProjectLoader::Load(string fileName)
       cerr << "Could not find file " << imgFolderPath + imgPath << endl;
       return false;
     }
+    ResizeImage(image, firstFrameCols, firstFrameRows);
     f->setImage(image);
     Mat mask = imread(curFolder + maskFolderPath + maskPath, CV_LOAD_IMAGE_GRAYSCALE);
     if (!mask.data)
@@ -252,6 +255,7 @@ bool ProjectLoader::Load(string fileName)
       cerr << "Could not find file " << maskFolderPath + maskPath << endl;
       return false;
     }
+    ResizeImage(mask, firstFrameCols, firstFrameRows);
     f->setMask(mask);
     f->setGroundPoint(gp);
     PoseHelper::copyTree(trBodyJointsCopy, trBodyJoints);
@@ -477,14 +481,6 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       line(image, p2, p3, color, lineWidth, CV_AA); 
       line(image, p3, p4, color, lineWidth, CV_AA); 
       line(image, p4, p1, color, lineWidth, CV_AA); 
-      /*if (bDrawOptimal)
-      {
-        line(image, p1, p2, optimalColor, lineWidth, CV_AA); 
-        line(image, p2, p3, optimalColor, lineWidth, CV_AA); 
-        line(image, p3, p4, optimalColor, lineWidth, CV_AA); 
-        line(image, p4, p1, optimalColor, lineWidth, CV_AA); 
-        bDrawOptimal = false;
-      }*/
     }
   }
   for (lls = labels.begin(); lls != labels.end(); ++lls)
@@ -552,5 +548,18 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
   
   cerr << "Writing file " << outFileName << endl;
   return imwrite(outFileName, image);
+}
+
+void ProjectLoader::ResizeImage(Mat &image, int32_t &cols, int32_t &rows)
+{
+  if (cols <= 0 || rows <= 0)
+  {
+    cols = image.cols;
+    rows = image.rows;
+  }
+  if (cols != image.cols || rows != image.rows)
+  {
+    resize(image, image, cvSize(cols, rows));
+  }
 }
 
