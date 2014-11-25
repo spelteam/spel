@@ -670,7 +670,6 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           bool blackPixel = mintensity < 10;
           if (!blackPixel)
           {
-            vector <LimbLabel> locationLabels;
             for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
             {
               Point2f p0 = Point2f(0, 0);
@@ -689,15 +688,18 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     if (sortedLabels.size() == 0)
     {
-      Point2f p0 = Point2f(0, 0);
-      Point2f p1 = Point2f(1.0, 0);
-      p1 *= boneLength;
-      p1 = PoseHelper::rotatePoint2D(p1, p0, theta - minTheta);
-      Point2f mid = 0.5 * p1;
-      p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
-      p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-      LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1);
-      sortedLabels.push_back(generatedLabel);
+      for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+      {
+        Point2f p0 = Point2f(0, 0);
+        Point2f p1 = Point2f(1.0, 0);
+        p1 *= boneLength;
+        p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
+        Point2f mid = 0.5 * p1;
+        p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
+        p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1);
+        sortedLabels.push_back(generatedLabel);
+      }
     }
     float uniqueLocationCandidates = 0;
     try
