@@ -284,13 +284,13 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 //function should return vector with suggested keyframe numbers
 vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params)
 {
-	vector<vector<int> > orderedList;
+	vector<vector<uint> > orderedList;
 	for(uint i=0; i<mstVec.size(); ++i)
 	{
 	    tree<int>::iterator iter;
         tree<int> MST = mstVec[i].getMST();	
         
-        vector<int> frames;
+        vector<uint> frames;
 
         for(iter=MST.begin(); iter!=MST.end(); ++iter)
         {
@@ -304,8 +304,8 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
     while(orderedList.size()!=0)
     {
         //find the largest frame MST:
-        int maxSize=0;
-        int idx=-1;
+        uint maxSize=0;
+        uint idx=-1;
         for(uint i=0; i<orderedList.size(); ++i)
         {
             if(orderedList[i].size()> maxSize)
@@ -320,7 +320,7 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
 
 
         //store it as the best candidate
-        vector<int> erasedVector = orderedList[idx];
+        vector<uint> erasedVector = orderedList[idx];
 
         frameOrder.push_back(Point2i(erasedVector[0], maxSize));
 

@@ -25,19 +25,19 @@ using namespace opengm;
 class TLPSSolver: Solver
 {
 
-  struct AxisAngle
-  {
-    Point3f axis=Point3f();
-    float angle=-1;
-  };
+  // struct AxisAngle
+  // {
+  //   Point3f axis=Point3f();
+  //   float angle=-1;
+  // };
 
-  struct Quaternion
-  {
-    float w;
-    float x;
-    float y;
-    float z;
-  };
+  // struct Quaternion
+  // {
+  //   float w;
+  //   float x;
+  //   float y;
+  //   float z;
+  // };
 
   //define the space
   typedef opengm::DiscreteSpace<> Space;
@@ -74,11 +74,11 @@ class TLPSSolver: Solver
     vector<Frame*> interpolateSlice(vector<Frame*> slice);//, map<string, float> params)
     float interpolateFloat(float prevAngle, float nextAngle, int step, int numSteps);
 
-    Point3f rotate(Point3f point, Mat rotationMatrix);
+    // Point3f rotate(Point3f point, Mat rotationMatrix);
 
-    TLPSSolver::AxisAngle computeAxisAngle(Point3f vec1, Point3f vec2, float epsilon);
-    Mat axisAngleToRotMatrix(TLPSSolver::AxisAngle input);
-    Mat mapVectorRotation(Point3f vec1, Point3f vec2, float epsilon);
+    // TLPSSolver::AxisAngle computeAxisAngle(Point3f vec1, Point3f vec2, float epsilon);
+    // Mat axisAngleToRotMatrix(TLPSSolver::AxisAngle input);
+    // Mat mapVectorRotation(Point3f vec1, Point3f vec2, float epsilon);
 
     //INHERITED
     //int id;

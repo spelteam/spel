@@ -1,7 +1,12 @@
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include "tlpssolver.hpp"
 #include "lockframe.hpp"
 #include "colorHistDetector.hpp"
 #include "math.h"
+#include "interpolation.hpp"
+
+using namespace Eigen;
 
 TLPSSolver::TLPSSolver()
 {
@@ -181,7 +186,7 @@ vector<vector<Frame*> > TLPSSolver::slice(const vector<Frame*>& frames, map<stri
 	vector<vector<Frame*> > slices;
 
 	vector<Frame*> currentSet;
-	bool isOpen;
+	//bool isOpen;
 	for(uint i=0; i<frames.size(); ++i)
 	{
 		currentSet.push_back(frames[i]); //push the frame to current set
@@ -211,91 +216,6 @@ vector<vector<Frame*> > TLPSSolver::slice(const vector<Frame*>& frames, map<stri
 	return slices; 
 }
 
-//epsilon is a very small positive value
-//angle is in radians
-TLPSSolver::AxisAngle TLPSSolver::computeAxisAngle(Point3f vec1, Point3f vec2, float epsilon)
-{
-	//two cases need to be handled
-	//1. angle approaches 0 - zero rotation angle
-	//2. angle approaches 180 - any perpendicular axis is the axis of rotation
-
-	//normalise the vectors
-	float nVec1 = 1.0/sqrt(vec1.x*vec1.x+vec1.y*vec1.y+vec1.z*vec1.z);
-	float nVec2 = 1.0/sqrt(vec2.x*vec2.x+vec2.y*vec2.y+vec2.z*vec2.z);
-
-	// vec1 = vec1*nVec1;
-	// vec2 = vec2*nVec2;
-
-	//angle is the arccos dot product of the two normalised vectors
-	float angle = acos(vec1.dot(vec2)*nVec2*nVec2);
-
-	Point3f axis;
-	//depending on what the angle is, decide how the axis should be computed
-	if(angle<=epsilon) //nearly zero angle
-	{
-		axis = Point3f(0,0,0); //zero axis 
-	}
-	else if(angle<=PI+epsilon && angle>=PI-epsilon) //if angle is within epsilon of PI (almost 180 degrees)
-	{
-		axis = Point3f(-vec1.y, vec1.x, vec1.z);//then axis = vec1 rotated by 90 degrees
-	}
-	else //if we are not in any of the exceptional cases
-	{
-		//axis is the cross product of the two vectors
-		axis = vec1.cross(vec2);
-		float aNorm = sqrt(axis.x*axis.x+axis.y*axis.y+axis.z*axis.z);
-		axis = axis*(1.0/aNorm); //normalise the axis
-	}
-	//set the rotation
-	TLPSSolver::AxisAngle answer;
-	answer.axis = axis;
-	answer.angle = angle;
-
-	return answer; //return the axis and angle
-}
-
-//convert AxisAngles to a 3x3 rotation matrix
-Mat TLPSSolver::axisAngleToRotMatrix(TLPSSolver::AxisAngle input)
-{
-	//http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/
-
-	float c,s,t, x, y, z;
-	c = cos(input.angle);
-	s = sin(input.angle);
-	t = 1-c;
-
-	//for x,y,z normalise the axis vector first
-	Point3f axis = input.axis;
-	float axisNorm = sqrt(axis.x*axis.x+axis.y*axis.y+axis.z*axis.z);
-	axis = axis*(1.0/axisNorm);
-
-	x = axis.x;
-	y = axis.y;
-	z = axis.z;
-
-	Mat matrix;
-	matrix.create(3, 3, DataType<float>::type);
-	matrix.at<float>(0,0) = t*x*x+c;
-	matrix.at<float>(0,1) = t*x*y-z*s;
-	matrix.at<float>(0,2) = t*x*z+y*s;
-
-	matrix.at<float>(1,0) = t*x*y+z*s;
-	matrix.at<float>(1,1) = t*y*y+c;
-	matrix.at<float>(1,2) = t*y*z-x*s;
-
-	matrix.at<float>(2,0) = t*x*z-y*s;
-	matrix.at<float>(2,1) = t*y*z+x*s;
-	matrix.at<float>(2,2) = t*z*z+c;
-
-	return matrix;
-}
-
-//get rotation matrix that maps one vector to another in 3D space
-Mat TLPSSolver::mapVectorRotation(Point3f vec1, Point3f vec2, float epsilon)
-{
-	return axisAngleToRotMatrix(computeAxisAngle(vec1,vec2,epsilon));
-}
-
 vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string, float> params)
 {
 	//first make sure that the front and back frames HAVE 3D space locations computed
@@ -305,6 +225,17 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	assert(slice.front()->getFrametype()!=LOCKFRAME && slice.front()->getFrametype()!=KEYFRAME);
 	assert(slice.back()->getFrametype()!=LOCKFRAME && slice.back()->getFrametype()!=KEYFRAME);
 	
+	vector<Frame*> result;
+
+	for(uint i=0; i<slice.size();++i)
+	{
+		Frame* ptr=NULL;
+		result.push_back(ptr);
+	}
+	//attach the start and end, and generate everything in between in this function
+	result[0] = slice[0];
+	result[result.size()-1] = slice[slice.size()-1];
+
 	//front and back are parent skeletons, their information 
 
 	//matrix.create(3, 3, DataType<float>::type);
@@ -316,116 +247,177 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	tree<BodyPart> partTree = slice.front()->getSkeleton().getPartTree();
 	tree<BodyPart>::iterator partIter, parentIter; //the body part iterator
 
-	vector<TLPSSolver::AxisAngle> prevRots; //previous keyframe rotation matrix
-	vector<TLPSSolver::AxisAngle> futureRots; //nextKeyframe rotation matrix
+	vector<Eigen::Quaternionf> rotations;
+	vector<Eigen::Vector3f> unrotatedPast;
+	vector<Eigen::Vector3f> unrotatedFuture;
 
-	//free matrix memory with release() function
-	//http://answers.opencv.org/question/14285/how-to-free-memory-through-cvmat/
+	for(uint i=0; i<partTree.size(); ++i)
+	{
+		rotations.push_back(Eigen::Quaternionf());
+		//unrotatedNodes.push_back(Eigen::Vector3f());
+	}
 
-	//convert the two into rotations for front tree
-	Point3f xAxis(1.0,0,0);
+	for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+	{	
+		//get partent and child joints of previous part
+		BodyJoint* childJointP = prevSkel.getBodyJoint(partIter->getChildJoint());
+		BodyJoint* parentJointP = prevSkel.getBodyJoint(partIter->getParentJoint());
 
-	BodyPart rootPart = *partTree.begin();
-	BodyJoint* childJointP = prevSkel.getBodyJoint(rootPart.getChildJoint());
-	BodyJoint* parentJointP = prevSkel.getBodyJoint(rootPart.getParentJoint());
+		//get parent and child joints of future part
+		BodyJoint* childJointF = futureSkel.getBodyJoint(partIter->getChildJoint());
+		BodyJoint* parentJointF = futureSkel.getBodyJoint(partIter->getParentJoint());
 
-	Point3f childLocP = childJointP->getSpaceLocation();
-	Point3f parentLocP = parentJointP->getSpaceLocation();
+		//convert Point3f to Vector3f
+		Point3f childLocP = childJointP->getSpaceLocation();
+		Point3f parentLocP = parentJointP->getSpaceLocation();
 
-	TLPSSolver::AxisAngle initialRotP = computeAxisAngle(xAxis, childLocP-parentLocP, 0.0005); //initial previous rotation
+		Point3f childLocF = childJointF->getSpaceLocation();
+		Point3f parentLocF = parentJointF->getSpaceLocation();
 
-	BodyJoint* childJointF = futureSkel.getBodyJoint(rootPart.getChildJoint());
-	BodyJoint* parentJointF = futureSkel.getBodyJoint(rootPart.getParentJoint());
-
-	Point3f childLocF = childJointF->getSpaceLocation();
-	Point3f parentLocF = parentJointF->getSpaceLocation();
-
-	TLPSSolver::AxisAngle initialRotF = computeAxisAngle(xAxis, childLocF-parentLocF, 0.0005); //initial future rotation
-
-	// // //insert tip
-	// // prevRotIter = prevRots.insert(prevRots.begin(), initialRotP);
-	// // futureRotIter = futureRots.insert(futureRots.begin(), initialRotF);
-	
-	// //initialise rotation vectors by pushing 3x3 matrices into them
-	// for(uint i=0; i<partTree.size(); ++i)
-	// {
-	// 	prevRots.push_back(TLPSSolver::AxisAngle());
-	// 	futureRots.push_back(TLPSSolver::AxisAngle());
-	// }
-
-	// prevRots[0] = initialRotP;
-	// futureRots[0] = initialRotF;
-
-	// //at this point, the root has already been set to zero
-	// for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-	// {
-	// 	//for prevSkel and futureSkel, at the same time
-	// 	//recover joints
-	// 	childJointP = prevSkel.getBodyJoint(partIter->getChildJoint());
-	// 	parentJointP = prevSkel.getBodyJoint(partIter->getParentJoint());
-
-	// 	childJointF = futureSkel.getBodyJoint(partIter->getChildJoint());
-	// 	parentJointF = futureSkel.getBodyJoint(partIter->getParentJoint());
-		
-	// 	//at every part, for both, past and future skel, translate parent joint to origin
-	// 	childLocF = childJointF->getSpaceLocation();
-	// 	parentLocF = parentJointF->getSpaceLocation();
-
-	// 	childLocP = childJointP->getSpaceLocation();
-	// 	parentLocP = parentJointP->getSpaceLocation();
-
-	// 	Point3f partVecP = childLocP-parentLocP;
-	// 	Point3f partVecF = childLocF-parentLocF;
-		
-	// 	//the vectors are the child-parent, these need to be unrotated
-	// 	//unrotate xAxis and child joint by multiplying by all rotation matrix inverses that are up in the hierarchy
-	// 	//find path to parent node
-		
-	// 	while(partTree.parent(partIter)!=partTree.begin())
-	// 	{
-	// 		//multiply by parent matrix
-	// 		partVecP = rotate(partVecP, prevRots[partIter->getPartID()]);
-	// 		partVecF = rotate(partVecF, futureRots[partIter->getPartID()]);
-
-	// 		parentIter = partTree.parent(partIter);
-	// 	}
+		Eigen::Vector3f prevVec(childLocP.x-parentLocP.x, childLocP.y-parentLocP.y, childLocP.z-parentLocP.z);
+		Eigen::Vector3f futureVec(childLocF.x-parentLocF.x, childLocF.y-parentLocF.y, childLocF.z-parentLocF.z);
 
 
-	// 	//then compute the rotation between xAxis and child joint vectorhttp://stackoverflow.com/questions/4099369/interpolate-between-rotation-matrices
-	// 	TLPSSolver::AxisAngle initialRotP = computeAxisAngle(xAxis, childLocP-parentLocP); //initial previous rotation
-	// 	TLPSSolver::AxisAngle initialRotF = computeAxisAngle(xAxis, childLocF-parentLocF); //initial future rotation
+		//get all rotations that need to happen
+		vector<Eigen::Quaternionf> previousNodes;
+ 		do
+		{
+			parentIter = partTree.parent(partIter);
+			if(parentIter!=NULL)
+			{
+	        	previousNodes.push_back(rotations[parentIter->getPartID()]);
+	        }
+        } while(parentIter!=NULL);
+        
+        //now unrotate starting from root down
+        for(uint i=previousNodes.size(); i>=0; --i)
+        {
+        	prevVec = previousNodes[i].conjugate()._transformVector(prevVec);
+        	futureVec = previousNodes[i].conjugate()._transformVector(prevVec);
+        }
+		//Eigen::Vector3f xaxis(1,0,0);
 
-	// 	//finally, store the rotation matrix
-	// 	prevRots[partIter->getPartID()] = initialRotP;
-	// 	futureRots[partIter->getPartID()] = initialRotF;
-			
-	// }
-	// //at the end of this step we should have all rotation stored as axis-angles
-	// //these shoulod be accessed in order of the tree
+		//compute quaterion between two positions
+		Quaternionf rotation;
+		rotation.setFromTwoVectors(prevVec, futureVec); //quaternion set
+		rotations[partIter->getPartID()] = rotation.normalized(); //push to vector of rotations
+		unrotatedPast[partIter->getPartID()] = prevVec;
+		unrotatedFuture[partIter->getPartID()] = futureVec;
+	}
 
-	// //now for every frame, for every part, compute the interpolated rotation, create rotated skeleton (3D), and set the frame accordingly
-	// for(uint frame=1; frame<slice.size()-1; ++i) //frame is the frame ID within the slice
-	// {
-	// 	//create a new skeleton of the same type as previous
-	// 	Skeleton newSkeleton; //this is the new skeleton for this frame
-		
-	// 	Interpolation newFrame; //this is the new frame => copy everything from existing frame
-	// 	newFrame.setImage(slice[frame]->getImage()); //set the image
-	// 	newFrame.setMask(slice[frame]->getMask()); //set the mask
-	// 	newFrame.setGroundPoint(slice[frame]->getGroundPoint()); //set the ground point
-	// 	newFrame.setId(slice[frame]->getId());
+	//now that quaterion rotations are computed, we can compute the new skeleton
+	for(uint i=1; i<slice.size()-1; ++i)
+	{
+		//only the t value depends on frame number
+		Skeleton interpolatedSkeleton = prevSkel;
+		vector<Vector3f> currentPartState;
+		partTree = 	interpolatedSkeleton.getPartTree();	
 
-	// 	newSkeleton = prevSkel; //newSkeleton is a copy of prevSkel
+		for(uint j=0; j<partTree.size(); ++j)
+		{
+			currentPartState.push_back(Eigen::Vector3f());
+		}
 
-	// 	//now for every body part
-	// 	for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-	// 	{
-	// 		//compute the interpolated quaternion rotaiton
-	// 		Quaternion pastQuat, futureQuat;
+		for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+		{
 
+			Eigen::Vector3f prevVec=unrotatedPast[partIter->getPartID()];
+			//rotate by this quaternion, and every quaternion up in the tree
+			Quaternionf thisRot = rotations[partIter->getPartID()];
 
-	// 	}
-	// }
+			float angle = 2*acos(thisRot.w());
+
+			float xa = thisRot.x()/sqrt(1.0-thisRot.w()*thisRot.w());
+			float ya = thisRot.y()/sqrt(1.0-thisRot.w()*thisRot.w());
+			float za = thisRot.z()/sqrt(1.0-thisRot.w()*thisRot.w());
+
+			Vector3f thisAxis(xa,ya,za);
+
+			angle = interpolateFloat(0, angle, i, slice.size()); //interpolate the angle
+
+			//re-generate AngleAxis object and create quaternion
+
+			//Quaternion to axis angle
+			// 			angle = 2 * acos(qw)
+			// x = qx / sqrt(1-qw*qw)
+			// y = qy / sqrt(1-qw*qw)
+			// z = qz / sqrt(1-qw*qw)
+			//Quaternion<float> q;  q = AngleAxis<float>(angle_in_radian, axis);
+
+			thisRot = AngleAxisf(angle,thisAxis);
+
+			prevVec = thisRot._transformVector(prevVec); //rotate the vector by 
+
+			//convert rotation to axis angle, interpolate angle, convert back to quaternion
+						
+	       	//rotate hierarchy
+	        do
+	        {
+				parentIter = partTree.parent(partIter);
+				if(parentIter!=NULL)
+				{
+		        	//if there is a parent rotate by its quaternion
+		        	Eigen::Quaternionf prevQuat = rotations[parentIter->getPartID()];
+
+		        	float angleP = 2*acos(prevQuat.w());
+
+					float xp = prevQuat.x()/sqrt(1.0-prevQuat.w()*prevQuat.w());
+					float yp = prevQuat.y()/sqrt(1.0-prevQuat.w()*prevQuat.w());
+					float zp = prevQuat.z()/sqrt(1.0-prevQuat.w()*prevQuat.w());
+
+					Vector3f prevAxis(xp,yp,zp);
+
+					angleP = interpolateFloat(0, angleP, i, slice.size()); //interpolate the angle
+
+		        	prevQuat = AngleAxisf(angleP, prevAxis);
+
+		        	prevVec = prevQuat._transformVector(prevVec);
+		        }
+	        } while(parentIter!=NULL);
+
+	        currentPartState[partIter->getPartID()] = prevVec;
+		}
+		//now update skeleton accordingly - locations just need to be added together (i.e. add child joint to vector) 
+
+		for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+		{
+			Vector3f childJoint = currentPartState[partIter->getPartID()];
+			Vector3f parentJoint(0,0,0);
+
+	        do
+	        {
+				parentIter = partTree.parent(partIter);
+				if(parentIter!=NULL)
+				{
+		        	//if there is a parent, first unrotate by its quaternion
+		        	childJoint=childJoint+currentPartState[parentIter->getPartID()];
+		        	parentJoint=parentJoint+currentPartState[parentIter->getPartID()];
+		        }
+	        } while(parentIter!=NULL);
+
+	        //parent and child joints now contain the 
+    		BodyJoint* childJointT = interpolatedSkeleton.getBodyJoint(partIter->getChildJoint());
+			BodyJoint* parentJointT = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint());
+			childJointT->setSpaceLocation(Point3f(childJoint.x(), childJoint.y(), childJoint.z()));
+			parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
+		}
+
+		//now skeleton should be set for this frame
+		//slice[i].setSkeleton(interpolatedSkeleton);
+
+		//frame type should be updated to interpolaion
+		Interpolation interpolatedFrame;
+		interpolatedFrame.setSkeleton(interpolatedSkeleton);
+		interpolatedFrame.setID(slice[i]->getID());
+		interpolatedFrame.setMask(slice[i]->getMask());
+		interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
+		interpolatedFrame.setImage(slice[i]->getImage());
+
+		//delete slice[i];
+		result[i] = &interpolatedFrame;
+	}
+
+	return result; //result contains Frame*'s that have been modified according to 
 
 }
 
@@ -438,50 +430,3 @@ inline float TLPSSolver::interpolateFloat(float prevAngle, float nextAngle, int 
         t=0;
     return prevAngle*(1-t)+nextAngle*t;
 }
-
-Point3f TLPSSolver::rotate(Point3f point, Mat rotationMatrix)
-{
-	//first make sure rotation matrix is of the right size
-	assert(rotationMatrix.rows == 3);
-	assert(rotationMatrix.cols ==3);
-
-	//if it is, continue
-	Point3f result;
-	result.x = rotationMatrix.at<float>(0,0)*point.x+rotationMatrix.at<float>(0,1)*point.y+rotationMatrix.at<float>(0,2)*point.z;
-	result.y = rotationMatrix.at<float>(1,0)*point.x+rotationMatrix.at<float>(1,1)*point.y+rotationMatrix.at<float>(1,2)*point.z;
-	result.z = rotationMatrix.at<float>(2,0)*point.x+rotationMatrix.at<float>(2,1)*point.y+rotationMatrix.at<float>(2,2)*point.z;
-
-	return result;
-}
-
-//Quaternions 
-//http://3dgep.com/understanding-quaternions/#Quaternion_Exponentiation
-//http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm#scale
-//http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.htm
-
-
-// Quaternion axisAngleToQuaternion(AxisAngle axisangle)
-// {
-// 	Quaternion quat;
-// 	Point3f axis = axisangle.axis;
-// 	float angle = axisange.angle;
-// 	quat.x = axis.x*sin(angle/2.0);
-// 	quat.y = axis.y*sin(angle/2.0);
-// 	quat.z = axis.z*sin(angle/2.0);
-// 	quat.w = cos(angle/2.0);
-
-// 	return quat;
-// }
-
-// Quaternion quaternionSLERP(Quaterion q1, Quaternion q2, float t)
-// {
-// 	//make sure t is between 0 and 1
-// 	assert(t<1.0 && t>0);
-
-// 	return q1*pow((q1.conjugate()*q2), t);
-// }
-
-// Quaternion pow(Quaternion quat, float power)
-// {
-// 	return exp(t*log(quat));
-// }
