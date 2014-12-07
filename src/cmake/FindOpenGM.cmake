@@ -11,13 +11,9 @@ ENDIF ()
 
 IF ( UNIX_STYLE_FIND )
   FIND_PATH ( OpenGM_INCLUDE_DIR opengm/opengm.hxx )
-  INCLUDE ( FindPackageHandleStandardArgs )
-  FIND_PACKAGE_HANDLE_STANDARD_ARGS ( OpenGM DEFAULT_MSG OpenGM_INCLUDE_DIR )
 ELSEIF ( WIN32_STYLE_FIND )
-  FIND_PATH ( OpenGM_INCLUDE_DIR opengm/opengm.hxx
-    PATHS
-      C:/opengm-2.3.3 )
-  INCLUDE ( FindPackageHandleStandardArgs )
-  FIND_PACKAGE_HANDLE_STANDARD_ARGS ( OpenGM DEFAULT_MSG OpenGM_INCLUDE_DIR )
+  FIND_PATH ( OpenGM_INCLUDE_DIR opengm/opengm.hxx PATHS C:/opengm-2.3.3 )
 ENDIF ()
+INCLUDE ( FindPackageHandleStandardArgs )
+FIND_PACKAGE_HANDLE_STANDARD_ARGS ( OpenGM DEFAULT_MSG OpenGM_INCLUDE_DIR )
 

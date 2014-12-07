@@ -430,3 +430,4 @@ inline float TLPSSolver::interpolateFloat(float prevAngle, float nextAngle, int 
         t=0;
     return prevAngle*(1-t)+nextAngle*t;
 }
+
