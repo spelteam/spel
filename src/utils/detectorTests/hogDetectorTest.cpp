@@ -1,5 +1,5 @@
 #include <iostream>
-#include <colorHistDetector.hpp>
+#include <hogDetector.hpp>
 #include "projectLoader.hpp"
 
 using namespace std;
@@ -9,7 +9,7 @@ int main (int argc, char **argv)
 {
   if (argc != 3) 
   {
-    cout << "Usage colorHistDetectorTest [project.xml] [out directory]" << endl;
+    cout << "Usage hogDetectorTest [project.xml] [out directory]" << endl;
     return -1;
   }
   string curFolder = argv[1];
@@ -32,7 +32,7 @@ int main (int argc, char **argv)
     cout << "Project was not loaded" << endl;
     return -1;
   }
-  ColorHistDetector detector;
+  HogDetector detector;
   map <string, float> params;
   cout << "Training..." << endl;
   try
@@ -61,8 +61,8 @@ int main (int argc, char **argv)
       try
       {
         labels = detector.detect(f, detectParams);
-        projectLoader.Save(labels, argv[2], f->getID());
-        projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
+        //projectLoader.Save(labels, argv[2], f->getID());
+        //projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
       }
       catch (exception &e)
       {
@@ -80,4 +80,3 @@ int main (int argc, char **argv)
   }
   return 0;
 }
-

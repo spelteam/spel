@@ -1,7 +1,11 @@
 #ifndef _LIBPOSE_HOGDETECTOR_HPP_
 #define _LIBPOSE_HOGDETECTOR_HPP_
 
+#include <opencv2/opencv.hpp>
 #include "detector.hpp"
+
+using namespace std;
+using namespace cv;
 
 class HogDetector : public Detector
 {
