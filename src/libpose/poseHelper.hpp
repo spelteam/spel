@@ -1,6 +1,11 @@
 #ifndef _POSEHELPER_HPP_
 #define _POSEHELPER_HPP_
 
+#ifdef WINDOWS
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif  // WINDOWS
+
 #include <opencv2/opencv.hpp>
 #include <tree.hh>
 

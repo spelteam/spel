@@ -1,6 +1,11 @@
 #ifndef _LIBPOSE_DETECTOR_HPP_
 #define _LIBPOSE_DETECTOR_HPP_
 
+#ifdef WINDOWS
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif  // WINDOWS
+
 #include <vector>
 #include <map>
 #include <string>

@@ -36,7 +36,7 @@ class ImageSimilarityMatrix
 
     float getPathCost(vector<int> path) const; //get cost for path through ISM
 
-    uint size() const;
+    uint32_t size() const;
 
     bool operator==(const ImageSimilarityMatrix &s) const;
     bool operator!=(const ImageSimilarityMatrix &s) const;

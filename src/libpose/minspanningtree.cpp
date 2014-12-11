@@ -96,5 +96,5 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
 
 int MinSpanningTree::size() const
 {
-	
+  return -1;
 }

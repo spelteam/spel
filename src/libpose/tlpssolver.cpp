@@ -37,7 +37,7 @@ Solution TLPSSolver::solve(const vector<Frame*>& frames, map<string, float> para
 	//first slice up the sequences
 	vector<vector<Frame*> > slices = slice(frames, params);
 
-	for(uint sliceNumber=0; sliceNumber<slices.size(); ++sliceNumber)
+	for(uint32_t sliceNumber=0; sliceNumber<slices.size(); ++sliceNumber)
 	{
 		//for every slice, build a factor graph
 		vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with 
@@ -52,7 +52,7 @@ Solution TLPSSolver::solve(const vector<Frame*>& frames, map<string, float> para
 
 		//no need to detect on keyframes and lockframes, use their joints to link to rather than labels
 		vector<vector<LimbLabel> > pastLabels;
-		for(uint currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
+		for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
 		{
 			//current frame represents the current frame, previous frame is currentFrame-1, next frame is currentFrame+1
 
@@ -60,7 +60,7 @@ Solution TLPSSolver::solve(const vector<Frame*>& frames, map<string, float> para
 
 			vector<size_t> numbersOfLabels; //numbers of labels per part
 
-			for(uint i=0; i<labels.size(); ++i)
+			for(uint32_t i=0; i<labels.size(); ++i)
 			{
 				numbersOfLabels.push_back(labels[i].size());
 			} //numbers of labels now contains the numbers
@@ -93,7 +93,7 @@ float TLPSSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
 int TLPSSolver::findFrameIndexById(int id, vector<Frame*> frames)
 {
-	for(uint i=0; i<frames.size(); ++i)
+	for(uint32_t i=0; i<frames.size(); ++i)
 	{
 		if(frames[i]->getID()==id)
 			return i;
@@ -187,7 +187,7 @@ vector<vector<Frame*> > TLPSSolver::slice(const vector<Frame*>& frames, map<stri
 
 	vector<Frame*> currentSet;
 	//bool isOpen;
-	for(uint i=0; i<frames.size(); ++i)
+	for(uint32_t i=0; i<frames.size(); ++i)
 	{
 		currentSet.push_back(frames[i]); //push the frame to current set
 		if(frames[i]->getFrametype()==KEYFRAME || frames[i]->getFrametype()==LOCKFRAME)
@@ -201,7 +201,7 @@ vector<vector<Frame*> > TLPSSolver::slice(const vector<Frame*>& frames, map<stri
 	//1) it contains 2 or less elements
 	//2) it doesn't end with a LOCKFRAME or a KEYFRAME
 	//3) it doesn't begin with a LOCKFRAME or a KEYFRAME
-	for(uint i=0;i<aux.size(); ++i)
+	for(uint32_t i=0;i<aux.size(); ++i)
 	{
 		if(aux[i].at(0)->getFrametype()==LOCKFRAME || aux[i].at(0)->getFrametype()==KEYFRAME) //if the set STARTS with a keyframe or a lockframe
 		{
@@ -227,7 +227,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	
 	vector<Frame*> result;
 
-	for(uint i=0; i<slice.size();++i)
+	for(uint32_t i=0; i<slice.size();++i)
 	{
 		Frame* ptr=NULL;
 		result.push_back(ptr);
@@ -251,7 +251,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	vector<Eigen::Vector3f> unrotatedPast;
 	vector<Eigen::Vector3f> unrotatedFuture;
 
-	for(uint i=0; i<partTree.size(); ++i)
+	for(uint32_t i=0; i<partTree.size(); ++i)
 	{
 		rotations.push_back(Eigen::Quaternionf());
 		//unrotatedNodes.push_back(Eigen::Vector3f());
@@ -290,7 +290,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
         } while(parentIter!=NULL);
         
         //now unrotate starting from root down
-        for(uint i=previousNodes.size(); i>=0; --i)
+        for(uint32_t i=previousNodes.size(); i>=0; --i)
         {
         	prevVec = previousNodes[i].conjugate()._transformVector(prevVec);
         	futureVec = previousNodes[i].conjugate()._transformVector(prevVec);
@@ -306,14 +306,14 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	}
 
 	//now that quaterion rotations are computed, we can compute the new skeleton
-	for(uint i=1; i<slice.size()-1; ++i)
+	for(uint32_t i=1; i<slice.size()-1; ++i)
 	{
 		//only the t value depends on frame number
 		Skeleton interpolatedSkeleton = prevSkel;
 		vector<Vector3f> currentPartState;
 		partTree = 	interpolatedSkeleton.getPartTree();	
 
-		for(uint j=0; j<partTree.size(); ++j)
+		for(uint32_t j=0; j<partTree.size(); ++j)
 		{
 			currentPartState.push_back(Eigen::Vector3f());
 		}

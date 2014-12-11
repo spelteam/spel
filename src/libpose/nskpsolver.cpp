@@ -63,7 +63,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 	//build frame MSTs by ID's as in ISM
 	vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);
 	//now add variables to the space, with number of detections
-	for(uint frameId=0; frameId<frames.size(); ++frameId)
+	for(uint32_t frameId=0; frameId<frames.size(); ++frameId)
 	{
 		if(frames[frameId]->getFrametype()!=0x02) //as long as it's not an interpolated frame, try to propagate from it
 		{
@@ -82,7 +82,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 				vector<size_t> numbersOfLabels; //numbers of labels per part
 
-				for(uint i=0; i<labels.size(); ++i)
+				for(uint32_t i=0; i<labels.size(); ++i)
 				{
 					numbersOfLabels.push_back(labels[i].size());
 				} //numbers of labels now contains the numbers
@@ -103,7 +103,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 					size_t scoreCostShape[]={numbersOfLabels[partIter->getPartID()]}; //number of labels
 					ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-					for(uint i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+					for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
 						scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
 					}
@@ -113,7 +113,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 					ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-					for(uint i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+					for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
 						priorCostFunc(i) = computePriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params);
 					}
@@ -129,9 +129,9 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 						size_t jointCostShape[]={numbersOfLabels[partIter->getPartID()], numbersOfLabels[parentPartIter->getPartID()]}; //number of labels
 						ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
 
-						for(uint i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+						for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 						{
-							for(uint j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
+							for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
 							{
 								//for every child/parent pair, compute score
 								jointCostFunc(i, j) = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
@@ -160,7 +160,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 				bp.arg(labeling);
 
 				vector<LimbLabel> solutionLabels;
-				for(uint i=0; i<labels.size();++i)
+				for(uint32_t i=0; i<labels.size();++i)
 				{
 					solutionLabels.push_back(labels[i][labeling[i]]); //pupulate solution vector
 				}
@@ -191,7 +191,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 	vector<Frame*> returnFrames;
 	//look at lockframes and frames, and put together the return frames
-	for(uint i=0; i<frames.size(); ++i)
+	for(uint32_t i=0; i<frames.size(); ++i)
 	{
 		int lockframeIndex = findFrameIndexById(frames[i]->getID(), frames);
 		if(lockframeIndex>=0) //if a new lockframe exists at this id
@@ -211,7 +211,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 //if no matching id in vector, return -1
 int NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 {
-	for(uint i=0; i<frames.size(); ++i)
+	for(uint32_t i=0; i<frames.size(); ++i)
 	{
 		if(frames[i]->getID()==id)
 			return i;
@@ -269,7 +269,7 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 
     vector<vector<int> > frameMSTvec;
 
-    for(uint i=0; i<ism.size(); ++i)
+    for(uint32_t i=0; i<ism.size(); ++i)
     {
     	//for each frame, build an MST
     	MinSpanningTree frameTree(ism, i, treeSize, simThresh);
@@ -284,13 +284,13 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 //function should return vector with suggested keyframe numbers
 vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params)
 {
-	vector<vector<uint> > orderedList;
-	for(uint i=0; i<mstVec.size(); ++i)
+	vector<vector<uint32_t> > orderedList;
+	for(uint32_t i=0; i<mstVec.size(); ++i)
 	{
 	    tree<int>::iterator iter;
         tree<int> MST = mstVec[i].getMST();	
         
-        vector<uint> frames;
+        vector<uint32_t> frames;
 
         for(iter=MST.begin(); iter!=MST.end(); ++iter)
         {
@@ -304,9 +304,9 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
     while(orderedList.size()!=0)
     {
         //find the largest frame MST:
-        uint maxSize=0;
-        uint idx=-1;
-        for(uint i=0; i<orderedList.size(); ++i)
+        uint32_t maxSize=0;
+        uint32_t idx=-1;
+        for(uint32_t i=0; i<orderedList.size(); ++i)
         {
             if(orderedList[i].size()> maxSize)
             {
@@ -320,17 +320,17 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
 
 
         //store it as the best candidate
-        vector<uint> erasedVector = orderedList[idx];
+        vector<uint32_t> erasedVector = orderedList[idx];
 
         frameOrder.push_back(Point2i(erasedVector[0], maxSize));
 
         orderedList.erase(orderedList.begin() + idx);
 
         //remove all values in that vector from all others
-        for(uint i=0; i<orderedList.size(); ++i)
+        for(uint32_t i=0; i<orderedList.size(); ++i)
         {
             //for each element in erasedVector
-            for(uint j=0; j<erasedVector.size(); ++j)
+            for(uint32_t j=0; j<erasedVector.size(); ++j)
             {
                 orderedList[i].erase(std::remove(orderedList[i].begin(), orderedList[i].end(), erasedVector[j]), orderedList[i].end());
             }
