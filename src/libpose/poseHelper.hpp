@@ -9,6 +9,7 @@
 #include <opencv2/opencv.hpp>
 #include <tree.hh>
 
+using namespace std;
 using namespace cv;
 
 template <class T>
