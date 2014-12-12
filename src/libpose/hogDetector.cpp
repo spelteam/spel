@@ -17,16 +17,19 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
   Size blockSize = Size(16, 16);
   Size blockStride = Size(8,8);
   Size cellSize = Size(8,8);
+  Size wndSize = Size(64, 128);
   const int nbins = 9;
-  double imgSigma = -1;
+  double wndSigma = -1;
   double thresholdL2hys = 0.2;
   bool gammaCorrection = true;
   int nlevels = 64;
   double hitThreshold = 0;
-  Size imgStride = Size(8, 8);
+  Size wndStride = Size(8, 8);
   Size padding = Size(32, 32);
   double scale0 = 1.05;
   int groupThreshold = 2;
+
+  HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
 
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
@@ -41,10 +44,8 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
     vector <Rect> found;
     vector <Rect> found_filtered;
     Mat img = (*frameNum)->getImage();
-    Size imgSize = img.size();
-    HOGDescriptor detector(imgSize, blockSize, blockStride, cellSize, nbins, imgSigma, thresholdL2hys, gammaCorrection, nlevels);
-    detector.detectMultiScale(img, found, hitThreshold, imgStride, padding, scale0, groupThreshold);
-    cout << "Found " << found.size() << endl;
+
+    detector.detectMultiScale(img, found, hitThreshold, wndStride, padding, scale0, groupThreshold);
     for (size_t n = 0; n < found.size(); n++)
     {
       Rect r = found[n];
@@ -70,13 +71,14 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   Size blockSize = Size(16, 16);
   Size blockStride = Size(8,8);
   Size cellSize = Size(8,8);
+  Size wndSize = Size(64, 128);
   const int nbins = 9;
-  double imgSigma = -1;
+  double wndSigma = -1;
   double thresholdL2hys = 0.2;
   bool gammaCorrection = true;
   int nlevels = 64;
   double hitThreshold = 0;
-  Size imgStride = Size(8, 8);
+  Size wndStride = Size(8, 8);
   Size padding = Size(32, 32);
   double scale0 = 1.05;
   int groupThreshold = 2;
@@ -84,10 +86,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   vector <Rect> found;
   vector <Rect> found_filtered;
   Mat img = frame->getImage();
-  Size imgSize = img.size();
-  HOGDescriptor detector(imgSize, blockSize, blockStride, cellSize, nbins, imgSigma, thresholdL2hys, gammaCorrection, nlevels);
-  detector.detectMultiScale(img, found, hitThreshold, imgStride, padding, scale0, groupThreshold);
-  cout << "Found " << found.size() << endl;
+  HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
+  
+  detector.detectMultiScale(img, found, hitThreshold, wndStride, padding, scale0, groupThreshold);
   for (size_t n = 0; n < found.size(); n++)
   {
     Rect r = found[n];
