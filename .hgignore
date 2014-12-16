@@ -4,5 +4,5 @@ googletest
 tinyxml2
 build
 pose-build
-*.user
 *~
+
