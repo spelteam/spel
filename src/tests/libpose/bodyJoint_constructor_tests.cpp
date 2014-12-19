@@ -4,8 +4,8 @@
 TEST(bodyJointTest, ConstructorTest)
 {
   BodyJoint bj1;
-  Point2f f2(0.0, 0.0);
-  Point3f f3(0.0, 0.0, 0.0);
+  Point2f f2(0.0f, 0.0f);
+  Point3f f3(0.0f, 0.0f, 0.0f);
 
   EXPECT_EQ(0, bj1.getLimbID());
   EXPECT_TRUE(bj1.getJointName().empty());
@@ -15,7 +15,7 @@ TEST(bodyJointTest, ConstructorTest)
 
   int limbID = 5;
   string jointName = "Some Name";
-  Point2f imageLocation(1.234, -4.321);
+  Point2f imageLocation(1.234f, -4.321f);
 
   BodyJoint bj2(limbID, jointName, imageLocation);
   EXPECT_EQ(limbID, bj2.getLimbID());
