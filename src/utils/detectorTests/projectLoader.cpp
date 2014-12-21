@@ -126,28 +126,28 @@ bool ProjectLoader::Load(string fileName)
   }
   projectTitle = root->Attribute(projectName.c_str());
   imgFolderPath = root->Attribute(projectImgFolderPath.c_str());
-  if (imgFolderPath.back() != '/')
+  if (imgFolderPath.size() > 0 && imgFolderPath.back() != '/')
   {
     imgFolderPath += '/';
   }
   maskFolderPath = root->Attribute(projectMaskFolderPath.c_str());
-  if (maskFolderPath.back() != '/')
+  if (maskFolderPath.size() > 0 && maskFolderPath.back() != '/')
   {
      maskFolderPath += '/';
   }
   camFolderPath = root->Attribute(projectCamFolderPath.c_str());
-  if (camFolderPath.back() != '/')
+  if (camFolderPath.size() > 0 && camFolderPath.back() != '/')
   {
     camFolderPath += '/';
   }
   allowScaling = root->BoolAttribute(projectAllowScaling.c_str());
   simMathPath = root->Attribute(projectSimMathPath.c_str());
-  if (simMathPath.back() != '/')
+  if (simMathPath.size() > 0 && simMathPath.back() != '/')
   {
     simMathPath += '/';
   }
   exportPath = root->Attribute(projectExportPath.c_str());
-  if (exportPath.back() != '/')
+  if (exportPath.size() > 0 && exportPath.back() != '/')
   {
     exportPath += '/';
   }

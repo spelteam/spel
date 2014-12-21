@@ -26,7 +26,7 @@ class MinSpanningTree
     tree<int> getMST(void) const;
 
     //get size
-    int size(void) const;
+    uint32_t size(void) const;
 
   private:
     tree<int> mst;

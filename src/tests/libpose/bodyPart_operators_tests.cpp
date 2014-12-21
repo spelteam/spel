@@ -8,7 +8,7 @@ TEST(bodyPartTest, OperatorsTest)
   int parentJoint = 0;
   int childJoint = 0;
   bool isOccluded = true;
-  float spaceLength = 1.343;
+  float spaceLength = 1.343f;
 
   BodyPart bp1(partID, partName, parentJoint, childJoint, isOccluded, spaceLength);
   BodyPart bp2(partID, partName, parentJoint, childJoint, isOccluded, spaceLength);

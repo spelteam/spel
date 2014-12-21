@@ -16,7 +16,7 @@ TEST(bodyPartTest, ConstructorTest)
   int parentJoint = 0;
   int childJoint = 0;
   bool isOccluded = true;
-  float spaceLength = 1.343;
+  float spaceLength = 1.343f;
 
   BodyPart bp2(partID, partName, parentJoint, childJoint);
   EXPECT_EQ(partID, bp2.getPartID());

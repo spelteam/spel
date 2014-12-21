@@ -51,9 +51,9 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
         Point2i minLoc(-1,-1);
         float min=FLT_MAX;
         //for each node currently in the graph
-        for(int i=0; i<graphNodes.size(); ++i)
+        for(uint32_t i=0; i<graphNodes.size(); ++i)
         {
-            for(int j=0; j<ism.size(); ++j)
+            for(uint32_t j=0; j<ism.size(); ++j)
             {
                 int x=graphNodes[i];
                 int y=j;
@@ -94,7 +94,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
     }
 }
 
-int MinSpanningTree::size() const
+uint32_t MinSpanningTree::size() const
 {
   return -1;
 }

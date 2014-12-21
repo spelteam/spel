@@ -50,28 +50,49 @@ Solution TLPSSolver::solve(const vector<Frame*>& frames, map<string, float> para
 		
 		chDetector.train(trainingFrames, params);
 
-		//no need to detect on keyframes and lockframes, use their joints to link to rather than labels
-		vector<vector<LimbLabel> > pastLabels;
+		vector<vector<vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
+
+		//initialise first level
+		for (uint32_t i=0; i<seqSlice.size(); ++i) // access by reference, the type of i is int&
+        {
+        	detections.push_back(vector<vector<LimbLabel> >());
+        	// for(auto&& j:i)
+        	// {
+        	// 	j.push_back(LimbLabel());
+        	// }
+        }
+
+		//first do the detections, and store them
+
 		for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
 		{
 			//current frame represents the current frame, previous frame is currentFrame-1, next frame is currentFrame+1
 
-			vector<vector<LimbLabel> > labels = chDetector.detect(frames[currentFrame], params); //detect labels based on keyframe training
+			vector<vector<LimbLabel> > labels = chDetector.detect(seqSlice[currentFrame], params); //detect labels based on keyframe training
 
-			vector<size_t> numbersOfLabels; //numbers of labels per part
+			detections[currentFrame] = labels; //store all detections into detections
+		}
 
-			for(uint32_t i=0; i<labels.size(); ++i)
+		vector<size_t> numbersOfLabels; //numbers of labels per part
+
+		for(uint32_t i=0; i<detections.size(); ++i)
+		{
+			for(uint32_t j=0; j<detections[i].size(); ++j)
 			{
-				numbersOfLabels.push_back(labels[i].size());
-			} //numbers of labels now contains the numbers
+				numbersOfLabels.push_back(detections[i][j].size());
+			}
+		} //numbers of labels now contains the numbers of labels, and their respective variations
 
-			Space space(numbersOfLabels.begin(), numbersOfLabels.end());
-			Model gm(space);
+		Space space(numbersOfLabels.begin(), numbersOfLabels.end());
+		Model gm(space);
 
-			tree<BodyPart> partTree = frames[currentFrame]->getSkeleton().getPartTree();
+		for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
+		{
+			tree<BodyPart> partTree = seqSlice[currentFrame]->getSkeleton().getPartTree();
 			tree<BodyPart>::iterator partIter, parentPartIter;
 
 			//construct the image score cost factors
+
 
 			//compute the prior cost (if any)
 
