@@ -1,0 +1,8 @@
+syntax: glob
+*.o
+googletest
+tinyxml2
+build
+pose-build
+*~
+
