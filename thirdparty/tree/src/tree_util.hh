@@ -140,7 +140,7 @@ std::vector<T> find_path_nodes(const tree<T>& t, typename tree<T>::iterator node
     return pathA; //return the vector
 }
 
-};
+}
 
 
 
