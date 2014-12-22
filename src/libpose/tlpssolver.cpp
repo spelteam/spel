@@ -319,7 +319,7 @@ float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLa
 	//@FIX this is really too simplistic, connecting these points
 	thisLabel.getEndpoints(c0,c1);
 	futureLabel.getEndpoints(p0,p1);
-Polygon
+//Polygon
 	//return the squared distance from the lower parent joint p1, to the upper child joint c0
 	return lambda*(pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2)+pow((c1.x-p1.x), 2)+pow((c1.y-p1.y), 2));
 }
