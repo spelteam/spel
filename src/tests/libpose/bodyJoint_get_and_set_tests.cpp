@@ -6,8 +6,8 @@ TEST(bodyJointTest, GetAndSetTest)
   BodyJoint bj1;
   int limbID = 5;
   string jointName = "Some Name";
-  Point2f imageLocation(2.534, -1.635);
-  Point3f spaceLocation(1.231, -2.0, -1.5);
+  Point2f imageLocation(2.534f, -1.635f);
+  Point3f spaceLocation(1.231f, -2.0f, -1.5f);
   bool depthSign = true;  
     
   bj1.setLimbID(limbID);

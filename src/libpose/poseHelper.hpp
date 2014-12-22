@@ -66,11 +66,26 @@ struct POSERECT
 class PoseHelper
 {
   public:
+    //find squared distance between two points
+    //Arguments:
+    //one - first point
+    //two - second point
+    //Result:
+    //squared distance between one and two
     template <typename T> static double distSquared(T one, T two)
     {
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
     }
+    //find angle between two vectors on a plane
+    //Arguments:
+    //x1, y1 - first vector
+    //x2, y2 - second vector
+    //Result:
+    //angle between first and second vector,
+    //positive counter clockwise
+    //angle is in the range [-PI; PI]
     static double angle2D(double x1, double y1, double x2, double y2);
+    //
     template <typename T> static T rotatePoint2D(const T point, const T pivot, const float degrees)
     {
       double radians = degrees * M_PI / 180.0;
@@ -84,6 +99,12 @@ class PoseHelper
       result = result + cnt;
       return result;
     }
+    //copies tree
+    //Arguments:
+    //dst - copy to
+    //src - copy from
+    //Result:
+    //dst is copy of src
     template <class T, class tree_node_allocator>
     static void copyTree(tree <T, tree_node_allocator> &dst, const tree <T, tree_node_allocator> &src) 
     {

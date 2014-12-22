@@ -8,9 +8,9 @@ TEST(bodyPartTest, GetAndSetTest)
   int parentJoint = 0;
   int childJoint = 0;
   bool isOccluded = false;
-  float spaceLength = 1.343;
-  POSERECT <Point2f> polygon (Point2f(1.0, 2.0), Point2f(2.0, 3.0), Point2f(3.0, 4.0), Point2f(4.0, 5.0));
-  float lwRatio=1.3;
+  float spaceLength = 1.343f;
+  POSERECT <Point2f> polygon (Point2f(1.0f, 2.0f), Point2f(2.0f, 3.0f), Point2f(3.0f, 4.0f), Point2f(4.0f, 5.0f));
+  float lwRatio=1.3f;
 
   bp1.setPartID(partID);
   bp1.setPartName(partName);
