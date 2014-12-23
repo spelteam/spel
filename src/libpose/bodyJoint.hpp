@@ -17,7 +17,7 @@ class BodyJoint
     BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc = {0.0, 0.0, 0.0}, bool depth = false);
     bool operator==(const BodyJoint &bj) const; // comparsion by unique index
     bool operator!=(const BodyJoint &bj) const; // comparsion by address
-	// All these functions just give access to thise object fields
+// All these functions just give access to this object fields
     int getLimbID(void) const;
     void setLimbID(int _limbID);
     string getJointName(void) const;

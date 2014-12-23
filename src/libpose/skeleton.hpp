@@ -18,7 +18,7 @@ class Skeleton
     void learnDepth(Skeleton &skel);
 //TODO (Vitaliy Koshura): Need implementation
     void infer2D(void);
-	// All these functions just give access to the object fields
+// All these functions just give access to the object fields
     Skeleton & operator=(const Skeleton &s);
     bool operator==(const Skeleton &s) const;
     bool operator!=(const Skeleton &s) const;
@@ -32,7 +32,7 @@ class Skeleton
     void setScale(float _scale);
 
     uint32_t getPartTreeCount(void) const; // count of bodypart elements, included in the tree
-	BodyJoint* getBodyJoint(int jointID) const; // search a joint by id and return a pointer to its address
+    BodyJoint* getBodyJoint(int jointID) const; // search a joint by id and return a pointer to its address
   private:
     string name; // name of the specific instance of
     tree <BodyPart> partTree; // tree of bodyparts is component of the body model
