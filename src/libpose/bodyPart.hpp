@@ -17,7 +17,7 @@ class BodyPart
     BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
     bool operator==(const BodyPart &bp) const; // comparsion by unique index
     bool operator!=(const BodyPart &bp) const; // comparsion by address
-	// get and set: All these functions just give access to the object fields
+// get and set: All these functions just give access to the object fields
     int getPartID(void) const;
     void setPartID(int _partID);
     string getPartName(void) const;
@@ -36,7 +36,7 @@ class BodyPart
     void setLWRatio(float _lwRatio);
   private:
     int partID; // identifier, must be unique within the limits of class
-	string partName; // the object name, respectively to a place in a skeleton model 
+    string partName; // the object name, respectively to a place in a skeleton model 
     int parentJoint; // identifier of adjacent overlying joint/node (see BodyJoint.hpp)
     int childJoint; // identifier of adjacent underlying joint/node (see BodyJoint.hpp)
     bool isOccluded; // when "true" - then this body part is overlapped in a frame, used in the skeleton recovery algorithm
