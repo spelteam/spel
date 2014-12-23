@@ -13,9 +13,11 @@ class HogDetector : public Detector
     int getID(void);
     void setID(int _id);
     void train(vector <Frame*> frames, map <string, float> params);
-    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params);
+    vector <vector <LimbLabel>> detect(Frame *frame, map <string, float> params);
   private:
     int id;
+    map <uint32_t, vector <float>> frameHOGDescriptors;
+    map <uint32_t, map <PHPoint<uint32_t>, vector <float>>> rawDescriptors;
 };
 
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

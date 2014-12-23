@@ -45,6 +45,24 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
     vector <Rect> found_filtered;
     Mat img = (*frameNum)->getImage();
 
+    vector <float> descriptors;
+
+    detector.compute(img, descriptors);
+    map <PHPoint<uint32_t>, vector <float>> currentFrameRawDescriptors;
+    for (uint32_t row = 0; row < img.rows; row++)
+    {
+      for (uint32_t col = 0; col < img.cols; col++)
+      {
+        currentFrameRawDescriptors.insert(pair <PHPoint<uint32_t>, vector <float>>(PHPoint<uint32_t>(row, col), vector <float>()));
+      }
+    }
+
+    frameHOGDescriptors.insert(pair <uint32_t, vector <float>>((*frameNum)->getID(), descriptors));
+
+// JUST FO DEBUG
+    cout << "Image: " << img.cols * img.rows << "\tDecriptors: " << descriptors.size() << endl;
+// JUST FO DEBUG END
+    
     detector.detectMultiScale(img, found, hitThreshold, wndStride, padding, scale0, groupThreshold);
     for (size_t n = 0; n < found.size(); n++)
     {
