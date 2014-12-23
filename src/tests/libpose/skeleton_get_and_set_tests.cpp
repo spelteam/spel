@@ -30,5 +30,6 @@ TEST(skeletonTest, GetAndSetTest)
   EXPECT_EQ(scale, s.getScale());
   EXPECT_EQ(1, s.getPartTreeCount());
   EXPECT_TRUE(bj==*s.getBodyJoint(bj.getLimbID()));
+  EXPECT_TRUE(NULL == s.getBodyJoint(-1));
 }
 
