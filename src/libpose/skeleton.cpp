@@ -1,9 +1,12 @@
 #include "skeleton.hpp"
+//See Skeleton.hpp for more info
 
+//default constructor
 Skeleton::Skeleton(void)
 {
 }
 
+// constructor with params
 Skeleton &Skeleton::operator=(const Skeleton &s)
 {
   if (this == &s)

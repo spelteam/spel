@@ -7,14 +7,17 @@
 
 using namespace std;
 
+// Objects of this class used as elements for building a skeleton model
+// See Skeleton.hpp for more info
+
 class BodyPart
 {
   public:
     BodyPart(void);
     BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
-    bool operator==(const BodyPart &bp) const;
-    bool operator!=(const BodyPart &bp) const;
-// get and set
+    bool operator==(const BodyPart &bp) const; // comparsion by unique index
+    bool operator!=(const BodyPart &bp) const; // comparsion by address
+	// get and set: All these functions just give access to the object fields
     int getPartID(void) const;
     void setPartID(int _partID);
     string getPartName(void) const;
@@ -32,14 +35,14 @@ class BodyPart
     float getLWRatio(void);
     void setLWRatio(float _lwRatio);
   private:
-    int partID;
-    string partName;
-    int parentJoint;
-    int childJoint;
-    bool isOccluded;
-    float spaceLength;
-    POSERECT <Point2f> partPolygon;
-    float lwRatio;
+    int partID; // identifier, must be unique within the limits of class
+	string partName; // the object name, respectively to a place in a skeleton model 
+    int parentJoint; // identifier of adjacent overlying joint/node (see BodyJoint.hpp)
+    int childJoint; // identifier of adjacent underlying joint/node (see BodyJoint.hpp)
+    bool isOccluded; // when "true" - then this body part is overlapped in a frame, used in the skeleton recovery algorithm
+    float spaceLength; // the length of body part, distance between neighboring joints
+    POSERECT <Point2f> partPolygon; // rectangle is used as simplified representation of body part 
+    float lwRatio; // coefficient of proportionality is used for scaling
 };
 
 #endif  // _BODYPART_HPP_

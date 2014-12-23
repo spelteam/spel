@@ -1,6 +1,7 @@
 #include "bodyJoint.hpp"
 // See bodyJoint.hpp and Skeleton.hpp for more info
 
+//default constructor
 BodyJoint::BodyJoint(void)
 {
   setLimbID(0);
@@ -10,6 +11,7 @@ BodyJoint::BodyJoint(void)
   setDepthSign(false);
 }
 
+// constructor with params
 BodyJoint::BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc, bool depth)
 {
   setLimbID(id);

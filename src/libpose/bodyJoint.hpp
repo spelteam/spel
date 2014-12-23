@@ -9,6 +9,7 @@ using namespace cv;
 
 // Objects of this class used as elements for building a skeleton model
 // See Skeleton.hpp for more info
+
 class BodyJoint
 {
   public:
@@ -16,7 +17,7 @@ class BodyJoint
     BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc = {0.0, 0.0, 0.0}, bool depth = false);
     bool operator==(const BodyJoint &bj) const; // comparsion by unique index
     bool operator!=(const BodyJoint &bj) const; // comparsion by address
-	// All these functions just give access to this object fields
+	// All these functions just give access to thise object fields
     int getLimbID(void) const;
     void setLimbID(int _limbID);
     string getJointName(void) const;
@@ -31,7 +32,7 @@ class BodyJoint
     int limbID; // identifier, must be unique within the limits of class
     string jointName; // the object name, respectively to a place in a skeleton model 
     Point2f imageLocation; // coordinates  of the joint on surface of the frame
-    Point3f spaceLocation; // it is expansion of the model for use in 3D space
+    Point3f spaceLocation; // expansion of the model for use in 3D space
     bool depthSign; // can be used as a flag to switch between 2D/3D, or indicate presence of several plans in the frame
 };
 

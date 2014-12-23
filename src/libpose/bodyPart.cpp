@@ -1,4 +1,7 @@
 #include "bodyPart.hpp"
+// See bodyPart.hpp and Skeleton.hpp for more info
+
+// default constructor
 BodyPart::BodyPart(void)
 {
   setPartID(0);
@@ -10,6 +13,7 @@ BodyPart::BodyPart(void)
   setLWRatio(0);
 }
 
+// constructor with params
 BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, float spaceLen)
 {
   setPartID(id);

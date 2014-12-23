@@ -1,11 +1,14 @@
 #include "score.hpp"
+// See Score.hpp for more info
 
+// default constructor
 Score::Score(void)
 {
   score = 0;
   detName = "";
 }
 
+// constructor with params
 Score::Score(float sc, string name)
 {
   score = sc;
