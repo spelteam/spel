@@ -48,6 +48,11 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
     vector <float> descriptors;
 
     detector.compute(img, descriptors);
+
+    // JUST FO DEBUG
+    cout << "Decriptors: " << descriptors.size() << endl;
+    // JUST FO DEBUG END
+
     map <PHPoint<uint32_t>, vector <float>> currentFrameRawDescriptors;
     for (uint32_t row = 0; row < img.rows; row++)
     {
@@ -56,12 +61,60 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
         currentFrameRawDescriptors.insert(pair <PHPoint<uint32_t>, vector <float>>(PHPoint<uint32_t>(row, col), vector <float>()));
       }
     }
+    uint64_t d = 0;
+    uint32_t i = 0, j = 0, n = 0, k = 0, r = 0, c = 0, b = 0;
 
-    frameHOGDescriptors.insert(pair <uint32_t, vector <float>>((*frameNum)->getID(), descriptors));
+    try
+    {
+      // image rows
+      for (i = 0; i + wndSize.height < img.rows + wndStride.height; i += wndStride.height)
+      {
+        // image cols
+        for (j = 0; j + wndSize.width < img.cols + wndStride.width; j += wndStride.width)
+        {
+          // window rows
+          for (n = i; n + blockStride.height < i + wndSize.height; n += blockStride.height)
+          {
+            // window cols
+            for (k = j; k + blockStride.width < j + wndSize.width; k += blockStride.width)
+            {
+              // block rows
+              for (r = n; r < n + blockSize.height; r += cellSize.height)
+              {
+                // block cols
+                for (c = k; c < k + blockSize.width; c += cellSize.width)
+                {
+                  // nbins
+                  for (b = 0; b < nbins; b++)
+                  {
+                    currentFrameRawDescriptors[PHPoint<uint32_t>(r, c)].push_back(descriptors.at(d++));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    catch (...)
+    {
+      cerr << "Descriptor parse error:" << endl << "Image row:\t" << i << "\tImage col:\t" << j << endl << "Window row:\t" << n << "\tWindow col:\t" << k << endl << "Block row:\t" << r << "\tBlock col:\t" << c << endl << "NBins:\t" << b << endl;
+      cerr << "Total image rows:\t" << img.rows << "\tTotal image cols:\t" << img.cols << endl;
+      cerr << "Total descriptors:\t" << descriptors.size() << endl;
+      cerr << "Trying to get Point at:\t" << r << ":" << c << endl;
+      cerr << "Trying to get descriptor at:\t" << d << endl;
+      break;
+    }
 
-// JUST FO DEBUG
-    cout << "Image: " << img.cols * img.rows << "\tDecriptors: " << descriptors.size() << endl;
-// JUST FO DEBUG END
+    if (d < descriptors.size())
+    {
+      cerr << "Error. Not all descriptors were parsed" << endl;
+      cerr << "Last parsed descriptor:\t" << d << endl;
+      cerr << "Total descriptor count:\t" << descriptors.size() << endl;
+      break;
+    }
+
+    rawDescriptors.insert(pair <uint32_t, map <PHPoint<uint32_t>, vector <float>>>((*frameNum)->getID(), currentFrameRawDescriptors));
     
     detector.detectMultiScale(img, found, hitThreshold, wndStride, padding, scale0, groupThreshold);
     for (size_t n = 0; n < found.size(); n++)
