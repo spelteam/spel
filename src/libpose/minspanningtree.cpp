@@ -45,7 +45,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
     graphNodes.push_back(rootNode);
     mst.insert(imgLoc, rootNode); //insert root node
     float absoluteMin = ism.mean();
-    while(mst.size() != treeSize && mst.size()<ism.size()) //do this until the tree is complete
+    while(mst.size() != static_cast<size_t>(treeSize) && mst.size()< static_cast<size_t>(ism.size())) //do this until the tree is complete
     {
         //cout << "in..." << endl;
         Point2i minLoc(-1,-1);

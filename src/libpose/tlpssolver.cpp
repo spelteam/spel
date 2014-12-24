@@ -337,7 +337,7 @@ float TLPSSolver::computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, m
 
 	//return the error between these'
 	float score=0;
-	for(int i=0; i<partPolygon.size(); ++i)
+    for(size_t i=0; i<partPolygon.size(); ++i)
 		score+= pow(partPolygon[i].x-labelPolygon[i].x, 2)+pow(partPolygon[i].y-labelPolygon[i].y,2);
 	
 	return lambda*score;

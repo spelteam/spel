@@ -3,6 +3,8 @@
 
 #include "frame.hpp"
 
+//This class represents frames that
+//founded by solver
 class Lockframe : public Frame
 {
   public:

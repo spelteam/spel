@@ -20,7 +20,7 @@ struct TPOSERECT
   T p3;
   T p4;
 };
-
+//represents rectangle
 template <class T>
 struct POSERECT
 {
@@ -30,7 +30,13 @@ struct POSERECT
   T point2;
   T point3;
   T point4;
-
+  //check whether point lies in rectangle
+  //Arguments:
+  //point - point which checks
+  //Result:
+  //1 - point lies in rectangle
+  //-1 - point doesn't lies in rectangle
+  //0 - point lies on the edge(vertex)
   int8_t containsPoint(T point)
   {
     vector <T> contour;
@@ -40,7 +46,7 @@ struct POSERECT
     contour.push_back(point4);
     return pointPolygonTest(contour, point, false);
   }
-
+  //convert rectangle to vector of points
   vector <T> asVector()
   {
     vector <T> contour;

@@ -3,6 +3,8 @@
 
 #include "frame.hpp"
 
+//This class represents frames that
+//interpolated between keyframes
 class Interpolation : public Frame
 {
   public:

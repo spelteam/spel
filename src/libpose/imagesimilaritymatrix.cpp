@@ -46,9 +46,9 @@ bool ImageSimilarityMatrix::operator==(const ImageSimilarityMatrix &s) const
     bool res=true;
 
     //if every element is 1
-    for(uint32_t i=0; i<result.rows; ++i)
+    for(int i=0; i<result.rows; ++i)
     {
-        for(uint32_t j=0; j<result.cols; ++j)
+        for(int j=0; j<result.cols; ++j)
         {
             if(result.at<float>(i,j)==0)
                 res=false;
@@ -64,9 +64,9 @@ bool ImageSimilarityMatrix::operator!=(const ImageSimilarityMatrix &s) const
     bool res=true;
 
     //if every element is 1
-    for(uint32_t i=0; i<result.rows; ++i)
+    for(int i=0; i<result.rows; ++i)
     {
-        for(uint32_t j=0; j<result.cols; ++j)
+        for(int j=0; j<result.cols; ++j)
         {
             if(result.at<float>(i,j)==0)
                 res=false;
@@ -86,9 +86,9 @@ bool ImageSimilarityMatrix::read(string filename)
     ifstream in(filename.c_str());
     if(in.is_open())
     {
-        for(uint32_t i=0; i<imageSimilarityMatrix.rows; ++i)
+        for(int i=0; i<imageSimilarityMatrix.rows; ++i)
         {
-            for(uint32_t j=0; j<imageSimilarityMatrix.cols; ++j)
+            for(int j=0; j<imageSimilarityMatrix.cols; ++j)
             {
                 float score;
                 in >>  score;
@@ -109,9 +109,9 @@ bool ImageSimilarityMatrix::write(string filename) const
     ofstream out(filename.c_str());
     if(out.is_open())
     {
-        for(uint32_t i=0; i<imageSimilarityMatrix.rows; ++i)
+        for(int i=0; i<imageSimilarityMatrix.rows; ++i)
         {
-            for(uint32_t j=0; j<imageSimilarityMatrix.cols; ++j)
+            for(int j=0; j<imageSimilarityMatrix.cols; ++j)
             {
                 out << imageSimilarityMatrix.at<float>(i,j) << " ";
             }
@@ -416,9 +416,9 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
 float ImageSimilarityMatrix::min() const//find the non-zero minimum in the image similarity matrix
 {
     float min = FLT_MAX;
-    for(uint32_t i=0; i<imageSimilarityMatrix.rows; ++i)
+    for(int i=0; i<imageSimilarityMatrix.rows; ++i)
     {
-        for(uint32_t j=0; j<imageSimilarityMatrix.cols; ++j)
+        for(int j=0; j<imageSimilarityMatrix.cols; ++j)
         {
             float val = imageSimilarityMatrix.at<float>(i,j);
             if(val!=0 && val<min && i!=j)
@@ -432,9 +432,9 @@ float ImageSimilarityMatrix::min() const//find the non-zero minimum in the image
 float ImageSimilarityMatrix::max() const//find the non-zero minimum in the image similarity matrix
 {
     float max = -1;
-    for(uint32_t i=0; i<imageSimilarityMatrix.rows; ++i)
+    for(int i=0; i<imageSimilarityMatrix.rows; ++i)
     {
-        for(uint32_t j=0; j<imageSimilarityMatrix.cols; ++j)
+        for(int j=0; j<imageSimilarityMatrix.cols; ++j)
         {
             float val = imageSimilarityMatrix.at<float>(i,j);
             if(val>max)
@@ -449,9 +449,9 @@ float ImageSimilarityMatrix::mean() const//find the non-zero minimum in the imag
 {
     float sum=0;
     float count=0;
-    for(uint32_t i=0; i<imageSimilarityMatrix.rows; ++i)
+    for(int i=0; i<imageSimilarityMatrix.rows; ++i)
     {
-        for(uint32_t j=0; j<imageSimilarityMatrix.cols; ++j)
+        for(int j=0; j<imageSimilarityMatrix.cols; ++j)
         {
             float val = imageSimilarityMatrix.at<float>(i,j);
             if(val!=0 && i!=j)
