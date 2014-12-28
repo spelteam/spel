@@ -18,6 +18,7 @@ class HogDetector : public Detector
     int id;
     map <uint32_t, vector <float>> frameHOGDescriptors;
     map <uint32_t, map <PHPoint<uint32_t>, vector <float>>> rawDescriptors;
+    map <uint32_t, map <uint32_t, map<PHPoint<float>, vector <float>>>> frameBodyPartDescriptors;
 };
 
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_
