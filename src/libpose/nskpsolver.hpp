@@ -20,6 +20,7 @@
 
 using namespace std;
 using namespace opengm;
+using namespace cv;
 
 //define the space and the model
 
@@ -38,9 +39,9 @@ class NSKPSolver: Solver
   public:
     NSKPSolver();
     ~NSKPSolver(); //inherited virtual
-    Solution solve(const vector<Frame*>& frames); //inherited virtual
-    Solution solve(const vector<Frame*>& frames, map<string, float>  params); //inherited virtual
-    Solution solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM); //inherited virtual
+    vector<vector<Solvlet> > solve(const vector<Frame*>& frames); //inherited virtual
+    vector<vector<Solvlet> > solve(const vector<Frame*>& frames, map<string, float>  params); //inherited virtual
+    vector<vector<Solvlet> > solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM); //inherited virtual
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name

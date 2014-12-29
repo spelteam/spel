@@ -17,7 +17,7 @@ NSKPSolver::~NSKPSolver() //inherited virtual
 
 }
 
-Solution NSKPSolver::solve(const vector<Frame*>& frames) //inherited virtual
+vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames) //inherited virtual
 {
 	map<string, float> params; //set the default parameters vector
 
@@ -27,7 +27,7 @@ Solution NSKPSolver::solve(const vector<Frame*>& frames) //inherited virtual
 	return this->solve(frames, params);
 }
 
-Solution NSKPSolver::solve(const vector<Frame*>& frames, map<string, float> params) //inherited virtual
+vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames, map<string, float> params) //inherited virtual
 {
 	//compute the ISM here
 	ImageSimilarityMatrix ISM(frames);
@@ -36,8 +36,10 @@ Solution NSKPSolver::solve(const vector<Frame*>& frames, map<string, float> para
 	return this->solve(frames, params, ISM);
 }
 
-Solution NSKPSolver::solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
+vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
 {
+	//parametrise the number of times frames get propagated
+
 	//propagate keyframes
 	vector<Frame*> propagatedFrames = propagateKeyframes(frames, params, ism);
 
@@ -57,6 +59,10 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 	// int mst_max_size=params.at("mst_max_size"); //@FIXME PARAM this is a param, not static
 
 	//the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
+
+	//emplace beforehand
+	float mst_thresm_multiplier=params.at("mst_thresh_multiplier");
+	int mst_max_size=params.at("mst_max_size");
 
 	vector<Frame*> lockframes;
 
@@ -222,11 +228,14 @@ int NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
+	//emplace first
+	float lambda = params.at("imageCoeff");
+	float scoreIndex = params.at("scoreIndex");
 	//@FIX
 	//for now, just return the first available score
 	vector<Score> scores = label.getScores();
 	if(scores.size()>0)
-		return scores[0].getScore();
+		return lambda*scores[scoreIndex].getScore();
 	else //if no scores present return -1
 		return -1;
 }
@@ -234,6 +243,8 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
 //compute distance to parent limb label
 float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params)
 {
+	//emplace default
+	float lambda = params.at("jointCoeff");
 	Point2f p0, p1, c0, c1;
 
 	//@FIX this is really too simplistic, connecting these points
@@ -241,20 +252,20 @@ float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& pare
 	parent.getEndpoints(p0,p1);
 
 	//return the squared distance from the lower parent joint p1, to the upper child joint c0
-	return pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2);
+	return lambda*(pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2));
 }
 
 //compute distance to the body part prior
 float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params)
 {
+	float lambda = params.at("priorCoeff");
 	Point2f p0,p1, pp0, pp1;
 	label.getEndpoints(p0,p1);
 	pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();	
 	pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
 
-
 	//return the sum of squared distances between the corresponding joints, prior to label
-	return pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2);
+	return lambda*(pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2));
 }
 
 
@@ -262,7 +273,7 @@ float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior
 //build an MST for every frame and return the vector
 vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params) //int treeSize, float threshold)
 {
-	//use emplace instead of setting some defaults?
+	//emplace defaults
 	int treeSize = params.at("treeSize");
 	float simThresh = params.at("simThresh");
     vector<MinSpanningTree> frameMST;
@@ -341,121 +352,56 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
 }
 
 float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params)
-{
-    // /*
-    //   There should clearly be several factors that affect the outcome of an evaluation:
-    //   1) Mask coverage
-    //   2) Parts falling outside mask range
-    //   3) ?
+{    
+    Mat maskMat = frame->getMask();
+    Mat labelMat;
+    Mat boolMaskMat;
+    labelMat.create(maskMat.rows, maskMat.cols, DataType<uchar>::type);
+    boolMaskMat.create(maskMat.rows, maskMat.cols, DataType<uchar>::type);
 
-    //   */
-    // float numPixels=0; //total number of pixels in mask
-    // float numHitPixels=0; //number of pixels in polygon that are inside the mask
-    // float numMissPixels=0; //number of pixels in polygons that are outside of the mask
-    // Mat maskMat = frame->getMask();
-    // //we are at some frame with the image already loaded (currentFrameNumber)    
+    //now for every pixel, if it belongs to any label, mark it as true, otherwise false
+    for(uint32_t i=0; i<labelMat.rows; ++i)
+    {
+    	for(uint32_t j=0; j<labelMat.cols; ++j)
+    	{
+    		labelMat.at<uchar>(i,j) = 0;
+		   	
+		   	int intensity = maskMat.at<uchar>(i, j);
+		   	bool blackPixel=intensity<10; //mask pixel intensity threshold below which we consider it to be black
 
-    // //count the total number of mask pixels
-    // for(uint x=0; x<maskMat.rows(); ++x)
-    // {
-    //     for(uint y=0; y<maskMat.cols(); ++y)
-    //     {
-    //     	//@FIXME need check to see whether maskMat is really of type uchar
-    //         int intensity = maskMat.at<uchar>(y, x);
-    //         bool blackPixel=intensity<10; //mask pixel intensity threshold below which we consider it to be black
+            if(!blackPixel) //only take in pixels that are in the mask
+                boolMaskMat.at<uchar>(i,j)=255; //contains only the pixels in our mask
+            else
+            	boolMaskMat.at<uchar>(i,j)=0;
+            		
+    		for(uint32_t l=0; l<labels.size();++l)
+    		{
+    			if(labels[i].containsPoint(Point2f(i,j)))
+    			{
+    				labelMat.at<uchar>(i,j) = 255;
+    				break; //once it's hit any label, it stays in the mask, safe to break
+    			}
+    		}
+    	}
+    }
 
-    //         //QColor maskCol = mask.pixel(x,y);
-    //         if(!blackPixel) //only take in pixels that are in the mask
-    //         {
-    //             numPixels++; //count the total number of pixels
-    //         }
-    //     }
-    // }
+    Mat diff = labelMat==boolMaskMat; //creates a uchar mask
 
-    // vector<float> limbScores;
-    // for(uint numLabel=0; numLabel<labels.size(); ++numLabel)
-    // {
-    //     float pixHit=0;
-    //     float pixTotal=0;
+    float numPixDiff = countNonZero(diff); //this will give the number of unexplained pixels of both types
+    float numMaskPix = countNonZero(boolMaskMat); //this is the number of pixles in our ground truth mask
+    float numLabelPix = countNonZero(labelMat); //this is the number of pixels in the labels
 
-    //     LimbLabel label = labels[numLabel];
-
-    //     for(uint x=0; x<maskMat.rows(); ++x)
-    //     {
-    //         for(uint y=0; y<maskMat.cols(); ++y)
-    //         {
-    //         	//@NEEDS FIXING
-    //             if(label.containsPoint(Point2f(x,y))) //polygon from label) //only take in pixels that are in the mask
-    //             {
-    //                 pixTotal++;
-
-    //                 int intensity = maskMat.at<uchar>(y, x);
-
-    //                 bool blackPixel=intensity<10; //if all intensities are zero
-
-    //                 //QColor maskCol = mask.pixel(x,y);
-    //                 if(!blackPixel)
-    //                 {
-    //                     pixHit++;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     limbScores.push_back(pixHit/pixTotal);
-    // }
+    //we can now construct a score which analyses the difference between explained and unexplained pixels
+    //mask being left unexplained and label pixels falling outside of mask should carry a penalty
 
 
-    // for(uint x=0; x<mask.width(); ++x)
-    // {
-    //     for(uint y=0; y<mask.height(); ++y)
-    //     {
+    //there are two test parameters: 1) what pixels are covered; 2) what label pixels lie outside
+    //For (1) use .containsPoint(Point2f point) to test whether label contains a certain point, for each point in mask (unexplained mask)
+    //For (2) build a matrix of bools of the same size as the original mask matrix
 
-    //         int intensity = maskMat.at<uchar>(y, x);
 
-    //         bool blackPixel=intensity<10; //if all intensities are zero
-    //         //QColor maskCol = mask.pixel(x,y);
-
-    //         if(!blackPixel) //only take in pixels that are in the mask
-    //         {
-    //             numPixels++; //count the total numbe rf pixels
-    //             bool hit=false;
-    //             for(uint i=0; i<labels.size(); ++i)
-    //             {
-
-    //                 LimbLabel label = labels[i];
-    //                 if(label.containsPoint(Point2f(x,y))) //polygon from label
-    //                 {
-    //                     hit = true;
-    //                     break;
-    //                 }
-    //             }
-    //             if(hit)
-    //             {
-    //                 numHitPixels++;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             bool hit=false;
-    //             for(uint i=0; i<labels.size(); ++i)
-    //             {
-    //                 LimbLabel label = labels[i];
-
-    //                 if(label.containsPoint(Point2f(x,y))) //polygon from label
-    //                 {
-    //                     hit = true;
-    //                     break;
-    //                 }
-    //             }
-    //             if(hit)
-    //             {
-    //                 //colour this pixel in as hit
-    //                 numMissPixels++;
-    //             }
-    //         }
-    //     }
-    // }
+    //the unexplainedMaskCoeff weight makes the unexplained empty mask space more or less important
+	return numPixDiff/numMaskPix; //so a value of 1 means there were as many pixels wrong as right in terms of coverage
 
     // float avgSuppScore=0;
 
@@ -488,6 +434,4 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
     // //@FIXME needs testing to establish that this scheme makes sense
     // return (numHitPixels-numMissPixels)/numPixels;
-
-	return 1.0;
 }
