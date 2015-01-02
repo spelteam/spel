@@ -9,6 +9,7 @@
 
 #include <detector.hpp>
 #include <keyframe.hpp>
+#include <solvlet.hpp>
 #include <interpolation.hpp>
 
 using namespace std;
@@ -22,6 +23,7 @@ class ProjectLoader
     bool Load(string fileName);
     bool Save(vector <vector <LimbLabel>> labels, string outFolder, int frameID);
     bool Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth);
+    bool drawFrameSolvlets(vector<Solvlet> solvlets, Frame *frame, string outFolder, Scalar color, int lineWidth);
     void static ResizeImage(Mat &image, int32_t &cols, int32_t &rows);
     vector <Frame*> getFrames(void);
   private:

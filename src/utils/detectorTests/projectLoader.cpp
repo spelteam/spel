@@ -409,8 +409,25 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
   return true;
 }
 
+
+bool ProjectLoader::drawFrameSolvlets(vector<Solvlet> solvlets, Frame *frame, string outFolder, Scalar color, int lineWidth)
+{
+  //draw
+  string outFileName = curFolder + outFolder;
+  if (outFileName[outFileName.size()] != '/')
+    outFileName += "/";
+  stringstream ss;
+  ss << frame->getID();
+  ss << ".png";
+  outFileName += ss.str();
+  Mat image;
+
+  return true;
+}
+
 bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
 {
+
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
