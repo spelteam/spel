@@ -8,18 +8,18 @@
 
 using namespace Eigen;
 
-TLPSSolver::TLPSSolver()
+TLPSSolver::TLPSSolver(void)
 {
 	id=0;
 	name="TLPS";
 }
 
-TLPSSolver::~TLPSSolver()
+TLPSSolver::~TLPSSolver(void)
 {
 
 }
 
-vector<vector<Solvlet> > TLPSSolver::solve(const vector<Frame*>& frames) //inherited virtual
+vector<Solvlet> TLPSSolver::solve(const vector<Frame*>& frames) //inherited virtual
 {
 	map<string, float> params; //set the default parameters vector
 
@@ -30,7 +30,7 @@ vector<vector<Solvlet> > TLPSSolver::solve(const vector<Frame*>& frames) //inher
 	return this->solve(frames, params);
 }
 
-vector<vector<Solvlet> > TLPSSolver::solve(const vector<Frame*>& frames, map<string, float> params) //inherited virtual
+vector<Solvlet> TLPSSolver::solve(const vector<Frame*>& frames, map<string, float> params) //inherited virtual
 {
 	//first slice up the sequences
 	vector<vector<Frame*> > slices = slice(frames);
@@ -237,8 +237,17 @@ vector<vector<Solvlet> > TLPSSolver::solve(const vector<Frame*>& frames, map<str
 
 	//take information from solver parameters to do this
 
+	//rearrange this into one vector of solvlets before returning
+	vector<Solvlet> retSolve;
+	for(int i=0; i<sequenceSolvlets.size();++i)
+	{
+		for(int j=0; j<sequenceSolvlets[i].size(); ++j)
+		{
+			retSolve.push_back(sequenceSolvlets[i][j]);
+		}
+	}
 
-	return sequenceSolvlets;
+	return retSolve;
 }
 
 float TLPSSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params)
@@ -260,6 +269,8 @@ int TLPSSolver::findFrameIndexById(int id, vector<Frame*> frames)
 float TLPSSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
 	//@FIX
+	params.emplace("imageCoeff", 0.5);
+	params.emplace("scoreIndex", 0);
 	float lambda = params.at("imageCoeff");
 	float scoreIndex = params.at("scoreIndex");
 	//for now, just return the first available score
@@ -275,6 +286,7 @@ float TLPSSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
 float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params)
 {
 	//emplace default
+	params.emplace("jointCoeff", 0.5);
 	float lambda = params.at("jointCoeff");
 	//@PARAM there should be a parameter that sets the joint connectivity penalty constant (alpha)
 	//compute the joint joining cost for the skeleton
@@ -291,6 +303,7 @@ float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& pare
 float TLPSSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, Skeleton& skeleton, map<string, float> params)
 {
 	//emplace default
+	params.emplace("priorCoeff", 0.5);
 	float lambda = params.at("priorCoeff");
 	//@PARAM there should be a parameter that sets the strength of the penalty when deviating from the prior
 	//compute the cost to interpolation prior
@@ -306,6 +319,7 @@ float TLPSSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior
 float TLPSSolver::computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, map<string, float> params)
 {
 	//emplace default
+	params.emplace("tempCoeff", 0.5);
 	float lambda = params.at("tempCoeff");
 	//compute the temporal connection cost to label in the past
 
@@ -324,6 +338,7 @@ float TLPSSolver::computePastTempCost(const LimbLabel& thisLabel, const LimbLabe
 float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, map<string, float> params)
 {
 	//emplace default
+	params.emplace("tempCoeff", 0.5);
 	float lambda = params.at("tempCoeff");
 	//compute temporal connection cost to label in the future
 	//@PARAM there needs to be a beta param here as well
@@ -340,6 +355,7 @@ float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLa
 float TLPSSolver::computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, map<string, float> params)
 {
 	//emploace default
+	params.emplace("anchorCoeff", 1.0);
 	float lambda = params.at("anchorCoeff");
 	
 	int limbId = thisLabel.getLimbID();

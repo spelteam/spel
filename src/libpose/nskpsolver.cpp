@@ -17,7 +17,7 @@ NSKPSolver::~NSKPSolver() //inherited virtual
 
 }
 
-vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames) //inherited virtual
+vector<Solvlet> NSKPSolver::solve(const vector<Frame*>& frames) //inherited virtual
 {
 	map<string, float> params; //set the default parameters vector
 
@@ -27,7 +27,7 @@ vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames) //inher
 	return this->solve(frames, params);
 }
 
-vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames, map<string, float> params) //inherited virtual
+vector<Solvlet> NSKPSolver::solve(const vector<Frame*>& frames, map<string, float> params) //inherited virtual
 {
 	//compute the ISM here
 	ImageSimilarityMatrix ISM(frames);
@@ -36,7 +36,7 @@ vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames, map<str
 	return this->solve(frames, params, ISM);
 }
 
-vector<vector<Solvlet> > NSKPSolver::solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
+vector<Solvlet> NSKPSolver::solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
 {
 	//parametrise the number of times frames get propagated
 

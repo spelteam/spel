@@ -15,13 +15,13 @@ class Solvlet
     Solvlet(int id, vector<LimbLabel> labels);
     
     Solvlet &operator=(const Solvlet &s);
-    bool operator==(const Solvlet &s) const;
-    bool operator!=(const Solvlet &s) const;
+    // bool operator==(const Solvlet &s) const;
+    // bool operator!=(const Solvlet &s) const;
 
-    int getFrameId(void);
+    int getFrameId(void) const;
     void setFrameId(int _id);
 
-    vector<LimbLabel> getLabels(void);
+    vector<LimbLabel> getLabels(void) const;
     void setLabels(vector<LimbLabel> _labels);
 
     Skeleton toSkeleton(void);

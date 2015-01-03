@@ -36,10 +36,10 @@ class TLPSSolver: Solver
   typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
   public:
-    TLPSSolver();
-    ~TLPSSolver(); //inherited virtual
-    vector<vector<Solvlet> > solve(const vector<Frame*>& frames); //inherited virtual
-    vector<vector<Solvlet> > solve(const vector<Frame*>& frames, map<string, float> params); //inherited virtual
+    TLPSSolver(void);
+    ~TLPSSolver(void); //inherited virtual
+    vector<Solvlet> solve(const vector<Frame*>& frames); //inherited virtual
+    vector<Solvlet> solve(const vector<Frame*>& frames, map<string, float> params); //inherited virtual
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name

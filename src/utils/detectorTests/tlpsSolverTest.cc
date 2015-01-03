@@ -2,9 +2,7 @@
 #include <tlpssolver.hpp>
 #include "projectLoader.hpp"
 
-
 using namespace std;
-
 
 int main (int argc, char **argv)
 {
@@ -34,62 +32,28 @@ int main (int argc, char **argv)
     return -1;
   }
   
-  //detection stage
-  ColorHistDetector detector;
   map <string, float> params; //use the default params
 
-  Solution solve;
-  cout << "Training..." << endl;
-  try
-  {
-    TLPSSolver tSolver;
-
-    //solve with some default params
-    solve = tSolver.solve(projectLoader.getFrames(), params);
-    //detector.train(projectLoader.getFrames(), params);
-  }
-  catch(exception &e)
-  {
-    cerr << e.what() << endl;
-    return -1;
-  }
-
-  //now examine the solution
+  vector<Solvlet> solve;
   
+  
+  vector <Frame*> vFrames = projectLoader.getFrames();
+  vector <Frame*>::iterator i;
 
-//   cout << "Training complete" << endl;
-//     vector <Frame*> vFrames = projectLoader.getFrames();
-//   vector <Frame*>::iterator i;
-//   map <string, float> detectParams;
-//   cout << "Detecting..." << endl;
-//   for (i = vFrames.begin(); i != vFrames.end(); ++i)
-//   {
-//     Frame *f = *i;
-// #ifndef DEBUG
-//     if (f->getFrametype() == INTERPOLATIONFRAME)
-// #endif  // DEBUG
-//     {
-//       vector <vector <LimbLabel> > labels;
-//       try
-//       {
-//         labels = detector.detect(f, detectParams);
-//         projectLoader.Save(labels, argv[2], f->getID());
-//         projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
-//       }
-//       catch (exception &e)
-//       {
-//         cerr << e.what() << endl;
-//         continue;
-//       }
-//     }
-//   }
-//   cout << "Detecting complete" << endl;
-//   for (i = vFrames.begin(); i != vFrames.end(); ++i)
-//   {
-//     Frame *f = *i;
-//     if (f != 0)
-//       delete f;
-//   }
-//   return 0;
+  TLPSSolver tSolver;
+
+  cout << "Solving using TLPSSolver..." << endl;
+  //solve with some default params
+  solve = tSolver.solve(vFrames, params);
+
+  //draw the solution
+  for(i=vFrames.begin(); i!=vFrames.end(); ++i)
+  {
+    Frame *f = *i;
+
+    projectLoader.drawFrameSolvlets(solve[f->getID()], f, argv[2], Scalar(0,0,255), 2);
+  }
+
+  return 0;
 }
 

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "solution.hpp"
+#include "solvlet.hpp"
 #include "frame.hpp"
 
 using namespace std;
@@ -11,12 +11,12 @@ using namespace std;
 class Solver
 {
   public:
-  	Solver();
-  	virtual ~Solver();
-  	virtual Solution solve(vector<Frame*>);
-  	virtual Solution solve(vector<Frame*>, vector<float> params);
-  	string getName(); //get the solver name. Every class inheriting solver has its own Name
-  	string getId(); //get the solver Id. Every class inheriting solver has is own ID
+  	Solver(void);
+  	virtual ~Solver(void);
+  	virtual vector<Solvlet> solve(const vector<Frame*>& v);
+  	virtual vector<Solvlet> solve(const vector<Frame*>& v, map<string, float> params);
+  	string getName(void); //get the solver name. Every class inheriting solver has its own Name
+  	int getId(void); //get the solver Id. Every class inheriting solver has its own ID
   protected:
   	int id;
   	string name;

@@ -95,3 +95,7 @@ float LimbLabel::getSumScore(void) const
   return sum;
 }
 
+void LimbLabel::getEndpoints(Point2f &p0, Point2f &p1) const
+{
+  
+}

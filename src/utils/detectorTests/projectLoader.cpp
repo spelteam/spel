@@ -410,7 +410,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
 }
 
 
-bool ProjectLoader::drawFrameSolvlets(vector<Solvlet> solvlets, Frame *frame, string outFolder, Scalar color, int lineWidth)
+bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth)
 {
   //draw
   string outFileName = curFolder + outFolder;
@@ -421,6 +421,74 @@ bool ProjectLoader::drawFrameSolvlets(vector<Solvlet> solvlets, Frame *frame, st
   ss << ".png";
   outFileName += ss.str();
   Mat image;
+
+  try
+  {
+    image = frame->getImage();
+  }
+  catch(...)
+  {
+    cerr << "Can't get image from frame" << endl;
+    return false;
+  }
+
+  vector<LimbLabel> labels = sol.getLabels();
+  vector<LimbLabel>::iterator ls; 
+
+  for (ls = labels.begin(); ls != labels.end(); ++ls)
+  {
+    Point2f p1, p2, p3, p4;
+    vector <Point2f> polygon;
+    try
+    {
+     polygon = ls->getPolygon();
+    }
+    catch(...)
+    {
+      cerr << "Can't get polygon" << endl;
+      continue;
+    }
+    try
+    {
+      p1 = polygon.at(0);
+    }
+    catch (...)
+    {
+      cerr << "Can't get first point from polygon" << endl;
+      continue;
+    }
+    try
+    {
+      p2 = polygon.at(1);
+    }
+    catch(...)
+    {
+      cerr << "Can't get second point from polygon" << endl;
+      continue;
+    }
+    try
+    {
+      p3 = polygon.at(2);
+    }
+    catch(...)
+    {
+      cerr << "Can't get third point from polygon" << endl;
+      continue;
+    }
+    try
+    {
+      p4 = polygon.at(3);
+    }
+    catch(...)
+    {
+      cerr << "Can't get fourth point from polygon" << endl;
+      continue;
+    }
+    line(image, p1, p2, color, lineWidth, CV_AA); 
+    line(image, p2, p3, color, lineWidth, CV_AA); 
+    line(image, p3, p4, color, lineWidth, CV_AA); 
+    line(image, p4, p1, color, lineWidth, CV_AA); 
+  }
 
   return true;
 }
