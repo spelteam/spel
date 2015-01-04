@@ -1191,6 +1191,8 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float pixDistAvg = 0;
   float pixDistNum = 0;
   PartModel model;
+  stringstream detectorName;
+  detectorName << getID();
   try
   {
     model = partModels.at(bodyPart.getPartID());
@@ -1326,12 +1328,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
 #endif  // DEBUG
       throw logic_error(ss.str());
     }*/
-    Score sc(score, "");
+    Score sc(score, detectorName.str());
     s.push_back(sc);
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
   }
   cerr << "Dirty label!" << endl;
-  Score sc(1.0, "");
+  Score sc(1.0, detectorName.str());
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }

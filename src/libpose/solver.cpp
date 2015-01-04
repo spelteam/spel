@@ -24,7 +24,7 @@ int Solver::getId()
 vector<Solvlet> Solver::solve(const vector<Frame*>& v)
 {
 	map<string, float> params;
-	solve(v, params);
+	return solve(v, params);
 }
 
 vector<Solvlet> Solver::solve(const vector<Frame*>& v, map<string, float> params)

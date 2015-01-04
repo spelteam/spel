@@ -52,5 +52,5 @@ void Solvlet::setLabels(vector<LimbLabel> _labels)
 
 Skeleton Solvlet::toSkeleton(void)
 {
-
+  return Skeleton();
 }
