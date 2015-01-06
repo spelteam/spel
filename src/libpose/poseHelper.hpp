@@ -57,6 +57,14 @@ struct POSERECT
     return contour;
   }
 
+  template <typename D> void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy)
+  {
+    minx = min(min(point1.x, point2.x), min(point3.x, point4.x));
+    maxx = max(max(point1.x, point2.x), max(point3.x, point4.x));
+    miny = min(min(point1.y, point2.y), min(point3.y, point4.y));
+    maxy = max(max(point1.y, point2.y), max(point3.y, point4.y));
+  }
+
   bool operator==(const POSERECT <T> &rect) const
   {
     return (this->point1 == rect.point1 && this->point2 == rect.point2 && this->point3 == rect.point3 && this->point4 == rect.point4);
