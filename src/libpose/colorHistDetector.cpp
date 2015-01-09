@@ -135,7 +135,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         break;
       }
       j1 = joint->getImageLocation();
-      float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
+      float boneLength = (float) sqrt(PoseHelper::distSquared(j0, j1));
 //TODO (Vitaliy Koshura): Check this!
       float boneWidth = 0;
       try
@@ -152,13 +152,13 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         throw logic_error(ss.str());
       }
       Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-      c1 = Point2f(0, 0.5 * boneWidth);
-      c2 = Point2f(boneLength, 0.5 * boneWidth);
-      c3 = Point2f(boneLength, -0.5 * boneWidth);
-      c4 = Point2f(0, -0.5 * boneWidth);
-      Point2f polyCenter = Point2f(boneLength * 0.5, 0);
+      c1 = Point2f(0.f, 0.5f * boneWidth);
+      c2 = Point2f(boneLength, 0.5f * boneWidth);
+      c3 = Point2f(boneLength, -0.5f * boneWidth);
+      c4 = Point2f(0.f, -0.5f * boneWidth);
+      Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f);
       Point2f direction = j1 - j0;
-      float rotationAngle = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
+      float rotationAngle = float( PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI) );
 // rotate polygon and translate
       c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
       c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
@@ -572,7 +572,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     float interpolateStep = (float)step / (float)stepCount;  // Interpolate2Ddisplacement
     Point2f j0 = pj0 * (1 - interpolateStep) + nj0 * interpolateStep;
     Point2f j1 = pj1 * (1 - interpolateStep) + nj1 * interpolateStep;
-    float boneLength = (j0 == j1) ? 1.0 : sqrt(PoseHelper::distSquared(j0, j1));
+    float boneLength = (j0 == j1) ? 1.0f : (float) sqrt(PoseHelper::distSquared(j0, j1));
     float boxWidth = 0;
     try
     {
@@ -589,8 +589,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       throw logic_error(ss.str());
     }
     Point2f direction = j1 - j0;
-    float theta = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
-    float minDist = boxWidth * 0.2;
+    float theta = float ( PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
+    float minDist = boxWidth * 0.2f;
     if (minDist < 2) minDist = 2;
     float searchDistance = 0;
     try
@@ -647,9 +647,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       throw logic_error(ss.str());
     }
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
-    for (float x = suggestStart.x - searchDistance * 0.5; x < suggestStart.x + searchDistance * 0.5; x += minDist)
+    for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
     {
-      for (float y = suggestStart.y - searchDistance * 0.5; y < suggestStart.y + searchDistance * 0.5; y += minDist)
+      for (float y = suggestStart.y - searchDistance * 0.5f; y < suggestStart.y + searchDistance * 0.5f; y += minDist)
       {
         if (x < maskMat.cols && y < maskMat.rows)
         {
@@ -964,7 +964,7 @@ float ColorHistDetector::getAvgSampleSizeFgBetween(const PartModel &partModel, u
 {
   if(s1 >= partModel.fgSampleSizes.size() || s2 >= partModel.fgSampleSizes.size())
     return 0;
-  return (partModel.fgSampleSizes[s1] + partModel.fgSampleSizes[s2]) / 2.0;
+  return (partModel.fgSampleSizes[s1] + partModel.fgSampleSizes[s2]) / 2.0f;
 }
 
 //TODO (Vitaliy Koshura): Need unit test
@@ -1168,17 +1168,17 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
   float x = boxCenter.x;
   float y = boxCenter.y;
-  float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
+  float boneLength = (float) sqrt(PoseHelper::distSquared(j0, j1));
   //TODO (Vitaliy Koshura): Need real implementation here
   float boxWidth = /*frame->getSkeleton().getScale() / */(boneLength / bodyPart.getLWRatio());
-  float rot = PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
+  float rot = float( PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI) );
   vector <Point3i> partPixelColours;
   Point2f c1, c2, c3, c4, polyCenter;
-  c1 = Point2f(0, 0.5 * boxWidth);
-  c2 = Point2f(boneLength, 0.5 * boxWidth);
-  c3 = Point2f(boneLength, -0.5 * boxWidth);
-  c4 = Point2f(0, -0.5 * boxWidth);
-  polyCenter = Point2f(boneLength * 0.5, 0);
+  c1 = Point2f(0.f, 0.5f * boxWidth);
+  c2 = Point2f(boneLength, 0.5f * boxWidth);
+  c3 = Point2f(boneLength, -0.5f * boxWidth);
+  c4 = Point2f(0.f, -0.5f * boxWidth);
+  polyCenter = Point2f(boneLength * 0.5f, 0.f);
   c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rot) + boxCenter - polyCenter;
   c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rot) + boxCenter - polyCenter;
   c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rot) + boxCenter - polyCenter;
@@ -1303,7 +1303,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     PartModel model(nBins);
     setPartHistogramm(model, partPixelColours);
-    float score = 1.0 - (supportScore + inMaskSupportScore);
+    float score = 1.0f - (supportScore + inMaskSupportScore);
     /*if (score < 0)
     {
       stringstream ss;
@@ -1322,4 +1322,3 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }
-
