@@ -317,7 +317,7 @@ bool ProjectLoader::Load(string fileName)
         int id;
         bool isOccluded;
         id = e->IntAttribute(bodyPartIdParam.c_str());
-        isOccluded = e->Attribute(bodyPartIsOccludedParam.c_str());
+        isOccluded = e->BoolAttribute(bodyPartIsOccludedParam.c_str());
         BodyPart *part = 0;
         for (topBodyParts = trBodyPartsCopy.begin(); topBodyParts != trBodyPartsCopy.end(); ++topBodyParts)
         {

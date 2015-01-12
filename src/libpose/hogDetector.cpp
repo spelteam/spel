@@ -112,6 +112,7 @@ void HogDetector::parseBodyPartDescriptors(Frame *frame, map <PHPoint<uint32_t>,
 
   tree <BodyPart> trBodyPart = frame->getSkeleton().getPartTree();
   map <uint32_t, map<PHPoint<float>, vector <float>>> frameDescriptors;
+  map <uint32_t, PartModel> framePartModels;
   for (tree <BodyPart>::iterator part = trBodyPart.begin(); part != trBodyPart.end(); ++part)
   {
     map <PHPoint <float>, vector <float>> partMap;
@@ -119,22 +120,64 @@ void HogDetector::parseBodyPartDescriptors(Frame *frame, map <PHPoint<uint32_t>,
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
 
+    map <PHPoint<uint32_t>, vector <float>> partModelPartDescriptors;
+    Point2f j0, j1;
+    BodyJoint *joint = frame->getSkeleton().getBodyJoint(part->getParentJoint());
+    if (joint == 0)
+    {
+#ifdef DEBUG
+      cerr << ERROR_HEADER << "Invalid parent joint" << endl;
+#endif  // DEBUG
+      break;
+    }
+    j0 = joint->getImageLocation();
+    joint = 0;
+    joint = frame->getSkeleton().getBodyJoint(part->getChildJoint());
+    if (joint == 0)
+    {
+#ifdef DEBUG
+      cerr << ERROR_HEADER << "Invalid child joint" << endl;
+#endif  // DEBUG
+      break;
+    }
+    j1 = joint->getImageLocation();
+    float boneLength = (float)sqrt(PoseHelper::distSquared(j0, j1));
+    //TODO (Vitaliy Koshura): Check this!
+    float boneWidth = 0;
+    boneWidth = boneLength / part->getLWRatio()/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
+    Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
+    Point2f c1 = Point2f(0.f, 0.5f * boneWidth);
+    Point2f c2 = Point2f(boneLength, 0.5f * boneWidth);
+    Point2f c3 = Point2f(boneLength, -0.5f * boneWidth);
+    Point2f c4 = Point2f(0.f, -0.5f * boneWidth);
+    Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f);
+    Point2f direction = j1 - j0;
+    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
+    // rotate polygon and translate
+    c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
+
+    PartModel partModel;
+    partModel.partModelRect = POSERECT <Point2f>(c1, c2, c3, c4);
     for (uint32_t x = (uint32_t)xmin; x <= (uint32_t)xmax; x++)
     {
       for (uint32_t y = (uint32_t)ymin; y <= (uint32_t)ymax; y++)
       {
-        Point2f point((float)x, (float)y);
         PHPoint<uint32_t> phpoint(x, y);
-        if (rect.containsPoint(point))
+        if (rect.containsPoint(phpoint))
         {
           partMap.insert(pair <PHPoint<float>, vector<float>>(PHPoint<float>((float)x, (float)y), currentFrameRawDescriptors.at(phpoint)));
+          partModel.partDescriptors.insert(pair <PHPoint <uint32_t>, vector <float>>((PoseHelper::rotatePoint2D(Point_<uint32_t>(x, y), Point_<uint32_t>(polyCenter), rotationAngle) + Point_<uint32_t>(boxCenter - polyCenter)), currentFrameRawDescriptors.at(phpoint)));
         }
       }
     }
     frameDescriptors.insert(pair <uint32_t, map <PHPoint<float>, vector<float>>>(part->getPartID(), partMap));
+    framePartModels.insert(pair <uint32_t, PartModel>(part->getPartID(), partModel));
   }
-
   frameBodyPartDescriptors.insert(pair <uint32_t, map <uint32_t, map<PHPoint<float>, vector <float>>>>(frame->getID(), frameDescriptors));
+  rawPartModelDescriptors.insert(pair <uint32_t, map <uint32_t, PartModel>>(frame->getID(), framePartModels));
 }
 
 //TODO (Vitaliy Koshura): Write real implementation here
@@ -178,6 +221,54 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
     catch (...)
     {
       break;
+    }
+    partModelAverageDescriptors.clear();
+    float factor = 1.0f / rawPartModelDescriptors.size();
+    for (map <uint32_t, map <uint32_t, PartModel>>::iterator frameModel = rawPartModelDescriptors.begin(); frameModel != rawPartModelDescriptors.end(); ++frameModel)
+    {
+      for (map <uint32_t, PartModel>::iterator part = frameModel->second.begin(); part != frameModel->second.end(); ++part)
+      {
+        if (partModelAverageDescriptors.count(part->first) == 0)
+        {
+          PartModel partModel;
+          partModel.partModelRect = part->second.partModelRect;
+          for (map <PHPoint<uint32_t>, vector <float>>::iterator descriptors = part->second.partDescriptors.begin(); descriptors != part->second.partDescriptors.end(); ++descriptors)
+          {
+            if (descriptors->second.size() < nbins)
+            {
+              throw logic_error("Not enough descriptors");
+            }
+            else
+            {
+              vector <float> values;
+              for (uint32_t i = 0; i < nbins; i++)
+              {
+                values.push_back(descriptors->second.at(i) * factor);
+              }
+              partModel.partDescriptors.insert(pair <PHPoint <uint32_t>, vector <float>>(descriptors->first, values));
+            }
+          }
+          partModelAverageDescriptors.insert(pair <uint32_t, PartModel>(part->first, partModel));
+        }
+        else
+        {
+          for (map <PHPoint<uint32_t>, vector <float>>::iterator descriptors = part->second.partDescriptors.begin(); descriptors != part->second.partDescriptors.end(); ++descriptors)
+          {
+            if (descriptors->second.size() < nbins)
+            {
+              throw logic_error("Not enough descriptors");
+            }
+            else
+            {
+              for (uint32_t i = 0; i < nbins; i++)
+              {
+                partModelAverageDescriptors.at(part->first).partDescriptors.at(descriptors->first).at(i) += descriptors->second.at(i) * factor;
+              }
+            }
+          }
+          
+        }
+      }
     }
 
     /*Mat img = (*frameNum)->getImage();
