@@ -169,7 +169,7 @@ void HogDetector::parseBodyPartDescriptors(Frame *frame, map <PHPoint<uint32_t>,
         if (rect.containsPoint(phpoint))
         {
           partMap.insert(pair <PHPoint<float>, vector<float>>(PHPoint<float>((float)x, (float)y), currentFrameRawDescriptors.at(phpoint)));
-          partModel.partDescriptors.insert(pair <PHPoint <uint32_t>, vector <float>>((PoseHelper::rotatePoint2D(Point_<uint32_t>(x, y), Point_<uint32_t>(polyCenter), rotationAngle) + Point_<uint32_t>(boxCenter - polyCenter)), currentFrameRawDescriptors.at(phpoint)));
+          partModel.partDescriptors.insert(pair <PHPoint <uint32_t>, vector <float>>((PoseHelper::rotatePoint2D(Point_<uint32_t>(x, y), Point_<uint32_t>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<uint32_t>((CvPoint2D32f)(boxCenter - polyCenter))), currentFrameRawDescriptors.at(phpoint)));
         }
       }
     }
