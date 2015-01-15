@@ -92,7 +92,7 @@
   <Frame id="7" imgPath="0007.png" maskPath="mask0007.pgm" camPath="0007.camu" isKeyframe="false" gpX="" gpY=""/>
   <Frame id="8" imgPath="0008.png" maskPath="mask0008.pgm" camPath="0008.camu" isKeyframe="false" gpX="" gpY=""/>
   <Frame id="9" imgPath="0009.png" maskPath="mask0009.pgm" camPath="0009.camu" isKeyframe="false" gpX="" gpY=""/>
-  <Frame id="10i" imgPath="0010.png" maskPath="mask0010.pgm" camPath="0010.camu" isKeyframe="true" gpX="" gpY="">
+  <Frame id="10" imgPath="0010.png" maskPath="mask0010.pgm" camPath="0010.camu" isKeyframe="true" gpX="" gpY="">
    <BodyJoints>
     <BodyJoint x="479" y="97" depthSign="false" id="0"/>
     <BodyJoint x="489" y="51" depthSign="false"  id="1"/>

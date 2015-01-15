@@ -123,6 +123,7 @@ ENDIF()
 
 ADD_SUBDIRECTORY ( libpose )
 ADD_SUBDIRECTORY ( utils )
+ADD_SUBDIRECTORY ( libposegui )
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )

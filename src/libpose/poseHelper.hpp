@@ -81,13 +81,13 @@ class PHPoint : public Point_<T>
 {
 public:
   // various constructors
-  PHPoint() : Point_<T>() {};
-  PHPoint(T _x, T _y) : Point_<T>(_x, _y) {};
-  PHPoint(const Point_<T>& pt) : Point_<T>(pt) {};
-  PHPoint(const CvPoint& pt) : Point_<T>(pt) {};
-  PHPoint(const CvPoint2D32f& pt) : Point_<T>(pt) {};
-  PHPoint(const Size_<T>& sz) : Point_<T>(sz) {};
-  PHPoint(const Vec<T, 2>& v) : Point_<T>(v) {};
+  PHPoint() : Point_<T>() {}
+  PHPoint(T _x, T _y) : Point_<T>(_x, _y) {}
+  PHPoint(const Point_<T>& pt) : Point_<T>(pt) {}
+  PHPoint(const CvPoint& pt) : Point_<T>(pt) {}
+  PHPoint(const CvPoint2D32f& pt) : Point_<T>(pt) {}
+  PHPoint(const Size_<T>& sz) : Point_<T>(sz) {}
+  PHPoint(const Vec<T, 2>& v) : Point_<T>(v) {}
 
   bool operator < (const PHPoint& pt) const
   {
@@ -100,12 +100,12 @@ class PHPoint3 : public Point3_ < T >
 {
 public:
   // various constructors
-  PHPoint3() : Point3_<T>() {};
-  PHPoint3(T _x, T _y, T _z) : Point3_<T>(_x, _y, _z) {};
-  PHPoint3(const Point3_<T>& pt) : Point3_<T>(pt) {};
-  explicit PHPoint3(const Point_<T>& pt) : Point3_<T>(pt) {};
-  PHPoint3(const CvPoint3D32f& pt) : Point3_<T>(pt) {};
-  PHPoint3(const Vec<T, 3>& v) : Point3_<T>(v) {};
+  PHPoint3() : Point3_<T>() {}
+  PHPoint3(T _x, T _y, T _z) : Point3_<T>(_x, _y, _z) {}
+  PHPoint3(const Point3_<T>& pt) : Point3_<T>(pt) {}
+  explicit PHPoint3(const Point_<T>& pt) : Point3_<T>(pt) {}
+  PHPoint3(const CvPoint3D32f& pt) : Point3_<T>(pt) {}
+  PHPoint3(const Vec<T, 3>& v) : Point3_<T>(v) {}
 
   bool operator < (const PHPoint3& pt) const
   {
