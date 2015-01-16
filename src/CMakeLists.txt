@@ -65,22 +65,7 @@ ELSE ()
   OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
 ENDIF ()
 
-# Check for appropriate build parameters
-# If ok BUILD_OK is set to ON
-SET ( BUILD_OK:BOOL OFF )
-IF ( DEFINED CMAKE_BUILD_TYPE )
-	FOREACH ( CFG ${CMAKE_CONFIGURATION_TYPES} )
-		IF ( CMAKE_BUILD_TYPE STREQUAL CFG )
-			SET ( BUILD_OK ON )
-			BREAK()
-		ENDIF()
-	ENDFOREACH()
-	IF ( NOT BUILD_OK )
-		MESSAGE ( FATAL_ERROR "Wrong build type parameter. Possible values for build type are: ${CMAKE_CONFIGURATION_TYPES}. Please choose one of those" )
-	ENDIF()
-ELSE()
-	MESSAGE ( FATAL_ERROR "Build type is not defined. Possible values are: ${CMAKE_CONFIGURATION_TYPES}. Please specify one" )
-ENDIF()
+OPTION ( LIBPOSE_GUI_BUILD "Build nice looking GUI application" ON )
 
 # Nessessary definitions
 
@@ -96,6 +81,10 @@ ENDIF()
 
 IF ( NOT GOOGLE_TEST )
   SET ( GOOGLE_TEST:BOOL OFF )
+ENDIF()
+
+IF ( NOT LIBPOSE_GUI_BUILD )
+  SET ( LIBPOSE_GUI_BUILD:BOOL OFF )
 ENDIF()
 
 SET ( TINYXML2_PATH "../thirdparty/tinyxml2" CACHE STRING "Path to TinyXml2 library" )
@@ -123,7 +112,26 @@ ENDIF()
 
 ADD_SUBDIRECTORY ( libpose )
 ADD_SUBDIRECTORY ( utils )
-ADD_SUBDIRECTORY ( libposegui )
+IF ( LIBPOSE_GUI_BUILD )
+  ADD_SUBDIRECTORY ( libposegui )
+ENDIF()
+
+# Check for appropriate build parameters
+# If ok BUILD_OK is set to ON
+SET ( BUILD_OK:BOOL OFF )
+IF ( DEFINED CMAKE_BUILD_TYPE )
+	FOREACH ( CFG ${CMAKE_CONFIGURATION_TYPES} )
+		IF ( CMAKE_BUILD_TYPE STREQUAL CFG )
+			SET ( BUILD_OK ON )
+			BREAK()
+		ENDIF()
+	ENDFOREACH()
+	IF ( NOT BUILD_OK )
+		MESSAGE ( FATAL_ERROR "Wrong build type parameter. Possible values for build type are: ${CMAKE_CONFIGURATION_TYPES}. Please choose one of those" )
+	ENDIF()
+ELSE()
+	MESSAGE ( FATAL_ERROR "Build type is not defined. Possible values are: ${CMAKE_CONFIGURATION_TYPES}. Please specify one" )
+ENDIF()
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
