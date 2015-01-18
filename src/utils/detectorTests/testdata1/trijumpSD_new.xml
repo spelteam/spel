@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Project name="trijumpSDfull" imgFolderPath="./seq/" maskFolderPath="./mask/" camFolderPath="./cam/" allowScaling="True"  simMatPath="" exportPath="">
+<Project name="trijumpSDfull" imgFolderPath="./seq/" maskFolderPath="./mask/" camFolderPath="./cam/" allowScaling="true"  simMatPath="" exportPath="">
  <BodyJoints>
   <BodyJoint id="0" name="Lower Back" />
   <BodyJoint id="1" name="Neck Bottom"/>
