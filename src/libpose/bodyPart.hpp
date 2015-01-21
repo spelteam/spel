@@ -14,7 +14,11 @@ class BodyPart
 {
   public:
     BodyPart(void);
+    BodyPart( const BodyPart& bodyPart );
+    BodyPart( BodyPart&& bodyPart );
     BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
+    BodyPart& operator=( const BodyPart& bodyPart );
+    BodyPart& operator=( BodyPart&& bodyPart );
     bool operator==(const BodyPart &bp) const; // comparsion by unique index
     bool operator!=(const BodyPart &bp) const; // comparsion by address
 // get and set: All these functions just give access to the object fields

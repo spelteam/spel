@@ -14,7 +14,11 @@ class BodyJoint
 {
   public:
     BodyJoint(void);
+    BodyJoint( const BodyJoint& bodyJoint );
+    BodyJoint( BodyJoint&& bodyJoint );
     BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc = {0.0, 0.0, 0.0}, bool depth = false);
+    BodyJoint& operator=( const BodyJoint& bodyJoint );
+    BodyJoint& operator=( BodyJoint&& bodyJoint );
     bool operator==(const BodyJoint &bj) const; // comparsion by unique index
     bool operator!=(const BodyJoint &bj) const; // comparsion by address
 // All these functions just give access to this object fields

@@ -24,8 +24,26 @@ struct TPOSERECT
 template <class T>
 struct POSERECT
 {
-  POSERECT() : point1(), point2(), point3(), point4() {}
-  POSERECT(T _point1, T _point2, T _point3, T _point4) : point1(_point1), point2(_point2), point3(_point3), point4(_point4) {}
+  POSERECT()
+      : point1(),
+        point2(),
+        point3(),
+        point4() {}
+  POSERECT( const POSERECT<T>& poserect)
+      : point1(poserect.point1),
+        point2(poserect.point2),
+        point3(poserect.point3),
+        point4(poserect.point4) {}
+  POSERECT( POSERECT<T>&& poserect )
+      : point1( std::move(poserect.point1) ),
+        point2( std::move(poserect.point2) ),
+        point3( std::move(poserect.point3) ),
+        point4( std::move(poserect.point4) ) {}
+  POSERECT(T _point1, T _point2, T _point3, T _point4)
+      : point1(_point1),
+        point2(_point2),
+        point3(_point3),
+        point4(_point4) {}
   T point1;
   T point2;
   T point3;
@@ -63,6 +81,26 @@ struct POSERECT
     maxx = max(max(point1.x, point2.x), max(point3.x, point4.x));
     miny = min(min(point1.y, point2.y), min(point3.y, point4.y));
     maxy = max(max(point1.y, point2.y), max(point3.y, point4.y));
+  }
+
+  POSERECT<T>& operator=( const POSERECT<T>& rect ){
+      if( &rect == this ) return *this;
+
+      point1 = rect.point1;
+      point2 = rect.point2;
+      point3 = rect.point3;
+      point4 = rect.point4;
+
+      return *this;
+  }
+
+  POSERECT<T>& operator=( POSERECT<T>&& rect ){
+      std::swap(point1,rect.point1);
+      std::swap(point2,rect.point2);
+      std::swap(point3,rect.point3);
+      std::swap(point4,rect.point4);
+
+      return *this;
   }
 
   bool operator==(const POSERECT <T> &rect) const

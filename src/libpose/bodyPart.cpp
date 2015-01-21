@@ -13,6 +13,33 @@ BodyPart::BodyPart(void)
   setLWRatio(0);
 }
 
+//copy constructor
+BodyPart::BodyPart(const BodyPart &bodyPart)
+    : partID(bodyPart.partID),
+      partName(bodyPart.partName),
+      parentJoint(bodyPart.parentJoint),
+      childJoint(bodyPart.childJoint),
+      isOccluded(bodyPart.isOccluded),
+      spaceLength(bodyPart.spaceLength),
+      partPolygon(bodyPart.partPolygon),
+      lwRatio(bodyPart.lwRatio)
+{
+}
+
+//move constructor
+BodyPart::BodyPart(BodyPart &&bodyPart)
+    : partID( std::move(bodyPart.partID) ),
+      partName( std::move(bodyPart.partName) ),
+      parentJoint( std::move(bodyPart.parentJoint) ),
+      childJoint( std::move(bodyPart.childJoint) ),
+      isOccluded( std::move(bodyPart.isOccluded) ),
+      spaceLength( std::move(bodyPart.spaceLength) ),
+      partPolygon( std::move(bodyPart.partPolygon) ),
+      lwRatio( std::move(bodyPart.lwRatio) )
+{
+}
+
+
 // constructor with params
 BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, float spaceLen)
 {
@@ -82,6 +109,30 @@ float BodyPart::getSpaceLength(void) const
 void BodyPart::setSpaceLength(float _spaceLength)
 {
   spaceLength = _spaceLength;
+}
+
+BodyPart& BodyPart::operator=( const BodyPart& bodyPart ){
+    if( &bodyPart == this ) return *this;
+
+    partID = bodyPart.partID;
+    partName = bodyPart.partName;
+    parentJoint = bodyPart.parentJoint;
+    childJoint = bodyPart.childJoint;
+    isOccluded = bodyPart.isOccluded;
+    spaceLength = bodyPart.spaceLength;
+
+    return *this;
+}
+
+BodyPart& BodyPart::operator=( BodyPart&& bodyPart ){
+    partID = std::move(bodyPart.partID);
+    std::swap( partName, bodyPart.partName );
+    parentJoint = std::move(bodyPart.parentJoint);
+    childJoint = std::move(bodyPart.parentJoint);
+    isOccluded = std::move(bodyPart.isOccluded);
+    spaceLength = std::move(bodyPart.spaceLength);
+
+    return *this;
 }
 
 bool BodyPart::operator==(const BodyPart &bp) const
