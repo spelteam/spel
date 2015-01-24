@@ -12,5 +12,6 @@
         <file>resources/icons/key_lock.png</file>
         <file>resources/icons/key_free.png</file>
         <file>resources/stylesheets/QGroupBox.qss</file>
+        <file>resources/xml/project.xsd</file>
     </qresource>
 </RCC>

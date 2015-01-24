@@ -16,8 +16,6 @@ class ToolBoxWidget;
 class SolveBoxWidget;
 class FrameBoxWidget;
 class FrameView2D;
-//model
-class Project;
 
 class MainWindow : public QMainWindow
 {
@@ -29,6 +27,8 @@ public:
 
 private slots:
     void on_actionClose_triggered();
+
+    void on_actionOpen_triggered();
 
 private:
     //layouts
@@ -42,8 +42,6 @@ private:
     SolveBoxWidget *solveTools;
     FrameBoxWidget *frameTools;
     FrameView2D *currFrame;
-    //model
-    Project *currProject;
 };
 
 #endif // MAINWINDOW_H

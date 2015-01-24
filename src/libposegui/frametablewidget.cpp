@@ -10,13 +10,16 @@ FrameTableWidget::FrameTableWidget(QWidget *parent) :
     this->setColumnCount(5);
     //hide row header
     this->verticalHeader()->hide();
+    //fix column width
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     //set style
     this->setStyleSheet("QTableWidget::item{ border : 5px solid blue }\nQTableWidget::item:focus{ border-color : red }");
 }
 
 #include <QDebug>
-
-void FrameTableWidget::openProjectEvent(){
+void FrameTableWidget::loadProjectEvent(){
+    qDebug() << "FrameTableWidget::loadProjectEvent" << endl;
+    return;
 }
 
 void FrameTableWidget::closeProjectEvent(){

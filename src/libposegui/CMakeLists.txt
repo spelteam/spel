@@ -7,14 +7,27 @@ cmake_minimum_required(VERSION 2.8.11)
 # Configure modules path
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/cmake" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
+# Add thirdparty software
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
+# Add libpose library
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/libpose" )
+#Add OpenCV library
+FIND_PACKAGE ( OpenCV REQUIRED )
+INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
+#Find the QtCore library
+find_package(Qt5Core)
 # Find the QtWidgets library
 find_package(Qt5Widgets)
+# Find the QtXml library
+find_package(Qt5Xml)
+#Find the QtXmlPatterns library
+find_package(Qt5XmlPatterns)
 
 #Add sources files
 
@@ -33,6 +46,14 @@ LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC frametablewidget.cpp)
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC frameview2d.cpp)
 #Project file
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC project.cpp)
+#Utility helper class
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC utility.cpp)
+#Custom graphick items
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC bodyjointitem.cpp)
+#Xml message handler
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC xmlmessagehandler.cpp)
+#Attributes of xml project
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC projectattr.h)
 
 #Add forms
 QT5_WRAP_UI(UIS_HDRS
@@ -47,4 +68,11 @@ QT5_ADD_RESOURCES( ${LIBPOSEGUI_MODULE}_RRC resources.qrc )
 add_executable(${LIBPOSEGUI_MODULE} ${${LIBPOSEGUI_MODULE}_SRC} ${UIS_HDRS} ${${LIBPOSEGUI_MODULE}_RRC} )
 
 # Use the Widgets module from Qt 5.
-target_link_libraries(${LIBPOSEGUI_MODULE} Qt5::Widgets)
+target_link_libraries( ${LIBPOSEGUI_MODULE}
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::Xml
+    Qt5::XmlPatterns
+    ${LIBPOSE_MODULE}
+    ${OpenCV_LIBS}
+)

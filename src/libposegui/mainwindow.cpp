@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QMessageBox>
+#include <QFileDialog>
 
 #include "frametablewidget.h"
 #include "toolboxwidget.h"
@@ -10,8 +12,7 @@
 #include "frameview2d.h"
 
 #include "project.h"
-
-#include <QFile>
+#include "utility.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -38,16 +39,11 @@ MainWindow::MainWindow(QWidget *parent) :
     MainLayout->addLayout(ToolLayout, 5);
     MainLayout->addWidget(framesView,1);
     ui->centralWidget->setLayout(MainLayout);
-    //model
-    currProject = new Project(this);
     //set styles for group boxes
-    QFile styleFile(":/root/resources/stylesheets/QGroupBox.qss");
-    styleFile.open( QFile::ReadOnly );
-    this->setStyleSheet( QString(styleFile.readAll()) );
-    styleFile.close();
+    this->setStyleSheet( Utility::fileToString(":/root/resources/stylesheets/QGroupBox.qss") );
     //connect
-    QObject::connect(currProject,&Project::open,framesView,&FrameTableWidget::openProjectEvent);
-    QObject::connect(currProject,&Project::close,framesView,&FrameTableWidget::closeProjectEvent);
+    QObject::connect(&Project::getInstance(),&Project::load,framesView,&FrameTableWidget::loadProjectEvent);
+    QObject::connect(&Project::getInstance(),&Project::close,framesView,&FrameTableWidget::closeProjectEvent);
 }
 
 MainWindow::~MainWindow()
@@ -58,11 +54,45 @@ MainWindow::~MainWindow()
     delete solveTools;
     delete frameTools;
     delete  currFrame;
-
-    delete currProject;
 }
 
 void MainWindow::on_actionClose_triggered()
 {
-     currProject->close();
+    Project::getInstance().close();
+}
+
+#include <QDebug>
+void MainWindow::on_actionOpen_triggered()
+{
+    //get filename from OpenFileDialog
+   /* QString projectFilename = QFileDialog::getOpenFileName(
+        this, //parent
+        "Open project", //caption
+        "", //start directory
+        "Project files (*.xml)" //filter files
+    );*/
+    QString projectFilename =
+            "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
+    //try to open project
+    ui->statusBar->showMessage("Loading project");
+    QString errMessage;
+    Project::ErrorCode errCode = Project::getInstance().open(
+       projectFilename,
+       &errMessage
+    );
+    if( errCode != Project::ErrorCode::SUCCESS ){
+        QMessageBox messageBox;
+        messageBox.setWindowTitle(this->windowTitle());
+        messageBox.setText(errMessage);
+        messageBox.setIcon(QMessageBox::Critical);
+        messageBox.exec();
+    } else{
+        QMessageBox messageBox;
+        messageBox.setWindowTitle(this->windowTitle());
+        messageBox.setText("All ok");
+        messageBox.setIcon(QMessageBox::Information);
+        messageBox.exec();
+    }
+     //load project to GUI
+    ui->statusBar->showMessage("Project was loaded");
 }

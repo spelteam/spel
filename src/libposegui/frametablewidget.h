@@ -11,7 +11,7 @@ public:
 signals:
 
 public slots:
-    void openProjectEvent();
+    void loadProjectEvent();
     void closeProjectEvent();
     void createProjectEvent();
 
