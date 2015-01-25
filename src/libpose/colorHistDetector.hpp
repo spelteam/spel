@@ -1,6 +1,7 @@
 #ifndef _LIBPOSE_COLORHISTDETECTOR_HPP_
 #define _LIBPOSE_COLORHISTDETECTOR_HPP_
 
+#include <gtest/gtest_prod.h>
 #include <opencv2/opencv.hpp>
 #include "detector.hpp"
 
@@ -19,6 +20,7 @@ class ColorHistDetector : public Detector
     vector <Frame*> getFrames() const;
     ColorHistDetector &operator=(const ColorHistDetector &c);
   private:
+    FRIEND_TEST(colorHistDetectorTest, PrivateFields);
     struct PartModel
     {
       PartModel(uint8_t _nBins = 8);
