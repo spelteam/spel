@@ -22,7 +22,10 @@ class Detector
     virtual void train(vector <Frame*> frames, map <string, float> params) = 0;
     virtual vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params) = 0;
   private:
-    // T model;
+    // T model;    
+  protected:
+    vector <Frame*> frames;
+    virtual void getNeighborFrame(Frame **curFrame, Frame **prevFrame, Frame **nextFrame, uint32_t &step, uint32_t &stepCount);
 };
 
 #endif  // _LIBPOSE_DETECTOR_HPP_

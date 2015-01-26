@@ -43,7 +43,7 @@ class ColorHistDetector : public Detector
     int id;
     const uint8_t nBins;
     map <int32_t, PartModel> partModels;
-    vector <Frame*> frames;
+    //vector <Frame*> frames;
     float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
     void setPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors);
     void addPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);

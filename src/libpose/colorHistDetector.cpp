@@ -462,7 +462,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   Frame *prevFrame = 0, *nextFrame = 0;
   uint32_t stepCount = 0;
   uint32_t step = 0;
-  for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
+  getNeighborFrame(&frame, &prevFrame, &nextFrame, step, stepCount);
+  /*for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
   {
     Frame *f = *i;
     if (f->getID() < frame->getID())
@@ -515,7 +516,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         }
       }
     }
-  }
+  }*/
   if (prevFrame == 0)
   {
     stringstream ss;
