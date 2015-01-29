@@ -462,7 +462,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   Frame *prevFrame = 0, *nextFrame = 0;
   uint32_t stepCount = 0;
   uint32_t step = 0;
-  getNeighborFrame(&frame, &prevFrame, &nextFrame, step, stepCount);
+  getNeighborFrame(frame, &prevFrame, &nextFrame, step, stepCount);
   if (prevFrame == 0)
   {
     stringstream ss;

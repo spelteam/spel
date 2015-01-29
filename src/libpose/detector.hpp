@@ -25,7 +25,8 @@ class Detector
     // T model;    
   protected:
     vector <Frame*> frames;
-    virtual void getNeighborFrame(Frame **curFrame, Frame **prevFrame, Frame **nextFrame, uint32_t &step, uint32_t &stepCount);
+    virtual void getNeighborFrame(Frame *frame, Frame **prevFrame, Frame **nextFrame, uint32_t &step, uint32_t &stepCount);
+    virtual void getRawBodyPartPosition();
 };
 
 #endif  // _LIBPOSE_DETECTOR_HPP_

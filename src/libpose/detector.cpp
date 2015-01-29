@@ -1,11 +1,11 @@
 #include "detector.hpp"
 
-void Detector::getNeighborFrame(Frame **curFrame, Frame **prevFrame, Frame **nextFrame, uint32_t &step, uint32_t &stepCount)
+void Detector::getNeighborFrame(Frame *frame, Frame **prevFrame, Frame **nextFrame, uint32_t &step, uint32_t &stepCount)
 {
   for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
   {
     Frame *f = *i;
-    if (f->getID() < (*curFrame)->getID())
+    if (f->getID() < frame->getID())
     {
       if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
       {
@@ -17,7 +17,7 @@ void Detector::getNeighborFrame(Frame **curFrame, Frame **prevFrame, Frame **nex
         stepCount++;
       }
     }
-    else if (f->getID() > (*curFrame)->getID())
+    else if (f->getID() > frame->getID())
     {
       stepCount++;
       if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
@@ -32,7 +32,7 @@ void Detector::getNeighborFrame(Frame **curFrame, Frame **prevFrame, Frame **nex
       if ((*prevFrame) == 0)
       {
         stringstream ss;
-        ss << "Couldn't find previous keyframe to the frame " << (*curFrame)->getID();
+        ss << "Couldn't find previous keyframe to the frame " << frame->getID();
         throw logic_error(ss.str());
       }
       else
@@ -50,4 +50,9 @@ void Detector::getNeighborFrame(Frame **curFrame, Frame **prevFrame, Frame **nex
       }
     }
   }
+}
+
+void Detector::getRawBodyPartPosition()
+{
+
 }
