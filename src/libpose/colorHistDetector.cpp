@@ -484,57 +484,16 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     vector <LimbLabel> labels;
-    BodyJoint *parentJoint = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint());
-    BodyJoint *childJoint = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint());
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
-    Skeleton prevSkeleton = prevFrame->getSkeleton();
-    tree <BodyJoint> prevBodyJoints = prevSkeleton.getJointTree();
-    Skeleton nextSkeleton = nextFrame->getSkeleton();
-    tree <BodyJoint> nextBodyJoints = nextSkeleton.getJointTree();
-    Point2f pj0, nj0, pj1, nj1;
-    for (tree <BodyJoint>::iterator i = prevBodyJoints.begin(); i != prevBodyJoints.end(); ++i)
-    {
-      if (i->getLimbID() == parentJoint->getLimbID())
-      {
-        pj0 = i->getImageLocation();
-      }
-      if (i->getLimbID() == childJoint->getLimbID())
-      {
-        pj1 = i->getImageLocation();
-      }
-    }
-    for (tree <BodyJoint>:: iterator i = nextBodyJoints.begin(); i != nextBodyJoints.end(); ++i)
-    {
-      if (i->getLimbID() == parentJoint->getLimbID())
-      {
-        nj0 = i->getImageLocation();
-      }
-      if (i->getLimbID() == childJoint->getLimbID())
-      {
-        nj1 = i->getImageLocation();
-      }
-    }
-    float interpolateStep = (float)step / (float)stepCount;  // Interpolate2Ddisplacement
-    Point2f j0 = pj0 * (1 - interpolateStep) + nj0 * interpolateStep;
-    Point2f j1 = pj1 * (1 - interpolateStep) + nj1 * interpolateStep;
-    float boneLength = (j0 == j1) ? 1.0f : (float) sqrt(PoseHelper::distSquared(j0, j1));
-    float boxWidth = 0;
-    try
-    {
-      //TODO (Vitaliy Koshura): Need real implementation.
-      boxWidth = boneLength / iteratorBodyPart->getLWRatio()/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sScaleParam << "' param";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-      throw logic_error(ss.str());
-    }
+    Point2f j0;
+    Point2f j1;
+
+    getRawBodyPartPosition(frame, prevFrame, nextFrame, iteratorBodyPart->getParentJoint(), iteratorBodyPart->getChildJoint(), step, stepCount, j0, j1);
+
+    float boneLength = getBoneLength(j0, j1);
+    float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart);
     Point2f direction = j1 - j0;
     float theta = float ( PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
     float minDist = boxWidth * 0.2f;
@@ -1115,9 +1074,9 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
   float x = boxCenter.x;
   float y = boxCenter.y;
-  float boneLength = (float) sqrt(PoseHelper::distSquared(j0, j1));
+  float boneLength = getBoneLength(j0, j1);
   //TODO (Vitaliy Koshura): Need real implementation here
-  float boxWidth = /*frame->getSkeleton().getScale() / */(boneLength / bodyPart.getLWRatio());
+  float boxWidth = getBoneWidth(boneLength, bodyPart);
   float rot = float( PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI) );
   vector <Point3i> partPixelColours;
   Point2f c1, c2, c3, c4, polyCenter;
