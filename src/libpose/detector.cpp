@@ -174,3 +174,24 @@ float Detector::getBoneWidth(float length, BodyPart bodyPart)
   }
   return length / ratio;
 }
+
+POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Point2f j1)
+{
+  Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
+  float x = boxCenter.x;
+  float y = boxCenter.y;
+  float boneLength = getBoneLength(j0, j1);
+  float boxWidth = getBoneWidth(boneLength, bodyPart);
+  float angle = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+  Point2f c1, c2, c3, c4, polyCenter;
+  c1 = Point2f(0.f, 0.5f * boxWidth);
+  c2 = Point2f(boneLength, 0.5f * boxWidth);
+  c3 = Point2f(boneLength, -0.5f * boxWidth);
+  c4 = Point2f(0.f, -0.5f * boxWidth);
+  polyCenter = Point2f(boneLength * 0.5f, 0.f);
+  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
+  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
+  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
+  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
+  return POSERECT <Point2f> (c1, c2, c3, c4);
+}

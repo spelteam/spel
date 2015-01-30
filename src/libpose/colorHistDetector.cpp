@@ -1069,27 +1069,13 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
 LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1)
 {
   vector <Score> s;
+  vector <Point3i> partPixelColours;
   Mat maskMat = frame->getMask();
   Mat imgMat = frame->getImage();
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-  float x = boxCenter.x;
-  float y = boxCenter.y;
   float boneLength = getBoneLength(j0, j1);
-  //TODO (Vitaliy Koshura): Need real implementation here
-  float boxWidth = getBoneWidth(boneLength, bodyPart);
   float rot = float( PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI) );
-  vector <Point3i> partPixelColours;
-  Point2f c1, c2, c3, c4, polyCenter;
-  c1 = Point2f(0.f, 0.5f * boxWidth);
-  c2 = Point2f(boneLength, 0.5f * boxWidth);
-  c3 = Point2f(boneLength, -0.5f * boxWidth);
-  c4 = Point2f(0.f, -0.5f * boxWidth);
-  polyCenter = Point2f(boneLength * 0.5f, 0.f);
-  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rot) + boxCenter - polyCenter;
-  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rot) + boxCenter - polyCenter;
-  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rot) + boxCenter - polyCenter;
-  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rot) + boxCenter - polyCenter;
-  POSERECT <Point2f> rect(c1, c2, c3, c4);
+  POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1);
   uint32_t totalPixels = 0;
   uint32_t pixelsInMask = 0;
   uint32_t pixelsWithLabel = 0;
@@ -1123,9 +1109,9 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
 #endif
     throw logic_error(ss.str());
   }
-  for (int32_t i = int32_t(x - boneLength * 0.5); i < int32_t(x + boneLength * 0.5); i++)
+  for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
   {
-    for (int32_t j = int32_t(y - boneLength * 0.5); j < int32_t(y + boneLength * 0.5); j++)
+    for (int32_t j = int32_t(boxCenter.y - boneLength * 0.5); j < int32_t(boxCenter.y + boneLength * 0.5); j++)
     {
       if (i < maskMat.cols && j < maskMat.rows)
       {
