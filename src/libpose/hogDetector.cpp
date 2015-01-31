@@ -141,26 +141,20 @@ void HogDetector::parseBodyPartDescriptors(Frame *frame, map <PHPoint<uint32_t>,
       break;
     }
     j1 = joint->getImageLocation();
-    float boneLength = (float)sqrt(PoseHelper::distSquared(j0, j1));
+    float boneLength = getBoneLength(j0, j1);
     //TODO (Vitaliy Koshura): Check this!
     float boneWidth = 0;
-    boneWidth = boneLength / part->getLWRatio()/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
+    boneWidth = getBoneWidth(boneLength, *part);
     Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-    Point2f c1 = Point2f(0.f, 0.5f * boneWidth);
-    Point2f c2 = Point2f(boneLength, 0.5f * boneWidth);
-    Point2f c3 = Point2f(boneLength, -0.5f * boneWidth);
-    Point2f c4 = Point2f(0.f, -0.5f * boneWidth);
     Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f);
     Point2f direction = j1 - j0;
     float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
-    // rotate polygon and translate
-    c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
-
     PartModel partModel;
-    partModel.partModelRect = POSERECT <Point2f>(c1, c2, c3, c4);
+    partModel.partModelRect = getBodyPartRect(*part, j0, j1);
+    (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point1), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+    (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point2), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+    (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point3), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+    (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point4), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
     for (uint32_t x = (uint32_t)xmin; x <= (uint32_t)xmax; x++)
     {
       for (uint32_t y = (uint32_t)ymin; y <= (uint32_t)ymax; y++)
@@ -201,6 +195,7 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
 
   HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
 
+  partModelAverageDescriptors.clear();
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
@@ -222,7 +217,6 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
     {
       break;
     }
-    partModelAverageDescriptors.clear();
     float factor = 1.0f / rawPartModelDescriptors.size();
     for (map <uint32_t, map <uint32_t, PartModel>>::iterator frameModel = rawPartModelDescriptors.begin(); frameModel != rawPartModelDescriptors.end(); ++frameModel)
     {
@@ -265,36 +259,42 @@ void HogDetector::train(vector <Frame*> frames, map <string, float> params)
                 partModelAverageDescriptors.at(part->first).partDescriptors.at(descriptors->first).at(i) += descriptors->second.at(i) * factor;
               }
             }
-          }
-          
+          }          
         }
       }
     }
-
-    /*Mat img = (*frameNum)->getImage();
-    
-    detector.detectMultiScale(img, found, hitThreshold, wndStride, padding, scale0, groupThreshold);
-    for (size_t n = 0; n < found.size(); n++)
-    {
-      Rect r = found[n];
-      for (size_t k = 0; k < found.size(); k++)
-      {
-        if (k != n && (r & found[k]) == r)
-        {
-          break;
-        }
-        if (k == found.size())
-        {
-          found_filtered.push_back(r);
-        }
-      }
-    }*/
   }
 }
 
 //TODO (Vitaliy Koshura): Write real implementation here
 vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params)
 {
+  const float searchDistCoeff = 0.5;
+  const string sSearchDistCoeff = "searchDistCoeff";
+
+  const float minTheta = 90;
+  const string sMinTheta = "minTheta";
+
+  const float maxTheta = 100;
+  const string sMaxTheta = "maxTheta";
+
+  const float stepTheta = 10;
+  const string sStepTheta = "stepTheta";
+
+  const uint32_t uniqueLocationCandidates = 4;
+  const string sUniqueLocationCandidates = "uniqueLocationCandidates";
+
+  const float scaleParam = 1;
+  const string sScaleParam = "scaleParam";
+
+  // first we need to check all used params
+  params.emplace(sSearchDistCoeff, searchDistCoeff);
+  params.emplace(sMinTheta, minTheta);
+  params.emplace(sMaxTheta, maxTheta);
+  params.emplace(sStepTheta, stepTheta);
+  params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
+  params.emplace(sScaleParam, scaleParam);
+
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
   Size blockStride = Size(8,8);
@@ -313,28 +313,291 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
 
   vector <Rect> found;
   vector <Rect> found_filtered;
-  //Mat img = frame->getImage();
+
   HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
 
-  computeDescriptors(detector, wndSize, wndStride, blockSize, blockStride, cellSize, nbins, frame);
+  map <PHPoint<uint32_t>, vector <float>> descriptors = computeDescriptors(detector, wndSize, wndStride, blockSize, blockStride, cellSize, nbins, frame);
   
-  /*detector.detectMultiScale(img, found, hitThreshold, wndStride, padding, scale0, groupThreshold);
-  for (size_t n = 0; n < found.size(); n++)
+  vector <vector <LimbLabel> > t;
+
+  Skeleton skeleton = frame->getSkeleton();
+  tree <BodyPart> partTree = skeleton.getPartTree();
+  tree <BodyPart>::iterator iteratorBodyPart;
+
+  Mat maskMat = frame->getMask();
+  Frame *prevFrame = 0, *nextFrame = 0;
+  uint32_t stepCount = 0;
+  uint32_t step = 0;
+  getNeighborFrame(frame, &prevFrame, &nextFrame, step, stepCount);
+  if (prevFrame == 0)
   {
-    Rect r = found[n];
-    for (size_t k = 0; k < found.size(); k++)
+    stringstream ss;
+    ss << "Couldn't find previous keyframe to the frame " << frame->getID();
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
+  }
+  if (nextFrame == 0)
+  {
+    stringstream ss;
+    ss << "Couldn't find next feyframe to the frame " << frame->getID();
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
+  }
+  for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+  {
+    vector <LimbLabel> labels;
+    vector <Point2f> uniqueLocations;
+    vector <LimbLabel> sortedLabels;
+    vector <vector <LimbLabel>> allLabels;
+    Point2f j0;
+    Point2f j1;
+
+    getRawBodyPartPosition(frame, prevFrame, nextFrame, iteratorBodyPart->getParentJoint(), iteratorBodyPart->getChildJoint(), step, stepCount, j0, j1);
+
+    float boneLength = getBoneLength(j0, j1);
+    float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart);
+    Point2f direction = j1 - j0;
+    float theta = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
+    float minDist = boxWidth * 0.2f;
+    if (minDist < 2) minDist = 2;
+    float searchDistance = 0;
+    try
     {
-      if (k != n && (r & found[k]) == r)
+      searchDistance = boneLength * params.at(sSearchDistCoeff);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Maybe there is no '" << sSearchDistCoeff << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
+    float minTheta = 0, maxTheta = 0, stepTheta = 0;
+    try
+    {
+      minTheta = params.at(sMinTheta);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Maybe there is no '" << sMinTheta << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
+    try
+    {
+      maxTheta = params.at(sMaxTheta);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Maybe there is no '" << sMaxTheta << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
+    try
+    {
+      stepTheta = params.at(sStepTheta);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Maybe there is no '" << sStepTheta << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
+    Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
+    for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
+    {
+      for (float y = suggestStart.y - searchDistance * 0.5f; y < suggestStart.y + searchDistance * 0.5f; y += minDist)
       {
-        break;
-      }
-      if (k == found.size())
-      {
-        found_filtered.push_back(r);
+        if (x < maskMat.cols && y < maskMat.rows)
+        {
+          uint8_t mintensity = 0;
+          try
+          {
+            mintensity = maskMat.at<uint8_t>((int)y, (int)x);
+          }
+          catch (...)
+          {
+            stringstream ss;
+            ss << "Can't get value in maskMat at " << "[" << y << "][" << x << "]";
+#ifdef DEBUG
+            cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+            throw logic_error(ss.str());
+          }
+          bool blackPixel = mintensity < 10;
+          if (!blackPixel)
+          {
+            for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+            {
+              Point2f p0 = Point2f(0, 0);
+              Point2f p1 = Point2f(1.0, 0);
+              p1 *= boneLength;
+              p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
+              Point2f mid = 0.5 * p1;
+              p1 = p1 + Point2f(x, y) - mid;
+              p0 = Point2f(x, y) - mid;
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, p0, p1, descriptors);
+              sortedLabels.push_back(generatedLabel);
+            }
+          }
+        }
       }
     }
-  }*/
-  vector <vector <LimbLabel> > t;
+    if (sortedLabels.size() == 0)
+    {
+      for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+      {
+        Point2f p0 = Point2f(0, 0);
+        Point2f p1 = Point2f(1.0, 0);
+        p1 *= boneLength;
+        p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
+        Point2f mid = 0.5 * p1;
+        p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
+        p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, p0, p1, descriptors);
+        sortedLabels.push_back(generatedLabel);
+      }
+    }
+    float uniqueLocationCandidates = 0;
+    try
+    {
+      uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Maybe there is no '" << sUniqueLocationCandidates << "' param";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
+    if (sortedLabels.size() > 0)
+    {
+      sort(sortedLabels.begin(), sortedLabels.end());
+      Mat locations(frame->getImage().cols, frame->getImage().rows, DataType<uint32_t>::type);
+      for (int32_t i = 0; i < frame->getImage().cols; i++)
+      {
+        for (int32_t j = 0; j < frame->getImage().rows; j++)
+        {
+          try
+          {
+            locations.at<uint32_t>(i, j) = 0;
+          }
+          catch (...)
+          {
+            stringstream ss;
+            ss << "There is no value of locations at " << "[" << i << "][" << j << "]";
+#ifdef DEBUG
+            cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+            throw logic_error(ss.str());
+          }
+        }
+      }
+      for (uint32_t i = 0; i < sortedLabels.size(); i++)
+      {
+        uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x;
+        uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y;
+        try
+        {
+          if (locations.at<uint32_t>(x, y) < uniqueLocationCandidates)
+          {
+            try
+            {
+              labels.push_back(sortedLabels.at(i));
+            }
+            catch (...)
+            {
+              stringstream ss;
+              ss << "Maybe there is no value of sortedLabels at " << "[" << i << "]";
+#ifdef DEBUG
+              cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+              throw logic_error(ss.str());
+            }
+            locations.at<uint32_t>(x, y) += 1;
+          }
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Maybe there is no value of locations at " << "[" << x << "][" << y << "]";
+#ifdef DEBUG
+          cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+          throw logic_error(ss.str());
+        }
+      }
+      locations.release();
+    }
+    t.push_back(labels);
+  }
+  map <int32_t, Mat>::iterator i;
+  maskMat.release();
+
   return t;
 }
 
+LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1, map <PHPoint<uint32_t>, vector <float>> descriptors)
+{
+  vector <Score> s;
+  Mat maskMat = frame->getMask();
+  Mat imgMat = frame->getImage();
+  Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
+  float boneLength = getBoneLength(j0, j1);
+  float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+  POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1);
+  stringstream detectorName;
+  detectorName << getID();
+
+  float xmax, ymax, xmin, ymin;
+  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+  Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f);
+  Point2f direction = j1 - j0;
+  float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
+  PartModel partModel;
+  partModel.partModelRect = rect;
+  (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point1), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+  (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point2), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+  (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point3), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+  (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point4), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+  for (uint32_t x = (uint32_t)xmin; x <= (uint32_t)xmax; x++)
+  {
+    for (uint32_t y = (uint32_t)ymin; y <= (uint32_t)ymax; y++)
+    {
+      PHPoint<uint32_t> phpoint(x, y);
+      if (rect.containsPoint(phpoint))
+      {
+        phpoint = PoseHelper::rotatePoint2D(Point_<uint32_t>(x, y), Point_<uint32_t>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<uint32_t>((CvPoint2D32f)(boxCenter - polyCenter));
+        partModel.partDescriptors.insert(pair <PHPoint <uint32_t>, vector <float>>(phpoint, descriptors.at(phpoint)));
+      }
+    }
+  }
+  float score = partModel.compare(partModelAverageDescriptors.at(bodyPart.getPartID()));
+  Score sc(score, detectorName.str());
+  s.push_back(sc);
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
+}
+
+float HogDetector::PartModel::compare(PartModel ethalon)
+{
+  uint32_t ethalonTotalCount = ethalon.partDescriptors.size();
+  uint32_t totalCount = partDescriptors.size();
+  return 0;
+}
