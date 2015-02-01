@@ -28,11 +28,11 @@ map <PHPoint<uint32_t>, vector <float>> HogDetector::computeDescriptors(HOGDescr
 
   map <PHPoint<uint32_t>, vector <float>> currentFrameRawDescriptors;
 
-  for (uint32_t row = 0; row < img.rows; row++)
+  for (uint32_t rows = 0; rows < img.rows; rows++)
   {
-    for (uint32_t col = 0; col < img.cols; col++)
+    for (uint32_t cols = 0; cols < img.cols; cols++)
     {
-      currentFrameRawDescriptors.insert(pair <PHPoint<uint32_t>, vector <float>>(PHPoint<uint32_t>(row, col), vector <float>()));
+      currentFrameRawDescriptors.insert(pair <PHPoint<uint32_t>, vector <float>>(PHPoint<uint32_t>(rows, cols), vector <float>()));
     }
   }
 
@@ -60,12 +60,16 @@ map <PHPoint<uint32_t>, vector <float>> HogDetector::computeDescriptors(HOGDescr
                 for (b = 0; b < nbins; b++)
                 {
                   // cell rows
-                  for (row = r; row < cellSize.height; row++)
+                  for (row = r; row < r + cellSize.height; row++)
                   {
                     // cell cols
-                    for (col = c; col < cellSize.width; col++)
+                    for (col = c; col < c + cellSize.width; col++)
                     {
-                      currentFrameRawDescriptors[PHPoint<uint32_t>(row, col)].push_back(descriptors.at(d));
+                      // use only first nbins count of descriptors
+                      if (currentFrameRawDescriptors[PHPoint<uint32_t>(row, col)].size() < nbins)
+                      {
+                        currentFrameRawDescriptors[PHPoint<uint32_t>(row, col)].push_back(descriptors.at(d));
+                      }
                     }
                   }
                   d++;
@@ -175,8 +179,9 @@ void HogDetector::parseBodyPartDescriptors(Frame *frame, map <PHPoint<uint32_t>,
 }
 
 //TODO (Vitaliy Koshura): Write real implementation here
-void HogDetector::train(vector <Frame*> frames, map <string, float> params)
+void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
+  frames = _frames;
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
   Size blockStride = Size(8,8);
@@ -315,8 +320,6 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   vector <Rect> found_filtered;
 
   HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
-
-  map <PHPoint<uint32_t>, vector <float>> descriptors = computeDescriptors(detector, wndSize, wndStride, blockSize, blockStride, cellSize, nbins, frame);
   
   vector <vector <LimbLabel> > t;
 
@@ -347,6 +350,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
 #endif  // DEBUG
     throw logic_error(ss.str());
   }
+
+  map <PHPoint<uint32_t>, vector <float>> descriptors = computeDescriptors(detector, wndSize, wndStride, blockSize, blockStride, cellSize, nbins, frame);
+
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     vector <LimbLabel> labels;
@@ -577,6 +583,7 @@ LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0
   (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point2), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
   (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point3), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
   (PoseHelper::rotatePoint2D(Point_<float>(partModel.partModelRect.point4), Point_<float>((CvPoint2D32f)polyCenter), rotationAngle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
+  cout << "Generate label begin" << endl;
   for (uint32_t x = (uint32_t)xmin; x <= (uint32_t)xmax; x++)
   {
     for (uint32_t y = (uint32_t)ymin; y <= (uint32_t)ymax; y++)
@@ -592,11 +599,13 @@ LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0
   float score = partModel.compare(partModelAverageDescriptors.at(bodyPart.getPartID()), nBins);
   Score sc(score, detectorName.str());
   s.push_back(sc);
+  cout << "Generate label end" << endl;
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }
 
 float HogDetector::PartModel::compare(PartModel ethalon, uint8_t nBins)
 {
+  cout << "Compare begin" << endl;
   uint32_t ethalonTotalCount = ethalon.partDescriptors.size();
   uint32_t totalCount = partDescriptors.size();
   uint32_t comparedCount = 0.0;
@@ -696,6 +705,6 @@ float HogDetector::PartModel::compare(PartModel ethalon, uint8_t nBins)
   }
   score /= comparedCount;
   score += (comparedCount / totalCount);
-
+  cout << "Compare end" << endl;
   return score; 
 }
