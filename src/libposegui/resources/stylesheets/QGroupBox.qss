@@ -1,0 +1,10 @@
+QGroupBox{
+	border : 3px solid; 
+	border-radius : 10px;
+}
+QGroupBox:enabled{
+	border-color:black;
+}
+QGroupBox:disabled{
+	border-color:gray;
+}
