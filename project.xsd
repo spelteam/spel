@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="Project" type="ProjectType"/>
+
+    <xs:complexType name="ProjectType">
+        <xs:sequence>
+            <xs:group ref="SkeletonGroup"/>
+            <xs:element name="Frames" type="FramesType"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="imgFolderPath" type="xs:string" use="required"/>
+        <xs:attribute name="maskFolderPath" type="xs:string" use="required"/>
+        <xs:attribute name="camFolderPath" type="xs:string" use="required"/>
+        <xs:attribute name="allowScaling" type="xs:boolean" use="required"/>
+        <xs:attribute name="simMatPath" type="xs:string"/>
+        <xs:attribute name="exportPath" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:group name="SkeletonGroup">
+        <xs:sequence>
+            <xs:element name="BodyJoints" type="BodyJointsHeaderType"/>
+            <xs:element name="BodyParts" type="BodyPartsHeaderType"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="BodyJointsHeaderType">
+        <xs:choice>
+            <xs:element name="BodyJoint" type="BodyJointHeaderType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:complexType>
+    
+    <xs:complexType name="BodyJointHeaderType">
+        <xs:attribute name="id" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+    </xs:complexType>
+    
+    <xs:complexType name="BodyPartsHeaderType">
+        <xs:choice>
+            <xs:element name="BodyPart" type="BodyPartHeaderType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:complexType>
+    
+    <xs:complexType name="BodyPartHeaderType">
+        <xs:attribute name="id" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="parentJointId" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="childJointId" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="expectedDistance" type="xs:decimal" use="required"/>
+        <xs:attribute name="lwRatio" type="xs:decimal" use="required"/>
+     </xs:complexType>
+    
+    <xs:complexType name="FramesType">
+        <xs:choice>
+            <xs:element name="Frame" type="FrameType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="FrameType">
+        <xs:group ref="KeyframeGroup" minOccurs="0"/>
+        <xs:attribute name="id" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="imgPath" type="xs:string" use="required"/>
+        <xs:attribute name="maskPath" type="xs:string" use="required"/>
+        <xs:attribute name="camPath" type="xs:string" use="required"/>
+        <xs:attribute name="isKeyframe" type="xs:boolean" use="required"/>
+        <!--xs:decimal should be. Used xs:string, cause attr is unused-->
+        <xs:attribute name="gpX" type="xs:string" use="required"/>
+        <xs:attribute name="gpY" type="xs:string" use="required"/>
+    </xs:complexType>
+    
+    <xs:group name="KeyframeGroup">
+        <xs:sequence>
+            <xs:element name="BodyJoints" type="BodyJointsType"/>
+            <xs:element name="BodyParts" type="BodyPartsType"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="BodyJointsType">
+        <xs:choice>
+            <xs:element name="BodyJoint" type="BodyJointType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:complexType>
+    
+    <xs:complexType name="BodyJointType">
+        <xs:attribute name="x" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="y" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="depthSign" type="xs:boolean" use="required"/>
+        <xs:attribute name="id" type="xs:nonNegativeInteger" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="BodyPartsType">
+        <xs:choice>
+            <xs:element name="BodyPart" type="BodyPartType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="BodyPartType">
+        <xs:attribute name="id" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="isOccluded" type="xs:boolean" use="required"/>
+    </xs:complexType>
+
+</xs:schema>
