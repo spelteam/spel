@@ -57,7 +57,7 @@ class TLPSSolver: Solver
     float computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, map<string, float> params);
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames); //separate the sequence into slices, for temporal solve
-    vector<Frame*> interpolateSlice(vector<Frame*> slice);//, map<string, float> params)
+    vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
     float interpolateFloat(float prevAngle, float nextAngle, int step, int numSteps);
 
     //INHERITED

@@ -145,6 +145,12 @@ bool BodyPart::operator!=(const BodyPart &bp) const
   return !(*this == bp);
 }
 
+std::ostream& operator<<(std::ostream& os, const BodyPart &bp)
+{
+    std::string s = std::to_string(bp.getPartID());
+    return os<<s;
+}
+
 POSERECT <Point2f> BodyPart::getPartPolygon(void)
 {
   return partPolygon;
