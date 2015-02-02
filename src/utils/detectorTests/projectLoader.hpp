@@ -38,6 +38,10 @@ class ProjectLoader
 
     string curFolder;
     vector <Frame*> vFrames;
+
+    void BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &root);
+    void AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &parent);
+
 };
 
 #endif  // _PROJECT_LOADER_HPP_
