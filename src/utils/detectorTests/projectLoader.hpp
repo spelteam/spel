@@ -7,6 +7,7 @@
 #include <tinyxml2.h>
 #include <opencv2/opencv.hpp>
 
+#include <tree_util.hh>
 #include <detector.hpp>
 #include <keyframe.hpp>
 #include <interpolation.hpp>

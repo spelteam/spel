@@ -8,7 +8,7 @@ int main (int argc, char **argv)
 {
   if (argc != 3) 
   {
-    cout << "Usage colorHistDetectorTest [project.xml] [out directory]" << endl;
+    cout << "Usage tlpsSolverTest [project.xml] [out directory]" << endl;
     return -1;
   }
   string curFolder = argv[1];

@@ -49,5 +49,7 @@ class BodyPart
     float lwRatio; // coefficient of proportionality is used for scaling
 };
 
+std::ostream& operator<<(std::ostream& os, const BodyPart &bp);
+
 #endif  // _BODYPART_HPP_
 

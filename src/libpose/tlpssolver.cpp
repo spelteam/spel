@@ -39,7 +39,7 @@ vector<Solvlet> TLPSSolver::solve(const vector<Frame*>& frames, map<string, floa
 	for(uint32_t sliceNumber=0; sliceNumber<slices.size(); ++sliceNumber)
 	{
 		//for every slice, build a factor graph
-		vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with 
+        vector<Frame*> seqSlice = interpolateSlice(slices[sliceNumber], params); //the slice we are working with
 
 		//train detectors
 		ColorHistDetector chDetector;
@@ -412,15 +412,21 @@ vector<vector<Frame*> > TLPSSolver::slice(const vector<Frame*>& frames) //separa
 	return slices; 
 }
 
-vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string, float> params)
+vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, float> params)
 {
 	//first make sure that the front and back frames HAVE 3D space locations computed
 	//if not, compute them
 
 	//check that the slice contains a keyframe/lockframe at each end
-	assert(slice.front()->getFrametype()!=LOCKFRAME && slice.front()->getFrametype()!=KEYFRAME);
-	assert(slice.back()->getFrametype()!=LOCKFRAME && slice.back()->getFrametype()!=KEYFRAME);
+    assert(slice.front()->getFrametype()==LOCKFRAME || slice.front()->getFrametype()==KEYFRAME);
+    assert(slice.back()->getFrametype()==LOCKFRAME || slice.back()->getFrametype()==KEYFRAME);
 	
+    params.emplace("useDefaultScale", 1);
+    params.emplace("defaultScale", 120);
+
+    float defaultScale =  params.at("defaultScale");
+    float useDefaultScale = params.at("useDefaultScale");
+
 	vector<Frame*> result;
 
 	for(uint32_t i=0; i<slice.size();++i)
@@ -438,6 +444,11 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	//now we need to build a tree of AxisAngles that reflects the rotations
 	Skeleton prevSkel = slice.front()->getSkeleton();
 	Skeleton futureSkel = slice.back()->getSkeleton();
+    if(useDefaultScale)
+    {
+        prevSkel.setScale(defaultScale);
+        futureSkel.setScale(defaultScale);
+    }
 
 	//set up the two part trees, the part tree is used for structure
 	tree<BodyPart> partTree = slice.front()->getSkeleton().getPartTree();
@@ -450,6 +461,8 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	for(uint32_t i=0; i<partTree.size(); ++i)
 	{
 		rotations.push_back(Eigen::Quaternionf());
+        unrotatedPast.push_back(Vector3f());
+        unrotatedFuture.push_back(Vector3f());
 		//unrotatedNodes.push_back(Eigen::Vector3f());
 	}
 
@@ -486,7 +499,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
         } while(parentIter!=NULL);
         
         //now unrotate starting from root down
-        for(uint32_t i=previousNodes.size(); i>=0; --i)
+        for(uint32_t i=previousNodes.size(); i>0; --i)
         {
         	prevVec = previousNodes[i].conjugate()._transformVector(prevVec);
         	futureVec = previousNodes[i].conjugate()._transformVector(prevVec);
@@ -506,6 +519,8 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 	{
 		//only the t value depends on frame number
 		Skeleton interpolatedSkeleton = prevSkel;
+        if(useDefaultScale)
+            interpolatedSkeleton.setScale(defaultScale);
 		vector<Vector3f> currentPartState;
 		partTree = 	interpolatedSkeleton.getPartTree();	
 
@@ -591,7 +606,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 		        }
 	        } while(parentIter!=NULL);
 
-	        //parent and child joints now contain the 
+            //parent and child joints now contain the correct location information
     		BodyJoint* childJointT = interpolatedSkeleton.getBodyJoint(partIter->getChildJoint());
 			BodyJoint* parentJointT = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint());
 			childJointT->setSpaceLocation(Point3f(childJoint.x(), childJoint.y(), childJoint.z()));
@@ -602,15 +617,15 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice)//, map<string,
 		//slice[i].setSkeleton(interpolatedSkeleton);
 
 		//frame type should be updated to interpolaion
-		Interpolation interpolatedFrame;
-		interpolatedFrame.setSkeleton(interpolatedSkeleton);
-		interpolatedFrame.setID(slice[i]->getID());
-		interpolatedFrame.setMask(slice[i]->getMask());
-		interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
-		interpolatedFrame.setImage(slice[i]->getImage());
+        Interpolation *interpolatedFrame;
+        interpolatedFrame->setSkeleton(interpolatedSkeleton);
+        interpolatedFrame->setID(slice[i]->getID());
+        interpolatedFrame->setMask(slice[i]->getMask());
+        interpolatedFrame->setGroundPoint(slice[i]->getGroundPoint());
+        interpolatedFrame->setImage(slice[i]->getImage());
 
 		//delete slice[i];
-		result[i] = &interpolatedFrame;
+        result[i] = interpolatedFrame;
 	}
 
 	return result; //result contains Frame*'s that have been modified according to 

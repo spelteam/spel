@@ -43,6 +43,7 @@ ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(PartModel 
 //TODO (Vitaliy Koshura): Need unit test
 ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
 {
+    id=0;
 }
 
 int ColorHistDetector::getID(void)
@@ -1189,13 +1190,14 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float supportScore = 0;
   float inMaskSupportScore = 0;
   pixDistAvg /= (float)pixDistNum;
+  float inMaskSuppWeight=0.5;
   if (partPixelColours.size() > 0)
   {
     supportScore = (float)totalPixelLabelScore / (float)totalPixels;
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     PartModel model(nBins);
     setPartHistogramm(model, partPixelColours);
-    float score = 1.0f - (supportScore + inMaskSupportScore);
+    float score = 1.0f - ((1.0-inMaskSuppWeight)*supportScore + inMaskSuppWeight*inMaskSupportScore);
     /*if (score < 0)
     {
       stringstream ss;
