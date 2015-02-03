@@ -670,14 +670,21 @@ void ProjectLoader::BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart
     return;
   try
   {
-    tree <BodyPart>::iterator parent = trBodyPart.insert(root, *vBodyParts.begin());
-    //cerr << trBodyPart.size() << endl;
-    vBodyParts.remove(*vBodyParts.begin());
-    AddChildBodyPartsToTree(vBodyParts, trBodyPart, parent);
-    if (vBodyParts.size() > 0)
+    list <BodyPart>::iterator i = vBodyParts.begin();
+    while (i != vBodyParts.end())
     {
-      cerr << "Not all BodyParts were parsed" << endl;
-      return;
+      if (i->getPartID() != 0)
+        continue;
+      tree <BodyPart>::iterator parent = trBodyPart.insert(root, *vBodyParts.begin());
+      //cerr << trBodyPart.size() << endl;
+      vBodyParts.remove(*vBodyParts.begin());
+      AddChildBodyPartsToTree(vBodyParts, trBodyPart, parent);
+      if (vBodyParts.size() > 0)
+      {
+        cerr << "Not all BodyParts were parsed" << endl;
+        return;
+      }
+      break;
     }
   }
   catch (...)
