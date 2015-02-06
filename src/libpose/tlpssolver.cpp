@@ -168,14 +168,15 @@ vector<Solvlet> TLPSSolver::solve(const vector<Frame*>& frames, map<string, floa
 					varIndices.push_back((currentFrame-1)*partTree.size()+partIter->getPartID()); //push back parent partID as the second variable index
 					varIndices.push_back((currentFrame)*partTree.size()+partIter->getPartID());
 
-					size_t futureCostShape[]={labels[partIter->getPartID()].size(), detections[currentFrame+1][parentPartIter->getPartID()].size()}; //number of labels
+                    size_t futureCostShape[]={labels[partIter->getPartID()].size(), detections[currentFrame+1][partIter->getPartID()].size()}; //number of labels
 					ExplicitFunction<float> futureTempCostFunc(futureCostShape, futureCostShape+1); //explicit function declare
 
 					for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
 						for(uint32_t j=0; j<detections[currentFrame+1][partIter->getPartID()].size(); ++j)
 						{
-							futureTempCostFunc(i,j) = computeFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame+1][partIter->getPartID()].at(j), params);
+                            float cost = computeFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame+1][partIter->getPartID()].at(j), params);
+                            futureTempCostFunc(i,j) = cost;
 						}
 					}
 					Model::FunctionIdentifier futureTempCostFid = gm.addFunction(futureTempCostFunc); //explicit function add to graphical model
@@ -460,7 +461,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, fl
 
 	for(uint32_t i=0; i<partTree.size(); ++i)
 	{
-		rotations.push_back(Eigen::Quaternionf());
+        rotations.push_back(Quaternionf::Identity());
         unrotatedPast.push_back(Vector3f());
         unrotatedFuture.push_back(Vector3f());
 		//unrotatedNodes.push_back(Eigen::Vector3f());
@@ -488,15 +489,13 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, fl
 
 
 		//get all rotations that need to happen
+        parentIter = partTree.parent(partIter);
 		vector<Eigen::Quaternionf> previousNodes;
- 		do
-		{
-			parentIter = partTree.parent(partIter);
-			if(parentIter!=NULL)
-			{
-	        	previousNodes.push_back(rotations[parentIter->getPartID()]);
-	        }
-        } while(parentIter!=NULL);
+        while(parentIter!=NULL)
+        {
+            previousNodes.push_back(rotations[parentIter->getPartID()]);
+            parentIter = partTree.parent(parentIter);
+        }
         
         //now unrotate starting from root down
         for(uint32_t i=previousNodes.size(); i>0; --i)
@@ -507,7 +506,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, fl
 		//Eigen::Vector3f xaxis(1,0,0);
 
 		//compute quaterion between two positions
-		Quaternionf rotation;
+        Quaternionf rotation;
 		rotation.setFromTwoVectors(prevVec, futureVec); //quaternion set
 		rotations[partIter->getPartID()] = rotation.normalized(); //push to vector of rotations
 		unrotatedPast[partIter->getPartID()] = prevVec;
@@ -562,29 +561,28 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, fl
 			//convert rotation to axis angle, interpolate angle, convert back to quaternion
 						
 	       	//rotate hierarchy
-	        do
+            parentIter = partTree.parent(partIter);
+            while(parentIter!=NULL)
 	        {
-				parentIter = partTree.parent(partIter);
-				if(parentIter!=NULL)
-				{
-		        	//if there is a parent rotate by its quaternion
-		        	Eigen::Quaternionf prevQuat = rotations[parentIter->getPartID()];
+                //if there is a parent rotate by its quaternion
+                Eigen::Quaternionf prevQuat = rotations[parentIter->getPartID()];
 
-		        	float angleP = 2*acos(prevQuat.w());
+                float angleP = 2*acos(prevQuat.w());
 
-					float xp = prevQuat.x()/sqrt(1.0-prevQuat.w()*prevQuat.w());
-					float yp = prevQuat.y()/sqrt(1.0-prevQuat.w()*prevQuat.w());
-					float zp = prevQuat.z()/sqrt(1.0-prevQuat.w()*prevQuat.w());
+                float xp = prevQuat.x()/sqrt(1.0-prevQuat.w()*prevQuat.w());
+                float yp = prevQuat.y()/sqrt(1.0-prevQuat.w()*prevQuat.w());
+                float zp = prevQuat.z()/sqrt(1.0-prevQuat.w()*prevQuat.w());
 
-					Vector3f prevAxis(xp,yp,zp);
+                Vector3f prevAxis(xp,yp,zp);
 
-					angleP = interpolateFloat(0, angleP, i, slice.size()); //interpolate the angle
+                angleP = interpolateFloat(0, angleP, i, slice.size()); //interpolate the angle
 
-		        	prevQuat = AngleAxisf(angleP, prevAxis);
+                prevQuat = AngleAxisf(angleP, prevAxis);
 
-		        	prevVec = prevQuat._transformVector(prevVec);
-		        }
-	        } while(parentIter!=NULL);
+                prevVec = prevQuat._transformVector(prevVec);
+
+                parentIter = partTree.parent(parentIter);
+            }
 
 	        currentPartState[partIter->getPartID()] = prevVec;
 		}
@@ -595,16 +593,14 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, fl
 			Vector3f childJoint = currentPartState[partIter->getPartID()];
 			Vector3f parentJoint(0,0,0);
 
-	        do
+            parentIter = partTree.parent(partIter);
+            while(parentIter!=NULL)
 	        {
-				parentIter = partTree.parent(partIter);
-				if(parentIter!=NULL)
-				{
-		        	//if there is a parent, first unrotate by its quaternion
-		        	childJoint=childJoint+currentPartState[parentIter->getPartID()];
-		        	parentJoint=parentJoint+currentPartState[parentIter->getPartID()];
-		        }
-	        } while(parentIter!=NULL);
+                //if there is a parent, first unrotate by its quaternion
+                childJoint=childJoint+currentPartState[parentIter->getPartID()];
+                parentJoint=parentJoint+currentPartState[parentIter->getPartID()];
+                parentIter = partTree.parent(parentIter);
+            }
 
             //parent and child joints now contain the correct location information
     		BodyJoint* childJointT = interpolatedSkeleton.getBodyJoint(partIter->getChildJoint());
@@ -617,7 +613,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, fl
 		//slice[i].setSkeleton(interpolatedSkeleton);
 
 		//frame type should be updated to interpolaion
-        Interpolation *interpolatedFrame;
+        Interpolation *interpolatedFrame = new Interpolation();
         interpolatedFrame->setSkeleton(interpolatedSkeleton);
         interpolatedFrame->setID(slice[i]->getID());
         interpolatedFrame->setMask(slice[i]->getMask());
@@ -628,6 +624,7 @@ vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, fl
         result[i] = interpolatedFrame;
 	}
 
+    //cout << "Interpolated keyframes" << endl;
 	return result; //result contains Frame*'s that have been modified according to 
 
 }

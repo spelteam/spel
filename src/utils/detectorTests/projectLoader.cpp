@@ -349,8 +349,8 @@ bool ProjectLoader::Load(string fileName)
     frames = frames->NextSiblingElement();
   }
 
-  kptree::print_tree_bracketed(trBodyParts);
-  cout << endl << "end of tree" << endl;
+//  kptree::print_tree_bracketed(trBodyParts);
+//  cout << endl << "end of tree" << endl;
 
   return true;
 }
