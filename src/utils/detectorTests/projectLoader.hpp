@@ -7,6 +7,7 @@
 #include <tinyxml2.h>
 #include <opencv2/opencv.hpp>
 
+#include <tree_util.hh>
 #include <detector.hpp>
 #include <keyframe.hpp>
 #include <interpolation.hpp>
@@ -37,6 +38,10 @@ class ProjectLoader
 
     string curFolder;
     vector <Frame*> vFrames;
+
+    void BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &root);
+    void AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &parent);
+
 };
 
 #endif  // _PROJECT_LOADER_HPP_

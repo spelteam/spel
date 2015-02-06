@@ -46,7 +46,7 @@ LIST ( APPEND ${LIBPOSE_MODULE}_SRC imagesimilaritymatrix)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC minspanningtree)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC nskpsolver)
 LIST ( APPEND ${LIBPOSE_MODULE}_SRC tlpssolver)
-
+LIST ( APPEND ${LIBPOSE_MODULE}_SRC detector)
 
 
 # Create a static library

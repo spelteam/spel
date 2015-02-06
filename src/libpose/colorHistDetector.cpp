@@ -43,6 +43,7 @@ ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(PartModel 
 //TODO (Vitaliy Koshura): Need unit test
 ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
 {
+    id=0;
 }
 
 int ColorHistDetector::getID(void)
@@ -135,7 +136,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         break;
       }
       j1 = joint->getImageLocation();
-      float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
+      float boneLength = (float) sqrt(PoseHelper::distSquared(j0, j1));
 //TODO (Vitaliy Koshura): Check this!
       float boneWidth = 0;
       try
@@ -152,13 +153,13 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         throw logic_error(ss.str());
       }
       Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-      c1 = Point2f(0, 0.5 * boneWidth);
-      c2 = Point2f(boneLength, 0.5 * boneWidth);
-      c3 = Point2f(boneLength, -0.5 * boneWidth);
-      c4 = Point2f(0, -0.5 * boneWidth);
-      Point2f polyCenter = Point2f(boneLength * 0.5, 0);
+      c1 = Point2f(0.f, 0.5f * boneWidth);
+      c2 = Point2f(boneLength, 0.5f * boneWidth);
+      c3 = Point2f(boneLength, -0.5f * boneWidth);
+      c4 = Point2f(0.f, -0.5f * boneWidth);
+      Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f);
       Point2f direction = j1 - j0;
-      float rotationAngle = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
+      float rotationAngle = float( PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI) );
 // rotate polygon and translate
       c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
       c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
@@ -219,7 +220,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             transform(lower, upper, back_inserter(partPolygons), [] (std::pair <int32_t, POSERECT<Point2f>> const &pair) { return pair.second; });
             for (vector <POSERECT <Point2f>>::iterator iteratorPartPolygons = partPolygons.begin(); iteratorPartPolygons != partPolygons.end(); ++iteratorPartPolygons)
             {
-              if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f(i, j)) > 0) == true)
+              if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f((float) i, (float) j)) > 0) == true)
               {
                 break;
               }
@@ -462,60 +463,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   Frame *prevFrame = 0, *nextFrame = 0;
   uint32_t stepCount = 0;
   uint32_t step = 0;
-  for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
-  {
-    Frame *f = *i;
-    if (f->getID() < frame->getID())
-    {
-      if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
-      {
-        prevFrame = f;
-        stepCount = 0;
-      }
-      else
-      {
-        stepCount++;
-      }
-    }
-    else if (f->getID() > frame->getID())
-    {
-      stepCount++;
-      if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
-      {
-        nextFrame = f;
-        break;
-      }
-    }
-    else // equal
-    {
-      stepCount++;
-      if (prevFrame == 0)
-      {
-        stringstream ss;
-        ss << "Couldn't find previous keyframe to the frame " << frame->getID();
-#ifdef DEBUG
-        cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-        throw logic_error(ss.str());
-      }
-      else
-      {
-        if (stepCount == 0)
-        {
-          stringstream ss;
-          ss << "Invalid stepCount";
-#ifdef DEBUG
-          cerr << ERROR_HEADER << ss.str() << endl;
-#endif // DEBUG
-          throw logic_error(ss.str());
-        }
-        else
-        {
-          step = stepCount;
-        }
-      }
-    }
-  }
+  getNeighborFrame(frame, &prevFrame, &nextFrame, step, stepCount);
   if (prevFrame == 0)
   {
     stringstream ss;
@@ -537,60 +485,19 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     vector <LimbLabel> labels;
-    BodyJoint *parentJoint = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint());
-    BodyJoint *childJoint = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint());
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
-    Skeleton prevSkeleton = prevFrame->getSkeleton();
-    tree <BodyJoint> prevBodyJoints = prevSkeleton.getJointTree();
-    Skeleton nextSkeleton = nextFrame->getSkeleton();
-    tree <BodyJoint> nextBodyJoints = nextSkeleton.getJointTree();
-    Point2f pj0, nj0, pj1, nj1;
-    for (tree <BodyJoint>::iterator i = prevBodyJoints.begin(); i != prevBodyJoints.end(); ++i)
-    {
-      if (i->getLimbID() == parentJoint->getLimbID())
-      {
-        pj0 = i->getImageLocation();
-      }
-      if (i->getLimbID() == childJoint->getLimbID())
-      {
-        pj1 = i->getImageLocation();
-      }
-    }
-    for (tree <BodyJoint>:: iterator i = nextBodyJoints.begin(); i != nextBodyJoints.end(); ++i)
-    {
-      if (i->getLimbID() == parentJoint->getLimbID())
-      {
-        nj0 = i->getImageLocation();
-      }
-      if (i->getLimbID() == childJoint->getLimbID())
-      {
-        nj1 = i->getImageLocation();
-      }
-    }
-    float interpolateStep = (float)step / (float)stepCount;  // Interpolate2Ddisplacement
-    Point2f j0 = pj0 * (1 - interpolateStep) + nj0 * interpolateStep;
-    Point2f j1 = pj1 * (1 - interpolateStep) + nj1 * interpolateStep;
-    float boneLength = (j0 == j1) ? 1.0 : sqrt(PoseHelper::distSquared(j0, j1));
-    float boxWidth = 0;
-    try
-    {
-      //TODO (Vitaliy Koshura): Need real implementation.
-      boxWidth = boneLength / iteratorBodyPart->getLWRatio()/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sScaleParam << "' param";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-      throw logic_error(ss.str());
-    }
+    Point2f j0;
+    Point2f j1;
+
+    getRawBodyPartPosition(frame, prevFrame, nextFrame, iteratorBodyPart->getParentJoint(), iteratorBodyPart->getChildJoint(), step, stepCount, j0, j1);
+
+    float boneLength = getBoneLength(j0, j1);
+    float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart);
     Point2f direction = j1 - j0;
-    float theta = PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI);
-    float minDist = boxWidth * 0.2;
+    float theta = float ( PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
+    float minDist = boxWidth * 0.2f;
     if (minDist < 2) minDist = 2;
     float searchDistance = 0;
     try
@@ -647,16 +554,16 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       throw logic_error(ss.str());
     }
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
-    for (float x = suggestStart.x - searchDistance * 0.5; x < suggestStart.x + searchDistance * 0.5; x += minDist)
+    for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
     {
-      for (float y = suggestStart.y - searchDistance * 0.5; y < suggestStart.y + searchDistance * 0.5; y += minDist)
+      for (float y = suggestStart.y - searchDistance * 0.5f; y < suggestStart.y + searchDistance * 0.5f; y += minDist)
       {
         if (x < maskMat.cols && y < maskMat.rows)
         {
           uint8_t mintensity = 0;
           try
           {
-            mintensity = maskMat.at<uint8_t>(y, x);
+            mintensity = maskMat.at<uint8_t>((int) y, (int) x);
           }
           catch(...)
           {
@@ -740,8 +647,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       }
       for (uint32_t i = 0; i < sortedLabels.size(); i++)
       {
-        uint32_t x = sortedLabels.at(i).getCenter().x;
-        uint32_t y = sortedLabels.at(i).getCenter().y;
+        uint32_t x = (uint32_t) sortedLabels.at(i).getCenter().x;
+        uint32_t y = (uint32_t) sortedLabels.at(i).getCenter().y;
         try
         {
           if (locations.at<uint32_t>(x, y) < uniqueLocationCandidates)
@@ -793,7 +700,7 @@ uint8_t ColorHistDetector::getNBins(void)
 //TODO (Vitaliy Koshura): Need unit test
 float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b)
 {
-  uint8_t factor = ceil(pow(2, 8)/partModel.nBins);
+  uint8_t factor = static_cast<uint8_t> ( ceil(pow(2, 8)/partModel.nBins) );
   float isFG = 0;
   try
   {
@@ -817,7 +724,7 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
   // do not add sample if the number of pixels is zero
   if (partColors.size() == 0)
     return;
-  uint8_t factor = ceil(pow(2, 8)/partModel.nBins);  // divide the color space into bins
+  uint8_t factor = static_cast<uint8_t> (ceil(pow(2, 8) / partModel.nBins));  // divide the color space into bins
   partModel.sizeFG = partColors.size();
   partModel.fgNumSamples = 1;
   partModel.fgSampleSizes.clear();
@@ -851,9 +758,9 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
   {
     try
     {
-      r = partColors.at(i).x / factor;
-      g = partColors.at(i).y / factor;
-      b = partColors.at(i).z / factor;
+      r = static_cast<uint8_t> (partColors.at(i).x / factor);
+      g = static_cast<uint8_t> (partColors.at(i).y / factor);
+      b = static_cast<uint8_t> (partColors.at(i).z / factor);
     }
     catch(...)
     {
@@ -920,16 +827,16 @@ void ColorHistDetector::addPartHistogramm(PartModel &partModel, const vector <Po
     }
   }
 
-  int factor = ceil(pow(2, 8)/partModel.nBins);//divide the color space into bins
+  int factor = (int) ceil(pow(2, 8)/partModel.nBins);//divide the color space into bins
   partModel.sizeFG += partColors.size();
   partModel.fgNumSamples++;
   partModel.fgSampleSizes.push_back(partColors.size());
 
   for(uint32_t i = 0; i < partColors.size(); i++)
   {
-    uint8_t r = partColors[i].x / factor;
-    uint8_t g = partColors[i].y / factor;
-    uint8_t b = partColors[i].z / factor;
+    uint8_t r = static_cast<uint8_t> (partColors[i].x / factor);
+    uint8_t g = static_cast<uint8_t> (partColors[i].y / factor);
+    uint8_t b = static_cast<uint8_t> (partColors[i].z / factor);
     partModel.partHistogramm[r][g][b]++;
   }
 
@@ -964,7 +871,7 @@ float ColorHistDetector::getAvgSampleSizeFgBetween(const PartModel &partModel, u
 {
   if(s1 >= partModel.fgSampleSizes.size() || s2 >= partModel.fgSampleSizes.size())
     return 0;
-  return (partModel.fgSampleSizes[s1] + partModel.fgSampleSizes[s2]) / 2.0;
+  return (partModel.fgSampleSizes[s1] + partModel.fgSampleSizes[s2]) / 2.0f;
 }
 
 //TODO (Vitaliy Koshura): Need unit test
@@ -1002,7 +909,7 @@ void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vect
       }
     }
   }
-  uint32_t factor = ceil(pow(2, 8) / partModel.nBins);
+  uint32_t factor = (uint32_t) ceil(pow(2, 8) / partModel.nBins);
   partModel.sizeBG += bgColors.size();
   partModel.bgNumSamples++;
   partModel.bgSampleSizes.push_back(bgColors.size());
@@ -1163,27 +1070,13 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
 LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1)
 {
   vector <Score> s;
+  vector <Point3i> partPixelColours;
   Mat maskMat = frame->getMask();
   Mat imgMat = frame->getImage();
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-  float x = boxCenter.x;
-  float y = boxCenter.y;
-  float boneLength = sqrt(PoseHelper::distSquared(j0, j1));
-  //TODO (Vitaliy Koshura): Need real implementation here
-  float boxWidth = /*frame->getSkeleton().getScale() / */(boneLength / bodyPart.getLWRatio());
-  float rot = PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
-  vector <Point3i> partPixelColours;
-  Point2f c1, c2, c3, c4, polyCenter;
-  c1 = Point2f(0, 0.5 * boxWidth);
-  c2 = Point2f(boneLength, 0.5 * boxWidth);
-  c3 = Point2f(boneLength, -0.5 * boxWidth);
-  c4 = Point2f(0, -0.5 * boxWidth);
-  polyCenter = Point2f(boneLength * 0.5, 0);
-  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rot) + boxCenter - polyCenter;
-  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rot) + boxCenter - polyCenter;
-  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rot) + boxCenter - polyCenter;
-  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rot) + boxCenter - polyCenter;
-  POSERECT <Point2f> rect(c1, c2, c3, c4);
+  float boneLength = getBoneLength(j0, j1);
+  float rot = float( PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI) );
+  POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1);
   uint32_t totalPixels = 0;
   uint32_t pixelsInMask = 0;
   uint32_t pixelsWithLabel = 0;
@@ -1217,33 +1110,18 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
 #endif
     throw logic_error(ss.str());
   }
-  for (int32_t i = x - boneLength * 0.5; i < x + boneLength * 0.5; i++)
+  for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
   {
-    for (int32_t j = y - boneLength * 0.5; j < y + boneLength * 0.5; j++)
+    for (int32_t j = int32_t(boxCenter.y - boneLength * 0.5); j < int32_t(boxCenter.y + boneLength * 0.5); j++)
     {
       if (i < maskMat.cols && j < maskMat.rows)
       {
-        float xmax = rect.point1.x, ymax = rect.point1.y, xmin = rect.point1.x, ymin = rect.point1.y;
-        if (rect.point1.x > rect.point2.x && rect.point1.x > rect.point3.x && rect.point1.x > rect.point4.x) xmax = rect.point1.x;
-        else if (rect.point2.x > rect.point1.x && rect.point2.x > rect.point3.x && rect.point2.x > rect.point4.x) xmax = rect.point2.x;
-        else if (rect.point3.x > rect.point1.x && rect.point3.x > rect.point2.x && rect.point3.x > rect.point4.x) xmax = rect.point3.x;
-        else if (rect.point4.x > rect.point1.x && rect.point4.x > rect.point2.x && rect.point4.x > rect.point3.x) xmax = rect.point4.x;
-        if (rect.point1.y > rect.point2.y && rect.point1.y > rect.point3.y && rect.point1.y > rect.point4.y) ymax = rect.point1.y;
-        else if (rect.point2.y > rect.point1.y && rect.point2.y > rect.point3.y && rect.point2.y > rect.point4.y) ymax = rect.point2.y;
-        else if (rect.point3.y > rect.point1.y && rect.point3.y > rect.point2.y && rect.point3.y > rect.point4.y) ymax = rect.point3.y;
-        else if (rect.point4.y > rect.point1.y && rect.point4.y > rect.point2.y && rect.point4.y > rect.point3.y) ymax = rect.point4.y;
-        if (rect.point1.x < rect.point2.x && rect.point1.x < rect.point3.x && rect.point1.x < rect.point4.x) xmin = rect.point1.x;
-        else if (rect.point2.x < rect.point1.x && rect.point2.x < rect.point3.x && rect.point2.x < rect.point4.x) xmin = rect.point2.x;
-        else if (rect.point3.x < rect.point1.x && rect.point3.x < rect.point2.x && rect.point3.x < rect.point4.x) xmin = rect.point3.x;
-        else if (rect.point4.x < rect.point1.x && rect.point4.x < rect.point2.x && rect.point4.x < rect.point3.x) xmin = rect.point4.x;
-        if (rect.point1.y < rect.point2.y && rect.point1.y < rect.point3.y && rect.point1.y < rect.point4.y) ymin = rect.point1.y;
-        else if (rect.point2.y < rect.point1.y && rect.point2.y < rect.point3.y && rect.point2.y < rect.point4.y) ymin = rect.point2.y;
-        else if (rect.point3.y < rect.point1.y && rect.point3.y < rect.point2.y && rect.point3.y < rect.point4.y) ymin = rect.point3.y;
-        else if (rect.point4.y < rect.point1.y && rect.point4.y < rect.point2.y && rect.point4.y < rect.point3.y) ymin = rect.point4.y;
+        float xmax, ymax, xmin, ymin;
+        rect.GetMinMaxXY <float> (xmin, ymin, xmax, ymax);
 
         if (i <= xmax && i >= xmin && j <= ymax && j >= ymin)
         {
-          if (rect.containsPoint(Point2f(i,j)) > 0)
+          if (rect.containsPoint(Point2f((float) i, (float) j)) > 0)
           {
             totalPixels++;
             uint8_t mintensity = 0;
@@ -1312,13 +1190,14 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float supportScore = 0;
   float inMaskSupportScore = 0;
   pixDistAvg /= (float)pixDistNum;
+  float inMaskSuppWeight=0.5;
   if (partPixelColours.size() > 0)
   {
     supportScore = (float)totalPixelLabelScore / (float)totalPixels;
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     PartModel model(nBins);
     setPartHistogramm(model, partPixelColours);
-    float score = 1.0 - (supportScore + inMaskSupportScore);
+    float score = 1.0f - ((1.0-inMaskSuppWeight)*supportScore + inMaskSuppWeight*inMaskSupportScore);
     /*if (score < 0)
     {
       stringstream ss;
@@ -1338,3 +1217,15 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }
 
+//Used only as prevent a warning for "const uint8_t nBins";
+vector <Frame*> ColorHistDetector::getFrames() const
+{
+	return frames;
+}
+
+//Used only as prevent a warning for "const uint8_t nBins";
+ColorHistDetector &ColorHistDetector::operator=(const ColorHistDetector &c)
+{
+	this->frames = c.getFrames();
+	return *this;
+}

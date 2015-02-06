@@ -481,7 +481,7 @@ tree<T, tree_node_allocator>::tree()
 
 template <class T, class tree_node_allocator>
 tree<T, tree_node_allocator>::tree(const T& x) 
-	{
+       {
 	head_initialise_();
 	set_head(x);
 	}

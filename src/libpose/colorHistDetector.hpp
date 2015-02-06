@@ -1,6 +1,9 @@
 #ifndef _LIBPOSE_COLORHISTDETECTOR_HPP_
 #define _LIBPOSE_COLORHISTDETECTOR_HPP_
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
 #include <opencv2/opencv.hpp>
 #include "detector.hpp"
 
@@ -16,7 +19,12 @@ class ColorHistDetector : public Detector
     void train(vector <Frame*> _frames, map <string, float> params);
     vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params);
     uint8_t getNBins(void);
+    vector <Frame*> getFrames() const;
+    ColorHistDetector &operator=(const ColorHistDetector &c);
   private:
+#ifdef DEBUG
+    FRIEND_TEST(colorHistDetectorTest, PrivateFields);
+#endif  // DEBUG
     struct PartModel
     {
       PartModel(uint8_t _nBins = 8);
@@ -35,7 +43,7 @@ class ColorHistDetector : public Detector
     int id;
     const uint8_t nBins;
     map <int32_t, PartModel> partModels;
-    vector <Frame*> frames;
+    //vector <Frame*> frames;
     float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
     void setPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors);
     void addPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);

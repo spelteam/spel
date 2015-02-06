@@ -3,6 +3,9 @@
 # libpose module name
 SET ( LIBPOSE_MODULE "libpose" )
 
+#libposegui module name
+SET ( LIBPOSEGUI_MODULE "libposegui" )
+
 # tests modules
 SET ( TESTS_MODULE "posetests" )
 SET ( COLORHISTDETECTORTEST_MODULE "ColorHistDetectorTest" )

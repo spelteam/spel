@@ -170,6 +170,7 @@ bool ProjectLoader::Load(string fileName)
   }
   tree <BodyPart> trBodyParts, trBodyPartsCopy;
   tree <BodyPart>::iterator topBodyParts;
+  list <BodyPart> vBodyParts;
   topBodyParts = trBodyParts.begin();
   while (true)
   {
@@ -211,9 +212,11 @@ bool ProjectLoader::Load(string fileName)
     part.setChildJoint(childJoint->getLimbID());
     part.setSpaceLength(expectedDistance);
     part.setLWRatio(lwRatio);
-    trBodyParts.insert(topBodyParts, part);
+    //trBodyParts.insert(topBodyParts, part);
+    vBodyParts.push_back(part);
     bodyParts = bodyParts->NextSiblingElement();
   }
+  BuildBodyPartTree(vBodyParts, trBodyParts, topBodyParts);
   int32_t firstFrameCols = -1;
   int32_t firstFrameRows = -1;
   while (true)
@@ -317,7 +320,7 @@ bool ProjectLoader::Load(string fileName)
         int id;
         bool isOccluded;
         id = e->IntAttribute(bodyPartIdParam.c_str());
-        isOccluded = e->Attribute(bodyPartIsOccludedParam.c_str());
+        isOccluded = e->BoolAttribute(bodyPartIsOccludedParam.c_str());
         BodyPart *part = 0;
         for (topBodyParts = trBodyPartsCopy.begin(); topBodyParts != trBodyPartsCopy.end(); ++topBodyParts)
         {
@@ -345,6 +348,10 @@ bool ProjectLoader::Load(string fileName)
     vFrames.push_back(f);
     frames = frames->NextSiblingElement();
   }
+
+//  kptree::print_tree_bracketed(trBodyParts);
+//  cout << endl << "end of tree" << endl;
+
   return true;
 }
 
@@ -657,3 +664,65 @@ void ProjectLoader::ResizeImage(Mat &image, int32_t &cols, int32_t &rows)
   }
 }
 
+void ProjectLoader::BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &root)
+{
+  if (vBodyParts.size() == 0)
+    return;
+  try
+  {
+    list <BodyPart>::iterator i = vBodyParts.begin();
+    while (i != vBodyParts.end())
+    {
+      if (i->getPartID() != 0)
+        continue;
+      tree <BodyPart>::iterator parent = trBodyPart.insert(root, *vBodyParts.begin());
+      //cerr << trBodyPart.size() << endl;
+      vBodyParts.remove(*vBodyParts.begin());
+      AddChildBodyPartsToTree(vBodyParts, trBodyPart, parent);
+      if (vBodyParts.size() > 0)
+      {
+        cerr << "Not all BodyParts were parsed" << endl;
+        return;
+      }
+      break;
+    }
+  }
+  catch (...)
+  {
+    cerr << "Can't get BodyPart of index 0 from vBodyParts" << endl;
+    return;
+  }
+}
+void ProjectLoader::AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &parent)
+{
+  list <BodyPart>::iterator i = vBodyParts.begin();
+  while (i != vBodyParts.end())
+  {
+    // it's a root
+    if (parent->getPartID() == trBodyPart.begin()->getPartID())
+    {
+      if (parent->getParentJoint() == i->getParentJoint() || parent->getChildJoint() == i->getParentJoint())
+      {
+        tree <BodyPart>::iterator inserted = trBodyPart.append_child(parent, *i);
+        vBodyParts.remove(*i);
+        AddChildBodyPartsToTree(vBodyParts, trBodyPart, inserted);
+        i = vBodyParts.begin();
+      }
+      else
+      {
+        ++i;
+      }
+    }
+    else if (parent->getChildJoint() == i->getParentJoint())
+    {
+      tree <BodyPart>::iterator inserted = trBodyPart.append_child(parent, *i);
+      vBodyParts.remove(*i);
+      AddChildBodyPartsToTree(vBodyParts, trBodyPart, inserted);
+      i = vBodyParts.begin();
+    }
+    else
+    {
+      ++i;
+    }
+  }
+}
