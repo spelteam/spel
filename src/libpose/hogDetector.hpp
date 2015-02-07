@@ -19,6 +19,7 @@ class HogDetector : public Detector
     {
       map <PHPoint<uint32_t>, vector <float>> partDescriptors;
       POSERECT <Point2f> partModelRect;
+      vector <float> descriptors;
       float compare(PartModel ethalon, uint8_t nBins);
     };
     int id;
@@ -28,9 +29,14 @@ class HogDetector : public Detector
     map <uint32_t, map <uint32_t, PartModel>> rawPartModelDescriptors;
     map <uint32_t, PartModel> partModelAverageDescriptors;
 
+    map <uint32_t, map <uint32_t, PartModel>> partModels;
+
     map <PHPoint<uint32_t>, vector <float>> computeDescriptors(HOGDescriptor detector, Size wndSize, Size wndStride, Size blockSize, Size blockStride, Size cellSize, int nbins, Frame *frame);
     void parseBodyPartDescriptors(Frame *frame, map <PHPoint<uint32_t>, vector <float>> currentFrameRawDescriptors);
     LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1, map <PHPoint<uint32_t>, vector <float>> deswcriptors, uint8_t nBins);
+
+    map <uint32_t, Size> getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize);
+    map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, Size wndSize, Size wndStride, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels);
 };
 
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_
