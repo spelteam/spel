@@ -11,10 +11,27 @@ FrameBoxWidget::FrameBoxWidget(QWidget *parent) :
     maskEditor = new QPushButton(this);
     maskEditor->setIcon(QPixmap(QString(":/root/resources/icons/big_mask.png")));
     maskEditor->setToolTip("Create/Edit mask");
+
+    //TODO:[T] change options
+    itemSkaler = new QSlider(Qt::Orientation::Horizontal, this);
+    itemSkaler->setToolTip("Scale body joints/parts");
+    itemSkaler->setMinimum(10);
+    itemSkaler->setMaximum(100);
+    itemSkaler->setSingleStep(1);
+    itemSkaler->setPageStep(1);
+    //TODO:[T] chagne options
+    maskViewer = new QSlider(Qt::Orientation::Horizontal, this);
+    maskViewer->setToolTip("Set opacity of the mask");
+    maskViewer->setMinimum(0);
+    maskViewer->setMaximum(255);
+    maskViewer->setSingleStep(1);
+    maskViewer->setPageStep(1);
     //layouts
     MainLayout = new QHBoxLayout;
     MainLayout->addWidget(changeViewer);
     MainLayout->addWidget(maskEditor);
+    MainLayout->addWidget(itemSkaler, 0, Qt::AlignLeft);
+    MainLayout->addWidget(maskViewer, 0, Qt::AlignLeft);
     MainLayout->addStretch(0);
     //settings
     this->setLayout(MainLayout);
@@ -24,6 +41,9 @@ FrameBoxWidget::FrameBoxWidget(QWidget *parent) :
 
 FrameBoxWidget::~FrameBoxWidget(){
     delete changeViewer;
+    delete maskEditor;
+    delete itemSkaler;
+    delete maskViewer;
     delete MainLayout;
 }
 

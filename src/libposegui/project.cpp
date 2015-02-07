@@ -25,6 +25,10 @@ Project& Project::getInstance(){
     return instance;
 }
 
+const QString& Project::getProjectFolder() const{
+    return projectFolder;
+}
+
 std::vector<Frame*> Project::getFrames() const{
     std::vector<Frame*> framesPtr;
 
@@ -35,10 +39,44 @@ std::vector<Frame*> Project::getFrames() const{
     return framesPtr;
 }
 
+Frame* Project::getFrame(int num) const{
+    return frames.at(num).get();
+}
+
+const QHash<int, FilenamePath>& Project::getPaths() const{
+    return paths;
+}
+
+const QString& Project::getLastError() const{
+    return lastError;
+}
+
+
+
+
+//PRIVATE
+
+Project::Project(QObject *parent)
+    :QObject(parent),
+      frames(),
+      paths(),
+      skeleton( new Skeleton() ),
+      projectFolder(),
+      lastError()
+{
+    //connect
+    QObject::connect(this, &Project::open, this, &Project::openProjectEvent);
+    QObject::connect(this, &Project::close, this, &Project::closeProjectEvent);
+}
+
 #include <QDebug>
 //TODO: [?]Go to background thread
 //TODO: [L]Create status bar of loading
-Project::ErrorCode Project::openProjectEvent(const QString &filename, QString *errMessage){
+Project::ErrorCode Project::openProjectEvent(const QString &filename){
+    if( currState == ProjectState::OPENED ){
+        lastError = "Project is opened";
+        return ErrorCode::INVALID_PROJECT_STATE;
+    }
     QRegExp rx("^/.*/");
     rx.setMinimal(false);
     projectFolder = filename.split(
@@ -53,7 +91,7 @@ Project::ErrorCode Project::openProjectEvent(const QString &filename, QString *e
     if( file.open(QFile::ReadOnly) ){
         document.setContent(&file);
     } else{
-        if(errMessage) *errMessage = file.errorString();
+        lastError = file.errorString();
         return ErrorCode::FILE_NOT_OPEN;
     }
     file.close();
@@ -67,7 +105,7 @@ Project::ErrorCode Project::openProjectEvent(const QString &filename, QString *e
     if( file.open(QFile::ReadOnly) ){
         schema.load(&file);
     } else{
-        if(errMessage) *errMessage = file.errorString();
+        lastError = file.errorString();
         return ErrorCode::FILE_NOT_OPEN;
     }
     file.close();
@@ -82,7 +120,7 @@ Project::ErrorCode Project::openProjectEvent(const QString &filename, QString *e
         }
     }
     if(errorOccured){
-        if(errMessage) *errMessage = messagesHandler.errorMessage();
+        lastError = messagesHandler.errorMessage();
         return ErrorCode::INVALID_PROJECT_STRUCTURE;
     }
 
@@ -99,21 +137,19 @@ Project::ErrorCode Project::openProjectEvent(const QString &filename, QString *e
     //load skeleton
     loadSkeleton(document);
     loadFrames(document);
+    //mark as opened
+    currState = ProjectState::OPENED;
 
     return ErrorCode::SUCCESS;
 }
 
-
-//PRIVATE
-
-Project::Project(QObject *parent)
-    :QObject(parent),
-      frames(),
-      paths(),
-      skeleton( new Skeleton() )
-{
-    //connect
-    QObject::connect(this, &Project::open, this, &Project::openProjectEvent);
+void Project::closeProjectEvent(){
+    //clear resources
+    frames.clear();
+    paths.clear();
+    projectFolder.clear();
+    //mark as closed
+    currState = ProjectState::CLOSED;
 }
 
 void Project::loadSkeleton( const QDomDocument &document){

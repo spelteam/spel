@@ -17,6 +17,8 @@ public slots:
 
 protected:
     void resizeEvent( QResizeEvent* event ) override;
+private:
+    const int SCALE_FACTOR = 80;
 };
 
 #endif // FRAMETABLEWIDGET_H

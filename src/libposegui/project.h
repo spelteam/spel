@@ -31,21 +31,27 @@ public:
         INVALID_PROJECT_STRUCTURE = 1 << 1,
         MISSING_FILE = 1 << 2,
         FILE_NOT_OPEN = 1 << 3,
+        INVALID_PROJECT_STATE = 1 << 4,
+    };
+    enum class ProjectState{
+        CLOSED,
+        OPENED
     };
 private:
     using FramePtr = std::unique_ptr<Frame>;
     using SkeletonPtr = std::unique_ptr<Skeleton>;
-private:
-    explicit Project(QObject *parent = 0);
+
 public:
     Project( const Project& ) = delete;
     Project& operator=(const Project&) = delete;
     Project( const Project&& ) = delete;
     Project& operator=( const Project&& ) = delete;
+private:
+    explicit Project(QObject *parent = 0);
 
 signals:
     void create();
-    Project::ErrorCode open( const QString& filename, QString* errMessage = nullptr );
+    Project::ErrorCode open( const QString& filename );
     void load();
     void close();
     void save();
@@ -53,12 +59,20 @@ signals:
 public slots:
 
 private slots:
-    Project::ErrorCode openProjectEvent( const QString& filename, QString* errMessage = nullptr );
+    Project::ErrorCode openProjectEvent( const QString& filename );
+    void closeProjectEvent();
 
 public:
     static Project& getInstance();
 
+    const QString& getProjectFolder() const;
+
     std::vector<Frame*> getFrames() const;
+    Frame* getFrame( int num ) const;
+
+    const QHash<int, FilenamePath>& getPaths() const;
+
+    const QString& getLastError() const;
 
 private:
     void loadSkeleton( const QDomDocument& document );
@@ -72,6 +86,8 @@ private:
     QHash<int, FilenamePath> paths;
     SkeletonPtr skeleton;
     QString projectFolder;
+    ProjectState currState = ProjectState::CLOSED;
+    QString lastError;
 };
 
 #endif // PROJECT_H

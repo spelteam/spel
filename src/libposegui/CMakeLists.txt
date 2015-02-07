@@ -49,7 +49,7 @@ LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC project.cpp)
 #Utility helper class
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC utility.cpp)
 #Custom graphick items
-#LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC bodyjointitem.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC bodyjointitem.cpp)
 #Xml message handler
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC xmlmessagehandler.cpp)
 #Attributes of xml project
