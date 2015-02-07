@@ -53,7 +53,7 @@ vector<Solvlet> TLPSSolver::solve(const vector<Frame*>& frames, map<string, floa
 		if(debugLevel>=1)
 		if(debugLevel>=1)
 			cout << "Interpolating slice "<< sliceNumber << endl;
-		vector<Frame*> seqSlice = interpolateSlice(slices[sliceNumber]); //the slice we are working with, interpolated
+		vector<Frame*> seqSlice = interpolateSlice(slices[sliceNumber], params); //the slice we are working with, interpolated
 
 		//train detectors
 		ColorHistDetector chDetector;

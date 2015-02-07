@@ -1,6 +1,11 @@
 #ifndef _LIBPOSE_LIMBLABEL_HPP_
 #define _LIBPOSE_LIMBLABEL_HPP_
 
+#ifdef WINDOWS
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif  // WINDOWS
+
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <string>
