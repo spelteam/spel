@@ -302,9 +302,6 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   map <uint32_t, Size> partSize = getMaxBodyPartHeightWidth(_frames, blockSize);
 
-  HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
-
-  partModelAverageDescriptors.clear();
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
@@ -320,57 +317,11 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     try
     {
-      parseBodyPartDescriptors(*frameNum, computeDescriptors(detector, wndSize, wndStride, blockSize, blockStride, cellSize, nbins, *frameNum));
+      computeDescriptors(*frameNum, nbins, wndSize, wndStride, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
     }
     catch (...)
     {
       break;
-    }
-    float factor = 1.0f / rawPartModelDescriptors.size();
-    for (map <uint32_t, map <uint32_t, PartModel>>::iterator frameModel = rawPartModelDescriptors.begin(); frameModel != rawPartModelDescriptors.end(); ++frameModel)
-    {
-      for (map <uint32_t, PartModel>::iterator part = frameModel->second.begin(); part != frameModel->second.end(); ++part)
-      {
-        if (partModelAverageDescriptors.count(part->first) == 0)
-        {
-          PartModel partModel;
-          partModel.partModelRect = part->second.partModelRect;
-          for (map <PHPoint<uint32_t>, vector <float>>::iterator descriptors = part->second.partDescriptors.begin(); descriptors != part->second.partDescriptors.end(); ++descriptors)
-          {
-            if (descriptors->second.size() < nbins)
-            {
-              throw logic_error("Not enough descriptors");
-            }
-            else
-            {
-              vector <float> values;
-              for (uint32_t i = 0; i < nbins; i++)
-              {
-                values.push_back(descriptors->second.at(i) * factor);
-              }
-              partModel.partDescriptors.insert(pair <PHPoint <uint32_t>, vector <float>>(descriptors->first, values));
-            }
-          }
-          partModelAverageDescriptors.insert(pair <uint32_t, PartModel>(part->first, partModel));
-        }
-        else
-        {
-          for (map <PHPoint<uint32_t>, vector <float>>::iterator descriptors = part->second.partDescriptors.begin(); descriptors != part->second.partDescriptors.end(); ++descriptors)
-          {
-            if (descriptors->second.size() < nbins)
-            {
-              throw logic_error("Not enough descriptors");
-            }
-            else
-            {
-              for (uint32_t i = 0; i < nbins; i++)
-              {
-                partModelAverageDescriptors.at(part->first).partDescriptors.at(descriptors->first).at(i) += descriptors->second.at(i) * factor;
-              }
-            }
-          }          
-        }
-      }
     }
   }
 }
