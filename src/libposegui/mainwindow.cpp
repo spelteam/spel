@@ -36,14 +36,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ToolLayout->addWidget(solveTools,1);
 
     MainLayout = new QVBoxLayout;
-    MainLayout->addLayout(ToolLayout, 5);
-    MainLayout->addWidget(framesView,1);
+    MainLayout->addLayout(ToolLayout, 9);
+    MainLayout->addWidget(framesView,3);
     ui->centralWidget->setLayout(MainLayout);
     //set styles for group boxes
-    this->setStyleSheet( Utility::fileToString(":/root/resources/stylesheets/QGroupBox.qss") );
+    this->setStyleSheet( Utility::fileToString(":/root/resources/stylesheets/Toolbox.qss") );
     //connect
+    //loading
     QObject::connect(&Project::getInstance(),&Project::load,framesView,&FrameTableWidget::loadProjectEvent);
+    QObject::connect(&Project::getInstance(),&Project::load, currFrame, &FrameView2D::loadProjectEvent );
+    //closing
     QObject::connect(&Project::getInstance(),&Project::close,framesView,&FrameTableWidget::closeProjectEvent);
+    QObject::connect(&Project::getInstance(),&Project::close,currFrame,&FrameView2D::closeProjectEvent);
+    //scaling
+    QObject::connect(frameTools->itemSkaler, &QSlider::valueChanged, currFrame, &FrameView2D::scaleItemsEvent);
+    //mask opacity
+    QObject::connect(frameTools->maskViewer, &QSlider::valueChanged, currFrame, &FrameView2D::changeMaskOpacityEvent);
+    //picking frame
+    QObject::connect(framesView, &FrameTableWidget::cellClicked,currFrame,&FrameView2D::pickFrameEvent);
+    QObject::connect(framesView, &FrameTableWidget::cellActivated,currFrame,&FrameView2D::pickFrameEvent);
+    QObject::connect(framesView, &FrameTableWidget::cellEntered,currFrame,&FrameView2D::pickFrameEvent);
 }
 
 MainWindow::~MainWindow()
@@ -58,7 +70,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionClose_triggered()
 {
+    ui->statusBar->showMessage("Closing project");
     Project::getInstance().close();
+    ui->statusBar->showMessage("Project was closed");
 }
 
 #include <QDebug>
@@ -75,15 +89,14 @@ void MainWindow::on_actionOpen_triggered()
             "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
     //try to open project
     ui->statusBar->showMessage("Loading project");
-    QString errMessage;
+
     Project::ErrorCode errCode = Project::getInstance().open(
-       projectFilename,
-       &errMessage
+       projectFilename
     );
     if( errCode != Project::ErrorCode::SUCCESS ){
         QMessageBox messageBox;
         messageBox.setWindowTitle(this->windowTitle());
-        messageBox.setText(errMessage);
+        messageBox.setText(Project::getInstance().getLastError());
         messageBox.setIcon(QMessageBox::Critical);
         messageBox.exec();
     } else{
@@ -92,7 +105,8 @@ void MainWindow::on_actionOpen_triggered()
         messageBox.setText("All ok");
         messageBox.setIcon(QMessageBox::Information);
         messageBox.exec();
+        //load project to GUI
+       Project::getInstance().load();
+       ui->statusBar->showMessage("Project was loaded");
     }
-     //load project to GUI
-    ui->statusBar->showMessage("Project was loaded");
 }

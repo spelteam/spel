@@ -4,6 +4,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QSlider>
 
 class FrameBoxWidget : public QGroupBox
 {
@@ -23,10 +24,12 @@ private:
     int state = 0;
     //layouts
     QHBoxLayout *MainLayout;
+public:
     //view
     QPushButton *changeViewer;
     QPushButton *maskEditor;
-
+    QSlider *itemSkaler;
+    QSlider *maskViewer;
 
 };
 
