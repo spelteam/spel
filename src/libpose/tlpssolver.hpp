@@ -3,6 +3,7 @@
 
 //OpenGM
 #include <opengm/graphicalmodel/graphicalmodel.hxx>
+#include <opengm/graphicalmodel/graphicalmodel_hdf5.hxx>
 #include <opengm/graphicalmodel/space/discretespace.hxx>
 #include <opengm/operations/adder.hxx>
 #include <opengm/functions/explicit_function.hxx>

@@ -98,28 +98,30 @@ float LimbLabel::getSumScore(void) const
 
 void LimbLabel::getEndpoints(Point2f &p0, Point2f &p1) const
 {
-  return; // this function needs to update the two endpoints passed into it
+    p0 = 0.5*polygon[0]+0.5*polygon[2];
+    p1 = 0.5*polygon[1]+0.5*polygon[3];
+    return; // this function needs to update the two endpoints passed into it
 }
 
-Point2f LimbLabel::rotatePoint2D(const Point2f point, const Point2f pivot, const float degrees)
-{
-    double radians = degrees*M_PI/180.0;
-    //first center "point"
+//Point2f LimbLabel::rotatePoint2D(const Point2f point, const Point2f pivot, const float degrees)
+//{
+//    double radians = degrees*M_PI/180.0;
+//    //first center "point"
 
-    Point2f pt, cnt;
-    pt = point;
-    cnt = pivot;
+//    Point2f pt, cnt;
+//    pt = point;
+//    cnt = pivot;
 
-    pt = pt-cnt;
+//    pt = pt-cnt;
 
-    //now rotate
-    Point2f result;
-    result.x = pt.x*cosf(radians) - pt.y*sinf(radians);
-    result.y = pt.x*sinf(radians) + pt.y*cosf(radians);
+//    //now rotate
+//    Point2f result;
+//    result.x = pt.x*cosf(radians) - pt.y*sinf(radians);
+//    result.y = pt.x*sinf(radians) + pt.y*cosf(radians);
 
-    //now translate back
-    result = result+cnt;
+//    //now translate back
+//    result = result+cnt;
 
-    Point2i res = result;
-    return res;
-}
+//    Point2i res = result;
+//    return res;
+//}

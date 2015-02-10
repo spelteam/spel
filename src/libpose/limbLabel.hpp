@@ -48,8 +48,8 @@ class LimbLabel
 
     bool containsPoint(Point2f pt);
   private:
-//rotate a point around a pivot by degrees
-    Point2f rotatePoint2D(const Point2f point, const Point2f pivot, const float degrees);
+////rotate a point around a pivot by degrees
+//    Point2f rotatePoint2D(const Point2f point, const Point2f pivot, const float degrees);
 // Label center 
     Point2f center;
 // identifier representing what bone this label belongs to
