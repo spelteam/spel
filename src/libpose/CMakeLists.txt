@@ -23,6 +23,24 @@ INCLUDE_DIRECTORIES ( ${OpenGM_INCLUDE_DIR} )
 FIND_PACKAGE ( Eigen3 REQUIRED )
 INCLUDE_DIRECTORIES (${Eigen3_INCLUDE_DIR} )
 
+# use HDF5
+IF ( WIN32 )
+# FindHDF5 is broken on Windows
+# it wrongly discovers the dlls instead of the lib files
+# see: www.cmake.org/Bug/bug_relationship_graph.php?bug_id=14111
+# therefore we set the variable manually
+  FIND_LIBRARY ( HDF5_IMPORT_LIB NAMES hdf5 hdf5dll )
+  FIND_LIBRARY ( HDF5_HL_IMPORT_LIB NAMES hdf5_hl hdf5_hldll )
+  FIND_PATH ( HDF5_INCLUDE_DIR hdf5.h )
+  SET ( HDF5_LIBRARIES ${HDF5_IMPORT_LIB} ${HDF5_HL_IMPORT_LIB} )
+  MESSAGE ( STATUS "HDF5: autodiscovery is broken on WIN32; using global search paths")
+  MESSAGE ( STATUS "HDF5: found ${HDF5_LIBRARIES}")
+ELSE ()
+   FIND_PACKAGE ( HDF5 REQUIRED )
+ENDIF ()
+INCLUDE_DIRECTORIES ( ${HDF5_INCLUDE_DIR} )
+ADD_DEFINITIONS ( ${HDF5_CPPFLAGS} )
+
 # Command line options, their defaults and checks
 
 # Set correct defines and include correct files
