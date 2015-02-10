@@ -220,8 +220,8 @@ vector<Solvlet> TLPSSolver::solve(const vector<Frame*>& frames, map<string, floa
 
 		//now solve the slice
 
-//        if(debugLevel>=2)
-//            opengm::hdf5::save(gm, "gm.h5", "tlps-gm");
+        if(debugLevel>=2)
+            opengm::hdf5::save(gm, "gm.h5", "tlps-gm");
 
 		const size_t maxNumberOfIterations = 100;
 	   	const double convergenceBound = 1e-7;
