@@ -83,6 +83,21 @@ struct POSERECT
     maxy = max(max(point1.y, point2.y), max(point3.y, point4.y));
   }
 
+  template <typename D> D GetCenter()
+  {
+    D center1 = 0.5 * point1 + 0.5 * point3;
+    D center2 = 0.5 * point2 + 0.5 * point4;
+    float dist = (float)sqrt(PoseHelper::distSquared(center1, center2));
+    if (dist > 0.001)
+    {
+      throw logic_error("Rect center couldn't be found");
+    }
+    else
+    {
+      return center1;
+    }
+  }
+
   POSERECT<T>& operator=( const POSERECT<T>& rect ){
       if( &rect == this ) return *this;
 

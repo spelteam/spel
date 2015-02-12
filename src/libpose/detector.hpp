@@ -30,7 +30,7 @@ class Detector
     virtual float getBoneLength(Point2f begin, Point2f end);
     virtual float getBoneWidth(float length, BodyPart bodyPart);
     virtual POSERECT <Point2f> getBodyPartRect(BodyPart bodyPart, Point2f j0, Point2f j1, Size ethalon = Size(0, 0));
-    virtual Mat rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, Point2f boxCenter, Point2f polyCenter, float angle, Size size);
+    virtual Mat rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size);
 };
 
 #endif  // _LIBPOSE_DETECTOR_HPP_

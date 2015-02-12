@@ -18,10 +18,11 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
   HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
   tree <BodyPart> partTree = frame->getSkeleton().getPartTree();
   Mat imgMat = frame->getImage();
+  Skeleton skeleton = frame->getSkeleton();
   for (tree <BodyPart>::iterator part = partTree.begin(); part != partTree.end(); ++part)
   {
     Point2f j0, j1;
-    BodyJoint *joint = frame->getSkeleton().getBodyJoint(part->getParentJoint());
+    BodyJoint *joint = skeleton.getBodyJoint(part->getParentJoint());
     if (joint == 0)
     {
 #ifdef DEBUG
@@ -31,7 +32,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     }
     j0 = joint->getImageLocation();
     joint = 0;
-    joint = frame->getSkeleton().getBodyJoint(part->getChildJoint());
+    joint = skeleton.getBodyJoint(part->getChildJoint());
     if (joint == 0)
     {
 #ifdef DEBUG
@@ -40,19 +41,17 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
       break;
     }
     j1 = joint->getImageLocation();
-    Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
     float boneLength = getBoneLength(j0, j1);
     float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     POSERECT <Point2f> rect = getBodyPartRect(*part, j0, j1, wndSize);
 
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-    Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f);
     Point2f direction = j1 - j0;
     float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
     PartModel partModel;
     partModel.partModelRect = rect;
-    Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, boxCenter, polyCenter, rotationAngle, wndSize);
+    Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, wndSize);
     detector.compute(partImage, partModel.descriptors);
     parts.insert(pair <uint32_t, PartModel>(part->getPartID(), partModel));
   }

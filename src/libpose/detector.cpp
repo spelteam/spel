@@ -196,31 +196,38 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
   return POSERECT <Point2f>(c1, c2, c3, c4);
 }
 
-Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, Point2f boxCenter, Point2f polyCenter, float angle, Size size)
+Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
 {
-  Mat partImage = Mat(size.height, size.width, CV_8UC3);
+  POSERECT <Point2f> tempRect = initialRect;
+  Mat partImage = Mat(size.width, size.height, CV_8UC3, Scalar(255, 255, 255));
   float xmax, ymax, xmin, ymin;
   initialRect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  (PoseHelper::rotatePoint2D(Point_<float>(initialRect.point1), Point_<float>((CvPoint2D32f)polyCenter), angle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
-  (PoseHelper::rotatePoint2D(Point_<float>(initialRect.point2), Point_<float>((CvPoint2D32f)polyCenter), angle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
-  (PoseHelper::rotatePoint2D(Point_<float>(initialRect.point3), Point_<float>((CvPoint2D32f)polyCenter), angle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
-  (PoseHelper::rotatePoint2D(Point_<float>(initialRect.point4), Point_<float>((CvPoint2D32f)polyCenter), angle) + Point_<float>((CvPoint2D32f)(boxCenter - polyCenter)));
-  for (uint32_t x = (uint32_t)xmin; x <= (uint32_t)xmax; x++)
+  Point2f center = initialRect.GetCenter<Point2f>();
+  Point2f newCenter = Point2f(0.5 * size.width, 0.5 * size.height);
+  initialRect.point1 = PoseHelper::rotatePoint2D(initialRect.point1, center, angle * -1) - center + newCenter;
+  initialRect.point2 = PoseHelper::rotatePoint2D(initialRect.point2, center, angle * -1) - center + newCenter;
+  initialRect.point3 = PoseHelper::rotatePoint2D(initialRect.point3, center, angle * -1) - center + newCenter;
+  initialRect.point4 = PoseHelper::rotatePoint2D(initialRect.point4, center, angle * -1) - center + newCenter;
+  for (float x = xmin; x <= xmax; x++)
   {
-    for (uint32_t y = (uint32_t)ymin; y <= (uint32_t)ymax; y++)
+    for (float y = ymin; y <= ymax; y++)
     {
-      PHPoint<uint32_t> phpoint(x, y);
-      if (initialRect.containsPoint(phpoint))
+      PHPoint<int32_t> phpoint;
+      Point2f p = Point2f(x, y);
+      if (tempRect.containsPoint(p) >= 0)
       {
-        phpoint = PoseHelper::rotatePoint2D(Point_<uint32_t>(x, y), Point_<uint32_t>((CvPoint2D32f)polyCenter), angle) + Point_<uint32_t>((CvPoint2D32f)(boxCenter - polyCenter));
+        p = PoseHelper::rotatePoint2D(p, center, angle * -1) - center + newCenter;
+        phpoint.x = (int32_t)p.x;
+        phpoint.y = (int32_t)p.y;
         try
         {
-          partImage.at<Vec3b>(phpoint.x, phpoint.y) = imgSource.at<Vec3b>(x, y);
+          Vec3b color = imgSource.at<Vec3b>((int32_t)y, (int32_t)x);
+          partImage.at<Vec3b>(phpoint.y, phpoint.x) = color;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't put value of indeces " << "[" << x << "][" << y << "]";
+          ss << "Couldn't put value of indeces " << "[" << (int32_t)x << "][" << (int32_t)y << "] into indeces [" << phpoint.x << "][" << phpoint.y << "]";
 #ifdef DEBUG
           cerr << ERROR_HEADER << ss.str() << endl;
 #endif  // DEBUG
