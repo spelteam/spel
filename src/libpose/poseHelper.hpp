@@ -12,6 +12,73 @@
 using namespace std;
 using namespace cv;
 
+// class with common functions
+class PoseHelper
+{
+  public:
+    //find squared distance between two points
+    //Arguments:
+    //one - first point
+    //two - second point
+    //Result:
+    //squared distance between one and two
+    template <typename T> static double distSquared(T one, T two)
+    {
+      return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
+    }
+    //find angle between two vectors on a plane
+    //Arguments:
+    //x1, y1 - first vector
+    //x2, y2 - second vector
+    //Result:
+    //angle between first and second vector,
+    //positive counter clockwise
+    //angle is in the range [-PI; PI]
+    static double angle2D(double x1, double y1, double x2, double y2);
+    //
+    template <typename T> static T rotatePoint2D(const T point, const T pivot, const float degrees)
+    {
+      double radians = degrees * M_PI / 180.0;
+      T pt, cnt;
+      pt = point;
+      cnt = pivot;
+      pt -= cnt;
+      T result;
+      result.x = pt.x * cosf(radians) - pt.y * sinf(radians);
+      result.y = pt.x * sinf(radians) + pt.y * cosf(radians);
+      result = result + cnt;
+      return result;
+    }
+    //copies tree
+    //Arguments:
+    //dst - copy to
+    //src - copy from
+    //Result:
+    //dst is copy of src
+    template <class T, class tree_node_allocator>
+    static void copyTree(tree <T, tree_node_allocator> &dst, const tree <T, tree_node_allocator> &src) 
+    {
+      dst.clear();
+      auto it = src.begin(), to = dst.begin();
+      while(it != src.end())
+      {
+        to = dst.insert(to, (*it));
+        it.skip_children();
+        ++it;
+      }
+      to = dst.begin();
+      it = src.begin();
+      while(it != src.end())
+      {
+        to = dst.replace(to, it);
+        to.skip_children();
+        it.skip_children();
+        ++to;
+        ++it;
+      }
+    }
+};
+
 template <class T>
 struct TPOSERECT
 {
@@ -164,73 +231,6 @@ public:
   {
     return (this->x < pt.x && this->y < pt.y && this->z < pt.z);
   }
-};
-
-// class with common functions
-class PoseHelper
-{
-  public:
-    //find squared distance between two points
-    //Arguments:
-    //one - first point
-    //two - second point
-    //Result:
-    //squared distance between one and two
-    template <typename T> static double distSquared(T one, T two)
-    {
-      return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
-    }
-    //find angle between two vectors on a plane
-    //Arguments:
-    //x1, y1 - first vector
-    //x2, y2 - second vector
-    //Result:
-    //angle between first and second vector,
-    //positive counter clockwise
-    //angle is in the range [-PI; PI]
-    static double angle2D(double x1, double y1, double x2, double y2);
-    //
-    template <typename T> static T rotatePoint2D(const T point, const T pivot, const float degrees)
-    {
-      double radians = degrees * M_PI / 180.0;
-      T pt, cnt;
-      pt = point;
-      cnt = pivot;
-      pt -= cnt;
-      T result;
-      result.x = pt.x * cosf(radians) - pt.y * sinf(radians);
-      result.y = pt.x * sinf(radians) + pt.y * cosf(radians);
-      result = result + cnt;
-      return result;
-    }
-    //copies tree
-    //Arguments:
-    //dst - copy to
-    //src - copy from
-    //Result:
-    //dst is copy of src
-    template <class T, class tree_node_allocator>
-    static void copyTree(tree <T, tree_node_allocator> &dst, const tree <T, tree_node_allocator> &src) 
-    {
-      dst.clear();
-      auto it = src.begin(), to = dst.begin();
-      while(it != src.end())
-      {
-        to = dst.insert(to, (*it));
-        it.skip_children();
-        ++it;
-      }
-      to = dst.begin();
-      it = src.begin();
-      while(it != src.end())
-      {
-        to = dst.replace(to, it);
-        to.skip_children();
-        it.skip_children();
-        ++to;
-        ++it;
-      }
-    }
 };
 
 #endif  // _POSEHELPER_HPP_
