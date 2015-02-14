@@ -12,48 +12,79 @@ void HogDetector::setID(int _id)
   id = _id;
 }
 
-map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size wndSize, Size wndStride, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels)
+map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size wndStride, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels)
 {
   map <uint32_t, PartModel> parts;
-  HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
+  Size wndSize;
   tree <BodyPart> partTree = frame->getSkeleton().getPartTree();
   Mat imgMat = frame->getImage();
   Skeleton skeleton = frame->getSkeleton();
   for (tree <BodyPart>::iterator part = partTree.begin(); part != partTree.end(); ++part)
   {
+    try
+    {
+      wndSize = partSize.at(part->getPartID());
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't get partSize for part " << part->getPartID();
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
     Point2f j0, j1;
     BodyJoint *joint = skeleton.getBodyJoint(part->getParentJoint());
     if (joint == 0)
     {
+      stringstream ss;
+      ss << "Invalid parent joint";
 #ifdef DEBUG
-      cerr << ERROR_HEADER << "Invalid parent joint" << endl;
+      cerr << ERROR_HEADER << ss.str() << endl;
 #endif  // DEBUG
-      break;
+      throw logic_error(ss.str());
     }
     j0 = joint->getImageLocation();
     joint = 0;
     joint = skeleton.getBodyJoint(part->getChildJoint());
     if (joint == 0)
     {
+      stringstream ss;
+      ss << "Invalid child joint";
 #ifdef DEBUG
-      cerr << ERROR_HEADER << "Invalid child joint" << endl;
+      cerr << ERROR_HEADER << ss.str() << endl;
 #endif  // DEBUG
-      break;
+      throw logic_error(ss.str());
     }
     j1 = joint->getImageLocation();
-    float boneLength = getBoneLength(j0, j1);
-    float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
-    POSERECT <Point2f> rect = getBodyPartRect(*part, j0, j1, wndSize);
+    try
+    {
+      float boneLength = getBoneLength(j0, j1);
+      float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+      POSERECT <Point2f> rect = getBodyPartRect(*part, j0, j1, wndSize);
 
-    float xmax, ymax, xmin, ymin;
-    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-    Point2f direction = j1 - j0;
-    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
-    PartModel partModel;
-    partModel.partModelRect = rect;
-    Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, wndSize);
-    detector.compute(partImage, partModel.descriptors);
-    parts.insert(pair <uint32_t, PartModel>(part->getPartID(), partModel));
+      float xmax, ymax, xmin, ymin;
+      rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+      Point2f direction = j1 - j0;
+      float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
+      PartModel partModel;
+      partModel.partModelRect = rect;
+      Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, wndSize);
+      HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
+      detector.compute(partImage, partModel.descriptors);
+      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), partModel));
+    }
+    catch (logic_error err)
+    {
+      stringstream ss;
+      ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part->getPartID() << endl;
+      ss << "\t" << err.what();
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
   }
   return parts;
 }
@@ -229,6 +260,10 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
   map <uint32_t, Size> result;
   for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
   {
+    if ((*frame)->getFrametype() != KEYFRAME && (*frame)->getFrametype() != LOCKFRAME)
+    {
+      continue;
+    }
     Skeleton skeleton = (*frame)->getSkeleton();
     tree <BodyPart> bodyParts = skeleton.getPartTree();
     for (tree <BodyPart>::iterator bodyPart = bodyParts.begin(); bodyPart != bodyParts.end(); ++bodyPart)
@@ -273,8 +308,8 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
   // normalize
   for (map <uint32_t, Size>::iterator part = result.begin(); part != result.end(); ++part)
   {
-    part->second.width += part->second.width % blockSize.width;
-    part->second.height += part->second.height % blockSize.height;
+    part->second.width += (blockSize.width - part->second.width % blockSize.width);
+    part->second.height += (blockSize.height -  part->second.height % blockSize.height);
   }
   return result;
 }
@@ -316,7 +351,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     try
     {
-      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>> ((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, wndSize, wndStride, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels)));
+      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>> ((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, wndStride, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels)));
     }
     catch (...)
     {

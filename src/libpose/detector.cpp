@@ -180,8 +180,8 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
   float x = boxCenter.x;
   float y = boxCenter.y;
-  float boneLength = ethalon == Size(0, 0) ? getBoneLength(j0, j1) : ethalon.width;
-  float boxWidth = ethalon == Size(0, 0) ? getBoneWidth(boneLength, bodyPart) : ethalon.height;
+  float boneLength = ethalon == Size(0, 0) ? getBoneLength(j0, j1) : ethalon.width - 0.5;
+  float boxWidth = ethalon == Size(0, 0) ? getBoneWidth(boneLength, bodyPart) : ethalon.height - 0.5;
   float angle = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
   Point2f c1, c2, c3, c4, polyCenter;
   c1 = Point2f(0.f, 0.5f * boxWidth);
@@ -199,7 +199,7 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
 Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
 {
   POSERECT <Point2f> tempRect = initialRect;
-  Mat partImage = Mat(size.width, size.height, CV_8UC3, Scalar(255, 255, 255));
+  Mat partImage = Mat(size.height, size.width, CV_8UC3, Scalar(255, 255, 255));
   float xmax, ymax, xmin, ymin;
   initialRect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
   Point2f center = initialRect.GetCenter<Point2f>();
