@@ -10,7 +10,8 @@ TEST(bodyPartTest, GetAndSetTest)
   bool isOccluded = false;
   float spaceLength = 1.343f;
   POSERECT <Point2f> polygon (Point2f(1.0f, 2.0f), Point2f(2.0f, 3.0f), Point2f(3.0f, 4.0f), Point2f(4.0f, 5.0f));
-  float lwRatio=1.3f;
+  float lwRatio = 1.3f;
+  float relativeLength = 0.5f;
 
   bp1.setPartID(partID);
   bp1.setPartName(partName);
@@ -20,6 +21,7 @@ TEST(bodyPartTest, GetAndSetTest)
   bp1.setSpaceLength(spaceLength);
   bp1.setPartPolygon(polygon);
   bp1.setLWRatio(lwRatio);
+  bp1.setRelativeLength(relativeLength);
 
   EXPECT_EQ(partID, bp1.getPartID());
   EXPECT_EQ(partName, bp1.getPartName());
@@ -29,5 +31,6 @@ TEST(bodyPartTest, GetAndSetTest)
   EXPECT_EQ(spaceLength, bp1.getSpaceLength());
   EXPECT_EQ(polygon, bp1.getPartPolygon());
   EXPECT_EQ(lwRatio, bp1.getLWRatio());
+  EXPECT_EQ(relativeLength, bp1.getRelativeLength());
 }
 
