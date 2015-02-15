@@ -61,8 +61,8 @@ int main (int argc, char **argv)
       try
       {
         labels = detector.detect(f, detectParams);
-        //projectLoader.Save(labels, argv[2], f->getID());
-        //projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
+        projectLoader.Save(labels, argv[2], f->getID());
+        projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
       }
       catch (exception &e)
       {
