@@ -40,6 +40,7 @@ bool ProjectLoader::Load(string fileName)
   const string bodyPartExpectedDistanceParam = "expectedDistance";
   const string bodyPartIsOccludedParam = "isOccluded";
   const string bodyPartLWRatioParam = "lwRatio";
+  const string bodyPartRelativeLengthParam = "relativeLength";
   const string frameIdParam = "id";
   const string frameImgPathParam = "imgPath";
   const string frameMaskPathParam = "maskPath";
@@ -182,12 +183,14 @@ bool ProjectLoader::Load(string fileName)
     int id;
     float expectedDistance;
     float lwRatio;
+    float relativeLength;
     id = e->IntAttribute(bodyPartIdParam.c_str());
     name = e->Attribute(bodyPartNameParam.c_str());
     parentJointId = e->IntAttribute(bodyPartParentJointIdParam.c_str());
     childJointId = e->IntAttribute(bodyPartChildJointIdParam.c_str());
     expectedDistance = e->FloatAttribute(bodyPartExpectedDistanceParam.c_str());
     lwRatio = e->FloatAttribute(bodyPartLWRatioParam.c_str());
+    relativeLength = e->FloatAttribute(bodyPartRelativeLengthParam.c_str());
     BodyJoint *parentJoint = 0, *childJoint = 0;
     for (topBodyJoints = trBodyJoints.begin(); topBodyJoints != trBodyJoints.end(); ++topBodyJoints)
     {
@@ -212,6 +215,7 @@ bool ProjectLoader::Load(string fileName)
     part.setChildJoint(childJoint->getLimbID());
     part.setSpaceLength(expectedDistance);
     part.setLWRatio(lwRatio);
+    part.setRelativeLength(relativeLength);
     //trBodyParts.insert(topBodyParts, part);
     vBodyParts.push_back(part);
     bodyParts = bodyParts->NextSiblingElement();

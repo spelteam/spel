@@ -11,6 +11,7 @@ BodyPart::BodyPart(void)
   setIsOccluded(false);
   setSpaceLength(0);
   setLWRatio(0);
+  setRelativeLength(0);
 }
 
 //copy constructor
@@ -22,20 +23,22 @@ BodyPart::BodyPart(const BodyPart &bodyPart)
       isOccluded(bodyPart.isOccluded),
       spaceLength(bodyPart.spaceLength),
       partPolygon(bodyPart.partPolygon),
-      lwRatio(bodyPart.lwRatio)
+      lwRatio(bodyPart.lwRatio),
+      relativeLength(bodyPart.relativeLength)
 {
 }
 
 //move constructor
 BodyPart::BodyPart(BodyPart &&bodyPart)
-    : partID( std::move(bodyPart.partID) ),
-      partName( std::move(bodyPart.partName) ),
-      parentJoint( std::move(bodyPart.parentJoint) ),
-      childJoint( std::move(bodyPart.childJoint) ),
-      isOccluded( std::move(bodyPart.isOccluded) ),
-      spaceLength( std::move(bodyPart.spaceLength) ),
-      partPolygon( std::move(bodyPart.partPolygon) ),
-      lwRatio( std::move(bodyPart.lwRatio) )
+    : partID(std::move(bodyPart.partID)),
+      partName(std::move(bodyPart.partName)),
+      parentJoint(std::move(bodyPart.parentJoint)),
+      childJoint(std::move(bodyPart.childJoint)),
+      isOccluded(std::move(bodyPart.isOccluded)),
+      spaceLength(std::move(bodyPart.spaceLength)),
+      partPolygon(std::move(bodyPart.partPolygon)),
+      lwRatio(std::move(bodyPart.lwRatio)),
+      relativeLength(std::move(bodyPart.relativeLength))
 {
 }
 
@@ -120,7 +123,7 @@ BodyPart& BodyPart::operator=( const BodyPart& bodyPart ){
     childJoint = bodyPart.childJoint;
     isOccluded = bodyPart.isOccluded;
     spaceLength = bodyPart.spaceLength;
-
+    relativeLength = bodyPart.relativeLength;
     return *this;
 }
 
@@ -131,7 +134,7 @@ BodyPart& BodyPart::operator=( BodyPart&& bodyPart ){
     childJoint = std::move(bodyPart.parentJoint);
     isOccluded = std::move(bodyPart.isOccluded);
     spaceLength = std::move(bodyPart.spaceLength);
-
+    relativeLength = std::move(bodyPart.relativeLength);
     return *this;
 }
 
@@ -171,3 +174,12 @@ void BodyPart::setLWRatio(float _lwRatio)
   lwRatio = _lwRatio;
 }
 
+float BodyPart::getRelativeLength(void)
+{
+  return relativeLength;
+}
+
+void BodyPart::setRelativeLength(float _relativeLength)
+{
+  relativeLength = _relativeLength;
+}

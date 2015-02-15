@@ -38,6 +38,8 @@ class BodyPart
     void setPartPolygon(POSERECT <Point2f> _partPolygon);
     float getLWRatio(void);
     void setLWRatio(float _lwRatio);
+    float getRelativeLength(void);
+    void setRelativeLength(float _relativeLength);
   private:
     int partID; // identifier, must be unique within the limits of class
     string partName; // the object name, respectively to a place in a skeleton model 
@@ -47,6 +49,7 @@ class BodyPart
     float spaceLength; // the length of body part, distance between neighboring joints
     POSERECT <Point2f> partPolygon; // rectangle is used as simplified representation of body part 
     float lwRatio; // coefficient of proportionality is used for scaling
+    float relativeLength; // 3d relative length
 };
 
 std::ostream& operator<<(std::ostream& os, const BodyPart &bp);
