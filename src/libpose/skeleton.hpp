@@ -16,7 +16,6 @@ class Skeleton
     string toString(void); // must return Skeleton as string
 //TODO (Vitaliy Koshura): Need implementation
     void learnDepth(Skeleton &skel);
-//TODO (Vitaliy Koshura): Need implementation
     void infer2D(void);
     void infer3D(void);
 // All these functions just give access to the object fields
