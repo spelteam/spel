@@ -18,6 +18,7 @@ class Skeleton
     void learnDepth(Skeleton &skel);
 //TODO (Vitaliy Koshura): Need implementation
     void infer2D(void);
+    void infer3D(void);
 // All these functions just give access to the object fields
     Skeleton & operator=(const Skeleton &s);
     bool operator==(const Skeleton &s) const;

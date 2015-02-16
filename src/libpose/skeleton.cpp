@@ -89,3 +89,36 @@ BodyJoint *Skeleton::getBodyJoint(int jointID) const
   }
   return joint;
 }
+
+void Skeleton::infer2D(void)
+{
+  for (tree <BodyJoint>::iterator tree = jointTree.begin(); tree != jointTree.end(); ++tree)
+  {
+    tree->setImageLocation(Point2f(tree->getSpaceLocation().x * scale, tree->getSpaceLocation().y * scale));
+  }
+}
+
+void Skeleton::infer3D(void)
+{
+  map <uint32_t, float> dz;
+  for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
+  {
+    float len3d = tree->getRelativeLength();
+    float len2d = sqrt(PoseHelper::distSquared(getBodyJoint(tree->getParentJoint())->getImageLocation(), getBodyJoint(tree->getChildJoint())->getImageLocation()));
+    float diff = pow(len3d, 2) - pow(len2d, 2); //compute the difference, this must be the depth
+    if (diff<0)
+      dz[tree->getPartID()] = 0;
+    else
+      dz[tree->getPartID()] = sqrt(diff);
+    
+    if (sqrt(diff)>len3d) dz[tree->getPartID()] = len3d;
+  }
+  for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
+  {
+    BodyJoint *child = getBodyJoint(tree->getChildJoint());
+    BodyJoint *parent = getBodyJoint(tree->getParentJoint());
+    float sign = child->getDepthSign() == 0 ? -1.0 : 1.0;
+    float z = tree == partTree.begin() ? 0.0 : parent->getSpaceLocation().z;
+    child->setSpaceLocation(Point3f(child->getImageLocation().x / scale, child->getImageLocation().y / scale, pow(-1, sign * dz.at(tree->getPartID()) + z)));
+  }
+}

@@ -26,6 +26,12 @@ class PoseHelper
     {
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
     }
+
+    template <typename T> static double distSquared3d(T one, T two)
+    {
+      return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0) + pow(one.z - two.z, 2.0);
+    }
+
     //find angle between two vectors on a plane
     //Arguments:
     //x1, y1 - first vector
