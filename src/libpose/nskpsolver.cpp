@@ -358,7 +358,7 @@ vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, ma
 
 float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params)
 {
-    //this function should evaluata
+    //this function should evaluata the solved frame, and
 
     Mat maskMat = frame->getMask();
     Mat labelMat;

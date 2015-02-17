@@ -17,7 +17,7 @@ class PoseHelper
 {
   public:
 
-    vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
+    //vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
     //find squared distance between two points
     //Arguments:
     //one - first point
