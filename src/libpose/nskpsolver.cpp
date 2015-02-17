@@ -58,11 +58,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 	// float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
 	// int mst_max_size=params.at("mst_max_size"); //@FIXME PARAM this is a param, not static
 
-	//the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
-
-	//emplace beforehand
-	float mst_thresm_multiplier=params.at("mst_thresh_multiplier");
-	int mst_max_size=params.at("mst_max_size");
+    //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
 
 	vector<Frame*> lockframes;
 
@@ -228,6 +224,7 @@ int NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
+    params.emplace("imageCoeff", 0.5);
 	//emplace first
 	float lambda = params.at("imageCoeff");
 	float scoreIndex = params.at("scoreIndex");
@@ -244,6 +241,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
 float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params)
 {
 	//emplace default
+    params.emplace("jointCoeff", 0.5);
 	float lambda = params.at("jointCoeff");
 	Point2f p0, p1, c0, c1;
 
@@ -258,6 +256,7 @@ float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& pare
 //compute distance to the body part prior
 float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params)
 {
+    params.emplace("priorCoeff", 0.5);
 	float lambda = params.at("priorCoeff");
 	Point2f p0,p1, pp0, pp1;
 	label.getEndpoints(p0,p1);
@@ -274,11 +273,17 @@ float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior
 vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params) //int treeSize, float threshold)
 {
 	//emplace defaults
+    params.emplace("treeSize", ism.size()); //no size limit
+    params.emplace("simThresh", 2.5); //set similarity as multiple of minimum, MUST be >=1
 	int treeSize = params.at("treeSize");
 	float simThresh = params.at("simThresh");
     vector<MinSpanningTree> frameMST;
+    for(uint32_t i=0; i<ism.size(); ++i)
+    {
+        frameMST.push_back(MinSpanningTree());
+    }
 
-    vector<vector<int> > frameMSTvec;
+    //vector<vector<int> > frameMSTvec;
 
     for(uint32_t i=0; i<ism.size(); ++i)
     {

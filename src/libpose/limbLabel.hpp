@@ -64,6 +64,8 @@ class LimbLabel
     bool isOccluded;
 // signify label is from a badly localised part
     bool isWeak; 
+//point in polygon test
+    int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy);
 };
 
 #endif  // _LIBPOSE_LIMBLABEL_HPP_

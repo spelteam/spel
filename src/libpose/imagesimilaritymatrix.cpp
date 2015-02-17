@@ -149,7 +149,6 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
             // Mat imgMatOne=frames[i]->getImage();
             // Mat imgMatTwo=frames[j]->getImage());
 
-
             Mat maskMatOne=frames[i]->getMask();
             Mat maskMatTwo=frames[j]->getMask();
 
@@ -308,11 +307,11 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
             {
                 for(int y=0; y<maskMatOne.cols; ++y)
                 {
-                    int intensity = maskMatOne.at<uchar>(y, x);
-                    int mintensity = maskMatTwo.at<uchar>(y, x);
+                    Scalar intensity = maskMatOne.at<uchar>(x, y);
+                    Scalar mintensity = maskMatTwo.at<uchar>(x, y);
 
-                    bool darkPixel=intensity<10;
-                    bool blackPixel=mintensity<10; //if all intensities are zero
+                    bool darkPixel=intensity.val[0]<10;
+                    bool blackPixel=mintensity.val[0]<10; //if all intensities are zero
 
                     if(!darkPixel) //if the pixel is non-black for maskOne
                     {
@@ -346,7 +345,7 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
             {
                 for(int y=0; y<maskMatOne.cols; ++y)
                 {
-                    int mintensityOne = maskMatOne.at<uchar>(j, i);
+                    int mintensityOne = maskMatOne.at<uchar>(x, y);
 
                     bool darkPixel=mintensityOne<10; //if all intensities are zero
 
@@ -358,9 +357,7 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
                     int xTwo = x+dX.x;
                     int yTwo = y+dX.y;
 
-                    int mintensityTwo = maskMatTwo.at<uchar>(yTwo, xTwo);
-
-                    bool blackPixel=mintensityTwo<10; //if all intensities are zero
+                    //now check bounds
 
                     int blueOne;
                     int greenOne;
@@ -374,18 +371,24 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
                     if(!darkPixel)
                     {
                         mOne = 1;
-                        Vec4b intensityOne = imgMatOne.at<Vec4b>(y, x);
+                        Vec4b intensityOne = imgMatOne.at<Vec4b>(x, y);
                         blueOne = intensityOne.val[0];
                         greenOne = intensityOne.val[1];
                         redOne = intensityOne.val[2];
                     }
-                    if(xTwo<imgMatTwo.rows && xTwo >=0 && yTwo < imgMatTwo.cols && yTwo >= 0 && !blackPixel)
+                    if(xTwo<imgMatTwo.rows && xTwo >=0 && yTwo < imgMatTwo.cols && yTwo >= 0)
                     {
-                        mTwo = 1;
-                        Vec4b intensityTwo = imgMatTwo.at<Vec4b>(j, i);
-                        blueTwo = intensityTwo.val[0];
-                        greenTwo = intensityTwo.val[1];
-                        redTwo = intensityTwo.val[2];
+                        Scalar mintensityTwo = maskMatTwo.at<uchar>(xTwo, yTwo);
+                        bool blackPixel=mintensityTwo.val[0]<10; //if all intensities are zero
+
+                        if(!blackPixel)
+                        {
+                            mTwo = 1;
+                            Vec4b intensityTwo = imgMatTwo.at<Vec4b>(xTwo, yTwo);
+                            blueTwo = intensityTwo.val[0];
+                            greenTwo = intensityTwo.val[1];
+                            redTwo = intensityTwo.val[2];
+                        }
                     }
 
                     // maskSimilarityScore+=abs(mOne-mTwo);
@@ -471,7 +474,7 @@ float ImageSimilarityMatrix::getPathCost(vector<int> path) const//get cost for p
     //check that the path is valid
     for(uint32_t i=0; i<path.size();++i)
     {
-        if(!path[i]<imageSimilarityMatrix.rows)
+        if(!(path[i]<imageSimilarityMatrix.rows))
         {
             cerr << "Path contains invalid node " << path[i] << endl;
             return -1;

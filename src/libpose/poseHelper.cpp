@@ -22,4 +22,3 @@ double PoseHelper::angle2D(double x1, double y1, double x2, double y2)
         dtheta += (M_PI * 2.0);
     return(dtheta);
 }
-

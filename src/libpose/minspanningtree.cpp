@@ -10,6 +10,7 @@ MinSpanningTree::MinSpanningTree(void)
 
 MinSpanningTree::MinSpanningTree(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold)
 {
+    assert(threshold>=1); //this threshold MUST be at least 1
 	build(ism, rootNode, treeSize, threshold);
 }
 
@@ -44,7 +45,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
     vector<int> graphNodes; //nodes already in the graph
     graphNodes.push_back(rootNode);
     mst.insert(imgLoc, rootNode); //insert root node
-    float absoluteMin = ism.mean();
+    float absoluteMin = ism.min();
     while(mst.size() != static_cast<size_t>(treeSize) && mst.size()< static_cast<size_t>(ism.size())) //do this until the tree is complete
     {
         //cout << "in..." << endl;
