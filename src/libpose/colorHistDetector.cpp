@@ -104,7 +104,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     map <int32_t, int> blankPixels;  // pixels outside the mask
     skeleton = (*frameNum)->getSkeleton();
     multimap <int32_t, POSERECT <Point2f>> polygons;  // polygons for this frame
-    multimap <int32_t, bool> polyDepth;
+    multimap <int32_t, float> polyDepth;
     partTree = skeleton.getPartTree();
     tree <BodyJoint> jointTree;
     tree <BodyJoint>::iterator iteratorBodyJoint;
@@ -167,7 +167,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
       POSERECT <Point2f> poserect(c1, c2, c3, c4);
       polygons.insert(pair <int32_t, POSERECT <Point2f>> (iteratorBodyPart->getPartID(), poserect));
-      polyDepth.insert(pair <int32_t, bool> (iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getDepthSign()));
+      polyDepth.insert(pair <int32_t, float> (iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getSpaceLocation().z));
     }
     Mat maskMat = (*frameNum)->getMask();
     Mat imgMat = (*frameNum)->getImage();
@@ -208,7 +208,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         }
         bool blackPixel = mintensity < 10;
         int partHit = -1;
-        bool depthSign = false;
+        float depth = 0;
         for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
         {
           uint32_t partNumber = iteratorBodyPart->getPartID();
@@ -237,26 +237,22 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           }
           try
           {
-            bool tempDepthSign;
-            vector <bool> partDepthSigns;
-            multimap <int32_t, bool>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);
-            transform(lower, upper, back_inserter(partDepthSigns), [] (std::pair <int32_t, bool> const &pair) { return pair.second; });
-            for (vector <bool>::iterator iteratorPartDepthSigns = partDepthSigns.begin(); iteratorPartDepthSigns != partDepthSigns.end(); ++iteratorPartDepthSigns)
+            float tempDepthSign;
+            vector <float> partDepths;
+            multimap <int32_t, float>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);
+            transform(lower, upper, back_inserter(partDepths), [] (std::pair <int32_t, bool> const &pair) { return pair.second; });
+            for (vector <float>::iterator iteratorPartDepths = partDepths.begin(); iteratorPartDepths != partDepths.end(); ++iteratorPartDepths)
             {
-              if ((tempDepthSign = *iteratorPartDepthSigns) == true)
+              if (bContainsPoint && partHit == -1)
               {
-                break;
+                partHit = partNumber;
+                depth = *iteratorPartDepths;
               }
-            }
-            if (bContainsPoint && partHit == -1)
-            {
-              partHit = partNumber;
-              depthSign = tempDepthSign;
-            }
-            else if (bContainsPoint && depthSign == false && tempDepthSign == true)
-            {
-              partHit = partNumber;
-              depthSign = tempDepthSign;
+              else if (bContainsPoint && *iteratorPartDepths < depth && tempDepthSign == true)
+              {
+                partHit = partNumber;
+                depth = *iteratorPartDepths;
+              }
             }
           }
           catch(...)
