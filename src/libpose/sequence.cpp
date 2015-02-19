@@ -15,17 +15,77 @@ Sequence::Sequence(void)
 
 Sequence::Sequence(const Sequence& seq)
 {
-
+    this->name = seq.name;
+    this->frames.clear();
+    this->frames = seq.frames;
 }
 
 Sequence::Sequence(string seqName, vector<Frame*> seq)
 {
-
+    name=this->name;
+    frames.clear();
+    for(uint32_t i=0; i<seq.size(); ++i)
+    {
+        seq[i]->setID(i);
+        frames.push_back(seq[i]);
+    }
 }
 
 void Sequence::computeInterpolation(map<string, float> params)
 {
+    //frames should be sliced into frame sets, where every non Keyframe non Lockframe frame should belong to a BOUNDED set
+    //unbounded sets are not included in the solve
+    vector<vector<Frame*> > aux;
+    vector<vector<Frame*> > slices;
 
+    vector<Frame*> currentSet;
+    //bool isOpen;
+    for(uint32_t i=0; i<frames.size(); ++i)
+    {
+        currentSet.push_back(frames[i]); //push the frame to current set
+        if(frames[i]->getFrametype()==KEYFRAME || frames[i]->getFrametype()==LOCKFRAME)
+        {
+            aux.push_back(currentSet);
+            currentSet.clear();
+            currentSet.push_back(frames[i]);
+        }
+    }
+    //now go through every set, and eliminate it if:
+    //1) it contains 2 or less elements
+    //2) it doesn't end with a LOCKFRAME or a KEYFRAME
+    //3) it doesn't begin with a LOCKFRAME or a KEYFRAME
+
+    for(uint32_t i=0;i<aux.size(); ++i)
+    {
+        if(aux[i].at(0)->getFrametype()==LOCKFRAME || aux[i].at(0)->getFrametype()==KEYFRAME) //if the set STARTS with a keyframe or a lockframe
+        {
+            if(aux[i].back()->getFrametype()==LOCKFRAME || aux[i].back()->getFrametype()==KEYFRAME) //if the set ENDS with a keyframe or a lockframe
+            {
+                if(aux[i].size()>2) //if size is greater than two elements
+                    slices.push_back(aux[i]); //push back slice
+            }
+        }
+    }
+
+    for(uint32_t i=0; i<slices.size(); ++i)
+    {
+        vector<Frame*> slice = interpolateSlice(slices[i], params);
+        slices[i] = slice;
+    }
+
+    //now store the results
+    for(uint32_t i=0; i<slices.size();++i)
+    {
+        vector<Frame*> slice = slices[i];
+        for(uint32_t j=0; j<slice.size();++j)
+        {
+            if(slice[j]->getFrametype()==INTERPOLATIONFRAME)
+            {
+                delete frames[slice[j]->getID()];
+                frames[slice[j]->getID()]=slice[j];
+            }
+        }
+    }
 }
 
 vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, float> params)
