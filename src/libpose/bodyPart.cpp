@@ -123,6 +123,8 @@ BodyPart& BodyPart::operator=( const BodyPart& bodyPart ){
     childJoint = bodyPart.childJoint;
     isOccluded = bodyPart.isOccluded;
     spaceLength = bodyPart.spaceLength;
+    partPolygon = bodyPart.partPolygon;
+    lwRatio = bodyPart.lwRatio;
     relativeLength = bodyPart.relativeLength;
     return *this;
 }
@@ -131,9 +133,11 @@ BodyPart& BodyPart::operator=( BodyPart&& bodyPart ){
     partID = std::move(bodyPart.partID);
     std::swap( partName, bodyPart.partName );
     parentJoint = std::move(bodyPart.parentJoint);
-    childJoint = std::move(bodyPart.parentJoint);
+    childJoint = std::move(bodyPart.childJoint);
     isOccluded = std::move(bodyPart.isOccluded);
     spaceLength = std::move(bodyPart.spaceLength);
+    std::swap( partPolygon, bodyPart.partPolygon );
+    lwRatio = std::move(bodyPart.lwRatio);
     relativeLength = std::move(bodyPart.relativeLength);
     return *this;
 }
