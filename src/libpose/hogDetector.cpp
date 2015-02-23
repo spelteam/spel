@@ -15,8 +15,26 @@ void HogDetector::setID(int _id)
 HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels)
 {
   float boneLength = getBoneLength(j0, j1);
+  if (boneLength < blockSize.width)
+  {
+    boneLength = blockSize.width;
+  }
+  else
+  {
+    boneLength = boneLength + blockSize.width - ((int)boneLength % blockSize.width);
+  }  
+  float boneWidth = getBoneWidth(boneLength, bodyPart);
+  if (boneWidth < blockSize.height)
+  {
+    boneWidth = blockSize.height;
+  }
+  else
+  {
+    boneWidth = boneWidth + blockSize.width - ((int)boneWidth % blockSize.height);
+  }
+  Size originalSize = Size(boneLength, boneWidth);
   float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
-  POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1, wndSize);
+  POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1, blockSize);
 
   float xmax, ymax, xmin, ymin;
   rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
@@ -24,10 +42,11 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
   PartModel partModel;
   partModel.partModelRect = rect;
-  Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, wndSize);
+  Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
+  Mat partImageResized = Mat(wndSize.height, wndSize.width, CV_8UC3, Scalar(255, 255, 255));
+  resize(partImage, partImageResized, wndSize);
   HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
-  detector.compute(partImage, partModel.descriptors);
-  
+  detector.compute(partImageResized, partModel.descriptors);  
   return partModel;
 }
 
