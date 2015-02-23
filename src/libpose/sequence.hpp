@@ -12,13 +12,20 @@ class Sequence
   public:
     Sequence(void);
     Sequence(const Sequence& seq);
-    Sequence(string seqName, vector<Frame*> seq); //constructor
+    Sequence(int idx, string seqName, vector<Frame*> seq); //constructor
+    string getName() const;
+    void setName(const string& _name);
+    int getID() const;
+    void setID(const int& _id);
+    vector<Frame*> getFrames() const;
+    void setFrames(const vector<Frame*> _frames);
     void computeInterpolation(map<string, float> params); //compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
     
   private:
     vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
     vector<Frame*> frames; // detection score
-    string name; // detector name, name of the algorithm that generate the evaluation
+    string name; // sequence name
+    int id;
 };
 
 #endif  // _SEQUENCE_HPP_

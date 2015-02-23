@@ -38,13 +38,14 @@ int main (int argc, char **argv)
   vector<Solvlet> solve;
   
   vector <Frame*> vFrames = projectLoader.getFrames();
+  Sequence seq(0, "test", vFrames);
   vector <Frame*>::iterator i;
 
   TLPSSolver tSolver;
 
   cout << "Solving using TLPSSolver..." << endl;
   //solve with some default params
-  solve = tSolver.solve(vFrames, params);
+  solve = tSolver.solve(seq, params);
 
   //draw the solution
   for(i=vFrames.begin(); i!=vFrames.end(); ++i)

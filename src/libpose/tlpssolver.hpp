@@ -39,8 +39,8 @@ class TLPSSolver: Solver
   public:
     TLPSSolver(void);
     ~TLPSSolver(void); //inherited virtual
-    vector<Solvlet> solve(const vector<Frame*>& frames); //inherited virtual
-    vector<Solvlet> solve(const vector<Frame*>& frames, map<string, float> params); //inherited virtual
+    vector<Solvlet> solve(Sequence& frames); //inherited virtual
+    vector<Solvlet> solve(Sequence &frames, map<string, float> params); //inherited virtual
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
@@ -58,8 +58,8 @@ class TLPSSolver: Solver
     float computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, map<string, float> params);
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames); //separate the sequence into slices, for temporal solve
-    vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
-    float interpolateFloat(float prevAngle, float nextAngle, int step, int numSteps);
+//    vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
+//    float interpolateFloat(float prevAngle, float nextAngle, int step, int numSteps);
 
     //INHERITED
     //int id;

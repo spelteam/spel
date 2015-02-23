@@ -120,8 +120,8 @@ bg=blue</panel_attributes>
 -name: string
 --
 /+Solver()/
-/+solve(frames: vector&lt;Frame&gt;): Solution/
-/+solve(frames: vector&lt;Frame&gt;, params: vector&lt;float&gt;): Solution/
+/+solve(frames: Sequence): Solution/
+/+solve(frames: Sequence, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;/
 +getName(): string
 +getId(): int</panel_attributes>
     <additional_attributes/>

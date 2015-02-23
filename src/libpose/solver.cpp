@@ -21,13 +21,13 @@ int Solver::getId()
 	return id;
 }
 
-vector<Solvlet> Solver::solve(const vector<Frame*>& v)
+vector<Solvlet> Solver::solve(const Sequence& v)
 {
 	map<string, float> params;
 	return solve(v, params);
 }
 
-vector<Solvlet> Solver::solve(const vector<Frame*>& v, map<string, float> params)
+vector<Solvlet> Solver::solve(const Sequence& v, map<string, float> params)
 {
 	vector<Solvlet> empty;
 

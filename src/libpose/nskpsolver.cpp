@@ -17,39 +17,41 @@ NSKPSolver::~NSKPSolver() //inherited virtual
 
 }
 
-vector<Solvlet> NSKPSolver::solve(const vector<Frame*>& frames) //inherited virtual
+vector<Solvlet> NSKPSolver::solve(Sequence& sequence) //inherited virtual
 {
 	map<string, float> params; //set the default parameters vector
 
 	//set some parameter deefaults
 	
 	//pass to next level solve function, for ISM computing
-	return this->solve(frames, params);
+    return this->solve(sequence, params);
 }
 
-vector<Solvlet> NSKPSolver::solve(const vector<Frame*>& frames, map<string, float> params) //inherited virtual
+vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float> params) //inherited virtual
 {
 	//compute the ISM here
-	ImageSimilarityMatrix ISM(frames);
+    ImageSimilarityMatrix ISM(sequence.getFrames());
 
 	//pass to solve function
-	return this->solve(frames, params, ISM);
+    return this->solve(sequence, params, ISM);
 }
 
-vector<Solvlet> NSKPSolver::solve(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
+vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
 {
 	//parametrise the number of times frames get propagated
 
+
 	//propagate keyframes
-	vector<Frame*> propagatedFrames = propagateKeyframes(frames, params, ism);
+    vector<Frame*> propagatedFrames = propagateKeyframes(sequence.getFrames(), params, ism);
 
 	//create tlps solver
-	TLPSSolver tlps;
+    TLPSSolver tlps;
+    sequence.setFrames(propagatedFrames);
 
 	//the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
 	//return the TLPS solve
-	return tlps.solve(propagatedFrames, params);
+    return tlps.solve(sequence, params);
 }
 
 vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism)

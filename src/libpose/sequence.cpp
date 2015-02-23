@@ -20,8 +20,9 @@ Sequence::Sequence(const Sequence& seq)
     this->frames = seq.frames;
 }
 
-Sequence::Sequence(string seqName, vector<Frame*> seq)
+Sequence::Sequence(int idx, string seqName, vector<Frame*> seq)
 {
+    this->id = idx;
     name=this->name;
     frames.clear();
     for(uint32_t i=0; i<seq.size(); ++i)
@@ -29,6 +30,41 @@ Sequence::Sequence(string seqName, vector<Frame*> seq)
         seq[i]->setID(i);
         frames.push_back(seq[i]);
     }
+}
+
+string Sequence::getName() const
+{
+    return this->name;
+}
+
+void Sequence::setName(const string& _name)
+{
+    this->name=_name;
+}
+
+int Sequence::getID() const
+{
+    return this->id;
+}
+
+void Sequence::setID(const int& _id)
+{
+    this->id = _id;
+}
+
+vector<Frame*> Sequence::getFrames() const
+{
+    return this->frames;
+}
+
+void Sequence::setFrames(const vector<Frame *> _frames)
+{
+//    for(int i=0; i<this->frames.size();++i)
+//    {
+//        delete frames[i];
+//    }
+    this->frames.clear();
+    this->frames=_frames;
 }
 
 void Sequence::computeInterpolation(map<string, float> params)
@@ -79,10 +115,11 @@ void Sequence::computeInterpolation(map<string, float> params)
         vector<Frame*> slice = slices[i];
         for(uint32_t j=0; j<slice.size();++j)
         {
-            if(slice[j]->getFrametype()==INTERPOLATIONFRAME)
+            if(slice[j]->getFrametype()==INTERPOLATIONFRAME) //only replace interpolations, everything keyframes and lockframes are fine
             {
-                delete frames[slice[j]->getID()];
-                frames[slice[j]->getID()]=slice[j];
+//                delete frames[slice[j]->getID()];
+                *(frames[slice[j]->getID()])=*(slice[j]); //copy the value from the resulting slice pointer
+                delete slice[j]; //delete the old slice pointer to free memory
             }
         }
     }
