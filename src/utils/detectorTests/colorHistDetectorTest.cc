@@ -38,6 +38,12 @@ int main (int argc, char **argv)
   try
   {
     detector.train(projectLoader.getFrames(), params);
+    Sequence *seq = new Sequence(0, "colorHistDetector", projectLoader.getFrames());
+    if (seq != 0)
+    {
+      seq->computeInterpolation(params);
+      delete seq;
+    }
   }
   catch(exception &e)
   {

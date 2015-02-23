@@ -272,28 +272,6 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   tree <BodyPart>::iterator iteratorBodyPart;
 
   Mat maskMat = frame->getMask();
-  Frame *prevFrame = 0, *nextFrame = 0;
-  uint32_t stepCount = 0;
-  uint32_t step = 0;
-  getNeighborFrame(frame, &prevFrame, &nextFrame, step, stepCount);
-  if (prevFrame == 0)
-  {
-    stringstream ss;
-    ss << "Couldn't find previous keyframe to the frame " << frame->getID();
-#ifdef DEBUG
-    cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-    throw logic_error(ss.str());
-  }
-  if (nextFrame == 0)
-  {
-    stringstream ss;
-    ss << "Couldn't find next feyframe to the frame " << frame->getID();
-#ifdef DEBUG
-    cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-    throw logic_error(ss.str());
-  }
 
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
@@ -301,10 +279,21 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
-    Point2f j0;
-    Point2f j1;
-
-    getRawBodyPartPosition(frame, prevFrame, nextFrame, iteratorBodyPart->getParentJoint(), iteratorBodyPart->getChildJoint(), step, stepCount, j0, j1);
+    Point2f j0, j1;
+    try
+    {
+      j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation();
+      j1 = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint())->getImageLocation();
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Can't get joints";
+#ifdef DEBUG
+      cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+      throw logic_error(ss.str());
+    }
 
     float boneLength = getBoneLength(j0, j1);
     float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart);
