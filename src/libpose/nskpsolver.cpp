@@ -21,7 +21,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence) //inherited virtual
 {
 	map<string, float> params; //set the default parameters vector
 
-	//set some parameter deefaults
+    //set some parameter defaults
 	
 	//pass to next level solve function, for ISM computing
     return this->solve(sequence, params);
@@ -40,7 +40,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 {
 	//parametrise the number of times frames get propagated
 
-
+    sequence.computeInterpolation(params); //interpolate the sequence first
 	//propagate keyframes
     vector<Frame*> propagatedFrames = propagateKeyframes(sequence.getFrames(), params, ism);
 
@@ -127,10 +127,11 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 					
 					if(partIter!=partTree.begin()) //if iterator is not on root node, there is always a parent body part
 					{
-						parentPartIter=partTree.parent(partIter); //find the parent of this part
-						varIndices.push_back(parentPartIter->getPartID()); //push back parent partID as the second variable index
+                        varIndices.clear();
+                        parentPartIter=partTree.parent(partIter); //find the parent of this part
+                        varIndices.push_back(parentPartIter->getPartID()); //push back parent partID as the second variable index
 
-						size_t jointCostShape[]={numbersOfLabels[partIter->getPartID()], numbersOfLabels[parentPartIter->getPartID()]}; //number of labels
+                        size_t jointCostShape[]={numbersOfLabels[parentPartIter->getPartID()], numbersOfLabels[partIter->getPartID()]}; //number of labels
 						ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
 
 						for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
@@ -138,9 +139,9 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 							for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
 							{
 								//for every child/parent pair, compute score
-								jointCostFunc(i, j) = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
+                                jointCostFunc(j, i) = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
 							}
-						}
+                        }
 
 						Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
 						gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
@@ -227,9 +228,10 @@ int NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
     params.emplace("imageCoeff", 0.5);
+    params.emplace("scoreIndex", 0);
 	//emplace first
 	float lambda = params.at("imageCoeff");
-	float scoreIndex = params.at("scoreIndex");
+    float scoreIndex = params.at("scoreIndex");
 	//@FIX
 	//for now, just return the first available score
 	vector<Score> scores = label.getScores();

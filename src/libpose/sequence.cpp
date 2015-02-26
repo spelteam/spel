@@ -167,6 +167,8 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
        prevSkel.setScale(defaultScale);
        futureSkel.setScale(defaultScale);
    }
+   prevSkel.infer3D();
+   futureSkel.infer3D();
 
    //set up the two part trees, the part tree is used for structure
    tree<BodyPart> partTree = slice.front()->getSkeleton().getPartTree();
@@ -343,6 +345,7 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
 
        //frame type should be updated to interpolaion
        Interpolation *interpolatedFrame = new Interpolation();
+       interpolatedSkeleton.infer2D(); //infer 2D from the interpolated 3D joints
        interpolatedFrame->setSkeleton(interpolatedSkeleton);
        interpolatedFrame->setID(slice[i]->getID());
        interpolatedFrame->setMask(slice[i]->getMask());
