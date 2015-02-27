@@ -50,6 +50,7 @@ LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC project.cpp)
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC utility.cpp)
 #Custom graphick items
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC bodyjointitem.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC bodypartitem.cpp)
 #Xml message handler
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC xmlmessagehandler.cpp)
 #Attributes of xml project
@@ -64,10 +65,10 @@ QT5_WRAP_UI(UIS_HDRS
 QT5_ADD_RESOURCES( ${LIBPOSEGUI_MODULE}_RRC resources.qrc )
 
 
-# Tell CMake to create the helloworld executable
+# Tell CMake to create the executable
 add_executable(${LIBPOSEGUI_MODULE} ${${LIBPOSEGUI_MODULE}_SRC} ${UIS_HDRS} ${${LIBPOSEGUI_MODULE}_RRC} )
 
-# Use the Widgets module from Qt 5.
+# Add libraries
 target_link_libraries( ${LIBPOSEGUI_MODULE}
     Qt5::Core
     Qt5::Widgets

@@ -3,6 +3,7 @@
 #include <QScrollBar>
 #include <QLabel>
 #include <QBitmap>
+#include <QKeyEvent>
 #include "project.h"
 #include "utility.h"
 
@@ -20,6 +21,7 @@ FrameTableWidget::FrameTableWidget(QWidget *parent) :
 
 #include <QDebug>
 void FrameTableWidget::loadProjectEvent(){
+    qDebug() << "Frame table view loading" << endl;
     //load images
     auto paths = Project::getInstance().getPaths();
     auto projectFolder = Project::getInstance().getProjectFolder();
@@ -71,9 +73,60 @@ void FrameTableWidget::createProjectEvent(){
 
 }
 
+//TODO: [L] Fix image resizing
 void FrameTableWidget::resizeEvent(QResizeEvent *event){
     QTableWidget::resizeEvent(event);
     //set row height to table height
     QHeaderView* vertHeader = this->verticalHeader();
     vertHeader->setDefaultSectionSize(vertHeader->height());
+}
+
+void FrameTableWidget::keyPressEvent(QKeyEvent *event){
+    if( Project::getInstance().getState() == Project::ProjectState::LOADED ){
+        switch (event->key()) {
+        case Qt::Key_Left:
+        case Qt::Key_B:{
+            QModelIndexList selectedCells = this->selectedIndexes();
+            //init with last column
+            int selectedColumn = this->columnCount()-1;
+            int columnCount = this->columnCount();
+            if(!selectedCells.empty()){
+                //get first selected cell
+                selectedColumn = selectedCells
+                        .at(0)
+                        .column();
+            }
+            //go to prev
+            selectedColumn = (selectedColumn-1+columnCount)%columnCount;
+            //select cell
+            this->selectColumn(selectedColumn);
+            //click on the selected cell
+            this->cellClicked(0,selectedColumn);
+            break;
+        }
+        case Qt::Key_Right:
+        case Qt::Key_N:{
+            QModelIndexList selectedCells = this->selectedIndexes();
+            //init with first column
+            int selectedColumn = 0;
+            int columnCount = this->columnCount();
+            if(!selectedCells.empty()){
+                //get last selected cell
+                selectedColumn = selectedCells
+                        .at(selectedCells.size()-1)
+                        .column();
+            }
+            //go to next
+            selectedColumn = (selectedColumn+1)%columnCount;
+            //select cell
+            this->selectColumn(selectedColumn);
+            //click on the selected cell
+            this->cellClicked(0,selectedColumn);
+            break;
+        }
+        default:{
+            break;
+        }
+        }
+    }
 }

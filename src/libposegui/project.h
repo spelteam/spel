@@ -35,12 +35,12 @@ public:
     };
     enum class ProjectState{
         CLOSED,
-        OPENED
+        OPENED,
+        LOADED
     };
 private:
     using FramePtr = std::unique_ptr<Frame>;
     using SkeletonPtr = std::unique_ptr<Skeleton>;
-
 public:
     Project( const Project& ) = delete;
     Project& operator=(const Project&) = delete;
@@ -60,6 +60,7 @@ public slots:
 
 private slots:
     Project::ErrorCode openProjectEvent( const QString& filename );
+    void loadProjectEvent();
     void closeProjectEvent();
 
 public:
@@ -74,13 +75,27 @@ public:
 
     const QString& getLastError() const;
 
-private:
-    void loadSkeleton( const QDomDocument& document );
-    void loadFrames( const QDomDocument& document );
-    void loadKeyframeJoints( const QDomElement& node, tree<BodyJoint>& bodyJoints,
-                             float colsFactor, float rowsFactor );
-    void loadKeyframeBodyParts( const QDomElement& node, tree<BodyPart>& bodyParts );
+    ProjectState getState() const;
 
+private:
+    //loading skeleton
+    Project::ErrorCode loadSkeleton(const QDomDocument &document);
+    Project::ErrorCode loadHeaderJoints( QDomElement &elem, tree<BodyJoint> &joints);
+    Project::ErrorCode loadHeaderParts( QDomElement &elem, tree<BodyPart> &bodyParts,
+                                          const tree<BodyJoint> &checkJoints );
+
+    //loading frames
+    Project::ErrorCode loadFrames(const QDomDocument &document);
+    Project::ErrorCode loadKeyframeJoints( QDomElement &elem, tree<BodyJoint> &joints,
+                                             float colsFactor, float rowsFactor);
+    Project::ErrorCode loadKeyframeParts( QDomElement &elem, tree<BodyPart> &bodyParts);
+    //open project helpers
+    void setProjectFolder( const QString &filename );
+    Project::ErrorCode readProjectXml( const QString &filename, QDomDocument &document );
+    Project::ErrorCode validateProjectXml( const QDomDocument &document );
+    //build structure of skeleton
+    Project::ErrorCode buildBodyPartTree(std::vector<BodyPart> &bodyList,
+                                          tree<BodyPart> &bodyParts);
 private:
     std::vector<FramePtr> frames;
     QHash<int, FilenamePath> paths;

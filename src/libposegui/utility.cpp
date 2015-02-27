@@ -33,24 +33,35 @@ void Utility::loadXmlPart(const QDomElement &element, const QString& partTagName
     }
 }
 
-BodyJoint& Utility::getJointById(tree<BodyJoint> &bodyJoints, int id){
-    tree<BodyJoint>::iterator it;
-    it = bodyJoints.begin();
+BodyJoint* Utility::getJointById( const tree<BodyJoint> &bodyJoints, int id){
+    tree<BodyJoint>::iterator it = bodyJoints.begin();
     while( it != bodyJoints.end() ){
-        if( it->getLimbID() == id ) return *it;
+        if( it->getLimbID() == id ) return &(*it);
         it++;
     }
-    Q_ASSERT(false);
+
+    return nullptr;
 }
 
-BodyPart& Utility::getBodyPartById(tree<BodyPart> &bodyParts, int id){
-    tree<BodyPart>::iterator it;
-    it = bodyParts.begin();
+BodyPart* Utility::getBodyPartById( const tree<BodyPart> &bodyParts, int id){
+    tree<BodyPart>::iterator it = bodyParts.begin();
     while( it != bodyParts.end() ){
-        if( it->getPartID() == id ) return *it;
+        if( it->getPartID() == id ) return &(*it);
         it++;
     }
-    Q_ASSERT(false);
+
+    return nullptr;
+}
+
+BodyJointItem* Utility::getJointItemById(const QList<QGraphicsItem *> &items, int id){
+    for( auto it = items.begin(); it != items.end(); ++it ){
+        if( dynamic_cast<BodyJointItem*>(*it) &&
+            static_cast<BodyJointItem*>(*it)->getId() == id )
+        {
+            return static_cast<BodyJointItem*>(*it);
+        }
+    }
+    return nullptr;
 }
 
 void Utility::resizeImage(Mat &image, int32_t &cols, int32_t &rows){
@@ -62,3 +73,13 @@ void Utility::resizeImage(Mat &image, int32_t &cols, int32_t &rows){
         cv::resize(image, image, cv::Size(cols, rows) );
     }
 }
+
+bool Utility::isJointItem(QList<QGraphicsItem*>::iterator& it){
+    return dynamic_cast<BodyJointItem*>(*it);
+}
+
+bool Utility::isSkeletonItem(QList<QGraphicsItem*>::iterator it){
+    return dynamic_cast<BodyJointItem*>(*it) ||
+            dynamic_cast<BodyPartItem*>(*it);
+}
+

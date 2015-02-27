@@ -4,21 +4,31 @@
 #include <QWidget>
 #include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QList>
+
+class BodyJointItem;
 
 class FrameView2D : public QWidget
 {
     Q_OBJECT
 private:
-    class TestGraphicsView : public QGraphicsView
+    class FrameGraphicsView : public QGraphicsView
     {
     public:
-        TestGraphicsView(QWidget* parent = 0):
+        FrameGraphicsView(QWidget* parent = 0):
             QGraphicsView(parent){
             setDragMode(DragMode::ScrollHandDrag);
+            setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+            setRenderHint(QPainter::Antialiasing);
+            setViewportUpdateMode(BoundingRectViewportUpdate);
+            setCacheMode(CacheBackground);
         }
-        TestGraphicsView(QGraphicsScene* scene, QWidget* parent = 0):
+        FrameGraphicsView(QGraphicsScene* scene, QWidget* parent = 0):
             QGraphicsView(scene,parent){
             setDragMode(DragMode::ScrollHandDrag);
+            setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+            setRenderHint(QPainter::Antialiasing);
+            setViewportUpdateMode(BoundingRectViewportUpdate);
         }
     protected:
         void wheelEvent(QWheelEvent* event) override;
@@ -37,7 +47,14 @@ public slots:
     void pickFrameEvent(int, int col);
 
 public:
-    TestGraphicsView *view;
+    FrameGraphicsView *view;
     QGraphicsScene *scene;
+
+private:
+    void loadFrameImage( int num );
+    void loadFrameJoints( int num );
+
+private:
+    QGraphicsPixmapItem* frameImage;
 };
 #endif // FRAMEVIEW2D_H

@@ -28,6 +28,7 @@ const QString BODY_PART_HEADER_CHDJOINT_ATTR = "childJointId";
 const QString BODY_PART_HEADER_PRTJOINT_ATTR = "parentJointId";
 const QString BODY_PART_HEADER_LWRATIO_ATTR = "lwRatio";
 const QString BODY_PART_HEADER_EXPECTDIST_ATTR = "expectedDistance";
+const QString BODY_PART_HEADER_RELLENGTH_ATTR = "relativeLength";
 //frame attributes
 const QString FRAME_ID_ATTR = "id";
 const QString FRAME_IMG_PATH_ATTR = "imgPath";
@@ -44,7 +45,8 @@ const QString BODY_JOINT_DEPTH_ATTR = "depthSign";
 //BodyPart attributes
 const QString BODY_PART_ID_ATTR = "id";
 const QString BODY_PART_IS_OCCLUD_ATTR = "isOccluded";
-
+//root body part id
+const int BODY_PART_ROOT_ID = 0;
 }
 
 #endif // PROJECTATTR_H
