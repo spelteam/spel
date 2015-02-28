@@ -1,7 +1,10 @@
 #include "bodyjointitem.h"
 
 #include "bodypartitem.h"
+#include "project.h"
 #include <QPainter>
+#include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
 //PUBLIC
 
 //TODO: [L] Rich tool tip
@@ -15,6 +18,7 @@ BodyJointItem::BodyJointItem(QGraphicsItem *parent)
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(1.0);
+    setAcceptHoverEvents(true);
 }
 
 BodyJointItem::~BodyJointItem()
@@ -27,6 +31,12 @@ void BodyJointItem::addBodyPart(BodyPartItem *bodyPart){
 
 void BodyJointItem::setId(int id){
     this->id = id;
+    //set tool tip
+    const int FRAME = 0;
+    BodyJoint* joint = Project::getInstance()
+            .getFrame(FRAME)->getSkeleton().getBodyJoint(id);
+    QString toolTip = QString::fromStdString(joint->getJointName());
+    setToolTip(toolTip);
 }
 
 int BodyJointItem::getId() const{
@@ -39,10 +49,17 @@ QRectF BodyJointItem::boundingRect() const{
     return QRectF(-boundRadius, -boundRadius, 2*boundRadius, 2*boundRadius);
 }
 
+#include <QDebug>
 void BodyJointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                           QWidget *widget)
 {
-    QBrush brush = QBrush(Qt::red,Qt::SolidPattern);
+    QColor color;
+    if( option->state & QStyle::State_MouseOver ){
+        color = Qt::blue;
+    } else{
+        color = Qt::red;
+    }
+    QBrush brush = QBrush(color,Qt::SolidPattern);
     QPen pen = QPen(brush,0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
     //QRadialGradient grad = QRadialGradient({0,0},radius);
     //grad.setColorAt(0.0,Qt::red);
@@ -73,11 +90,26 @@ QVariant BodyJointItem::itemChange(GraphicsItemChange change, const QVariant &va
 }
 
 void BodyJointItem::mousePressEvent(QGraphicsSceneMouseEvent *event){
+    if( event->button() == Qt::RightButton ){
+        //TODO: [L] Update depth
+    }
     update();
     QGraphicsItem::mousePressEvent(event);
 }
 
 void BodyJointItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
+    //TODO: [L] Update joint position
     update();
     QGraphicsItem::mouseReleaseEvent(event);
+}
+
+void BodyJointItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event){
+    //repaint
+    update();
+    setCursor(Qt::ArrowCursor);
+}
+
+void BodyJointItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event){
+    //repaint
+    update();
 }

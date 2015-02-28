@@ -33,6 +33,7 @@ class Skeleton
 
     uint32_t getPartTreeCount(void) const; // count of bodypart elements, included in the tree
     BodyJoint* getBodyJoint(int jointID) const; // search a joint by id and return a pointer to its address
+    BodyPart* getBodyPart( int partID ) const; // search a body part by id and return a pointer to its address
   private:
     string name; // name of the specific instance of
     tree <BodyPart> partTree; // tree of bodyparts is component of the body model

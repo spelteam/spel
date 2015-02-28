@@ -10,6 +10,8 @@ class BodyJointItem : public QGraphicsItem
 public:
     BodyJointItem(  QGraphicsItem * parent = 0 );
     ~BodyJointItem();
+signals:
+    void updateJoint( int id );
 public:
     void addBodyPart( BodyPartItem *bodyPart );
     void setId( int id );
@@ -27,6 +29,9 @@ protected:
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 private:
     QList<BodyPartItem*> partList;
     qreal radius = 1.0;

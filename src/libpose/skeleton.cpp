@@ -90,6 +90,18 @@ BodyJoint *Skeleton::getBodyJoint(int jointID) const
   return joint;
 }
 
+BodyPart* Skeleton::getBodyPart(int partID) const
+{
+    auto it = partTree.begin();
+    while( it != partTree.end() ){
+        if( it->getPartID() == partID ){
+            return &(*it);
+        }
+        ++it;
+    }
+    return nullptr;
+}
+
 void Skeleton::infer2D(void)
 {
   for (tree <BodyJoint>::iterator tree = jointTree.begin(); tree != jointTree.end(); ++tree)

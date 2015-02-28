@@ -30,7 +30,7 @@
   <BodyPart id="5" name="Right Clavicle" parentJointId="1" childJointId="6" expectedDistance="0" lwRatio="3.4" relativeLength="0.0881"/>
   <BodyPart id="6" name="Left Femur" parentJointId="2" childJointId="7" expectedDistance="0" lwRatio="3.059" relativeLength="0.2694"/>
   <BodyPart id="7" name="Right Femur" parentJointId="3" childJointId="8" expectedDistance="0" lwRatio="3.059" relativeLength="0.2694"/>
-  <BodyPart id="8" name="Head=" parentJointId="4" childJointId="9" expectedDistance="0" lwRatio="1.125" relativeLength="0.1088"/>
+  <BodyPart id="8" name="Head" parentJointId="4" childJointId="9" expectedDistance="0" lwRatio="1.125" relativeLength="0.1088"/>
   <BodyPart id="9" name="Left Humerus" parentJointId="5" childJointId="10" expectedDistance="0" lwRatio="3.0" relativeLength="0.1554"/>
   <BodyPart id="10" name="Right Humerus" parentJointId="6" childJointId="11" expectedDistance="0" lwRatio="3.0" relativeLength="0.1554"/>
   <BodyPart id="11" name="Left Tibia" parentJointId="7" childJointId="12" expectedDistance="0" lwRatio="4.727" relativeLength="0.2694"/>
