@@ -67,7 +67,7 @@ void Sequence::setFrames(const vector<Frame *> _frames)
     this->frames=_frames;
 }
 
-void Sequence::computeInterpolation(map<string, float> params)
+void Sequence::computeInterpolation(map<string, float> &params)
 {
     //frames should be sliced into frame sets, where every non Keyframe non Lockframe frame should belong to a BOUNDED set
     //unbounded sets are not included in the solve
@@ -119,8 +119,15 @@ void Sequence::computeInterpolation(map<string, float> params)
             {
 //                delete frames[slice[j]->getID()];
                 *(frames[slice[j]->getID()])=*(slice[j]); //copy the value from the resulting slice pointer
-                delete slice[j]; //delete the old slice pointer to free memory
+                //delete slice[j]; //delete the old slice pointer to free memory
             }
+            else
+            {
+                Skeleton skel = slice[j]->getSkeleton();
+                skel.infer3D();
+                slice[j]->setSkeleton(skel);
+            }
+
         }
     }
 }
@@ -151,7 +158,9 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
    {
        Frame* ptr=NULL;
        result.push_back(ptr);
-   }
+   } //fill vector with empty pointers
+
+
    //attach the start and end, and generate everything in between in this function
    result[0] = slice[0];
    result[result.size()-1] = slice[slice.size()-1];
@@ -320,10 +329,12 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
        for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
        {
            Vector3f childJoint = currentPartState[partIter->getPartID()];
-           Vector3f parentJoint(0,0,0);
+           Point3f parentJointP  = prevSkel.getBodyJoint(0)->getSpaceLocation();
+           Vector3f parentJoint(parentJointP.x, parentJointP.y, parentJointP.z);
+           //Vector3f parentJoint(0,0,0); //this is the root location of the prevSkel
 
            parentIter = partTree.parent(partIter);
-           while(parentIter!=NULL)
+           while(parentIter!=NULL && parentIter!=partTree.begin())
            {
                //if there is a parent, first unrotate by its quaternion
                childJoint=childJoint+currentPartState[parentIter->getPartID()];
@@ -334,6 +345,7 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
            //parent and child joints now contain the correct location information
            BodyJoint* childJointT = interpolatedSkeleton.getBodyJoint(partIter->getChildJoint());
            BodyJoint* parentJointT = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint());
+
            childJointT->setSpaceLocation(Point3f(childJoint.x(), childJoint.y(), childJoint.z()));
            parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
        }
@@ -359,4 +371,39 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
    //cout << "Interpolated keyframes" << endl;
    return result; //result contains Frame*'s that have been modified according to
 
+}
+
+void Sequence::estimateUniformScale(map<string,float> &params)
+{
+    assert(frames.size()!=0);
+    //the purpose of this function is to set identical scale for all skeletons in the sequence
+    //it will disable the use default scale parameter
+    params.emplace("useDefaultScale", 0);
+    params.at("useDefaultScale") = 0;
+    //now go through every KEYFRAME skeleton
+
+    vector<float> scales;
+    for(uint32_t i=0; i<frames.size();++i)
+    {
+
+        if(frames[i]->getFrametype()==KEYFRAME)
+        {
+            Skeleton skel = frames[i]->getSkeleton();
+            tree<BodyPart> partTree = skel.getPartTree();
+            for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
+            {
+              float len3d = tree->getRelativeLength();
+              float len2d = sqrt(PoseHelper::distSquared(skel.getBodyJoint(tree->getParentJoint())->getImageLocation(), skel.getBodyJoint(tree->getChildJoint())->getImageLocation()));
+              scales.push_back(len2d/len3d); //compute the difference, this must be the depth
+            }
+        }
+    }
+    float scale = *std::max_element(scales.begin(), scales.end());
+
+    for(uint32_t i=0; i<frames.size();++i)
+    {
+        Skeleton skel(frames[i]->getSkeleton());
+        skel.setScale(scale);
+        frames[i]->setSkeleton(skel);
+    }
 }

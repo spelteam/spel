@@ -39,6 +39,31 @@ int main (int argc, char **argv)
   
   vector <Frame*> vFrames = projectLoader.getFrames();
   Sequence seq(0, "test", vFrames);
+
+  //now test inrepolation for this sequence
+  seq.estimateUniformScale(params);
+  seq.computeInterpolation(params);
+
+  //first, test the 3D locations
+  for(uint32_t i=0; i<vFrames.size(); ++i)
+  {
+      if(vFrames[i]->getFrametype()==KEYFRAME)
+        cout << vFrames[i]->getID() << " KEYFRAME " << endl;
+      else
+          cout << vFrames[i]->getID() << endl;
+
+      tree <BodyJoint> jointTree = vFrames[i]->getSkeleton().getJointTree();
+      tree <BodyJoint>::iterator iter;
+      for(iter=jointTree.begin(); iter!=jointTree.end(); ++iter)
+      {
+          Point3f spaceLoc = iter->getSpaceLocation();
+          cout << "\t id: " << iter->getLimbID() << " x: " << spaceLoc.x
+               << " y: " << spaceLoc.y << " z: " << spaceLoc.z << endl;
+      }
+  }
+
+  exit(0);
+
   vector <Frame*>::iterator i;
 
   TLPSSolver tSolver;
