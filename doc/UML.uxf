@@ -4,8 +4,8 @@
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>1120</x>
-      <y>16</y>
+      <x>1536</x>
+      <y>0</y>
       <w>232</w>
       <h>152</h>
     </coordinates>
@@ -375,22 +375,6 @@ operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;</pane
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>24;24;432;376</additional_attributes>
   </element>
-  <element>
-    <type>com.umlet.element.Class</type>
-    <coordinates>
-      <x>992</x>
-      <y>200</y>
-      <w>400</w>
-      <h>128</h>
-    </coordinates>
-    <panel_attributes>PoseHelper
---
---
-+distSquared(one: T, two: T): double
-+angle2D(x1: double, y1: double, x2: double, y2: double): double;
-+rotatePoint2D(point: T, pivot: T, degrees: float): T</panel_attributes>
-    <additional_attributes/>
-  </element>
   <group>
     <element>
       <type>com.umlet.element.Class</type>
@@ -663,6 +647,139 @@ bg=yellow</panel_attributes>
   </element>
   <group>
     <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>1000</x>
+        <y>16</y>
+        <w>496</w>
+        <h>768</h>
+      </coordinates>
+      <panel_attributes>PoseHelper
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1016</x>
+        <y>40</y>
+        <w>456</w>
+        <h>112</h>
+      </coordinates>
+      <panel_attributes>PoseHelper
+--
+--
++distSquared(one: T, two: T): double
++distSquared3d(one: T, two: T): double;
++angle2D(x1: double, y1: double, x2: double, y2: double): double;
++interpolateFloat(prevAngle: double, nextAngle: double, step: int, nextStep: int): double;
++rotatePoint2D(point: T, pivot: T, degrees: float): T;
++copyTree(dst: tree &lt;T, tree_node_allocator&gt;&amp;, src: tree &lt;T, tree_node_allocator&gt;&amp;);</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1016</x>
+        <y>168</y>
+        <w>456</w>
+        <h>72</h>
+      </coordinates>
+      <panel_attributes>TPOSERECT
+--
++p1: T;
++p2: T;
++p3: T;
++p4: T;
+--
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1016</x>
+        <y>248</y>
+        <w>456</w>
+        <h>240</h>
+      </coordinates>
+      <panel_attributes>POSERECT &lt;T&gt;
+--
++p1: T;
++p2: T;
++p3: T;
++p4: T;
+--
++POSERECT();
++POSERECT(poserect: POSERECT&lt;T&gt;&amp;);
++POSERECT(poserect: POSERECT&lt;T&gt;&amp;&amp;);
++POSERECT(_point1: T, _point2: T, _point3: T, _point4: T);
++containsPoint(point: T): int8_t;
++asVector(): vector &lt;T&gt;;
++GetMinMaxXY(minx: D&amp;, miny: D&amp;, maxx: D&amp;, maxy: D&amp;);
++GetCenter(): D;
++operator=(rect &lt;POSERECT&lt;T&gt;&amp;) POSERECT&lt;T&gt;&amp;;
++operator=(rect &lt;POSERECT&lt;T&gt;&amp;&amp;) POSERECT&lt;T&gt;&amp;;
++operator==(rect &lt;POSERECT&lt;T&gt;&amp;): bool;
++operator!=(rect &lt;POSERECT&lt;T&gt;&amp;): bool;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1016</x>
+        <y>496</y>
+        <w>456</w>
+        <h>128</h>
+      </coordinates>
+      <panel_attributes>PHPoint
+--
+--
++PHPoint();
++PHPoint(_x: T, _y: T);
++PHPoint(pt: Point_&lt;T&gt;&amp;);
++PHPoint(pt: CvPoint&amp;);
++PHPoint(pt: CvPoint2D32f&amp;);
++PHPoint(sz: Size_&lt;T&gt;&amp;);
++PHPoint(v: Vec&lt;T, 2&gt;&amp;);
++operator&lt;(pt: PHPoint&amp;): bool;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1016</x>
+        <y>640</y>
+        <w>456</w>
+        <h>128</h>
+      </coordinates>
+      <panel_attributes>PHPoint3
+--
+--
++PHPoint3();
++PHPoint3(_x: T, _y: T);
++PHPoint3(pt: Point3_&lt;T&gt;&amp;);
++PHPoint3(pt: Point_&lt;T&gt;&amp;);
++PHPoint(pt: CvPoint3D32f&amp;);
++PHPoint(v: Vec&lt;T, 3&gt;&amp;);
++operator&lt;(pt: PHPoint3&amp;): bool;</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>16</x>
+        <y>1152</y>
+        <w>568</w>
+        <h>680</h>
+      </coordinates>
+      <panel_attributes>*Skeletal Structure*
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>32</x>
@@ -679,9 +796,15 @@ bg=yellow</panel_attributes>
 +isOccluded: bool
 +spaceLength: float 
 +partPolygon: POSERECT &lt;Point2f&gt;
++lwRatio: float;
++relativeLength: float;
 --
 +BodyPart()
++BodyPart(bodyPart: BodyPart&amp;);
++BodyPart(bodyPart: BodyPart&amp;&amp;);
 +BodyPart(id: int, name: string, pJoint: int, cJoint: int, isOcc: bool, spaceLeng: float)
++operator=(bodyPart: BodyPart&amp;):BodyPart&amp;;
++operator=(bodyPart: BodyPart&amp;&amp;):BodyPart&amp;;
 +getPartID(): int
 +setPartID(_partID: int)
 +getPartName(): string;
@@ -696,8 +819,12 @@ bg=yellow</panel_attributes>
 +setSpaceLength(_spaceLength: float)
 +getPartPolygon(): POSERECT &lt;Point2f&gt;
 +setPartPolygon(_partPolygon: POSERECT &lt;Point2f&gt;)
-+operator==: bool
-+operator!=: bool
++getLWRatio(): float;
++setLWRatio(_lwRatio: float);
++getRelativeLength(): float;
++setRelativeLength(_relativeLength: float);
++operator==(bp: BodyPart&amp;): bool
++operator!=(bp: BodyPart&amp;): bool
 </panel_attributes>
       <additional_attributes/>
     </element>
@@ -718,7 +845,11 @@ bg=yellow</panel_attributes>
 +depthSign: bool
 --
 +BodyJoint()
++BodyJoint(bodyJoint: BodyJoint&amp;);
++BodyJoint(bodyJoint: BodyJoint&amp;&amp;);
 +BodyJoint(id: int, name: string, imgLoc: Point2f, spaceLoc: Point, depth: bool)
++operator=(bodyJoint: BodyJoint&amp;): BodyJoint&amp;;
++operator=(bodyJoint: BodyJoint&amp;&amp;): BodyJoint&amp;;
 +getLimbID(): int
 +setLimbID(_limbID: int)
 +getJointName(): string
@@ -729,20 +860,8 @@ bg=yellow</panel_attributes>
 +setSpaceLocation(_spaceLocation: Point3f)
 +getDepthSign(): bool
 +setDepthSign(_depthSign: bool)
-+operator==: bool
-+operator!=: bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>16</x>
-        <y>1152</y>
-        <w>568</w>
-        <h>680</h>
-      </coordinates>
-      <panel_attributes>*Skeletal Structure*
-bg=orange</panel_attributes>
++operator==(bj: BodyJoint&amp;): bool
++operator!=(bj: BodyJoint&amp;): bool</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
