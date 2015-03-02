@@ -17,7 +17,7 @@ TEST(skeletonTest, infer3dTest)
 
   if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath)))
   {
-    FAIL();
+    FAIL() << "Can't get current directory";
   }
   curFolder = cCurrentPath;
   if (curFolder.back() != '/')
@@ -35,7 +35,7 @@ TEST(skeletonTest, infer3dTest)
 
   if (projectLoader.Load(xml) == false)
   {
-    FAIL();
+    FAIL() << "Can't load project xml: " << xml ;
   }
 
   vector <Frame*> frames = projectLoader.getFrames();
@@ -53,7 +53,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL();
+        FAIL() << "SpaceLocation can't be (0, 0, 0)";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
@@ -86,7 +86,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL();
+        FAIL() << "SpaceLocation can't be (0, 0, 0)";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
@@ -105,8 +105,8 @@ TEST(skeletonTest, infer3dTest)
   for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
   {
     //TODO(Vitalii Koshura): Remove this after correct work of interpolation
-    if ((*frame)->getFrametype() != KEYFRAME)
-      continue;
+    /*if ((*frame)->getFrametype() != KEYFRAME)
+      continue;*/
     Skeleton skeleton = (*frame)->getSkeleton();
     skeleton.infer3D();
     tree <BodyPart> partTree = skeleton.getPartTree();
@@ -116,7 +116,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL();
+        FAIL() << "SpaceLocation can't be (0, 0, 0)";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
@@ -135,8 +135,8 @@ TEST(skeletonTest, infer3dTest)
   for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
   {
     //TODO(Vitalii Koshura): Remove this after correct work of interpolation
-    if ((*frame)->getFrametype() != KEYFRAME)
-      continue;
+    /*if ((*frame)->getFrametype() != KEYFRAME)
+      continue;*/
     Skeleton skeleton = (*frame)->getSkeleton();
     skeleton.infer3D();
     tree <BodyPart> partTree = skeleton.getPartTree();
@@ -146,7 +146,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL();
+        FAIL() << "SpaceLocation can't be (0, 0, 0)";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
