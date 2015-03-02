@@ -8,10 +8,12 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${LIBPOSE_MODULE}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/utils/detectorTests" )
 
 FIND_PACKAGE ( OpenCV REQUIRED )
 INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}" )
 
 OPTION ( DISABLE_PTHREADS "Do not use pthreads" OFF )
 
@@ -34,6 +36,9 @@ endif()
 # main test file
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec )
 
+# project loader: need for some tests with input data
+LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/utils/detectorTests/projectLoader )
+LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}/tinyxml2.cpp )
 
 # libpose tests
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_get_and_set_tests )
@@ -58,6 +63,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/score_operators_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_poserect_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_rotatepoint_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_angle_dist_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_infer_tests )
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )
@@ -67,6 +73,8 @@ ADD_EXECUTABLE ( ${TESTS_MODULE} ${${TESTS_MODULE}_SRC} )
 
 # TODO: Library names should be taken from variables
 TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} )
+
+ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/testdata1 $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/testdata1 )
 
 # Installation instructions for the test module
 # Please specify the installation instructions sprcific
