@@ -82,7 +82,8 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 			for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
 			{
-				vector<vector<LimbLabel> > labels = chDetector.detect(frames[*mstIter], params); //detect labels based on keyframe training
+        vector<vector<LimbLabel> > labels;
+        labels = chDetector.detect(frames[*mstIter], params, labels); //detect labels based on keyframe training
 
 				vector<size_t> numbersOfLabels; //numbers of labels per part
 

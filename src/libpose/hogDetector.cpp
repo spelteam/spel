@@ -218,7 +218,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
   }
 }
 
-vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params)
+vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
   const float searchDistCoeff = 0.5;
   const string sSearchDistCoeff = "searchDistCoeff";
@@ -485,7 +485,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     }
     t.push_back(labels);
   }
-  return t;
+  return merge(limbLabels, t);
 }
 
 LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors)

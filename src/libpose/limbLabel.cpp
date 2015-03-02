@@ -159,3 +159,8 @@ int LimbLabel::pnpoly(int nvert, float *vertx, float *verty, float testx, float 
   }
   return c;
 }
+
+void LimbLabel::addScore(Score detectionScore)
+{
+  scores.push_back(detectionScore);
+}

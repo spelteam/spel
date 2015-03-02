@@ -9,7 +9,7 @@ class SurfDetector : public Detector
     int getID(void);
     void setID(int _id);
     void train(vector <Frame*> frames, map <string, float>);
-    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params);
+    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
   private:
     int id;
 };

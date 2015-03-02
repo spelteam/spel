@@ -437,7 +437,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
 }
 
 // Returns a labels vector of possible body parts position
-vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params)
+vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
   const float searchDistCoeff = 0.5;
   const string sSearchDistCoeff = "searchDistCoeff";
@@ -719,7 +719,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     i->second.release();
   }
   maskMat.release();
-  return t;
+  return merge(limbLabels, t);
 }
 
 // Return nBins

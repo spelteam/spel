@@ -260,3 +260,68 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
   }
   return partImage;
 }
+
+vector <vector <LimbLabel>> Detector::merge(vector <vector <LimbLabel>> first, vector <vector <LimbLabel>> second)
+{
+  if (first.size() != second.size() && first.size() > 0 && second.size() > 0)
+  {
+    stringstream ss;
+    ss << "Can't merge vectors with different sizes (different count of BodyPart): First: " << first.size() << " Second: " << second.size();
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+    throw logic_error(ss.str());
+  }
+  if (first.size() == 0)
+  {
+    return second;
+  }
+  if (second.size() == 0)
+  {
+    return first;
+  }
+  bool bFound = false;
+  for (vector <vector <LimbLabel>>::iterator f = first.begin(); f != first.end(); ++f)
+  {
+    for (vector <vector <LimbLabel>>::iterator s = second.begin(); s != second.end(); ++s)
+    {
+      if (f->front().getLimbID() == s->front().getLimbID())
+      {
+        for (vector <LimbLabel>::iterator fl = f->begin(); fl != f->end(); ++fl)
+        {
+          for (vector <LimbLabel>::iterator sl = s->begin(); sl != s->end(); ++sl)
+          {
+            if (fl->getCenter() == sl->getCenter() && fl->getAngle() == sl->getAngle())
+            {
+              bFound = true;
+              vector <Score> sls = sl->getScores();
+              for (vector <Score>::iterator ss = sls.begin(); ss != sls.end(); ++ss)
+              {
+                fl->addScore(*ss);
+              }
+            }
+          }
+        }
+
+        for (vector <LimbLabel>::iterator sl = s->begin(); sl != s->end(); ++sl)
+        {
+          bFound = false;
+          for (vector <LimbLabel>::iterator fl = f->begin(); fl != f->end(); ++fl)
+          {
+            if (fl->getCenter() == sl->getCenter() && fl->getAngle() == sl->getAngle())
+            {
+              bFound = true;
+              break;
+            }
+          }
+          if (!bFound)
+          {
+            f->push_back(*sl);
+          }
+        }
+        break;
+      }
+    }
+  }
+  return first;
+}

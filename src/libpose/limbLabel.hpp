@@ -36,7 +36,7 @@ class LimbLabel
 //TODO (Vitaliy Koshura): Need implementation
     void getEndpoints(Point2f &p0, Point2f &p1) const; 
 //TODO (Vitaliy Koshura): Need implementation
-    void addScore(Score detectionScore) const; 
+    void addScore(Score detectionScore); 
     Point2f getCenter(void) const;
     vector<Score> getScores(void) const; //get the label scores
     int getLimbID(void) const;

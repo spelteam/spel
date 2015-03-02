@@ -82,7 +82,8 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 		{
 			//current frame represents the current frame, previous frame is currentFrame-1, next frame is currentFrame+1
 
-			vector<vector<LimbLabel> > labels = chDetector.detect(seqSlice[currentFrame], params); //detect labels based on keyframe training
+      vector<vector<LimbLabel> > labels;
+      labels = chDetector.detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
 
 			detections[currentFrame] = labels; //store all detections into detections
 		}

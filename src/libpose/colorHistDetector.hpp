@@ -17,7 +17,7 @@ class ColorHistDetector : public Detector
     int getID(void);
     void setID(int _id);
     void train(vector <Frame*> _frames, map <string, float> params);
-    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params);
+    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
     uint8_t getNBins(void);
     vector <Frame*> getFrames() const;
     ColorHistDetector &operator=(const ColorHistDetector &c);
