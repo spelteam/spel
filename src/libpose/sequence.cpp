@@ -279,7 +279,7 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
 
            Vector3f thisAxis(xa,ya,za);
 
-           angle = PoseHelper::interpolateFloat(0, angle, i, slice.size()); //interpolate the angle
+           angle = PoseHelper::interpolateFloat(0, angle, i, slice.size()-1)*180.0/M_PI; //interpolate the angle
 
            //re-generate AngleAxis object and create quaternion
 
@@ -311,7 +311,7 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
 
                Vector3f prevAxis(xp,yp,zp);
 
-               angleP = PoseHelper::interpolateFloat(0, angleP, i, slice.size()); //interpolate the angle
+               angleP = PoseHelper::interpolateFloat(0, angleP, i, slice.size()-1)*180.0/M_PI; //interpolate the angle
 
                prevQuat = AngleAxisf(angleP, prevAxis);
 
@@ -329,25 +329,15 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
        for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
        {
            Vector3f childJoint = currentPartState[partIter->getPartID()];
-           Point3f parentJointP  = prevSkel.getBodyJoint(0)->getSpaceLocation();
-           Vector3f parentJoint(parentJointP.x, parentJointP.y, parentJointP.z);
-           //Vector3f parentJoint(0,0,0); //this is the root location of the prevSkel
-
-           parentIter = partTree.parent(partIter);
-           while(parentIter!=NULL && parentIter!=partTree.begin())
-           {
-               //if there is a parent, first unrotate by its quaternion
-               childJoint=childJoint+currentPartState[parentIter->getPartID()];
-               parentJoint=parentJoint+currentPartState[parentIter->getPartID()];
-               parentIter = partTree.parent(parentIter);
-           }
-
            //parent and child joints now contain the correct location information
            BodyJoint* childJointT = interpolatedSkeleton.getBodyJoint(partIter->getChildJoint());
            BodyJoint* parentJointT = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint());
 
-           childJointT->setSpaceLocation(Point3f(childJoint.x(), childJoint.y(), childJoint.z()));
-           parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
+           Point3f p  = parentJointT->getSpaceLocation();
+
+           childJointT->setSpaceLocation(Point3f(p.x+childJoint.x(), p.y+childJoint.y(), p.z+childJoint.z()));
+
+           //parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
        }
 
        cerr << "\t Skeleton generated" << endl;

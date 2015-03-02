@@ -113,11 +113,14 @@ void Skeleton::infer2D(void)
 void Skeleton::infer3D(void)
 {
   map <uint32_t, float> dz;
+
+  assert(scale!=0);
+
   for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
   {
     float len3d = tree->getRelativeLength();
     float len2d = sqrt(PoseHelper::distSquared(getBodyJoint(tree->getParentJoint())->getImageLocation(), getBodyJoint(tree->getChildJoint())->getImageLocation()));
-    float diff = pow(len3d, 2) - pow(len2d, 2); //compute the difference, this must be the depth
+    float diff = pow(len3d, 2) - pow(len2d/scale, 2); //compute the difference, this must be the depth
     if (diff<0)
       dz[tree->getPartID()] = 0;
     else
@@ -129,6 +132,10 @@ void Skeleton::infer3D(void)
   {
     BodyJoint *child = getBodyJoint(tree->getChildJoint());
     BodyJoint *parent = getBodyJoint(tree->getParentJoint());
+    if(tree->getPartID()==0) //if zero partID, we are on the root part
+    {
+        parent->setSpaceLocation(Point3f(parent->getImageLocation().x / scale, parent->getImageLocation().y / scale, 0));
+    }
     float sign = child->getDepthSign() == 0 ? -1.0 : 1.0;
     float z = tree == partTree.begin() ? 0.0 : parent->getSpaceLocation().z;
     child->setSpaceLocation(Point3f(child->getImageLocation().x / scale, child->getImageLocation().y / scale, sign * dz.at(tree->getPartID()) + z));

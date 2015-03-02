@@ -19,7 +19,8 @@ class Sequence
     void setID(const int& _id);
     vector<Frame*> getFrames() const;
     void setFrames(const vector<Frame*> _frames);
-    void computeInterpolation(map<string, float> params); //compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
+    void computeInterpolation(map<string, float> &params); //compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
+    void estimateUniformScale(map<string, float> &params);
     
   private:
     vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
