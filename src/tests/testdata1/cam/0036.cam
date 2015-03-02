@@ -1,0 +1,11 @@
+#SOGEM V1.1 ascii
+o_Camera {
+	CVec	-5.886386	10.984264	29.136375
+	AVec	0.316779	-0.308892	-0.896793
+	UpVec	0.102882	0.951097	-0.291255
+	Width	720
+	Height	576
+	PixelSizeX	1.28e-05
+	PixelSizeY	9e-06
+	FocalLength	0.042634
+}
