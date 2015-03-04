@@ -69,6 +69,14 @@ void Sequence::setFrames(const vector<Frame *> _frames)
 
 void Sequence::computeInterpolation(map<string, float> &params)
 {
+    params.emplace("useDefaultScale", 1);
+    params.emplace("defaultScale", 180);
+
+    float defaultScale =  params.at("defaultScale");
+    float useDefaultScale = params.at("useDefaultScale");
+
+
+
     //frames should be sliced into frame sets, where every non Keyframe non Lockframe frame should belong to a BOUNDED set
     //unbounded sets are not included in the solve
     vector<vector<Frame*> > aux;
@@ -81,6 +89,15 @@ void Sequence::computeInterpolation(map<string, float> &params)
         currentSet.push_back(frames[i]); //push the frame to current set
         if(frames[i]->getFrametype()==KEYFRAME || frames[i]->getFrametype()==LOCKFRAME)
         {
+            //infer keyframe/lockframe 3D locations
+            Skeleton skel = frames[i]->getSkeleton();
+            if(useDefaultScale)
+            {
+                skel.setScale(defaultScale);
+            }
+            skel.infer3D();
+            frames[i]->setSkeleton(skel);
+
             aux.push_back(currentSet);
             currentSet.clear();
             currentSet.push_back(frames[i]);
@@ -105,30 +122,7 @@ void Sequence::computeInterpolation(map<string, float> &params)
 
     for(uint32_t i=0; i<slices.size(); ++i)
     {
-        vector<Frame*> slice = interpolateSlice(slices[i], params);
-        slices[i] = slice;
-    }
-
-    //now store the results
-    for(uint32_t i=0; i<slices.size();++i)
-    {
-        vector<Frame*> slice = slices[i];
-        for(uint32_t j=0; j<slice.size();++j)
-        {
-            if(slice[j]->getFrametype()==INTERPOLATIONFRAME) //only replace interpolations, everything keyframes and lockframes are fine
-            {
-//                delete frames[slice[j]->getID()];
-                *(frames[slice[j]->getID()])=*(slice[j]); //copy the value from the resulting slice pointer
-                //delete slice[j]; //delete the old slice pointer to free memory
-            }
-            else
-            {
-                Skeleton skel = slice[j]->getSkeleton();
-                skel.infer3D();
-                slice[j]->setSkeleton(skel);
-            }
-
-        }
+        interpolateSlice(slices[i], params);
     }
 }
 
@@ -146,38 +140,8 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
         assert(slice[i]->getFrametype()!=KEYFRAME && slice[i]->getFrametype()!=LOCKFRAME); //if the inbetween frames are not keyframes and lockframes
    }
 
-   params.emplace("useDefaultScale", 1);
-   params.emplace("defaultScale", 180);
-
-   float defaultScale =  params.at("defaultScale");
-   float useDefaultScale = params.at("useDefaultScale");
-
-   vector<Frame*> result;
-
-   for(uint32_t i=0; i<slice.size();++i)
-   {
-       Frame* ptr=NULL;
-       result.push_back(ptr);
-   } //fill vector with empty pointers
-
-
-   //attach the start and end, and generate everything in between in this function
-   result.front() = slice.front();
-   result.back() = slice.back();
-
-   //front and back are parent skeletons, their information
-
-   //matrix.create(3, 3, DataType<float>::type);
-   //now we need to build a tree of AxisAngles that reflects the rotations
    Skeleton prevSkel = slice.front()->getSkeleton();
    Skeleton futureSkel = slice.back()->getSkeleton();
-   if(useDefaultScale)
-   {
-       prevSkel.setScale(defaultScale);
-       futureSkel.setScale(defaultScale);
-   }
-   prevSkel.infer3D();
-   futureSkel.infer3D();
 
    //set up the two part trees, the part tree is used for structure
    tree<BodyPart> partTree = slice.front()->getSkeleton().getPartTree();
@@ -229,9 +193,7 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
        for(vector<int>::reverse_iterator pathIter=path.rbegin(); pathIter!=path.rend(); ++pathIter)
        {
            prevVec = rotationsPast[*pathIter].inverse()._transformVector(prevVec);
-           //prevDvec = rotationsPast[parentIter->getPartID()].inverse()._transformVector(prevDvec);
            futureVec = rotationsFuture[*pathIter].inverse()._transformVector(futureVec);
-           //futureDvec = rotationsFuture[parentIter->getPartID()].inverse()._transformVector(futureDvec);
        }
 
        //now compute the quaternions
@@ -251,8 +213,8 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
        float time = (float)i/(slice.size()-1);
        //only the t value depends on frame number
        Skeleton interpolatedSkeleton = prevSkel;
-       if(useDefaultScale)
-           interpolatedSkeleton.setScale(defaultScale);
+//       if(useDefaultScale)
+//           interpolatedSkeleton.setScale(defaultScale);
        vector<Vector3f> currentPartState;
        partTree = interpolatedSkeleton.getPartTree();
 
@@ -287,18 +249,10 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
 
             //partVec = rotationsPast[partIter->getPartID()]._transformVector(partVec);
             currentPartState[partIter->getPartID()] = partVec;
-
-//            Quaternionf qRes, qStart, qEnd;
-//            qStart = rotationsPast[partIter->getPartID()];
-//            qEnd = rotationsFuture[partIter->getPartID()];
-
-//            qRes = qStart.slerp(time, qEnd);
-
-
        }
        //now update skeleton accordingly - locations just need to be added together (i.e. add child joint to vector)
 
-        cerr << "\t New joint locations computed" << endl;
+       cerr << "\t New joint locations computed" << endl;
 
        for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
        {
@@ -316,17 +270,18 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
 
                 BodyJoint* currentRootJoint = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint()); //this should be the future root joint
                 currentRootJoint->setSpaceLocation(Point3f(X,Y,Z));
-           }
+            }
             BodyJoint* parentJointT = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint());
             BodyJoint* childJointT = interpolatedSkeleton.getBodyJoint(partIter->getChildJoint());
-           //root location needs to be interpolated
-           Vector3f partState = currentPartState[partIter->getPartID()]*partIter->getRelativeLength();;
+
+            //root location needs to be interpolated
+
+            Vector3f partState = currentPartState[partIter->getPartID()]*partIter->getRelativeLength();;
+
            //parent and child joints now contain the correct location information
+            Point3f p  = parentJointT->getSpaceLocation();
 
-
-           Point3f p  = parentJointT->getSpaceLocation();
-
-           childJointT->setSpaceLocation(Point3f(p.x+partState.x(), p.y+partState.y(), p.z+partState.z()));
+            childJointT->setSpaceLocation(Point3f(p.x+partState.x(), p.y+partState.y(), p.z+partState.z()));
 
            //parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
        }
@@ -337,20 +292,20 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
        //slice[i].setSkeleton(interpolatedSkeleton);
 
        //frame type should be updated to interpolaion
-       Interpolation *interpolatedFrame = new Interpolation();
+       Interpolation interpolatedFrame;
        interpolatedSkeleton.infer2D(); //infer 2D from the interpolated 3D joints
-       interpolatedFrame->setSkeleton(interpolatedSkeleton);
-       interpolatedFrame->setID(slice[i]->getID());
-       interpolatedFrame->setMask(slice[i]->getMask());
-       interpolatedFrame->setGroundPoint(slice[i]->getGroundPoint());
-       interpolatedFrame->setImage(slice[i]->getImage());
+       interpolatedFrame.setSkeleton(interpolatedSkeleton);
+       interpolatedFrame.setID(slice[i]->getID());
+       interpolatedFrame.setMask(slice[i]->getMask());
+       interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
+       interpolatedFrame.setImage(slice[i]->getImage());
 
        //delete slice[i];
-       result[i] = interpolatedFrame;
+       *slice[i] = interpolatedFrame;
    }
 
    //cout << "Interpolated keyframes" << endl;
-   return result; //result contains Frame*'s that have been modified according to
+   return slice; //result contains Frame*'s that have been modified according to
 
 }
 

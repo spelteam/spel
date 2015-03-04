@@ -53,7 +53,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL() << "SpaceLocation can't be (0, 0, 0)";
+        FAIL() << "SpaceLocation can't be (0, 0, 0) 1";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
@@ -86,7 +86,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL() << "SpaceLocation can't be (0, 0, 0)";
+        FAIL() << "SpaceLocation can't be (0, 0, 0) 2";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
@@ -107,6 +107,28 @@ TEST(skeletonTest, infer3dTest)
     //TODO(Vitalii Koshura): Remove this after correct work of interpolation
     /*if ((*frame)->getFrametype() != KEYFRAME)
       continue;*/
+    //check if frame has a keyframe before AND after
+    bool hasPrevAnchor=false, hasFutureAnchor=false;
+    //before
+    for(vector<Frame*>::reverse_iterator prevAnchor(frame); prevAnchor!=frames.rend(); ++prevAnchor)
+    {
+        if((*prevAnchor)->getFrametype()==KEYFRAME || (*prevAnchor)->getFrametype()==LOCKFRAME)
+        {
+            hasPrevAnchor=true;
+            break;
+        }
+    }
+    //after
+    for(vector<Frame*>::iterator futureAnchor=frame; futureAnchor!=frames.end(); ++futureAnchor)
+    {
+        if((*futureAnchor)->getFrametype()==KEYFRAME || (*futureAnchor)->getFrametype()==LOCKFRAME)
+        {
+            hasFutureAnchor=true;
+            break;
+        }
+    }
+    if(!hasPrevAnchor || !hasFutureAnchor)
+        continue;
     Skeleton skeleton = (*frame)->getSkeleton();
     skeleton.infer3D();
     tree <BodyPart> partTree = skeleton.getPartTree();
@@ -116,7 +138,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL() << "SpaceLocation can't be (0, 0, 0)";
+        FAIL() << "SpaceLocation can't be (0, 0, 0) 3";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
@@ -137,6 +159,27 @@ TEST(skeletonTest, infer3dTest)
     //TODO(Vitalii Koshura): Remove this after correct work of interpolation
     /*if ((*frame)->getFrametype() != KEYFRAME)
       continue;*/
+      bool hasPrevAnchor=false, hasFutureAnchor=false;
+      //before
+      for(vector<Frame*>::reverse_iterator prevAnchor(frame); prevAnchor!=frames.rend(); ++prevAnchor)
+      {
+          if((*prevAnchor)->getFrametype()==KEYFRAME || (*prevAnchor)->getFrametype()==LOCKFRAME)
+          {
+              hasPrevAnchor=true;
+              break;
+          }
+      }
+      //after
+      for(vector<Frame*>::iterator futureAnchor=frame; futureAnchor!=frames.end(); ++futureAnchor)
+      {
+          if((*futureAnchor)->getFrametype()==KEYFRAME || (*futureAnchor)->getFrametype()==LOCKFRAME)
+          {
+              hasFutureAnchor=true;
+              break;
+          }
+      }
+      if(!hasPrevAnchor || !hasFutureAnchor)
+          continue;
     Skeleton skeleton = (*frame)->getSkeleton();
     skeleton.infer3D();
     tree <BodyPart> partTree = skeleton.getPartTree();
@@ -146,7 +189,7 @@ TEST(skeletonTest, infer3dTest)
       BodyJoint *childJoint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (parentJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0) || childJoint->getSpaceLocation() == Point3f(0.0, 0.0, 0.0))
       {
-        FAIL() << "SpaceLocation can't be (0, 0, 0)";
+        FAIL() << "SpaceLocation can't be (0, 0, 0) 4";
       }
       Point3f point1 = parentJoint->getSpaceLocation();
       Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
