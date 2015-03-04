@@ -23,9 +23,9 @@
 
  <BodyParts>
   <BodyPart id="0" name="Root" parentJointId="0" childJointId="1" expectedDistance="0" lwRatio="1.9" relativeLength="0.2953"/>
-  <BodyPart id="1" name="Left Hip" parentJointId="0" childJointId="2" expectedDistance="0" lwRatio="3.2" relativeLength="0.0829"/>
-  <BodyPart id="2" name="Right Hip" parentJointId="0" childJointId="3" expectedDistance="0" lwRatio="3.2" relativeLength="0.0829"/>
-  <BodyPart id="3" name="Neck" parentJointId="1" childJointId="4" expectedDistance="0" lwRatio="1.454" relativeLength="0.0829"/>
+  <BodyPart id="1" name="Left Hip" parentJointId="0" childJointId="2" expectedDistance="0" lwRatio="3.2" relativeLength="0.0647"/>
+  <BodyPart id="2" name="Right Hip" parentJointId="0" childJointId="3" expectedDistance="0" lwRatio="3.2" relativeLength="0.0647"/>
+  <BodyPart id="3" name="Neck" parentJointId="1" childJointId="4" expectedDistance="0" lwRatio="1.454" relativeLength="0.04663"/>
   <BodyPart id="4" name="Left Clavicle" parentJointId="1" childJointId="5" expectedDistance="0" lwRatio="3.4" relativeLength="0.0881"/>
   <BodyPart id="5" name="Right Clavicle" parentJointId="1" childJointId="6" expectedDistance="0" lwRatio="3.4" relativeLength="0.0881"/>
   <BodyPart id="6" name="Left Femur" parentJointId="2" childJointId="7" expectedDistance="0" lwRatio="3.059" relativeLength="0.2694"/>
@@ -37,8 +37,8 @@
   <BodyPart id="12" name="Right Tibia" parentJointId="8" childJointId="13" expectedDistance="0" lwRatio="4.727" relativeLength="0.2694"/>
   <BodyPart id="13" name="Left Radius" parentJointId="10" childJointId="14" expectedDistance="0" lwRatio="3.75" relativeLength="0.1554"/>
   <BodyPart id="14" name="Right Radius" parentJointId="11" childJointId="15" expectedDistance="0" lwRatio="3.75" relativeLength="0.1554"/>
-  <BodyPart id="15" name="Left Metatarsal" parentJointId="12" childJointId="16" expectedDistance="0" lwRatio="3.5" relativeLength="0.1295"/>
-  <BodyPart id="16" name="Right Metatarsal" parentJointId="13" childJointId="17" expectedDistance="0" lwRatio="3.5" relativeLength="0.1295"/>
+  <BodyPart id="15" name="Left Metatarsal" parentJointId="12" childJointId="16" expectedDistance="0" lwRatio="3.5" relativeLength="0.1139"/>
+  <BodyPart id="16" name="Right Metatarsal" parentJointId="13" childJointId="17" expectedDistance="0" lwRatio="3.5" relativeLength="0.1139"/>
  </BodyParts>
 
  <Frames>

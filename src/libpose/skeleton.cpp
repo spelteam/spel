@@ -106,7 +106,7 @@ void Skeleton::infer2D(void)
 {
   for (tree <BodyJoint>::iterator tree = jointTree.begin(); tree != jointTree.end(); ++tree)
   {
-    tree->setImageLocation(Point2f(tree->getSpaceLocation().x/* * scale*/, tree->getSpaceLocation().y/* * scale*/));
+    tree->setImageLocation(Point2f(tree->getSpaceLocation().x*scale, tree->getSpaceLocation().y*scale));
   }
 }
 
@@ -134,10 +134,10 @@ void Skeleton::infer3D(void)
     BodyJoint *parent = getBodyJoint(tree->getParentJoint());
     if(tree->getPartID()==0) //if zero partID, we are on the root part
     {
-        parent->setSpaceLocation(Point3f(parent->getImageLocation().x, parent->getImageLocation().y, 0));
+        parent->setSpaceLocation(Point3f(parent->getImageLocation().x/scale, parent->getImageLocation().y/scale, 0));
     }
     float sign = child->getDepthSign() == 0 ? -1.0 : 1.0;
     float z = tree == partTree.begin() ? 0.0 : parent->getSpaceLocation().z;
-    child->setSpaceLocation(Point3f(child->getImageLocation().x, child->getImageLocation().y, sign * dz.at(tree->getPartID()) + z));
+    child->setSpaceLocation(Point3f(child->getImageLocation().x/scale, child->getImageLocation().y/scale, sign * dz.at(tree->getPartID()) + z));
   }
 }

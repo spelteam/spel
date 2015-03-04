@@ -38,8 +38,6 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
     sequence.computeInterpolation(params); //interpolate the sequences
 
-    //vector<Frame*> frames = sequence.getFrames(); //now get its frames
-
 	//first slice up the sequences
 	if(debugLevel>=1)
 		cout << "TLPSSolver started, slicing sequence..." << endl;
@@ -82,8 +80,10 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 		{
 			//current frame represents the current frame, previous frame is currentFrame-1, next frame is currentFrame+1
 
-      vector<vector<LimbLabel> > labels;
-      labels = chDetector.detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
+            cerr << "Detecting on frame " << seqSlice[currentFrame]->getID() << endl;
+
+            vector<vector<LimbLabel> > labels;
+            labels = chDetector.detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
 
 			detections[currentFrame] = labels; //store all detections into detections
 		}
@@ -106,6 +106,9 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
         //OK
 
+        cerr << "Computing slice factors" << endl;
+
+        int suppFactors=0, jointFactors=0, anchorFactors=0, tempFactors=0;
 		//now do the factors
 		for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
 		{
@@ -135,6 +138,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
 				Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
 				gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                suppFactors++;
 
                 if(currentFrame == 1) //anchor to first skeleton in sequence
                 {
@@ -151,6 +155,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
                     Model::FunctionIdentifier anchorFid = gm.addFunction(anchorCostFunc); //explicit function add to graphical model
                     gm.addFactor(anchorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                    anchorFactors++;
                 }
 
                 //anchor to last frame of the slice (i.e. to frame=seqSlice.size()-1
@@ -169,6 +174,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
                     Model::FunctionIdentifier anchorFid = gm.addFunction(anchorCostFunc); //explicit function add to graphical model
                     gm.addFactor(anchorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                    anchorFactors++;
                 }
 
                 if(partIter!=partTree.begin()) //if iterator is not on root node, there is always a parent body part
@@ -196,6 +202,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
                     Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
                     gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                    jointFactors++;
                 }
 				
                 //futre temporal link (if not anchored)
@@ -220,9 +227,28 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                     }
                     Model::FunctionIdentifier futureTempCostFid = gm.addFunction(futureTempCostFunc); //explicit function add to graphical model
                     gm.addFactor(futureTempCostFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                    tempFactors++;
                 }
 			}
 		}
+
+        if(debugLevel=1)
+        {
+            float n,k;
+            n=seqSlice.size()-2; //num non-anchor frames
+            k=seqSlice.front()->getSkeleton().getPartTree().size(); //number of bones
+            float expectedSuppFactors=n*k; //n*k
+            float expectedJointFactors=n*(k-1); //n*(k-1)
+            float expectedAnchorFactors=2*k; //2*k
+            float expectedTempFactors=(n-1)*k; //(n-1)*k
+
+            assert(expectedSuppFactors==suppFactors);
+            assert(expectedJointFactors==jointFactors);
+            assert(expectedAnchorFactors==anchorFactors);
+            assert(expectedTempFactors==tempFactors);
+        }
+
+        cerr << "Solving slice factor graph" << endl;
 
 		//now solve the slice
 
@@ -455,242 +481,4 @@ vector<vector<Frame*> > TLPSSolver::slice(const vector<Frame*>& frames) //separa
 
 	return slices; 
 }
-
-//vector<Frame*> TLPSSolver::interpolateSlice(vector<Frame*> slice, map<string, float> params)
-//{
-//	//first make sure that the front and back frames HAVE 3D space locations computed
-//	//if not, compute them
-
-//	//check that the slice contains a keyframe/lockframe at each end
-//    assert(slice.front()->getFrametype()==LOCKFRAME || slice.front()->getFrametype()==KEYFRAME);
-//    assert(slice.back()->getFrametype()==LOCKFRAME || slice.back()->getFrametype()==KEYFRAME);
-	
-//    params.emplace("useDefaultScale", 1);
-//    params.emplace("defaultScale", 120);
-
-//    float defaultScale =  params.at("defaultScale");
-//    float useDefaultScale = params.at("useDefaultScale");
-
-//	vector<Frame*> result;
-
-//	for(uint32_t i=0; i<slice.size();++i)
-//	{
-//		Frame* ptr=NULL;
-//		result.push_back(ptr);
-//	}
-//	//attach the start and end, and generate everything in between in this function
-//	result[0] = slice[0];
-//	result[result.size()-1] = slice[slice.size()-1];
-
-//	//front and back are parent skeletons, their information
-
-//	//matrix.create(3, 3, DataType<float>::type);
-//	//now we need to build a tree of AxisAngles that reflects the rotations
-//	Skeleton prevSkel = slice.front()->getSkeleton();
-//	Skeleton futureSkel = slice.back()->getSkeleton();
-//    if(useDefaultScale)
-//    {
-//        prevSkel.setScale(defaultScale);
-//        futureSkel.setScale(defaultScale);
-//    }
-
-//	//set up the two part trees, the part tree is used for structure
-//	tree<BodyPart> partTree = slice.front()->getSkeleton().getPartTree();
-//	tree<BodyPart>::iterator partIter, parentIter; //the body part iterator
-
-//	vector<Eigen::Quaternionf> rotations;
-//	vector<Eigen::Vector3f> unrotatedPast;
-//	vector<Eigen::Vector3f> unrotatedFuture;
-
-//	for(uint32_t i=0; i<partTree.size(); ++i)
-//	{
-//        rotations.push_back(Quaternionf::Identity());
-//        unrotatedPast.push_back(Vector3f());
-//        unrotatedFuture.push_back(Vector3f());
-//		//unrotatedNodes.push_back(Eigen::Vector3f());
-//	}
-
-//	cerr << "\t Setup complete" << endl;
-
-//	for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-//	{
-////        cerr << "\t\t Setting up rotations for part " << partIter->getPartID() << endl;
-//		//get partent and child joints of previous part
-//		BodyJoint* childJointP = prevSkel.getBodyJoint(partIter->getChildJoint());
-//		BodyJoint* parentJointP = prevSkel.getBodyJoint(partIter->getParentJoint());
-
-//		//get parent and child joints of future part
-//		BodyJoint* childJointF = futureSkel.getBodyJoint(partIter->getChildJoint());
-//		BodyJoint* parentJointF = futureSkel.getBodyJoint(partIter->getParentJoint());
-
-//		//convert Point3f to Vector3f
-//		Point3f childLocP = childJointP->getSpaceLocation();
-//		Point3f parentLocP = parentJointP->getSpaceLocation();
-
-//		Point3f childLocF = childJointF->getSpaceLocation();
-//		Point3f parentLocF = parentJointF->getSpaceLocation();
-
-//		Eigen::Vector3f prevVec(childLocP.x-parentLocP.x, childLocP.y-parentLocP.y, childLocP.z-parentLocP.z);
-//		Eigen::Vector3f futureVec(childLocF.x-parentLocF.x, childLocF.y-parentLocF.y, childLocF.z-parentLocF.z);
-
-
-//		//get all rotations that need to happen
-//        parentIter = partTree.parent(partIter);
-//		vector<Eigen::Quaternionf> previousNodes;
-//        while(parentIter!=NULL)
-//        {
-//            previousNodes.push_back(rotations[parentIter->getPartID()]);
-//            parentIter = partTree.parent(parentIter);
-//        }
-
-        
-//        //now unrotate starting from root down
-//        //cerr << previousNodes.size() << endl;
-//        for(int i=previousNodes.size()-1; i>=0; --i)
-//        {
-//        	prevVec = previousNodes[i].conjugate()._transformVector(prevVec);
-//        	futureVec = previousNodes[i].conjugate()._transformVector(prevVec);
-//        }
-//		//Eigen::Vector3f xaxis(1,0,0);
-
-//		//compute quaterion between two positions
-//        Quaternionf rotation;
-//		rotation.setFromTwoVectors(prevVec, futureVec); //quaternion set
-//		rotations[partIter->getPartID()] = rotation.normalized(); //push to vector of rotations
-//		unrotatedPast[partIter->getPartID()] = prevVec;
-//		unrotatedFuture[partIter->getPartID()] = futureVec;
-
-//	}
-
-//	cerr << "\t Quaternions computed" << endl;
-
-//	//now that quaterion rotations are computed, we can compute the new skeleton
-//	for(uint32_t i=1; i<slice.size()-1; ++i)
-//	{
-//		//only the t value depends on frame number
-//		Skeleton interpolatedSkeleton = prevSkel;
-//        if(useDefaultScale)
-//            interpolatedSkeleton.setScale(defaultScale);
-//		vector<Vector3f> currentPartState;
-//		partTree = 	interpolatedSkeleton.getPartTree();
-
-//		for(uint32_t j=0; j<partTree.size(); ++j)
-//		{
-//			currentPartState.push_back(Eigen::Vector3f());
-//		}
-
-//		for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-//		{
-
-//			Eigen::Vector3f prevVec=unrotatedPast[partIter->getPartID()];
-//			//rotate by this quaternion, and every quaternion up in the tree
-//			Quaternionf thisRot = rotations[partIter->getPartID()];
-
-//			float angle = 2*acos(thisRot.w());
-
-//			float xa = thisRot.x()/sqrt(1.0-thisRot.w()*thisRot.w());
-//			float ya = thisRot.y()/sqrt(1.0-thisRot.w()*thisRot.w());
-//			float za = thisRot.z()/sqrt(1.0-thisRot.w()*thisRot.w());
-
-//			Vector3f thisAxis(xa,ya,za);
-
-//			angle = interpolateFloat(0, angle, i, slice.size()); //interpolate the angle
-
-//			//re-generate AngleAxis object and create quaternion
-
-//			//Quaternion to axis angle
-//			// 			angle = 2 * acos(qw)
-//			// x = qx / sqrt(1-qw*qw)
-//			// y = qy / sqrt(1-qw*qw)
-//			// z = qz / sqrt(1-qw*qw)
-//			//Quaternion<float> q;  q = AngleAxis<float>(angle_in_radian, axis);
-
-//			thisRot = AngleAxisf(angle,thisAxis);
-
-//			prevVec = thisRot._transformVector(prevVec); //rotate the vector by
-
-//			//convert rotation to axis angle, interpolate angle, convert back to quaternion
-						
-//	       	//rotate hierarchy
-//            parentIter = partTree.parent(partIter);
-//            while(parentIter!=NULL)
-//	        {
-//                //if there is a parent rotate by its quaternion
-//                Eigen::Quaternionf prevQuat = rotations[parentIter->getPartID()];
-
-//                float angleP = 2*acos(prevQuat.w());
-
-//                float xp = prevQuat.x()/sqrt(1.0-prevQuat.w()*prevQuat.w());
-//                float yp = prevQuat.y()/sqrt(1.0-prevQuat.w()*prevQuat.w());
-//                float zp = prevQuat.z()/sqrt(1.0-prevQuat.w()*prevQuat.w());
-
-//                Vector3f prevAxis(xp,yp,zp);
-
-//                angleP = interpolateFloat(0, angleP, i, slice.size()); //interpolate the angle
-
-//                prevQuat = AngleAxisf(angleP, prevAxis);
-
-//                prevVec = prevQuat._transformVector(prevVec);
-
-//                parentIter = partTree.parent(parentIter);
-//            }
-
-//	        currentPartState[partIter->getPartID()] = prevVec;
-//		}
-//		//now update skeleton accordingly - locations just need to be added together (i.e. add child joint to vector)
-
-//			cerr << "\t New joint locations computed" << endl;
-
-//		for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-//		{
-//			Vector3f childJoint = currentPartState[partIter->getPartID()];
-//			Vector3f parentJoint(0,0,0);
-
-//            parentIter = partTree.parent(partIter);
-//            while(parentIter!=NULL)
-//	        {
-//                //if there is a parent, first unrotate by its quaternion
-//                childJoint=childJoint+currentPartState[parentIter->getPartID()];
-//                parentJoint=parentJoint+currentPartState[parentIter->getPartID()];
-//                parentIter = partTree.parent(parentIter);
-//            }
-
-//            //parent and child joints now contain the correct location information
-//    		BodyJoint* childJointT = interpolatedSkeleton.getBodyJoint(partIter->getChildJoint());
-//			BodyJoint* parentJointT = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint());
-//			childJointT->setSpaceLocation(Point3f(childJoint.x(), childJoint.y(), childJoint.z()));
-//			parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
-//		}
-
-//		cerr << "\t Skeleton generated" << endl;
-
-//		//now skeleton should be set for this frame
-//		//slice[i].setSkeleton(interpolatedSkeleton);
-
-//		//frame type should be updated to interpolaion
-//        Interpolation *interpolatedFrame = new Interpolation();
-//        interpolatedFrame->setSkeleton(interpolatedSkeleton);
-//        interpolatedFrame->setID(slice[i]->getID());
-//        interpolatedFrame->setMask(slice[i]->getMask());
-//        interpolatedFrame->setGroundPoint(slice[i]->getGroundPoint());
-//        interpolatedFrame->setImage(slice[i]->getImage());
-
-//		//delete slice[i];
-//        result[i] = interpolatedFrame;
-//	}
-
-//    //cout << "Interpolated keyframes" << endl;
-//	return result; //result contains Frame*'s that have been modified according to
-
-//}
-
-//inline float TLPSSolver::interpolateFloat(float prevAngle, float nextAngle, int step, int numSteps)
-//{
-//    float t;
-//    if(numSteps!=0)
-//        t = (float)step/(float)numSteps;
-//    else
-//        t=0;
-//    return prevAngle*(1-t)+nextAngle*t;
-//}
 

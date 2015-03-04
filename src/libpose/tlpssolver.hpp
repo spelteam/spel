@@ -40,7 +40,7 @@ class TLPSSolver: Solver
     TLPSSolver(void);
     ~TLPSSolver(void); //inherited virtual
     vector<Solvlet> solve(Sequence& frames); //inherited virtual
-    vector<Solvlet> solve(Sequence &frames, map<string, float> params); //inherited virtual
+    vector<Solvlet> solve(Sequence& frames, map<string, float> params); //inherited virtual
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
