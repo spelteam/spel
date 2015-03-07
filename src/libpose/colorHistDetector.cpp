@@ -135,7 +135,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       }
       j0 = joint->getImageLocation(); // coordinates of current joint
       joint = 0;
-      joint = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint()); // the cild node of current body part pointer
+      joint = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint()); // the child node of current body part pointer
       if (joint == 0)
       {
 #ifdef DEBUG
@@ -149,7 +149,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       float boneWidth = 0;
       try
       { //currents body part polygon width 
-        boneWidth = boneLength / iteratorBodyPart->getLWRatio()/*skeleton.getScale() * boneLength * params.at(sScaleParam)*/;
+        boneWidth = boneLength / iteratorBodyPart->getLWRatio();
       }
       catch (...)
       {
@@ -280,11 +280,11 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             throw logic_error(ss.str());
           }
 
-          partNumber++; // Why? ///////////////////////////////
+          //partNumber++; // Why? ///////////////////////////////
         }
         if (partHit != -1) // if was found polygon, that contains this pixel
         {
-          if (!blackPixel) // if pixel color is don't black
+          if (!blackPixel) // if pixel color isn't black
           {
             try
             {
@@ -457,6 +457,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const float scaleParam = 1; // scaling coefficient
   const string sScaleParam = "scaleParam";
 
+  const float searchDistCoeffMult = 1.25;
+  const string sSearchDistCoeffMult = "searchDistCoeffMult";
+
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -464,6 +467,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sStepTheta, stepTheta);
   params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
   params.emplace(sScaleParam, scaleParam);
+  params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
 
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
@@ -473,29 +477,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   map <int32_t, Mat> pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
   map <int32_t, Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
   Mat maskMat = frame->getMask(); // copy mask from the frame
-  //Frame *prevFrame = 0, *nextFrame = 0;
-  //uint32_t stepCount = 0;
-  //uint32_t step = 0;
-  //  getNeighborFrame(frame, &prevFrame, &nextFrame, step, stepCount);
-  //  if (prevFrame == 0)
-  //  {
-  //    stringstream ss;
-  //    ss << "Couldn't find previous keyframe to the frame " << frame->getID();
-  //#ifdef DEBUG
-  //    cerr << ERROR_HEADER << ss.str() << endl;
-  //#endif  // DEBUG
-  //    throw logic_error(ss.str());
-  //  }
-  //  if (nextFrame == 0)
-  //  {
-  //    stringstream ss;
-  //    ss << "Couldn't find next feyframe to the frame " << frame->getID();
-  //#ifdef DEBUG
-  //    cerr << ERROR_HEADER << ss.str() << endl;
-  //#endif  // DEBUG
-  //    throw logic_error(ss.str());
-  //  }
-
+  
   // For all body parts
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   { //Temporary variables
@@ -518,8 +500,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
 #endif  // DEBUG
       throw logic_error(ss.str());
     }
-    //getRawBodyPartPosition(frame, prevFrame, nextFrame, iteratorBodyPart->getParentJoint(), iteratorBodyPart->getChildJoint(), step, stepCount, j0, j1);
-
+    
     float boneLength = getBoneLength(j0, j1); // distance between nodes
     float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart); // current body part polygon width
     Point2f direction = j1 - j0; // direction of bodypart vector
@@ -528,8 +509,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     if (minDist < 2) minDist = 2; // the minimal linear step
     float searchDistance = 0;
     try
-    {
-      searchDistance = boneLength * params.at(sSearchDistCoeff); // the limiting of search area
+    {      
+      float mult = partTree.depth(iteratorBodyPart) * searchDistCoeffMult;
+      if (mult == 0) mult = 1;
+      searchDistance = boneLength * params.at(sSearchDistCoeff) * partTree.depth(iteratorBodyPart) * mult; // the limiting of search area
     }
     catch (...)
     {

@@ -238,6 +238,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   const float scaleParam = 1;
   const string sScaleParam = "scaleParam";
 
+  const float searchDistCoeffMult = 1.25;
+  const string sSearchDistCoeffMult = "searchDistCoeffMult";
+
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -245,6 +248,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sStepTheta, stepTheta);
   params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
   params.emplace(sScaleParam, scaleParam);
+  params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
 
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
@@ -304,7 +308,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     float searchDistance = 0;
     try
     {
-      searchDistance = boneLength * params.at(sSearchDistCoeff);
+      float mult = partTree.depth(iteratorBodyPart) * searchDistCoeffMult;
+      if (mult == 0) mult = 1;
+      searchDistance = boneLength * params.at(sSearchDistCoeff) * mult;
     }
     catch (...)
     {
