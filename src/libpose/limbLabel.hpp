@@ -20,7 +20,7 @@ class LimbLabel
 //TODO (Vitaliy Koshura): Need implementation
     LimbLabel();
     LimbLabel(const LimbLabel& ll);
-    LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores);
+    LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded = false);
 
 // output labels as printable string
 //TODO (Vitaliy Koshura): Need implementation

@@ -16,14 +16,14 @@ LimbLabel::LimbLabel(const LimbLabel& ll)
   isWeak = ll.getIsWeak();
 }
 
-LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores)
+LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded)
 {
   limbID = _id;
   center = _centre;
   angle = _angle;
   polygon = _polygon;
   scores = _scores;
-
+  isOccluded = _isOccluded;
 }
 LimbLabel &LimbLabel::operator=(const LimbLabel &ll)
 {

@@ -1148,12 +1148,10 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   {
     maskMat.release();
     imgMat.release();
-    stringstream ss;
-    ss << "getAvgSampleSizeFg(model) == 0";
-#ifdef DEBUG
-    cerr << ERROR_HEADER << ss.str() << endl;
-#endif
-    throw logic_error(ss.str());
+    cerr << ERROR_HEADER << "Dirty label!" << endl;
+    Score sc(0.0, detectorName.str());
+    s.push_back(sc);
+    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
   }
   // Scan the area near the bodypart center
   for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
@@ -1177,12 +1175,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
             }
             catch (...)
             {
-              stringstream ss;
-              ss << "Couldn't get value of maskMat at " << "[" << j << "][" << i << "]";
-#ifdef DEBUG
-              cerr << ERROR_HEADER << ss.str() << endl;
-#endif // DEBUG
-              throw logic_error(ss.str());
+              maskMat.release();
+              imgMat.release();
+              cerr << ERROR_HEADER << "Dirty label!" << endl;
+              Score sc(0.0, detectorName.str());
+              s.push_back(sc);
+              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
             }
             bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
@@ -1193,12 +1191,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               }
               catch (...)
               {
-                stringstream ss;
-                ss << "Couldn't find pixel distribution for body part " << bodyPart.getPartID();
-#ifdef DEBUG
-                cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-                throw logic_error(ss.str());
+                maskMat.release();
+                imgMat.release();
+                cerr << ERROR_HEADER << "Dirty label!" << endl;
+                Score sc(0.0, detectorName.str());
+                s.push_back(sc);
+                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
               }
               pixDistNum++; // counting of the all scanned pixels
               try
@@ -1211,12 +1209,12 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               }
               catch (...)
               {
-                stringstream ss;
-                ss << "Couldn't find pixel labels for body part " << bodyPart.getPartID();
-#ifdef DEBUG
-                cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-                throw logic_error(ss.str());
+                maskMat.release();
+                imgMat.release();
+                cerr << ERROR_HEADER << "Dirty label!" << endl;
+                Score sc(0.0, detectorName.str());
+                s.push_back(sc);
+                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
               }
               // copy colors components of the current pixel
               Vec3b intensity = imgMat.at<Vec3b>(j, i);
@@ -1258,10 +1256,10 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     s.push_back(sc); // the set of scores
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);// create the limb label
   }
-  cerr << "Dirty label!" << endl;
-  Score sc(1.0, detectorName.str());
+  cerr << ERROR_HEADER << "Dirty label!" << endl;
+  Score sc(0.0, detectorName.str());
   s.push_back(sc);
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s); // create the limb label
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
 }
 
 //Used only as prevent a warning for "const uint8_t nBins";

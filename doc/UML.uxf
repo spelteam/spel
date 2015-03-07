@@ -933,7 +933,7 @@ bg=yellow</panel_attributes>
 --
 +LimbLabel()
 +LimbLabel(ll: LimbLabel&amp;)
-+LimbLabel(_id:int, _centre: Point2f, _angle: float, _polygon: vector&lt;Point2f&gt;, _scores: vector&lt;Score&gt;)
++LimbLabel(_id:int, _centre: Point2f, _angle: float, _polygon: vector&lt;Point2f&gt;, _scores: vector&lt;Score&gt;, _isOccluded: bool)
 +toString: string;
 +addScore(detectionScore: Score)
 +getScores(): vector&lt;Score&gt;
