@@ -251,7 +251,6 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           }
           try
           {
-            float tempDepthSign;
             vector <float> partDepths;
             multimap <int32_t, float>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);            
             transform(lower, upper, back_inserter(partDepths), [](std::pair <int32_t, bool> const &pair) { return pair.second; }); // copy "polyDepth" to "PartDepth"
@@ -263,7 +262,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
                 partHit = partNumber; // store the number of the first found polygon
                 depth = *iteratorPartDepths;
               }
-              else if (bContainsPoint && *iteratorPartDepths < depth && tempDepthSign == true) // How, for float tempDepthSign?/////////////////
+              else if (bContainsPoint && *iteratorPartDepths < depth) // How, for float tempDepthSign?/////////////////
               {
                 partHit = partNumber;
                 depth = *iteratorPartDepths;
@@ -279,8 +278,6 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
 #endif  // DEBUG
             throw logic_error(ss.str());
           }
-
-          //partNumber++; // Why? ///////////////////////////////
         }
         if (partHit != -1) // if was found polygon, that contains this pixel
         {

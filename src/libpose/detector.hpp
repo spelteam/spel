@@ -25,8 +25,8 @@ class Detector
     virtual vector <vector <LimbLabel>> merge(vector <vector <LimbLabel>> first, vector <vector <LimbLabel>> second);
   protected:
     vector <Frame*> frames;
-    virtual void getNeighborFrame(Frame *frame, Frame **prevFrame, Frame **nextFrame, uint32_t &step, uint32_t &stepCount);
-    virtual void getRawBodyPartPosition(Frame *frame, Frame *prevFrame, Frame *nextFrame, int parentJointID, int childJointID, uint32_t &step, uint32_t &stepCount, Point2f &j0, Point2f &j1);
+    //virtual void getNeighborFrame(Frame *frame, Frame **prevFrame, Frame **nextFrame, uint32_t &step, uint32_t &stepCount);
+    //virtual void getRawBodyPartPosition(Frame *frame, Frame *prevFrame, Frame *nextFrame, int parentJointID, int childJointID, uint32_t &step, uint32_t &stepCount, Point2f &j0, Point2f &j1);
     virtual float getBoneLength(Point2f begin, Point2f end);
     virtual float getBoneWidth(float length, BodyPart bodyPart);
     virtual POSERECT <Point2f> getBodyPartRect(BodyPart bodyPart, Point2f j0, Point2f j1, Size blockSize = Size(0, 0));
