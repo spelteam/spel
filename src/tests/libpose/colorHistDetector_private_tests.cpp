@@ -55,7 +55,7 @@ TEST(colorHistDetectorTest, PrivateFields)
   Colors.push_back(Point3i(rand()*K, rand()*K, rand()*K));
   partModel1.sizeFG = ColorsCount;
   partModel1.fgNumSamples = 1;
-  partModel1.fgSampleSizes.push_back(Colors.size());
+  partModel1.fgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
   for (uint32_t i = 0; i < ColorsCount; i++)
     partModel1.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
   for (uint8_t r = 0; r < partModel1.nBins; r++)
@@ -80,9 +80,9 @@ TEST(colorHistDetectorTest, PrivateFields)
     for (uint8_t g = 0; g < partModel1.nBins; g++)
       for (uint8_t b = 0; b < partModel1.nBins; b++)
         partModel1.partHistogramm[r][g][b] *= partModel1.sizeFG;
-  partModel1.sizeFG += Colors.size();
+  partModel1.sizeFG += static_cast <uint32_t> (Colors.size());
   partModel1.fgNumSamples++;
-  partModel1.fgSampleSizes.push_back(Colors.size());
+  partModel1.fgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
   for (uint32_t i = 0; i < ColorsCount; i++)
     partModel1.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
   for (uint8_t r = 0; r < partModel1.nBins; r++)
@@ -112,7 +112,7 @@ TEST(colorHistDetectorTest, PrivateFields)
   uint32_t s1 = 0, s2 = 0;
   float f = (partModel1.fgSampleSizes[s1] + partModel1.fgSampleSizes[s2]) / 2.0f;
   EXPECT_EQ(f, chd3.getAvgSampleSizeFgBetween(partModel2, s1, s2));
-  EXPECT_EQ(0.f, chd3.getAvgSampleSizeFgBetween(partModel2, partModel1.fgSampleSizes.size(), s2));
+  EXPECT_EQ(0.f, chd3.getAvgSampleSizeFgBetween(partModel2, static_cast <uint32_t> (partModel1.fgSampleSizes.size()), s2));
   
   //Testing function matchPartHistogramsED
   float distance = 0;
@@ -129,9 +129,9 @@ TEST(colorHistDetectorTest, PrivateFields)
     for (uint8_t g = 0; g < partModel1.nBins; g++)
       for (uint8_t b = 0; b < partModel1.nBins; b++)
         partModel1.bgHistogramm[r][g][b] *= partModel1.sizeBG;
-  partModel1.sizeBG += Colors.size();
+  partModel1.sizeBG += static_cast <uint32_t> (Colors.size());
   partModel1.bgNumSamples++;
-  partModel1.bgSampleSizes.push_back(Colors.size());
+  partModel1.bgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
   for (uint32_t i = 0; i < Colors.size(); i++)
     partModel1.bgHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
   for (uint8_t r = 0; r < partModel1.nBins; r++)

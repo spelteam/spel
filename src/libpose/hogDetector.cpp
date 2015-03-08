@@ -12,12 +12,12 @@ void HogDetector::setID(int _id)
   id = _id;
 }
 
-HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels)
+HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
 {
   float boneLength = getBoneLength(j0, j1);
   if (boneLength < blockSize.width)
   {
-    boneLength = blockSize.width;
+    boneLength = static_cast <float> (blockSize.width);
   }
   else
   {
@@ -26,14 +26,13 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   float boneWidth = getBoneWidth(boneLength, bodyPart);
   if (boneWidth < blockSize.height)
   {
-    boneWidth = blockSize.height;
+    boneWidth = static_cast <float> (blockSize.height);
   }
   else
   {
     boneWidth = boneWidth + blockSize.width - ((int)boneWidth % blockSize.height);
   }
-  Size originalSize = Size(boneLength, boneWidth);
-  float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+  Size originalSize = Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
   POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1, blockSize);
 
   float xmax, ymax, xmin, ymin;
@@ -45,12 +44,12 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
   Mat partImageResized = Mat(wndSize.height, wndSize.width, CV_8UC3, Scalar(255, 255, 255));
   resize(partImage, partImageResized, wndSize);
-  HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, wndSigma, thresholdL2hys, gammaCorrection, nlevels);
+  HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
   detector.compute(partImageResized, partModel.descriptors);  
   return partModel;
 }
 
-map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels)
+map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
 {
   map <uint32_t, PartModel> parts;
   Size wndSize;
@@ -98,7 +97,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     j1 = joint->getImageLocation();
     try
     {      
-      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels)));
+      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
     }
     catch (logic_error err)
     {
@@ -152,7 +151,7 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
       float boneWidth = 0;
       boneWidth = getBoneWidth(boneLength, *bodyPart);
 
-      Size maxSize = Size(boneLength, boneWidth);
+      Size maxSize = Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
       if (result.size() > 0)
       {
         try
@@ -186,11 +185,10 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
   double thresholdL2hys = 0.2;
   bool gammaCorrection = true;
   int nlevels = 64;
-  double hitThreshold = 0;
   Size wndStride = Size(8, 8);
   Size padding = Size(32, 32);
-  double scale0 = 1.05;
-  int groupThreshold = 2;
+  int derivAperture = 1;
+  int histogramNormType = HOGDescriptor::L2Hys;
 
   partSize = getMaxBodyPartHeightWidth(_frames, blockSize);
 
@@ -209,7 +207,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     try
     {
-      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>> ((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels)));
+      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>> ((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
     }
     catch (...)
     {
@@ -260,11 +258,10 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   double thresholdL2hys = 0.2;
   bool gammaCorrection = true;
   int nlevels = 64;
-  double hitThreshold = 0;
   Size wndStride = Size(8, 8);
   Size padding = Size(32, 32);
-  double scale0 = 1.05;
-  int groupThreshold = 2;
+  int derivAperture = 1;
+  int histogramNormType = HOGDescriptor::L2Hys;
 
   vector <Rect> found;
   vector <Rect> found_filtered;
@@ -394,7 +391,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels));
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType));
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -412,7 +409,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels));
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType));
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -518,7 +515,7 @@ float HogDetector::compare(BodyPart bodyPart, PartModel model)
     count++;
     for (map <uint32_t, PartModel>::iterator partModel = framePartModels->second.begin(); partModel != framePartModels->second.end(); ++partModel)
     {
-      if (partModel->first != bodyPart.getPartID())
+      if (partModel->first != static_cast <uint32_t> (bodyPart.getPartID()))
       {
         continue;
       }

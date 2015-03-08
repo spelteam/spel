@@ -32,7 +32,7 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
   {
     if (boneLength < blockSize.width)
     {
-      boneLength = blockSize.width - 1;
+      boneLength = static_cast <float> (blockSize.width - 1);
     }
     else
     {
@@ -44,7 +44,7 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
   {
     if (boxWidth < blockSize.height)
     {
-      boxWidth = blockSize.height - 1;
+      boxWidth = static_cast <float> (blockSize.height - 1);
     }
     else
     {
@@ -72,7 +72,7 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
   float xmax, ymax, xmin, ymin;
   initialRect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
   Point2f center = initialRect.GetCenter<Point2f>();
-  Point2f newCenter = Point2f(0.5 * size.width, 0.5 * size.height);
+  Point2f newCenter = Point2f(0.5f * size.width, 0.5f * size.height);
   initialRect.point1 = PoseHelper::rotatePoint2D(initialRect.point1, center, angle * -1) - center + newCenter;
   initialRect.point2 = PoseHelper::rotatePoint2D(initialRect.point2, center, angle * -1) - center + newCenter;
   initialRect.point3 = PoseHelper::rotatePoint2D(initialRect.point3, center, angle * -1) - center + newCenter;

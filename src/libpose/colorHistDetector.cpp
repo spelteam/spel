@@ -736,10 +736,10 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
   if (partColors.size() == 0)
     return;
   uint8_t factor = static_cast<uint8_t> (ceil(pow(2, 8) / partModel.nBins)); // colorspace scaling coefficient
-  partModel.sizeFG = partColors.size();
+  partModel.sizeFG = static_cast <uint32_t> (partColors.size());
   partModel.fgNumSamples = 1;
   partModel.fgSampleSizes.clear();
-  partModel.fgSampleSizes.push_back(partColors.size());
+  partModel.fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
 
   // clear histogram first
   for (uint8_t r = 0; r < partModel.nBins; r++)
@@ -840,9 +840,9 @@ void ColorHistDetector::addPartHistogramm(PartModel &partModel, const vector <Po
   }
 
   int factor = (int)ceil(pow(2, 8) / partModel.nBins); // colorspace scaling coefficient
-  partModel.sizeFG += partColors.size();
+  partModel.sizeFG += static_cast <uint32_t> (partColors.size());
   partModel.fgNumSamples++;
-  partModel.fgSampleSizes.push_back(partColors.size());
+  partModel.fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
 
   // Scaling of colorspace, reducing the capacity and number of colour intervals
   // Adjustment of the histogram
@@ -927,9 +927,9 @@ void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vect
     }
   }
   uint32_t factor = (uint32_t)ceil(pow(2, 8) / partModel.nBins); // colorspace scaling coefficient
-  partModel.sizeBG += bgColors.size();
+  partModel.sizeBG += static_cast <uint32_t> (bgColors.size());
   partModel.bgNumSamples++;
-  partModel.bgSampleSizes.push_back(bgColors.size());
+  partModel.bgSampleSizes.push_back(static_cast <uint32_t> (bgColors.size()));
   for (uint32_t i = 0; i < bgColors.size(); i++)
   {
       partModel.bgHistogramm[bgColors[i].x / factor][bgColors[i].y / factor][bgColors[i].z / factor]++; // increment the frequency of interval, that this color have hit
@@ -1222,7 +1222,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     PartModel model(nBins);
     setPartHistogramm(model, partPixelColours); // Build the part histogram
-    float score = 1.0f - ((1.0 - inMaskSuppWeight)*supportScore + inMaskSuppWeight*inMaskSupportScore);
+    float score = 1.0f - ((1.0f - inMaskSuppWeight)*supportScore + inMaskSuppWeight*inMaskSupportScore);
     /*if (score < 0)
     {
     stringstream ss;
