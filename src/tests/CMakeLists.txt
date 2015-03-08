@@ -64,6 +64,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_poserect_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_rotatepoint_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_angle_dist_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_infer_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/detector_tests )
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )

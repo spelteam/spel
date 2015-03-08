@@ -77,6 +77,7 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
   initialRect.point2 = PoseHelper::rotatePoint2D(initialRect.point2, center, angle * -1) - center + newCenter;
   initialRect.point3 = PoseHelper::rotatePoint2D(initialRect.point3, center, angle * -1) - center + newCenter;
   initialRect.point4 = PoseHelper::rotatePoint2D(initialRect.point4, center, angle * -1) - center + newCenter;
+   Size ImSize = imgSource.size(); // it need for testing
   for (float x = xmin; x <= xmax; x++)
   {
     for (float y = ymin; y <= ymax; y++)
@@ -84,6 +85,7 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
       PHPoint<int32_t> phpoint;
       Point2f p = Point2f(x, y);
       if (tempRect.containsPoint(p) >= 0)
+      if ((0 <= x < ImSize.width) && (0 <= y < ImSize.height)) // it need for testing
       {
         p = PoseHelper::rotatePoint2D(p, center, angle * -1) - center + newCenter;
         phpoint.x = (int32_t)p.x;
