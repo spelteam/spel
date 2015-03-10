@@ -69,23 +69,6 @@ void FillRectRand(Mat &Img, POSERECT<Point2f> &rect)
         
 }
 
-void FillRotatedRectRand(Mat &Img, POSERECT<Point2f> &rect)
-{
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  Vec3b colour;
-  const int c = 250;
-  for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-    {
-      if (rect.containsPoint(Point2f(i, j)) == 1)
-      {
-        colour = Vec3b(rand() * c / RAND_MAX, rand() * c / RAND_MAX, rand() * c / RAND_MAX);
-        Img.at<Vec3b>(j, i) = colour;
-      }
-    }
-}
-
 // Rotation the rectangle image
 Mat RotateImage(Mat Img, POSERECT<Point2f> &rect, float angle)
 {   
@@ -141,29 +124,21 @@ TEST(DetectorTests, rotateImageToDefault_OneColor)
 
     Mat img1 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
     Mat img2 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
-    Mat img3 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
 
     Vec3b colour(0, 0, 255); // color fill 
 
     FillRect(img1, rect, colour);
-    img2 = RotateImage(img1, rect, angle);
-    FillRotatedRect(img3, RotatedRect, colour);
+    FillRotatedRect(img2, RotatedRect, colour);
 
     TestingDetector chd;
     Size size(xmax - xmin + 1, ymax - ymin + 1);
 
-    POSERECT <Point2f> RotatedRectCopy = RotatedRect;
-
     // Testing
     Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
 
-    Mat  Y = chd.DeRotate(img3, RotatedRectCopy, angle, size);
-
     imwrite("image.jpg", img1);
     imwrite("rotated_image.jpg", img2);
-    imwrite("default_rotated_image.jpg", img3);
     imwrite("derotated_image.jpg", X);
-    imwrite("derotated_default_rotated_image.jpg", Y);
 
     Point2f Min, Max;
  
@@ -186,38 +161,13 @@ TEST(DetectorTests, rotateImageToDefault_OneColor)
             S++;
 
 
-    float epsilon = 40; // tolerable error of the matching points number, %
+    float epsilon = 20; // tolerable error of the matching points number, %
     float FalsePixels = 100 * (S0 - S) / S0;
-    EXPECT_LE(FalsePixels, epsilon);
-
-    // Check Y image
-    GetExtremePoints(Y, Vec3b(255, 255, 255), Min, Max);
-
-    // Checking extreme points
-    delta = 1; // tolerable linear error
-    EXPECT_LE(Min.x, delta);
-    EXPECT_LE(abs(Max.x + xmin - MaxR.x), delta);
-    EXPECT_LE(Min.y, delta);
-    EXPECT_LE(abs(Max.y + ymin - MaxR.y), delta);
-
-    // Checking matching of the images points with one fill color 
-    S = 0;
-    S0 = (xmax - xmin + 1)*(ymax - ymin + 1);
-    for (int i = xmin; i <= xmax; i++)
-      for (int j = ymin; j <= ymax; j++)
-        if (img1.at<Vec3b>(j, i) == Y.at<Vec3b>(j - ymin, i - xmin))
-          S++;
-
-
-    epsilon = 40; // tolerable error of the matching points number, %
-    FalsePixels = 100 * (S0 - S) / S0;
     EXPECT_LE(FalsePixels, epsilon);
 
     img1.release();
     img2.release();
-    img3.release();
     X.release();
-    Y.release();
 }
 
 TEST(DetectorTests, rotateImageToDefault_RandColor)
@@ -237,11 +187,9 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
 
     Mat img1 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
     Mat img2 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
-    Mat img3 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
 
     FillRectRand(img1, rect);
     img2 = RotateImage(img1, rect, angle);
-    FillRotatedRectRand(img3, RotatedRect);
 
     TestingDetector chd;
     Size size(xmax - xmin + 1, ymax - ymin + 1);
@@ -250,13 +198,9 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
 
     Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
 
-    Mat  Y = chd.DeRotate(img3, RotatedRectCopy, angle, size);
-
     imwrite("image_RandColor.jpg", img1);
     imwrite("rotated_image_RandColor.jpg", img2);
-    imwrite("default_rotated_image_RandColor.jpg", img3);
     imwrite("derotated_image_RandColor.jpg", X);
-    imwrite("derotated_default_rotated_image_RandColor.jpg", Y);
 
     Point2f Min, Max;
 
@@ -282,31 +226,7 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
     float FalsePixels = 100 * (S0 - S) / S0;
     EXPECT_LE(FalsePixels, epsilon);
 
-    // Check Y image
-    GetExtremePoints(Y, Vec3b(255, 255, 255), Min, Max);
-
-    // Checking extreme points
-    delta = 1; // tolerable linear error
-    EXPECT_LE(Min.x, delta);
-    EXPECT_LE(abs(Max.x + xmin - MaxR.x), delta);
-    EXPECT_LE(Min.y, delta);
-    EXPECT_LE(abs(Max.y + ymin - MaxR.y), delta);
-
-    // Checking matching of the images points with one fill color 
-    S = 0;
-    S0 = (xmax - xmin + 1)*(ymax - ymin + 1);
-    for (int i = xmin; i <= xmax; i++)
-      for (int j = ymin; j <= ymax; j++)
-        if (img1.at<Vec3b>(j, i) == Y.at<Vec3b>(j - ymin, i - xmin))
-          S++;
-
-    epsilon = 67; // tolerable error of the matching points number, %
-    FalsePixels = 100 * (S0 - S) / S0;
-    EXPECT_LE(FalsePixels, epsilon);
-
     img1.release();
     img2.release();
-    img3.release();
     X.release();
-    Y.release();
 }

@@ -68,45 +68,22 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
 Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
 {
   POSERECT <Point2f> tempRect = initialRect;
-  Mat partImage = Mat(size.height, size.width, CV_8UC3, Scalar(255, 255, 255));
   float xmax, ymax, xmin, ymin;
   initialRect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
   Point2f center = initialRect.GetCenter<Point2f>();
   Point2f newCenter = Point2f(0.5f * size.width, 0.5f * size.height);
-  initialRect.point1 = PoseHelper::rotatePoint2D(initialRect.point1, center, angle * -1) - center + newCenter;
-  initialRect.point2 = PoseHelper::rotatePoint2D(initialRect.point2, center, angle * -1) - center + newCenter;
-  initialRect.point3 = PoseHelper::rotatePoint2D(initialRect.point3, center, angle * -1) - center + newCenter;
-  initialRect.point4 = PoseHelper::rotatePoint2D(initialRect.point4, center, angle * -1) - center + newCenter;
-   Size ImSize = imgSource.size(); // it need for testing
-  for (float x = xmin; x <= xmax; x++)
-  {
-    for (float y = ymin; y <= ymax; y++)
-    {
-      PHPoint<int32_t> phpoint;
-      Point2f p = Point2f(x, y);
-      if (tempRect.containsPoint(p) >= 0)
-      if ((0 <= x < ImSize.width) && (0 <= y < ImSize.height)) // it need for testing
-      {
-        p = PoseHelper::rotatePoint2D(p, center, angle * -1) - center + newCenter;
-        phpoint.x = (int32_t)p.x;
-        phpoint.y = (int32_t)p.y;
-        try
-        {
-          Vec3b color = imgSource.at<Vec3b>((int32_t)y, (int32_t)x);
-          partImage.at<Vec3b>(phpoint.y, phpoint.x) = color;
-        }
-        catch (...)
-        {
-          stringstream ss;
-          ss << "Couldn't put value of indeces " << "[" << (int32_t)x << "][" << (int32_t)y << "] into indeces [" << phpoint.x << "][" << phpoint.y << "]";
-#ifdef DEBUG
-          cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
-          throw logic_error(ss.str());
-        }
-      }
-    }
-  }
+  Size2f croppedSize = initialRect.RectSize <Size2f>();
+  float radius = sqrt(pow(croppedSize.height, 2) + pow(croppedSize.width, 2)) / 2;
+  Point2f c1, c2, c3, c4, polyCenter;
+  Mat imgCropped = imgSource(Rect(xmin, ymin, round(radius) * 2, round(radius) * 2)).clone();
+
+  Mat rotationMatrix = getRotationMatrix2D(Point2f(radius, radius), angle, 1.0);
+
+  Mat imgRotated = Mat(imgCropped.rows, imgCropped.cols, CV_8UC3, Scalar(255, 255, 255));
+  warpAffine(imgCropped, imgRotated, rotationMatrix, Size(round(radius) * 2, round(radius) * 2));
+
+  Mat partImage = imgRotated(Rect(round(radius - size.width / 2.0) + 1, round(radius - size.height / 2.0) + 1, size.width, size.height)).clone();
+
   return partImage;
 }
 

@@ -203,6 +203,12 @@ struct POSERECT
   {
     return !(*this == rect);
   }
+
+  template <typename D> D RectSize(void)
+  {
+    return (D(sqrt(PoseHelper::distSquared(point2, point3)), sqrt(PoseHelper::distSquared(point1, point2))));
+  }
+
 };
 
 template <typename T>
