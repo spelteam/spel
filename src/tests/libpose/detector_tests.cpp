@@ -230,3 +230,124 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
     img2.release();
     X.release();
 }
+
+TEST(DetectorTests, rotateImageToDefault_FileImage)
+{
+    Mat img1 = imread("image1.jpg");
+    Mat img2 = imread("image2.jpg");
+    Mat img3 = imread("image3.jpg");
+    Mat img4 = imread("image4.jpg");
+    Mat Q1 = imread("Q1.jpg");
+    Mat Q2 = imread("Q2.jpg");
+    Mat Q3 = imread("Q3.jpg");
+    Mat Q4 = imread("Q4.jpg");
+
+    imwrite("Q01.jpg", Q1);
+    imwrite("Q02.jpg", Q2);
+    imwrite("Q03.jpg", Q3);
+    imwrite("Q04.jpg", Q4);
+
+    // Prepare input data
+    Size img_size = img1.size();
+    int rows = img_size.height, cols = img_size.width; // image size
+    float angle = 45; // the rotetion angle
+    float x1 = 10.0, x2 = 39.0, y1 = 20.0, y2 = 59.0; // the rectangle vertices
+    POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
+    POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
+    Point2f center = rect.GetCenter<Point2f >();
+
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    Point2f MinR(xmin, ymin);
+    Point2f MaxR(xmax, ymax);
+
+    TestingDetector chd;
+    Size size(xmax - xmin + 1, ymax - ymin + 1);
+
+    // Testing
+
+    Mat  X1 = chd.DeRotate(Q1, RotatedRect, angle, size);
+    Mat  X2 = chd.DeRotate(Q2, RotatedRect, angle, size);
+    Mat  X3 = chd.DeRotate(Q3, RotatedRect, angle, size);
+    Mat  X4 = chd.DeRotate(Q4, RotatedRect, angle, size);
+
+    imwrite("derotated_image1.jpg", X1);
+    imwrite("derotated_image2.jpg", X2);
+    imwrite("derotated_image3.jpg", X3);
+    imwrite("derotated_image4.jpg", X4);
+
+    Point2f Min1, Max1;
+    Point2f Min2, Max2;
+    Point2f Min3, Max3;
+    Point2f Min4, Max4;
+
+    // Check X image
+    GetExtremePoints(X1, Vec3b(255, 255, 255), Min1, Max1);
+    GetExtremePoints(X2, Vec3b(255, 255, 255), Min2, Max2);
+    GetExtremePoints(X3, Vec3b(255, 255, 255), Min3, Max3);
+    GetExtremePoints(X4, Vec3b(255, 255, 255), Min4, Max4);
+
+    // Checking extreme points
+    float delta = 1; // tolerable linear error
+    EXPECT_LE(Min1.x, delta);
+    EXPECT_LE(abs(Max1.x + xmin - MaxR.x), delta);
+    EXPECT_LE(Min1.y, delta);
+    EXPECT_LE(abs(Max1.y + ymin - MaxR.y), delta);
+
+    EXPECT_LE(Min2.x, delta);
+    EXPECT_LE(abs(Max2.x + xmin - MaxR.x), delta);
+    EXPECT_LE(Min2.y, delta);
+    EXPECT_LE(abs(Max2.y + ymin - MaxR.y), delta);
+
+    // Checking matching of the images points with one fill color 
+    float epsilon = 40; // tolerable error of the matching points number, %
+
+    uint32_t S = 0;
+    uint32_t S0 = (xmax - xmin + 1)*(ymax - ymin + 1);
+
+    for (int i = xmin; i <= xmax; i++)
+    for (int j = ymin; j <= ymax; j++)
+    if (img1.at<Vec3b>(j, i) == X1.at<Vec3b>(j - ymin, i - xmin))
+        S++;
+    float FalsePixels = 100 * (S0 - S) / S0;
+    EXPECT_LE(FalsePixels, epsilon);
+
+    S = 0;
+    for (int i = xmin; i <= xmax; i++)
+    for (int j = ymin; j <= ymax; j++)
+    if (img2.at<Vec3b>(j, i) == X2.at<Vec3b>(j - ymin, i - xmin))
+        S++;
+    FalsePixels = 100 * (S0 - S) / S0;
+    EXPECT_LE(FalsePixels, epsilon);
+
+    S = 0;
+    for (int i = xmin; i <= xmax; i++)
+    for (int j = ymin; j <= ymax; j++)
+    if (img3.at<Vec3b>(j, i) == X3.at<Vec3b>(j - ymin, i - xmin))
+        S++;
+    FalsePixels = 100 * (S0 - S) / S0;
+    EXPECT_LE(FalsePixels, epsilon);
+
+    S = 0;
+    for (int i = xmin; i <= xmax; i++)
+    for (int j = ymin; j <= ymax; j++)
+    if (img4.at<Vec3b>(j, i) == X4.at<Vec3b>(j - ymin, i - xmin))
+        S++;
+    FalsePixels = 100 * (S0 - S) / S0;
+    EXPECT_LE(FalsePixels, epsilon);
+
+    img1.release();
+    img2.release();
+    img3.release();
+    img4.release();
+
+    Q1.release();
+    Q2.release();
+    Q3.release();
+    Q4.release();
+
+    X1.release();
+    X2.release();
+    X3.release();
+    X4.release();
+}
