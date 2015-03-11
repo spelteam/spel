@@ -233,15 +233,36 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
 
 TEST(DetectorTests, rotateImageToDefault_FileImage)
 {
-    Mat img1 = imread("image1.jpg");
-    Mat img2 = imread("image2.jpg");
-    Mat img3 = imread("image3.jpg");
-    Mat img4 = imread("image4.jpg");
-    Mat Q1 = imread("Q1.jpg");
-    Mat Q2 = imread("Q2.jpg");
-    Mat Q3 = imread("Q3.jpg");
-    Mat Q4 = imread("Q4.jpg");
-
+#ifdef WINDOWS
+#ifdef DEBUG
+  Mat img1 = imread("Debug/posetests_TestData/ImageRotationTestData/image1.jpg");
+  Mat img2 = imread("Debug/posetests_TestData/ImageRotationTestData/image2.jpg");
+  Mat img3 = imread("Debug/posetests_TestData/ImageRotationTestData/image3.jpg");
+  Mat img4 = imread("Debug/posetests_TestData/ImageRotationTestData/image4.jpg");
+  Mat Q1 = imread("Debug/posetests_TestData/ImageRotationTestData/Q1.jpg");
+  Mat Q2 = imread("Debug/posetests_TestData/ImageRotationTestData/Q2.jpg");
+  Mat Q3 = imread("Debug/posetests_TestData/ImageRotationTestData/Q3.jpg");
+  Mat Q4 = imread("Debug/posetests_TestData/ImageRotationTestData/Q4.jpg");
+#else
+  Mat img1 = imread("Release/posetests_TestData/ImageRotationTestData/image1.jpg");
+  Mat img2 = imread("Release/posetests_TestData/ImageRotationTestData/image2.jpg");
+  Mat img3 = imread("Release/posetests_TestData/ImageRotationTestData/image3.jpg");
+  Mat img4 = imread("Release/posetests_TestData/ImageRotationTestData/image4.jpg");
+  Mat Q1 = imread("Release/posetests_TestData/ImageRotationTestData/Q1.jpg");
+  Mat Q2 = imread("Release/posetests_TestData/ImageRotationTestData/Q2.jpg");
+  Mat Q3 = imread("Release/posetests_TestData/ImageRotationTestData/Q3.jpg");
+  Mat Q4 = imread("Release/posetests_TestData/ImageRotationTestData/Q4.jpg");
+#endif  // DEBUG
+#else
+    Mat img1 = imread("posetests_TestData/ImageRotationTestData/image1.jpg");
+    Mat img2 = imread("posetests_TestData/ImageRotationTestData/image2.jpg");
+    Mat img3 = imread("posetests_TestData/ImageRotationTestData/image3.jpg");
+    Mat img4 = imread("posetests_TestData/ImageRotationTestData/image4.jpg");
+    Mat Q1 = imread("posetests_TestData/ImageRotationTestData/Q1.jpg");
+    Mat Q2 = imread("posetests_TestData/ImageRotationTestData/Q2.jpg");
+    Mat Q3 = imread("posetests_TestData/ImageRotationTestData/Q3.jpg");
+    Mat Q4 = imread("posetests_TestData/ImageRotationTestData/Q4.jpg");
+#endif  // WINDOWS
     imwrite("Q01.jpg", Q1);
     imwrite("Q02.jpg", Q2);
     imwrite("Q03.jpg", Q3);

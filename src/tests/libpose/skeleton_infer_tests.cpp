@@ -25,8 +25,12 @@ TEST(skeletonTest, infer3dTest)
     curFolder += '/';
   }
 #ifdef WINDOWS
+#ifdef DEBUG
   curFolder += "Debug/";
-#endif
+#else
+  curFolder += "Release/";
+#endif  // DEBUG
+#endif  // WINDOWS
   curFolder += "posetests_TestData/testdata1/";
 
   ProjectLoader projectLoader(curFolder);
