@@ -38,9 +38,10 @@ int main (int argc, char **argv)
   try
   {
     detector.train(projectLoader.getFrames(), params);
-    Sequence *seq = new Sequence(0, "colorHistDetector", projectLoader.getFrames());
+    Sequence *seq = new Sequence(0, "hogDetector", projectLoader.getFrames());
     if (seq != 0)
     {
+      seq->estimateUniformScale(params);
       seq->computeInterpolation(params);
       delete seq;
     }
@@ -58,6 +59,28 @@ int main (int argc, char **argv)
   cout << "Detecting..." << endl;
   for (i = vFrames.begin(); i != vFrames.end(); ++i)
   {
+    //check if frame has a keyframe before AND after
+    bool hasPrevAnchor = false, hasFutureAnchor = false;
+    //before
+    for (vector<Frame*>::reverse_iterator prevAnchor(i); prevAnchor != vFrames.rend(); ++prevAnchor)
+    {
+      if ((*prevAnchor)->getFrametype() == KEYFRAME || (*prevAnchor)->getFrametype() == LOCKFRAME)
+      {
+        hasPrevAnchor = true;
+        break;
+      }
+    }
+    //after
+    for (vector<Frame*>::iterator futureAnchor = i; futureAnchor != vFrames.end(); ++futureAnchor)
+    {
+      if ((*futureAnchor)->getFrametype() == KEYFRAME || (*futureAnchor)->getFrametype() == LOCKFRAME)
+      {
+        hasFutureAnchor = true;
+        break;
+      }
+    }
+    if (!hasPrevAnchor || !hasFutureAnchor)
+      continue;
     Frame *f = *i;
 #ifndef DEBUG
     if (f->getFrametype() == INTERPOLATIONFRAME)

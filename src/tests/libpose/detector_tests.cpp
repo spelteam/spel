@@ -163,6 +163,7 @@ TEST(DetectorTests, rotateImageToDefault_OneColor)
 
     float epsilon = 20; // tolerable error of the matching points number, %
     float FalsePixels = 100 * (S0 - S) / S0;
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     img1.release();
@@ -224,6 +225,7 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
 
     float epsilon = 67; // tolerable error of the matching points number, %
     float FalsePixels = 100 * (S0 - S) / S0;
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     img1.release();
@@ -331,6 +333,7 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     if (img1.at<Vec3b>(j, i) == X1.at<Vec3b>(j - ymin, i - xmin))
         S++;
     float FalsePixels = 100 * (S0 - S) / S0;
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     S = 0;
@@ -339,6 +342,7 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     if (img2.at<Vec3b>(j, i) == X2.at<Vec3b>(j - ymin, i - xmin))
         S++;
     FalsePixels = 100 * (S0 - S) / S0;
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     S = 0;
@@ -347,6 +351,7 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     if (img3.at<Vec3b>(j, i) == X3.at<Vec3b>(j - ymin, i - xmin))
         S++;
     FalsePixels = 100 * (S0 - S) / S0;
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     S = 0;
@@ -355,6 +360,7 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     if (img4.at<Vec3b>(j, i) == X4.at<Vec3b>(j - ymin, i - xmin))
         S++;
     FalsePixels = 100 * (S0 - S) / S0;
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     img1.release();

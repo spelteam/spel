@@ -108,9 +108,6 @@ TEST(skeletonTest, infer3dTest)
 
   for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
   {
-    //TODO(Vitalii Koshura): Remove this after correct work of interpolation
-    /*if ((*frame)->getFrametype() != KEYFRAME)
-      continue;*/
     //check if frame has a keyframe before AND after
     bool hasPrevAnchor=false, hasFutureAnchor=false;
     //before
@@ -160,9 +157,6 @@ TEST(skeletonTest, infer3dTest)
 
   for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
   {
-    //TODO(Vitalii Koshura): Remove this after correct work of interpolation
-    /*if ((*frame)->getFrametype() != KEYFRAME)
-      continue;*/
       bool hasPrevAnchor=false, hasFutureAnchor=false;
       //before
       for(vector<Frame*>::reverse_iterator prevAnchor(frame); prevAnchor!=frames.rend(); ++prevAnchor)
