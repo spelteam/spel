@@ -67,23 +67,31 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
 
 Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
 {
-  POSERECT <Point2f> tempRect = initialRect;
-  float xmax, ymax, xmin, ymin;
-  initialRect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+  Mat partImage = Mat(size, CV_8UC3, Scalar(0, 0, 0));
   Point2f center = initialRect.GetCenter<Point2f>();
   Point2f newCenter = Point2f(0.5f * size.width, 0.5f * size.height);
-  Size2f croppedSize = initialRect.RectSize <Size2f>();
-  float radius = sqrt(pow(croppedSize.height, 2) + pow(croppedSize.width, 2)) / 2;
-  Point2f c1, c2, c3, c4, polyCenter;
-  Mat imgCropped = imgSource(Rect(xmin, ymin, round(radius) * 2, round(radius) * 2)).clone();
-
-  Mat rotationMatrix = getRotationMatrix2D(Point2f(radius, radius), angle, 1.0);
-
-  Mat imgRotated = Mat(imgCropped.rows, imgCropped.cols, CV_8UC3, Scalar(255, 255, 255));
-  warpAffine(imgCropped, imgRotated, rotationMatrix, Size(round(radius) * 2, round(radius) * 2));
-
-  Mat partImage = imgRotated(Rect(round(radius - size.width / 2.0) + 1, round(radius - size.height / 2.0) + 1, size.width, size.height)).clone();
-
+  for (int32_t x = 0; x < size.width; x++)
+  {
+    for (int32_t y = 0; y < size.height; y++)
+    {
+      Point2f p = Point2f(x, y);
+      try
+      {
+        p = PoseHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
+        Vec3b color = imgSource.at<Vec3b>(round(p.y), round(p.x));
+        partImage.at<Vec3b>(y, x) = color;
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Couldn't get value of indeces " << "[" << x << "][" << y << "] from indeces [" << p.x << "][" << p.y << "]";
+#ifdef DEBUG
+        cerr << ERROR_HEADER << ss.str() << endl;
+#endif  // DEBUG
+        throw logic_error(ss.str());
+      }
+    }
+  }
   return partImage;
 }
 
