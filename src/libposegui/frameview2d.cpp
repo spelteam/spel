@@ -51,9 +51,9 @@ void FrameView2D::changeMaskOpacityEvent(int value){
     //TEMP
 }
 
-void FrameView2D::pickFrameEvent(int, int col){
-    loadFrameImage(col);
-    loadFrameJoints(col);
+void FrameView2D::pickFrameEvent(int num){
+    loadFrameImage(num);
+    loadFrameJoints(num);
 }
 
 //PRIVATE
@@ -95,48 +95,43 @@ void FrameView2D::loadFrameImage(int num){
 void FrameView2D::loadFrameJoints(int num){
     //clear frame
     auto itemList = scene->items();
-    if( itemList.size() > 1 ){
-        //more then one background image
-        for( auto it = itemList.begin(); it != itemList.end(); ++it){
-            if( Utility::isSkeletonItem(it) ){
-                scene->removeItem(*it);
-            }
+    for( auto it = itemList.begin(); it != itemList.end(); ++it){
+        if( Utility::isSkeletonItem(it) ){
+            scene->removeItem(*it);
         }
     }
     //load skeleton
     auto frame = Project::getInstance().getFrame(num);
     if( frame->getFrametype() == KEYFRAME ){
         //load body joints
-        auto bodyJoints = frame->getSkeleton()
-                .getJointTree();
-        auto it = bodyJoints.begin();
-        while( it != bodyJoints.end() ){
-            BodyJoint joint = *it;
-            BodyJointItem* newItem = new BodyJointItem();
-
-            newItem->setId(joint.getLimbID());
-            newItem->setPos(joint.getImageLocation().x,joint.getImageLocation().y);
+        auto bodyJoints = frame->getSkeletonPtr()
+                ->getJointTreePtr();
+        auto it = bodyJoints->begin();
+        while( it != bodyJoints->end() ){
+            BodyJoint *joint = &(*it);
+            BodyJointItem* newItem = new BodyJointItem(joint);
             scene->addItem(newItem);
+
             ++it;
         }
         //load body parts
-        auto bodyParts = frame->getSkeleton()
-                .getPartTree();
-        auto pit = bodyParts.begin();
-        while( pit != bodyParts.end() ){
-            BodyPart part = *pit;
+        BodyPartItem::Frametype = KEYFRAME;
+        auto bodyParts = frame->getSkeletonPtr()
+                ->getPartTreePtr();
+        auto pit = bodyParts->begin();
+        while( pit != bodyParts->end() ){
+            BodyPart *part = &(*pit);
             BodyJointItem* child =
-                    Utility::getJointItemById(scene->items(),part.getChildJoint());
+                    Utility::getJointItemById(scene->items(),part->getChildJoint());
             BodyJointItem* parent =
-                    Utility::getJointItemById(scene->items(),part.getParentJoint());
+                    Utility::getJointItemById(scene->items(),part->getParentJoint());
             if( !child || !parent ){
                 qDebug() << "Error! Joints not exist!" << endl;
                 return;
             }
-            BodyPartItem* newItem = new BodyPartItem(child,parent);
-
-            newItem->setId(part.getPartID());
+            BodyPartItem* newItem = new BodyPartItem(part,child,parent);
             scene->addItem(newItem);
+
             ++pit;
         }
     }
@@ -162,6 +157,20 @@ void FrameView2D::FrameGraphicsView::wheelEvent(QWheelEvent *event){
         scale(1.0 / scaleFactor, 1.0 / scaleFactor);
     }
     //update();
+}
+
+void FrameView2D::FrameGraphicsView::mousePressEvent(QMouseEvent *event){
+    if( event->button() == Qt::RightButton ){
+        if( dragMode() == DragMode::RubberBandDrag ){
+            setDragMode(DragMode::ScrollHandDrag);
+            setCursor(Qt::OpenHandCursor);
+        } else{
+            setDragMode(DragMode::RubberBandDrag);
+            setCursor(Qt::ArrowCursor);
+        }
+    }
+    update();
+    QGraphicsView::mousePressEvent(event);
 }
 
 

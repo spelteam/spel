@@ -83,3 +83,13 @@ bool Utility::isSkeletonItem(QList<QGraphicsItem*>::iterator it){
             dynamic_cast<BodyPartItem*>(*it);
 }
 
+QColor Utility::blendColors(const QColor &first, const QColor &second){
+    QColor mix;
+    mix.setRed( ( first.red()+second.red() )/2 );
+    mix.setGreen( ( first.green()+second.green() )/2 );
+    mix.setBlue( ( first.blue()+second.blue() )/2 );
+    mix.setAlpha( ( first.alpha()+second.alpha() )/2 );
+
+    return mix;
+}
+

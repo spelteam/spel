@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QDomDocument>
+#include <QColor>
 
 #include <bodyJoint.hpp>
 #include <bodyPart.hpp>
@@ -36,6 +37,7 @@ public:
 
     static bool isJointItem( QList<QGraphicsItem*>::iterator& it );
     static bool isSkeletonItem( QList<QGraphicsItem*>::iterator it );
+    static QColor blendColors( const QColor& first, const QColor& second );
 };
 
 #endif // UTILITY_H

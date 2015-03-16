@@ -9,11 +9,14 @@ class FrameTableWidget : public QTableWidget
 public:
     explicit FrameTableWidget(QWidget *parent = 0);
 signals:
-
+    void pickFrame( int num );
 public slots:
     void loadProjectEvent();
     void closeProjectEvent();
     void createProjectEvent();
+    void changeFrametypeEvent(int num);
+private slots:
+    void pickFrameEventEmitter( int, int col);
 
 protected:
     void resizeEvent( QResizeEvent* event ) override;

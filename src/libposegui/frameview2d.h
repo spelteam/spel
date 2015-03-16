@@ -7,6 +7,7 @@
 #include <QList>
 
 class BodyJointItem;
+class BodyPartItem;
 
 class FrameView2D : public QWidget
 {
@@ -17,7 +18,7 @@ private:
     public:
         FrameGraphicsView(QWidget* parent = 0):
             QGraphicsView(parent){
-            setDragMode(DragMode::ScrollHandDrag);
+            setDragMode(DragMode::RubberBandDrag);
             setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
             setRenderHint(QPainter::Antialiasing);
             setViewportUpdateMode(BoundingRectViewportUpdate);
@@ -25,13 +26,14 @@ private:
         }
         FrameGraphicsView(QGraphicsScene* scene, QWidget* parent = 0):
             QGraphicsView(scene,parent){
-            setDragMode(DragMode::ScrollHandDrag);
+            setDragMode(DragMode::RubberBandDrag);
             setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
             setRenderHint(QPainter::Antialiasing);
             setViewportUpdateMode(BoundingRectViewportUpdate);
         }
     protected:
         void wheelEvent(QWheelEvent* event) override;
+        void mousePressEvent(QMouseEvent * event) override;
     };
 public:
     explicit FrameView2D(QWidget *parent = 0);
@@ -44,7 +46,7 @@ public slots:
     void closeProjectEvent();
     void scaleItemsEvent( int value );
     void changeMaskOpacityEvent( int value );
-    void pickFrameEvent(int, int col);
+    void pickFrameEvent(int num);
 
 public:
     FrameGraphicsView *view;

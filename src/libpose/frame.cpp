@@ -47,6 +47,10 @@ Skeleton Frame::getSkeleton(void)
   return skeleton;
 }
 
+Skeleton* Frame::getSkeletonPtr(){
+    return &skeleton;
+}
+
 void Frame::setSkeleton(Skeleton _skeleton)
 {
   skeleton = _skeleton;

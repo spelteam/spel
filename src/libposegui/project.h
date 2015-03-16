@@ -40,6 +40,7 @@ public:
     };
 private:
     using FramePtr = std::unique_ptr<Frame>;
+private:
     using SkeletonPtr = std::unique_ptr<Skeleton>;
 public:
     Project( const Project& ) = delete;
@@ -76,6 +77,9 @@ public:
     const QString& getLastError() const;
 
     ProjectState getState() const;
+
+    void exchangeAtKeyframe( int num );
+    void exchangeAtInterpolation( int num );
 
 private:
     //loading skeleton

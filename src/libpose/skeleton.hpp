@@ -25,8 +25,12 @@ class Skeleton
     string getName(void) const;
     void setName(string _name);
     tree <BodyPart> getPartTree(void) const; 
+    //direct access
+    tree<BodyPart>* getPartTreePtr();
     void setPartTree(tree <BodyPart> _partTree); 
     tree <BodyJoint> getJointTree(void) const; 
+    //direct access
+    tree<BodyJoint>* getJointTreePtr();
     void setJointTree(tree <BodyJoint> _jointTree);
     float getScale(void) const;
     void setScale(float _scale);

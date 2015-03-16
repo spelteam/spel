@@ -1,7 +1,8 @@
 #include "bodyjointitem.h"
 
 #include "bodypartitem.h"
-#include "project.h"
+#include "utility.h"
+#include <bodyJoint.hpp>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
@@ -9,16 +10,21 @@
 
 //TODO: [L] Rich tool tip
 //TODO: [!] Context menu
-BodyJointItem::BodyJointItem(QGraphicsItem *parent)
+BodyJointItem::BodyJointItem(BodyJoint *joint, QGraphicsItem *parent)
     : QGraphicsItem(parent),
-      id(-1)
+      joint(joint)
 {
+    //set position
+    setPos(joint->getImageLocation().x,joint->getImageLocation().y);
+    //set params
     setFlag(ItemIsSelectable);
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(1.0);
     setAcceptHoverEvents(true);
+    //set tool tip
+    updateToolTip();
 }
 
 BodyJointItem::~BodyJointItem()
@@ -29,18 +35,8 @@ void BodyJointItem::addBodyPart(BodyPartItem *bodyPart){
     partList << bodyPart;
 }
 
-void BodyJointItem::setId(int id){
-    this->id = id;
-    //set tool tip
-    const int FRAME = 0;
-    BodyJoint* joint = Project::getInstance()
-            .getFrame(FRAME)->getSkeleton().getBodyJoint(id);
-    QString toolTip = QString::fromStdString(joint->getJointName());
-    setToolTip(toolTip);
-}
-
 int BodyJointItem::getId() const{
-    return id;
+    return joint->getLimbID();
 }
 
 QRectF BodyJointItem::boundingRect() const{
@@ -53,14 +49,14 @@ QRectF BodyJointItem::boundingRect() const{
 void BodyJointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                           QWidget *widget)
 {
-    QColor color;
-    if( option->state & QStyle::State_MouseOver ){
-        color = Qt::blue;
-    } else{
-        color = Qt::red;
+    QColor color = joint->getDepthSign() ? Palette::inDepth : Palette::outDepth;
+    qreal width = 0;
+    if( option->state & (QStyle::State_MouseOver | QStyle::State_Selected) ){
+        color = Utility::blendColors(color,Palette::selected);
+        width = 0.7;
     }
     QBrush brush = QBrush(color,Qt::SolidPattern);
-    QPen pen = QPen(brush,0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
+    QPen pen = QPen(brush,width,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
     //QRadialGradient grad = QRadialGradient({0,0},radius);
     //grad.setColorAt(0.0,Qt::red);
     //grad.setColorAt(1.0, Qt::blue);
@@ -78,6 +74,8 @@ void BodyJointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 QVariant BodyJointItem::itemChange(GraphicsItemChange change, const QVariant &value){
     switch(change){
     case ItemPositionHasChanged:
+        //update joint position
+        joint->setImageLocation({pos().x(),pos().y()});
         foreach (auto *part, partList) {
             part->adjust();
         }
@@ -91,16 +89,22 @@ QVariant BodyJointItem::itemChange(GraphicsItemChange change, const QVariant &va
 
 void BodyJointItem::mousePressEvent(QGraphicsSceneMouseEvent *event){
     if( event->button() == Qt::RightButton ){
-        //TODO: [L] Update depth
+        //update joint depth sign
+        joint->setDepthSign(!joint->getDepthSign());
+        //update tool tip
+        updateToolTip();
     }
     update();
     QGraphicsItem::mousePressEvent(event);
 }
 
 void BodyJointItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
-    //TODO: [L] Update joint position
     update();
     QGraphicsItem::mouseReleaseEvent(event);
+    //update joint position
+    joint->setImageLocation({pos().x(),pos().y()});
+    //update tool tip
+    updateToolTip();
 }
 
 void BodyJointItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event){
@@ -112,4 +116,20 @@ void BodyJointItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event){
 void BodyJointItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event){
     //repaint
     update();
+}
+
+//PRIVATE
+
+QColor BodyJointItem::Palette::inDepth = Qt::yellow;
+QColor BodyJointItem::Palette::outDepth = Qt::cyan;
+QColor BodyJointItem::Palette::selected = Qt::white;
+
+void BodyJointItem::updateToolTip(){
+    QString toolTip;
+    QString name = QString::fromStdString(joint->getJointName());
+    QString depthSign = joint->getDepthSign() ? "true" : "false";
+    QString pos = "x: " + QString::number(joint->getImageLocation().x) +
+                  " y: " + QString::number(joint->getImageLocation().y);
+    toolTip = name + "\nDepth sign: " + depthSign + "\n" + pos;
+    setToolTip(toolTip);
 }

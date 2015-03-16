@@ -27,7 +27,7 @@ ToolBoxWidget::ToolBoxWidget(QWidget *parent) :
     MainLayout->addWidget(jointer);
     MainLayout->addWidget(bodyParter);
     //settings
-    this->setEnabled(true);
+    this->setEnabled(false);
     this->setLayout(MainLayout);
     //connect
     //QObject::connect(eraser,&QLabel::mousePressEvent,this,&ToolBoxWidget::mousePressEvent);

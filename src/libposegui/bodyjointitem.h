@@ -4,17 +4,23 @@
 #include <QGraphicsItem>
 
 class BodyPartItem;
+class BodyJoint;
 
 class BodyJointItem : public QGraphicsItem
 {
+private:
+    struct Palette{
+        static QColor inDepth; //depthSign true
+        static QColor outDepth;//depthSign false
+        static QColor selected;
+    };
 public:
-    BodyJointItem(  QGraphicsItem * parent = 0 );
+    BodyJointItem( BodyJoint *joint, QGraphicsItem * parent = 0 );
     ~BodyJointItem();
 signals:
-    void updateJoint( int id );
+    void updateJoint( BodyJointItem *jointItem );
 public:
     void addBodyPart( BodyPartItem *bodyPart );
-    void setId( int id );
     int getId() const;
 
     enum { Type = UserType + 1 };
@@ -33,9 +39,11 @@ protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 private:
+    void updateToolTip();
+private:
     QList<BodyPartItem*> partList;
     qreal radius = 1.0;
-    int id;
+    BodyJoint *joint;
 };
 
 #endif // BODYJOINTITEM_H

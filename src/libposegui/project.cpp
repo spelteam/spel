@@ -57,6 +57,25 @@ Project::ProjectState Project::getState() const{
     return currState;
 }
 
+void Project::exchangeAtKeyframe( int num ){
+    FramePtr keyFrame = FramePtr( new Keyframe() );
+    //TODO: [!] get nearest keyframe
+    //get first keyframe
+    for( unsigned int i = 0; i < frames.size(); ++i ){
+        if( frames.at(i)->getFrametype() == KEYFRAME ){
+            keyFrame->setSkeleton( frames.at(i)->getSkeleton() );
+            break;
+        }
+    }
+    frames.at(num) = std::move( keyFrame );
+}
+
+void Project::exchangeAtInterpolation( int num ){
+    FramePtr interFrame = FramePtr( new Interpolation() );
+    interFrame->setSkeleton( *skeleton.get() );
+    frames.at(num) = std::move( interFrame );
+}
+
 
 
 //PRIVATE

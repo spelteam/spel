@@ -47,6 +47,10 @@ tree <BodyPart> Skeleton::getPartTree(void) const
   return partTree;
 }
 
+tree<BodyPart>* Skeleton::getPartTreePtr(){
+    return &partTree;
+}
+
 void Skeleton::setPartTree(tree <BodyPart> _partTree)
 {
   partTree = _partTree;
@@ -55,6 +59,10 @@ void Skeleton::setPartTree(tree <BodyPart> _partTree)
 tree <BodyJoint> Skeleton::getJointTree(void) const
 {
   return jointTree;
+}
+
+tree<BodyJoint>* Skeleton::getJointTreePtr(){
+    return &jointTree;
 }
 
 void Skeleton::setJointTree(tree <BodyJoint> _jointTree)

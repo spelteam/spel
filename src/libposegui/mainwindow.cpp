@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     framesView = new FrameTableWidget();
     editTools = new ToolBoxWidget();
     solveTools = new SolveBoxWidget();
-    frameTools = new FrameBoxWidget();
+    frameTools = new FrameBoxWidget(framesView);
     currFrame = new FrameView2D();
     //layouts
     FrameLayout = new QVBoxLayout;
@@ -47,17 +47,21 @@ MainWindow::MainWindow(QWidget *parent) :
     //loading
     QObject::connect(&Project::getInstance(),&Project::load,framesView,&FrameTableWidget::loadProjectEvent);
     QObject::connect(&Project::getInstance(),&Project::load, currFrame, &FrameView2D::loadProjectEvent );
+    QObject::connect(&Project::getInstance(),&Project::load, frameTools, &FrameBoxWidget::loadProjectEvent );
     //closing
     QObject::connect(&Project::getInstance(),&Project::close,framesView,&FrameTableWidget::closeProjectEvent);
     QObject::connect(&Project::getInstance(),&Project::close,currFrame,&FrameView2D::closeProjectEvent);
+    QObject::connect(&Project::getInstance(),&Project::close,frameTools,&FrameBoxWidget::closeProjectEvent);
     //scaling
     QObject::connect(frameTools->itemSkaler, &QSlider::valueChanged, currFrame, &FrameView2D::scaleItemsEvent);
     //mask opacity
     QObject::connect(frameTools->maskViewer, &QSlider::valueChanged, currFrame, &FrameView2D::changeMaskOpacityEvent);
     //picking frame
-    QObject::connect(framesView, &FrameTableWidget::cellClicked,currFrame,&FrameView2D::pickFrameEvent);
-    QObject::connect(framesView, &FrameTableWidget::cellActivated,currFrame,&FrameView2D::pickFrameEvent);
-    QObject::connect(framesView, &FrameTableWidget::cellEntered,currFrame,&FrameView2D::pickFrameEvent);
+    QObject::connect(framesView, &FrameTableWidget::pickFrame, currFrame, &FrameView2D::pickFrameEvent);
+    QObject::connect(framesView, &FrameTableWidget::pickFrame, frameTools, &FrameBoxWidget::pickFrameEvent);
+    //change frametype
+    QObject::connect(frameTools,&FrameBoxWidget::changeFrametype,
+                     framesView,&FrameTableWidget::changeFrametypeEvent);
 }
 
 MainWindow::~MainWindow()

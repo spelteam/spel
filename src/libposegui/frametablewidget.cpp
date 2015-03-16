@@ -17,6 +17,10 @@ FrameTableWidget::FrameTableWidget(QWidget *parent) :
     this->verticalHeader()->hide();
     //fix column width
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    //emit pickFrame signal
+    QObject::connect(this,&FrameTableWidget::cellClicked,this,&FrameTableWidget::pickFrameEventEmitter);
+    QObject::connect(this,&FrameTableWidget::cellActivated,this,&FrameTableWidget::pickFrameEventEmitter);
+    QObject::connect(this,&FrameTableWidget::cellEntered,this,&FrameTableWidget::pickFrameEventEmitter);
 }
 
 #include <QDebug>
@@ -71,6 +75,20 @@ void FrameTableWidget::closeProjectEvent(){
 
 void FrameTableWidget::createProjectEvent(){
 
+}
+
+void FrameTableWidget::changeFrametypeEvent(int num){
+    //change style of cell
+    auto frame = Project::getInstance().getFrame(num);
+    if( frame->getFrametype() == KEYFRAME ){
+        this->cellWidget(0,num)
+                ->setStyleSheet(Utility::fileToString(":/root/resources/stylesheets/Keyframe.qss"));
+    } else{
+        this->cellWidget(0,num)
+                ->setStyleSheet(Utility::fileToString(":/root/resources/stylesheets/Interframe.qss"));
+    }
+    //repick frame
+    pickFrame(num);
 }
 
 //TODO: [L] Fix image resizing
@@ -129,4 +147,10 @@ void FrameTableWidget::keyPressEvent(QKeyEvent *event){
         }
         }
     }
+}
+
+//PRIVATE
+
+void FrameTableWidget::pickFrameEventEmitter(int, int col){
+    emit pickFrame(col);
 }

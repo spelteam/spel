@@ -28,6 +28,8 @@ class Frame
     Mat getMask(void);
     void setMask(Mat _mask);
     Skeleton getSkeleton(void);
+    //TODO: [!]Refactor getters for direct access
+    Skeleton* getSkeletonPtr();
     void setSkeleton(Skeleton _skeleton);
     Point2f getGroundPoint(void);
     void setGroundPoint(Point2f _groundPoint);
