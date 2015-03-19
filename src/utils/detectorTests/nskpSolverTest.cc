@@ -39,6 +39,11 @@ int main (int argc, char **argv)
   
   vector <Frame*> vFrames = projectLoader.getFrames();
   Sequence seq(0, "test", vFrames);
+
+  //now test inrepolation for this sequence
+  seq.estimateUniformScale(params);
+  seq.computeInterpolation(params);
+
   vector <Frame*>::iterator i;
 
   NSKPSolver tSolver;

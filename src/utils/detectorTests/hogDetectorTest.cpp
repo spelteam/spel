@@ -37,7 +37,10 @@ int main (int argc, char **argv)
   cout << "Training..." << endl;
   try
   {
-    detector.train(projectLoader.getFrames(), params);
+    vector<Frame*> trainFrames;
+    trainFrames.push_back(projectLoader.getFrames()[2]);
+    trainFrames.push_back(projectLoader.getFrames()[10]);
+    detector.train(trainFrames, params);
     Sequence *seq = new Sequence(0, "hogDetector", projectLoader.getFrames());
     if (seq != 0)
     {

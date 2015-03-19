@@ -534,7 +534,7 @@ float HogDetector::compare(BodyPart bodyPart, PartModel model)
         {
           try
           {
-            score += abs(model.descriptors.at(i) - partModel->second.descriptors.at(i));
+            score += pow(model.descriptors.at(i) - partModel->second.descriptors.at(i), 2);
           }
           catch (...)
           {

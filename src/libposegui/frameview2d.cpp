@@ -102,7 +102,7 @@ void FrameView2D::loadFrameJoints(int num){
     }
     //load skeleton
     auto frame = Project::getInstance().getFrame(num);
-    if( frame->getFrametype() == KEYFRAME ){
+    if(true){//frame->getFrametype() == KEYFRAME ){
         //load body joints
         auto bodyJoints = frame->getSkeletonPtr()
                 ->getJointTreePtr();

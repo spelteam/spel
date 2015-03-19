@@ -3,6 +3,7 @@
 #include "tlpssolver.hpp"
 #include "lockframe.hpp"
 #include "colorHistDetector.hpp"
+#include "hogDetector.hpp"
 #include "math.h"
 #include "interpolation.hpp"
 
@@ -34,6 +35,13 @@ vector<Solvlet> TLPSSolver::solve(Sequence &frames) //inherited virtual
 vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params) //inherited virtual
 {
     params.emplace("debugLevel", 1); //set the default debug info level
+    params.emplace("useHoGdet", 1); //set the default debug info level
+    params.emplace("useCSdet", 0); //set the default debug info level
+    params.emplace("useSURFdet", 0); //set the default debug info level
+    params.emplace("maxPartCandidates", 300); //set the default debug info level
+
+    int maxPartCandidates = params.at("maxPartCandidates");
+    bool useHoG = params.at("useHoGdet");
     int debugLevel = params.at("debugLevel");
 
     sequence.computeInterpolation(params); //interpolate the sequences
@@ -58,12 +66,16 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
         vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
 
 		//train detectors
+        Detector * testDet;
+        if(useHoG)
+            testDet = new HogDetector();
 		ColorHistDetector chDetector;
 		vector<Frame*> trainingFrames;
 		trainingFrames.push_back(seqSlice.front()); //set training frame by index
 		trainingFrames.push_back(seqSlice.back());
 		
-		chDetector.train(trainingFrames, params);
+        //chDetector.train(trainingFrames, params);
+        testDet->train(trainingFrames, params);
 
 		vector<vector<vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
 
@@ -82,10 +94,13 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
             cerr << "Detecting on frame " << seqSlice[currentFrame]->getID() << endl;
 
-            vector<vector<LimbLabel> > labels;
-            labels = chDetector.detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
+            vector<vector<LimbLabel> > labels, temp;
+            labels = testDet->detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
 
-			detections[currentFrame] = labels; //store all detections into detections
+            for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labels.size(); ++currentSize)
+                temp.push_back(labels[currentSize]);
+
+            detections[currentFrame] = temp; //store all detections into detections
 		}
 
 		vector<size_t> numbersOfLabels; //numbers of labels per part
@@ -106,7 +121,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
         //OK
 
-        cerr << "Computing slice factors" << endl;
+        cerr << "Computing slice factors..." << endl;
 
         int suppFactors=0, jointFactors=0, anchorFactors=0, tempFactors=0;
 		//now do the factors
@@ -117,6 +132,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
 			//construct the image score cost factors
 			//label score cost
+            cerr << "Computing Factors at Frame " << seqSlice[currentFrame]->getID() << endl;
 			vector<vector<LimbLabel> > labels = detections[currentFrame];
 			for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for each of the detected parts
 			{
@@ -232,7 +248,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 			}
 		}
 
-        if(debugLevel=1)
+        if(debugLevel>=1)
         {
             float n,k;
             n=seqSlice.size()-2; //num non-anchor frames
