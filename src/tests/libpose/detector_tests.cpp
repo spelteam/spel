@@ -323,7 +323,7 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     EXPECT_LE(abs(Max2.y + ymin - MaxR.y), delta);
 
     // Checking matching of the images points with one fill color 
-    float epsilon = 40; // tolerable error of the matching points number, %
+    float epsilon = 75; // tolerable error of the matching points number, %
 
     uint32_t S = 0;
     uint32_t S0 = (xmax - xmin + 1)*(ymax - ymin + 1);
