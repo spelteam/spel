@@ -68,8 +68,15 @@ QT5_ADD_RESOURCES( ${LIBPOSEGUI_MODULE}_RRC resources.qrc )
 # Tell CMake to create the executable
 add_executable(${LIBPOSEGUI_MODULE} ${${LIBPOSEGUI_MODULE}_SRC} ${UIS_HDRS} ${${LIBPOSEGUI_MODULE}_RRC} )
 
+if (WIN32)
+  set (QtMain Qt5::WinMain)
+else ()
+  set (QtMain Qt5::Main)
+endif()
+
 # Add libraries
 target_link_libraries( ${LIBPOSEGUI_MODULE}
+    ${QtMain}
     Qt5::Core
     Qt5::Widgets
     Qt5::Xml
@@ -77,3 +84,12 @@ target_link_libraries( ${LIBPOSEGUI_MODULE}
     ${LIBPOSE_MODULE}
     ${OpenCV_LIBS}
 )
+
+# Hide console window on Windows system
+if (WIN32)
+  if (MSVC)
+    set_target_properties(${LIBPOSEGUI_MODULE} PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
+  elseif(CMAKE_COMPILER_IS_GNUCXX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mwindows")
+  endif()
+endif()
