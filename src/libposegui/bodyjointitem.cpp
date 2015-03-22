@@ -73,13 +73,16 @@ void BodyJointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
 QVariant BodyJointItem::itemChange(GraphicsItemChange change, const QVariant &value){
     switch(change){
-    case ItemPositionHasChanged:
+    case ItemPositionHasChanged:{
         //update joint position
-        joint->setImageLocation({pos().x(),pos().y()});
+        float x = static_cast<float>(this->pos().x());
+        float y = static_cast<float>(this->pos().y());
+        joint->setImageLocation({x,y});
         foreach (auto *part, partList) {
             part->adjust();
         }
         break;
+    }
     default:
         break;
     }
@@ -102,7 +105,9 @@ void BodyJointItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
     update();
     QGraphicsItem::mouseReleaseEvent(event);
     //update joint position
-    joint->setImageLocation({pos().x(),pos().y()});
+    float x = static_cast<float>(this->pos().x());
+    float y = static_cast<float>(this->pos().y());
+    joint->setImageLocation({x,y});
     //update tool tip
     updateToolTip();
 }
