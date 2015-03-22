@@ -1,6 +1,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <functional>
 #include <QObject>
 #include <QString>
 #include <QDomDocument>
