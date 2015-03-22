@@ -70,8 +70,6 @@ add_executable(${LIBPOSEGUI_MODULE} ${${LIBPOSEGUI_MODULE}_SRC} ${UIS_HDRS} ${${
 
 if (WIN32)
   set (QtMain Qt5::WinMain)
-else ()
-  set (QtMain Qt5::Main)
 endif()
 
 # Add libraries
