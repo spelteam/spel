@@ -78,7 +78,7 @@ bool LimbLabel::getIsWeak(void) const
 
 bool LimbLabel::operator < (const LimbLabel &ll) const
 {
-  return getSumScore() < ll.getSumScore();
+  return getAvgScore() < ll.getAvgScore();
 }
 
 bool LimbLabel::operator > (const LimbLabel &ll) const
@@ -86,14 +86,16 @@ bool LimbLabel::operator > (const LimbLabel &ll) const
   return !(*this < ll);
 }
 
-float LimbLabel::getSumScore(void) const
+float LimbLabel::getAvgScore(void) const
 {
   float sum = 0;
+  uint32_t count = 0;
   for_each(scores.begin(), scores.end(), [&](Score s)
   {
+    count++;
     sum += s.getScore();
   });
-  return sum;
+  return ((count > 0) ? (sum / count) : 0.0f);
 }
 
 void LimbLabel::getEndpoints(Point2f &p0, Point2f &p1) const

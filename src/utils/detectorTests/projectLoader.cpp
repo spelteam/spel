@@ -404,7 +404,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
         {
           outFile << sqrt(PoseHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2])) << " ";
         }
-        outFile << ls->getSumScore() << " ";
+        outFile << ls->getAvgScore() << " ";
         outFile << "0" << " ";
         outFile << "0" << " ";
         outFile << ((ls->getIsOccluded() == true) ? 0 : 1);

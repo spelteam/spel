@@ -157,5 +157,14 @@ vector <vector <LimbLabel>> Detector::merge(vector <vector <LimbLabel>> first, v
       }
     }
   }
-  return first;
+
+  vector <vector <LimbLabel>> result;
+  for (vector <vector <LimbLabel>>::iterator l = first.begin(); l != first.end(); ++l)
+  {
+    vector <LimbLabel> v = *l;
+    sort(v.begin(), v.end());
+    result.push_back(v);
+  }
+
+  return result;
 }

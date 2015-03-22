@@ -9,6 +9,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <string>
+#include <cstdint>
 #include "score.hpp"
 
 using namespace std;
@@ -44,7 +45,7 @@ class LimbLabel
     vector <Point2f> getPolygon(void) const;
     bool getIsOccluded(void) const;
     bool getIsWeak(void) const;
-    float getSumScore(void) const;
+    float getAvgScore(void) const;
 
     bool containsPoint(Point2f pt);
   private:

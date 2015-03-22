@@ -888,29 +888,15 @@ bg=yellow</panel_attributes>
   </group>
   <group>
     <element>
-      <type>com.umlet.element.Class</type>
+      <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>608</x>
-        <y>1248</y>
-        <w>192</w>
-        <h>192</h>
+        <x>600</x>
+        <y>816</y>
+        <w>592</w>
+        <h>632</h>
       </coordinates>
-      <panel_attributes>Score
---
-+score: float
-+detName: string
---
-+Score()
-+Score(sc: float, name: string)
-+operator=(s: Score&amp;): Score&amp;
-+operator==(s: Score&amp;): bool
-+operator!=(s: Score&amp;): bool
-+operator&lt;(s: Score&amp;): bool
-+operator&gt;(s: Score&amp;): bool
-+getScore(): float
-+setScore(_score: float)
-+getDetName(): string
-+setDetName(_detName: string)</panel_attributes>
+      <panel_attributes>*Part Labelling*
+bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
@@ -944,7 +930,7 @@ bg=yellow</panel_attributes>
 +getPolygon(): vector &lt;Point2f&gt;
 +getIsOccluded(): bool
 +getIsWeak(): bool
-+getSumScore(): float;
++getAvgScore(): float;
 +operator=(ll: LimbLabel&amp;): Score&amp;
 +operator==(ll: LimbLabel&amp;): bool
 +operator!=(ll: LimbLabel&amp;): bool
@@ -955,15 +941,29 @@ bg=yellow</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
-      <type>com.umlet.element.Package</type>
+      <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>600</x>
-        <y>816</y>
-        <w>592</w>
-        <h>632</h>
+        <x>608</x>
+        <y>1248</y>
+        <w>192</w>
+        <h>192</h>
       </coordinates>
-      <panel_attributes>*Part Labelling*
-bg=orange</panel_attributes>
+      <panel_attributes>Score
+--
++score: float
++detName: string
+--
++Score()
++Score(sc: float, name: string)
++operator=(s: Score&amp;): Score&amp;
++operator==(s: Score&amp;): bool
++operator!=(s: Score&amp;): bool
++operator&lt;(s: Score&amp;): bool
++operator&gt;(s: Score&amp;): bool
++getScore(): float
++setScore(_score: float)
++getDetName(): string
++setDetName(_detName: string)</panel_attributes>
       <additional_attributes/>
     </element>
   </group>

@@ -239,6 +239,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   const float searchDistCoeffMult = 1.25;
   const string sSearchDistCoeffMult = "searchDistCoeffMult";
 
+  const float useHoGdet = 1.0f;
+  const string sUseHoGdet = "useHoGdet";
+
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -247,6 +250,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
   params.emplace(sScaleParam, scaleParam);
   params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
+  params.emplace(sUseHoGdet, useHoGdet);
 
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);

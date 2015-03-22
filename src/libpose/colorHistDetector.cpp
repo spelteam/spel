@@ -457,6 +457,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const float searchDistCoeffMult = 1.25;
   const string sSearchDistCoeffMult = "searchDistCoeffMult";
 
+  const float useCSdet = 1.0f;
+  const string sUseCSdet = "useCSdet";
+
+
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -465,6 +469,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
   params.emplace(sScaleParam, scaleParam);
   params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
+  params.emplace(sUseCSdet, useCSdet);
 
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
