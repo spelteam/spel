@@ -1,5 +1,6 @@
 #include <math.h>
 #include "limbLabel.hpp"
+#include "poseHelper.hpp"
 
 LimbLabel::LimbLabel()
 {
@@ -132,35 +133,37 @@ bool LimbLabel::containsPoint(Point2f pt)
 {
     //decide whether this point belongs to this polygon or not
 
-    float *vertx = new float[4];
-    vertx[0] = polygon[0].x;
-    vertx[1] = polygon[1].x;
-    vertx[2] = polygon[2].x;
-    vertx[3] = polygon[3].x;
+//    float *vertx = new float[4];
+//    vertx[0] = polygon[0].x;
+//    vertx[1] = polygon[1].x;
+//    vertx[2] = polygon[2].x;
+//    vertx[3] = polygon[3].x;
 
-    float *verty = new float[4];
-    verty[0] = polygon[0].y;
-    verty[1] = polygon[1].y;
-    verty[2] = polygon[2].y;
-    verty[3] = polygon[3].y;
+//    float *verty = new float[4];
+//    verty[0] = polygon[0].y;
+//    verty[1] = polygon[1].y;
+//    verty[2] = polygon[2].y;
+//    verty[3] = polygon[3].y;
 
-    int result = LimbLabel::pnpoly(4, vertx, verty, pt.x, pt.y);
+//    int result = LimbLabel::pnpoly(4, vertx, verty, pt.x, pt.y);
 
-    return result;
+    POSERECT <Point2f> poserect(polygon[0], polygon[1], polygon[2], polygon[3]);
+
+    return poserect.containsPoint(pt);
 }
 
-//decide whether this point belongs to this polygon or not
-//http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html#Originality
-int LimbLabel::pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
-{
-  int i, j, c = 0;
-  for (i = 0, j = nvert-1; i < nvert; j = i++) {
-    if ( ((verty[i]>testy) != (verty[j]>testy)) &&
-     (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
-       c = !c;
-  }
-  return c;
-}
+////decide whether this point belongs to this polygon or not
+////http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html#Originality
+//int LimbLabel::pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
+//{
+//  int i, j, c = 0;
+//  for (i = 0, j = nvert-1; i < nvert; j = i++) {
+//    if ( ((verty[i]>testy) != (verty[j]>testy)) &&
+//     (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+//       c = !c;
+//  }
+//  return c;
+//}
 
 void LimbLabel::addScore(Score detectionScore)
 {

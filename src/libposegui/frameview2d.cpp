@@ -126,7 +126,7 @@ void FrameView2D::loadFrameJoints(int num){
             BodyJointItem* parent =
                     Utility::getJointItemById(scene->items(),part->getParentJoint());
             if( !child || !parent ){
-                qDebug() << "Error! Joints not exist!" << endl;
+                qDebug() << "Error! Joints do not exist!" << endl;
                 return;
             }
             BodyPartItem* newItem = new BodyPartItem(part,child,parent);

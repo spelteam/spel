@@ -1,3 +1,4 @@
+#include <limits>
 #include "nskpsolver.hpp"
 #include <tree.hh>
 #include "lockframe.hpp"
@@ -40,14 +41,42 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float> params)
 vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
 {
 	//parametrise the number of times frames get propagated
+    params.emplace("nskpIters", 0); //set number of iterations, 0 to iterate until no new lockframes are introduced
+
+    uint32_t nskpIters=params.at("nskpIters");
+    if(nskpIters==0)
+        nskpIters=INT32_MAX;
 
     sequence.computeInterpolation(params); //interpolate the sequence first
 	//propagate keyframes
-    vector<Frame*> propagatedFrames = propagateKeyframes(sequence.getFrames(), params, ism);
+    vector<Frame*> propagatedFrames = sequence.getFrames();
+    uint32_t lockframesLastIter=0;
+    for(uint32_t i=0; i<nskpIters; ++i)
+    {
+        if(i>=nskpIters)
+            break;
+
+        propagateKeyframes(propagatedFrames, params, ism);
+
+        //calculate number of lockframes in the sequence
+        uint32_t numLockframes=0;
+        for(vector<Frame*>::iterator frameIter=propagatedFrames.begin(); frameIter!=propagatedFrames.end(); ++frameIter)
+        {
+            if((*frameIter)->getFrametype()==LOCKFRAME)
+                numLockframes++;
+        }
+
+        if(numLockframes==lockframesLastIter) //terminate loop if no more lockframes are generated
+        {
+            cerr << "Terminating keyframe propagation after " << i << " iterations." << endl;
+            break;
+        }
+        lockframesLastIter=numLockframes;
+    }
 
 	//create tlps solver
     TLPSSolver tlps;
-    sequence.setFrames(propagatedFrames);
+    //sequence.setFrames(propagatedFrames);
 
 	//the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
@@ -55,7 +84,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     return tlps.solve(sequence, params);
 }
 
-vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism)
+void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism)
 {
 	// //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
 	// float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
@@ -63,17 +92,22 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
 
+    int numLockframesGenerated=0;
     params.emplace("useHoGdet", 1); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useCSdet", 0); //determine if colorhist detector is used and with what coefficient
     params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
-    params.emplace("maxPartCandidates", 300); //set the max number of part candidates to allow into the solver
+    params.emplace("maxPartCandidates", 200); //set the max number of part candidates to allow into the solver
     params.emplace("acceptLockframeThreshold", 0.5); //set up the lockframe accept threshold by mask coverage
+    params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
+    params.emplace("propagateToLockframes", 0);
 
-    int maxPartCandidates = params.at("maxPartCandidates");
+    uint32_t maxPartCandidates = params.at("maxPartCandidates");
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useHoGdet");
+    uint32_t debugLevel = params.at("debugLevel");
+    bool propagateToLockframes=params.at("propagateToLockframes");
 
-	vector<Frame*> lockframes;
+    vector<Frame*> lockframes;
 
 	//build frame MSTs by ID's as in ISM
 	vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);
@@ -92,7 +126,6 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
             if(useCS)
                 detectors.push_back(new ColorHistDetector());
 
-            //ColorHistDetector chDetector;
 			vector<Frame*> trainingFrames;
 			trainingFrames.push_back(frames[frameId]); //set training frame by index
 			
@@ -103,20 +136,29 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 			for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
 			{
-                vector<vector<LimbLabel> > labels,temp;
+                if(frames[*mstIter]->getFrametype()==KEYFRAME) //skip keyframes
+                    continue;
+                else if(frames[*mstIter]->getFrametype()==LOCKFRAME && !propagateToLockframes) //skip lockframes, unless
+                    continue;
+                vector<vector<LimbLabel> > labels, tempLabels;
+                vector<vector<LimbLabel> >::iterator labelPartsIter;
 
                 for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
                 {
                     labels = detectors[i]->detect(frames[*mstIter], params, labels); //detect labels based on keyframe training
-                    for(uint32_t j=0; j<labels.size(); ++j)
-                    {
-                        for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labels.size(); ++currentSize)
-                        {
-                            temp.push_back(labels[currentSize]);
-                        }
-                        labels=temp;
-                    }
                 }
+
+                for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+                {
+                    vector<LimbLabel> temp;
+                    for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+                    {
+                        temp.push_back(labelPartsIter->at(currentSize));
+                    }
+                    tempLabels.push_back(temp);
+                }
+
+                labels = tempLabels;
 
 				vector<size_t> numbersOfLabels; //numbers of labels per part
 
@@ -132,6 +174,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 				tree<BodyPart> partTree = skeleton.getPartTree();
 				tree<BodyPart>::iterator partIter, parentPartIter;
 
+                uint32_t jointFactors=0, suppFactors=0, priorFactors=0;
 				//label score cost
 				for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for each of the detected parts
 				{
@@ -148,6 +191,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 					Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
 					gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                    suppFactors++;
 
 					ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
@@ -158,12 +202,14 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 					Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
 					gm.addFactor(priorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                    priorFactors++;
 					
 					if(partIter!=partTree.begin()) //if iterator is not on root node, there is always a parent body part
 					{
                         varIndices.clear();
                         parentPartIter=partTree.parent(partIter); //find the parent of this part
                         varIndices.push_back(parentPartIter->getPartID()); //push back parent partID as the second variable index
+                        varIndices.push_back(partIter->getPartID()); //push first value in (parent, this)
 
                         size_t jointCostShape[]={numbersOfLabels[parentPartIter->getPartID()], numbersOfLabels[partIter->getPartID()]}; //number of labels
 						ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
@@ -179,8 +225,22 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 
 						Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
 						gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                        jointFactors++;
 					}
 				}
+
+                if(debugLevel>=1)
+                {
+                    float k;
+                    k=skeleton.getPartTree().size(); //number of bones
+                    float expectedSuppFactors=k; //n*k
+                    float expectedPriorFactors=k; //n*k
+                    float expectedJointFactors=(k-1); //n*(k-1)
+
+                    assert(expectedSuppFactors==suppFactors);
+                    assert(expectedJointFactors==jointFactors);
+                    assert(priorFactors==expectedPriorFactors);
+                }
 
 				// set up the optimizer (loopy belief propagation)
 
@@ -204,7 +264,7 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 					solutionLabels.push_back(labels[i][labeling[i]]); //pupulate solution vector
 				}
 				//labeling now contains the approximately optimal labels for this problem
-				float solutionScore = evaluateSolution(frames[frameId], solutionLabels, params);
+                float solutionScore = evaluateSolution(frames[*mstIter], solutionLabels, params);
 				//evaluate the solution, and decide whether it should be added to keyframes
 
                 float acceptLockframeThreshold = params.at("acceptLockframeThreshold"); //@PARAM this is a parameter, not a static value
@@ -213,42 +273,52 @@ vector<Frame*> NSKPSolver::propagateKeyframes(const vector<Frame*>& frames, map<
 					//set up the lockframe
 					Solvlet solvlet(*mstIter, solutionLabels);
 					Skeleton skel(solvlet.toSkeleton());
-					Lockframe lockframe;
+                    skel.setScale(frames[*mstIter]->getSkeleton().getScale()); //set skeleton scale
+                    Frame * lockframe = new Lockframe();
 
-					lockframe.setImage(frames[frameId]->getImage());
-					lockframe.setMask(frames[frameId]->getMask());
-					lockframe.setSkeleton(skel);
-					lockframe.setID(frames[frameId]->getID());
+                    lockframe->setSkeleton(skel);
+                    lockframe->setID(frames[*mstIter]->getID());
 
-					//create a frame pointer and push to the return vector
-					Frame * ptr = &lockframe;
-					lockframes.push_back(ptr);
+                    lockframe->setImage(frames[*mstIter]->getImage());
+                    lockframe->setMask(frames[*mstIter]->getMask());
+                    lockframe->setSkeleton(skel);
+
+                    //frames[*mstIter]=&lockframe;
+                    lockframes.push_back(lockframe);
+                    numLockframesGenerated++;
 				}
 			}
 		}
 	}
 
-	vector<Frame*> returnFrames;
-	//look at lockframes and frames, and put together the return frames
-	for(uint32_t i=0; i<frames.size(); ++i)
-	{
-		int lockframeIndex = findFrameIndexById(frames[i]->getID(), frames);
-		if(lockframeIndex>=0) //if a new lockframe exists at this id
-		{
-			//push it into the sequen
-			returnFrames.push_back(lockframes[lockframeIndex]);
-		}
-		else //otherwise push back the old frame
-		{
-			returnFrames.push_back(frames[i]);
-		}
-	}
-	return returnFrames;
+    for(uint32_t i=0; i<lockframes.size();++i)
+    {
+        *(frames[lockframes[i]->getID()]) = *(lockframes.at(i)); //make pointers point to the correct objects
+    }
+
+    cerr << "Generated " << numLockframesGenerated << " lockframes!" << endl;
+
+//	vector<Frame*> returnFrames;
+//	//look at lockframes and frames, and put together the return frames
+//	for(uint32_t i=0; i<frames.size(); ++i)
+//	{
+//		int lockframeIndex = findFrameIndexById(frames[i]->getID(), frames);
+//		if(lockframeIndex>=0) //if a new lockframe exists at this id
+//		{
+//			//push it into the sequen
+//			returnFrames.push_back(lockframes[lockframeIndex]);
+//		}
+//		else //otherwise push back the old frame
+//		{
+//			returnFrames.push_back(frames[i]);
+//		}
+//	}
+//	return returnFrames;
 }
 
 //return the index of the first instance of frame with matching id 
 //if no matching id in vector, return -1
-int NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
+uint32_t NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 {
 	for(uint32_t i=0; i<frames.size(); ++i)
 	{

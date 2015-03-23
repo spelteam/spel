@@ -18,8 +18,8 @@ class Solvlet
     // bool operator==(const Solvlet &s) const;
     // bool operator!=(const Solvlet &s) const;
 
-    int getFrameId(void) const;
-    void setFrameId(int _id);
+    int getFrameID(void) const;
+    void setFrameID(int _id);
 
     vector<LimbLabel> getLabels(void) const;
     void setLabels(vector<LimbLabel> _labels);

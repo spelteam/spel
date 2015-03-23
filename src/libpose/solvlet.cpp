@@ -17,7 +17,7 @@ Solvlet &Solvlet::operator=(const Solvlet &s)
     return *this;
   }
   this->setLabels(s.getLabels());
-  this->setFrameId(s.getFrameId());
+  this->setFrameID(s.getFrameID());
   return *this;
 }
 
@@ -31,12 +31,12 @@ Solvlet &Solvlet::operator=(const Solvlet &s)
 
 // }
 
-int Solvlet::getFrameId(void) const
+int Solvlet::getFrameID(void) const
 {
 	return frameId;
 }
 
-void Solvlet::setFrameId(int _id)
+void Solvlet::setFrameID(int _id)
 {
 	frameId=_id;
 }

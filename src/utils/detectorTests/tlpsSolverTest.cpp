@@ -62,22 +62,15 @@ int main (int argc, char **argv)
       }
   }
 
-  //exit(0);
-
-  vector <Frame*>::iterator i;
-
   TLPSSolver tSolver;
 
   cout << "Solving using TLPSSolver..." << endl;
   //solve with some default params
   solve = tSolver.solve(seq, params);
 
-  //draw the solution
-  for(i=vFrames.begin(); i!=vFrames.end(); ++i)
+  for(uint32_t i=0; i<solve.size();++i)
   {
-    Frame *f = *i;
-
-    projectLoader.drawFrameSolvlets(solve[f->getID()], f, argv[2], Scalar(0,0,255), 2);
+    projectLoader.drawFrameSolvlets(solve[i], vFrames[solve[i].getFrameID()], argv[2], Scalar(0,0,255), 2);
   }
 
   return 0;

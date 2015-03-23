@@ -272,6 +272,7 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
 
 void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& frames)
 {
+    cerr << "building ISM matrix" <<endl;
     //create matrices and fill with zeros
     imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
     // maskSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
