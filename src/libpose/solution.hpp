@@ -26,9 +26,11 @@ class Solution
   
   private:
     int id;
-    int solverId; //id of the solver solution was obtained from
+    ///id of the solver solution was obtained from
+    int solverId;
     int sequenceId;
-    string solverName; //name of the solver
+    ///name of the solver
+    string solverName;
     vector <float> solverParams;
     vector <Solvlet> solvlets;
 };

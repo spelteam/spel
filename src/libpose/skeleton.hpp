@@ -7,7 +7,7 @@
 
 using namespace std;
 
-//Human body model
+///Human body model
 class Skeleton
 {
   public:
@@ -25,24 +25,31 @@ class Skeleton
     string getName(void) const;
     void setName(string _name);
     tree <BodyPart> getPartTree(void) const; 
-    //direct access
+    ///direct access
     tree<BodyPart>* getPartTreePtr();
     void setPartTree(tree <BodyPart> _partTree); 
     tree <BodyJoint> getJointTree(void) const; 
-    //direct access
+    ///direct access
     tree<BodyJoint>* getJointTreePtr();
     void setJointTree(tree <BodyJoint> _jointTree);
     float getScale(void) const;
     void setScale(float _scale);
 
-    uint32_t getPartTreeCount(void) const; // count of bodypart elements, included in the tree
-    BodyJoint* getBodyJoint(int jointID) const; // search a joint by id and return a pointer to its address
-    BodyPart* getBodyPart( int partID ) const; // search a body part by id and return a pointer to its address
+    /// count of bodypart elements, included in the tree
+    uint32_t getPartTreeCount(void) const;
+    /// search a joint by id and return a pointer to its address
+    BodyJoint* getBodyJoint(int jointID) const;
+    /// search a body part by id and return a pointer to its address
+    BodyPart* getBodyPart( int partID ) const;
   private:
-    string name; // name of the specific instance of
-    tree <BodyPart> partTree; // tree of bodyparts is component of the body model
-    tree <BodyJoint> jointTree; // tree of joints is component of the body model
-    float scale; // scale factor, used for scaling
+    /// name of the specific instance of
+    string name;
+    /// tree of bodyparts is component of the body model
+    tree <BodyPart> partTree;
+    /// tree of joints is component of the body model
+    tree <BodyJoint> jointTree;
+    /// scale factor, used for scaling
+    float scale;
 };
 
 #endif  // _LIBPOSE_SKELETON_HPP_

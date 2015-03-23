@@ -22,26 +22,30 @@ using namespace std;
 using namespace opengm;
 using namespace cv;
 
-//define the space and the model
+///define the space and the model
 
 class NSKPSolver: Solver
 {
-  //define the space
+  ///define the space
   typedef opengm::DiscreteSpace<> Space;
-  //define the model
+  ///define the model
   typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
 
-  //define the update rules
+  ///define the update rules
   typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
-  //define the inference algorithm
+  ///define the inference algorithm
   typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
   public:
     NSKPSolver();
-    ~NSKPSolver(); //inherited virtual
-    vector<Solvlet> solve(Sequence& frames); //inherited virtual
-    vector<Solvlet> solve(Sequence &frames, map<string, float>  params); //inherited virtual
-    vector<Solvlet> solve(Sequence& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM); //inherited virtual
+    ///inherited virtual
+    ~NSKPSolver();
+    ///inherited virtual
+    vector<Solvlet> solve(Sequence& frames);
+    ///inherited virtual
+    vector<Solvlet> solve(Sequence &frames, map<string, float>  params);
+    ///inherited virtual
+    vector<Solvlet> solve(Sequence& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM);
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name

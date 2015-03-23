@@ -19,28 +19,30 @@
 using namespace std;
 using namespace opengm;
 
-//define the space and the model
-
 #define PI 3.14159265
 
+///define the space and the model
 class TLPSSolver: Solver
 {
 
-  //define the space
+  ///define the space
   typedef opengm::DiscreteSpace<> Space;
-  //define the model
+  ///define the model
   typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
 
-  //define the update rules
+  ///define the update rules
   typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
-  //define the inference algorithm
+  ///define the inference algorithm
   typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
   public:
     TLPSSolver(void);
-    ~TLPSSolver(void); //inherited virtual
-    vector<Solvlet> solve(Sequence& frames); //inherited virtual
-    vector<Solvlet> solve(Sequence& frames, map<string, float> params); //inherited virtual
+    ///inherited virtual
+    ~TLPSSolver(void);
+    ///inherited virtual
+    vector<Solvlet> solve(Sequence& frames);
+    ///inherited virtual
+    vector<Solvlet> solve(Sequence& frames, map<string, float> params);
   //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
@@ -57,7 +59,8 @@ class TLPSSolver: Solver
     float computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, map<string, float> params);
     float computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, map<string, float> params);
 
-    vector<vector<Frame*> > slice(const vector<Frame*>& frames); //separate the sequence into slices, for temporal solve
+    ///separate the sequence into slices, for temporal solve
+    vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 //    vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
 //    float interpolateFloat(float prevAngle, float nextAngle, int step, int numSteps);
 

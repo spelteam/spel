@@ -7,8 +7,8 @@
 
 using namespace std;
 
-// Objects of this class used as elements for building a skeleton model
-// See Skeleton.hpp for more info
+/// Objects of this class used as elements for building a skeleton model
+/// See [[Skeleton]].hpp for more info
 
 class BodyPart
 {
@@ -19,8 +19,10 @@ class BodyPart
     BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
     BodyPart& operator=( const BodyPart& bodyPart );
     BodyPart& operator=( BodyPart&& bodyPart );
-    bool operator==(const BodyPart &bp) const; // comparsion by unique index
-    bool operator!=(const BodyPart &bp) const; // comparsion by address
+/// comparsion by unique index
+    bool operator==(const BodyPart &bp) const;
+/// comparsion by address
+    bool operator!=(const BodyPart &bp) const;
 // get and set: All these functions just give access to the object fields
     int getPartID(void) const;
     void setPartID(int _partID);
@@ -41,15 +43,24 @@ class BodyPart
     float getRelativeLength(void);
     void setRelativeLength(float _relativeLength);
   private:
-    int partID; // identifier, must be unique within the limits of class
-    string partName; // the object name, respectively to a place in a skeleton model 
-    int parentJoint; // identifier of adjacent overlying joint/node (see BodyJoint.hpp)
-    int childJoint; // identifier of adjacent underlying joint/node (see BodyJoint.hpp)
-    bool isOccluded; // when "true" - then this body part is overlapped in a frame, used in the skeleton recovery algorithm
-    float spaceLength; // the length of body part, distance between neighboring joints
-    POSERECT <Point2f> partPolygon; // rectangle is used as simplified representation of body part 
-    float lwRatio; // coefficient of proportionality is used for scaling
-    float relativeLength; // 3d relative length
+/// identifier, must be unique within the limits of class
+    int partID;
+/// the object name, respectively to a place in a skeleton model 
+    string partName;
+/// identifier of adjacent overlying joint/node (see BodyJoint.hpp)
+    int parentJoint;
+/// identifier of adjacent underlying joint/node (see BodyJoint.hpp)
+    int childJoint;
+/// when "true" - then this body part is overlapped in a frame, used in the skeleton recovery algorithm
+    bool isOccluded;
+/// the length of body part, distance between neighboring joints
+    float spaceLength;
+/// rectangle is used as simplified representation of body part 
+    POSERECT <Point2f> partPolygon;
+/// coefficient of proportionality is used for scaling
+    float lwRatio;
+/// 3d relative length
+    float relativeLength;
 };
 
 std::ostream& operator<<(std::ostream& os, const BodyPart &bp);

@@ -14,12 +14,12 @@ class ImageSimilarityMatrix
 {
   public:
 
-    //constructors
+    ///constructors
     ImageSimilarityMatrix(void);
     ImageSimilarityMatrix(const ImageSimilarityMatrix& m);
     ImageSimilarityMatrix(const vector<Frame*>& frames);
     
-    //destructor
+    ///destructor
     ~ImageSimilarityMatrix(void);
 
     void buildImageSimilarityMatrix(const vector<Frame*>& frames);
@@ -33,8 +33,8 @@ class ImageSimilarityMatrix
     float max() const;
 
     float at(int row, int col) const;
-
-    float getPathCost(vector<int> path) const; //get cost for path through ISM
+    ///get cost for path through ISM
+    float getPathCost(vector<int> path) const; 
 
     uint32_t size() const;
 
@@ -51,7 +51,8 @@ class ImageSimilarityMatrix
 
 
   private:
-    Mat imageSimilarityMatrix; //the image similarity matrix
+    ///the image similarity matrix
+    Mat imageSimilarityMatrix;
     
 };
 

@@ -6,26 +6,30 @@
 
 using namespace std;
 
-// Used to evaluate accuracy of a detection
+/// Used to evaluate accuracy of a detection
 class Sequence
 {
   public:
     Sequence(void);
     Sequence(const Sequence& seq);
-    Sequence(int idx, string seqName, vector<Frame*> seq); //constructor
+    ///constructor
+    Sequence(int idx, string seqName, vector<Frame*> seq);
     string getName() const;
     void setName(const string& _name);
     int getID() const;
     void setID(const int& _id);
     vector<Frame*> getFrames() const;
     void setFrames(const vector<Frame*> _frames);
-    void computeInterpolation(map<string, float> &params); //compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
+    ///compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
+    void computeInterpolation(map<string, float> &params);
     void estimateUniformScale(map<string, float> &params);
     
   private:
     vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
-    vector<Frame*> frames; // detection score
-    string name; // sequence name
+    /// detection score
+    vector<Frame*> frames;
+    ///sequence name
+    string name;
     int id;
 };
 

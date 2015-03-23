@@ -18,14 +18,14 @@ class MinSpanningTree
     MinSpanningTree(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
     MinSpanningTree(const MinSpanningTree& mst);
     ~MinSpanningTree(void);
-
-    void build(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold); //build the MST
+    ///build the MST
+    void build(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
 
     MinSpanningTree& operator=(const MinSpanningTree& _MST);
 
     tree<int> getMST(void) const;
 
-    //get size
+    ///get size
     uint32_t size(void) const;
 
   private:

@@ -12,18 +12,18 @@
 using namespace std;
 using namespace cv;
 
-// class with common functions
+/// class with common functions
 class PoseHelper
 {
   public:
 
     //vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
-    //find squared distance between two points
-    //Arguments:
-    //one - first point
-    //two - second point
-    //Result:
-    //squared distance between one and two
+    ///find squared distance between two points
+    ///Arguments:
+    ///one - first point
+    ///two - second point
+    ///Result:
+    ///squared distance between one and two
     template <typename T> static double distSquared(T one, T two)
     {
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
@@ -34,14 +34,14 @@ class PoseHelper
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0) + pow(one.z - two.z, 2.0);
     }
 
-    //find angle between two vectors on a plane
-    //Arguments:
-    //x1, y1 - first vector
-    //x2, y2 - second vector
-    //Result:
-    //angle between first and second vector,
-    //positive counter clockwise
-    //angle is in the range [-PI; PI]
+    ///find angle between two vectors on a plane
+    ///Arguments:
+    ///x1, y1 - first vector
+    ///x2, y2 - second vector
+    ///Result:
+    ///angle between first and second vector,
+    ///positive counter clockwise
+    ///angle is in the range [-PI; PI]
     static double angle2D(double x1, double y1, double x2, double y2);
     static double interpolateFloat(double prevAngle, double nextAngle, int step, int numSteps);
     //
@@ -58,12 +58,12 @@ class PoseHelper
       result = result + cnt;
       return result;
     }
-    //copies tree
-    //Arguments:
-    //dst - copy to
-    //src - copy from
-    //Result:
-    //dst is copy of src
+    ///copies tree
+    ///Arguments:
+    ///dst - copy to
+    ///src - copy from
+    ///Result:
+    ///dst is copy of src
     template <class T, class tree_node_allocator>
     static void copyTree(tree <T, tree_node_allocator> &dst, const tree <T, tree_node_allocator> &src) 
     {
@@ -96,7 +96,7 @@ struct TPOSERECT
   T p3;
   T p4;
 };
-//represents rectangle
+///represents rectangle
 template <class T>
 struct POSERECT
 {
@@ -124,13 +124,13 @@ struct POSERECT
   T point2;
   T point3;
   T point4;
-  //check whether point lies in rectangle
-  //Arguments:
-  //point - point which checks
-  //Result:
-  //1 - point lies in rectangle
-  //-1 - point doesn't lies in rectangle
-  //0 - point lies on the edge(vertex)
+  ///check whether point lies in rectangle
+  ///Arguments:
+  ///point - point which checks
+  ///Result:
+  ///1 - point lies in rectangle
+  ///-1 - point doesn't lies in rectangle
+  ///0 - point lies on the edge(vertex)
   int8_t containsPoint(T point)
   {
     vector <T> contour;
@@ -140,7 +140,7 @@ struct POSERECT
     contour.push_back(point4);
     return pointPolygonTest(contour, point, false);
   }
-  //convert rectangle to vector of points
+  ///convert rectangle to vector of points
   vector <T> asVector()
   {
     vector <T> contour;
@@ -215,7 +215,7 @@ template <typename T>
 class PHPoint : public Point_<T>
 {
 public:
-  // various constructors
+  /// various constructors
   PHPoint() : Point_<T>() {}
   PHPoint(T _x, T _y) : Point_<T>(_x, _y) {}
   PHPoint(const Point_<T>& pt) : Point_<T>(pt) {}
@@ -234,7 +234,7 @@ template <typename T>
 class PHPoint3 : public Point3_ < T >
 {
 public:
-  // various constructors
+  /// various constructors
   PHPoint3() : Point3_<T>() {}
   PHPoint3(T _x, T _y, T _z) : Point3_<T>(_x, _y, _z) {}
   PHPoint3(const Point3_<T>& pt) : Point3_<T>(pt) {}

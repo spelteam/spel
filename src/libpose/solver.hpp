@@ -15,8 +15,10 @@ class Solver
   	virtual ~Solver(void);
     virtual vector<Solvlet> solve(const Sequence& v);
     virtual vector<Solvlet> solve(const Sequence& v, map<string, float> params);
-  	string getName(void); //get the solver name. Every class inheriting solver has its own Name
-    int getId(void); //get the solver Id. Every class inheriting solver has its own ID
+    ///get the solver name. Every class inheriting solver has its own Name
+  	string getName(void);
+    ///get the solver Id. Every class inheriting solver has its own ID
+    int getId(void);
   protected:
   	int id;
   	string name;

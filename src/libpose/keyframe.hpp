@@ -3,9 +3,9 @@
 
 #include "frame.hpp"
 
-//This class represents user defined
-//frame( implies that user analyzes the frame
-// and make a mark points ).
+///This class represents user defined
+///frame( implies that user analyzes the frame
+/// and make a mark points ).
 class Keyframe : public Frame
 {
   public:
