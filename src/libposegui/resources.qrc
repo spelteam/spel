@@ -16,5 +16,7 @@
         <file>resources/stylesheets/Interframe.qss</file>
         <file>resources/stylesheets/Keyframe.qss</file>
         <file>resources/stylesheets/Lockframe.qss</file>
+        <file>resources/icons/interpolation.png</file>
+        <file>resources/icons/solving.png</file>
     </qresource>
 </RCC>

@@ -10,7 +10,6 @@
 #include "solveboxwidget.h"
 #include "frameboxwidget.h"
 #include "frameview2d.h"
-#include "sequence.hpp"
 
 #include "project.h"
 #include "utility.h"
@@ -45,14 +44,17 @@ MainWindow::MainWindow(QWidget *parent) :
     //set styles for group boxes
     this->setStyleSheet( Utility::fileToString(":/root/resources/stylesheets/Toolbox.qss") );
     //connect
+    Project::getInstance();//connect events at Project constructor
     //loading
     QObject::connect(&Project::getInstance(),&Project::load,framesView,&FrameTableWidget::loadProjectEvent);
     QObject::connect(&Project::getInstance(),&Project::load, currFrame, &FrameView2D::loadProjectEvent );
     QObject::connect(&Project::getInstance(),&Project::load, frameTools, &FrameBoxWidget::loadProjectEvent );
+    QObject::connect(&Project::getInstance(),&Project::load,solveTools, &SolveBoxWidget::loadProjectEvent);
     //closing
     QObject::connect(&Project::getInstance(),&Project::close,framesView,&FrameTableWidget::closeProjectEvent);
     QObject::connect(&Project::getInstance(),&Project::close,currFrame,&FrameView2D::closeProjectEvent);
     QObject::connect(&Project::getInstance(),&Project::close,frameTools,&FrameBoxWidget::closeProjectEvent);
+    QObject::connect(&Project::getInstance(),&Project::close,solveTools, &SolveBoxWidget::closeProjectEvent);
     //scaling
     QObject::connect(frameTools->itemSkaler, &QSlider::valueChanged, currFrame, &FrameView2D::scaleItemsEvent);
     //mask opacity
@@ -63,6 +65,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //change frametype
     QObject::connect(frameTools,&FrameBoxWidget::changeFrametype,
                      framesView,&FrameTableWidget::changeFrametypeEvent);
+    //interpolation events
+    QObject::connect(&Project::getInstance(),&Project::keyframeUpdated,
+                     solveTools,&SolveBoxWidget::keyframeUpdatedEvent);
+
 }
 
 MainWindow::~MainWindow()
@@ -91,15 +97,15 @@ void MainWindow::on_actionClose_triggered()
 void MainWindow::on_actionOpen_triggered()
 {
     //get filename from OpenFileDialog
-   QString projectFilename = QFileDialog::getOpenFileName(
-         this, //parent
-         "Open project", //caption
-         "", //start directory
-         "Project files (*.xml)" //filter files
-     );
+   //QString projectFilename = QFileDialog::getOpenFileName(
+   //      this, //parent
+    //     "Open project", //caption
+    //     "", //start directory
+    //     "Project files (*.xml)" //filter files
+    // );
 
-//    QString projectFilename =
-//            "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
+    QString projectFilename =
+            "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
     //try to open project
     ui->statusBar->showMessage("Loading project");
 
@@ -124,10 +130,5 @@ void MainWindow::on_actionOpen_triggered()
         //load project to GUI
        Project::getInstance().load();
        ui->statusBar->showMessage("Project was loaded: "+QString::number(elapsed));
-
-       Sequence seq(0, "test", Project::getInstance().getFrames());
-       map<string,float> params;
-       //seq.estimateUniformScale(params);
-       seq.computeInterpolation(params);
     }
 }

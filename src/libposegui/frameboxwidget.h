@@ -13,7 +13,7 @@ class FrameBoxWidget : public QGroupBox
 {
     Q_OBJECT
 public:
-    explicit FrameBoxWidget( FrameTableWidget* framesView );
+    explicit FrameBoxWidget( QWidget *parent = 0 );
     ~FrameBoxWidget();
 signals:
     void changeFrametype( int frameNum );
@@ -34,8 +34,6 @@ private:
     bool isKeyframe;
     //number of current frame
     int num;
-    //link to frame table
-    FrameTableWidget* framesView;
 public:
     //view
     QPushButton *changeViewer;

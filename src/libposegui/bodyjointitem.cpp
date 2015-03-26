@@ -2,14 +2,16 @@
 
 #include "bodypartitem.h"
 #include "utility.h"
+#include "project.h"
 #include <bodyJoint.hpp>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
+
 //PUBLIC
 
-//TODO: [L] Rich tool tip
-//TODO: [!] Context menu
+FRAMETYPE BodyJointItem::Frametype = INTERPOLATIONFRAME;
+
 BodyJointItem::BodyJointItem(BodyJoint *joint, QGraphicsItem *parent)
     : QGraphicsItem(parent),
       joint(joint)
@@ -17,9 +19,11 @@ BodyJointItem::BodyJointItem(BodyJoint *joint, QGraphicsItem *parent)
     //set position
     setPos(joint->getImageLocation().x,joint->getImageLocation().y);
     //set params
-    setFlag(ItemIsSelectable);
-    setFlag(ItemIsMovable);
-    setFlag(ItemSendsGeometryChanges);
+    if( Frametype == KEYFRAME ){
+        setFlag(ItemIsSelectable);
+        setFlag(ItemIsMovable);
+        setFlag(ItemSendsGeometryChanges);
+    }
     setCacheMode(DeviceCoordinateCache);
     setZValue(1.0);
     setAcceptHoverEvents(true);
@@ -81,6 +85,7 @@ QVariant BodyJointItem::itemChange(GraphicsItemChange change, const QVariant &va
         foreach (auto *part, partList) {
             part->adjust();
         }
+        Project::getInstance().keyframeUpdated();
         break;
     }
     default:

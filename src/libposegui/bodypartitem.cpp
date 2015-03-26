@@ -48,20 +48,24 @@ void BodyPartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 {
     if( !source || !dest ) return;
 
-    QColor color = bodyPart->getIsOccluded() ?
-                Palette::occluded : Palette::notOccluded;
-    qreal width = 0;
+    QColor color;// = bodyPart->getIsOccluded() ?
+                //Palette::occluded : Palette::notOccluded;
     switch(Frametype){
     case INTERPOLATIONFRAME:
-        color = Utility::blendColors(color,Palette::interpolation);
+        color = Palette::interpolation;
         break;
     case KEYFRAME:
-        color = Utility::blendColors(color,Palette::keyframe);
+        color = Palette::keyframe;
         break;
     case LOCKFRAME:
-        color = Utility::blendColors(color,Palette::lockframe);
+        color = Palette::lockframe;
         break;
     }
+    if( !bodyPart->getIsOccluded() ){
+        color = Utility::blendColors(color,Palette::notOccluded);
+    }
+    qreal width = 0;
+
     if( option->state & QStyle::State_MouseOver ){
         color = Utility::blendColors(color,Palette::selected);
         width = 0.7;
@@ -100,7 +104,7 @@ void BodyPartItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event){
 //PRIVATE
 
 QColor BodyPartItem::Palette::occluded = Qt::yellow;
-QColor BodyPartItem::Palette::notOccluded = Qt::cyan;
+QColor BodyPartItem::Palette::notOccluded = Qt::white;
 QColor BodyPartItem::Palette::interpolation = Qt::blue;
 QColor BodyPartItem::Palette::lockframe = Qt::green;
 QColor BodyPartItem::Palette::keyframe = Qt::red;

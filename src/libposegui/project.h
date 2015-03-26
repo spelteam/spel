@@ -57,8 +57,10 @@ signals:
     void close();
     void save();
 
-public slots:
+    void keyframeUpdated();
 
+public slots:
+    //void interpolateFramesEvent();
 private slots:
     Project::ErrorCode openProjectEvent( const QString& filename );
     void loadProjectEvent();
@@ -80,6 +82,8 @@ public:
 
     void exchangeAtKeyframe( int num );
     void exchangeAtInterpolation( int num );
+
+    void interpolateFrames();
 
 private:
     //loading skeleton

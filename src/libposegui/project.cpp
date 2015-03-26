@@ -8,6 +8,7 @@
 #include <keyframe.hpp>
 #include <interpolation.hpp>
 #include <lockframe.hpp>
+#include <sequence.hpp>
 
 #include "projectattr.h"
 #include "utility.h"
@@ -68,12 +69,23 @@ void Project::exchangeAtKeyframe( int num ){
         }
     }
     frames.at(num) = std::move( keyFrame );
+    //update state of solve box
+    keyframeUpdated();
 }
 
 void Project::exchangeAtInterpolation( int num ){
     FramePtr interFrame = FramePtr( new Interpolation() );
     interFrame->setSkeleton( *skeleton.get() );
     frames.at(num) = std::move( interFrame );
+    //update state of solve box
+    keyframeUpdated();
+}
+
+void Project::interpolateFrames(){
+    Sequence seq(0, "test", Project::getInstance().getFrames());
+    map<string,float> params;
+    //seq.estimateUniformScale(params);
+    seq.computeInterpolation(params);
 }
 
 
@@ -99,6 +111,7 @@ Project::Project(QObject *parent)
 //TODO: [L]Create status bar of loading
 //TODO: [L] Error message write in low-level functions
 //TODO: [!?]Refactor method
+//TODO: [!]Fix when filename is empty string
 Project::ErrorCode Project::openProjectEvent(const QString &filename){
     if( currState == ProjectState::OPENED ){
         lastError = "Project is opened";
@@ -158,6 +171,8 @@ void Project::closeProjectEvent(){
 
 //TODO: [!] This event is called last.
 void Project::loadProjectEvent(){
+    //interpolate frames
+    interpolateFrames();
     //mark as loaded
     qDebug() << "Project loading" << endl;
     currState = ProjectState::LOADED;

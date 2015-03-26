@@ -2,6 +2,7 @@
 #define BODYJOINTITEM_H
 
 #include <QGraphicsItem>
+#include <frame.hpp>
 
 class BodyPartItem;
 class BodyJoint;
@@ -38,6 +39,8 @@ protected:
 
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+public:
+    static FRAMETYPE Frametype;
 private:
     void updateToolTip();
 private:

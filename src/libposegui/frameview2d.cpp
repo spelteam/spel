@@ -53,7 +53,7 @@ void FrameView2D::changeMaskOpacityEvent(int value){
 
 void FrameView2D::pickFrameEvent(int num){
     loadFrameImage(num);
-    loadFrameJoints(num);
+    loadFrameSkeleton(num);
 }
 
 //PRIVATE
@@ -92,7 +92,7 @@ void FrameView2D::loadFrameImage(int num){
 }
 
 //TODO: [!] Load skeleton, (save?)
-void FrameView2D::loadFrameJoints(int num){
+void FrameView2D::loadFrameSkeleton(int num){
     //clear frame
     auto itemList = scene->items();
     for( auto it = itemList.begin(); it != itemList.end(); ++it){
@@ -102,38 +102,36 @@ void FrameView2D::loadFrameJoints(int num){
     }
     //load skeleton
     auto frame = Project::getInstance().getFrame(num);
-    if(true){//frame->getFrametype() == KEYFRAME ){
-        //load body joints
-        auto bodyJoints = frame->getSkeletonPtr()
-                ->getJointTreePtr();
-        auto it = bodyJoints->begin();
-        while( it != bodyJoints->end() ){
-            BodyJoint *joint = &(*it);
-            BodyJointItem* newItem = new BodyJointItem(joint);
-            scene->addItem(newItem);
+    BodyJointItem::Frametype = frame->getFrametype();
+    auto bodyJoints = frame->getSkeletonPtr()
+            ->getJointTreePtr();
+    auto it = bodyJoints->begin();
+    while( it != bodyJoints->end() ){
+        BodyJoint *joint = &(*it);
+        BodyJointItem* newItem = new BodyJointItem(joint);
+        scene->addItem(newItem);
 
-            ++it;
+        ++it;
+    }
+    //load body parts
+    BodyPartItem::Frametype = frame->getFrametype();
+    auto bodyParts = frame->getSkeletonPtr()
+            ->getPartTreePtr();
+    auto pit = bodyParts->begin();
+    while( pit != bodyParts->end() ){
+        BodyPart *part = &(*pit);
+        BodyJointItem* child =
+                Utility::getJointItemById(scene->items(),part->getChildJoint());
+        BodyJointItem* parent =
+                Utility::getJointItemById(scene->items(),part->getParentJoint());
+        if( !child || !parent ){
+            qDebug() << "Error! Joints not exist!" << endl;
+            return;
         }
-        //load body parts
-        BodyPartItem::Frametype = KEYFRAME;
-        auto bodyParts = frame->getSkeletonPtr()
-                ->getPartTreePtr();
-        auto pit = bodyParts->begin();
-        while( pit != bodyParts->end() ){
-            BodyPart *part = &(*pit);
-            BodyJointItem* child =
-                    Utility::getJointItemById(scene->items(),part->getChildJoint());
-            BodyJointItem* parent =
-                    Utility::getJointItemById(scene->items(),part->getParentJoint());
-            if( !child || !parent ){
-                qDebug() << "Error! Joints do not exist!" << endl;
-                return;
-            }
-            BodyPartItem* newItem = new BodyPartItem(part,child,parent);
-            scene->addItem(newItem);
+        BodyPartItem* newItem = new BodyPartItem(part,child,parent);
+        scene->addItem(newItem);
 
-            ++pit;
-        }
+        ++pit;
     }
 }
 

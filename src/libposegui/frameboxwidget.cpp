@@ -3,10 +3,10 @@
 #include "frametablewidget.h"
 
 //TODO:[!] naked STRINGS!!!
-FrameBoxWidget::FrameBoxWidget( FrameTableWidget *framesView ) :
+FrameBoxWidget::FrameBoxWidget(QWidget *parent ) :
+    QGroupBox(parent),
     isKeyframe(false),
-    num(-1),
-    framesView(framesView)
+    num(-1)
 {
     //view
     changeViewer = new QPushButton(this);
@@ -36,7 +36,7 @@ FrameBoxWidget::FrameBoxWidget( FrameTableWidget *framesView ) :
     maskViewer->setSingleStep(1);
     maskViewer->setPageStep(1);
     //layouts
-    MainLayout = new QHBoxLayout;
+    MainLayout = new QHBoxLayout();
     MainLayout->addWidget(changeViewer);
     MainLayout->addWidget(frametypeSelector);
     MainLayout->addWidget(maskEditor);

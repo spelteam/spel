@@ -54,7 +54,7 @@ public:
 
 private:
     void loadFrameImage( int num );
-    void loadFrameJoints( int num );
+    void loadFrameSkeleton( int num );
 
 private:
     QGraphicsPixmapItem* frameImage;
