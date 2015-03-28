@@ -108,6 +108,7 @@ int main (int argc, char **argv)
         vector <vector <LimbLabel> > labels;
         try
         {
+          cout << "Detecting frame " << f->getID() << "..." << endl;
           labels = detector.detect(f, detectParams, labels);
           projectLoader.Save(labels, argv[2], f->getID());
           projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);

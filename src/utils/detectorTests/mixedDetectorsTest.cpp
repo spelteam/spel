@@ -34,83 +34,113 @@ int main(int argc, char **argv)
   }
 
   map <uint32_t, vector <vector <LimbLabel>>> allLabels;
+  vector <Frame*> vFrames = projectLoader.getFrames();
+  vector <Frame*>::iterator i;
 
-  ColorHistDetector detector;
   map <string, float> params;
   cout << "ColorHistDetector..." << endl;
   cout << "Training..." << endl;
-  try
+  vector <Frame*> allFrames = projectLoader.getFrames();
+  vector<Frame*> trainFrames;
+  int8_t kfCount = 0;
+  for (vector <Frame*>::iterator frame = allFrames.begin(); frame != allFrames.end(); ++frame)
   {
-    detector.train(projectLoader.getFrames(), params);
-    Sequence *seq = new Sequence(0, "colorHistDetector", projectLoader.getFrames());
-    if (seq != 0)
+    if ((*frame)->getFrametype() != KEYFRAME && (*frame)->getFrametype() != LOCKFRAME && kfCount == 1)
     {
-      seq->estimateUniformScale(params);
-      seq->computeInterpolation(params);
-      delete seq;
+      trainFrames.push_back(*frame);
     }
-  }
-  catch (exception &e)
-  {
-    cerr << e.what() << endl;
-    return -1;
-  }
+    else if ((*frame)->getFrametype() == KEYFRAME || (*frame)->getFrametype() == LOCKFRAME)
+    {
+      trainFrames.push_back(*frame);
+      kfCount++;
+    }
 
-  cout << "Training complete" << endl;
-  vector <Frame*> vFrames = projectLoader.getFrames();
-  vector <Frame*>::iterator i;
-  map <string, float> detectParams;
-  cout << "Detecting..." << endl;
-  for (i = vFrames.begin(); i != vFrames.end(); ++i)
-  {
-    //check if frame has a keyframe before AND after
-    bool hasPrevAnchor = false, hasFutureAnchor = false;
-    //before
-    for (vector<Frame*>::reverse_iterator prevAnchor(i); prevAnchor != vFrames.rend(); ++prevAnchor)
-    {
-      if ((*prevAnchor)->getFrametype() == KEYFRAME || (*prevAnchor)->getFrametype() == LOCKFRAME)
-      {
-        hasPrevAnchor = true;
-        break;
-      }
-    }
-    //after
-    for (vector<Frame*>::iterator futureAnchor = i; futureAnchor != vFrames.end(); ++futureAnchor)
-    {
-      if ((*futureAnchor)->getFrametype() == KEYFRAME || (*futureAnchor)->getFrametype() == LOCKFRAME)
-      {
-        hasFutureAnchor = true;
-        break;
-      }
-    }
-    if (!hasPrevAnchor || !hasFutureAnchor)
+    if (kfCount < 2)
       continue;
 
-    Frame *f = *i;
-#ifndef DEBUG
-    if (f->getFrametype() == INTERPOLATIONFRAME)
-#endif  // DEBUG
+    kfCount = 0;
+    ColorHistDetector detector;
+    cout << "Training..." << endl;
+    try
     {
-      vector <vector <LimbLabel> > labels;
-      try
+      detector.train(trainFrames, params);
+      Sequence *seq = new Sequence(0, "colorHistDetector", projectLoader.getFrames());
+      if (seq != 0)
       {
-        labels = detector.detect(f, detectParams, labels);
-        allLabels[f->getID()] = labels;
-      }
-      catch (exception &e)
-      {
-        cerr << e.what() << endl;
-        continue;
+        seq->estimateUniformScale(params);
+        seq->computeInterpolation(params);
+        delete seq;
       }
     }
+    catch (exception &e)
+    {
+      cerr << e.what() << endl;
+      return -1;
+    }
+
+    cout << "Training complete" << endl;
+    vector <Frame*>::iterator i;
+    map <string, float> detectParams;
+    cout << "Detecting..." << endl;
+    for (i = trainFrames.begin(); i != trainFrames.end(); ++i)
+    {
+      //check if frame has a keyframe before AND after
+      bool hasPrevAnchor = false, hasFutureAnchor = false;
+      //before
+      for (vector<Frame*>::reverse_iterator prevAnchor(i); prevAnchor != trainFrames.rend(); ++prevAnchor)
+      {
+        if ((*prevAnchor)->getFrametype() == KEYFRAME || (*prevAnchor)->getFrametype() == LOCKFRAME)
+        {
+          hasPrevAnchor = true;
+          break;
+        }
+      }
+      //after
+      for (vector<Frame*>::iterator futureAnchor = i; futureAnchor != trainFrames.end(); ++futureAnchor)
+      {
+        if ((*futureAnchor)->getFrametype() == KEYFRAME || (*futureAnchor)->getFrametype() == LOCKFRAME)
+        {
+          hasFutureAnchor = true;
+          break;
+        }
+      }
+      if (!hasPrevAnchor || !hasFutureAnchor)
+        continue;
+      Frame *f = *i;
+#ifndef DEBUG
+      if (f->getFrametype() == INTERPOLATIONFRAME)
+#endif  // DEBUG
+      {
+        vector <vector <LimbLabel> > labels;
+        try
+        {
+          labels = allLabels.at(f->getID());
+        }
+        catch (...)
+        {
+          cout << "No labels for this frame." << endl;
+        }
+        try
+        {
+          cout << "Detecting frame " << f->getID() << "..." << endl;
+          labels = detector.detect(f, detectParams, labels);
+          allLabels[f->getID()] = labels;
+        }
+        catch (exception &e)
+        {
+          cerr << e.what() << endl;
+          continue;
+        }
+      }
+    }
+    cout << "Detecting complete" << endl;
+    trainFrames.clear();
   }
   cout << "Detecting complete" << endl;
 
   cout << "HoGDetector..." << endl;
 
-  vector <Frame*> allFrames = projectLoader.getFrames();
-  vector<Frame*> trainFrames;
-  int8_t kfCount = 0;
+  kfCount = 0;
   for (vector <Frame*>::iterator frame = allFrames.begin(); frame != allFrames.end(); ++frame)
   {
     if ((*frame)->getFrametype() != KEYFRAME && (*frame)->getFrametype() != LOCKFRAME && kfCount == 1)
@@ -190,6 +220,7 @@ int main(int argc, char **argv)
         }
         try
         {
+          cout << "Detecting frame " << f->getID() << "..." << endl;
           labels = detector.detect(f, detectParams, labels);
           allLabels[f->getID()] = labels;
         }
