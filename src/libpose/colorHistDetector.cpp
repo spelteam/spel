@@ -45,7 +45,7 @@ ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(PartModel 
 // Constructor with initialization of constant field "nBins"
 ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
 {
-  id = 0;
+  id = 0x434844;
 }
 
 // Returns unique ID of "ColorHistDetector" object

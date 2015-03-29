@@ -10,6 +10,7 @@ using namespace cv;
 class HogDetector : public Detector
 {
   public:
+    HogDetector(void);
     int getID(void);
     void setID(int _id);
     void train(vector <Frame*> _frames, map <string, float> params);

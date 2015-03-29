@@ -64,6 +64,7 @@ bg=blue</panel_attributes>
 --
 
 --
++surfDetector()
 +getId(): int
 +setId(int _id) 
 +train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)
@@ -947,6 +948,7 @@ bg=yellow</panel_attributes>
 +partSize: map&lt;uint32_t, Size&gt;
 +partModels: map&lt;uint32_t, map&lt;uint32_t, PartModel&gt;&gt;
 --
++HogDetector()
 +getId(): int
 +setId(int _id) 
 +train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)

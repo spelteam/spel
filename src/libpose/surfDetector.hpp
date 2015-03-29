@@ -6,6 +6,7 @@
 class SurfDetector : public Detector
 {
   public:
+    SurfDetector(void);
     int getID(void);
     void setID(int _id);
     void train(vector <Frame*> frames, map <string, float>);

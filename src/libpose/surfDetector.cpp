@@ -1,5 +1,10 @@
 #include "surfDetector.hpp"
 
+SurfDetector::SurfDetector(void)
+{
+  id = 0x5344;
+}
+
 int SurfDetector::getID(void)
 {
   return id;

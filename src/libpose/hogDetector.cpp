@@ -2,6 +2,11 @@
 
 #define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 
+HogDetector::HogDetector(void)
+{
+  id = 0x4844;
+}
+
 int HogDetector::getID(void)
 {
   return id;
