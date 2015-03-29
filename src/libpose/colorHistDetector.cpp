@@ -65,12 +65,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
 {
   frames = _frames; // vector of pointers - presents a sequence of frames
   sort(frames.begin(), frames.end(), FramePointerComparer()); // sorting frames by id
-  const float scaleParam = 1; // scaling coefficient
-  const string sScaleParam = "scaleParam";
+  //const float scaleParam = 1; // scaling coefficient
+  //const string sScaleParam = "scaleParam";
   const uint8_t debugLevel = 1;
   const string sDebugLevel = "debugLevel";
   // first we need to check all used params
-  params.emplace(sScaleParam, scaleParam);
+  //params.emplace(sScaleParam, scaleParam);
   params.emplace(sDebugLevel, debugLevel);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
@@ -155,7 +155,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       catch (...)
       {
         stringstream ss;
-        ss << "Maybe there is no '" << sScaleParam << "' param";
+        ss << "Can't get LWRatio value";
         if (debugLevelParam >=1)
           cerr << ERROR_HEADER << ss.str() << endl;
         throw logic_error(ss.str());
@@ -438,8 +438,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const uint32_t uniqueLocationCandidates = 4; // limiting the choice of the solutions number for each bodypart 
   const string sUniqueLocationCandidates = "uniqueLocationCandidates";
 
-  const float scaleParam = 1; // scaling coefficient
-  const string sScaleParam = "scaleParam";
+  //const float scaleParam = 1; // scaling coefficient
+  //const string sScaleParam = "scaleParam";
 
   const float searchDistCoeffMult = 1.25;
   const string sSearchDistCoeffMult = "searchDistCoeffMult";
@@ -457,7 +457,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sMaxTheta, maxTheta);
   params.emplace(sStepTheta, stepTheta);
   params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
-  params.emplace(sScaleParam, scaleParam);
+  //params.emplace(sScaleParam, scaleParam);
   params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
   params.emplace(sUseCSdet, useCSdet);
   params.emplace(sDebugLevel, debugLevel);
@@ -504,7 +504,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     float searchDistance = 0;
     try
     {      
-      float mult = partTree.depth(iteratorBodyPart) * searchDistCoeffMult;
+      float mult = partTree.depth(iteratorBodyPart) * params.at(sSearchDistCoeffMult);
       if (mult == 0) mult = 1;
       searchDistance = boneLength * params.at(sSearchDistCoeff) * partTree.depth(iteratorBodyPart) * mult; // the limiting of search area
     }
