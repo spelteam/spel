@@ -402,7 +402,22 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
+              Size size;
+              try
+              {
+                size = partSize.at(iteratorBodyPart->getPartID());
+              }
+              catch (...)
+              {
+                stringstream ss;
+                ss << "Can't get partSize for body part " << iteratorBodyPart->getPartID();
+                if (debugLevelParam >= 1)
+                { 
+                  cerr << ERROR_HEADER << ss.str() << endl;
+                  throw logic_error(ss.str());
+                }
+              }
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -420,7 +435,22 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
+        Size size;
+        try
+        {
+          size = partSize.at(iteratorBodyPart->getPartID());
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Can't get partSize for body part " << iteratorBodyPart->getPartID();
+          if (debugLevelParam >= 1)
+          {
+            cerr << ERROR_HEADER << ss.str() << endl;
+            throw logic_error(ss.str());
+          }
+        }
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
         sortedLabels.push_back(generatedLabel);
       }
     }
