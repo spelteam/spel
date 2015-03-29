@@ -7,7 +7,7 @@ TEST(scoreTest, ConstructorTest)
   
   EXPECT_EQ(0, s1.getScore());
   EXPECT_TRUE(s1.getDetName().empty());
-  EXPECT_FLOAT_EQ(0.0f, s1.getScore());
+  EXPECT_FLOAT_EQ(1.0f, s1.getCoeff());
 
   float score = 12.5f;
   string detName = "Test Name";
@@ -16,6 +16,6 @@ TEST(scoreTest, ConstructorTest)
 
   EXPECT_EQ(score, s2.getScore());
   EXPECT_EQ(detName, s2.getDetName());
-  EXPECT_FLOAT_EQ(coeff, s1.getCoeff());
+  EXPECT_FLOAT_EQ(coeff, s2.getCoeff());
 }
 
