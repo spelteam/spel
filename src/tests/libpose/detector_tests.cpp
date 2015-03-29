@@ -39,8 +39,8 @@ void FillRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
 {
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-    for (int i = xmin; i <= xmax; i++)
-        for (int j = ymin; j <= ymax; j++)
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+        for (int j = (int)ymin; j <= (int)ymax; j++)
             Img.at<Vec3b>(j, i) = colour;
 }
 
@@ -48,9 +48,9 @@ void FillRotatedRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
 {
   float xmax, ymax, xmin, ymin;
   rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-      if (rect.containsPoint(Point2f(i,j)) == 1)
+  for (int i = (int)xmin; i <= (int)xmax; i++)
+    for (int j = (int)ymin; j <= (int)ymax; j++)
+      if (rect.containsPoint(Point2f((float)i,(float)j)) == 1)
         Img.at<Vec3b>(j, i) = colour;
 }
 
@@ -60,10 +60,10 @@ void FillRectRand(Mat &Img, POSERECT<Point2f> &rect)
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
     Vec3b colour;
     const int c = 250;
-    for (int i = xmin; i <= xmax; i++)
-        for (int j = ymin; j <= ymax; j++)
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+        for (int j = (int)ymin; j <= (int)ymax; j++)
         {
-            colour = Vec3b(rand() * c / RAND_MAX, rand() * c / RAND_MAX, rand() * c / RAND_MAX);
+            colour = Vec3b(uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX));
             Img.at<Vec3b>(j, i) = colour;
         }
         
@@ -78,13 +78,15 @@ Mat RotateImage(Mat Img, POSERECT<Point2f> &rect, float angle)
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
     Point2f center = rect.GetCenter<Point2f >();
     Point2f E;
-    for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
+    for (int i = (int)xmin; i <= (int)xmax; i++)
     {
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+      {
         E = Point2i(i, j);
         E = PoseHelper::rotatePoint2D(E, center, angle);
-        if ((0 <  E.x < size.width) && (0 < E.y < size.height))
-            img2.at<Vec3b>((int32_t)(E.y), (int32_t)(E.x)) = Img.at<Vec3b>(j, i);
+        if ((0 < E.x < size.width) && (0 < E.y < size.height))
+          img2.at<Vec3b>((int32_t)(E.y), (int32_t)(E.x)) = Img.at<Vec3b>(j, i);
+      }
     }
     return img2;
 }
@@ -93,16 +95,16 @@ Mat RotateImage(Mat Img, POSERECT<Point2f> &rect, float angle)
 void GetExtremePoints(Mat Img, Vec3b bgColour, Point2f &Min, Point2f &Max)
 {
     Size size = Img.size();
-    Min = Point2f(size.width + 1, size.height + 1);
+    Min = Point2f((float)size.width + 1, (float)size.height + 1);
     Max = Point2f(-1, -1);
     for (int i = 0; i < size.width; i++)
         for (int j = 0; j < size.height; j++)
             if (Img.at<Vec3b>(j, i) != bgColour)
             {
-                if (i < Min.x) { Min.x = i; }
-                if (i > Max.x) { Max.x = i; }
-                if (j < Min.y) { Min.y = j; }
-                if (j > Max.y) { Max.y = j; }
+                if (i < (int)Min.x) { Min.x = (float)i; }
+                if (i > (int)Max.x) { Max.x = (float)i; }
+                if (j < (int)Min.y) { Min.y = (float)j; }
+                if (j > (int)Max.y) { Max.y = (float)j; }
             }
 }
 
@@ -131,7 +133,7 @@ TEST(DetectorTests, rotateImageToDefault_OneColor)
     FillRotatedRect(img2, RotatedRect, colour);
 
     TestingDetector chd;
-    Size size(xmax - xmin + 1, ymax - ymin + 1);
+    Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
 
     // Testing
     Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
@@ -154,15 +156,15 @@ TEST(DetectorTests, rotateImageToDefault_OneColor)
 
     // Checking matching of the images points with one fill color 
     uint32_t S = 0;
-    uint32_t S0 = (xmax - xmin + 1)*(ymax - ymin + 1);
-    for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-        if (img1.at<Vec3b>(j, i) == X.at<Vec3b>(j - ymin, i - xmin))
+    uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+    for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img1.at<Vec3b>(j, i) == X.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
             S++;
 
 
     float epsilon = 20; // tolerable error of the matching points number, %
-    float FalsePixels = 100 * (S0 - S) / S0;
+    float FalsePixels = (float)(100 * (S0 - S) / S0);
     cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
@@ -193,7 +195,7 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
     img2 = RotateImage(img1, rect, angle);
 
     TestingDetector chd;
-    Size size(xmax - xmin + 1, ymax - ymin + 1);
+    Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
 
     POSERECT <Point2f> RotatedRectCopy = RotatedRect;
 
@@ -217,14 +219,14 @@ TEST(DetectorTests, rotateImageToDefault_RandColor)
 
     // Checking matching of the images points with one fill color 
     uint32_t S = 0;
-    uint32_t S0 = (xmax - xmin + 1)*(ymax - ymin + 1);
-    for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-    if (img1.at<Vec3b>(j, i) == X.at<Vec3b>(j - ymin, i - xmin))
-        S++;
+    uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img1.at<Vec3b>(j, i) == X.at<Vec3b>(((int)(j - ymin), (int)(i - xmin))))
+          S++;
 
     float epsilon = 67; // tolerable error of the matching points number, %
-    float FalsePixels = 100 * (S0 - S) / S0;
+    float FalsePixels = (float)(100 * (S0 - S) / S0);
     cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
@@ -272,7 +274,7 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
 
     // Prepare input data
     Size img_size = img1.size();
-    int rows = img_size.height, cols = img_size.width; // image size
+    
     float angle = 45; // the rotetion angle
     float x1 = 10.0, x2 = 39.0, y1 = 20.0, y2 = 59.0; // the rectangle vertices
     POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
@@ -285,7 +287,7 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     Point2f MaxR(xmax, ymax);
 
     TestingDetector chd;
-    Size size(xmax - xmin + 1, ymax - ymin + 1);
+    Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
 
     // Testing
 
@@ -326,40 +328,40 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     float epsilon = 75; // tolerable error of the matching points number, %
 
     uint32_t S = 0;
-    uint32_t S0 = (xmax - xmin + 1)*(ymax - ymin + 1);
+    uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
 
-    for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-    if (img1.at<Vec3b>(j, i) == X1.at<Vec3b>(j - ymin, i - xmin))
-        S++;
-    float FalsePixels = 100 * (S0 - S) / S0;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img1.at<Vec3b>(j, i) == X1.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    float FalsePixels = (float)(100 * (S0 - S) / S0);
     cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     S = 0;
-    for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-    if (img2.at<Vec3b>(j, i) == X2.at<Vec3b>(j - ymin, i - xmin))
-        S++;
-    FalsePixels = 100 * (S0 - S) / S0;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img2.at<Vec3b>(j, i) == X2.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    FalsePixels = (float)(100 * (S0 - S) / S0);
     cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     S = 0;
-    for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-    if (img3.at<Vec3b>(j, i) == X3.at<Vec3b>(j - ymin, i - xmin))
-        S++;
-    FalsePixels = 100 * (S0 - S) / S0;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img3.at<Vec3b>(j, i) == X3.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    FalsePixels = (float)(100 * (S0 - S) / S0);
     cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 
     S = 0;
-    for (int i = xmin; i <= xmax; i++)
-    for (int j = ymin; j <= ymax; j++)
-    if (img4.at<Vec3b>(j, i) == X4.at<Vec3b>(j - ymin, i - xmin))
-        S++;
-    FalsePixels = 100 * (S0 - S) / S0;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img4.at<Vec3b>(j, i) == X4.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    FalsePixels = (float)(100 * (S0 - S) / S0);
     cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
     EXPECT_LE(FalsePixels, epsilon);
 

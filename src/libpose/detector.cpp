@@ -74,11 +74,11 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
   {
     for (int32_t y = 0; y < size.height; y++)
     {
-      Point2f p = Point2f(x, y);
+      Point2f p = Point2f((float)x, (float)y);
       try
       {
         p = PoseHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
-        Vec3b color = imgSource.at<Vec3b>(round(p.y), round(p.x));
+        Vec3b color = imgSource.at<Vec3b>((int)round(p.y), (int)round(p.x));
         partImage.at<Vec3b>(y, x) = color;
       }
       catch (...)

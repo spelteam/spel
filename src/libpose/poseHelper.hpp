@@ -47,7 +47,7 @@ class PoseHelper
     //
     template <typename T> static T rotatePoint2D(const T point, const T pivot, const float degrees)
     {
-      double radians = degrees * M_PI / 180.0;
+      float radians = degrees * M_PI / 180.0;
       T pt, cnt;
       pt = point;
       cnt = pivot;
@@ -138,7 +138,7 @@ struct POSERECT
     contour.push_back(point2);
     contour.push_back(point3);
     contour.push_back(point4);
-    return pointPolygonTest(contour, point, false);
+    return (int8_t)pointPolygonTest(contour, point, false);
   }
   ///convert rectangle to vector of points
   vector <T> asVector()

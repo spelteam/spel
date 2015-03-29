@@ -25,7 +25,7 @@ double PoseHelper::angle2D(double x1, double y1, double x2, double y2)
 
 double PoseHelper::interpolateFloat(double prevAngle, double nextAngle, int step, int numSteps)
 {
-    float t;
+    double t;
     if(numSteps!=0)
         t = (double)step/(double)numSteps;
     else

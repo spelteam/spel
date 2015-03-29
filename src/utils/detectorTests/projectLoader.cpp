@@ -285,8 +285,8 @@ bool ProjectLoader::Load(string fileName)
         y = e->FloatAttribute(bodyJointYParam.c_str());
         if (imageOriginalCols != image.cols || imageOriginalRows != image.rows)
         {
-          float colsFactor = image.cols / imageOriginalCols;
-          float rowsFactor = image.rows / imageOriginalRows;
+          float colsFactor = (float)(image.cols / imageOriginalCols);
+          float rowsFactor = (float)(image.rows / imageOriginalRows);
           x *= colsFactor;
           y *= rowsFactor;
         }

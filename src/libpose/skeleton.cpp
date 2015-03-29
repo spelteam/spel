@@ -82,7 +82,7 @@ void Skeleton::setScale(float _scale)
 
 uint32_t Skeleton::getPartTreeCount(void) const
 {
-  return partTree.size();
+  return (uint32_t)partTree.size();
 }
 
 BodyJoint *Skeleton::getBodyJoint(int jointID) const

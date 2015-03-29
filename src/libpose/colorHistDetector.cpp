@@ -73,7 +73,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   params.emplace(sScaleParam, scaleParam);
   params.emplace(sDebugLevel, debugLevel);
 
-  debugLevelParam = params.at(sDebugLevel);
+  debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
   if (frames.size() == 0)
     throw logic_error("No input frames"); // the sequence of frames is empty
@@ -462,7 +462,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sUseCSdet, useCSdet);
   params.emplace(sDebugLevel, debugLevel);
 
-  debugLevelParam = params.at(sDebugLevel);
+  debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
@@ -1108,7 +1108,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     imgMat.release();
     if (debugLevelParam >= 2)
       cerr << ERROR_HEADER << "Dirty label!" << endl;
-    Score sc(0.0, detectorName.str());
+    Score sc(0.0, detectorName.str(), _useCSdet);
     s.push_back(sc);
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
   }
@@ -1138,7 +1138,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               imgMat.release();
               if (debugLevelParam >= 2)
                 cerr << ERROR_HEADER << "Dirty label!" << endl;
-              Score sc(0.0, detectorName.str());
+              Score sc(0.0, detectorName.str(), _useCSdet);
               s.push_back(sc);
               return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
             }
@@ -1155,7 +1155,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
                 imgMat.release();
                 if (debugLevelParam >= 2)
                   cerr << ERROR_HEADER << "Dirty label!" << endl;
-                Score sc(0.0, detectorName.str());
+                Score sc(0.0, detectorName.str(), _useCSdet);
                 s.push_back(sc);
                 return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
               }
@@ -1174,7 +1174,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
                 imgMat.release();
                 if (debugLevelParam >= 2)
                   cerr << ERROR_HEADER << "Dirty label!" << endl;
-                Score sc(0.0, detectorName.str());
+                Score sc(0.0, detectorName.str(), _useCSdet);
                 s.push_back(sc);
                 return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
               }
@@ -1214,13 +1214,13 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     #endif  // DEBUG
     throw logic_error(ss.str());
     }*/
-    Score sc(score, detectorName.str()); // create the score
+    Score sc(score, detectorName.str(), _useCSdet); // create the score
     s.push_back(sc); // the set of scores
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);// create the limb label
   }
   if (debugLevelParam >= 2)
     cerr << ERROR_HEADER << "Dirty label!" << endl;
-  Score sc(0.0, detectorName.str());
+  Score sc(0.0, detectorName.str(), _useCSdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
 }

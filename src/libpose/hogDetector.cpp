@@ -180,7 +180,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   params.emplace(sDebugLevel, debugLevel);
 
-  debugLevelParam = params.at(sDebugLevel);
+  debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
@@ -263,7 +263,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
   params.emplace(sUseHoGdet, useHoGdet);
 
-  debugLevelParam = params.at(sDebugLevel);
+  debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
@@ -508,7 +508,7 @@ LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, 
   detectorName << getID();
 
   float score = compare(bodyPart, descriptors);
-  Score sc(score, detectorName.str());
+  Score sc(score, detectorName.str(), _useHoGdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }
