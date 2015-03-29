@@ -10,7 +10,7 @@ class Score
 {
   public:
     Score(void);
-    Score(float sc, string name);
+    Score(float sc, string name, float _coeff = 1.0f);
 /// copying all fields
     Score & operator=(const Score &s);
 /// All this operators perform comparison by score values
@@ -24,11 +24,14 @@ class Score
     void setScore(float _score);
     string getDetName(void) const;
     void setDetName(string _detName);
+    float getCoeff(void) const;
+    void setCoeff(float _coeff);
   private:
 /// detection score
     float score;
 /// detector name, name of the algorithm that generate the evaluation
     string detName;
+    float coeff;
 };
 
 #endif  // _SCORE_HPP_

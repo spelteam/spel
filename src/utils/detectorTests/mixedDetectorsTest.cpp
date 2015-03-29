@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 
   map <string, float> params;
   cout << "ColorHistDetector..." << endl;
-  cout << "Training..." << endl;
   vector <Frame*> allFrames = projectLoader.getFrames();
   vector<Frame*> trainFrames;
   int8_t kfCount = 0;

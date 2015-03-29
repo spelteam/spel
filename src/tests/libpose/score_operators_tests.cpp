@@ -16,5 +16,6 @@ TEST(scoreTest, OperatorsTest)
 
   EXPECT_EQ(s4.getScore(), s3.getScore());
   EXPECT_EQ(s4.getDetName(), s3.getDetName());
+  EXPECT_FLOAT_EQ(s4.getCoeff(), s3.getCoeff());
 }
 

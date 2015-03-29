@@ -600,7 +600,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
               Point2f mid = 0.5 * p1; // center of the vector
               p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
               p0 = Point2f(x, y) - mid; // shift the vector to current point
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1); // build  the vector label
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
               sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
             }
           }
@@ -618,7 +618,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         Point2f mid = 0.5 * p1; // center of the vector
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
-        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1);
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet);
         sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
       }
     }
@@ -1097,7 +1097,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
   return pixelLabels;
 }
 
-LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1)
+LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet)
 {
   vector <Score> s;
   vector <Point3i> partPixelColours;

@@ -93,7 +93,7 @@ float LimbLabel::getAvgScore(void) const
   for_each(scores.begin(), scores.end(), [&](Score s)
   {
     count++;
-    sum += s.getScore();
+    sum += s.getScore() * s.getCoeff();
   });
   return ((count > 0) ? (sum / count) : 0.0f);
 }

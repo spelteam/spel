@@ -55,8 +55,8 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1400</x>
-      <y>1584</y>
+      <x>1480</x>
+      <y>1576</y>
       <w>616</w>
       <h>128</h>
     </coordinates>
@@ -88,8 +88,6 @@ bg=blue</panel_attributes>
 /+train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)/
 /+detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vectot&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;/
 +merge(first: vector&lt;vectot&lt;LimbLabel&gt;&gt;, second: vector&lt;vectot&lt;LimbLabel&gt;&gt;): vector&lt;vectot&lt;LimbLabel&gt;&gt;
-+getNeighborFrame(frame: Frame*, prevFrame: Frame**, nextFrame: Frame**, step: uint32_t&amp;, stepCount: uint32_t&amp;)
-+getRawBodyPartPosition(frame: Frame*, prevFrame: Frame*, nextFrame: Frame*, parentJointID: int, childJointID: int, step: uint32_t&amp;, stepCount: uint32_t&amp;, j0: Point2f&amp;, j1: Point2f&amp;)
 +getBoneLength(begin: Point2f, end: Point2f): float;
 +getBoneWidth(length: float, bpdyPart: BpodyPart): float;
 +getBodyPartRect(bodyPart: BodyPart, j0: Point2f, j1: Point2f, blockSize: Size): POSERECT &lt;Point2f&gt;
@@ -335,24 +333,24 @@ operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;</pane
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>896</x>
+      <x>920</x>
       <y>1208</y>
-      <w>576</w>
+      <w>552</w>
       <h>280</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>560;24;24;264</additional_attributes>
+    <additional_attributes>536;24;24;264</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>1440</x>
       <y>1208</y>
-      <w>192</w>
-      <h>392</h>
+      <w>272</w>
+      <h>384</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>24;24;176;376</additional_attributes>
+    <additional_attributes>24;24;256;368</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
@@ -749,145 +747,6 @@ bg=orange</panel_attributes>
   </group>
   <group>
     <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>2048</x>
-        <y>1784</y>
-        <w>1232</w>
-        <h>64</h>
-      </coordinates>
-      <panel_attributes>PartModel
---
-+partModelRect: POSERECT&lt;Point2f&gt;
-+descriptos: vector&lt;float&gt;
---</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>2048</x>
-        <y>1584</y>
-        <w>1232</w>
-        <h>192</h>
-      </coordinates>
-      <panel_attributes>HogDetector
---
-+id: int
-+partSize: map&lt;uint32_t, Size&gt;
-+partModels: map&lt;uint32_t, map&lt;uint32_t, PartModel&gt;&gt;
---
-+getId(): int
-+setId(int _id) 
-+train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)
-+detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt;&gt;
-+generateLabel(bodyPart: BodyPart, j0: Point2f, j1: Point2f, descriptors: PartModel): LimbLabel
-+getMaxBodyPartHeightWidth(frames: vector&lt;Frame*&gt;, blockSize: Size): map&lt;uint32_t, Size&gt;
-+computeDescriptors(bodyPart: BodyPart, j0: Point2f, j1: Point2f, imgMat: Mat, nbins: int, wndSize: Size, blockSize: Size, blockStride: SIze, cellSize: Size, wndSig,a: double, thresholdL2hys: double, gammaCorrection: bool, nlevels: int): PartModel
-+computeDescriptors(frame: Frame*, nbins: int, blockSize: Size, blockStride: Size, cellSize: Size, wndSigma: double, thresholdL2hys: double, gammaCorrection: bool, nlevels: int): map&lt;uint32_t, PartModel&gt;
-+compare(bodyPart: BodyPart, partModel: PartModel): float</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>2040</x>
-        <y>1560</y>
-        <w>1248</w>
-        <h>304</h>
-      </coordinates>
-      <panel_attributes>bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>608</x>
-        <y>1912</y>
-        <w>760</w>
-        <h>184</h>
-      </coordinates>
-      <panel_attributes>PartModel
---
-+nBins: byte
-+partHistogramm: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
-+gbHistogramm: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
-+sizeFg: int
-+sizeBG: int;
-+fgNumSamples: int
-+bgNumSamples: int
-+fgSampleSizes: vector&lt;uint32_t&gt;
-+bgSampleSizes: vector&lt;uint32_t&gt;
-+gfBlankSizes: vector&lt;uint32_t&gt;
---
-PartModel(_nBins: uint8_t)
-operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>608</x>
-        <y>1584</y>
-        <w>760</w>
-        <h>304</h>
-      </coordinates>
-      <panel_attributes>ColorHistDetector
---
-+id: int;
-+nBins: uint8_t
-+partModels: map &lt;int, PartModel&gt;
---
-+ColorHistDetector(_nBins: int8_t)
-+getId(): int
-+setId(int _id) 
-+train(_frames: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;)
-+detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
-+getNBins(): byte
-+getFrames: vector &lt;Frame*&gt;
-operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
-+computePixelBelongingLikelihood(partModel: PartModel&amp;, r: byte, g: byte, b: byte): float
-+setPartHistogramm(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;)
-+addPartHistogramm(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;, nBlankPixels: int)
-+addBackgroundHistogramm(partModel: PartModel&amp;, bgColors: vector &lt;Point3i&gt;)
-+getAvgSampleSizeFg(partModel: PartModel&amp;): float
-+getAvgSampleSizeFgBetween(partModel: PartModel&amp;, s1: int, s2: int): float
-+matchPartHistogramsED(partModelPrev: PartModel&amp;, partModel: PartModel&amp;): float
-+buildPixelDistributions(frame: Frame*): map &lt;int, Mat&gt;
-+buildPixelLabels(frame: Frame*, pixelDistributions: map&lt;int, Mat&gt;): map &lt;int, Mat&gt;
-+generateLabel(bodyPart: BodyPart, frame: Frame, pixelDistributions: map &lt;int, Mat&gt;, pixelLabels: map &lt;int, Mat&gt;, j0: Point2f, j1 : Point2f): LimbLabel</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Note</type>
-      <coordinates>
-        <x>608</x>
-        <y>1496</y>
-        <w>552</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>*Potentially to remove *
--- fgNumSamples contain duplicated data that can be accessed 
-   from fgSampleSizes.size()
-bg=yellow</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>600</x>
-        <y>1456</y>
-        <w>784</w>
-        <h>656</h>
-      </coordinates>
-      <panel_attributes>bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
         <x>600</x>
@@ -899,15 +758,45 @@ bg=yellow</panel_attributes>
 bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>608</x>
-        <y>848</y>
-        <w>568</w>
-        <h>392</h>
-      </coordinates>
-      <panel_attributes>LimbLabel
+    <group>
+      <element>
+        <type>com.umlet.element.Class</type>
+        <coordinates>
+          <x>608</x>
+          <y>1248</y>
+          <w>192</w>
+          <h>192</h>
+        </coordinates>
+        <panel_attributes>Score
+--
++score: float
++detName: string
++coeff: float
+--
++Score()
++Score(sc: float, name: string, _coeff: name)
++operator=(s: Score&amp;): Score&amp;
++operator==(s: Score&amp;): bool
++operator!=(s: Score&amp;): bool
++operator&lt;(s: Score&amp;): bool
++operator&gt;(s: Score&amp;): bool
++getScore(): float
++setScore(_score: float)
++getDetName(): string
++setDetName(_detName: string)
++getCoeff(): float
++setCoeff(_coeff: float)</panel_attributes>
+        <additional_attributes/>
+      </element>
+      <element>
+        <type>com.umlet.element.Class</type>
+        <coordinates>
+          <x>608</x>
+          <y>848</y>
+          <w>568</w>
+          <h>392</h>
+        </coordinates>
+        <panel_attributes>LimbLabel
 --
 +limbId: int
 +center: cv:Point2f
@@ -938,32 +827,146 @@ bg=orange</panel_attributes>
 +operator&gt;(ll: LimbLabel&amp;):bool
 +containsPoint(pt: Point2f): bool
 +pnpoly(nvert: int, vertx: float*, verty: float*, testx: float, testy: float): int</panel_attributes>
+        <additional_attributes/>
+      </element>
+    </group>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>608</x>
+        <y>1912</y>
+        <w>848</w>
+        <h>184</h>
+      </coordinates>
+      <panel_attributes>PartModel
+--
++nBins: byte
++partHistogramm: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
++gbHistogramm: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
++sizeFg: int
++sizeBG: int;
++fgNumSamples: int
++bgNumSamples: int
++fgSampleSizes: vector&lt;uint32_t&gt;
++bgSampleSizes: vector&lt;uint32_t&gt;
++gfBlankSizes: vector&lt;uint32_t&gt;
+--
+PartModel(_nBins: uint8_t)
+operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>608</x>
-        <y>1248</y>
-        <w>192</w>
+        <y>1584</y>
+        <w>848</w>
+        <h>304</h>
+      </coordinates>
+      <panel_attributes>ColorHistDetector
+--
++id: int;
++nBins: uint8_t
++partModels: map &lt;int, PartModel&gt;
+--
++ColorHistDetector(_nBins: int8_t)
++getId(): int
++setId(int _id) 
++train(_frames: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;)
++detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
++getNBins(): byte
++getFrames: vector &lt;Frame*&gt;
+operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
++computePixelBelongingLikelihood(partModel: PartModel&amp;, r: byte, g: byte, b: byte): float
++setPartHistogramm(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;)
++addPartHistogramm(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;, nBlankPixels: int)
++addBackgroundHistogramm(partModel: PartModel&amp;, bgColors: vector &lt;Point3i&gt;)
++getAvgSampleSizeFg(partModel: PartModel&amp;): float
++getAvgSampleSizeFgBetween(partModel: PartModel&amp;, s1: int, s2: int): float
++matchPartHistogramsED(partModelPrev: PartModel&amp;, partModel: PartModel&amp;): float
++buildPixelDistributions(frame: Frame*): map &lt;int, Mat&gt;
++buildPixelLabels(frame: Frame*, pixelDistributions: map&lt;int, Mat&gt;): map &lt;int, Mat&gt;
++generateLabel(bodyPart: BodyPart, frame: Frame, pixelDistributions: map &lt;int, Mat&gt;, pixelLabels: map &lt;int, Mat&gt;, j0: Point2f, j1 : Point2f, _useCSdet: float): LimbLabel</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Note</type>
+      <coordinates>
+        <x>608</x>
+        <y>1496</y>
+        <w>552</w>
+        <h>56</h>
+      </coordinates>
+      <panel_attributes>*Potentially to remove *
+-- fgNumSamples contain duplicated data that can be accessed 
+   from fgSampleSizes.size()
+bg=yellow</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>600</x>
+        <y>1456</y>
+        <w>864</w>
+        <h>656</h>
+      </coordinates>
+      <panel_attributes>bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>2152</x>
+        <y>1784</y>
+        <w>1232</w>
+        <h>64</h>
+      </coordinates>
+      <panel_attributes>PartModel
+--
++partModelRect: POSERECT&lt;Point2f&gt;
++descriptos: vector&lt;float&gt;
+--</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>2152</x>
+        <y>1584</y>
+        <w>1232</w>
         <h>192</h>
       </coordinates>
-      <panel_attributes>Score
+      <panel_attributes>HogDetector
 --
-+score: float
-+detName: string
++id: int
++partSize: map&lt;uint32_t, Size&gt;
++partModels: map&lt;uint32_t, map&lt;uint32_t, PartModel&gt;&gt;
 --
-+Score()
-+Score(sc: float, name: string)
-+operator=(s: Score&amp;): Score&amp;
-+operator==(s: Score&amp;): bool
-+operator!=(s: Score&amp;): bool
-+operator&lt;(s: Score&amp;): bool
-+operator&gt;(s: Score&amp;): bool
-+getScore(): float
-+setScore(_score: float)
-+getDetName(): string
-+setDetName(_detName: string)</panel_attributes>
++getId(): int
++setId(int _id) 
++train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)
++detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt;&gt;
++generateLabel(bodyPart: BodyPart, j0: Point2f, j1: Point2f, descriptors: PartModel, _useHoGdet: float): LimbLabel
++getMaxBodyPartHeightWidth(frames: vector&lt;Frame*&gt;, blockSize: Size): map&lt;uint32_t, Size&gt;
++computeDescriptors(bodyPart: BodyPart, j0: Point2f, j1: Point2f, imgMat: Mat, nbins: int, wndSize: Size, blockSize: Size, blockStride: SIze, cellSize: Size, wndSig,a: double, thresholdL2hys: double, gammaCorrection: bool, nlevels: int, derivAperture: int, histogramNormType: int): PartModel
++computeDescriptors(frame: Frame*, nbins: int, blockSize: Size, blockStride: Size, cellSize: Size, wndSigma: double, thresholdL2hys: double, gammaCorrection: bool, nlevels: int, derivAperture: int, histogramNormType: int): map&lt;uint32_t, PartModel&gt;
++compare(bodyPart: BodyPart, partModel: PartModel): float</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>2144</x>
+        <y>1560</y>
+        <w>1248</w>
+        <h>304</h>
+      </coordinates>
+      <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>

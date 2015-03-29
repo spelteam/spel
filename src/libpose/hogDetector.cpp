@@ -395,7 +395,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType));
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -413,7 +413,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType));
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, partSize.at(iteratorBodyPart->getPartID()), blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -495,7 +495,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   return merge(limbLabels, t);
 }
 
-LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors)
+LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet)
 {
   vector <Score> s;
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;

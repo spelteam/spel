@@ -53,7 +53,7 @@ class ColorHistDetector : public Detector
     float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel);
     map <int32_t, Mat> buildPixelDistributions(Frame *frame);
     map <int32_t, Mat> buildPixelLabels(Frame *frame, map <int32_t, Mat> pixelDistributions);
-    LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1);
+    LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet);
 };
 
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_
