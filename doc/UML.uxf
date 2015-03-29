@@ -864,13 +864,14 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
         <x>608</x>
         <y>1584</y>
         <w>848</w>
-        <h>304</h>
+        <h>320</h>
       </coordinates>
       <panel_attributes>ColorHistDetector
 --
 +id: int;
 +nBins: uint8_t
 +partModels: map &lt;int, PartModel&gt;
++debugLevelParam: uint8_t
 --
 +ColorHistDetector(_nBins: int8_t)
 +getId(): int
@@ -923,7 +924,7 @@ bg=yellow</panel_attributes>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>2152</x>
-        <y>1784</y>
+        <y>1800</y>
         <w>1232</w>
         <h>64</h>
       </coordinates>
@@ -940,13 +941,14 @@ bg=yellow</panel_attributes>
         <x>2152</x>
         <y>1584</y>
         <w>1232</w>
-        <h>192</h>
+        <h>208</h>
       </coordinates>
       <panel_attributes>HogDetector
 --
 +id: int
 +partSize: map&lt;uint32_t, Size&gt;
 +partModels: map&lt;uint32_t, map&lt;uint32_t, PartModel&gt;&gt;
++debugLevelParam: uint8_t
 --
 +HogDetector()
 +getId(): int
@@ -966,7 +968,7 @@ bg=yellow</panel_attributes>
         <x>2144</x>
         <y>1560</y>
         <w>1248</w>
-        <h>304</h>
+        <h>320</h>
       </coordinates>
       <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>

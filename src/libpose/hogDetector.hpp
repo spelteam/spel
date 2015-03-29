@@ -22,7 +22,7 @@ class HogDetector : public Detector
       vector <float> descriptors;
     };
     int id;
-
+    uint8_t debugLevelParam;
     map <uint32_t, Size> partSize;
     map <uint32_t, map <uint32_t, PartModel>> partModels;
 

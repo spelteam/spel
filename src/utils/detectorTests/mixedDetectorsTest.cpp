@@ -38,6 +38,8 @@ int main(int argc, char **argv)
   vector <Frame*>::iterator i;
 
   map <string, float> params;
+  params.emplace("debugLevel", 3);
+
   cout << "ColorHistDetector..." << endl;
   vector <Frame*> allFrames = projectLoader.getFrames();
   vector<Frame*> trainFrames;

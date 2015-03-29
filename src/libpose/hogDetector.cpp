@@ -71,9 +71,8 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     {
       stringstream ss;
       ss << "Couldn't get partSize for part " << part->getPartID();
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     Point2f j0, j1;
@@ -82,9 +81,8 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     {
       stringstream ss;
       ss << "Invalid parent joint";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     j0 = joint->getImageLocation();
@@ -94,9 +92,8 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     {
       stringstream ss;
       ss << "Invalid child joint";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     j1 = joint->getImageLocation();
@@ -109,9 +106,8 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
       stringstream ss;
       ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part->getPartID() << endl;
       ss << "\t" << err.what();
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
   }
@@ -135,9 +131,8 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
       BodyJoint *joint = skeleton.getBodyJoint(bodyPart->getParentJoint());
       if (joint == 0)
       {
-#ifdef DEBUG
-        cerr << ERROR_HEADER << "Invalid parent joint" << endl;
-#endif  // DEBUG
+        if (debugLevelParam >= 1)
+          cerr << ERROR_HEADER << "Invalid parent joint" << endl;
         break;
       }
       j0 = joint->getImageLocation();
@@ -145,9 +140,8 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
       joint = skeleton.getBodyJoint(bodyPart->getChildJoint());
       if (joint == 0)
       {
-#ifdef DEBUG
-        cerr << ERROR_HEADER << "Invalid child joint" << endl;
-#endif  // DEBUG
+        if (debugLevelParam >= 1)
+          cerr << ERROR_HEADER << "Invalid child joint" << endl;
         break;
       }
       j1 = joint->getImageLocation();
@@ -180,6 +174,14 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
 void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
   frames = _frames;
+
+  const uint8_t debugLevel = 1;
+  const string sDebugLevel = "debugLevel";
+
+  params.emplace(sDebugLevel, debugLevel);
+
+  debugLevelParam = params.at(sDebugLevel);
+
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
   Size blockStride = Size(8,8);
@@ -204,9 +206,8 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
       continue;
     }
 
-#ifdef DEBUG
-    cerr << "Training on frame " << (*frameNum)->getID() << endl;
-#endif  // DEBUG
+    if (debugLevelParam >= 2)
+      cerr << "Training on frame " << (*frameNum)->getID() << endl;
     vector <Rect> found;
     vector <Rect> found_filtered;
 
@@ -247,6 +248,11 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   const float useHoGdet = 1.0f;
   const string sUseHoGdet = "useHoGdet";
 
+  const uint8_t debugLevel = 1;
+  const string sDebugLevel = "debugLevel";
+
+  params.emplace(sDebugLevel, debugLevel);
+
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -256,6 +262,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sScaleParam, scaleParam);
   params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
   params.emplace(sUseHoGdet, useHoGdet);
+
+  debugLevelParam = params.at(sDebugLevel);
 
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
@@ -299,9 +307,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     {
       stringstream ss;
       ss << "Can't get joints";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
 
@@ -322,9 +329,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     {
       stringstream ss;
       ss << "Maybe there is no '" << sSearchDistCoeff << "' param";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     float minTheta = 0, maxTheta = 0, stepTheta = 0;
@@ -336,9 +342,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     {
       stringstream ss;
       ss << "Maybe there is no '" << sMinTheta << "' param";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     try
@@ -349,9 +354,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     {
       stringstream ss;
       ss << "Maybe there is no '" << sMaxTheta << "' param";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     try
@@ -362,9 +366,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     {
       stringstream ss;
       ss << "Maybe there is no '" << sStepTheta << "' param";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
@@ -383,9 +386,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           {
             stringstream ss;
             ss << "Can't get value in maskMat at " << "[" << y << "][" << x << "]";
-#ifdef DEBUG
-            cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
             throw logic_error(ss.str());
           }
           bool blackPixel = mintensity < 10;
@@ -431,9 +433,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     {
       stringstream ss;
       ss << "Maybe there is no '" << sUniqueLocationCandidates << "' param";
-#ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
     if (sortedLabels.size() > 0)
@@ -452,9 +453,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           {
             stringstream ss;
             ss << "There is no value of locations at " << "[" << i << "][" << j << "]";
-#ifdef DEBUG
-            cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
             throw logic_error(ss.str());
           }
         }
@@ -475,9 +475,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             {
               stringstream ss;
               ss << "Maybe there is no value of sortedLabels at " << "[" << i << "]";
-#ifdef DEBUG
-              cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+              if (debugLevelParam >= 1)
+                cerr << ERROR_HEADER << ss.str() << endl;
               throw logic_error(ss.str());
             }
             locations.at<uint32_t>(x, y) += 1;
@@ -487,9 +486,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
         {
           stringstream ss;
           ss << "Maybe there is no value of locations at " << "[" << x << "][" << y << "]";
-#ifdef DEBUG
-          cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
         }
       }
@@ -534,9 +532,8 @@ float HogDetector::compare(BodyPart bodyPart, PartModel model)
         {
           stringstream ss;
           ss << "Invalid descriptor count. Need: " << partModel->second.descriptors.size() << ". Have: " << model.descriptors.size();
-#ifdef DEBUG
-          cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
         }
         for (uint32_t i = 0; i < model.descriptors.size(); ++i)
@@ -549,9 +546,8 @@ float HogDetector::compare(BodyPart bodyPart, PartModel model)
           {
             stringstream ss;
             ss << "Can't get some descriptor at " << i;
-#ifdef DEBUG
-            cerr << ERROR_HEADER << ss.str() << endl;
-#endif  // DEBUG
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
             throw logic_error(ss.str());
           }
         }

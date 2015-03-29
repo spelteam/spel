@@ -33,6 +33,7 @@ int main (int argc, char **argv)
     return -1;
   }
   map <string, float> params;
+  params.emplace("debugLevel", 3);
 
   vector <Frame*> allFrames = projectLoader.getFrames();
   vector<Frame*> trainFrames;
