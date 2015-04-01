@@ -55,6 +55,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_operators_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/colorHistDetector_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/colorHistDetector_private_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/colorHistDetector_train_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/hogDetector_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/surfDetector_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/score_get_and_set_tests )
@@ -77,24 +78,25 @@ TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} )
 
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/testdata1 $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/testdata1 )
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/ImageRotationTestData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/ImageRotationTestData )
+ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/CHDTrainTestData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/CHDTrainTestData )
 
 # Installation instructions for the test module
 # Please specify the installation instructions sprcific
 # To the architecture the project is being built for.
 
 IF ( UNIX )
-	INSTALL (
-		TARGETS ${TESTS_MODULE}
-		RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
-		LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
-		ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
-	)
+    INSTALL (
+        TARGETS ${TESTS_MODULE}
+        RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
+        LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
+        ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
+    )
 ELSEIF ( WIN32 )
-	INSTALL (
-		TARGETS ${TESTS_MODULE}
-		RUNTIME DESTINATION bin/
-		LIBRARY DESTINATION lib/
-		ARCHIVE DESTINATION lib/static/
-	)
+    INSTALL (
+        TARGETS ${TESTS_MODULE}
+        RUNTIME DESTINATION bin/
+        LIBRARY DESTINATION lib/
+        ARCHIVE DESTINATION lib/static/
+    )
 ENDIF()
 

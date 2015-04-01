@@ -24,6 +24,7 @@ class ColorHistDetector : public Detector
   private:
 #ifdef DEBUG
     FRIEND_TEST(colorHistDetectorTest, PrivateFields);
+    FRIEND_TEST(colorHistDetectorTest, Train);
 #endif  // DEBUG
     struct PartModel
     {
