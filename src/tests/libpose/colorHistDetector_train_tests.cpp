@@ -134,7 +134,7 @@ TEST(colorHistDetectorTest, Train)
     #ifdef WINDOWS
         FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
     #else
-        FilePath = "Release/posetests_TestData/CHDTrainTestData/";
+        FilePath = "posetests_TestData/CHDTrainTestData/";
     #endif
 
 //Load the input data
