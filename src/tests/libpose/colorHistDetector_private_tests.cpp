@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <colorHistDetector.hpp>
-#include "Keyframe.hpp"
-#include "Lockframe.hpp"
+#include "colorHistDetector.hpp"
+#include "keyframe.hpp"
+#include "lockframe.hpp"
 
 //IT'S TEMPORARY TESTS
 TEST(colorHistDetectorTest, PrivateFields)

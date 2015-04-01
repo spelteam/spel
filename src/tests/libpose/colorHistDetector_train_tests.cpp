@@ -1,17 +1,16 @@
 #include <gtest/gtest.h>
-#include <colorHistDetector.hpp>
 #include <tree.hh>
-#include "bodyPart.hpp"
-#include "Skeleton.hpp"
-#include "Keyframe.hpp"
-#include "Lockframe.hpp"
 #include <fstream>
 #include <iostream>
-#include "frame.hpp"
 #include <string>
-#include <interpolation.hpp>
+#include "colorHistDetector.hpp"
+#include "bodyPart.hpp"
+#include "skeleton.hpp"
+#include "keyframe.hpp"
+#include "lockframe.hpp"
+#include "frame.hpp"
+#include "interpolation.hpp"
 #include "projectLoader.hpp"
-#include <fstream>
 
 class CHD : public ColorHistDetector
 {
