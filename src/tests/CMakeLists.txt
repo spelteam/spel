@@ -64,7 +64,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/score_operators_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_poserect_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_rotatepoint_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/poseHelper_angle_dist_tests )
-LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_infer_tests )
+#LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_infer_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/detector_tests )
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
@@ -86,17 +86,17 @@ ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -
 
 IF ( UNIX )
     INSTALL (
-        TARGETS ${TESTS_MODULE}
-        RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
-        LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
-        ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
+            TARGETS ${TESTS_MODULE}
+            RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
+            LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
+            ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
     )
 ELSEIF ( WIN32 )
     INSTALL (
-        TARGETS ${TESTS_MODULE}
-        RUNTIME DESTINATION bin/
-        LIBRARY DESTINATION lib/
-        ARCHIVE DESTINATION lib/static/
+            TARGETS ${TESTS_MODULE}
+            RUNTIME DESTINATION bin/
+            LIBRARY DESTINATION lib/
+            ARCHIVE DESTINATION lib/static/
     )
 ENDIF()
 
