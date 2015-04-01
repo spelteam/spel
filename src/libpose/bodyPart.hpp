@@ -36,6 +36,8 @@ class BodyPart
     void setIsOccluded(bool _isOccluded);
     float getSpaceLength(void) const;
     void setSpaceLength(float _spaceLength);
+    float getSearchRadius(void) const;
+    void setSearchRadius(float _searchRadius);
     POSERECT <Point2f> getPartPolygon(void);
     void setPartPolygon(POSERECT <Point2f> _partPolygon);
     float getLWRatio(void);
@@ -61,6 +63,7 @@ class BodyPart
     float lwRatio;
 /// 3d relative length
     float relativeLength;
+    float searchRadius;
 };
 
 std::ostream& operator<<(std::ostream& os, const BodyPart &bp);

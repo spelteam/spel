@@ -104,6 +104,17 @@ void BodyPart::setIsOccluded(bool _isOccluded)
   isOccluded = _isOccluded;
 }
 
+float BodyPart::getSearchRadius(void) const
+{
+  return searchRadius;
+}
+
+void BodyPart::setSearchRadius(float _searchRadius)
+{
+  searchRadius = _searchRadius;
+}
+
+
 float BodyPart::getSpaceLength(void) const
 {
   return spaceLength;

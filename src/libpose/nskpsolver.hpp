@@ -51,7 +51,7 @@ class NSKPSolver: Solver
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
   private:
-    void propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism);
+    vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
     
     vector<Point2i> suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params);
@@ -59,8 +59,12 @@ class NSKPSolver: Solver
 
     uint32_t findFrameIndexById(int id, vector<Frame*> frames);
     float computeScoreCost(const LimbLabel& label, map<string, float> params);
+
     float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params);
+    float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float min, float max);
+
     float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params);
+    float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float min, float max);
 
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);

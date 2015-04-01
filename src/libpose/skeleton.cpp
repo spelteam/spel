@@ -85,6 +85,17 @@ uint32_t Skeleton::getPartTreeCount(void) const
   return (uint32_t)partTree.size();
 }
 
+void Skeleton::shift(Point2f point)
+{
+    for(tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
+    {
+        //add point to every joint
+        Point2f prevLoc = i->getImageLocation();
+        Point2f nextLoc = prevLoc+point;
+        i->setImageLocation(nextLoc);
+    }
+}
+
 BodyJoint *Skeleton::getBodyJoint(int jointID) const
 {
   BodyJoint *joint = 0;

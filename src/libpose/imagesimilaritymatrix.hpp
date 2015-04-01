@@ -33,6 +33,7 @@ class ImageSimilarityMatrix
     float max() const;
 
     float at(int row, int col) const;
+    Point2f getShift(int row, int col) const;
     ///get cost for path through ISM
     float getPathCost(vector<int> path) const; 
 
@@ -53,6 +54,7 @@ class ImageSimilarityMatrix
   private:
     ///the image similarity matrix
     Mat imageSimilarityMatrix;
+    Mat imageShiftMatrix;
     
 };
 

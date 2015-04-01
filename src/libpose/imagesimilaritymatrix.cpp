@@ -20,6 +20,7 @@ ImageSimilarityMatrix::ImageSimilarityMatrix(const ImageSimilarityMatrix& m)
 {
     //by default use colour
     imageSimilarityMatrix=m.imageSimilarityMatrix;
+    imageShiftMatrix = m.imageShiftMatrix;
 }
 
 //get ISM value at (row, col)
@@ -37,6 +38,23 @@ float ImageSimilarityMatrix::at(int row, int col) const
         return -1;
     }
     return imageSimilarityMatrix.at<float>(row,col);
+}
+
+//get ISM value at (row, col)
+Point2f ImageSimilarityMatrix::getShift(int row, int col) const
+{
+
+    if(row>=imageShiftMatrix.rows)
+    {
+        cerr << "Shift Matrix contains " << imageShiftMatrix.rows << " rows, cannot request row " << endl; //<< to_string(row) << end;
+        return Point2f();
+    }
+    if(col>=imageShiftMatrix.cols)
+    {
+        cerr << "Shift Matrix contains " << imageShiftMatrix.cols << " cols, cannot request col " << endl; // << to_string(col) << end;
+        return Point2f();
+    }
+    return imageShiftMatrix.at<Point2f>(row,col);
 }
 
 bool ImageSimilarityMatrix::operator==(const ImageSimilarityMatrix &s) const
@@ -78,6 +96,7 @@ bool ImageSimilarityMatrix::operator!=(const ImageSimilarityMatrix &s) const
 ImageSimilarityMatrix& ImageSimilarityMatrix::operator=(const ImageSimilarityMatrix &s)
 {
     imageSimilarityMatrix=s.imageSimilarityMatrix;
+    imageShiftMatrix=s.imageShiftMatrix;
     return *this;
 }
 
@@ -95,8 +114,22 @@ bool ImageSimilarityMatrix::read(string filename)
                 imageSimilarityMatrix.at<float>(i,j)=score;
             }
         }
+
+         //@FIX fix this if it is imported
+
+        for(int i=0; i<imageShiftMatrix.rows; ++i)
+        {
+            for(int j=0; j<imageShiftMatrix.cols; ++j)
+            {
+                float x,y;
+                in >> x >> y;
+                imageShiftMatrix.at<Point2f>(i,j)=Point2f(x,y);
+            }
+        }
         return true;
     }
+
+
     else
     {
         cerr << "Could not open " << filename << " for reading. " << endl;
@@ -117,6 +150,15 @@ bool ImageSimilarityMatrix::write(string filename) const
             }
             out << endl;
         }
+
+        for(int i=0; i<imageShiftMatrix.rows; ++i)
+        {
+            for(int j=0; j<imageShiftMatrix.cols; ++j)
+            {
+                out << imageShiftMatrix.at<Point2f>(i,j).x << " " << imageShiftMatrix.at<Point2f>(i,j).y << " ";
+            }
+            out << endl;
+        }
         return true;
     }
     else
@@ -130,6 +172,7 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
      //create matrices and fill with zeros
     // imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
     imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
+    imageShiftMatrix.create(frames.size(), frames.size(), DataType<Point2f>::type);
 
     for(uint32_t i=0; i<frames.size(); ++i)
     {
@@ -145,6 +188,15 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
     {
         for(uint32_t j=0; j<frames.size(); ++j)
         {
+            //only do this loop if
+            if(j>i)
+                continue;
+            if(i==j)
+            {
+                imageShiftMatrix.at<Point2f>(i,j) = Point2f(0,0);
+                imageSimilarityMatrix.at<float>(i,j) = 0;
+                continue;
+            }
             //load images, compute similarity, store to matrix
             // Mat imgMatOne=frames[i]->getImage();
             // Mat imgMatTwo=frames[j]->getImage());
@@ -193,6 +245,9 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
 
             //cOne and cTwo now have the centres
             dX = cTwo-cOne;
+
+            imageShiftMatrix.at<Point2f>(i,j) = dX;
+            imageShiftMatrix.at<Point2f>(j,i) = -dX;
 
             //so, dX+cOne = cTwo
             //and cOne = cTwo-dX
@@ -275,6 +330,7 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
     cerr << "building ISM matrix" <<endl;
     //create matrices and fill with zeros
     imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
+    imageShiftMatrix.create(frames.size(), frames.size(), DataType<Point2f>::type);
     // maskSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
 
     for(uint32_t i=0; i<frames.size(); ++i)
@@ -282,7 +338,7 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
         for(uint32_t j=0; j<frames.size(); ++j)
         {
             imageSimilarityMatrix.at<float>(i,j) = 0;
-            // maskSimilarityMatrix.at<float>(i,j) = 0;
+            imageShiftMatrix.at<Point2f>(i,j) = Point2f(0,0);
         }
     }
 
@@ -291,6 +347,16 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
     {
         for(uint32_t j=0; j<frames.size(); ++j)
         {
+            //only do this loop if
+            if(j>i)
+                continue;
+            if(i==j)
+            {
+                imageShiftMatrix.at<Point2f>(i,j) = Point2f(0,0);
+                imageSimilarityMatrix.at<float>(i,j) = 0;
+                continue;
+            }
+
             //load images, compute similarity, store to matrix
             Mat imgMatOne=frames[i]->getImage();
             Mat imgMatTwo=frames[j]->getImage();
@@ -339,6 +405,8 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
             //so, dX+cOne = cTwo
             //and cOne = cTwo-dX
 
+            imageShiftMatrix.at<Point2f>(i,j) = dX;
+            imageShiftMatrix.at<Point2f>(j,i) = -dX;
 
             float similarityScore = 0;
             // float maskSimilarityScore = 0;

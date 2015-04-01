@@ -41,12 +41,13 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float> params)
 vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
 {
 	//parametrise the number of times frames get propagated
-    params.emplace("nskpIters", 0); //set number of iterations, 0 to iterate until no new lockframes are introduced
+    params.emplace("nskpIters", 1); //set number of iterations, 0 to iterate until no new lockframes are introduced
 
     uint32_t nskpIters=params.at("nskpIters");
     if(nskpIters==0)
         nskpIters=INT32_MAX;
 
+    vector<Solvlet> solvlets;
     sequence.computeInterpolation(params); //interpolate the sequence first
 	//propagate keyframes
     vector<Frame*> propagatedFrames = sequence.getFrames();
@@ -56,7 +57,10 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
         if(i>=nskpIters)
             break;
 
-        propagateKeyframes(propagatedFrames, params, ism);
+        vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism);
+
+        for(vector<Solvlet>::iterator s=sol.begin(); s!=sol.end();++s)
+            solvlets.push_back(*s);
 
         //calculate number of lockframes in the sequence
         uint32_t numLockframes=0;
@@ -81,10 +85,11 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 	//the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
 	//return the TLPS solve
-    return tlps.solve(sequence, params);
+    return solvlets;
+    //return tlps.solve(sequence, params);
 }
 
-void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism)
+vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism)
 {
 	// //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
 	// float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
@@ -92,18 +97,20 @@ void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  
 
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
 
+    vector<Solvlet> solvlets;
     int numLockframesGenerated=0;
-    params.emplace("useHoGdet", 1); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useCSdet", 0); //determine if colorhist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 1); //determine if colorhist detector is used and with what coefficient
     params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
     params.emplace("maxPartCandidates", 200); //set the max number of part candidates to allow into the solver
-    params.emplace("acceptLockframeThreshold", 0.5); //set up the lockframe accept threshold by mask coverage
+    params.emplace("acceptLockframeThreshold", 0.8); //set up the lockframe accept threshold by mask coverage
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
     params.emplace("propagateToLockframes", 0);
 
     uint32_t maxPartCandidates = params.at("maxPartCandidates");
     float useHoG = params.at("useHoGdet");
-    float useCS = params.at("useHoGdet");
+    float useCS = params.at("useCSdet");
+    //float useSURF = params.at("useSURFdet");
     uint32_t debugLevel = params.at("debugLevel");
     bool propagateToLockframes=params.at("propagateToLockframes");
 
@@ -138,14 +145,31 @@ void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  
 			{
                 if(frames[*mstIter]->getFrametype()==KEYFRAME) //skip keyframes
                     continue;
-                else if(frames[*mstIter]->getFrametype()==LOCKFRAME && !propagateToLockframes) //skip lockframes, unless
+                else if(frames[*mstIter]->getFrametype()==LOCKFRAME && !propagateToLockframes) //skip lockframes, unless explicitly requested
                     continue;
                 vector<vector<LimbLabel> > labels, tempLabels;
                 vector<vector<LimbLabel> >::iterator labelPartsIter;
 
+                Frame * lockframe = new Lockframe();
+                Skeleton shiftedPrior = frames[frameId]->getSkeleton();
+
+                lockframe->setID(frames[*mstIter]->getID());
+                lockframe->setImage(frames[*mstIter]->getImage());
+                lockframe->setMask(frames[*mstIter]->getMask());
+
+                //compute the shift between the frame we are propagating from and the current frame
+                Point2f shift = ism.getShift(frames[frameId]->getID(),frames[*mstIter]->getID());
+
+                //shift the prior by this distance
+                shiftedPrior.shift(shift);
+
+                //set the skeleton for the shifted prior
+                lockframe->setSkeleton(shiftedPrior);
+                Skeleton skeleton = lockframe->getSkeleton();
+
                 for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
                 {
-                    labels = detectors[i]->detect(frames[*mstIter], params, labels); //detect labels based on keyframe training
+                    labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
                 }
 
                 for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
@@ -170,8 +194,8 @@ void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  
 				Space space(numbersOfLabels.begin(), numbersOfLabels.end());
 				Model gm(space);
 
-				Skeleton skeleton = frames[*mstIter]->getSkeleton();
-				tree<BodyPart> partTree = skeleton.getPartTree();
+                //Skeleton skeleton = frames[*mstIter]->getSkeleton();
+                tree<BodyPart> partTree = shiftedPrior.getPartTree();
 				tree<BodyPart>::iterator partIter, parentPartIter;
 
                 uint32_t jointFactors=0, suppFactors=0, priorFactors=0;
@@ -195,9 +219,26 @@ void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  
 
 					ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
+                    //precompute the maxium and minimum for normalisation
+                    float priorMin=FLT_MAX, priorMax=0;
+                    vector<LimbLabel>::iterator lbl;
+                    //vector<float> priorCostFuncValues;
+                    for(lbl=labels[partIter->getPartID()].begin(); lbl!=labels[partIter->getPartID()].end(); ++lbl) //for each label in for this part
+                    {
+                        float val = computePriorCost(*lbl, *partIter, skeleton, params);
+
+                        if(val<priorMin)
+                            priorMin = val;
+                        if(val>priorMax)
+                            priorMax = val;
+
+                        //priorCostFuncValues.push_back(val);
+                    }
+
+                    //now set up the solutions
 					for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 					{
-						priorCostFunc(i) = computePriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params);
+                        priorCostFunc(i) = computeNormPriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params, priorMin, priorMax);
 					}
 
 					Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
@@ -214,12 +255,26 @@ void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  
                         size_t jointCostShape[]={numbersOfLabels[parentPartIter->getPartID()], numbersOfLabels[partIter->getPartID()]}; //number of labels
 						ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
 
+                        float jointMin=FLT_MAX, jointMax=0;
+                        for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+                        {
+                            for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
+                            {
+                                float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
+
+                                if(val<jointMin)
+                                    jointMin = val;
+                                if(val>jointMax)
+                                    jointMax = val;
+                            }
+                        }
+
 						for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
 						{
 							for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
 							{
 								//for every child/parent pair, compute score
-                                jointCostFunc(j, i) = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
+                                jointCostFunc(j, i) = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMin, jointMax);
 							}
                         }
 
@@ -272,16 +327,17 @@ void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  
 				{
 					//set up the lockframe
 					Solvlet solvlet(*mstIter, solutionLabels);
+                    solvlets.push_back(solvlet);
 					Skeleton skel(solvlet.toSkeleton());
                     skel.setScale(frames[*mstIter]->getSkeleton().getScale()); //set skeleton scale
-                    Frame * lockframe = new Lockframe();
+                    //Frame * lockframe = new Lockframe();
 
                     lockframe->setSkeleton(skel);
-                    lockframe->setID(frames[*mstIter]->getID());
+//                    lockframe->setID(frames[*mstIter]->getID());
 
-                    lockframe->setImage(frames[*mstIter]->getImage());
-                    lockframe->setMask(frames[*mstIter]->getMask());
-                    lockframe->setSkeleton(skel);
+//                    lockframe->setImage(frames[*mstIter]->getImage());
+//                    lockframe->setMask(frames[*mstIter]->getMask());
+//                    lockframe->setSkeleton(skel);
 
                     //frames[*mstIter]=&lockframe;
                     lockframes.push_back(lockframe);
@@ -298,22 +354,7 @@ void NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  
 
     cerr << "Generated " << numLockframesGenerated << " lockframes!" << endl;
 
-//	vector<Frame*> returnFrames;
-//	//look at lockframes and frames, and put together the return frames
-//	for(uint32_t i=0; i<frames.size(); ++i)
-//	{
-//		int lockframeIndex = findFrameIndexById(frames[i]->getID(), frames);
-//		if(lockframeIndex>=0) //if a new lockframe exists at this id
-//		{
-//			//push it into the sequen
-//			returnFrames.push_back(lockframes[lockframeIndex]);
-//		}
-//		else //otherwise push back the old frame
-//		{
-//			returnFrames.push_back(frames[i]);
-//		}
-//	}
-//	return returnFrames;
+    return solvlets;
 }
 
 //return the index of the first instance of frame with matching id 
@@ -331,50 +372,95 @@ uint32_t NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
-    params.emplace("imageCoeff", 0.5);
+    params.emplace("imageCoeff", 0.0);
     params.emplace("scoreIndex", 0);
 	//emplace first
 	float lambda = params.at("imageCoeff");
     float scoreIndex = params.at("scoreIndex");
 	//@FIX
+    float useHoG = params.at("useHoGdet");
+    float useCS = params.at("useCSdet");
+
 	//for now, just return the first available score
 	vector<Score> scores = label.getScores();
+    //find the ones that we're working with, and combine them
+//    float scoreSum=0;
+//    for(uint32_t i=0; i<scores.size(); ++i)
+//    {
+//        if(scores[i].getDetName()==)
+//    }
 	if(scores.size()>0)
 		return lambda*scores[scoreIndex].getScore();
 	else //if no scores present return -1
-		return -1;
+        return 0;
 }
 
 //compute distance to parent limb label
 float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params)
 {
 	//emplace default
-    params.emplace("jointCoeff", 0.5);
-	float lambda = params.at("jointCoeff");
+    //params.emplace("jointCoeff", 0.5);
+    //float lambda = params.at("jointCoeff");
 	Point2f p0, p1, c0, c1;
 
 	//@FIX this is really too simplistic, connecting these points
 	child.getEndpoints(c0,c1);
 	parent.getEndpoints(p0,p1);
 
+    //normalise this?
+
 	//return the squared distance from the lower parent joint p1, to the upper child joint c0
-	return lambda*(pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2));
+    return pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2);
+}
+
+//compute distance to parent limb label
+float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float min, float max)
+{
+    //emplace default
+    params.emplace("jointCoeff", 0.5);
+    float lambda = params.at("jointCoeff");
+    Point2f p0, p1, c0, c1;
+
+    //@FIX this is really too simplistic, connecting these points
+    child.getEndpoints(c0,c1);
+    parent.getEndpoints(p0,p1);
+
+    //normalise this?
+
+    //return the squared distance from the lower parent joint p1, to the upper child joint c0
+    return lambda*((pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2))/max);
 }
 
 //compute distance to the body part prior
 float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params)
 {
-    params.emplace("priorCoeff", 0.5);
+    params.emplace("priorCoeff", 0.0);
 	float lambda = params.at("priorCoeff");
 	Point2f p0,p1, pp0, pp1;
 	label.getEndpoints(p0,p1);
 	pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();	
 	pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
 
+    //normalise this cost?
+
 	//return the sum of squared distances between the corresponding joints, prior to label
 	return lambda*(pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2));
 }
 
+float NSKPSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float min, float max)
+{
+    params.emplace("priorCoeff", 0.0);
+    float lambda = params.at("priorCoeff");
+    Point2f p0,p1, pp0, pp1;
+    label.getEndpoints(p0,p1);
+    pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
+    pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
+
+    //normalise this cost?
+
+    //return the sum of squared distances between the corresponding joints, prior to label
+    return lambda*((pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2))/max);
+}
 
 
 //build an MST for every frame and return the vector
@@ -482,9 +568,9 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     Mat mask = frame->getMask();
     int correctPixels=0, incorrectPixels=0;
 
-    for(uint32_t i=0; i<mask.rows; ++i) //at every row
+    for(int i=0; i<mask.rows; ++i) //at every row
     {
-        for(uint32_t j=0; j<mask.cols; ++j) //and every col
+        for(int j=0; j<mask.cols; ++j) //and every col
         {
             //check whether pixel hit a label
             bool labelHit=false;

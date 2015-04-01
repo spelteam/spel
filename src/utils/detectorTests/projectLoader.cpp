@@ -501,7 +501,8 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
     line(image, p4, p1, color, lineWidth, CV_AA); 
   }
 
-  return true;
+  cerr << "Writing file " << outFileName << endl;
+  return imwrite(outFileName, image);
 }
 
 bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
