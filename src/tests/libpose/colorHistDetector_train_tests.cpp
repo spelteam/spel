@@ -152,6 +152,8 @@ TEST(colorHistDetectorTest, Train)
         if (FirstKeyframe < 0) FirstKeyframe = i;
     }
     Mat image = frames[FirstKeyframe]->getImage();
+    Mat image1;
+    image.copyTo(image1);
 
 //Ran "Train()"
     map <string, float> params;
@@ -204,9 +206,9 @@ TEST(colorHistDetectorTest, Train)
                     }
                     if (b)
                     {
-                        Vec3b color = image.at<Vec3b>(y, x);
                         int c = 50 + i * 10;
-                        image.at<Vec3b>(y, x) = Vec3b(c, c, c);
+                        image1.at<Vec3b>(y, x) = Vec3b(c, c, c);
+                        Vec3b color = image.at<Vec3b>(y, x);
                         Model.partHistogramm[color[0] / factor][color[1] / factor][color[2] / factor]++;
                         Model.sizeFG++;
                     }
@@ -259,7 +261,7 @@ TEST(colorHistDetectorTest, Train)
     for (int i = 0; i < detector.partModels.size(); i++)
     {
         fout << endl << "Rect[" << i << "]:" << endl;
-        PutHistogramm(fout, detector.partModels[i].partHistogramm, detector.partModels[i].sizeFG);
+        PutHistogramm(fout, detector.partModels[i].partHistogramm, detector.partModels[i].sizeFG / KeyframesCount);
     }
 
     fout << "\n------------Occluded polygons-----------\nSorted by layer\n";
@@ -270,10 +272,11 @@ TEST(colorHistDetectorTest, Train)
             fout << Crossings[i][k].first << "; ";
         Crossings[i].clear();
     }
-    imwrite("UsedPixels.png", image);
+    imwrite("UsedPixels.png", image1);
     fout.close();
     Crossings.clear();
     partModels.clear();
 
     image.release();
+    image1.release();
 }
