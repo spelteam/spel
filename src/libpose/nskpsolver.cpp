@@ -103,7 +103,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("useCSdet", 1); //determine if colorhist detector is used and with what coefficient
     params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
     params.emplace("maxPartCandidates", 200); //set the max number of part candidates to allow into the solver
-    params.emplace("acceptLockframeThreshold", 0.8); //set up the lockframe accept threshold by mask coverage
+    params.emplace("acceptLockframeThreshold", 0.0); //set up the lockframe accept threshold by mask coverage
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
     params.emplace("propagateToLockframes", 0);
 
@@ -151,8 +151,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 vector<vector<LimbLabel> >::iterator labelPartsIter;
 
                 Frame * lockframe = new Lockframe();
-                Skeleton shiftedPrior = frames[frameId]->getSkeleton();
-
+                //Skeleton shiftedPrior = frames[frameId]->getSkeleton();
+                lockframe->setSkeleton(frames[frameId]->getSkeleton());
                 lockframe->setID(frames[*mstIter]->getID());
                 lockframe->setImage(frames[*mstIter]->getImage());
                 lockframe->setMask(frames[*mstIter]->getMask());
@@ -160,11 +160,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 //compute the shift between the frame we are propagating from and the current frame
                 Point2f shift = ism.getShift(frames[frameId]->getID(),frames[*mstIter]->getID());
 
-                //shift the prior by this distance
-                shiftedPrior.shift(shift);
-
-                //set the skeleton for the shifted prior
-                lockframe->setSkeleton(shiftedPrior);
+                lockframe->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
                 Skeleton skeleton = lockframe->getSkeleton();
 
                 for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
@@ -195,7 +191,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 				Model gm(space);
 
                 //Skeleton skeleton = frames[*mstIter]->getSkeleton();
-                tree<BodyPart> partTree = shiftedPrior.getPartTree();
+                tree<BodyPart> partTree = skeleton.getPartTree();
 				tree<BodyPart>::iterator partIter, parentPartIter;
 
                 uint32_t jointFactors=0, suppFactors=0, priorFactors=0;
@@ -255,12 +251,21 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                         size_t jointCostShape[]={numbersOfLabels[parentPartIter->getPartID()], numbersOfLabels[partIter->getPartID()]}; //number of labels
 						ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
 
+                        //first figure out which of the current body part's joints should be in common with the parent body part
+
+                        bool toChild=false;
+                        if(parentPartIter->getChildJoint() == partIter->getParentJoint())
+                        {
+                            //then it's connected to child
+                            toChild=true;
+                        }
+
                         float jointMin=FLT_MAX, jointMax=0;
                         for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
                         {
                             for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
                             {
-                                float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
+                                float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, toChild);
 
                                 if(val<jointMin)
                                     jointMin = val;
@@ -274,7 +279,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 							for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
 							{
 								//for every child/parent pair, compute score
-                                jointCostFunc(j, i) = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMin, jointMax);
+                                jointCostFunc(j, i) = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
 							}
                         }
 
@@ -323,7 +328,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 				//evaluate the solution, and decide whether it should be added to keyframes
 
                 float acceptLockframeThreshold = params.at("acceptLockframeThreshold"); //@PARAM this is a parameter, not a static value
-				if(solutionScore<=acceptLockframeThreshold)
+                if(solutionScore>=acceptLockframeThreshold)
 				{
 					//set up the lockframe
 					Solvlet solvlet(*mstIter, solutionLabels);
@@ -372,7 +377,7 @@ uint32_t NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
-    params.emplace("imageCoeff", 0.0);
+    params.emplace("imageCoeff", 0.1);
     params.emplace("scoreIndex", 0);
 	//emplace first
 	float lambda = params.at("imageCoeff");
@@ -396,7 +401,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
 }
 
 //compute distance to parent limb label
-float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params)
+float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, bool toChild)
 {
 	//emplace default
     //params.emplace("jointCoeff", 0.5);
@@ -410,32 +415,47 @@ float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& pare
     //normalise this?
 
 	//return the squared distance from the lower parent joint p1, to the upper child joint c0
-    return pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2);
+    if(toChild)
+        return pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2);
+    else //otherwise we're connected to the parent's parent body part
+        return pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2);
 }
 
 //compute distance to parent limb label
-float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float min, float max)
+float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float max, bool toChild)
 {
     //emplace default
     params.emplace("jointCoeff", 0.5);
+    params.emplace("jointLeeway", 0.1);
     float lambda = params.at("jointCoeff");
+    float leeway = params.at("jointLeeway");
     Point2f p0, p1, c0, c1;
 
     //@FIX this is really too simplistic, connecting these points
     child.getEndpoints(c0,c1);
     parent.getEndpoints(p0,p1);
 
-    //normalise this?
+    //child length
+    float clen = sqrt(pow(c0.x-c1.x, 2)+pow(c0.y-c1.y, 2));
 
+    //normalise this?
+    //give some leeway
+    float score = 0;
+    if(toChild) //connected to parent's child body part
+        score = (pow(c0.x-p1.x, 2)+pow(c0.y-p1.y, 2))/max;
+    else
+        score = (pow(c0.x-p0.x, 2)+pow(c0.y-p0.y, 2))/max;
+    if(score<pow(clen*leeway, 2)) //any distnace below leeway is zero
+        score=0;
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
-    return lambda*((pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2))/max);
+    return lambda*score;
 }
 
 //compute distance to the body part prior
 float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params)
 {
-    params.emplace("priorCoeff", 0.0);
-	float lambda = params.at("priorCoeff");
+//  params.emplace("priorCoeff", 0.0);
+//	float lambda = params.at("priorCoeff");
 	Point2f p0,p1, pp0, pp1;
 	label.getEndpoints(p0,p1);
 	pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();	
@@ -444,7 +464,7 @@ float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior
     //normalise this cost?
 
 	//return the sum of squared distances between the corresponding joints, prior to label
-	return lambda*(pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2));
+    return pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2);
 }
 
 float NSKPSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float min, float max)
@@ -461,7 +481,6 @@ float NSKPSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& p
     //return the sum of squared distances between the corresponding joints, prior to label
     return lambda*((pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2))/max);
 }
-
 
 //build an MST for every frame and return the vector
 vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params) //int treeSize, float threshold)
@@ -592,153 +611,14 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
                 incorrectPixels++;
             else if(!blackPixel && !labelHit) //if white not in label, incorret
                 incorrectPixels++;
-            else //otherwise correct
+            else if(!blackPixel && labelHit)//otherwise correct
                 correctPixels++;
+//            else //black pixel and not label hit
+//                correctPixels++; //don't count these at all?
         }
     }
 
-    return correctPixels/(correctPixels+incorrectPixels);
-
-    // float numPixels=0; //total number of pixels in mask
-    // float numHitPixels=0; //number of pixels in polygon that are inside the mask
-    // float numMissPixels=0; //number of pixels in polygons that are outside of the mask
-    // Mat maskMat = frame->getMask();
-    // // //we are at some frame with the image already loaded (currentFrameNumber)
-
-    // //count the total number of mask pixels
-    // for(int x=0; x<maskMat.rows(); ++x)
-    // {
-    //     for(int y=0; y<maskMat.cols(); ++y)
-    //     {
-    //     	//@FIXME need check to see whether maskMat is really of type uchar
-    //         int intensity = maskMat.at<uchar>(y, x);
-    //         bool blackPixel=intensity<10; //mask pixel intensity threshold below which we consider it to be black
-
-    //         //QColor maskCol = mask.pixel(x,y);
-    //         if(!blackPixel) //only take in pixels that are in the mask
-    //         {
-    //             numPixels++; //count the total number of pixels
-    //         }
-    //     }
-    // }
-
-    //counted the total number of pixels in the mask
-    //this can be compared to the number of
-
-    // vector<float> limbScores;
-    // for(int numLabel=0; numLabel<labels.size(); ++numLabel)
-    // {
-    //     float pixHit=0;
-    //     float pixTotal=0;
-
-    //     LimbLabel label = labels[numLabel];
-
-    //     for(int x=0; x<maskMat.rows(); ++x)
-    //     {
-    //         for(int y=0; y<maskMat.cols(); ++y)
-    //         {
-    //         	//@NEEDS FIXING
-    //             if(label.containsPoint(Point2f(x,y))) //polygon from label) //only take in pixels that are in the mask
-    //             {
-    //                 pixTotal++;
-
-    //                 int intensity = maskMat.at<uchar>(y, x);
-
-    //                 bool blackPixel=intensity<10; //if all intensities are zero
-
-    //                 //QColor maskCol = mask.pixel(x,y);
-    //                 if(!blackPixel)
-    //                 {
-    //                     pixHit++;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     limbScores.push_back(pixHit/pixTotal);
-    // }
-
-
-    // for(int x=0; x<mask.width(); ++x)
-    // {
-    //     for(int y=0; y<mask.height(); ++y)
-    //     {
-
-    //         int intensity = maskMat.at<uchar>(y, x);
-
-    //         bool blackPixel=intensity<10; //if all intensities are zero
-    //         //QColor maskCol = mask.pixel(x,y);
-
-    //         if(!blackPixel) //only take in pixels that are in the mask
-    //         {
-    //             numPixels++; //count the total numbe rf pixels
-    //             bool hit=false;
-    //             for(int i=0; i<labels.size(); ++i)
-    //             {
-
-    //                 LimbLabel label = labels[i];
-    //                 if(label.containsPoint(Point2f(x,y))) //polygon from label
-    //                 {
-    //                     hit = true;
-    //                     break;
-    //                 }
-    //             }
-    //             if(hit)
-    //             {
-    //                 numHitPixels++;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             bool hit=false;
-    //             for(int i=0; i<labels.size(); ++i)
-    //             {
-    //                 LimbLabel label = labels[i];
-
-    //                 if(label.containsPoint(Point2f(x,y))) //polygon from label
-    //                 {
-    //                     hit = true;
-    //                     break;
-    //                 }
-    //             }
-    //             if(hit)
-    //             {
-    //                 //colour this pixel in as hit
-    //                 numMissPixels++;
-    //             }
-    //         }
-    //     }
-    // }
-
-    // float avgSuppScore=0;
-
-    // for(int i=0; i<labels.size();++i)
-    // {
-    //     if(i==0 || i>5) //count only the real labels
-    //         avgSuppScore+=labels[i].supportScore;
-    // }
-
-    // avgSuppScore=avgSuppScore/labels.size();
-
-    // //show the worst half of labels
-    // //    cerr << "Poorly localised labels: ";
-    // //    for(int i=0; i<labels.size(); ++i)
-    // //    {
-    // //        if((i==0 || i>5) && labels[i].supportScore>avgSuppScore) //high is bad
-    // //            cerr << limbName(i).toStdString() << " (" <<labels[i].supportScore<<") ";
-    // //    }
-    // //    cerr << endl;
-
-    // // cerr << "Poorly localised labels (by hit/total pixels ratio): ";
-    // // for(int i=0; i<labels.size(); ++i)
-    // // {
-    // //     if((i==0 || i>5) && limbScores[i]<0.4) //high is bad
-    // //         cerr << limbName(i).toStdString() << " (" <<limbScores[i]<<") ";
-    // // }
-    // // cerr << endl;
-
-    // //also, if there are any completely broken limbs, this should lower the score
-
-    // //@FIXME needs testing to establish that this scheme makes sense
-    // return (numHitPixels-numMissPixels)/numPixels;
+    double solutionEval = (float)correctPixels/((float)correctPixels+(float)incorrectPixels);
+    cerr << "Solution evaluation score - " << solutionEval << endl;
+    return solutionEval;
 }

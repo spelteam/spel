@@ -198,8 +198,6 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
                 continue;
             }
             //load images, compute similarity, store to matrix
-            // Mat imgMatOne=frames[i]->getImage();
-            // Mat imgMatTwo=frames[j]->getImage());
 
             Mat maskMatOne=frames[i]->getMask();
             Mat maskMatTwo=frames[j]->getMask();
@@ -237,7 +235,6 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
                         cTwo+=Point2f(x,y);
                         mSizeTwo++;
                     }
-
                 }
             }
             cOne = cOne*(1.0/mSizeOne);
@@ -274,50 +271,20 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
 
                     bool blackPixel=mintensityTwo<10; //if all intensities are zero
 
-                    // int blueOne;
-                    // int greenOne;
-                    // int redOne;
-
-                    // int blueTwo;
-                    // int greenTwo;
-                    // int redTwo;
-
                     //compare points
                     if(!darkPixel)
                     {
                         mOne = 1;
-                        // Vec4b intensityOne = imgMatOne.at<Vec4b>(y, x);
-                        // blueOne = intensityOne.val[0];
-                        // greenOne = intensityOne.val[1];
-                        // redOne = intensityOne.val[2];
                     }
                     if(xTwo<maskMatTwo.rows && xTwo >=0 && yTwo < maskMatTwo.cols && yTwo >= 0 && !blackPixel)
                     {
                         mTwo = 1;
-                        // Vec4b intensityTwo = imgMatTwo.at<Vec4b>(j, i);
-                        // blueTwo = intensityTwo.val[0];
-                        // greenTwo = intensityTwo.val[1];
-                        // redTwo = intensityTwo.val[2];
                     }
 
                     maskSimilarityScore+=abs(mOne-mTwo);
-
-                    // if(mOne^mTwo) //maximum penalty if they are different
-                    // {
-                    //     similarityScore+=pow(255, 2)+pow(255, 2)+pow(255, 2); //square of absolute difference
-                    // }
-                    // else //if both are in mask, or outside of mask
-                    // {
-                    //     similarityScore+=pow(redOne-redTwo, 2)+pow(greenOne-greenTwo, 2)+
-                    //         pow(blueOne-blueTwo, 2); //square of absolute difference
-                    // }
                 }
             }
 
-            // cout << " score = " << maskSimilarityScore << endl;
-
-            // imageSimilarityMatrix.at<float>(i,j) = similarityScore;
-            // imageSimilarityMatrix.at<float>(j,i) = similarityScore;
             imageSimilarityMatrix.at<float>(i,j) = maskSimilarityScore;
             imageSimilarityMatrix.at<float>(j,i) = maskSimilarityScore;
         }
@@ -418,8 +385,6 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
 
                     bool darkPixel=mintensityOne<10; //if all intensities are zero
 
-                    //QColor pixOne;
-                    //QColor pixTwo;
                     int mOne=0, mTwo=0;
 
                     //apply the transformation
@@ -428,13 +393,13 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
 
                     //now check bounds
 
-                    int blueOne;
-                    int greenOne;
-                    int redOne;
+                    int blueOne=0;
+                    int greenOne=0;
+                    int redOne=0;
 
-                    int blueTwo;
-                    int greenTwo;
-                    int redTwo;
+                    int blueTwo=255;
+                    int greenTwo=255;
+                    int redTwo=255;
 
                     //compare points
                     if(!darkPixel)
@@ -478,8 +443,6 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
 
             imageSimilarityMatrix.at<float>(i,j) = similarityScore;
             imageSimilarityMatrix.at<float>(j,i) = similarityScore;
-            // maskSimilarityMatrix.at<float>(i,j) = maskSimilarityScore;
-            // maskSimilarityMatrix.at<float>(j,i) = maskSimilarityScore;
         }
     }
     return;

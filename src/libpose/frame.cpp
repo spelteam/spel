@@ -80,3 +80,16 @@ vector <Point2f> Frame::getPartPolygon(int partID)
   return vector <Point2f> ();
 }
 
+void Frame::shiftSkeleton2D(Point2f point) //shift in 2D and recompute 3D?
+{
+    tree <BodyJoint> jointTree = skeleton.getJointTree();
+    for(tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
+    {
+        //add point to every joint
+        Point2f prevLoc = i->getImageLocation();
+        Point2f nextLoc = prevLoc+point;
+        i->setImageLocation(nextLoc);
+    }
+    skeleton.infer3D();
+}
+

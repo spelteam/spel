@@ -97,15 +97,15 @@ void MainWindow::on_actionClose_triggered()
 void MainWindow::on_actionOpen_triggered()
 {
     //get filename from OpenFileDialog
-   //QString projectFilename = QFileDialog::getOpenFileName(
-   //      this, //parent
-    //     "Open project", //caption
-    //     "", //start directory
-    //     "Project files (*.xml)" //filter files
-    // );
+   QString projectFilename = QFileDialog::getOpenFileName(
+         this, //parent
+         "Open project", //caption
+         "", //start directory
+         "Project files (*.xml)" //filter files
+     );
 
-    QString projectFilename =
-            "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
+//    QString projectFilename =
+//            "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
     //try to open project
     ui->statusBar->showMessage("Loading project");
 

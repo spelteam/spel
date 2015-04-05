@@ -30,6 +30,7 @@ class Frame
     Skeleton getSkeleton(void);
     //TODO: [!]Refactor getters for direct access
     Skeleton* getSkeletonPtr();
+    void shiftSkeleton2D(Point2f shift);
     void setSkeleton(Skeleton _skeleton);
     Point2f getGroundPoint(void);
     void setGroundPoint(Point2f _groundPoint);

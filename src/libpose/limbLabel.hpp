@@ -64,7 +64,7 @@ class LimbLabel
     vector<Point2f> polygon;
 /// signify label is for an occluded limb
     bool isOccluded;
-/// signify label is from a badly localised part
+/// signify label is from a badly localised part i.e. all very weak or all very similar detection scores
     bool isWeak; 
 //point in polygon test
 //    int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy);

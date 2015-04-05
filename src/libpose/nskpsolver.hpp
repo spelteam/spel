@@ -60,8 +60,8 @@ class NSKPSolver: Solver
     uint32_t findFrameIndexById(int id, vector<Frame*> frames);
     float computeScoreCost(const LimbLabel& label, map<string, float> params);
 
-    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params);
-    float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float min, float max);
+    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, bool toChild);
+    float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float max, bool toChild);
 
     float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params);
     float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float min, float max);

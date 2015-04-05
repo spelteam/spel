@@ -34,7 +34,7 @@ class Skeleton
     void setJointTree(tree <BodyJoint> _jointTree);
     float getScale(void) const;
     void setScale(float _scale);
-    void shift(Point2f point);
+    //void shift(Point2f point);
 
     /// count of bodypart elements, included in the tree
     uint32_t getPartTreeCount(void) const;
