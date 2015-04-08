@@ -12,7 +12,7 @@ BodyPart::BodyPart(void)
   setSpaceLength(0);
   setLWRatio(0);
   setRelativeLength(0);
-  setSearchRadius(1);
+  setSearchRadius(-1.0f);
 }
 
 //copy constructor
@@ -55,7 +55,7 @@ BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, floa
   setChildJoint(cJoint);
   setIsOccluded(isOcc);
   setSpaceLength(spaceLen);
-  setSearchRadius(1);
+  setSearchRadius(-1.0f);
 }
 
 int BodyPart::getPartID(void) const
@@ -203,4 +203,14 @@ float BodyPart::getRelativeLength(void)
 void BodyPart::setRelativeLength(float _relativeLength)
 {
   relativeLength = _relativeLength;
+}
+
+float BodyPart::getRotationAngle(void)
+{
+  return rotationAngle;
+}
+
+void BodyPart::setRotationAngle(float _rotationAngle)
+{
+  rotationAngle = _rotationAngle;
 }

@@ -88,8 +88,8 @@ int main (int argc, char **argv)
         {
           hasPrevAnchor = true;
           break;
+        }
       }
-    }
       //after
       for (vector<Frame*>::iterator futureAnchor = i; futureAnchor != trainFrames.end(); ++futureAnchor)
       {
@@ -120,10 +120,10 @@ int main (int argc, char **argv)
           continue;
         }
       }
-  }
+    }
     cout << "Detecting complete" << endl;
     trainFrames.clear();
-}
+  }
   vector <Frame*> vFrames = projectLoader.getFrames();
   vector <Frame*>::iterator i;
   for (i = vFrames.begin(); i != vFrames.end(); ++i)

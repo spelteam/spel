@@ -169,6 +169,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f); // polygon center 
       Point2f direction = j1 - j0; // used as estimation of the vector's direction
       float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
+      iteratorBodyPart->setRotationAngle(rotationAngle);
       // Rotate and shift the polygon to the bodypart center
       c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
       c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
@@ -178,6 +179,8 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       polygons.insert(pair <int32_t, POSERECT <Point2f>>(iteratorBodyPart->getPartID(), poserect));
       polyDepth.insert(pair <int32_t, float>(iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getSpaceLocation().z));
     }
+    skeleton.setPartTree(partTree);
+    (*frameNum)->setSkeleton(skeleton);
     Mat maskMat = (*frameNum)->getMask(); // copy mask from the current frame
     Mat imgMat = (*frameNum)->getImage(); // copy image from the current frame
     // Range over all pixels of the frame
@@ -450,6 +453,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const uint8_t debugLevel = 1;
   const string sDebugLevel = "debugLevel";
 
+  const float rotationThreshold = 0.025f;
+  const string sRotationThreshold = "rotationThreshold";
+
 
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
@@ -461,8 +467,79 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
   params.emplace(sUseCSdet, useCSdet);
   params.emplace(sDebugLevel, debugLevel);
+  params.emplace(sRotationThreshold, rotationThreshold);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
+
+  tree <BodyPart> prevFrameBodyPartTree, nextFrameBodyPartTree;
+  //check if frame has a keyframe before AND after
+  bool hasPrevAnchor = false, hasFutureAnchor = false;
+
+  for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
+  {
+    if ((*i)->getID() == frame->getID())
+    {
+      //before
+      try
+      {
+        for (vector<Frame*>::reverse_iterator prevAnchor(i); prevAnchor != frames.rend(); ++prevAnchor)
+        {
+          if ((*prevAnchor)->getFrametype() == KEYFRAME || (*prevAnchor)->getFrametype() == LOCKFRAME)
+          {
+            prevFrameBodyPartTree = (*prevAnchor)->getSkeleton().getPartTree();
+            hasPrevAnchor = true;
+            break;
+          }
+        }
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Can't get previous keyframe";
+        if (debugLevelParam >= 1)
+          cerr << ERROR_HEADER << ss.str() << endl;
+        throw logic_error(ss.str());
+      }
+      //after
+      try
+      {
+        for (vector<Frame*>::iterator futureAnchor = i; futureAnchor != frames.end(); ++futureAnchor)
+        {
+          if ((*futureAnchor)->getFrametype() == KEYFRAME || (*futureAnchor)->getFrametype() == LOCKFRAME)
+          {
+            nextFrameBodyPartTree = (*futureAnchor)->getSkeleton().getPartTree();
+            hasFutureAnchor = true;
+            break;
+          }
+        }
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Can't get next keyframe";
+        if (debugLevelParam >= 1)
+          cerr << ERROR_HEADER << ss.str() << endl;
+        throw logic_error(ss.str());
+      }
+    }
+  }
+
+  if (!hasPrevAnchor)
+  {
+    stringstream ss;
+    ss << "No previous keyframe";
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
+  if (!hasFutureAnchor)
+  {
+    stringstream ss;
+    ss << "No next keyframe";
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
 
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
@@ -481,6 +558,46 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
     Point2f j0, j1;
+    float prevRotationAngle = 0.0f, nextRotationAngle = 0.0f;
+
+    bool bFound = false;
+    for (tree <BodyPart>::iterator i = prevFrameBodyPartTree.begin(); i != prevFrameBodyPartTree.end(); ++i)
+    {
+      if (iteratorBodyPart->getPartID() == i->getPartID())
+      { 
+        bFound = true;
+        prevRotationAngle = i->getRotationAngle();
+        break;
+      }
+    }
+    if (!bFound)
+    {
+      stringstream ss;
+      ss << "No such body part in previous keyframe";
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
+
+    bFound = false;
+    for (tree <BodyPart>::iterator i = nextFrameBodyPartTree.begin(); i != nextFrameBodyPartTree.end(); ++i)
+    {
+      if (iteratorBodyPart->getPartID() == i->getPartID())
+      {
+        bFound = true;
+        nextRotationAngle = i->getRotationAngle();
+        break;
+      }
+    }
+    if (!bFound)
+    {
+      stringstream ss;
+      ss << "No such body part in next keyframe";
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
+
     try
     {
       j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation(); // copy current bodypart parent joint
@@ -501,10 +618,11 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     float theta = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
     float minDist = boxWidth * 0.2f; // linear step of searching
     if (minDist < 2) minDist = 2; // the minimal linear step
-    float searchDistance = 0;
+    float searchDistance = iteratorBodyPart->getSearchRadius();
     try
     {      
-      searchDistance = boneLength * params.at(sSearchDistCoeff) + iteratorBodyPart->getSearchRadius(); // the limiting of search area
+      if (searchDistance < 0)
+        searchDistance = boneLength * params.at(sSearchDistCoeff); // the limiting of search area
     }
     catch (...)
     {
@@ -577,16 +695,19 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           { // Scan the possible rotation zone
             for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
             {
-              // Create a new label vector and build it label
-              Point2f p0 = Point2f(0, 0); // the point of unit vector
-              Point2f p1 = Point2f(1.0, 0); // the point of unit vector
-              p1 *= boneLength; // change the vector length 
-              p1 = PoseHelper::rotatePoint2D(p1, p0, rot); // rotate the vector
-              Point2f mid = 0.5 * p1; // center of the vector
-              p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
-              p0 = Point2f(x, y) - mid; // shift the vector to current point
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
-              sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
+              if (abs(rot - prevRotationAngle) < abs(prevRotationAngle - nextRotationAngle) + abs(rotationThreshold))
+              {
+                // Create a new label vector and build it label
+                Point2f p0 = Point2f(0, 0); // the point of unit vector
+                Point2f p1 = Point2f(1.0, 0); // the point of unit vector
+                p1 *= boneLength; // change the vector length 
+                p1 = PoseHelper::rotatePoint2D(p1, p0, rot); // rotate the vector
+                Point2f mid = 0.5 * p1; // center of the vector
+                p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
+                p0 = Point2f(x, y) - mid; // shift the vector to current point
+                LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
+                sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
+              }
             }
           }
         }

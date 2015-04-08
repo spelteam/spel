@@ -44,6 +44,8 @@ class BodyPart
     void setLWRatio(float _lwRatio);
     float getRelativeLength(void);
     void setRelativeLength(float _relativeLength);
+    float getRotationAngle(void);
+    void setRotationAngle(float _rotationAngle);
   private:
 /// identifier, must be unique within the limits of class
     int partID;
@@ -64,6 +66,7 @@ class BodyPart
 /// 3d relative length
     float relativeLength;
     float searchRadius;
+    float rotationAngle;
 };
 
 std::ostream& operator<<(std::ostream& os, const BodyPart &bp);
