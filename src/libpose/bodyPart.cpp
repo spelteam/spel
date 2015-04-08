@@ -12,7 +12,8 @@ BodyPart::BodyPart(void)
   setSpaceLength(0);
   setLWRatio(0);
   setRelativeLength(0);
-  setSearchRadius(-1.0f);
+  setSearchRadius(0);
+  setRotationSearchRange(0);
 }
 
 //copy constructor
@@ -26,7 +27,8 @@ BodyPart::BodyPart(const BodyPart &bodyPart)
       partPolygon(bodyPart.partPolygon),
       lwRatio(bodyPart.lwRatio),
       relativeLength(bodyPart.relativeLength),
-      searchRadius(bodyPart.searchRadius)
+      searchRadius(bodyPart.searchRadius),
+      rotationSearchRange(bodyPart.rotationSearchRange)
 {
 }
 
@@ -41,7 +43,9 @@ BodyPart::BodyPart(BodyPart &&bodyPart)
       partPolygon(std::move(bodyPart.partPolygon)),
       lwRatio(std::move(bodyPart.lwRatio)),
       relativeLength(std::move(bodyPart.relativeLength)),
-      searchRadius(std::move(bodyPart.searchRadius))
+      searchRadius(std::move(bodyPart.searchRadius)),
+      rotationSearchRange(std::move(bodyPart.rotationSearchRange))
+
 {
 }
 
@@ -55,7 +59,8 @@ BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, floa
   setChildJoint(cJoint);
   setIsOccluded(isOcc);
   setSpaceLength(spaceLen);
-  setSearchRadius(-1.0f);
+  setSearchRadius(0);
+  setRotationSearchRange(0);
 }
 
 int BodyPart::getPartID(void) const
@@ -142,6 +147,7 @@ BodyPart& BodyPart::operator=( const BodyPart& bodyPart ){
     lwRatio = bodyPart.lwRatio;
     relativeLength = bodyPart.relativeLength;
     searchRadius = bodyPart.searchRadius;
+    rotationSearchRange = bodyPart.rotationSearchRange;
     return *this;
 }
 
@@ -156,6 +162,7 @@ BodyPart& BodyPart::operator=( BodyPart&& bodyPart ){
     lwRatio = std::move(bodyPart.lwRatio);
     relativeLength = std::move(bodyPart.relativeLength);
     searchRadius = std::move(bodyPart.searchRadius);
+    rotationSearchRange = std::move(bodyPart.rotationSearchRange);
     return *this;
 }
 

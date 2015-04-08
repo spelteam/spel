@@ -169,7 +169,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f); // polygon center 
       Point2f direction = j1 - j0; // used as estimation of the vector's direction
       float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
-      iteratorBodyPart->setRotationAngle(rotationAngle);
+      iteratorBodyPart->setRotationSearchRange(rotationAngle);
       // Rotate and shift the polygon to the bodypart center
       c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
       c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
@@ -566,7 +566,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       if (iteratorBodyPart->getPartID() == i->getPartID())
       { 
         bFound = true;
-        prevRotationAngle = i->getRotationAngle();
+        prevRotationAngle = i->getRotationSearchRange();
         break;
       }
     }
@@ -585,7 +585,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       if (iteratorBodyPart->getPartID() == i->getPartID())
       {
         bFound = true;
-        nextRotationAngle = i->getRotationAngle();
+        nextRotationAngle = i->getRotationSearchRange();
         break;
       }
     }

@@ -44,8 +44,8 @@ class BodyPart
     void setLWRatio(float _lwRatio);
     float getRelativeLength(void);
     void setRelativeLength(float _relativeLength);
-    float getRotationAngle(void);
-    void setRotationAngle(float _rotationAngle);
+    float getRotationSearchRange(void);
+    void setRotationSearchRange(float _rotationAngle);
   private:
 /// identifier, must be unique within the limits of class
     int partID;

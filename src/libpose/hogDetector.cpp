@@ -99,7 +99,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     j1 = joint->getImageLocation();
     Point2f direction = j1 - j0; // used as estimation of the vector's direction
     float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
-    part->setRotationAngle(rotationAngle);
+    part->setRotationSearchRange(rotationAngle);
     try
     {      
       parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
@@ -384,7 +384,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
       if (iteratorBodyPart->getPartID() == i->getPartID())
       {
         bFound = true;
-        prevRotationAngle = i->getRotationAngle();
+        prevRotationAngle = i->getRotationSearchRange();
         break;
       }
     }
@@ -403,7 +403,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
       if (iteratorBodyPart->getPartID() == i->getPartID())
       {
         bFound = true;
-        nextRotationAngle = i->getRotationAngle();
+        nextRotationAngle = i->getRotationSearchRange();
         break;
       }
     }
