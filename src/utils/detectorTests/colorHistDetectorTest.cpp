@@ -79,6 +79,7 @@ int main (int argc, char **argv)
     cout << "Detecting..." << endl;
     for (i = trainFrames.begin(); i != trainFrames.end(); ++i)
     {
+      tree <BodyPart> prevBodyPartTree, nextBodyPartTree;
       //check if frame has a keyframe before AND after
       bool hasPrevAnchor = false, hasFutureAnchor = false;
       //before
@@ -87,6 +88,7 @@ int main (int argc, char **argv)
         if ((*prevAnchor)->getFrametype() == KEYFRAME || (*prevAnchor)->getFrametype() == LOCKFRAME)
         {
           hasPrevAnchor = true;
+          prevBodyPartTree = (*prevAnchor)->getSkeleton().getPartTree();
           break;
         }
       }
@@ -96,12 +98,36 @@ int main (int argc, char **argv)
         if ((*futureAnchor)->getFrametype() == KEYFRAME || (*futureAnchor)->getFrametype() == LOCKFRAME)
         {
           hasFutureAnchor = true;
+          nextBodyPartTree = (*futureAnchor)->getSkeleton().getPartTree();
           break;
         }
       }
       if (!hasPrevAnchor || !hasFutureAnchor)
         continue;
       Frame *f = *i;
+      Skeleton frameSkeleton = f->getSkeleton();
+      tree <BodyPart> frameBodyPartTree = frameSkeleton.getPartTree();
+      bool bFound = false;
+      for (tree <BodyPart>::iterator i = frameBodyPartTree.begin(); i != frameBodyPartTree.end(); ++i)
+      {
+        for (tree <BodyPart>::iterator j = prevBodyPartTree.begin(); j != prevBodyPartTree.end(); ++j)
+        {
+          if (i->getPartID() == j->getPartID())
+          {
+            for (tree <BodyPart>::iterator k = nextBodyPartTree.begin(); k != nextBodyPartTree.end(); ++k)
+            {
+              if (j->getPartID() == k->getPartID())
+              {
+                i->setRotationSearchRange(abs(j->getRotationSearchRange() - k->getRotationSearchRange()));
+                break;
+              }
+            }
+            break;
+          }
+        }
+      }
+      frameSkeleton.setPartTree(frameBodyPartTree);
+      f->setSkeleton(frameSkeleton);
 #ifndef DEBUG
       if (f->getFrametype() == INTERPOLATIONFRAME)
 #endif  // DEBUG
