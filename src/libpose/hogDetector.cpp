@@ -330,7 +330,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     float searchDistance = iteratorBodyPart->getSearchRadius();
     try
     {
-      if (searchDistance < 0)
+      if (searchDistance <= 0)
         searchDistance = boneLength * params.at(sSearchDistCoeff);
     }
     catch (...)

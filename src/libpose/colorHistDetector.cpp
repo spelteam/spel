@@ -512,7 +512,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     float searchDistance = iteratorBodyPart->getSearchRadius();
     try
     {      
-      if (searchDistance < 0)
+      if (searchDistance <= 0)
         searchDistance = boneLength * params.at(sSearchDistCoeff); // the limiting of search area
     }
     catch (...)
