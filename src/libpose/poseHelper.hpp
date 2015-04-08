@@ -138,6 +138,7 @@ struct POSERECT
     contour.push_back(point2);
     contour.push_back(point3);
     contour.push_back(point4);
+
     return (int8_t)pointPolygonTest(contour, point, false);
   }
   ///convert rectangle to vector of points

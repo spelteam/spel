@@ -377,7 +377,7 @@ uint32_t NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
-    params.emplace("imageCoeff", 0.1);
+    params.emplace("imageCoeff", 0.5);
     params.emplace("scoreIndex", 0);
 	//emplace first
 	float lambda = params.at("imageCoeff");
@@ -586,37 +586,54 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
     Mat mask = frame->getMask();
     int correctPixels=0, incorrectPixels=0;
+    int pixelsInMask=0;
+    int coveredPixelsInMask=0;
+    int incorrectlyCoveredPixels=0;
+    int missedPixels=0;
 
-    for(int i=0; i<mask.rows; ++i) //at every row
+    for(int i=0; i<mask.cols; ++i) //at every col - x
     {
-        for(int j=0; j<mask.cols; ++j) //and every col
+        for(int j=0; j<mask.rows; ++j) //and every row - y
         {
-            //check whether pixel hit a label
+            //int test = labels[0].containsPoint(Point2f(480,100));
+            //check whether pixel hit a label from solution
             bool labelHit=false;
             for(vector<LimbLabel>::iterator label=labels.begin(); label!=labels.end(); ++label)
             {
                 if(label->containsPoint(Point2f(i,j)))
                 {
                     labelHit=true;
-                    break;
+                    //break;
                 }
             }
 
             //check pixel colour
             int intensity = mask.at<uchar>(i, j);
-            bool blackPixel=intensity<10;
+            bool blackPixel=(intensity<10);
 
+            if(!blackPixel)
+                pixelsInMask++;
 
             if(blackPixel && labelHit) //if black in label, incorrect
+            {
                 incorrectPixels++;
+                incorrectlyCoveredPixels++;
+            }
             else if(!blackPixel && !labelHit) //if white not in label, incorret
+            {
                 incorrectPixels++;
+                missedPixels++;
+            }
             else if(!blackPixel && labelHit)//otherwise correct
+            {
                 correctPixels++;
+                coveredPixelsInMask++;
+            }
 //            else //black pixel and not label hit
 //                correctPixels++; //don't count these at all?
         }
     }
+
 
     double solutionEval = (float)correctPixels/((float)correctPixels+(float)incorrectPixels);
     cerr << "Solution evaluation score - " << solutionEval << endl;
