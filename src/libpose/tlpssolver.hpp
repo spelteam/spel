@@ -25,17 +25,17 @@ using namespace opengm;
 class TLPSSolver: Solver
 {
 
-  ///define the space
-  typedef opengm::DiscreteSpace<> Space;
-  ///define the model
-  typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
+    ///define the space
+    typedef opengm::DiscreteSpace<> Space;
+    ///define the model
+    typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
 
-  ///define the update rules
-  typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
-  ///define the inference algorithm
-  typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
+    ///define the update rules
+    typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
+    ///define the inference algorithm
+    typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
-  public:
+public:
     TLPSSolver(void);
     ///inherited virtual
     ~TLPSSolver(void);
@@ -43,11 +43,11 @@ class TLPSSolver: Solver
     vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual
     vector<Solvlet> solve(Sequence& frames, map<string, float> params);
-  //INHERITED
+    //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
-  private:
+private:
 
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params);
 
@@ -61,10 +61,9 @@ class TLPSSolver: Solver
 
     ///separate the sequence into slices, for temporal solve
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);
-//    vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
-//    float interpolateFloat(float prevAngle, float nextAngle, int step, int numSteps);
 
     //INHERITED
+    //private:
     //int id;
     //string name;
 };

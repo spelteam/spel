@@ -35,12 +35,15 @@ class Frame
     Point2f getGroundPoint(void);
     void setGroundPoint(Point2f _groundPoint);
     virtual FRAMETYPE getFrametype(void) = 0;
+    int getParentFrameID(void);
+    void setParentFrameID(int _parentFrameID);
   private:
     int id;
     Mat image;
     Mat mask;
     Skeleton skeleton;
     Point2f groundPoint;
+    int parentFrameID; //the ID of the frame this lockframe was derived from
 };
 
 class FramePointerComparer

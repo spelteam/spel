@@ -26,17 +26,17 @@ using namespace cv;
 
 class NSKPSolver: Solver
 {
-  ///define the space
-  typedef opengm::DiscreteSpace<> Space;
-  ///define the model
-  typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
+    ///define the space
+    typedef opengm::DiscreteSpace<> Space;
+    ///define the model
+    typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
 
-  ///define the update rules
-  typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
-  ///define the inference algorithm
-  typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
+    ///define the update rules
+    typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
+    ///define the inference algorithm
+    typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
-  public:
+public:
     NSKPSolver();
     ///inherited virtual
     ~NSKPSolver();
@@ -46,11 +46,11 @@ class NSKPSolver: Solver
     vector<Solvlet> solve(Sequence &frames, map<string, float>  params);
     ///inherited virtual
     vector<Solvlet> solve(Sequence& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM);
-  //INHERITED
+    //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
-  private:
+private:
     vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
     

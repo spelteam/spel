@@ -59,10 +59,10 @@ vector<Frame*> Sequence::getFrames() const
 
 void Sequence::setFrames(const vector<Frame *> _frames)
 {
-//    for(int i=0; i<this->frames.size();++i)
-//    {
-//        delete frames[i];
-//    }
+    //    for(int i=0; i<this->frames.size();++i)
+    //    {
+    //        delete frames[i];
+    //    }
     this->frames.clear();
     this->frames=_frames;
 }
@@ -128,103 +128,105 @@ void Sequence::computeInterpolation(map<string, float> &params)
 
 vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, float> params)
 {
-   //first make sure that the front and back frames HAVE 3D space locations computed
-   //if not, compute them
+    //first make sure that the front and back frames HAVE 3D space locations computed
+    //if not, compute them
+    params.emplace("debugLevel", 1);
+    int debugLevel = params.at("debugLevel");
 
-   //check that the slice contains a keyframe/lockframe at each end
-   assert(slice.front()->getFrametype()==LOCKFRAME || slice.front()->getFrametype()==KEYFRAME);
-   assert(slice.back()->getFrametype()==LOCKFRAME || slice.back()->getFrametype()==KEYFRAME);
+    //check that the slice contains a keyframe/lockframe at each end
+    assert(slice.front()->getFrametype()==LOCKFRAME || slice.front()->getFrametype()==KEYFRAME);
+    assert(slice.back()->getFrametype()==LOCKFRAME || slice.back()->getFrametype()==KEYFRAME);
 
-   for(uint32_t i=1; i<slice.size()-1; ++i)
-   {
+    for(uint32_t i=1; i<slice.size()-1; ++i)
+    {
         assert(slice[i]->getFrametype()!=KEYFRAME && slice[i]->getFrametype()!=LOCKFRAME); //if the inbetween frames are not keyframes and lockframes
-   }
+    }
 
-   Skeleton prevSkel = slice.front()->getSkeleton();
-   Skeleton futureSkel = slice.back()->getSkeleton();
+    Skeleton prevSkel = slice.front()->getSkeleton();
+    Skeleton futureSkel = slice.back()->getSkeleton();
 
-   //set up the two part trees, the part tree is used for structure
-   tree<BodyPart> partTree = slice.front()->getSkeleton().getPartTree();
-   tree<BodyPart>::iterator partIter, parentIter; //the body part iterator
+    //set up the two part trees, the part tree is used for structure
+    tree<BodyPart> partTree = slice.front()->getSkeleton().getPartTree();
+    tree<BodyPart>::iterator partIter, parentIter; //the body part iterator
 
-   vector<Eigen::Quaternionf> rotationsPast; //unrotate past vector by this
-   vector<Eigen::Quaternionf> rotationsFuture; //unrotate future vector by this
+    vector<Eigen::Quaternionf> rotationsPast; //unrotate past vector by this
+    vector<Eigen::Quaternionf> rotationsFuture; //unrotate future vector by this
 
-   for(uint32_t i=0; i<partTree.size(); ++i)
-   {
+    for(uint32_t i=0; i<partTree.size(); ++i)
+    {
         rotationsPast.push_back(Quaternionf::Identity());
         rotationsFuture.push_back(Quaternionf::Identity());
-   }
+    }
 
-   cerr << "\t Setup complete" << endl;
+    if(debugLevel>=1)
+        cerr << "\t Setup complete" << endl;
 
-   for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-   {
-//        cerr << "\t\t Setting up rotations for part " << partIter->getPartID() << endl;
-       //get partent and child joints of previous part
-       BodyJoint* childJointP = prevSkel.getBodyJoint(partIter->getChildJoint());
-       BodyJoint* parentJointP = prevSkel.getBodyJoint(partIter->getParentJoint());
+    for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+    {
+        //get partent and child joints of previous part
+        BodyJoint* childJointP = prevSkel.getBodyJoint(partIter->getChildJoint());
+        BodyJoint* parentJointP = prevSkel.getBodyJoint(partIter->getParentJoint());
 
-       //get parent and child joints of future part
-       BodyJoint* childJointF = futureSkel.getBodyJoint(partIter->getChildJoint());
-       BodyJoint* parentJointF = futureSkel.getBodyJoint(partIter->getParentJoint());
+        //get parent and child joints of future part
+        BodyJoint* childJointF = futureSkel.getBodyJoint(partIter->getChildJoint());
+        BodyJoint* parentJointF = futureSkel.getBodyJoint(partIter->getParentJoint());
 
-       //convert Point3f to Vector3f
-       Point3f childLocP = childJointP->getSpaceLocation();
-       Point3f parentLocP = parentJointP->getSpaceLocation();
+        //convert Point3f to Vector3f
+        Point3f childLocP = childJointP->getSpaceLocation();
+        Point3f parentLocP = parentJointP->getSpaceLocation();
 
-       Point3f childLocF = childJointF->getSpaceLocation();
-       Point3f parentLocF = parentJointF->getSpaceLocation();
+        Point3f childLocF = childJointF->getSpaceLocation();
+        Point3f parentLocF = parentJointF->getSpaceLocation();
 
-       Eigen::Vector3f prevVec(childLocP.x-parentLocP.x, childLocP.y-parentLocP.y, childLocP.z-parentLocP.z);
-       Eigen::Vector3f futureVec(childLocF.x-parentLocF.x, childLocF.y-parentLocF.y, childLocF.z-parentLocF.z);
+        Eigen::Vector3f prevVec(childLocP.x-parentLocP.x, childLocP.y-parentLocP.y, childLocP.z-parentLocP.z);
+        Eigen::Vector3f futureVec(childLocF.x-parentLocF.x, childLocF.y-parentLocF.y, childLocF.z-parentLocF.z);
 
 
-       //get all rotations that need to happen
-       Vector3f prevDvec(1.0, 0, 0), futureDvec(1.0, 0, 0);
-       parentIter = partTree.parent(partIter);
-       vector<int> path;
-       while(parentIter!=NULL)
-       {
-           path.push_back(parentIter->getPartID());
-           parentIter = partTree.parent(parentIter);
-       }
+        //get all rotations that need to happen
+        Vector3f prevDvec(1.0, 0, 0), futureDvec(1.0, 0, 0);
+        parentIter = partTree.parent(partIter);
+        vector<int> path;
+        while(parentIter!=NULL)
+        {
+            path.push_back(parentIter->getPartID());
+            parentIter = partTree.parent(parentIter);
+        }
 
-       for(vector<int>::reverse_iterator pathIter=path.rbegin(); pathIter!=path.rend(); ++pathIter)
-       {
-           prevVec = rotationsPast[*pathIter].inverse()._transformVector(prevVec);
-           futureVec = rotationsFuture[*pathIter].inverse()._transformVector(futureVec);
-       }
+        for(vector<int>::reverse_iterator pathIter=path.rbegin(); pathIter!=path.rend(); ++pathIter)
+        {
+            prevVec = rotationsPast[*pathIter].inverse()._transformVector(prevVec);
+            futureVec = rotationsFuture[*pathIter].inverse()._transformVector(futureVec);
+        }
 
-       //now compute the quaternions
-       Eigen::Quaternionf prevRot, futureRot;
-       prevRot = prevRot.FromTwoVectors(prevDvec, prevVec.normalized());
-       futureRot = prevRot.FromTwoVectors(futureDvec, futureVec.normalized());
+        //now compute the quaternions
+        Eigen::Quaternionf prevRot, futureRot;
+        prevRot = prevRot.FromTwoVectors(prevDvec, prevVec.normalized());
+        futureRot = prevRot.FromTwoVectors(futureDvec, futureVec.normalized());
 
-       rotationsPast[partIter->getPartID()] = prevRot.normalized();
-       rotationsFuture[partIter->getPartID()] = futureRot.normalized();
-   }
+        rotationsPast[partIter->getPartID()] = prevRot.normalized();
+        rotationsFuture[partIter->getPartID()] = futureRot.normalized();
+    }
 
-   cerr << "\t Quaternions computed" << endl;
+    if(debugLevel>=1)
+        cerr << "\t Quaternions computed" << endl;
 
-   //now that quaterion rotations are computed, we can compute the new skeleton
-   for(uint32_t i=1; i<slice.size()-1; ++i)
-   {
-       float time = (float)i/(slice.size()-1);
-       //only the t value depends on frame number
-       Skeleton interpolatedSkeleton = prevSkel;
-//       if(useDefaultScale)
-//           interpolatedSkeleton.setScale(defaultScale);
-       vector<Vector3f> currentPartState;
-       partTree = interpolatedSkeleton.getPartTree();
+    //now that quaterion rotations are computed, we can compute the new skeleton
+    for(uint32_t i=1; i<slice.size()-1; ++i)
+    {
+        float time = (float)i/(slice.size()-1);
+        //only the t value depends on frame number
+        Skeleton interpolatedSkeleton = prevSkel;
 
-       for(uint32_t j=0; j<partTree.size(); ++j)
-       {
-           currentPartState.push_back(Eigen::Vector3f());
-       }
+        vector<Vector3f> currentPartState;
+        partTree = interpolatedSkeleton.getPartTree();
 
-       for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-       {
+        for(uint32_t j=0; j<partTree.size(); ++j)
+        {
+            currentPartState.push_back(Eigen::Vector3f());
+        }
+
+        for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+        {
             Eigen::Vector3f partVec(1.0, 0, 0);
             //partVec = partVec*partIter->getRelativeLength();
 
@@ -249,16 +251,17 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
 
             //partVec = rotationsPast[partIter->getPartID()]._transformVector(partVec);
             currentPartState[partIter->getPartID()] = partVec;
-       }
-       //now update skeleton accordingly - locations just need to be added together (i.e. add child joint to vector)
+        }
+        //now update skeleton accordingly - locations just need to be added together (i.e. add child joint to vector)
 
-       cerr << "\t New joint locations computed" << endl;
+        if(debugLevel>=1)
+            cerr << "\t New joint locations computed" << endl;
 
-       for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
-       {
+        for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+        {
 
-           if(partIter->getPartID()==0) //if this is the root bone
-           {   //first set up the interpolated location of the root joint
+            if(partIter->getPartID()==0) //if this is the root bone
+            {   //first set up the interpolated location of the root joint
                 BodyJoint* prevRootJoint = prevSkel.getBodyJoint(partIter->getParentJoint()); //this should be the previous root joint
                 BodyJoint* futureRootJoint = futureSkel.getBodyJoint(partIter->getParentJoint()); //this should be the future root joint
                 Point3f prevRootLoc = prevRootJoint->getSpaceLocation();
@@ -278,34 +281,34 @@ vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, floa
 
             Vector3f partState = currentPartState[partIter->getPartID()]*partIter->getRelativeLength();;
 
-           //parent and child joints now contain the correct location information
+            //parent and child joints now contain the correct location information
             Point3f p  = parentJointT->getSpaceLocation();
 
             childJointT->setSpaceLocation(Point3f(p.x+partState.x(), p.y+partState.y(), p.z+partState.z()));
 
-           //parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
-       }
+            //parentJointT->setSpaceLocation(Point3f(parentJoint.x(), parentJoint.y(), parentJoint.z()));
+        }
 
-       cerr << "\t Skeleton generated" << endl;
+        cerr << "\t Skeleton generated" << endl;
 
-       //now skeleton should be set for this frame
-       //slice[i].setSkeleton(interpolatedSkeleton);
+        //now skeleton should be set for this frame
+        //slice[i].setSkeleton(interpolatedSkeleton);
 
-       //frame type should be updated to interpolaion
-       Interpolation interpolatedFrame;
-       interpolatedSkeleton.infer2D(); //infer 2D from the interpolated 3D joints
-       interpolatedFrame.setSkeleton(interpolatedSkeleton);
-       interpolatedFrame.setID(slice[i]->getID());
-       interpolatedFrame.setMask(slice[i]->getMask());
-       interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
-       interpolatedFrame.setImage(slice[i]->getImage());
+        //frame type should be updated to interpolaion
+        Interpolation interpolatedFrame;
+        interpolatedSkeleton.infer2D(); //infer 2D from the interpolated 3D joints
+        interpolatedFrame.setSkeleton(interpolatedSkeleton);
+        interpolatedFrame.setID(slice[i]->getID());
+        interpolatedFrame.setMask(slice[i]->getMask());
+        interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
+        interpolatedFrame.setImage(slice[i]->getImage());
 
-       //delete slice[i];
-       *slice[i] = interpolatedFrame;
-   }
+        //delete slice[i];
+        *slice[i] = interpolatedFrame;
+    }
 
-   //cout << "Interpolated keyframes" << endl;
-   return slice; //result contains Frame*'s that have been modified according to
+    //cout << "Interpolated keyframes" << endl;
+    return slice; //result contains Frame*'s that have been modified according to
 
 }
 
@@ -328,9 +331,9 @@ void Sequence::estimateUniformScale(map<string,float> &params)
             tree<BodyPart> partTree = skel.getPartTree();
             for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
             {
-              float len3d = tree->getRelativeLength();
-              float len2d = sqrt(PoseHelper::distSquared(skel.getBodyJoint(tree->getParentJoint())->getImageLocation(), skel.getBodyJoint(tree->getChildJoint())->getImageLocation()));
-              scales.push_back(len2d/len3d); //compute the difference, this must be the depth
+                float len3d = tree->getRelativeLength();
+                float len2d = sqrt(PoseHelper::distSquared(skel.getBodyJoint(tree->getParentJoint())->getImageLocation(), skel.getBodyJoint(tree->getChildJoint())->getImageLocation()));
+                scales.push_back(len2d/len3d); //compute the difference, this must be the depth
             }
         }
     }

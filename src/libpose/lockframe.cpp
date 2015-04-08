@@ -8,4 +8,3 @@ FRAMETYPE Lockframe::getFrametype(void)
 {
   return frameType;
 }
-

@@ -33,7 +33,7 @@ int main (int argc, char **argv)
   }
   
   map <string, float> params; //use the default params
-  params.emplace("debugLevel", 3); //set the debug setting to highest (0,1,2,3)
+  params.emplace("debugLevel", 1); //set the debug setting to highest (0,1,2,3)
 
   vector<Solvlet> solve;
   

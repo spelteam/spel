@@ -2,6 +2,9 @@
 
 Frame::Frame(void)
 {
+    setParentFrameID(-1);
+    setID(-1);
+    setGroundPoint(Point2f(0,0));
 }
 
 Frame::~Frame(void)
@@ -93,3 +96,12 @@ void Frame::shiftSkeleton2D(Point2f point) //shift in 2D and recompute 3D?
     skeleton.infer3D();
 }
 
+int Frame::getParentFrameID(void)
+{
+    return parentFrameID;
+}
+
+void Frame::setParentFrameID(int _parentFrameID)
+{
+    parentFrameID = _parentFrameID;
+}

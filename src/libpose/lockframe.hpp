@@ -10,6 +10,7 @@ class Lockframe : public Frame
   public:
     Lockframe(void);
     FRAMETYPE getFrametype(void);
+
   private:
     const FRAMETYPE frameType;
 };

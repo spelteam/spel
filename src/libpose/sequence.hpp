@@ -9,7 +9,7 @@ using namespace std;
 /// Used to evaluate accuracy of a detection
 class Sequence
 {
-  public:
+public:
     Sequence(void);
     Sequence(const Sequence& seq);
     ///constructor
@@ -24,7 +24,7 @@ class Sequence
     void computeInterpolation(map<string, float> &params);
     void estimateUniformScale(map<string, float> &params);
     
-  private:
+private:
     vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
     /// detection score
     vector<Frame*> frames;
@@ -34,4 +34,4 @@ class Sequence
 };
 
 #endif  // _SEQUENCE_HPP_
- 
+
