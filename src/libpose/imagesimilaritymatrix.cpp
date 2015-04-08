@@ -243,8 +243,8 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
             //cOne and cTwo now have the centres
             dX = cTwo-cOne;
 
-            imageShiftMatrix.at<Point2f>(i,j) = dX;
-            imageShiftMatrix.at<Point2f>(j,i) = -dX;
+            imageShiftMatrix.at<Point2f>(i,j) = Point2f(dX.y, dX.x);;
+            imageShiftMatrix.at<Point2f>(j,i) = Point2f(-dX.y, -dX.x);;
 
             //so, dX+cOne = cTwo
             //and cOne = cTwo-dX
@@ -372,8 +372,8 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
             //so, dX+cOne = cTwo
             //and cOne = cTwo-dX
 
-            imageShiftMatrix.at<Point2f>(i,j) = dX;
-            imageShiftMatrix.at<Point2f>(j,i) = -dX;
+            imageShiftMatrix.at<Point2f>(i,j) = Point2f(dX.y, dX.x);
+            imageShiftMatrix.at<Point2f>(j,i) = Point2f(-dX.y, -dX.x);
 
             float similarityScore = 0;
             // float maskSimilarityScore = 0;

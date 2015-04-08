@@ -65,8 +65,8 @@ class BodyPart
     float lwRatio;
 /// 3d relative length
     float relativeLength;
-    float searchRadius;
-    float rotationAngle;
+    float searchRadius; //search radius for detection of this bodypart
+    float rotationSearchRange; //rotation angle range to search through
 };
 
 std::ostream& operator<<(std::ostream& os, const BodyPart &bp);

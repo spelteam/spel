@@ -102,8 +102,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("useHoGdet", 0); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useCSdet", 1); //determine if colorhist detector is used and with what coefficient
     params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
-    params.emplace("maxPartCandidates", 200); //set the max number of part candidates to allow into the solver
-    params.emplace("acceptLockframeThreshold", 0.0); //set up the lockframe accept threshold by mask coverage
+    params.emplace("maxPartCandidates", 500); //set the max number of part candidates to allow into the solver
+    params.emplace("acceptLockframeThreshold", 0.5); //set up the lockframe accept threshold by mask coverage
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
     params.emplace("propagateToLockframes", 0);
 
@@ -600,7 +600,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
             bool labelHit=false;
             for(vector<LimbLabel>::iterator label=labels.begin(); label!=labels.end(); ++label)
             {
-                if(label->containsPoint(Point2f(i,j)))
+                if(label->containsPoint(Point2f(i,j))) //this is done in x,y coords
                 {
                     labelHit=true;
                     //break;
@@ -608,7 +608,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
             }
 
             //check pixel colour
-            int intensity = mask.at<uchar>(i, j);
+            int intensity = mask.at<uchar>(j, i); //this is done with reve
             bool blackPixel=(intensity<10);
 
             if(!blackPixel)

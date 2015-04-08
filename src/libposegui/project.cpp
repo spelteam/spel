@@ -1,8 +1,7 @@
-#include "project.h"
-
 #include <QFile>
 #include <QXmlSchema>
 #include <QXmlSchemaValidator>
+#include "tlpssolver.hpp"
 #include "xmlmessagehandler.h"
 
 #include <keyframe.hpp>
@@ -14,6 +13,7 @@
 #include "utility.h"
 
 #include <queue>
+#include "project.h"
 
 using namespace project_attributes;
 

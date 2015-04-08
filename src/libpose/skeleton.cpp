@@ -4,6 +4,11 @@
 //default constructor
 Skeleton::Skeleton(void)
 {
+    /// name of the specific instance of
+    name="uninitialised";
+    /// tree of bodyparts is component of the body model
+    /// scale factor, used for scaling
+    scale=0;
 }
 
 // constructor with params

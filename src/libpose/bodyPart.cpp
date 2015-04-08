@@ -205,12 +205,12 @@ void BodyPart::setRelativeLength(float _relativeLength)
   relativeLength = _relativeLength;
 }
 
-float BodyPart::getRotationAngle(void)
+float BodyPart::getRotationSearchRange(void)
 {
-  return rotationAngle;
+  return rotationSearchRange;
 }
 
-void BodyPart::setRotationAngle(float _rotationAngle)
+void BodyPart::setRotationSearchRange(float _rotationAngle)
 {
-  rotationAngle = _rotationAngle;
+  rotationSearchRange = _rotationAngle;
 }
