@@ -273,76 +273,6 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
-  tree <BodyPart> prevFrameBodyPartTree, nextFrameBodyPartTree;
-  //check if frame has a keyframe before AND after
-  bool hasPrevAnchor = false, hasFutureAnchor = false;
-
-  for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
-  {
-    if ((*i)->getID() == frame->getID())
-    {
-      //before
-      try
-      {
-        for (vector<Frame*>::reverse_iterator prevAnchor(i); prevAnchor != frames.rend(); ++prevAnchor)
-        {
-          if ((*prevAnchor)->getFrametype() == KEYFRAME || (*prevAnchor)->getFrametype() == LOCKFRAME)
-          {
-            prevFrameBodyPartTree = (*prevAnchor)->getSkeleton().getPartTree();
-            hasPrevAnchor = true;
-            break;
-          }
-        }
-      }
-      catch (...)
-      {
-        stringstream ss;
-        ss << "Can't get previous keyframe";
-        if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
-      }
-      //after
-      try
-      {
-        for (vector<Frame*>::iterator futureAnchor = i; futureAnchor != frames.end(); ++futureAnchor)
-        {
-          if ((*futureAnchor)->getFrametype() == KEYFRAME || (*futureAnchor)->getFrametype() == LOCKFRAME)
-          {
-            nextFrameBodyPartTree = (*futureAnchor)->getSkeleton().getPartTree();
-            hasFutureAnchor = true;
-            break;
-          }
-        }
-      }
-      catch (...)
-      {
-        stringstream ss;
-        ss << "Can't get next keyframe";
-        if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
-      }
-    }
-  }
-
-  if (!hasPrevAnchor)
-  {
-    stringstream ss;
-    ss << "No previous keyframe";
-    if (debugLevelParam >= 1)
-      cerr << ERROR_HEADER << ss.str() << endl;
-    throw logic_error(ss.str());
-  }
-  if (!hasFutureAnchor)
-  {
-    stringstream ss;
-    ss << "No next keyframe";
-    if (debugLevelParam >= 1)
-      cerr << ERROR_HEADER << ss.str() << endl;
-    throw logic_error(ss.str());
-  }
-
 //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
   Size blockStride = Size(8,8);
@@ -376,46 +306,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
     Point2f j0, j1;
-    float prevRotationAngle = 0.0f, nextRotationAngle = 0.0f;
-
-    bool bFound = false;
-    for (tree <BodyPart>::iterator i = prevFrameBodyPartTree.begin(); i != prevFrameBodyPartTree.end(); ++i)
-    {
-      if (iteratorBodyPart->getPartID() == i->getPartID())
-      {
-        bFound = true;
-        prevRotationAngle = i->getRotationSearchRange();
-        break;
-      }
-    }
-    if (!bFound)
-    {
-      stringstream ss;
-      ss << "No such body part in previous keyframe";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-
-    bFound = false;
-    for (tree <BodyPart>::iterator i = nextFrameBodyPartTree.begin(); i != nextFrameBodyPartTree.end(); ++i)
-    {
-      if (iteratorBodyPart->getPartID() == i->getPartID())
-      {
-        bFound = true;
-        nextRotationAngle = i->getRotationSearchRange();
-        break;
-      }
-    }
-    if (!bFound)
-    {
-      stringstream ss;
-      ss << "No such body part in next keyframe";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-
+    
     try
     {
       j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation();
@@ -512,7 +403,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           {
             for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
             {
-              if (abs(rot - prevRotationAngle) < abs(prevRotationAngle - nextRotationAngle) + abs(rotationThreshold))
+              if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
               {
                 Point2f p0 = Point2f(0, 0);
                 Point2f p1 = Point2f(1.0, 0);
