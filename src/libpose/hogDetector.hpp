@@ -26,7 +26,7 @@ class HogDetector : public Detector
     map <uint32_t, Size> partSize;
     map <uint32_t, map <uint32_t, PartModel>> partModels;
 
-    LimbLabel generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet);
+    LimbLabel generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet);
 
     map <uint32_t, Size> getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize);
     PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);

@@ -107,7 +107,6 @@ int main (int argc, char **argv)
       Frame *f = *i;
       Skeleton frameSkeleton = f->getSkeleton();
       tree <BodyPart> frameBodyPartTree = frameSkeleton.getPartTree();
-      bool bFound = false;
       for (tree <BodyPart>::iterator i = frameBodyPartTree.begin(); i != frameBodyPartTree.end(); ++i)
       {
         for (tree <BodyPart>::iterator j = prevBodyPartTree.begin(); j != prevBodyPartTree.end(); ++j)

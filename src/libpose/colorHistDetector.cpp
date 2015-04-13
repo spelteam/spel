@@ -1124,6 +1124,8 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     s.push_back(sc);
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
   }
+  float xmax, ymax, xmin, ymin;
+  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
   // Scan the area near the bodypart center
   for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
   {
@@ -1131,9 +1133,6 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     {
       if (i < maskMat.cols && j < maskMat.rows) // if the point is within the image
       {
-        float xmax, ymax, xmin, ymin;
-        rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
-
         if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
         {
           if (rect.containsPoint(Point2f((float)i, (float)j)) > 0) // if the point belongs to the rectangle

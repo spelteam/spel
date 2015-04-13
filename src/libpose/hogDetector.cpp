@@ -427,7 +427,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
                     throw logic_error(ss.str());
                   }
                 }
-                LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
+                LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
                 sortedLabels.push_back(generatedLabel);
               }
             }
@@ -461,7 +461,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             throw logic_error(ss.str());
           }
         }
-        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
+        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -539,7 +539,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   return merge(limbLabels, t);
 }
 
-LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet)
+LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet)
 {
   vector <Score> s;
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
@@ -548,7 +548,55 @@ LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, 
   stringstream detectorName;
   detectorName << getID();
 
+  uint32_t totalPixels = 0;
+  uint32_t inMaskPixels = 0;
+  float boneLength = getBoneLength(j0, j1); // distance between joints
+  Mat imgMat = frame->getImage(); // copy image from the frame
+  Mat maskMat = frame->getMask(); // copy mask from the frame 
+  float xmax, ymax, xmin, ymin;
+  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
+
+  // Scan the area near the bodypart center
+  for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
+  {
+    for (int32_t j = int32_t(boxCenter.y - boneLength * 0.5); j < int32_t(boxCenter.y + boneLength * 0.5); j++)
+    {
+      if (i < maskMat.cols && j < maskMat.rows) // if the point is within the image
+      {
+        if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
+        {
+          if (rect.containsPoint(Point2f((float)i, (float)j)) > 0) // if the point belongs to the rectangle
+          {
+            totalPixels++; // counting of the contained pixels
+            uint8_t mintensity = 0;
+            try
+            {
+              mintensity = maskMat.at<uint8_t>(j, i); // copy current point mask value 
+            }
+            catch (...)
+            {
+              maskMat.release();
+              imgMat.release();
+              if (debugLevelParam >= 2)
+                cerr << ERROR_HEADER << "Dirty label!" << endl;
+              Score sc(-1.0f, detectorName.str(), _useHoGdet);
+              s.push_back(sc);
+              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+            }
+            bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
+            if (!blackPixel)
+            {
+              inMaskPixels++; // counting of the all scanned pixels
+            }
+          }
+        }
+      }
+    }
+  }
+  maskMat.release();
+  imgMat.release();
   float score = compare(bodyPart, descriptors);
+  score += inMaskPixels / totalPixels;
   Score sc(score, detectorName.str(), _useHoGdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
