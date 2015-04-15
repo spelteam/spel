@@ -1,19 +1,25 @@
 #include <QFile>
 #include <QXmlSchema>
 #include <QXmlSchemaValidator>
-#include "tlpssolver.hpp"
+#include <QtConcurrent/QtConcurrent>
 #include "xmlmessagehandler.h"
 
+#include <nskpsolver.hpp>
+#include <tlpssolver.hpp>
 #include <keyframe.hpp>
 #include <interpolation.hpp>
 #include <lockframe.hpp>
 #include <sequence.hpp>
+#include <solvlet.hpp>
+
 
 #include "projectattr.h"
 #include "utility.h"
 
 #include <queue>
+
 #include "project.h"
+
 
 using namespace project_attributes;
 
@@ -84,8 +90,49 @@ void Project::exchangeAtInterpolation( int num ){
 void Project::interpolateFrames(){
     Sequence seq(0, "test", Project::getInstance().getFrames());
     map<string,float> params;
-    //seq.estimateUniformScale(params);
+    seq.estimateUniformScale(params);
     seq.computeInterpolation(params);
+}
+
+void Project::solveFrames(){
+    //test interpolation
+    interpolateFrames();
+    //run solver
+    std::vector<Solvlet> solve;
+    NSKPSolver solver;
+    Sequence seq(0, "test", getFrames());
+    map <string, float> params; //use the default params
+
+    params.emplace("debugLevel", 3); //set the debug setting to highest (0,1,2,3)
+    solve = solver.solve(seq,params);
+    //draw solution
+    QFile file("solve.txt");
+    if( !file.open(QIODevice::WriteOnly | QIODevice::Text) ){
+        return;
+    }
+    QTextStream out(&file);
+    for( const Solvlet& solvlet : solve ){
+        out << "Solvlet|Frame Id: " << solvlet.getFrameID() << endl;
+        vector<LimbLabel> labels = solvlet.getLabels();
+        for( const LimbLabel& label : labels ){
+            out << "Limb|Id: " << label.getLimbID() << endl;
+            out << "Limb|Is occluded: " << label.getIsOccluded() << endl;
+            out << "Limb|Is weak: " << label.getIsWeak() << endl;
+            out << "Limb|Angle: " << label.getAngle() << endl;
+            out << "Limb|Center: " << label.getCenter().x << " " << label.getCenter().y << endl;
+            out << "Limb|Polygon: " << endl;
+            for( auto vertex : label.getPolygon() ){
+                out << "Vertex: " << vertex.x << " " << vertex.y << endl;
+            }
+            out << "Limb|Scores: " << endl;
+            for( auto score : label.getScores() ){
+                out << "Score: " << score.getScore() << endl;
+            }
+            out << "\n";
+        }
+        out << "\n\n\n";
+    }
+    qDebug() << "Finished" << endl;
 }
 
 
@@ -94,6 +141,7 @@ void Project::interpolateFrames(){
 
 Project::Project(QObject *parent)
     :QObject(parent),
+      futureWatcher(),
       frames(),
       paths(),
       skeleton( new Skeleton() ),
@@ -308,6 +356,7 @@ Project::ErrorCode Project::loadFrames(const QDomDocument &document){
         //add new paths
         paths[num] = { imgPath, maskPath, camPath };
         //load image
+        qDebug() << "Path :" << projectFolder + FilenamePath::imgFolderPath + imgPath << endl;
         cv::Mat image = cv::imread(
             (projectFolder+FilenamePath::imgFolderPath+imgPath).toStdString(),
             CV_LOAD_IMAGE_COLOR
@@ -444,12 +493,8 @@ Project::ErrorCode Project::loadKeyframeParts( QDomElement &elem, tree<BodyPart>
 }
 
 void Project::setProjectFolder(const QString &filename){
-    QRegExp rx("^/.*/");
-    rx.setMinimal(false);
-    projectFolder = filename.split(
-        filename.split(rx,QString::SkipEmptyParts).first(),
-        QString::SkipEmptyParts
-    ).first();
+	QDir d = QFileInfo(filename).absoluteDir();
+    projectFolder = d.absolutePath() + "/";
 }
 
 Project::ErrorCode Project::readProjectXml(const QString &filename, QDomDocument &document){

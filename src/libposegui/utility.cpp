@@ -20,7 +20,7 @@ QString Utility::fileToString(const QString &filename){
     return result;
 }
 
-void Utility::loadXmlPart(const QDomElement &element, const QString& partTagName,
+/*void Utility::loadXmlPart(const QDomElement &element, const QString& partTagName,
                 std::function<void(const QDomElement&, int)> loadAttrs)
 {
     const QDomNodeList& partNodes = element
@@ -31,7 +31,7 @@ void Utility::loadXmlPart(const QDomElement &element, const QString& partTagName
 
         loadAttrs( childNode, i );
     }
-}
+}*/
 
 BodyJoint* Utility::getJointById( const tree<BodyJoint> &bodyJoints, int id){
     tree<BodyJoint>::iterator it = bodyJoints.begin();

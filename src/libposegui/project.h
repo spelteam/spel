@@ -5,12 +5,13 @@
 #include <QString>
 #include <QHash>
 #include <QDomDocument>
+#include <QFutureWatcher>
+
 #include <frame.hpp>
 
 #include <memory>
 #include <vector>
 #include <functional>
-
 
 struct FilenamePath{
     static QString imgFolderPath;
@@ -84,6 +85,7 @@ public:
     void exchangeAtInterpolation( int num );
 
     void interpolateFrames();
+    void solveFrames();
 
 private:
     //loading skeleton
@@ -104,6 +106,9 @@ private:
     //build structure of skeleton
     Project::ErrorCode buildBodyPartTree(std::vector<BodyPart> &bodyList,
                                           tree<BodyPart> &bodyParts);
+public:
+    //thread
+    QFutureWatcher<void> futureWatcher;
 private:
     std::vector<FramePtr> frames;
     QHash<int, FilenamePath> paths;

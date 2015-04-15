@@ -16,6 +16,8 @@ class ToolBoxWidget;
 class SolveBoxWidget;
 class FrameBoxWidget;
 class FrameView2D;
+//utilites
+class QProgressBar;
 
 class MainWindow : public QMainWindow
 {
@@ -29,7 +31,6 @@ private slots:
     void on_actionClose_triggered();
 
     void on_actionOpen_triggered();
-
 private:
     //layouts
     QVBoxLayout *FrameLayout;
@@ -42,6 +43,8 @@ private:
     SolveBoxWidget *solveTools;
     FrameBoxWidget *frameTools;
     FrameView2D *currFrame;
+    //utilites
+    QProgressBar *progressBar;
 };
 
 #endif // MAINWINDOW_H
