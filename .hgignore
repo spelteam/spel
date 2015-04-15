@@ -4,6 +4,8 @@ googletest
 tinyxml2
 build
 pose-build
+pose-build-win
+pose-build-win-msvc-qt
 *~
 
 quaternions.txt

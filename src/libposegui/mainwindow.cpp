@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QProgressBar>
 
 #include "frametablewidget.h"
 #include "toolboxwidget.h"
@@ -27,6 +28,11 @@ MainWindow::MainWindow(QWidget *parent) :
     solveTools = new SolveBoxWidget();
     frameTools = new FrameBoxWidget(framesView);
     currFrame = new FrameView2D();
+    //utilites
+    progressBar = new QProgressBar();
+    progressBar->setVisible(false);
+    progressBar->setMinimum(0);
+    progressBar->setMaximum(100);
     //layouts
     FrameLayout = new QVBoxLayout;
     FrameLayout->addWidget(frameTools,1);
@@ -38,8 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ToolLayout->addWidget(solveTools,1);
 
     MainLayout = new QVBoxLayout;
-    MainLayout->addLayout(ToolLayout, 9);
+    MainLayout->addLayout(ToolLayout, 8);
     MainLayout->addWidget(framesView,3);
+    MainLayout->addWidget(progressBar,1);
     ui->centralWidget->setLayout(MainLayout);
     //set styles for group boxes
     this->setStyleSheet( Utility::fileToString(":/root/resources/stylesheets/Toolbox.qss") );
@@ -68,7 +75,13 @@ MainWindow::MainWindow(QWidget *parent) :
     //interpolation events
     QObject::connect(&Project::getInstance(),&Project::keyframeUpdated,
                      solveTools,&SolveBoxWidget::keyframeUpdatedEvent);
-
+    //task progress
+    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::started,
+                     progressBar, &QProgressBar::show);
+    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::finished,
+                     progressBar, &QProgressBar::hide);
+    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::progressValueChanged,
+                     progressBar, &QProgressBar::setValue);
 }
 
 MainWindow::~MainWindow()
@@ -96,7 +109,7 @@ void MainWindow::on_actionClose_triggered()
 #include <QTime>
 void MainWindow::on_actionOpen_triggered()
 {
-    //get filename from OpenFileDialog
+   //get filename from OpenFileDialog
    QString projectFilename = QFileDialog::getOpenFileName(
          this, //parent
          "Open project", //caption
@@ -104,8 +117,12 @@ void MainWindow::on_actionOpen_triggered()
          "Project files (*.xml)" //filter files
      );
 
-//    QString projectFilename =
-//            "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
+	//linux testing path
+    //QString projectFilename =
+    //        "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
+    //windows testing path
+    //QString projectFilename =
+    //       "D:/Documents/Work/Libpose/src/tests/testdata1/trijumpSD_new.xml";
     //try to open project
     ui->statusBar->showMessage("Loading project");
 

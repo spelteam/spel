@@ -1,6 +1,7 @@
 #include "solveboxwidget.h"
 
 #include "project.h"
+#include <QtConcurrent/QtConcurrent>
 
 //PUBLIC
 
@@ -57,5 +58,7 @@ void SolveBoxWidget::interpolatorClicked(){
 }
 
 void SolveBoxWidget::solverClicked(){
-
+    QFuture<void> some = QtConcurrent::run(&Project::getInstance(),&Project::solveFrames);
+    Project::getInstance().futureWatcher.setFuture(some);
+    solver->setEnabled(false);
 }

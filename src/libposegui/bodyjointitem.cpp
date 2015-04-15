@@ -103,6 +103,8 @@ void BodyJointItem::mousePressEvent(QGraphicsSceneMouseEvent *event){
         updateToolTip();
     }
     update();
+    //TODO: [!] bug
+    assert(false);
     QGraphicsItem::mousePressEvent(event);
 }
 

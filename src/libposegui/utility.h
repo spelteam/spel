@@ -1,7 +1,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <functional>
+//#include <functional>
 #include <QObject>
 #include <QString>
 #include <QDomDocument>
@@ -26,8 +26,8 @@ public slots:
 public:
     static QString fileToString( const QString& filename );
 
-    static void loadXmlPart( const QDomElement& element, const QString& partTagName,
-              std::function<void( const QDomElement&, int )> loadAttrs);
+    //static void loadXmlPart( const QDomElement& element, const QString& partTagName,
+    //          std::function<void( const QDomElement&, int )> loadAttrs);
 
     static BodyJoint* getJointById( const tree<BodyJoint>& bodyJoints, int id );
     static BodyPart* getBodyPartById( const tree<BodyPart>& bodyParts, int id );
