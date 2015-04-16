@@ -108,12 +108,12 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("propagateToLockframes", 0); //don't propagate from lockframes, only from keyframes
     params.emplace("baseRotationRange", 60); //search angle range of +/- 60 degrees
     params.emplace("baseSearchRadius", 100); //search a radius of 100 pixels
-    params.empalce("baseSearchStep", 10); //search in a grid every 10 pixels
+    params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
 
     //solver sensitivity parameters
-    params.emplace("imageCoeff", 0.0); //set solver detector infromation sensitivity
+    params.emplace("imageCoeff", 0.2); //set solver detector infromation sensitivity
     params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
