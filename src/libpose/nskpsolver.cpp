@@ -99,8 +99,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
 
     //detector enablers
-    params.emplace("useHoGdet", 0); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useCSdet", 1); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 0); //determine if ColHist detector is used and with what coefficient
     params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
     params.emplace("maxPartCandidates", 50000); //set the max number of part candidates to allow into the solver
 
@@ -488,7 +488,7 @@ float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& 
         score = (pow(c0.x-p1.x, 2)+pow(c0.y-p1.y, 2))/max;
     else
         score = (pow(c0.x-p0.x, 2)+pow(c0.y-p0.y, 2))/max;
-    if(score<pow(clen*leeway, 2)) //any distnace below leeway is zero
+    if(score<(clen*leeway)/max) //any distnace below leeway is zero
         score=0;
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
     return lambda*score;

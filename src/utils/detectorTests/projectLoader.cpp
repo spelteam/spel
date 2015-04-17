@@ -495,10 +495,16 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
       cerr << "Can't get fourth point from polygon" << endl;
       continue;
     }
-    line(image, p1, p2, color, lineWidth, CV_AA); 
-    line(image, p2, p3, color, lineWidth, CV_AA); 
-    line(image, p3, p4, color, lineWidth, CV_AA); 
-    line(image, p4, p1, color, lineWidth, CV_AA); 
+    // //temporary comment
+//    line(image, p1, p2, color, lineWidth, CV_AA);
+//    line(image, p2, p3, color, lineWidth, CV_AA);
+//    line(image, p3, p4, color, lineWidth, CV_AA);
+//    line(image, p4, p1, color, lineWidth, CV_AA);
+
+    line(image, p1, p2, Scalar(255,0,0), lineWidth, CV_AA);
+    line(image, p2, p3, Scalar(0,255,0), lineWidth, CV_AA);
+    line(image, p3, p4, Scalar(0,0,255), lineWidth, CV_AA);
+    line(image, p4, p1, Scalar(255,0,255), lineWidth, CV_AA);
   }
 
   cerr << "Writing file " << outFileName << endl;
