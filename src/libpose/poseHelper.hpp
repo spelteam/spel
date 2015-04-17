@@ -7,6 +7,9 @@
 #endif  // WINDOWS
 
 #include <opencv2/opencv.hpp>
+#if OpenCV_VERSION >= 3000
+#include <opencv2/core/types_c.h>
+#endif
 #include <tree.hh>
 
 using namespace std;

@@ -3,9 +3,14 @@
 
 #include <iostream>
 #include <fstream>
+#include <list>
 
 #include <tinyxml2.h>
 #include <opencv2/opencv.hpp>
+#if OpenCV_VERSION >= 3000
+#include <opencv2/imgcodecs/imgcodecs_c.h>
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 
 #include <tree_util.hh>
 #include <detector.hpp>
