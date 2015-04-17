@@ -67,11 +67,11 @@
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
-    <BodyPart id="1" isOccluded="false"/>
-    <BodyPart id="2" isOccluded="false"/>
-    <BodyPart id="3" isOccluded="false"/>
-    <BodyPart id="4" isOccluded="false"/>
-    <BodyPart id="5" isOccluded="false"/>
+    <BodyPart id="1" isOccluded="true"/>
+    <BodyPart id="2" isOccluded="true"/>
+    <BodyPart id="3" isOccluded="true"/>
+    <BodyPart id="4" isOccluded="true"/>
+    <BodyPart id="5" isOccluded="true"/>
     <BodyPart id="6" isOccluded="false"/>
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
@@ -115,11 +115,11 @@
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
-    <BodyPart id="1" isOccluded="false"/>
-    <BodyPart id="2" isOccluded="false"/>
-    <BodyPart id="3" isOccluded="false"/>
-    <BodyPart id="4" isOccluded="false"/>
-    <BodyPart id="5" isOccluded="false"/>
+    <BodyPart id="1" isOccluded="true"/>
+    <BodyPart id="2" isOccluded="true"/>
+    <BodyPart id="3" isOccluded="true"/>
+    <BodyPart id="4" isOccluded="true"/>
+    <BodyPart id="5" isOccluded="true"/>
     <BodyPart id="6" isOccluded="false"/>
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
@@ -166,11 +166,11 @@
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
-    <BodyPart id="1" isOccluded="false"/>
-    <BodyPart id="2" isOccluded="false"/>
-    <BodyPart id="3" isOccluded="false"/>
-    <BodyPart id="4" isOccluded="false"/>
-    <BodyPart id="5" isOccluded="false"/>
+    <BodyPart id="1" isOccluded="true"/>
+    <BodyPart id="2" isOccluded="true"/>
+    <BodyPart id="3" isOccluded="true"/>
+    <BodyPart id="4" isOccluded="true"/>
+    <BodyPart id="5" isOccluded="true"/>
     <BodyPart id="6" isOccluded="false"/>
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
@@ -219,11 +219,11 @@
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
-    <BodyPart id="1" isOccluded="false"/>
-    <BodyPart id="2" isOccluded="false"/>
-    <BodyPart id="3" isOccluded="false"/>
-    <BodyPart id="4" isOccluded="false"/>
-    <BodyPart id="5" isOccluded="false"/>
+    <BodyPart id="1" isOccluded="true"/>
+    <BodyPart id="2" isOccluded="true"/>
+    <BodyPart id="3" isOccluded="true"/>
+    <BodyPart id="4" isOccluded="true"/>
+    <BodyPart id="5" isOccluded="true"/>
     <BodyPart id="6" isOccluded="false"/>
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
@@ -276,11 +276,11 @@
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
-    <BodyPart id="1" isOccluded="false"/>
-    <BodyPart id="2" isOccluded="false"/>
-    <BodyPart id="3" isOccluded="false"/>
-    <BodyPart id="4" isOccluded="false"/>
-    <BodyPart id="5" isOccluded="false"/>
+    <BodyPart id="1" isOccluded="true"/>
+    <BodyPart id="2" isOccluded="true"/>
+    <BodyPart id="3" isOccluded="true"/>
+    <BodyPart id="4" isOccluded="true"/>
+    <BodyPart id="5" isOccluded="true"/>
     <BodyPart id="6" isOccluded="false"/>
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
