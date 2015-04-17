@@ -4,6 +4,7 @@
 #include "lockframe.hpp"
 #include "colorHistDetector.hpp"
 #include "hogDetector.hpp"
+#include "surfDetector.hpp"
 #include "tlpssolver.hpp"
 
 //using namespace opengm;
@@ -99,21 +100,21 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
 
     //detector enablers
-    params.emplace("useHoGdet", 1); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useCSdet", 0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
     params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
-    params.emplace("maxPartCandidates", 50000); //set the max number of part candidates to allow into the solver
+    params.emplace("maxPartCandidates", 5000); //set the max number of part candidates to allow into the solver
 
     //detector search parameters
     params.emplace("propagateToLockframes", 0); //don't propagate from lockframes, only from keyframes
-    params.emplace("baseRotationRange", 60); //search angle range of +/- 60 degrees
-    params.emplace("baseSearchRadius", 100); //search a radius of 100 pixels
+    params.emplace("baseRotationRange", 0); //search angle range of +/- 60 degrees
+    params.emplace("baseSearchRadius", 0); //search a radius of 100 pixels
     params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
 
     //solver sensitivity parameters
-    params.emplace("imageCoeff", 0.2); //set solver detector infromation sensitivity
+    params.emplace("imageCoeff", 0.0); //set solver detector infromation sensitivity
     params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
@@ -154,6 +155,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 detectors.push_back(new HogDetector());
             if(useCS)
                 detectors.push_back(new ColorHistDetector());
+            if(useSURF)
+                detectors.push_back(new SurfDetector());
 
             vector<Frame*> trainingFrames;
             trainingFrames.push_back(frames[frameId]); //set training frame by index
@@ -396,6 +399,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
             }
         }
     }
+
+    //deduplicate results
 
     for(uint32_t i=0; i<lockframes.size();++i)
     {

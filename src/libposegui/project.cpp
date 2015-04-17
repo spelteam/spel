@@ -319,7 +319,7 @@ Project::ErrorCode Project::loadHeaderParts(QDomElement &elem, tree<BodyPart> &b
         bodyPart.setParentJoint(parentJointId);
         bodyPart.setChildJoint(childJointId);
         bodyPart.setLWRatio(lwRatio);
-        bodyPart.setSpaceLength(expectedDistance);
+        bodyPart.setExpectedDistance(expectedDistance);
         bodyPart.setRelativeLength(relativeLength);
         //add body part to list
         bodyList.push_back(bodyPart);

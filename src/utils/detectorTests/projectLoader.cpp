@@ -213,7 +213,7 @@ bool ProjectLoader::Load(string fileName)
     part.setPartName(name);
     part.setParentJoint(parentJoint->getLimbID());
     part.setChildJoint(childJoint->getLimbID());
-    part.setSpaceLength(expectedDistance);
+    part.setExpectedDistance(expectedDistance);
     part.setLWRatio(lwRatio);
     part.setRelativeLength(relativeLength);
     //trBodyParts.insert(topBodyParts, part);

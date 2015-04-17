@@ -9,7 +9,7 @@ BodyPart::BodyPart(void)
   setParentJoint(0);
   setChildJoint(0);
   setIsOccluded(false);
-  setSpaceLength(0);
+  setExpectedDistance(0);
   setLWRatio(0);
   setRelativeLength(0);
   setSearchRadius(0);
@@ -23,7 +23,7 @@ BodyPart::BodyPart(const BodyPart &bodyPart)
       parentJoint(bodyPart.parentJoint),
       childJoint(bodyPart.childJoint),
       isOccluded(bodyPart.isOccluded),
-      spaceLength(bodyPart.spaceLength),
+      expectedDistance(bodyPart.expectedDistance),
       partPolygon(bodyPart.partPolygon),
       lwRatio(bodyPart.lwRatio),
       relativeLength(bodyPart.relativeLength),
@@ -39,7 +39,7 @@ BodyPart::BodyPart(BodyPart &&bodyPart)
       parentJoint(std::move(bodyPart.parentJoint)),
       childJoint(std::move(bodyPart.childJoint)),
       isOccluded(std::move(bodyPart.isOccluded)),
-      spaceLength(std::move(bodyPart.spaceLength)),
+      expectedDistance(std::move(bodyPart.expectedDistance)),
       partPolygon(std::move(bodyPart.partPolygon)),
       lwRatio(std::move(bodyPart.lwRatio)),
       relativeLength(std::move(bodyPart.relativeLength)),
@@ -58,7 +58,7 @@ BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, floa
   setParentJoint(pJoint);
   setChildJoint(cJoint);
   setIsOccluded(isOcc);
-  setSpaceLength(spaceLen);
+  setExpectedDistance(spaceLen);
   setSearchRadius(0);
   setRotationSearchRange(0);
 }
@@ -124,14 +124,14 @@ void BodyPart::setSearchRadius(float _searchRadius)
 }
 
 
-float BodyPart::getSpaceLength(void) const
+float BodyPart::getExpectedDistance(void) const
 {
-  return spaceLength;
+  return expectedDistance;
 }
 
-void BodyPart::setSpaceLength(float _spaceLength)
+void BodyPart::setExpectedDistance(float _expectedDistance)
 {
-  spaceLength = _spaceLength;
+  expectedDistance = _expectedDistance;
 }
 
 BodyPart& BodyPart::operator=( const BodyPart& bodyPart ){
@@ -142,7 +142,7 @@ BodyPart& BodyPart::operator=( const BodyPart& bodyPart ){
     parentJoint = bodyPart.parentJoint;
     childJoint = bodyPart.childJoint;
     isOccluded = bodyPart.isOccluded;
-    spaceLength = bodyPart.spaceLength;
+    expectedDistance = bodyPart.expectedDistance;
     partPolygon = bodyPart.partPolygon;
     lwRatio = bodyPart.lwRatio;
     relativeLength = bodyPart.relativeLength;
@@ -157,7 +157,7 @@ BodyPart& BodyPart::operator=( BodyPart&& bodyPart ){
     parentJoint = std::move(bodyPart.parentJoint);
     childJoint = std::move(bodyPart.childJoint);
     isOccluded = std::move(bodyPart.isOccluded);
-    spaceLength = std::move(bodyPart.spaceLength);
+    expectedDistance = std::move(bodyPart.expectedDistance);
     std::swap( partPolygon, bodyPart.partPolygon );
     lwRatio = std::move(bodyPart.lwRatio);
     relativeLength = std::move(bodyPart.relativeLength);

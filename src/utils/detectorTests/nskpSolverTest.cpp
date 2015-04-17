@@ -52,7 +52,7 @@ int main (int argc, char **argv)
   //draw the solution
   for(uint32_t i=0; i<solve.size();++i)
   {
-    projectLoader.drawFrameSolvlets(solve[i], vFrames[solve[i].getFrameID()], argv[2], Scalar(0,0,255), 2);
+    projectLoader.drawFrameSolvlets(solve[i], vFrames[solve[i].getFrameID()], argv[2], Scalar(0,0,255), 1);
   }
 
   return 0;

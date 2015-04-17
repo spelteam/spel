@@ -100,14 +100,9 @@ float LimbLabel::getAvgScore(void) const
 
 void LimbLabel::getEndpoints(Point2f &p0, Point2f &p1) const
 {
-    p0 = 0.5*polygon[0]+0.5*polygon[3];
-    p1 = 0.5*polygon[1]+0.5*polygon[2];
+    p0 = 0.5*polygon[3]+0.5*polygon[0]; //pink = parent
+    p1 = 0.5*polygon[1]+0.5*polygon[2]; //green = child
 
-//    if(this->limbID==0)
-//    {
-//        p0 = 0.5*polygon[0]+0.5*polygon[3];
-//        p1 = 0.5*polygon[1]+0.5*polygon[2];
-//    }
 
     return; // this function needs to update the two endpoints passed into it
 }

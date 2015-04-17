@@ -34,8 +34,8 @@ class BodyPart
     void setChildJoint(int _childJoint);
     bool getIsOccluded(void) const;
     void setIsOccluded(bool _isOccluded);
-    float getSpaceLength(void) const;
-    void setSpaceLength(float _spaceLength);
+    float getExpectedDistance(void) const;
+    void setExpectedDistance(float _expectedDistance);
     float getSearchRadius(void) const;
     void setSearchRadius(float _searchRadius);
     POSERECT <Point2f> getPartPolygon(void);
@@ -57,8 +57,8 @@ class BodyPart
     int childJoint;
 /// when "true" - then this body part is overlapped in a frame, used in the skeleton recovery algorithm
     bool isOccluded;
-/// the length of body part, distance between neighboring joints
-    float spaceLength;
+/// expected distance to parent bodypart, as a multiplier of this part's le
+    float expectedDistance;
 /// rectangle is used as simplified representation of body part 
     POSERECT <Point2f> partPolygon;
 /// coefficient of proportionality is used for scaling
