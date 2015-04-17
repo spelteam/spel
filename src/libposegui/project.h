@@ -9,6 +9,10 @@
 
 #include <frame.hpp>
 
+#if OpenCV_VERSION >= 3000
+#include <opencv2/imgcodecs/imgcodecs_c.h>
+#endif
+
 #include <memory>
 #include <vector>
 #include <functional>
