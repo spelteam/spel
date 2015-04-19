@@ -29,34 +29,8 @@ cmake_minimum_required(VERSION 2.8.11)
 # Configure modules path
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/cmake" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
-# Add thirdparty software
-INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
 # Add libpose library
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/libpose" )
-#Add OpenCV library
-FIND_PACKAGE ( OpenCV REQUIRED )
-INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
-ADD_DEFINITIONS ( -DOpenCV_VERSION=${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}${OpenCV_VERSION_TWEAK} )
-# use OpenGM
-FIND_PACKAGE ( OpenGM REQUIRED )
-INCLUDE_DIRECTORIES ( ${OpenGM_INCLUDE_DIR} )
-# use HDF5
-IF ( WIN32 )
-# FindHDF5 is broken on Windows
-# it wrongly discovers the dlls instead of the lib files
-# see: www.cmake.org/Bug/bug_relationship_graph.php?bug_id=14111
-# therefore we set the variable manually
-  FIND_LIBRARY ( HDF5_IMPORT_LIB NAMES hdf5 hdf5dll )
-  FIND_LIBRARY ( HDF5_HL_IMPORT_LIB NAMES hdf5_hl hdf5_hldll )
-  FIND_PATH ( HDF5_INCLUDE_DIR hdf5.h )
-  SET ( HDF5_LIBRARIES ${HDF5_IMPORT_LIB} ${HDF5_HL_IMPORT_LIB} )
-  MESSAGE ( STATUS "HDF5: autodiscovery is broken on WIN32; using global search paths")
-  MESSAGE ( STATUS "HDF5: found ${HDF5_LIBRARIES}")
-ELSE ()
-  FIND_PACKAGE ( HDF5 REQUIRED )
-ENDIF ()
-INCLUDE_DIRECTORIES ( ${HDF5_INCLUDE_DIR} )
-ADD_DEFINITIONS ( ${HDF5_CPPFLAGS} )
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

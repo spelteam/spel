@@ -9,7 +9,7 @@
 
 #include <frame.hpp>
 
-#if OpenCV_VERSION >= 3000
+#if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #endif
 
