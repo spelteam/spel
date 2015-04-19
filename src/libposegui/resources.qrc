@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/root">
+        <file>resources/icons/masks.png</file>
+        <file>resources/icons/eraser.png</file>
+        <file>resources/icons/big_mask.png</file>
+        <file>resources/icons/artistic.png</file>
+        <file>resources/icons/picker.png</file>
+        <file>resources/icons/jointer.png</file>
+        <file>resources/icons/body_parter.png</file>
+        <file>resources/icons/view3d.png</file>
+        <file>resources/icons/view2d.png</file>
+        <file>resources/icons/key_lock.png</file>
+        <file>resources/icons/key_free.png</file>
+        <file>resources/stylesheets/Toolbox.qss</file>
+        <file>resources/xml/project.xsd</file>
+        <file>resources/stylesheets/Interframe.qss</file>
+        <file>resources/stylesheets/Keyframe.qss</file>
+        <file>resources/stylesheets/Lockframe.qss</file>
+        <file>resources/icons/interpolation.png</file>
+        <file>resources/icons/solving.png</file>
+    </qresource>
+</RCC>
