@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <limbLabel.hpp>
-#include "poseHelper.hpp"
 
 TEST(limbLabel, ConstructorTest)
 {
@@ -54,19 +53,21 @@ TEST(limbLabel, ConstructorTest)
     EXPECT_EQ(avgScore, label1.getAvgScore());
 
     //Testing function AddScore()
-    float score3Value = 0.2;
+    float score3Value = 0.1;
     Score score3(score3Value, "", scoreCoeff);
     scores.push_back(score3);
     label3.addScore(score3);
     EXPECT_EQ(scores, label3.getScores());
 
     //Testing operator "<"
-    EXPECT_TRUE(label3<label1);
-    EXPECT_FALSE(label1<label3);
+    EXPECT_TRUE(label3<label1) << " Operator '<', expected: " << label3.getAvgScore() << " < " << label1.getAvgScore() << " = true" << endl;
+    EXPECT_FALSE(label1<label3) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label3.getAvgScore() << " = false" << endl;
+    EXPECT_FALSE(label1<label1) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label1.getAvgScore() << " = false" << endl;
 
-    //Testing operator ">" ????????????
-    EXPECT_TRUE(label1>label3); // ????????????
-    EXPECT_FALSE(label3>label1); // ???????????
+    //Testing operator ">"
+    EXPECT_TRUE(label1>label3) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label3.getAvgScore() << " = true" << endl;
+    EXPECT_FALSE(label3>label1) << " Operator '>', expected: " << label3.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
+    EXPECT_FALSE(label1>label1) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
 
     //Testing function getEndPoints()
     Point2f p1, p2;
@@ -76,5 +77,10 @@ TEST(limbLabel, ConstructorTest)
     //    0---3
     //    |   |
     //    1---2
+
+    //Testing function containsPoint()
+    bool b = label1.containsPoint(center);
+    EXPECT_TRUE(label1.containsPoint(center));
+    EXPECT_FALSE(label1.containsPoint(Point2f(-1.0, -1.0)));
 
 }
