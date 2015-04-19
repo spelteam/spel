@@ -54,10 +54,48 @@ ADD_DEFINITIONS ( -D_POSE_VERSION_="${${PROJECT_NAME}_VERSION}" )
 
 SET ( CMAKE_MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/cmake" )
 
-# Move this to the destination project
+# find common packages
+# use OpenGM
 FIND_PACKAGE ( OpenGM REQUIRED )
+INCLUDE_DIRECTORIES ( ${OpenGM_INCLUDE_DIR} )
 
+# use OpenCV
+FIND_PACKAGE ( OpenCV REQUIRED )
+ADD_DEFINITIONS ( -DOpenCV_VERSION_MAJOR=${OpenCV_VERSION_MAJOR} )
+ADD_DEFINITIONS ( -DOpenCV_VERSION_MINOR=${OpenCV_VERSION_MINOR} )
+ADD_DEFINITIONS ( -DOpenCV_VERSION_PATCH=${OpenCV_VERSION_PATCH} )
+ADD_DEFINITIONS ( -DOpenCV_VERSION_TWEAK=${OpenCV_VERSION_TWEAK} )
+
+INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
+
+# use tree.hh
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
+
+# use Eigen3
+FIND_PACKAGE ( Eigen3 REQUIRED )
+INCLUDE_DIRECTORIES (${Eigen3_INCLUDE_DIR} )
+
+# use HDF5
+IF ( WIN32 )
+# FindHDF5 is broken on Windows
+# it wrongly discovers the dlls instead of the lib files
+# see: www.cmake.org/Bug/bug_relationship_graph.php?bug_id=14111
+# therefore we set the variable manually
+  FIND_LIBRARY ( HDF5_IMPORT_LIB NAMES hdf5 hdf5dll )
+  FIND_LIBRARY ( HDF5_HL_IMPORT_LIB NAMES hdf5_hl hdf5_hldll )
+  FIND_PATH ( HDF5_INCLUDE_DIR hdf5.h )
+  SET ( HDF5_LIBRARIES ${HDF5_IMPORT_LIB} ${HDF5_HL_IMPORT_LIB} )
+  MESSAGE ( STATUS "HDF5: autodiscovery is broken on WIN32; using global search paths")
+  MESSAGE ( STATUS "HDF5: found ${HDF5_LIBRARIES}")
+ELSE ()
+  FIND_PACKAGE ( HDF5 REQUIRED )
+ENDIF ()
+INCLUDE_DIRECTORIES ( ${HDF5_INCLUDE_DIR} )
+ADD_DEFINITIONS ( ${HDF5_CPPFLAGS} )
+
+# libpose source
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
+
 
 # Command line options, their defaults and checks
 

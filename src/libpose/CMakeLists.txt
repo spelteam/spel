@@ -11,32 +11,6 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
 IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH )
   INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
 ENDIF()
-FIND_PACKAGE ( OpenCV REQUIRED )
-ADD_DEFINITIONS ( -DOpenCV_VERSION=${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}${OpenCV_VERSION_TWEAK} )
-INCLUDE_DIRECTORIES ( ${OpenCV_INCLUDE_DIRS} )
-INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/../thirdparty/tree/src" )
-
-# use OpenGM
-FIND_PACKAGE ( OpenGM REQUIRED )
-INCLUDE_DIRECTORIES ( ${OpenGM_INCLUDE_DIR} )
-
-# use Eigen3
-FIND_PACKAGE ( Eigen3 REQUIRED )
-INCLUDE_DIRECTORIES (${Eigen3_INCLUDE_DIR} )
-
-# use HDF5
-IF ( WIN32 )
-# FindHDF5 is broken on Windows
-# it wrongly discovers the dlls instead of the lib files
-# see: www.cmake.org/Bug/bug_relationship_graph.php?bug_id=14111
-# therefore we set the variable manually
-  FIND_PATH ( HDF5_INCLUDE_DIR hdf5.h )
-  MESSAGE ( STATUS "HDF5: autodiscovery is broken on WIN32; using global search paths")
-ELSE ()
-  FIND_PACKAGE ( HDF5 REQUIRED )
-ENDIF ()
-INCLUDE_DIRECTORIES ( ${HDF5_INCLUDE_DIR} )
-ADD_DEFINITIONS ( ${HDF5_CPPFLAGS} )
 
 # Command line options, their defaults and checks
 

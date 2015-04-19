@@ -7,7 +7,7 @@
 #endif  // WINDOWS
 
 #include <opencv2/opencv.hpp>
-#if OpenCV_VERSION >= 3000
+#if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/core/types_c.h>
 #endif
 #include <tree.hh>
