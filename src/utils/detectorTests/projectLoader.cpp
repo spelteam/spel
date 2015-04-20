@@ -513,7 +513,7 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   return imwrite(outFileName, image);
 }
 
-bool ProjectLoader::drawLockrameSolvlets(Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
+bool ProjectLoader::drawLockframeSolvlets(Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
 {
   //draw
   string outFileName = curFolder + outFolder;
