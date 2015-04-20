@@ -1,3 +1,8 @@
+#ifdef WINDOWS
+  #ifdef _MSC_VER
+    #include <Windows.h>
+  #endif // _MSC_VER
+#endif // WINDOWS
 #include <gtest/gtest.h>
 #include <tree.hh>
 #include <fstream>
@@ -131,10 +136,13 @@ TEST(colorHistDetectorTest, Train)
 {
     String FilePath; 
 
+    FilePath = "posetests_TestData/CHDTrainTestData/";
+
     #ifdef WINDOWS
-        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-    #else
-        FilePath = "posetests_TestData/CHDTrainTestData/";
+      #ifdef _MSC_VER
+        if (IsDebuggerPresent())
+          FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+      #endif
     #endif
 
 //Load the input data
