@@ -115,7 +115,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     //solver sensitivity parameters
     params.emplace("imageCoeff", 0.3); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+    params.emplace("jointCoeff", 0.0); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
@@ -194,40 +194,41 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 tree<BodyPart> partTree = skeleton.getPartTree();
                 tree<BodyPart>::iterator partIter, parentPartIter;
 
-                for(partIter=partTree.begin(); partIter!=partTree.begin(); ++partIter)
-                {
-                    //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
-                    //and based on node depth (deeper nodes have a higher distance)
-                    //this should rely on parameters e.g. 
-                    int depth = partTree.depth(partIter);
+// //temporary comment
+//                for(partIter=partTree.begin(); partIter!=partTree.begin(); ++partIter)
+//                {
+//                    //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
+//                    //and based on node depth (deeper nodes have a higher distance)
+//                    //this should rely on parameters e.g.
+//                    int depth = partTree.depth(partIter);
 
-                    float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
+//                    float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
 
-                    partIter->setRotationSearchRange(rotationRange);
-                    partIter->setSearchRadius(baseSearchRadius);
+//                    partIter->setRotationSearchRange(rotationRange);
+//                    partIter->setSearchRadius(baseSearchRadius);
 
-                }
+//                }
 
                 for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
                 {
                     labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
                 }
+// //temp coment this out
+//                for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+//                {
+//                    uint32_t maxPartCandidates = params.at("maxPartCandidates");
+//                    vector<LimbLabel> temp;
 
-                for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
-                {
-                    uint32_t maxPartCandidates = params.at("maxPartCandidates");
-                    vector<LimbLabel> temp;
+//                    if((labelPartsIter->at(0)).getIsWeak() || (labelPartsIter->at(0)).getIsOccluded()) //if weak or occluded, add all labels
+//                        maxPartCandidates = labelPartsIter->size();
+//                    for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+//                    {
+//                        temp.push_back(labelPartsIter->at(currentSize));
+//                    }
+//                    tempLabels.push_back(temp);
+//                }
 
-                    if((labelPartsIter->at(0)).getIsWeak() || (labelPartsIter->at(0)).getIsOccluded()) //if weak or occluded, add all labels
-                        maxPartCandidates = labelPartsIter->size();
-                    for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
-                    {
-                        temp.push_back(labelPartsIter->at(currentSize));
-                    }
-                    tempLabels.push_back(temp);
-                }
-
-                labels = tempLabels;
+//                labels = tempLabels;
 
                 vector<size_t> numbersOfLabels; //numbers of labels per part
 

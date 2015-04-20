@@ -8,6 +8,8 @@ LimbLabel::LimbLabel()
     angle = 0;
     scores = vector<Score>();
     polygon = vector<Point2f>();
+    for(int i=0; i<4; ++i)
+        polygon.push_back(Point2f(0,0));
     isOccluded = true;
     isWeak = true;
 }
@@ -90,7 +92,7 @@ bool LimbLabel::operator < (const LimbLabel &ll) const
 
 bool LimbLabel::operator > (const LimbLabel &ll) const
 {
-  return !(*this < ll);
+  return getAvgScore() > ll.getAvgScore();
 }
 
 float LimbLabel::getAvgScore(void) const
