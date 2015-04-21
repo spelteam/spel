@@ -1,3 +1,6 @@
+#if defined(WINDOWS) && defined(_MSC_VER)
+#include <Windows.h>
+#endif
 #include <gtest/gtest.h>
 #include <skeleton.hpp>
 #include <projectLoader.hpp>
@@ -26,7 +29,8 @@ TEST(skeletonTest, infer3dTest)
   }
 #ifdef WINDOWS
 #ifdef DEBUG
-  curFolder += "Debug/";
+  if (IsDebuggerPresent())
+    curFolder += "Debug/";
 #else
   curFolder += "Release/";
 #endif  // DEBUG
