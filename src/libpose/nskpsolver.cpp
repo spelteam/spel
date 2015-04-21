@@ -107,8 +107,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     //detector search parameters
     params.emplace("propagateToLockframes", 0); //don't propagate from lockframes, only from keyframes
-    params.emplace("baseRotationRange", 10); //search angle range of +/- 60 degrees
-    params.emplace("baseSearchRadius", 0); //search a radius of 100 pixels
+    params.emplace("baseRotationRange", 60); //search angle range of +/- 60 degrees
+    params.emplace("baseSearchRadius", 30); //search a radius of 100 pixels
     params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
@@ -194,20 +194,20 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 tree<BodyPart> partTree = skeleton.getPartTree();
                 tree<BodyPart>::iterator partIter, parentPartIter;
 
-// //temporary comment
-//                for(partIter=partTree.begin(); partIter!=partTree.begin(); ++partIter)
-//                {
-//                    //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
-//                    //and based on node depth (deeper nodes have a higher distance)
-//                    //this should rely on parameters e.g.
-//                    int depth = partTree.depth(partIter);
+ //temporary comment
+                for(partIter=partTree.begin(); partIter!=partTree.begin(); ++partIter)
+                {
+                    //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
+                    //and based on node depth (deeper nodes have a higher distance)
+                    //this should rely on parameters e.g.
+                    int depth = partTree.depth(partIter);
 
-//                    float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
+                    float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
 
-//                    partIter->setRotationSearchRange(rotationRange);
-//                    partIter->setSearchRadius(baseSearchRadius);
+                    partIter->setRotationSearchRange(rotationRange);
+                    partIter->setSearchRadius(baseSearchRadius);
 
-//                }
+                }
 
                 for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
                 {
@@ -398,6 +398,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 float acceptLockframeThreshold = params.at("acceptLockframeThreshold"); //@PARAM this is a parameter, not a static value
                 if(solutionScore>=acceptLockframeThreshold)
                 {
+                    //make sure the skeleton carries the original range
+
                     //set up the lockframe
                     Solvlet solvlet(*mstIter, solutionLabels);
                     solvlets.push_back(solvlet);

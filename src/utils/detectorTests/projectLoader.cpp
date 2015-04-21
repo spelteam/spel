@@ -1,4 +1,8 @@
 #include "projectLoader.hpp"
+#include "imagesimilaritymatrix.hpp"
+#include "lockframe.hpp"
+#include "poseHelper.hpp"
+
 ProjectLoader::ProjectLoader(string _curFolder)
 {
   curFolder = _curFolder;
@@ -513,7 +517,7 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   return imwrite(outFileName, image);
 }
 
-bool ProjectLoader::drawLockframeSolvlets(Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
+bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentFrame, Sequence seq, string outFolder, Scalar color, int lineWidth)
 {
   //draw
   string outFileName = curFolder + outFolder;
@@ -597,6 +601,46 @@ bool ProjectLoader::drawLockframeSolvlets(Solvlet sol, Frame *frame, Frame * par
     line(image, p2, p3, Scalar(0,255,0), lineWidth, CV_AA);
     line(image, p3, p4, Scalar(0,0,255), lineWidth, CV_AA);
     line(image, p4, p1, Scalar(255,0,255), lineWidth, CV_AA);
+  }
+
+  //solvlets are draw, now draw the skeleton from parent frame
+
+  //ImageSimilarityMatrix ism(seq.getFrames());
+
+  Point2f shift = ism.getShift(parentFrame->getID(),frame->getID());
+
+  Frame* newFrame = new Lockframe();
+  *newFrame = *parentFrame;
+
+  newFrame->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
+
+  Skeleton parentSkel = newFrame->getSkeleton(); //this is the shifted skeleton
+
+  tree<BodyPart> partTree = parentSkel.getPartTree();
+
+  for(tree<BodyPart>::iterator partIter = partTree.begin(); partIter!=partTree.end(); ++partIter)
+  {
+      //get joints
+      int j0,j1;
+      j0 = partIter->getParentJoint();
+      j1 = partIter->getChildJoint();
+
+      Point2f p0, p1;
+
+      p0 = parentSkel.getBodyJoint(j0)->getImageLocation();
+      p1 = parentSkel.getBodyJoint(j1)->getImageLocation();
+
+      float pixelRadius = partIter->getSearchRadius();
+      float angleRadius = partIter->getRotationSearchRange();
+
+      line(image, p0, p1, Scalar(0,255,255), lineWidth, CV_AA);
+      circle(image, 0.5*p0+0.5*p1, (int)pixelRadius, Scalar(255,255,255), lineWidth, CV_AA);
+      //draw upright black halfcircle
+      //compute
+
+      double startAngleUpright = PoseHelper::angle2D((p1-p0).x, (p1-p0).y, 1.0, 0.0);
+      ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,startAngleUpright,startAngleUpright+angleRadius,Scalar(255,255,0),lineWidth,CV_AA);
+      ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,startAngleUpright+180,startAngleUpright+180+angleRadius,Scalar(255,255,0),lineWidth,CV_AA);
   }
 
   cerr << "Writing file " << outFileName << endl;
