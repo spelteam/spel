@@ -1,6 +1,10 @@
 #ifndef _NSKPSOLVER_HPP_
 #define _NSKPSOLVER_HPP_
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
+
 //OpenGM
 #include <opengm/graphicalmodel/graphicalmodel.hxx>
 #include <opengm/graphicalmodel/space/discretespace.hxx>
@@ -51,6 +55,11 @@ public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
 private:
+#ifdef DEBUG
+    FRIEND_TEST(nskpsolverTests, findFrameIndexById);
+    FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost); 
+    FRIEND_TEST(nskpsolverTests, evaluateSolution);
+#endif  // DEBUG
     vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
     
