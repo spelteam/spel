@@ -32,6 +32,10 @@ INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 # Add libpose library
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/libpose" )
 
+IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH )
+  INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
+ENDIF()
+
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
