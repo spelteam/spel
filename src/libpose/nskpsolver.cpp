@@ -398,12 +398,24 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 float acceptLockframeThreshold = params.at("acceptLockframeThreshold"); //@PARAM this is a parameter, not a static value
                 if(solutionScore>=acceptLockframeThreshold)
                 {
-                    //make sure the skeleton carries the original range
-
-                    //set up the lockframe
                     Solvlet solvlet(*mstIter, solutionLabels);
                     solvlets.push_back(solvlet);
                     Skeleton skel(solvlet.toSkeleton());
+
+                    partIter=skel.getPartTree().begin();
+                    //make sure the skeleton carries the original range
+                    for(parentPartIter=partTree.begin(); parentPartIter!=partTree.end(); ++parentPartIter)
+                    {
+                        if(partIter==skel.getPartTree().end())
+                            break;
+
+                        partIter->setRotationSearchRange(parentPartIter->getRotationSearchRange());
+                        partIter->setSearchRadius(parentPartIter->getSearchRadius());
+
+                        ++partIter;
+                    }
+                    //set up the lockframe
+
                     skel.setScale(frames[*mstIter]->getSkeleton().getScale()); //set skeleton scale
                     lockframe->setSkeleton(skel);
                     lockframe->setParentFrameID(frames[frameId]->getID());
