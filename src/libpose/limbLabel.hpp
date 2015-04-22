@@ -1,6 +1,10 @@
 #ifndef _LIBPOSE_LIMBLABEL_HPP_
 #define _LIBPOSE_LIMBLABEL_HPP_
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
+
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -50,6 +54,10 @@ class LimbLabel
 
     bool containsPoint(Point2f pt);
   private:
+#ifdef DEBUG
+      FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost); // Used for set isWeak to "false" in nskpsolver_tests.computeScoreCost
+      FRIEND_TEST(nskpsolverTests, evaluateSolution);// Used for set isWeak to "false" in nskpsolver_tests.evaluateSolution
+#endif  // DEBUG
 ////rotate a point around a pivot by degrees
 //    Point2f rotatePoint2D(const Point2f point, const Point2f pivot, const float degrees);
 /// Label center 
