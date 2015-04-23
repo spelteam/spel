@@ -65,6 +65,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/skeleton_infer_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/detector_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/limbLabel_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/nskpsolver_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/frames_tests )
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )

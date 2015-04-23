@@ -249,7 +249,7 @@ TEST(colorHistDetectorTest, Train)
     }
     if (AllValuesEqual) fout << "none";
 
-    cout << "Out files: TrainUnitTest_Output.txt, UsedPixels.png\n\n";
+    cout << "Output files: TrainUnitTest_Output.txt, UsedPixels.png\n\n";
     EXPECT_TRUE(AllValuesEqual);
 
     fout << "\n-----------Expected histogramm-----------\n";
