@@ -52,6 +52,7 @@ TEST(nskpsolverTests, ScoreCostAndJointCost)
 //Testing function "computeScoreCost"
 
     //scores[0] = score1Value, isWeak = true, isOccluded = false, 
+    label1.isWeak = true;
     EXPECT_EQ(0, S.computeScoreCost(label1, params));
 
     //scores[0] = score1Value, isWeak = false, isOccluded = false, 
