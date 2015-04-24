@@ -1,9 +1,24 @@
+#if defined(WINDOWS) && defined(_MSC_VER)
+#include <Windows.h>
+#endif
+
 #include <gtest/gtest.h>
+#include <iostream>
 #include "lockframe.hpp"
 #include "keyframe.hpp"
 #include "bodyJoint.hpp"
 #include "bodyPart.hpp"
 #include "skeleton.hpp"
+#include "projectLoader.hpp"
+
+map<int, Point2f> getImageLocations(Skeleton skeleton)
+{
+    map<int, Point2f> Locations;
+    tree <BodyJoint> jointTree = skeleton.getJointTree();
+    for (tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
+        Locations.emplace(pair<int, Point2f>(i->getLimbID(), i->getImageLocation()));
+    return Locations;
+}
 
 TEST(FramesTests, Constructors)
 {
@@ -152,6 +167,39 @@ TEST(FramesTests, GetAndSet)
 
     image.release();
     mask.release();
-    delete frame;
+    delete frame;    
 }
 
+TEST(FramesTests, shiftSkeleton2D)
+{
+    String FilePath;
+    FilePath = "posetests_TestData/CHDTrainTestData/";
+
+#if defined(WINDOWS) && defined(_MSC_VER)
+    if (IsDebuggerPresent())
+        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+#endif
+
+    //Load the input data
+    ProjectLoader projectLoader(FilePath);
+    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
+    vector<Frame*> frames = projectLoader.getFrames();
+
+    //Copy skeleton from keyframe
+    Frame *frame = frames[0];
+    Skeleton skeleton = frame->getSkeleton();
+    tree<BodyPart> PartTree = skeleton.getPartTree();
+
+    //Create shifted points vector 
+    Point2f shift(10, 10);
+    map<int, Point2f> locations_expected = getImageLocations(skeleton);
+    for (int i = 0; i < locations_expected.size(); i++)
+        locations_expected[i] += shift;
+
+    //Run "shiftSkeleton2D"
+    frame->shiftSkeleton2D(shift);
+    map<int, Point2f> locations_actual = getImageLocations(skeleton);
+
+    EXPECT_EQ(locations_expected, locations_actual) << " Skeleton shift error?! \n(*Impact of 'skeleton.infer3D' not considered in this test!)";
+    // Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test !!!
+}
