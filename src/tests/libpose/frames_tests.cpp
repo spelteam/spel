@@ -3,7 +3,6 @@
 #endif
 
 #include <gtest/gtest.h>
-#include <iostream>
 #include "lockframe.hpp"
 #include "keyframe.hpp"
 #include "bodyJoint.hpp"
@@ -186,7 +185,7 @@ TEST(FramesTests, shiftSkeleton2D)
     vector<Frame*> frames = projectLoader.getFrames();
 
     //Copy skeleton from keyframe
-    Frame *frame = frames[0];
+    Frame* frame = frames[0];
     Skeleton skeleton = frame->getSkeleton();
     tree<BodyPart> PartTree = skeleton.getPartTree();
 
@@ -198,8 +197,8 @@ TEST(FramesTests, shiftSkeleton2D)
 
     //Run "shiftSkeleton2D"
     frame->shiftSkeleton2D(shift);
-    map<int, Point2f> locations_actual = getImageLocations(skeleton);
+    map<int, Point2f> locations_actual = getImageLocations(frame->getSkeleton());
 
-    EXPECT_EQ(locations_expected, locations_actual) << " Skeleton shift error?! \n(*Impact of 'skeleton.infer3D' not considered in this test!)";
-    // Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test !!!
+    EXPECT_EQ(locations_expected, locations_actual) << " Skeleton shift error?!\n* Impact of 'skeleton.infer3D' not considered in this test!";
+    //Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test!;
 }
