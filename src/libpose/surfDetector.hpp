@@ -16,6 +16,9 @@
 
 using namespace std;
 using namespace cv;
+#if OpenCV_VERSION_MAJOR == 3
+using namespace xfeatures2d;
+#endif
 
 class SurfDetector : public Detector
 {
