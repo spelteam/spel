@@ -33,6 +33,7 @@ LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _po
   polygon = _polygon;
   scores = _scores;
   isOccluded = _isOccluded;
+  isWeak = true;
 }
 LimbLabel &LimbLabel::operator=(const LimbLabel &ll)
 {

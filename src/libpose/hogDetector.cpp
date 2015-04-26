@@ -213,8 +213,6 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     if (debugLevelParam >= 2)
       cerr << "Training on frame " << (*frameNum)->getID() << endl;
-    vector <Rect> found;
-    vector <Rect> found_filtered;
 
     try
     {
@@ -287,9 +285,6 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   Size padding = Size(32, 32);
   int derivAperture = 1;
   int histogramNormType = HOGDescriptor::L2Hys;
-
-  vector <Rect> found;
-  vector <Rect> found_filtered;
 
   vector <vector <LimbLabel> > t;
 
