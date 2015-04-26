@@ -3,8 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 #if OpenCV_VERSION_MAJOR == 3
-#include <opencv2/xobjdetect.hpp>
-#elif OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH < 9
+#include "opencv2/features2d.hpp"
+#include <opencv2/xfeatures2d.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #elif OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
 #include <opencv2/nonfree/nonfree.hpp>
@@ -16,6 +16,7 @@
 
 using namespace std;
 using namespace cv;
+
 #if OpenCV_VERSION_MAJOR == 3
 using namespace xfeatures2d;
 #endif

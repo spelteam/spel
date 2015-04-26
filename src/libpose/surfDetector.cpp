@@ -393,11 +393,17 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   partModel.partModelRect = rect;
   Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
 
+#if OpenCV_VERSION_MAJOR == 3
+  Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
+  detector->detect(partImage, partModel.keyPoints);
+  Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+  extractor->compute(partImage, partModel.keyPoints, partModel.descriptors);
+#else
   SurfFeatureDetector detector(minHessian);
   detector.detect(partImage, partModel.keyPoints);
   SurfDescriptorExtractor extractor;
   extractor.compute(partImage, partModel.keyPoints, partModel.descriptors);
-
+#endif
   return partModel;
 }
 
