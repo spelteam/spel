@@ -5,6 +5,9 @@
 SurfDetector::SurfDetector(void)
 {
   id = 0x5344;
+#if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
+  initModule_nonfree();
+#endif
 }
 
 int SurfDetector::getID(void)
@@ -390,12 +393,11 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   partModel.partModelRect = rect;
   Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
 
-#if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && defined (WIN32)
   SurfFeatureDetector detector(minHessian);
   detector.detect(partImage, partModel.keyPoints);
   SurfDescriptorExtractor extractor;
   extractor.compute(partImage, partModel.keyPoints, partModel.descriptors);
-#endif
+
   return partModel;
 }
 
@@ -466,9 +468,9 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model)
 {
   float score = 0;
   uint32_t count = 0;
-#if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && defined (WIN32)
   FlannBasedMatcher matcher;
   vector <vector <DMatch>> matches;
+
   for (map <uint32_t, map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
   {
     count++;
@@ -494,6 +496,5 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model)
       }
     }
   }
-#endif
   return score /= count;
 }
