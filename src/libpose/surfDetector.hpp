@@ -2,7 +2,7 @@
 #define _LIBPOSE_SURFDETECTOR_HPP_
 
 #include <opencv2/opencv.hpp>
-#if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4
+#if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && defined (WIN32)
 #include <opencv2/nonfree/features2d.hpp>
 #else
 #error "Unsupported version of OpenCV. Should be 2.4.*.*"
