@@ -80,6 +80,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      progressBar, &QProgressBar::show);
     QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::finished,
                      progressBar, &QProgressBar::hide);
+    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::finished,
+                     solveTools,&SolveBoxWidget::solveFinishedEvent);
     QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::progressValueChanged,
                      progressBar, &QProgressBar::setValue);
 }
@@ -115,7 +117,7 @@ void MainWindow::on_actionOpen_triggered()
          "Open project", //caption
          "", //start directory
          "Project files (*.xml)" //filter files
-     );
+   );
 
 	//linux testing path
     //QString projectFilename =

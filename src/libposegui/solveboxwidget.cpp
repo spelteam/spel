@@ -50,6 +50,10 @@ void SolveBoxWidget::keyframeUpdatedEvent(){
     interpolator->setEnabled(true);
 }
 
+void SolveBoxWidget::solveFinishedEvent(){
+    solver->setEnabled(true);
+}
+
 //PRIVATE
 
 void SolveBoxWidget::interpolatorClicked(){
