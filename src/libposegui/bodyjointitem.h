@@ -4,6 +4,8 @@
 #include <QGraphicsItem>
 #include <frame.hpp>
 
+//TODO[!]: Add state machine 
+
 class BodyPartItem;
 class BodyJoint;
 

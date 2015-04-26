@@ -18,6 +18,7 @@ public slots:
     void loadProjectEvent();
     void closeProjectEvent();
     void keyframeUpdatedEvent();
+    void solveFinishedEvent();
 private slots:
     void interpolatorClicked();
     void solverClicked();

@@ -16,6 +16,7 @@ BodyJointItem::BodyJointItem(BodyJoint *joint, QGraphicsItem *parent)
     : QGraphicsItem(parent),
       joint(joint)
 {
+    setAcceptedMouseButtons(Qt::NoButton);
     //set position
     setPos(joint->getImageLocation().x,joint->getImageLocation().y);
     //set params
@@ -23,6 +24,7 @@ BodyJointItem::BodyJointItem(BodyJoint *joint, QGraphicsItem *parent)
         setFlag(ItemIsSelectable);
         setFlag(ItemIsMovable);
         setFlag(ItemSendsGeometryChanges);
+        setAcceptedMouseButtons(Qt::AllButtons);
     }
     setCacheMode(DeviceCoordinateCache);
     setZValue(1.0);
@@ -103,8 +105,6 @@ void BodyJointItem::mousePressEvent(QGraphicsSceneMouseEvent *event){
         updateToolTip();
     }
     update();
-    //TODO: [!] bug
-    assert(false);
     QGraphicsItem::mousePressEvent(event);
 }
 

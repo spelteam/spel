@@ -17,8 +17,13 @@ BodyPartItem::BodyPartItem(BodyPart *bodyPart, BodyJointItem *parentJoint,
       dest(childJoint),
       bodyPart(bodyPart)
 {
+    setAcceptedMouseButtons(Qt::NoButton);
     //set tool tip
     updateToolTip();
+    //set params
+    if( Frametype == KEYFRAME ){
+        setAcceptedMouseButtons(Qt::AllButtons);
+    }
     setAcceptHoverEvents(true);
     source->addBodyPart(this);
     dest->addBodyPart(this);
