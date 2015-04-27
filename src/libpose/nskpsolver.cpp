@@ -394,6 +394,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 ss.score=evaluateSolution(frames[solvlet.getFrameID()],
                         solvlet.getLabels(), params);
                 allSolves[solvlet.getFrameID()].push_back(ss);
+
+                delete lockframe; //delete the unused pointer now
             }
         }
     }

@@ -639,7 +639,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
 
   }
 
-  partTree = parentSkel.getPartTree();
+  //partTree = parentSkel.getPartTree();
 
   //draw the search regions
   for(tree<BodyPart>::iterator partIter = partTree.begin(); partIter!=partTree.end(); ++partIter)
@@ -664,6 +664,23 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
       double startAngleUpright = PoseHelper::angle2D((p1-p0).x, (p1-p0).y, 1.0, 0.0)*180.0/M_PI;
       ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,startAngleUpright,startAngleUpright+angleRadius,Scalar(255,255,0),lineWidth,CV_AA);
       ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,startAngleUpright+180.0,startAngleUpright+180+angleRadius,Scalar(255,255,0),lineWidth,CV_AA);
+  }
+
+  partTree = skel.getPartTree();
+  //draw the skeleton resulting from solve
+  for(tree<BodyPart>::iterator partIter = partTree.begin(); partIter!=partTree.end(); ++partIter)
+  {
+      //get joints
+      int j0,j1;
+      j0 = partIter->getParentJoint();
+      j1 = partIter->getChildJoint();
+
+      Point2f p0, p1;
+
+      p0 = skel.getBodyJoint(j0)->getImageLocation();
+      p1 = skel.getBodyJoint(j1)->getImageLocation();
+
+      line(image, p0, p1, Scalar(255,0,0), lineWidth, CV_AA);
   }
 
   cerr << "Writing file " << outFileName << endl;
