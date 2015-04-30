@@ -92,7 +92,7 @@ Skeleton Solvlet::toSkeleton(const Skeleton &example)
                 if(partID==0) //root
                 {
                     //set 2D joint locations
-                    pjIter->setImageLocation(pj); //set porent joint only for root node
+                    pjIter->setImageLocation(pj); //set parent joint only for root node
                 }
                 cjIter->setImageLocation(cj); //set child joint for all other nodes
             } //TODO: introduce a more complex scheme of doing this, such as finding midpoints, or points

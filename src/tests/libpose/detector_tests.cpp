@@ -115,7 +115,7 @@ TEST(DetectorTests, rotateImageToDefault_OneColor)
 {
     // Prepare input data
     int rows = 200, cols = 200; // image size
-    float angle = 45; // the rotetion angle
+    float angle = 45; // the rotation angle
     float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
     POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
     POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);

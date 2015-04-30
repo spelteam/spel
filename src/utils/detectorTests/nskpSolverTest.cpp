@@ -47,7 +47,13 @@ int main (int argc, char **argv)
     NSKPSolver tSolver;
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params
-    ImageSimilarityMatrix ism(vFrames);
+    //ImageSimilarityMatrix ism(vFrames);
+    ImageSimilarityMatrix ism;
+    if(!ism.read("testISM.ism"))
+    {
+        ism.buildImageSimilarityMatrix(vFrames);
+        ism.write(("testISM.ism"));
+    }
     solve = tSolver.solve(seq, params, ism);
 
     //draw the solution
@@ -56,7 +62,7 @@ int main (int argc, char **argv)
         Frame* frame = vFrames[solve[i].getFrameID()];
         Frame* parent = vFrames[frame->getParentFrameID()];
 
-        projectLoader.drawLockframeSolvlets(ism, solve[i], frame, parent, seq, argv[2], Scalar(0,0,255), 1);
+        projectLoader.drawLockframeSolvlets(ism, solve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
     }
 
     return 0;

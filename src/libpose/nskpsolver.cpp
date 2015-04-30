@@ -100,15 +100,15 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
 
     //detector enablers
-    params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
     params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
     params.emplace("maxPartCandidates", 5000); //set the max number of part candidates to allow into the solver
 
     //detector search parameters
     params.emplace("propagateToLockframes", 0); //don't propagate from lockframes, only from keyframes
-    params.emplace("baseRotationRange", 60); //search angle range of +/- 60 degrees
-    params.emplace("baseSearchRadius", 30); //search a radius of 100 pixels
+    params.emplace("baseRotationRange", 1); //search angle range of +/- 60 degrees
+    params.emplace("baseSearchRadius", 10); //search a radius of 100 pixels
     params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
@@ -214,13 +214,16 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     //this should rely on parameters e.g.
                     int depth = partTree.depth(partIter);
 
-                    float rotationRange = baseRotationRange;//*pow(depthRotationCoeff, depth);
+                    float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
+                    float searchRange = baseSearchRadius;
 
                     partIter->setRotationSearchRange(rotationRange);
-                    partIter->setSearchRadius(baseSearchRadius);
+                    partIter->setSearchRadius(searchRange);
 
                 }
+                skeleton.setPartTree(partTree);
                 lockframe->setSkeleton(skeleton);
+                frames[frameId]->setSkeleton(skeleton);
 
                 lockframe->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
 
@@ -474,20 +477,23 @@ uint32_t NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
-    params.emplace("imageCoeff", 0.0);
-    params.emplace("useHoGdet", 0);
-    params.emplace("useCSdet", 1.0);
+//    params.emplace("imageCoeff", 0);
+//    params.emplace("useHoGdet", 1.0);
+//    params.emplace("useCSdet", 0);
 
     float lambda = params.at("imageCoeff");
 
     //@FIX
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
+    //float useSURF = params.at("useSURF");
 
-    //for now, just return the first available score
+    //TODO: Fix score combinations
     vector<Score> scores = label.getScores();
 
-    if(label.getIsOccluded()||label.getIsWeak()) //if it's occluded, return zero
+    string hogName = "18500";
+
+    if(label.getIsOccluded() || label.getIsWeak()) //if it's occluded, return zero
         return 0;
     if(scores.size()>0)
         return lambda*scores[0].getScore();

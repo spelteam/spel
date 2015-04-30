@@ -105,12 +105,18 @@ bool ImageSimilarityMatrix::read(string filename)
     ifstream in(filename.c_str());
     if(in.is_open())
     {
+        int size;
+        in >> size;
+
+        imageSimilarityMatrix.create(size, size, DataType<float>::type);
+        imageShiftMatrix.create(size, size, DataType<Point2f>::type);
+
         for(int i=0; i<imageSimilarityMatrix.rows; ++i)
         {
             for(int j=0; j<imageSimilarityMatrix.cols; ++j)
             {
                 float score;
-                in >>  score;
+                in >> score;
                 imageSimilarityMatrix.at<float>(i,j)=score;
             }
         }
@@ -128,8 +134,6 @@ bool ImageSimilarityMatrix::read(string filename)
         }
         return true;
     }
-
-
     else
     {
         cerr << "Could not open " << filename << " for reading. " << endl;
@@ -142,6 +146,7 @@ bool ImageSimilarityMatrix::write(string filename) const
     ofstream out(filename.c_str());
     if(out.is_open())
     {
+        out << imageSimilarityMatrix.rows << endl; //size
         for(int i=0; i<imageSimilarityMatrix.rows; ++i)
         {
             for(int j=0; j<imageSimilarityMatrix.cols; ++j)
