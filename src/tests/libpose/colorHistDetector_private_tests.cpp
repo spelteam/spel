@@ -1,3 +1,7 @@
+#if defined(WINDOWS) && defined(_MSC_VER)
+#include <Windows.h>
+#endif
+
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 #include <tree.hh>
@@ -140,17 +144,18 @@ TEST(colorHistDetectorTest, Operators)
     EXPECT_EQ(x.fgBlankSizes, y.fgBlankSizes);
 }
 
-TEST(colorHistDetectorTest, Functions)
+TEST(colorHistDetectorTest, bulkyFunctions)
 {
 // Prepare input data
 
     //Path to the input files
     String FilePath;
-    #ifdef WINDOWS
-    FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-    #else
     FilePath = "posetests_TestData/CHDTrainTestData/";
-    #endif
+
+#if defined(WINDOWS) && defined(_MSC_VER)
+    if (IsDebuggerPresent())
+        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+#endif
 
     //Load the input data
     ProjectLoader projectLoader(FilePath);

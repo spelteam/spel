@@ -26,7 +26,7 @@ class ColorHistDetector : public Detector
     FRIEND_TEST(colorHistDetectorTest, Constructors);
     FRIEND_TEST(colorHistDetectorTest, computePixelBelongingLikelihood);
     FRIEND_TEST(colorHistDetectorTest, Operators);
-    FRIEND_TEST(colorHistDetectorTest, Functions);
+    FRIEND_TEST(colorHistDetectorTest, bulkyFunctions);
     FRIEND_TEST(colorHistDetectorTest, Train);
 #endif  // DEBUG
     struct PartModel
