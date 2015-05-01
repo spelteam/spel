@@ -1,29 +1,134 @@
 #include <gtest/gtest.h>
+#include <opencv2/opencv.hpp>
+#include <tree.hh>
+#include <fstream>
+#include <iostream>
+#include <string>
 #include "colorHistDetector.hpp"
+#include "bodyPart.hpp"
+#include "skeleton.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
+#include "frame.hpp"
+#include "interpolation.hpp"
+#include "projectLoader.hpp"
+
+class LimbIDCompare
+{
+public:
+    bool operator () (vector<LimbLabel> X, vector<LimbLabel> Y)
+    {
+        return Y[0].getLimbID() > X[0].getLimbID();
+    }
+};
+
+// Selecting locations of all body part from skeleton
+map<int, pair<Point2f, Point2f>> getPartLocations(Skeleton skeleton)
+{
+    map<int, pair<Point2f, Point2f>> PartLocations;
+    BodyJoint* J0, *J1;
+    Point2f p0,p1;
+    tree <BodyPart> partTree = skeleton.getPartTree();
+    for (tree <BodyPart>::iterator i = partTree.begin(); i != partTree.end(); ++i)
+    {
+        J0 = skeleton.getBodyJoint(i->getChildJoint());
+        J1 = skeleton.getBodyJoint(i->getParentJoint());
+        p0 = J0->getImageLocation();
+        p1 = J1->getImageLocation();
+        PartLocations.emplace(pair<int, pair<Point2f, Point2f>>(i->getPartID(), pair<Point2f, Point2f>(p0, p1)));
+    }
+    return PartLocations;
+}
+
+//Built bodypart rectangle on bodypart joints
+POSERECT<Point2f> BuildPartRectOnJoints(BodyJoint* j0, BodyJoint* j1, float LWRatio)
+{
+    Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
+    float boneLength = (float)sqrt(PoseHelper::distSquared(p0, p1)); // distance between nodes
+    float boneWidth = boneLength / LWRatio;
+    Point2f boxCenter = p0 * 0.5 + p1 * 0.5; // the bobypart center  coordinates
+    // Coordinates for drawing of the polygon at the coordinate origin
+    Point2f c1 = Point2f(0.f, 0.5f * boneWidth);
+    Point2f c2 = Point2f(boneLength, 0.5f * boneWidth);
+    Point2f c3 = Point2f(boneLength, -0.5f * boneWidth);
+    Point2f c4 = Point2f(0.f, -0.5f * boneWidth);
+    Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f); // polygon center 
+    Point2f direction = p1 - p0; // used as estimation of the vector's direction
+    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
+    // Rotate and shift the polygon to the bodypart center
+    c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    POSERECT <Point2f> poserect(c1, c2, c3, c4);
+    return poserect;
+}
+
+//Build set of the rect pixels colors 
+vector <Point3i> GetPartColors(Mat image, Mat mask, POSERECT < Point2f > rect)
+{
+    vector <Point3i> PartColors;
+    float xmin, ymin, xmax, ymax;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    for (int x = xmin; x < xmax; x++)
+    {
+        for (int y = ymin; y < ymax; y++)
+        {
+            if ((rect.containsPoint(Point2f(x, y))> 0) && (mask.at<uint8_t>(y, x) > 9))
+            {
+                Vec3b color = image.at<Vec3b>(y, x);
+                PartColors.push_back(Point3i(color[0], color[1], color[2]));
+            }
+        }
+    }
+    return PartColors;
+}
 
 //IT'S TEMPORARY TESTS
-TEST(colorHistDetectorTest, PrivateFields)
+
+TEST(colorHistDetectorTest, Constructors)
 {
-    cout << "Test 'colorHistDetectorTest.PrivateFields' execution...";
-    //Testing PartModel constructor
+    //Testing "PartModel" constructor
     uint8_t _nBins = 10;
     const int maxIndex = _nBins - 1;
-    ColorHistDetector::PartModel x(_nBins);
-    EXPECT_EQ(0.0f, x.partHistogramm[maxIndex][maxIndex][maxIndex]);
-    EXPECT_EQ(x.nBins, x.partHistogramm[maxIndex][maxIndex].size());
-    EXPECT_EQ(0.0f, x.bgHistogramm[maxIndex][maxIndex][maxIndex]);
-    EXPECT_EQ(x.nBins, x.bgHistogramm[maxIndex][maxIndex].size());
+    ColorHistDetector::PartModel x0(_nBins);
+    EXPECT_EQ(0.0f, x0.partHistogramm[maxIndex][maxIndex][maxIndex]);
+    EXPECT_EQ(x0.nBins, x0.partHistogramm[maxIndex][maxIndex].size());
+    EXPECT_EQ(0.0f, x0.bgHistogramm[maxIndex][maxIndex][maxIndex]);
+    EXPECT_EQ(x0.nBins, x0.bgHistogramm[maxIndex][maxIndex].size());
 
-    //Testing PartModel operator "="
-    x.sizeFG = 1;
-    x.sizeBG = 2;
-    x.fgNumSamples = 3;
-    x.bgNumSamples = 4;
-    x.fgSampleSizes.push_back(100);
-    x.bgSampleSizes.push_back(200);
-    x.fgBlankSizes.push_back(300);
+    //Testing "ColorHistDetector" constructor with parameter "_nBins"
+    ColorHistDetector chd1(_nBins);
+    EXPECT_EQ(_nBins, chd1.nBins);
+}
+
+TEST(colorHistDetectorTest, computePixelBelongingLikelihood)
+{
+    //Testing  function "computePixelBelongingLikelihood"
+    const uint8_t nBins = 8, outside = 255;
+    const uint8_t _factor = static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
+    uint8_t i = 70;
+    uint8_t t = i / _factor;
+    ColorHistDetector chd2(nBins);
+    ColorHistDetector::PartModel z(nBins);
+    z.partHistogramm[t][t][t] = 3.14f;
+    EXPECT_EQ(z.partHistogramm[t][t][t], chd2.computePixelBelongingLikelihood(z, i, i, i));
+    EXPECT_EQ(0.f, chd2.computePixelBelongingLikelihood(z, outside, outside, outside));
+}
+
+TEST(colorHistDetectorTest, Operators)
+{
+    const int nBins = 8;
+    ColorHistDetector::PartModel x(nBins);
+    x.sizeFG = 100;
+    x.sizeBG = 200;
+    x.fgNumSamples = 2;
+    x.bgNumSamples = 2;
+    x.fgSampleSizes.push_back(65);
+    x.fgSampleSizes.push_back(45);
+    x.bgSampleSizes.push_back(102);
+    x.bgSampleSizes.push_back(98);
+    x.fgBlankSizes.push_back(30);
     ColorHistDetector::PartModel y = x;
     EXPECT_EQ(x.partHistogramm, y.partHistogramm);
     EXPECT_EQ(x.bgHistogramm, y.bgHistogramm);
@@ -33,331 +138,407 @@ TEST(colorHistDetectorTest, PrivateFields)
     EXPECT_EQ(x.fgSampleSizes, y.fgSampleSizes);
     EXPECT_EQ(x.bgSampleSizes, y.bgSampleSizes);
     EXPECT_EQ(x.fgBlankSizes, y.fgBlankSizes);
+}
 
-    //Testing ColorHistDetector constructor with parameter "_nBins"
-    ColorHistDetector chd1(_nBins);
-    EXPECT_EQ(_nBins, chd1.nBins);
+TEST(colorHistDetectorTest, Functions)
+{
+// Prepare input data
 
-    //Testing  function computePixelBelongingLikelihood
-    const uint8_t nBins = 8, outside = 255;
-    const uint8_t _factor = static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
-    uint8_t i = 7;
-    uint8_t t = i / _factor;
-    ColorHistDetector chd2(nBins);
-    ColorHistDetector::PartModel z(nBins);
-    z.partHistogramm[t][t][t] = 3.14f;
-    EXPECT_EQ(z.partHistogramm[t][t][t], chd2.computePixelBelongingLikelihood(z, i, i, i));
-    EXPECT_EQ(0.f, chd2.computePixelBelongingLikelihood(z, outside, outside, outside));
+    //Path to the input files
+    String FilePath;
+    #ifdef WINDOWS
+    FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+    #else
+    FilePath = "posetests_TestData/CHDTrainTestData/";
+    #endif
 
-    //Testing function setPartHistogramm
-    const uint8_t ColorsCount = 255;
-    const int K = RAND_MAX / ColorsCount;
+    //Load the input data
+    ProjectLoader projectLoader(FilePath);
+    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
+    vector<Frame*> frames = projectLoader.getFrames();
+
+    //Run "Train()"
+    map <string, float> params;
+    ColorHistDetector detector;
+    detector.train(frames, params);
+
+    //Counting a keyframes
+    int KeyframesCount = 0;
+    int FirstKeyframe = -1;
+    for (int i = 0; i < frames.size(); i++)
+    if (frames[i]->getFrametype() == KEYFRAME)
+    {
+        KeyframesCount++;
+        if (FirstKeyframe < 0) FirstKeyframe = i;
+    }
+
+    //Copy image and skeleton from first keyframe
+    Mat image = frames[FirstKeyframe]->getImage();
+    Mat mask = frames[FirstKeyframe]->getMask();
+    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    tree <BodyPart> partTree = skeleton.getPartTree();
+    tree <BodyJoint> jointsTree = skeleton.getJointTree();
+
+    const int nBins = 8;
     const uint8_t factor = static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
-    ColorHistDetector::PartModel partModel1(nBins), partModel2 = partModel1;
-    vector <Point3i> Colors;
-    for (int c = 0; c < ColorsCount; c++)
-        Colors.push_back(Point3i(rand() / K, rand() / K, rand() / K));
-    partModel1.sizeFG = ColorsCount;
-    partModel1.fgNumSamples = 1;
-    partModel1.fgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
-    for (uint32_t i = 0; i < ColorsCount; i++)
-        partModel1.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
-    for (uint8_t r = 0; r < partModel1.nBins; r++)
-    for (uint8_t g = 0; g < partModel1.nBins; g++)
-    for (uint8_t b = 0; b < partModel1.nBins; b++)
-        partModel1.partHistogramm[r][g][b] /= partModel1.sizeFG;
 
-    ColorHistDetector chd3(nBins);
-    chd3.setPartHistogramm(partModel2, Colors);
-    EXPECT_EQ(partModel1.partHistogramm, partModel2.partHistogramm);
-    EXPECT_EQ(partModel1.bgHistogramm, partModel2.bgHistogramm);
-    EXPECT_EQ(partModel1.sizeFG, partModel2.sizeFG);
-    EXPECT_EQ(partModel1.fgNumSamples, partModel2.fgNumSamples);
-    EXPECT_EQ(partModel1.bgNumSamples, partModel2.bgNumSamples);
-    EXPECT_EQ(partModel1.fgSampleSizes, partModel2.fgSampleSizes);
-    EXPECT_EQ(partModel1.bgSampleSizes, partModel2.bgSampleSizes);
-    EXPECT_EQ(partModel1.fgBlankSizes, partModel2.fgBlankSizes);
+    //Select body part for testing
+    const int  partID = 1;
+    //Copy body part
+    BodyPart bodyPart = *skeleton.getBodyPart(partID);
+    //Copy part joints 
+    BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());
+    BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
+    //Build part rect
+    POSERECT<Point2f> rect = BuildPartRectOnJoints(j0, j1, bodyPart.getLWRatio());
+    //Build part colors
+    vector <Point3i> Colors = GetPartColors(image, mask, rect);
 
-    //Testing function addPartHistogramm
-    uint32_t nBlankPixels = 100;
-    for (uint8_t r = 0; r < partModel1.nBins; r++)
-    for (uint8_t g = 0; g < partModel1.nBins; g++)
-    for (uint8_t b = 0; b < partModel1.nBins; b++)
-        partModel1.partHistogramm[r][g][b] *= partModel1.sizeFG;
-    partModel1.sizeFG += static_cast <uint32_t> (Colors.size());
-    partModel1.fgNumSamples++;
-    partModel1.fgSampleSizes.push_back(Colors.size());
-    for (uint32_t i = 0; i < ColorsCount; i++)
-        partModel1.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
-    for (uint8_t r = 0; r < partModel1.nBins; r++)
-    for (uint8_t g = 0; g < partModel1.nBins; g++)
-    for (uint8_t b = 0; b < partModel1.nBins; b++)
-        partModel1.partHistogramm[r][g][b] /= partModel1.sizeFG;
-    partModel1.fgBlankSizes.push_back(nBlankPixels);
+    //Copy part model
+    ColorHistDetector::PartModel model = detector.partModels.at(partID);
 
-    chd3.addPartHistogramm(partModel2, Colors, nBlankPixels);
-    EXPECT_EQ(partModel1.partHistogramm, partModel2.partHistogramm);
-    EXPECT_EQ(partModel1.bgHistogramm, partModel2.bgHistogramm);
-    EXPECT_EQ(partModel1.sizeFG, partModel2.sizeFG);
-    EXPECT_EQ(partModel1.fgNumSamples, partModel2.fgNumSamples);
-    EXPECT_EQ(partModel1.bgNumSamples, partModel2.bgNumSamples);
-    EXPECT_EQ(partModel1.fgSampleSizes, partModel2.fgSampleSizes);
-    EXPECT_EQ(partModel1.bgSampleSizes, partModel2.bgSampleSizes);
-    EXPECT_EQ(partModel1.fgBlankSizes, partModel2.fgBlankSizes);
+//Testing function "setPartHistogramm"
+    ColorHistDetector::PartModel partModel_expected(nBins), partModel_actual(nBins);
+    partModel_expected.sizeFG = Colors.size();
+    partModel_expected.fgNumSamples = 1;
+    partModel_expected.fgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
+    for (uint32_t i = 0; i < Colors.size(); i++)
+        partModel_expected.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+    for (uint8_t r = 0; r < partModel_expected.nBins; r++)
+    for (uint8_t g = 0; g <partModel_expected.nBins; g++)
+    for (uint8_t b = 0; b < partModel_expected.nBins; b++)
+        partModel_expected.partHistogramm[r][g][b] /= Colors.size();
 
-    //Testing function getAvgSampleSizeFg
+    detector.setPartHistogramm(partModel_actual, Colors);
+    EXPECT_EQ(partModel_expected.partHistogramm, partModel_actual.partHistogramm);
+    EXPECT_EQ(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+    EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
+    EXPECT_EQ(partModel_expected.fgNumSamples, partModel_actual.fgNumSamples);
+    EXPECT_EQ(partModel_expected.bgNumSamples, partModel_actual.bgNumSamples);
+    EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
+    EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
+    EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+
+// Testing function "addPartHistogramm"
+    uint32_t nBlankPixels = 10;
+    for (uint8_t r = 0; r < partModel_expected.nBins; r++)
+    for (uint8_t g = 0; g < partModel_expected.nBins; g++)
+    for (uint8_t b = 0; b < partModel_expected.nBins; b++)
+        partModel_expected.partHistogramm[r][g][b] *= partModel_expected.sizeFG;
+    partModel_expected.sizeFG += static_cast <uint32_t> (Colors.size());
+    partModel_expected.fgNumSamples++;
+    partModel_expected.fgSampleSizes.push_back(Colors.size());
+    for (uint32_t i = 0; i < Colors.size(); i++)
+        partModel_expected.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+    for (uint8_t r = 0; r < partModel_expected.nBins; r++)
+    for (uint8_t g = 0; g < partModel_expected.nBins; g++)
+    for (uint8_t b = 0; b < partModel_expected.nBins; b++)
+        partModel_expected.partHistogramm[r][g][b] /= partModel_expected.sizeFG;
+    partModel_expected.fgBlankSizes.push_back(nBlankPixels);
+
+    detector.addPartHistogramm(partModel_actual, Colors, nBlankPixels);
+    EXPECT_EQ(partModel_expected.partHistogramm, partModel_actual.partHistogramm);
+    EXPECT_EQ(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+    EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
+    EXPECT_EQ(partModel_expected.fgNumSamples, partModel_actual.fgNumSamples);
+    EXPECT_EQ(partModel_expected.bgNumSamples, partModel_actual.bgNumSamples);
+    EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
+    EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
+    EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+
+// Testing function "getAvgSampleSizeFg"
     float Sum = 0;
-    for (uint32_t i = 0; i < partModel1.fgSampleSizes.size(); i++)
-        Sum += partModel1.fgSampleSizes[i];
-    Sum /= partModel1.fgNumSamples;
-    EXPECT_EQ(Sum, chd3.getAvgSampleSizeFg(partModel2));
+    for (uint32_t i = 0; i < partModel_expected.fgSampleSizes.size(); i++)
+        Sum += partModel_expected.fgSampleSizes[i];
+    Sum /= partModel_expected.fgNumSamples;
+    EXPECT_EQ(Sum, detector.getAvgSampleSizeFg(partModel_actual));
 
-    //Testing function getAvgSampleSizeFgBetween
+// Testing function "getAvgSampleSizeFgBetween"
     uint32_t s1 = 0, s2 = 0;
-    float f = (partModel1.fgSampleSizes[s1] + partModel1.fgSampleSizes[s2]) / 2.0f;
-    EXPECT_EQ(f, chd3.getAvgSampleSizeFgBetween(partModel2, s1, s2));
-    EXPECT_EQ(0.f, chd3.getAvgSampleSizeFgBetween(partModel2, static_cast <uint32_t> (partModel1.fgSampleSizes.size()), s2));
+    float f = (partModel_expected.fgSampleSizes[s1] + partModel_expected.fgSampleSizes[s2]) / 2.0f;
+    EXPECT_EQ(f, detector.getAvgSampleSizeFgBetween(partModel_actual, s1, s2));
+    EXPECT_EQ(0.f, detector.getAvgSampleSizeFgBetween(partModel_actual, static_cast <uint32_t> (partModel_expected.fgSampleSizes.size()), s2));
 
-    //Testing function matchPartHistogramsED
+// Testing function "matchPartHistogramsED"
     float distance = 0;
-    for (uint8_t r = 0; r < partModel1.nBins; r++)
-    for (uint8_t g = 0; g < partModel1.nBins; g++)
-    for (uint8_t b = 0; b < partModel1.nBins; b++)
-        distance += pow(partModel1.partHistogramm[r][g][b] - partModel1.partHistogramm[r][g][b], 2.0f);
-    f = chd3.matchPartHistogramsED(partModel1, partModel1);
+    for (uint8_t r = 0; r < partModel_expected.nBins; r++)
+    for (uint8_t g = 0; g < partModel_expected.nBins; g++)
+    for (uint8_t b = 0; b < partModel_expected.nBins; b++)
+        distance += pow(partModel_expected.partHistogramm[r][g][b] - partModel_expected.partHistogramm[r][g][b], 2.0f);
+    f = detector.matchPartHistogramsED(partModel_expected, partModel_expected);
     EXPECT_EQ(sqrt(distance), f);
 
-    //Testing function addBackgroundHistogramm
+// Testing function "addBackgroundHistogramm"
     vector <Point3i> cEmpty;
-    for (uint8_t r = 0; r < partModel1.nBins; r++)
-    for (uint8_t g = 0; g < partModel1.nBins; g++)
-    for (uint8_t b = 0; b < partModel1.nBins; b++)
-        partModel1.bgHistogramm[r][g][b] *= partModel1.sizeBG;
-    partModel1.sizeBG += static_cast <uint32_t> (Colors.size());
-    partModel1.bgNumSamples++;
-    partModel1.bgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
+    for (uint8_t r = 0; r < partModel_expected.nBins; r++)
+    for (uint8_t g = 0; g < partModel_expected.nBins; g++)
+    for (uint8_t b = 0; b < partModel_expected.nBins; b++)
+        partModel_expected.bgHistogramm[r][g][b] *= partModel_expected.sizeBG;
+    partModel_expected.sizeBG += static_cast <uint32_t> (Colors.size());
+    partModel_expected.bgNumSamples++;
+    partModel_expected.bgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
     for (uint32_t i = 0; i < Colors.size(); i++)
-        partModel1.bgHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
-    for (uint8_t r = 0; r < partModel1.nBins; r++)
-    for (uint8_t g = 0; g < partModel1.nBins; g++)
-    for (uint8_t b = 0; b < partModel1.nBins; b++)
-        partModel1.bgHistogramm[r][g][b] /= (float)partModel1.sizeBG;
+        partModel_expected.bgHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+    for (uint8_t r = 0; r < partModel_expected.nBins; r++)
+    for (uint8_t g = 0; g < partModel_expected.nBins; g++)
+    for (uint8_t b = 0; b < partModel_expected.nBins; b++)
+        partModel_expected.bgHistogramm[r][g][b] /= (float)partModel_expected.sizeBG;
 
-    chd3.addBackgroundHistogramm(partModel2, cEmpty);
-    EXPECT_NE(partModel1.bgHistogramm, partModel2.bgHistogramm);
-    chd3.addBackgroundHistogramm(partModel2, Colors);
-    EXPECT_EQ(partModel1.partHistogramm, partModel2.partHistogramm);
-    EXPECT_EQ(partModel1.bgHistogramm, partModel2.bgHistogramm);
-    EXPECT_EQ(partModel1.sizeFG, partModel2.sizeFG);
-    EXPECT_EQ(partModel1.fgNumSamples, partModel2.fgNumSamples);
-    EXPECT_EQ(partModel1.bgNumSamples, partModel2.bgNumSamples);
-    EXPECT_EQ(partModel1.fgSampleSizes, partModel2.fgSampleSizes);
-    EXPECT_EQ(partModel1.bgSampleSizes, partModel2.bgSampleSizes);
-    EXPECT_EQ(partModel1.fgBlankSizes, partModel2.fgBlankSizes);
+    detector.addBackgroundHistogramm(partModel_actual, cEmpty);
+    EXPECT_NE(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+    detector.addBackgroundHistogramm(partModel_actual, Colors);
+    EXPECT_EQ(partModel_expected.partHistogramm, partModel_actual.partHistogramm);
+    EXPECT_EQ(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+    EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
+    EXPECT_EQ(partModel_expected.fgNumSamples, partModel_actual.fgNumSamples);
+    EXPECT_EQ(partModel_expected.bgNumSamples, partModel_actual.bgNumSamples);
+    EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
+    EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
+    EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
 
-    //Temporary. Testing function buildPixelDistributions
-    BodyPart bp1;
-    tree<BodyPart> tbp;
-    const uchar partCount = 4;
-    tree<BodyPart>::iterator ti;
-    Skeleton skeleton;
-    ColorHistDetector chd(nBins);
-    const uint32_t rows = 320, cols = 480;
-    Mat imgMat = Mat(rows, cols, DataType <Vec3b>::type);
-    Mat maskMat = Mat(rows, cols, DataType <uint8_t>::type);
-
-    tbp.clear();
-    bp1.setPartID(0);
-    bp1.setLWRatio(0.25);
-    ti = tbp.begin();
-    ti = tbp.insert(ti, bp1);
-    chd.partModels[0] = partModel1;
-    for (int32_t id = 1; id <= partCount; id++)
+// Testing function buildPixelDistributions
+    Mat t(image.cols,image.rows, DataType <float>::type);
+    ColorHistDetector::PartModel partModel = detector.partModels[partID];
+    for (int x = 0; x < image.cols; x++)
+    for (int y = 0; y < image.rows; y++)
     {
-        chd.partModels[id] = partModel1;
-        bp1.setPartID(id);
-        ti = tbp.append_child(ti, bp1);
-    }
-    skeleton.setPartTree(tbp);
-    Frame* frame1 = new(Keyframe);
-    frame1->setSkeleton(skeleton);
+        Vec3b intensity = image.at<Vec3b>(y, x);
+        uint8_t blue = intensity.val[0];
+        uint8_t green = intensity.val[1];
+        uint8_t red = intensity.val[2];
+        uint8_t mintensity = mask.at<uint8_t>(y, x);
+        bool blackPixel = mintensity < 10; 
 
-    for (int x = 0; x < cols; x++)
-    for (int y = 0; y < rows; y++)
-    {
-        imgMat.at<Vec3b>(y, x) = Vec3b(uchar(rand() / K), uchar(rand() / K), uchar(rand() / K));
-        maskMat.at<uint8_t>(y, x) = uchar(rand() / K);
-    }
-    frame1->setImage(imgMat);
-    frame1->setMask(maskMat);
+        t.at<float>(x, y) = blackPixel ? 0 : partModel.partHistogramm.at(red / factor).at(green / factor).at(blue / factor); // (x, y)  or (y, x) !? ?
+        //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
+     }
 
-    map <int32_t, Mat> pixelDistributions_e;
-    for (tree<BodyPart>::iterator I = tbp.begin(); I != tbp.end(); ++I)
+    map <int32_t, Mat> pixelDistributions = detector.buildPixelDistributions(frames[FirstKeyframe]);
+    for (int x = 0; x < t.cols; x++)
+    for (int y = 0; y < t.rows; y++)
+        EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
+
+// Testing function BuildPixelLabels
+    Mat p(image.cols, image.rows, DataType <float>::type);
+    for (int x = 0; x < image.cols; x++)
+    for (int y = 0; y < image.rows; y++)
     {
-        Mat t = Mat(cols, rows, DataType <float>::type);
-        int ID = I->getPartID();
-        ColorHistDetector::PartModel partModel = chd.partModels[ID];
-        for (uint32_t x = 0; x < cols; x++)
-        for (uint32_t y = 0; y < rows; y++)
+        bool blackPixel = mask.at<uint8_t>(y, x) < 10;
+        if (!blackPixel)
         {
-            Vec3b intensity = imgMat.at<Vec3b>(y, x);
-            uint8_t blue = intensity.val[0];
-            uint8_t green = intensity.val[1];
-            uint8_t red = intensity.val[2];
-            uint8_t mintensity = maskMat.at<uint8_t>(y, x);
-            bool blackPixel = mintensity < 10;
-            t.at<float>(x, y) = blackPixel ? 0 : chd.computePixelBelongingLikelihood(partModel, red, green, blue);
-        }
-        pixelDistributions_e.insert(pair <int32_t, Mat>(ID, t));
-        t.release();
-    }
-
-    map <int32_t, Mat> pixelDistributions = chd.buildPixelDistributions(frame1);
-    for (int i = 0; i < partCount; i++)
-    for (uint32_t x = 0; x < cols; x++)
-    for (uint32_t y = 0; y < rows; y++)
-        EXPECT_EQ(pixelDistributions_e[i].at<float>(x, y), pixelDistributions[i].at<float>(x, y));
-    EXPECT_EQ(pixelDistributions_e.size(), pixelDistributions.size());
-
-    for (map <int32_t, Mat>::iterator I = pixelDistributions_e.begin(); I != pixelDistributions_e.end(); ++I)
-        I->second.release();
-    pixelDistributions_e.clear();
-
-    //Temporary. Testing function BuildPixelLabels
-    map <int32_t, Mat> pixelLabels_e;
-    for (ti = tbp.begin(); ti != tbp.end(); ++ti)
-    {
-        Mat t = Mat(cols, rows, DataType <float>::type);
-        Mat tt;
-        tt = pixelDistributions.at(ti->getPartID());
-        for (uint32_t x = 0; x < cols; x++)
-        for (uint32_t y = 0; y < rows; y++)
-        {
-            uint8_t mintensity = maskMat.at<uint8_t>(y, x);
-            bool blackPixel = mintensity < 10;
-            if (!blackPixel)
+            float top = 0;
+            for (tree <BodyPart>::iterator i = partTree.begin(); i != partTree.end(); ++i)
             {
-                float top = 0, sum = 0;
-                for (tree <BodyPart>::iterator i = tbp.begin(); i != tbp.end(); ++i)
-                {
-                    Mat temp;
-                    temp = pixelDistributions.at(i->getPartID());
-                    if (temp.at<float>(x, y) > top)
-                        top = temp.at<float>(x, y);
-                    sum += temp.at<float>(x, y);
-                    temp.release();
-                }
-                t.at<float>(x, y) = (top == 0) ? 0 : tt.at<float>(x, y) / top;
+                Mat temp;
+                temp = pixelDistributions.at(i->getPartID());
+                if (temp.at<float>(x, y) > top) // (x,y)  or (y,x) !?? Matrix "PixelLabels" - transposed relative to the matrix "Image"
+                   top = temp.at<float>(x, y);
+                temp.release(); // (x,y)  or (y,x) !??
             }
-            else
-                t.at<float>(x, y) = 0;
+            p.at<float>(x, y) = (top == 0) ? 0 : pixelDistributions[partID].at<float>(x, y) / top;
         }
-        pixelLabels_e.insert(pair<int32_t, Mat>(ti->getPartID(), t));
-        t.release();
+        else
+            p.at<float>(x, y) = 0; // (x,y)  or (y,x) !??
     }
 
-    map<int32_t, Mat> pixelLabels_a = chd.buildPixelLabels(frame1, pixelDistributions);
+    map<int32_t, Mat> pixelLabels = detector.buildPixelLabels(frames[FirstKeyframe], pixelDistributions);
 
-    for (int i = 0; i < partCount; i++)
-    for (uint32_t x = 0; x < cols; x++)
-    for (uint32_t y = 0; y < rows; y++)
-        EXPECT_EQ(pixelLabels_e[i].at<float>(x, y), pixelLabels_a[i].at<float>(x, y));
-    EXPECT_EQ(pixelLabels_e.size(), pixelLabels_a.size());
+    int q = 0;
+    for (int x = 0; x < p.cols; x++)
+    for (int y = 0; y < p.rows; y++)
+        EXPECT_EQ(p.at<float>(y, x), pixelLabels[partID].at<float>(y, x)) << q++ << ": " << x << ", " << y;
 
-    //Temporary. Testing function generateLabel
-    map <int32_t, Mat> pixelLabels = chd.buildPixelLabels(frame1, pixelDistributions);
-    Point2f j0 = Point2f(cols / 5, rows / 5), j1 = Point2f(cols / 7, rows / 7);
+// Testing function generateLabel
     vector <Score> s;
-    vector <Point3i> partPixelColours;
-    Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-    float boneLength = chd.getBoneLength(j0, j1);
-    float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
-    POSERECT <Point2f> rect = chd.getBodyPartRect(bp1, j0, j1);
+    Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
+    Point2f boxCenter =  p0 * 0.5 + p1 * 0.5;
+    float boneLength = detector.getBoneLength(p0, p1);
+    float rot = float(PoseHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
     uint32_t totalPixels = 0, pixelsInMask = 0, pixelsWithLabel = 0;
     float totalPixelLabelScore = 0, pixDistAvg = 0, pixDistNum = 0;
-    ColorHistDetector::PartModel model;
     stringstream detectorName;
-    detectorName << chd.getID();
-    model = chd.partModels.at(bp1.getPartID());
+    detectorName << partID;
 
-    if (chd.getAvgSampleSizeFg(model) == 0)
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    bool PartContainPoints = false;
+    for (int i = xmin; i<xmax; i++ )
+    for (int j = ymin; j <ymax; j++)
+    if (rect.containsPoint(Point2f((float)i, (float)j)) > 0)
     {
-        maskMat.release();
-        imgMat.release();
-    }
-    for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
-    for (int32_t j = int32_t(boxCenter.y - boneLength * 0.5); j < int32_t(boxCenter.y + boneLength * 0.5); j++)
-    if (i < maskMat.cols && j < maskMat.rows)
-    {
-        float xmax, ymax, xmin, ymin;
-        rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-        if (i <= xmax && i >= xmin && j <= ymax && j >= ymin)
-        if (rect.containsPoint(Point2f((float)i, (float)j)) > 0)
-        {
-            totalPixels++;
-            uint8_t mintensity = 0;
-            mintensity = maskMat.at<uint8_t>(j, i);
-            bool blackPixel = mintensity < 10;
-            if (!blackPixel)
+        totalPixels++;
+        uint8_t mintensity = mask.at<uint8_t>(j, i);
+            if ( mintensity >= 10)
             {
-                pixDistAvg += pixelDistributions.at(bp1.getPartID()).at<float>(i, j);
+                pixDistAvg += pixelDistributions.at(partID).at<float>(i, j);
                 pixDistNum++;
-                if (pixelLabels.at(bp1.getPartID()).at<float>(i, j))
+                if (pixelLabels.at(partID).at<float>(i, j))
                 {
                     pixelsWithLabel++;
-                    totalPixelLabelScore += pixelLabels.at(bp1.getPartID()).at<float>(i, j);
+                    totalPixelLabelScore += pixelLabels.at(partID).at<float>(i, j);
                 }
-                Vec3b intensity = imgMat.at<Vec3b>(j, i);
-                uint8_t blue = intensity.val[0];
-                uint8_t green = intensity.val[1];
-                uint8_t red = intensity.val[2];
-                Point3i ptColor(red, green, blue);
                 pixelsInMask++;
-                partPixelColours.push_back(ptColor);
+                PartContainPoints = true;
             }
-        }
-    }
-
+     }
     float supportScore = 0, inMaskSupportScore = 0;
-    pixDistAvg /= (float)pixDistNum;
+    float inMaskSuppWeight = 0.5;
     LimbLabel limbLabel_e;
-    if (partPixelColours.size() > 0)
+    if (PartContainPoints)
     {
         supportScore = (float)totalPixelLabelScore / (float)totalPixels;
         inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
-        ColorHistDetector::PartModel model(nBins);
-        chd.setPartHistogramm(model, partPixelColours);
-        float score = 1.0f - (supportScore + inMaskSupportScore);
+        float score = 1.0f - ((1.0f - inMaskSuppWeight)*supportScore + inMaskSuppWeight*inMaskSupportScore);
         Score sc(score, detectorName.str());
         s.push_back(sc);
-        limbLabel_e = LimbLabel(bp1.getPartID(), boxCenter, rot, rect.asVector(), s);
+        limbLabel_e = LimbLabel(partID, boxCenter, rot, rect.asVector(), s);
     }
     else
     {
         Score sc(1.0, detectorName.str());
         s.push_back(sc);
-        limbLabel_e = LimbLabel(bp1.getPartID(), boxCenter, rot, rect.asVector(), s);
+        limbLabel_e = LimbLabel(partID, boxCenter, rot, rect.asVector(), s);
     }
 
-    LimbLabel limbLabel_a = chd.generateLabel(bp1, frame1, pixelDistributions, pixelLabels, j0, j1, 1.0f);
+    LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), frames[0], pixelDistributions, pixelLabels, p0, p1, 1.0f);
 
     EXPECT_EQ(limbLabel_e.getLimbID(), limbLabel_a.getLimbID());
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
     EXPECT_EQ(limbLabel_e.getAngle(), limbLabel_a.getAngle());
-    //EXPECT_EQ(limbLabel_e.getScores(), limbLabel_a.getScores());
+    EXPECT_EQ(limbLabel_e.getScores(), limbLabel_a.getScores());
     EXPECT_EQ(limbLabel_e.getPolygon(), limbLabel_a.getPolygon());
     EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
     EXPECT_EQ(limbLabel_e.getIsWeak(), limbLabel_a.getIsWeak());
+    EXPECT_EQ(limbLabel_e.getIsWeak(), limbLabel_a.getIsWeak());
+    EXPECT_EQ(model.bgHistogramm, detector.partModels[partID].bgHistogramm);
+
+// Testing function "detect"
+
+    ofstream fout("Output_CHDTest_detect.txt");
+
+    // Copy skeleton from keyframe to frames[1] 
+    frames[1]->setSkeleton(frames[0]->getSkeleton()); 
+
+    // Run "detect"
+    vector<vector<LimbLabel>> limbLabels;
+    map <string, float> detectParams;
+    limbLabels = detector.detect(frames[1], detectParams, limbLabels);
+
+    // sort "limbLabels" by limb id
+    sort(limbLabels.begin(), limbLabels.end(), LimbIDCompare());
+
+    // Output top of "limbLabels" into text file
+    fout << "\nTop Labels, sorted by part id:\n\n";
+    for (int i = 0; i < limbLabels.size(); i++) // For all body parts
+    {
+        for (int k = 0; (k < limbLabels[i].size()) && (k <4); k++) // For all scores of this bodypart
+        {
+            Point2f p0, p1;
+            limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
+            fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
+            vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
+            for (int t = 0; t < scores.size(); t++)
+            {
+                fout << scores[t].getScore() << ", "; // Put all scores of the Label
+            }
+            fout << "}\n";
+        }
+        fout << endl;
+    }
+
+    // Copy coordinates of BodyParts from skeleton
+    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(skeleton);
+
+    // Compare labels with ideal bodyparts from keyframe, and output debug information 
+    float TolerableCoordinateError = 7; // Linear error in pixels
+    float TolerableAngleError = 0.1; // 10% (not used in this test)
+    int TopListLabelsCount = 4; // Size of "labels top list"
+    map<int, vector<LimbLabel>> effectiveLabels;
+    vector<int> WithoutGoodLabelInTop;
+    bool EffectiveLabbelsInTop = true;
+
+    fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
+
+    for (int id = 0; id < limbLabels.size(); id++)
+    {
+        fout << "\nPartID = " << id << ":\n";
+        Point2f l0, l1, p0, p1, delta0, delta1;
+        vector<LimbLabel> temp;
+        p0 = PartLocation[id].first; // Ideal boby part point
+        p1 = PartLocation[id].second; // Ideal boby part point
+        for (int k = 0; k < limbLabels[id].size(); k++)
+        {   
+            limbLabels[id][k].getEndpoints(l0, l1); // Label points
+            delta0 = l0 - p0;
+            delta1 = l1 - p1;
+            float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+            delta0 = l0 - p1;
+            delta1 = l1 - p0;
+            float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+            float error = min(error_A, error_B); // Distance between ideal body part and label
+            if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >=0) // Label is "effective" if it has small error and of not less than zero  Score  value
+                temp.push_back(limbLabels[id][k]); // Copy effective labels
+            // Put linear errors for all Lalbels into text file, copy indexes of a "badly processed parts"
+            fout << "    PartID = " << id << ", LabelIndex = " << k << ":    AvgScore = " << limbLabels[id][k].getAvgScore() << ", LinearError = " << error << endl;
+            if (k == TopListLabelsCount - 1)
+            {
+                fout << "    //End of part[" << id << "] top labels list\n";
+                if (!(skeleton.getBodyPart(id)->getIsOccluded()))
+                if (temp.size() < 1)
+                {
+                    EffectiveLabbelsInTop = false; // false == Present not Occluded bodyparts, but no nave "effective labels" in the top of list
+                    WithoutGoodLabelInTop.push_back(id); // Copy index of not Occluded parts, wich no have "effective labels" in the top of labels list
+                }
+            }
+        }
+        effectiveLabels.emplace(pair<int, vector<LimbLabel>>(id, temp));
+    }
+
+    //Output top of "effectiveLabels" into text file
+    fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
+    for (int i = 0; i < effectiveLabels.size(); i++)
+    {
+        for (int k = 0; k < effectiveLabels[i].size(); k++)
+        {
+            Point2f p0, p1;
+            limbLabels[i][k].getEndpoints(p0, p1);
+            fout  << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
+            vector<Score> scores = effectiveLabels[i][k].getScores();
+            for (int t = 0; t < scores.size(); t++)
+            {
+                fout << scores[t].getScore() << ", ";
+            }
+
+            fout << "}\n";
+        }
+        fout << endl;
+    }
+
+    fout.close();
+    cout << "\nLimbLabels saved in file: Output_CHDTest_detect.txt\n";
+
+    // Output messages 
+    if (!EffectiveLabbelsInTop) cout << endl <<" ColorHistDetector_Tests.detect:" << endl;
+    EXPECT_TRUE(EffectiveLabbelsInTop);
+    if (!EffectiveLabbelsInTop)
+    {
+        cout << "Body parts with id: ";
+        for (int i = 0; i < WithoutGoodLabelInTop.size(); i++)
+        {
+            cout << WithoutGoodLabelInTop[i];
+            if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";
+        }
+        cout << " - does not have effective labels in the top of labels list." << endl;
+    }
+    if (!EffectiveLabbelsInTop) cout << endl;
 
     for (map <int32_t, Mat>::iterator I = pixelDistributions.begin(); I != pixelDistributions.end(); ++I)
         I->second.release();
-
-    chd.partModels.clear();
-    imgMat.release();
-    maskMat.release();
-    delete frame1;
-    tbp.clear();
-    pixelDistributions.clear();
-    cout << '\r';
+    detector.partModels.clear();
+    image.release();
+    mask.release();
+    for (int i = 0; i < frames.size(); i++)
+        delete frames[i];
 }
+

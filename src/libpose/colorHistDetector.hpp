@@ -23,7 +23,10 @@ class ColorHistDetector : public Detector
     ColorHistDetector &operator=(const ColorHistDetector &c);
   private:
 #ifdef DEBUG
-    FRIEND_TEST(colorHistDetectorTest, PrivateFields);
+    FRIEND_TEST(colorHistDetectorTest, Constructors);
+    FRIEND_TEST(colorHistDetectorTest, computePixelBelongingLikelihood);
+    FRIEND_TEST(colorHistDetectorTest, Operators);
+    FRIEND_TEST(colorHistDetectorTest, Functions);
     FRIEND_TEST(colorHistDetectorTest, Train);
 #endif  // DEBUG
     struct PartModel

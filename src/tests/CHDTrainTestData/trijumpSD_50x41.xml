@@ -69,12 +69,12 @@
     <BodyPart id="2" isOccluded="false"/>
     <BodyPart id="3" isOccluded="false"/>
     <BodyPart id="4" isOccluded="false"/>
-    <BodyPart id="5" isOccluded="false"/>
+    <BodyPart id="5" isOccluded="true"/>
     <BodyPart id="6" isOccluded="false"/>
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
     <BodyPart id="9" isOccluded="false"/>
-    <BodyPart id="10" isOccluded="false"/>
+    <BodyPart id="10" isOccluded="true"/>
     <BodyPart id="11" isOccluded="false"/>
     <BodyPart id="12" isOccluded="false"/>
     <BodyPart id="13" isOccluded="false"/>
@@ -111,12 +111,12 @@
     <BodyPart id="2" isOccluded="false"/>
     <BodyPart id="3" isOccluded="false"/>
     <BodyPart id="4" isOccluded="false"/>
-    <BodyPart id="5" isOccluded="false"/>
+    <BodyPart id="5" isOccluded="true"/>
     <BodyPart id="6" isOccluded="false"/>
     <BodyPart id="7" isOccluded="false"/>
     <BodyPart id="8" isOccluded="false"/>
     <BodyPart id="9" isOccluded="false"/>
-    <BodyPart id="10" isOccluded="false"/>
+    <BodyPart id="10" isOccluded="true"/>
     <BodyPart id="11" isOccluded="false"/>
     <BodyPart id="12" isOccluded="false"/>
     <BodyPart id="13" isOccluded="false"/>
