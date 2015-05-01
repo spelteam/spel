@@ -11,11 +11,23 @@ class TestingDetector : public ColorHistDetector
 {
   public:
   Mat DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size);
+  float GetBoneLength(Point2f begin, Point2f end);
+  float GetBoneWidth(float length, BodyPart bodyPart);
 };
 
 Mat TestingDetector::DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
 {
     return  TestingDetector::rotateImageToDefault(imgSource, initialRect, angle, size);
+}
+
+float TestingDetector::GetBoneLength(Point2f begin, Point2f end)
+{
+    return TestingDetector::getBoneLength(begin, end);
+}
+
+float TestingDetector::GetBoneWidth(float length, BodyPart bodyPart)
+{
+    return  TestingDetector::getBoneWidth(length, bodyPart);
 }
 
 POSERECT<Point2f> CreateRect(float x1, float x2, float y1, float y2)
@@ -68,8 +80,7 @@ void FillRectRand(Mat &Img, POSERECT<Point2f> &rect)
         {
             colour = Vec3b(uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX));
             Img.at<Vec3b>(j, i) = colour;
-        }
-        
+        }        
 }
 
 // Rotation the rectangle image
@@ -115,7 +126,7 @@ TEST(DetectorTests, rotateImageToDefault_OneColor)
 {
     // Prepare input data
     int rows = 200, cols = 200; // image size
-    float angle = 45; // the rotation angle
+    float angle = 45; // the rotetion angle
     float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
     POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
     POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
@@ -398,3 +409,31 @@ TEST(DetectorTests, rotateImageToDefault_FileImage)
     X3.release();
     X4.release();
 }
+
+TEST(DetectorTests, getBoneLength)
+{
+    const int nBins = 8;
+    TestingDetector detector;
+    Point2f begin(0, 0), end(1, 0);
+
+    float length = detector.GetBoneLength(begin, end);
+    cout << length;
+    EXPECT_EQ(end.x - begin.x, length);
+}
+
+TEST(DetectorTests, getBoneWidth)
+{
+    const int nBins = 8;
+    TestingDetector detector;
+    BodyPart part;
+    float lwRatio = 2.0;
+    part.setLWRatio(lwRatio);
+    float length = 1;
+
+    float width = detector.GetBoneWidth(length, part);
+    cout << length;
+    EXPECT_EQ(length / lwRatio, width);
+}
+
+
+
