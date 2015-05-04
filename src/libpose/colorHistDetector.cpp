@@ -10,16 +10,70 @@ ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
   bgHistogramm.resize(nBins);
   for (uint8_t r = 0; r < nBins; r++)
   {
-    partHistogramm[r].resize(nBins);
-    bgHistogramm[r].resize(nBins);
+    try
+    {
+      partHistogramm.at(r).resize(nBins);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't find partHistogramm " << "[" << r << "]";
+      throw logic_error(ss.str());
+    }    
+    try
+    {
+      bgHistogramm.at(r).resize(nBins);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't find bgHistogramm " << "[" << r << "]";     
+      throw logic_error(ss.str());
+    }
     for (uint8_t g = 0; g < nBins; g++)
     {
-      partHistogramm[r][g].resize(nBins);
-      bgHistogramm[r][g].resize(nBins);
+      try
+      {
+        partHistogramm.at(r).at(g).resize(nBins);
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "]";
+        throw logic_error(ss.str());
+      }
+      try
+      {
+        bgHistogramm.at(r).at(g).resize(nBins);
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "]";
+        throw logic_error(ss.str());
+      }
       for (int b = 0; b < nBins; b++)
       {
-        partHistogramm[r][g][b] = 0.0;
-        bgHistogramm[r][g][b] = 0.0;
+        try
+        {
+          partHistogramm.at(r).at(g).at(b) = 0.0;
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          throw logic_error(ss.str());
+        }
+        try
+        {
+          bgHistogramm.at(r).at(g).at(b) = 0.0;
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          throw logic_error(ss.str());
+        }
       }
     }
   }
@@ -124,8 +178,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       partPixelColours.insert(pair <int32_t, vector <Point3i>>(iteratorBodyPart->getPartID(), vector <Point3i>())); // container initialization for conserve colours set for each of body parts
       bgPixelColours.insert(pair <int32_t, vector <Point3i>>(iteratorBodyPart->getPartID(), vector <Point3i>())); // container initialization for conserve background colours set for each of body parts
       blankPixels.insert(pair <int32_t, int>(iteratorBodyPart->getPartID(), 0)); // container initialization for counting blank pixels for each of body parts
-      Point2f j1, j0;  // temporary adjacent joints
-      Point2f c1, c2, c3, c4; // temporary polygon's vertices
+      Point2f j1, j0;  // temporary adjacent joints   
       BodyJoint *joint = 0; // temporary conserve a joints
       joint = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint()); // the parent node of current body part pointer 
 
@@ -145,12 +198,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         break; // a joint has no marking on the frame
       }
       j1 = joint->getImageLocation(); // coordinates of current joint
-      float boneLength = (float)sqrt(PoseHelper::distSquared(j0, j1)); // distance between nodes
+      float boneLength = getBoneLength(j0, j1); // distance between nodes
       //TODO (Vitaliy Koshura): Check this!
       float boneWidth = 0;
       try
       { //currents body part polygon width 
-        boneWidth = boneLength / iteratorBodyPart->getLWRatio();
+        boneWidth = getBoneWidth(boneLength, *iteratorBodyPart);
       }
       catch (...)
       {
@@ -160,22 +213,10 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           cerr << ERROR_HEADER << ss.str() << endl;
         throw logic_error(ss.str());
       }
-      Point2f boxCenter = j0 * 0.5 + j1 * 0.5; // the bobypart center  coordinates
-      // Coordinates for drawing of the polygon at the coordinate origin
-      c1 = Point2f(0.f, 0.5f * boneWidth);
-      c2 = Point2f(boneLength, 0.5f * boneWidth);
-      c3 = Point2f(boneLength, -0.5f * boneWidth);
-      c4 = Point2f(0.f, -0.5f * boneWidth);
-      Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f); // polygon center 
       Point2f direction = j1 - j0; // used as estimation of the vector's direction
       float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
-      iteratorBodyPart->setRotationSearchRange(rotationAngle);
-      // Rotate and shift the polygon to the bodypart center
-      c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
-      c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
-      c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
-      c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
-      POSERECT <Point2f> poserect(c1, c2, c3, c4);
+      iteratorBodyPart->setRotationSearchRange(rotationAngle);     
+      POSERECT <Point2f> poserect = getBodyPartRect(*iteratorBodyPart, j0, j1);
       polygons.insert(pair <int32_t, POSERECT <Point2f>>(iteratorBodyPart->getPartID(), poserect));
       polyDepth.insert(pair <int32_t, float>(iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getSpaceLocation().z));
     }
@@ -235,7 +276,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             // Checking whether a pixel belongs to the current and to another polygons            
             for (vector <POSERECT <Point2f>>::iterator iteratorPartPolygons = partPolygons.begin(); iteratorPartPolygons != partPolygons.end(); ++iteratorPartPolygons)
             {
-              if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f((float)i, (float)j)) > 0) == true)
+              if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f((float)j, (float)i)) > 0) == true)
               {
                 break;; // was found polygon, which contain current pixel
               }
@@ -635,19 +676,19 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     if (sortedLabels.size() > 0) // if labels vector is not empty
     {
       sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
-      Mat locations(frame->getImage().cols, frame->getImage().rows, DataType<uint32_t>::type); // create the temporary matrix
+      Mat locations(frame->getImage().rows, frame->getImage().cols, DataType<uint32_t>::type); // create the temporary matrix
       for (int32_t i = 0; i < frame->getImage().cols; i++)
       {
         for (int32_t j = 0; j < frame->getImage().rows; j++)
         {
           try
           {
-            locations.at<uint32_t>(i, j) = 0; // init elements of the "location" matrix
+            locations.at<uint32_t>(j, i) = 0; // init elements of the "location" matrix
           }
           catch (...)
           {
             stringstream ss;
-            ss << "There is no value of locations at " << "[" << i << "][" << j << "]";
+            ss << "There is no value of locations at " << "[" << j << "][" << i << "]";
             if (debugLevelParam >= 1)
               cerr << ERROR_HEADER << ss.str() << endl;
             throw logic_error(ss.str());
@@ -661,7 +702,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y; // copy center coordinates of current label
         try
         {
-          if (locations.at<uint32_t>(x, y) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
+          if (locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
           {
             try
             {
@@ -675,13 +716,13 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
                 cerr << ERROR_HEADER << ss.str() << endl;
               throw logic_error(ss.str());
             }
-            locations.at<uint32_t>(x, y) += 1; // increase the counter of labels number at given point
+            locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
           }
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Maybe there is no value of locations at " << "[" << x << "][" << y << "]";
+          ss << "Maybe there is no value of locations at " << "[" << y << "][" << x << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -710,10 +751,9 @@ uint8_t ColorHistDetector::getNBins(void)
 float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b)
 { // Scaling of colorspace, finding the colors interval, which now gets this color
   uint8_t factor = static_cast<uint8_t> (ceil(pow(2, 8) / partModel.nBins));
-  float isFG = 0;
   try
   {
-    isFG = partModel.partHistogramm.at(r / factor).at(g / factor).at(b / factor); // relative frequency of current color reiteration 
+    return partModel.partHistogramm.at(r / factor).at(g / factor).at(b / factor); // relative frequency of current color reiteration 
   }
   catch (...)
   {
@@ -723,7 +763,6 @@ float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partMo
       cerr << ERROR_HEADER << ss.str() << endl;
     throw logic_error(ss.str());
   }
-  return isFG;
 }
 
 // Build into the "partModel" a histogram of the color set "partColors"
@@ -752,7 +791,7 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find partHistogramm " << "[" << (int)r / factor << "][" << (int)g / factor << "][" << (int)b / factor << "]";
+          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -827,7 +866,18 @@ void ColorHistDetector::addPartHistogramm(PartModel &partModel, const vector <Po
     {
       for (uint8_t b = 0; b < partModel.nBins; b++)
       {
-        partModel.partHistogramm[r][g][b] *= partModel.sizeFG; // converting the colors relative frequency into the pixels number
+        try
+        {
+          partModel.partHistogramm.at(r).at(g).at(b) *= partModel.sizeFG; // converting the colors relative frequency into the pixels number
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
       }
     }
   }
@@ -841,10 +891,34 @@ void ColorHistDetector::addPartHistogramm(PartModel &partModel, const vector <Po
   // Adjustment of the histogram
   for (uint32_t i = 0; i < partColors.size(); i++)
   {
-    uint8_t r = static_cast<uint8_t> (partColors[i].x / factor);
-    uint8_t g = static_cast<uint8_t> (partColors[i].y / factor);
-    uint8_t b = static_cast<uint8_t> (partColors[i].z / factor);
-    partModel.partHistogramm[r][g][b]++; // increment the frequency of interval, that this color have hit
+    Point3i color;
+    try
+    {
+      color = partColors.at(i);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't find partColor " << "[" << i << "]";
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
+    uint8_t r = static_cast<uint8_t> (color.x / factor);
+    uint8_t g = static_cast<uint8_t> (color.y / factor);
+    uint8_t b = static_cast<uint8_t> (color.z / factor);
+    try
+    {
+      partModel.partHistogramm.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
   }
 
   //renormalise
@@ -855,7 +929,18 @@ void ColorHistDetector::addPartHistogramm(PartModel &partModel, const vector <Po
       for (uint8_t b = 0; b < partModel.nBins; b++)
       {
         //normalise the histograms
-        partModel.partHistogramm[r][g][b] /= partModel.sizeFG;
+        try
+        {
+          partModel.partHistogramm.at(r).at(g).at(b) /= partModel.sizeFG;
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
       }
     }
   }
@@ -869,7 +954,18 @@ float ColorHistDetector::getAvgSampleSizeFg(const PartModel &partModel)
   float sum = 0;
   for (uint32_t i = 0; i < partModel.fgSampleSizes.size(); i++)
   {
-    sum += partModel.fgSampleSizes[i];
+    try
+    {
+      sum += partModel.fgSampleSizes.at(i);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't find fgSampleSizes " << "[" << i << "]";
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
   }
   sum /= partModel.fgNumSamples;
   return sum;
@@ -880,7 +976,18 @@ float ColorHistDetector::getAvgSampleSizeFgBetween(const PartModel &partModel, u
 {
   if (s1 >= partModel.fgSampleSizes.size() || s2 >= partModel.fgSampleSizes.size())
     return 0;
-  return (partModel.fgSampleSizes[s1] + partModel.fgSampleSizes[s2]) / 2.0f;
+  try
+  {
+    return (partModel.fgSampleSizes.at(s1) + partModel.fgSampleSizes.at(s2)) / 2.0f;
+  }
+  catch (...)
+  {
+    stringstream ss;
+    ss << "Couldn't find fgSampleSizes " << "[" << s1 << "] or fgSampleSizes [" << s2 << "]";
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
 }
 
 //TODO (Vitaliy Koshura): Need unit test
@@ -895,7 +1002,18 @@ float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, c
       for (uint8_t b = 0; b < partModel.nBins; b++)
       {
         // accumulation of the Euclidean distances between the points
-        distance += pow(partModel.partHistogramm[r][g][b] - partModelPrev.partHistogramm[r][g][b], 2);
+        try
+        {
+          distance += pow(partModel.partHistogramm.at(r).at(g).at(b) - partModelPrev.partHistogramm.at(r).at(g).at(b), 2);
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
       }
     }
   }
@@ -915,7 +1033,18 @@ void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vect
     {
       for (uint8_t b = 0; b < partModel.nBins; b++)
       {
-        partModel.bgHistogramm[r][g][b] *= partModel.sizeBG;
+        try
+        {
+          partModel.bgHistogramm.at(r).at(g).at(b) *= partModel.sizeBG;
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
       }
     }
   }
@@ -925,7 +1054,31 @@ void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vect
   partModel.bgSampleSizes.push_back(static_cast <uint32_t> (bgColors.size()));
   for (uint32_t i = 0; i < bgColors.size(); i++)
   {
-      partModel.bgHistogramm[bgColors[i].x / factor][bgColors[i].y / factor][bgColors[i].z / factor]++; // increment the frequency of interval, that this color have hit
+    Point3i color;
+    try
+    {
+      color = bgColors.at(i);
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't find bgColors " << "[" << i << "]";
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
+    try
+    {
+      partModel.bgHistogramm.at(color.x / factor).at(color.y / factor).at(color.z / factor)++; // increment the frequency of interval, that this color have hit
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Couldn't find bgHistogramm " << "[" << color.x / factor << "][" << color.y / factor << "][" << color.z / factor << "]";
+      if (debugLevelParam >= 1)
+        cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
   }
   // renormalise
   for (uint8_t r = 0; r < partModel.nBins; r++)
@@ -934,7 +1087,18 @@ void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vect
     {
       for (uint8_t b = 0; b < partModel.nBins; b++)
       {
-        partModel.bgHistogramm[r][g][b] /= (float)partModel.sizeBG;
+        try
+        {
+          partModel.bgHistogramm.at(r).at(g).at(b) /= (float)partModel.sizeBG;
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
       }
     }
   }
@@ -964,7 +1128,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
   // For all bodyparts
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
-    Mat t = Mat(width, height, DataType <float>::type); // create empty matrix
+    Mat t = Mat(height, width, DataType <float>::type); // create empty matrix
     int partID = iteratorBodyPart->getPartID();
     try
     {
@@ -982,7 +1146,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
           uint8_t mintensity = maskMat.at<uint8_t>(y, x); // copy mask of the current pixel
           bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
 
-          t.at<float>(x, y) = blackPixel ? 0 : computePixelBelongingLikelihood(partModel, red, green, blue); // relative frequency of the current pixel color reiteration 
+          t.at<float>(y, x) = blackPixel ? 0 : computePixelBelongingLikelihood(partModel, red, green, blue); // relative frequency of the current pixel color reiteration 
         }
       }
     }
@@ -1015,7 +1179,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
   // For all body parts
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
-    Mat t = Mat(width, height, DataType <float>::type); // create empty matrix
+    Mat t = Mat(height, width, DataType <float>::type); // create empty matrix
     Mat tt;
     try
     { // Matrix, that contains relative frequency of the pixels colors reiteration for current body part
@@ -1056,16 +1220,49 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
                 cerr << ERROR_HEADER << ss.str() << endl;
               throw logic_error(ss.str());
             }
-            if (temp.at<float>(x, y) > top) // search max value of the current bodypart pixel color frequency
-              top = temp.at<float>(x, y); 
-            sum += temp.at<float>(x, y);
-            temp.release();
+            try
+            {
+              if (temp.at<float>(y, x) > top) // search max value of the current bodypart pixel color frequency
+                top = temp.at<float>(y, x);
+              sum += temp.at<float>(y, x);
+              temp.release();
+            }
+            catch (...)
+            {
+              stringstream ss;
+              ss << "Couldn't find value of temp " << "[" << y << "][" << x << "]";
+              if (debugLevelParam >= 1)
+                cerr << ERROR_HEADER << ss.str() << endl;
+              throw logic_error(ss.str());
+            }
           }
-          t.at<float>(x, y) = (top == 0) ? 0 : tt.at<float>(x, y) / (float)top;
+          try
+          {
+            t.at<float>(y, x) = (top == 0) ? 0 : tt.at<float>(y, x) / (float)top;
+          }
+          catch (...)
+          {
+            stringstream ss;
+            ss << "Couldn't find t " << "[" << y << "][" << x << "] or tt [" << y << "][" << x << "]";
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
+            throw logic_error(ss.str());
+          }
         }
         else
         {
-          t.at<float>(x, y) = 0;
+          try
+          {
+            t.at<float>(y, x) = 0;
+          }
+          catch (...)
+          {
+            stringstream ss;
+            ss << "Couldn't find value of t " << "[" << y << "][" << x << "]";
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
+            throw logic_error(ss.str());
+          }
         }
       }
     }
@@ -1135,7 +1332,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
       {
         if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
         {
-          if (rect.containsPoint(Point2f((float)i, (float)j)) > 0) // if the point belongs to the rectangle
+          if (rect.containsPoint(Point2f((float)j, (float)i)) > 0) // if the point belongs to the rectangle
           {
             totalPixels++; // counting of the contained pixels
             uint8_t mintensity = 0;
@@ -1158,12 +1355,14 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
             {
               try
               {
-                pixDistAvg += pixelDistributions.at(bodyPart.getPartID()).at<float>(i, j); // Accumulation the "distributions" of contained pixels
+                pixDistAvg += pixelDistributions.at(bodyPart.getPartID()).at<float>(j, i); // Accumulation the "distributions" of contained pixels
               }
               catch (...)
               {
                 maskMat.release();
                 imgMat.release();
+                if (debugLevelParam >= 1)
+                  cerr << ERROR_HEADER << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << j << "][" << i << "]" << endl;
                 if (debugLevelParam >= 2)
                   cerr << ERROR_HEADER << "Dirty label!" << endl;
                 Score sc(-1.0f, detectorName.str(), _useCSdet);
@@ -1173,16 +1372,18 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               pixDistNum++; // counting of the all scanned pixels
               try
               {
-                if (pixelLabels.at(bodyPart.getPartID()).at<float>(i, j))
+                if (pixelLabels.at(bodyPart.getPartID()).at<float>(j, i))
                 {
                   pixelsWithLabel++;
-                  totalPixelLabelScore += pixelLabels.at(bodyPart.getPartID()).at<float>(i, j); // Accumulation of the pixel labels
+                  totalPixelLabelScore += pixelLabels.at(bodyPart.getPartID()).at<float>(j, i); // Accumulation of the pixel labels
                 }
               }
               catch (...)
               {
                 maskMat.release();
                 imgMat.release();
+                if (debugLevelParam >= 1)
+                  cerr << ERROR_HEADER << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << j << "][" << i << "]" << endl;
                 if (debugLevelParam >= 2)
                   cerr << ERROR_HEADER << "Dirty label!" << endl;
                 Score sc(-1.0f, detectorName.str(), _useCSdet);
@@ -1215,7 +1416,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
     PartModel model(nBins);
     setPartHistogramm(model, partPixelColours); // Build the part histogram
-    float score = 1.0f - ((1.0f - inMaskSuppWeight)*supportScore + inMaskSuppWeight*inMaskSupportScore);
+    float score = 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + inMaskSuppWeight * inMaskSupportScore);
     Score sc(score, detectorName.str(), _useCSdet); // create the score
     s.push_back(sc); // the set of scores
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);// create the limb label

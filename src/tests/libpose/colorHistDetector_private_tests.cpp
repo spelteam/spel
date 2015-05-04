@@ -302,7 +302,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
 
 // Testing function buildPixelDistributions
-    Mat t(image.cols,image.rows, DataType <float>::type);
+    Mat t(image.rows,image.cols, DataType <float>::type);
     ColorHistDetector::PartModel partModel = detector.partModels[partID];
     for (int x = 0; x < image.cols; x++)
     for (int y = 0; y < image.rows; y++)
@@ -314,7 +314,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
         uint8_t mintensity = mask.at<uint8_t>(y, x);
         bool blackPixel = mintensity < 10; 
 
-        t.at<float>(x, y) = blackPixel ? 0 : partModel.partHistogramm.at(red / factor).at(green / factor).at(blue / factor); // (x, y)  or (y, x) !? ?
+        t.at<float>(y, x) = blackPixel ? 0 : partModel.partHistogramm.at(red / factor).at(green / factor).at(blue / factor); // (x, y)  or (y, x) !? ?
         //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
      }
 
@@ -324,7 +324,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
         EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
 
 // Testing function BuildPixelLabels
-    Mat p(image.cols, image.rows, DataType <float>::type);
+    Mat p(image.rows, image.cols, DataType <float>::type);
     for (int x = 0; x < image.cols; x++)
     for (int y = 0; y < image.rows; y++)
     {
@@ -336,14 +336,14 @@ TEST(colorHistDetectorTest, bulkyFunctions)
             {
                 Mat temp;
                 temp = pixelDistributions.at(i->getPartID());
-                if (temp.at<float>(x, y) > top) // (x,y)  or (y,x) !?? Matrix "PixelLabels" - transposed relative to the matrix "Image"
-                   top = temp.at<float>(x, y);
+                if (temp.at<float>(y, x) > top) // (x,y)  or (y,x) !?? Matrix "PixelLabels" - transposed relative to the matrix "Image"
+                   top = temp.at<float>(y, x);
                 temp.release(); // (x,y)  or (y,x) !??
             }
-            p.at<float>(x, y) = (top == 0) ? 0 : pixelDistributions[partID].at<float>(x, y) / top;
+            p.at<float>(y, x) = (top == 0) ? 0 : pixelDistributions[partID].at<float>(y, x) / top;
         }
         else
-            p.at<float>(x, y) = 0; // (x,y)  or (y,x) !??
+            p.at<float>(y, x) = 0; // (x,y)  or (y,x) !??
     }
 
     map<int32_t, Mat> pixelLabels = detector.buildPixelLabels(frames[FirstKeyframe], pixelDistributions);
@@ -369,18 +369,18 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     bool PartContainPoints = false;
     for (int i = xmin; i<xmax; i++ )
     for (int j = ymin; j <ymax; j++)
-    if (rect.containsPoint(Point2f((float)i, (float)j)) > 0)
+    if (rect.containsPoint(Point2f((float)j, (float)i)) > 0)
     {
         totalPixels++;
         uint8_t mintensity = mask.at<uint8_t>(j, i);
             if ( mintensity >= 10)
             {
-                pixDistAvg += pixelDistributions.at(partID).at<float>(i, j);
+                pixDistAvg += pixelDistributions.at(partID).at<float>(j, i);
                 pixDistNum++;
-                if (pixelLabels.at(partID).at<float>(i, j))
+                if (pixelLabels.at(partID).at<float>(j, i))
                 {
                     pixelsWithLabel++;
-                    totalPixelLabelScore += pixelLabels.at(partID).at<float>(i, j);
+                    totalPixelLabelScore += pixelLabels.at(partID).at<float>(j, i);
                 }
                 pixelsInMask++;
                 PartContainPoints = true;
