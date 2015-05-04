@@ -463,19 +463,23 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
   }
   maskMat.release();
   imgMat.release();
-  float score = compare(bodyPart, partModel);
+  float score = compare(bodyPart, partModel, j0, j1);
   score += inMaskPixels / totalPixels;
   Score sc(score, detectorName.str(), _useSURFdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }
 
-float SurfDetector::compare(BodyPart bodyPart, PartModel model)
+float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1)
 {
   float score = 0;
   uint32_t count = 0;
   FlannBasedMatcher matcher;
   vector <vector <DMatch>> matches;
+
+  float length = getBoneLength(j0, j1);
+  float width = getBoneWidth(length, bodyPart);
+  float coeff = sqrt(pow(length, 2) + pow(width, 2));
 
   for (map <uint32_t, map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
   {
@@ -494,7 +498,7 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model)
         {
           if ((matches[i][0].distance < 0.6*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
           {
-            s += matches[i][0].distance;
+            s += matches[i][0].distance / coeff;
           }
         }
         score += s / matches.size();
