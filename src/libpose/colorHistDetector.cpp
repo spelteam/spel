@@ -121,7 +121,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   sort(frames.begin(), frames.end(), FramePointerComparer()); // sorting frames by id
   //const float scaleParam = 1; // scaling coefficient
   //const string sScaleParam = "scaleParam";
-  const uint8_t debugLevel = 1;
+  const uint8_t debugLevel = 5;
   const string sDebugLevel = "debugLevel";
   // first we need to check all used params
   //params.emplace(sScaleParam, scaleParam);
@@ -491,7 +491,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const float useCSdet = 1.0f;
   const string sUseCSdet = "useCSdet";
 
-  const uint8_t debugLevel = 1;
+  const uint8_t debugLevel = 5;
   const string sDebugLevel = "debugLevel";
 
   const float rotationThreshold = 0.025f;
@@ -1344,6 +1344,8 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
             {
               maskMat.release();
               imgMat.release();
+              if (debugLevelParam >= 1)
+                cerr << ERROR_HEADER << "Can't get maskMat [" << j << "][" << i << "]" << endl;
               if (debugLevelParam >= 2)
                 cerr << ERROR_HEADER << "Dirty label!" << endl;
               Score sc(-1.0f, detectorName.str(), _useCSdet);
