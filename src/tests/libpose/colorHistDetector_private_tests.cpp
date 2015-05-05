@@ -369,7 +369,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     bool PartContainPoints = false;
     for (int i = xmin; i<xmax; i++ )
     for (int j = ymin; j <ymax; j++)
-    if (rect.containsPoint(Point2f((float)j, (float)i)) > 0)
+    if (rect.containsPoint(Point2f((float)i, (float)j)) > 0)
     {
         totalPixels++;
         uint8_t mintensity = mask.at<uint8_t>(j, i);

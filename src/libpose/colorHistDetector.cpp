@@ -276,7 +276,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             // Checking whether a pixel belongs to the current and to another polygons            
             for (vector <POSERECT <Point2f>>::iterator iteratorPartPolygons = partPolygons.begin(); iteratorPartPolygons != partPolygons.end(); ++iteratorPartPolygons)
             {
-              if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f((float)j, (float)i)) > 0) == true)
+              if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f((float)i, (float)j)) > 0) == true)
               {
                 break;; // was found polygon, which contain current pixel
               }
@@ -1332,7 +1332,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
       {
         if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
         {
-          if (rect.containsPoint(Point2f((float)j, (float)i)) > 0) // if the point belongs to the rectangle
+          if (rect.containsPoint(Point2f((float)i, (float)j)) > 0) // if the point belongs to the rectangle
           {
             totalPixels++; // counting of the contained pixels
             uint8_t mintensity = 0;

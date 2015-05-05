@@ -560,7 +560,7 @@ LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0
       {
         if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
         {
-          if (rect.containsPoint(Point2f((float)j, (float)i)) > 0) // if the point belongs to the rectangle
+          if (rect.containsPoint(Point2f((float)i, (float)j)) > 0) // if the point belongs to the rectangle
           {
             totalPixels++; // counting of the contained pixels
             uint8_t mintensity = 0;
