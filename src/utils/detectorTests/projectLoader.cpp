@@ -699,7 +699,63 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
   Mat temp = tempImage;
   for (tree<BodyPart>::iterator bpi = bp.begin(); bpi != bp.end(); ++bpi)
   {
-    POSERECT <Point2f> rect = bpi->getPartPolygon();
+    Point2f j1, j0;  // temporary adjacent joints   
+    BodyJoint *joint = 0; // temporary conserve a joints
+    joint = s.getBodyJoint(bpi->getParentJoint()); // the parent node of current body part pointer 
+
+    if (joint == 0)
+      break; // a joint has no marking on the frame
+
+    j0 = joint->getImageLocation(); // coordinates of current joint
+    joint = 0;
+    joint = s.getBodyJoint(bpi->getChildJoint()); // the child node of current body part pointer
+
+    if (joint == 0)
+      break; // a joint has no marking on the frame
+
+    j1 = joint->getImageLocation(); // coordinates of current joint
+    float boneLength = (j0 == j1) ? 1.0f : (float)sqrt(PoseHelper::distSquared(j0, j1)); // distance between nodes
+    //TODO (Vitaliy Koshura): Check this!
+    float boneWidth;
+    try
+    { //currents body part polygon width 
+      float ratio = (*bpi).getLWRatio();
+      if (ratio == 0)
+      {
+        stringstream ss;
+        ss << "Ratio can't be 0";
+#ifdef DEBUG
+        cerr << ss.str() << endl;
+#endif  // DEBUG
+      }
+      boneWidth = boneLength / ratio;
+    }
+    catch (...)
+    {
+      stringstream ss;
+      ss << "Can't get LWRatio value";
+      cerr << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
+    Point2f direction = j1 - j0; // used as estimation of the vector's direction
+    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
+    bpi->setRotationSearchRange(rotationAngle);
+
+    Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
+
+    float angle = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    Point2f c1, c2, c3, c4, polyCenter;
+    c1 = Point2f(0.f, 0.5f * boneWidth);
+    c2 = Point2f(boneLength, 0.5f * boneWidth);
+    c3 = Point2f(boneLength, -0.5f * boneWidth);
+    c4 = Point2f(0.f, -0.5f * boneWidth);
+    polyCenter = Point2f(boneLength * 0.5f, 0.f);
+    c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
+    c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
+    c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
+    c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
+    POSERECT <Point2f> rect = POSERECT <Point2f>(c1, c2, c3, c4);
+
     line(temp, rect.point1, rect.point2, Scalar(255, 0, 0), lineWidth, CV_AA);
     line(temp, rect.point2, rect.point3, Scalar(0, 255, 0), lineWidth, CV_AA);
     line(temp, rect.point3, rect.point4, Scalar(0, 0, 255), lineWidth, CV_AA);
