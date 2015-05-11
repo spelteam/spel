@@ -718,7 +718,6 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
 
   for (vector <vector <LimbLabel> >::iterator lls = labels.begin(); lls != labels.end(); ++lls)
   {
-    int i = 0;
     if (lls->size() == 0)
     {
       continue;
@@ -782,7 +781,7 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
 
       string fileName = tempFileName;
       stringstream ssTemp;
-      ssTemp << frameID << "." << i << "." << j << ".png";
+      ssTemp << frameID << "." << ls->getLimbID() << "." << j << ".png";
       fileName += ssTemp.str();
 
       cerr << "Writing file " << fileName << endl;
@@ -798,7 +797,6 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
 
       j++;
     }
-    i++;
   }
   for (vector <vector <LimbLabel> >::iterator lls = labels.begin(); lls != labels.end(); ++lls)
   {
