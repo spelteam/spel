@@ -121,7 +121,11 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   sort(frames.begin(), frames.end(), FramePointerComparer()); // sorting frames by id
   //const float scaleParam = 1; // scaling coefficient
   //const string sScaleParam = "scaleParam";
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
   // first we need to check all used params
   //params.emplace(sScaleParam, scaleParam);
@@ -153,7 +157,6 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   }
   tree <BodyPart> partTree;
   // Handling all frames
-  tree <BodyPart>::iterator iteratorBodyPart;
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
@@ -170,10 +173,8 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     multimap <int32_t, POSERECT <Point2f>> polygons;  // polygons for this frame
     multimap <int32_t, float> polyDepth; // used for evaluation of overlapped polygons
     partTree = skeleton.getPartTree(); // the skeleton body parts
-    tree <BodyJoint> jointTree; // the skeleton joints
-    tree <BodyJoint>::iterator iteratorBodyJoint;
     // Handling all bodyparts on the frames
-    for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+    for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
     {
       partPixelColours.insert(pair <int32_t, vector <Point3i>>(iteratorBodyPart->getPartID(), vector <Point3i>())); // container initialization for conserve colours set for each of body parts
       bgPixelColours.insert(pair <int32_t, vector <Point3i>>(iteratorBodyPart->getPartID(), vector <Point3i>())); // container initialization for conserve background colours set for each of body parts
@@ -200,7 +201,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       j1 = joint->getImageLocation(); // coordinates of current joint
       float boneLength = getBoneLength(j0, j1); // distance between nodes
       //TODO (Vitaliy Koshura): Check this!
-      float boneWidth = 0;
+      float boneWidth;
       try
       { //currents body part polygon width 
         boneWidth = getBoneWidth(boneLength, *iteratorBodyPart);
@@ -263,7 +264,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
         int partHit = -1; // will be equal to -1 until is not found polygon, which contains the point
         float depth = 0;
         // Handling all poligons
-        for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+        for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
         {
           uint32_t partNumber = iteratorBodyPart->getPartID();
           bool bContainsPoint = false;
@@ -393,7 +394,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     }
 
     // Create model for each bodypart
-    for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+    for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
     {
       int32_t partNumber = iteratorBodyPart->getPartID();
       if (partModels.find(partNumber) == partModels.end())
@@ -491,7 +492,11 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const float useCSdet = 1.0f;
   const string sUseCSdet = "useCSdet";
 
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
   const float rotationThreshold = 0.025f;
@@ -516,18 +521,15 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
   tree <BodyPart> partTree = skeleton.getPartTree(); // copy tree of bodypart from the skeleton
 
-  tree <BodyPart>::iterator iteratorBodyPart;
   map <int32_t, Mat> pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
   map <int32_t, Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
   Mat maskMat = frame->getMask(); // copy mask from the frame
   
   // For all body parts
-  for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+  for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   { //Temporary variables
     vector <LimbLabel> labels;
-    vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
-    vector <vector <LimbLabel>> allLabels;
     Point2f j0, j1;
     
     try
@@ -617,7 +619,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           catch (...)
           {
             stringstream ss;
-            ss << "Can't get value in maskMat at " << "[" << y << "][" << x << "]";
+            ss << "Can't get value in maskMat at " << "[" << (int)y << "][" << (int)x << "]";
             if (debugLevelParam >= 1)
               cerr << ERROR_HEADER << ss.str() << endl;
             throw logic_error(ss.str());
@@ -799,10 +801,10 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
       }
     }
   }
-  uint8_t r, g, b;
   // Scaling of colorspace, reducing the capacity and number of colour intervals that are used to construct the histogram
   for (uint32_t i = 0; i < partColors.size(); i++)
   {
+    uint8_t r, g, b;
     try
     {
       r = static_cast<uint8_t> (partColors.at(i).x / factor);
@@ -1017,8 +1019,7 @@ float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, c
       }
     }
   }
-  float score = sqrt(distance);
-  return score;
+  return sqrt(distance);
 }
 
 // Background histogram
@@ -1109,7 +1110,6 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
 {
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
   tree <BodyPart> partTree = skeleton.getPartTree(); // copy part tree from the skeleton
-  tree <BodyPart>::iterator iteratorBodyPart;
   Mat imgMat = frame->getImage(); // copy image from the frame
   Mat maskMat = frame->getMask(); // copy mask from the frame
   uint32_t width = imgMat.cols;
@@ -1126,7 +1126,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
     throw logic_error(ss.str());
   }
   // For all bodyparts
-  for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+  for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     Mat t = Mat(height, width, DataType <float>::type); // create empty matrix
     int partID = iteratorBodyPart->getPartID();
@@ -1174,10 +1174,9 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
   uint32_t height = maskMat.rows;
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
   tree <BodyPart> partTree = skeleton.getPartTree(); // copy part tree from the skeleton
-  tree <BodyPart>::iterator iteratorBodyPart;
   map <int32_t, Mat> pixelLabels;
   // For all body parts
-  for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+  for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     Mat t = Mat(height, width, DataType <float>::type); // create empty matrix
     Mat tt;
@@ -1279,8 +1278,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
 }
 
 LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet)
-{
-  vector <Score> s;
+{ 
   vector <Point3i> partPixelColours;
   Mat maskMat = frame->getMask(); // copy mask from the frame 
   Mat imgMat = frame->getImage(); // copy image from the frame
@@ -1318,6 +1316,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     if (debugLevelParam >= 2)
       cerr << ERROR_HEADER << "Dirty label!" << endl;
     Score sc(-1.0f, detectorName.str(), _useCSdet);
+    vector <Score> s;
     s.push_back(sc);
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
   }
@@ -1349,6 +1348,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               if (debugLevelParam >= 2)
                 cerr << ERROR_HEADER << "Dirty label!" << endl;
               Score sc(-1.0f, detectorName.str(), _useCSdet);
+              vector <Score> s;
               s.push_back(sc);
               return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
             }
@@ -1368,6 +1368,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
                 if (debugLevelParam >= 2)
                   cerr << ERROR_HEADER << "Dirty label!" << endl;
                 Score sc(-1.0f, detectorName.str(), _useCSdet);
+                vector <Score> s;
                 s.push_back(sc);
                 return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
               }
@@ -1389,6 +1390,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
                 if (debugLevelParam >= 2)
                   cerr << ERROR_HEADER << "Dirty label!" << endl;
                 Score sc(-1.0f, detectorName.str(), _useCSdet);
+                vector <Score> s;
                 s.push_back(sc);
                 return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
               }
@@ -1420,12 +1422,14 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     setPartHistogramm(model, partPixelColours); // Build the part histogram
     float score = 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + inMaskSuppWeight * inMaskSupportScore);
     Score sc(score, detectorName.str(), _useCSdet); // create the score
+    vector <Score> s;
     s.push_back(sc); // the set of scores
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);// create the limb label
   }
   if (debugLevelParam >= 2)
     cerr << ERROR_HEADER << "Dirty label!" << endl;
   Score sc(-1.0f, detectorName.str(), _useCSdet);
+  vector <Score> s;
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
 }

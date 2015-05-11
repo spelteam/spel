@@ -73,10 +73,10 @@ bool ProjectLoader::Load(string fileName)
     }
     else
     {
-       cerr << "Expect: " << projectNode << endl;
-       cerr << "Got: " << root->Name() << endl;
+      cerr << "Expect: " << projectNode << endl;
+      cerr << "Got: " << root->Name() << endl;
     }
-      return false;
+    return false;
   }
   XMLNode *bodyJoints = root->FirstChildElement(bodyJointsNode.c_str());
   if (bodyJoints != 0)
@@ -138,7 +138,7 @@ bool ProjectLoader::Load(string fileName)
   maskFolderPath = root->Attribute(projectMaskFolderPath.c_str());
   if (maskFolderPath.size() > 0 && maskFolderPath.back() != '/')
   {
-     maskFolderPath += '/';
+    maskFolderPath += '/';
   }
   camFolderPath = root->Attribute(projectCamFolderPath.c_str());
   if (camFolderPath.size() > 0 && camFolderPath.back() != '/')
@@ -159,7 +159,7 @@ bool ProjectLoader::Load(string fileName)
   tree <BodyJoint> trBodyJoints, trBodyJointsCopy;
   tree <BodyJoint>::iterator topBodyJoints;
   topBodyJoints = trBodyJoints.begin();
-  while(true)
+  while (true)
   {
     if (bodyJoints == 0) break;
     BodyJoint joint;
@@ -312,7 +312,7 @@ bool ProjectLoader::Load(string fileName)
         Point2f imgLocation = Point2f(x, y);
         joint->setImageLocation(imgLocation);
         joint->setDepthSign(depthSign);
-        bodyJoints = bodyJoints->NextSiblingElement(); 
+        bodyJoints = bodyJoints->NextSiblingElement();
       }
     }
     PoseHelper::copyTree(trBodyPartsCopy, trBodyParts);
@@ -321,7 +321,7 @@ bool ProjectLoader::Load(string fileName)
       bodyParts = frames->FirstChildElement(bodyPartsNode.c_str());
       bodyParts = bodyParts->FirstChildElement(bodyPartNode.c_str());
       topBodyParts = trBodyPartsCopy.begin();
-      while(true)
+      while (true)
       {
         if (bodyParts == 0) break;
         XMLElement *e = bodyParts->ToElement();
@@ -350,15 +350,15 @@ bool ProjectLoader::Load(string fileName)
     Skeleton skeleton;
     skeleton.setJointTree(trBodyJointsCopy);
     skeleton.setPartTree(trBodyPartsCopy);
-//TODO (Vitaliy Koshura): This need to be loaded!!!!!!
-    skeleton.setScale(100.0);    
+    //TODO (Vitaliy Koshura): This need to be loaded!!!!!!
+    skeleton.setScale(100.0);
     f->setSkeleton(skeleton);
     vFrames.push_back(f);
     frames = frames->NextSiblingElement();
   }
 
-//  kptree::print_tree_bracketed(trBodyParts);
-//  cout << endl << "end of tree" << endl;
+  //  kptree::print_tree_bracketed(trBodyParts);
+  //  cout << endl << "end of tree" << endl;
 
   return true;
 }
@@ -366,7 +366,7 @@ bool ProjectLoader::Load(string fileName)
 bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, int frameID)
 {
   vector <vector <LimbLabel> >::iterator lls;
-  vector <LimbLabel>::iterator ls; 
+  vector <LimbLabel>::iterator ls;
   for (lls = labels.begin(); lls != labels.end(); ++lls)
   {
     if (lls->size() == 0)
@@ -384,7 +384,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
     {
       ss << lls->begin()->getLimbID();
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get limb id" << endl;
       continue;
@@ -414,7 +414,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
         outFile << ((ls->getIsOccluded() == true) ? 0 : 1);
         outFile << std::endl;
       }
-      catch(...)
+      catch (...)
       {
         cerr << "Empty LimbLabel" << endl;
       }
@@ -441,14 +441,14 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   {
     image = frame->getImage();
   }
-  catch(...)
+  catch (...)
   {
     cerr << "Can't get image from frame" << endl;
     return false;
   }
 
   vector<LimbLabel> labels = sol.getLabels();
-  vector<LimbLabel>::iterator ls; 
+  vector<LimbLabel>::iterator ls;
 
   for (ls = labels.begin(); ls != labels.end(); ++ls)
   {
@@ -456,9 +456,9 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
     vector <Point2f> polygon;
     try
     {
-     polygon = ls->getPolygon();
+      polygon = ls->getPolygon();
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get polygon" << endl;
       continue;
@@ -476,7 +476,7 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
     {
       p2 = polygon.at(1);
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get second point from polygon" << endl;
       continue;
@@ -485,7 +485,7 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
     {
       p3 = polygon.at(2);
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get third point from polygon" << endl;
       continue;
@@ -494,26 +494,26 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
     {
       p4 = polygon.at(3);
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get fourth point from polygon" << endl;
       continue;
     }
     // //temporary comment
-//    line(image, p1, p2, color, lineWidth, CV_AA);
-//    line(image, p2, p3, color, lineWidth, CV_AA);
-//    line(image, p3, p4, color, lineWidth, CV_AA);
-//    line(image, p4, p1, color, lineWidth, CV_AA);
+    //    line(image, p1, p2, color, lineWidth, CV_AA);
+    //    line(image, p2, p3, color, lineWidth, CV_AA);
+    //    line(image, p3, p4, color, lineWidth, CV_AA);
+    //    line(image, p4, p1, color, lineWidth, CV_AA);
 
-    line(image, p1, p2, Scalar(255,0,0), lineWidth, CV_AA);
-    line(image, p2, p3, Scalar(0,255,0), lineWidth, CV_AA);
-    line(image, p3, p4, Scalar(0,0,255), lineWidth, CV_AA);
-    line(image, p4, p1, Scalar(255,0,255), lineWidth, CV_AA);
+    line(image, p1, p2, Scalar(255, 0, 0), lineWidth, CV_AA);
+    line(image, p2, p3, Scalar(0, 255, 0), lineWidth, CV_AA);
+    line(image, p3, p4, Scalar(0, 0, 255), lineWidth, CV_AA);
+    line(image, p4, p1, Scalar(255, 0, 255), lineWidth, CV_AA);
   }
 
   cerr << "Writing file " << outFileName << endl;
-  if(frame->getParentFrameID()!=-1)
-      cerr<<"Parent Frame ID: " << frame->getParentFrameID() <<endl;
+  if (frame->getParentFrameID() != -1)
+    cerr << "Parent Frame ID: " << frame->getParentFrameID() << endl;
   return imwrite(outFileName, image);
 }
 
@@ -533,7 +533,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   {
     image = frame->getImage();
   }
-  catch(...)
+  catch (...)
   {
     cerr << "Can't get image from frame" << endl;
     return false;
@@ -548,9 +548,9 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     vector <Point2f> polygon;
     try
     {
-     polygon = ls->getPolygon();
+      polygon = ls->getPolygon();
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get polygon" << endl;
       continue;
@@ -568,7 +568,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     {
       p2 = polygon.at(1);
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get second point from polygon" << endl;
       continue;
@@ -577,7 +577,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     {
       p3 = polygon.at(2);
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get third point from polygon" << endl;
       continue;
@@ -586,31 +586,31 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     {
       p4 = polygon.at(3);
     }
-    catch(...)
+    catch (...)
     {
       cerr << "Can't get fourth point from polygon" << endl;
       continue;
     }
     // //temporary comment
-//    line(image, p1, p2, color, lineWidth, CV_AA);
-//    line(image, p2, p3, color, lineWidth, CV_AA);
-//    line(image, p3, p4, color, lineWidth, CV_AA);
-//    line(image, p4, p1, color, lineWidth, CV_AA);
+    //    line(image, p1, p2, color, lineWidth, CV_AA);
+    //    line(image, p2, p3, color, lineWidth, CV_AA);
+    //    line(image, p3, p4, color, lineWidth, CV_AA);
+    //    line(image, p4, p1, color, lineWidth, CV_AA);
 
-    line(image, p1, p2, Scalar(255,0,0), lineWidth, CV_AA);
-    line(image, p2, p3, Scalar(0,255,0), lineWidth, CV_AA);
-    line(image, p3, p4, Scalar(0,0,255), lineWidth, CV_AA);
-    line(image, p4, p1, Scalar(255,0,255), lineWidth, CV_AA);
+    line(image, p1, p2, Scalar(255, 0, 0), lineWidth, CV_AA);
+    line(image, p2, p3, Scalar(0, 255, 0), lineWidth, CV_AA);
+    line(image, p3, p4, Scalar(0, 0, 255), lineWidth, CV_AA);
+    line(image, p4, p1, Scalar(255, 0, 255), lineWidth, CV_AA);
   }
 
   //solvlets are draw, now draw the skeleton from parent frame
 
   //ImageSimilarityMatrix ism(seq.getFrames());
 
-  Point2f shift = ism.getShift(parentFrame->getID(),frame->getID());
+  Point2f shift = ism.getShift(parentFrame->getID(), frame->getID());
 
-//  Frame* newFrame = new Lockframe();
-//  *newFrame = *parentFrame;
+  //  Frame* newFrame = new Lockframe();
+  //  *newFrame = *parentFrame;
 
   parentFrame->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
 
@@ -621,52 +621,52 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   tree<BodyPart> partTree = parentSkel.getPartTree();
 
   //draw the skeletal prior
-  for(tree<BodyPart>::iterator partIter = partTree.begin(); partIter!=partTree.end(); ++partIter)
+  for (tree<BodyPart>::iterator partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
   {
-      //get joints
-      int j0,j1;
-      j0 = partIter->getParentJoint();
-      j1 = partIter->getChildJoint();
+    //get joints
+    int j0, j1;
+    j0 = partIter->getParentJoint();
+    j1 = partIter->getChildJoint();
 
-      Point2f p0, p1;
+    Point2f p0, p1;
 
-      p0 = parentSkel.getBodyJoint(j0)->getImageLocation();
-      p1 = parentSkel.getBodyJoint(j1)->getImageLocation();
+    p0 = parentSkel.getBodyJoint(j0)->getImageLocation();
+    p1 = parentSkel.getBodyJoint(j1)->getImageLocation();
 
-      line(image, p0, p1, Scalar(0,255,255), lineWidth, CV_AA);
+    line(image, p0, p1, Scalar(0, 255, 255), lineWidth, CV_AA);
 
-      float pixelRadius = partIter->getSearchRadius();
-      float angleRadius = partIter->getRotationSearchRange();
+    float pixelRadius = partIter->getSearchRadius();
+    float angleRadius = partIter->getRotationSearchRange();
 
-      circle(image, 0.5*p0+0.5*p1, (int)pixelRadius, Scalar(0,0,0), lineWidth, CV_AA);
-      //draw upright black halfcircle
-      //compute
+    circle(image, 0.5*p0 + 0.5*p1, (int)pixelRadius, Scalar(0, 0, 0), lineWidth, CV_AA);
+    //draw upright black halfcircle
+    //compute
 
-      double startAngleUpright = PoseHelper::angle2D((p1-p0).x, (p1-p0).y, 1.0, 0.0)*180.0/M_PI;
-      ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,startAngleUpright-angleRadius,startAngleUpright+angleRadius,Scalar(255,255,255),lineWidth,CV_AA);
-      //ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,-startAngleUpright+180.0,startAngleUpright+180+angleRadius,Scalar(0,255,0),lineWidth,CV_AA);
+    double startAngleUpright = PoseHelper::angle2D((p1 - p0).x, (p1 - p0).y, 1.0, 0.0)*180.0 / M_PI;
+    ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - angleRadius, startAngleUpright + angleRadius, Scalar(255, 255, 255), lineWidth, CV_AA);
+    //ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,-startAngleUpright+180.0,startAngleUpright+180+angleRadius,Scalar(0,255,0),lineWidth,CV_AA);
   }
 
-//  //draw the skeleton resulting from solve
-//  partTree = skel.getPartTree();
-//  for(tree<BodyPart>::iterator partIter = partTree.begin(); partIter!=partTree.end(); ++partIter)
-//  {
-//      //get joints
-//      int j0,j1;
-//      j0 = partIter->getParentJoint();
-//      j1 = partIter->getChildJoint();
+  //  //draw the skeleton resulting from solve
+  //  partTree = skel.getPartTree();
+  //  for(tree<BodyPart>::iterator partIter = partTree.begin(); partIter!=partTree.end(); ++partIter)
+  //  {
+  //      //get joints
+  //      int j0,j1;
+  //      j0 = partIter->getParentJoint();
+  //      j1 = partIter->getChildJoint();
 
-//      Point2f p0, p1;
+  //      Point2f p0, p1;
 
-//      p0 = skel.getBodyJoint(j0)->getImageLocation();
-//      p1 = skel.getBodyJoint(j1)->getImageLocation();
+  //      p0 = skel.getBodyJoint(j0)->getImageLocation();
+  //      p1 = skel.getBodyJoint(j1)->getImageLocation();
 
-//      line(image, p0, p1, Scalar(0,255,0), lineWidth, CV_AA);
-//  }
+  //      line(image, p0, p1, Scalar(0,255,0), lineWidth, CV_AA);
+  //  }
 
   cerr << "Writing file " << outFileName << endl;
-  if(frame->getParentFrameID()!=-1)
-      cerr<<"Parent Frame ID: " << frame->getParentFrameID() <<endl;
+  if (frame->getParentFrameID() != -1)
+    cerr << "Parent Frame ID: " << frame->getParentFrameID() << endl;
   return imwrite(outFileName, image);
 }
 
@@ -677,99 +677,62 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
+  string tempFileName = outFileName;
   stringstream ss;
   ss << frameID;
   ss << ".png";
   outFileName += ss.str();
-  Mat image;
+  Mat image, tempImage;
   try
   {
     image = frame->getImage();
+    tempImage = image;
   }
-  catch(...)
+  catch (...)
   {
     cerr << "Can't get image from frame" << endl;
     return false;
   }
 
-  vector <vector <LimbLabel> >::iterator lls;
-  vector <LimbLabel>::iterator ls; 
-  for (lls = labels.begin(); lls != labels.end(); ++lls)
+  Skeleton s = frame->getSkeleton();
+  tree <BodyPart> bp = s.getPartTree();
+  Mat temp = tempImage;
+  for (tree<BodyPart>::iterator bpi = bp.begin(); bpi != bp.end(); ++bpi)
   {
-    if (lls->size() == 0)
-    {
-      continue;
-    }
-    for (ls = lls->begin(); ls != lls->end(); ++ls)
-    {
-      Point2f p1, p2, p3, p4;
-      vector <Point2f> polygon;
-      try
-      {
-       polygon = ls->getPolygon();
-      }
-      catch(...)
-      {
-        cerr << "Can't get polygon" << endl;
-        continue;
-      }
-      try
-      {
-        p1 = polygon.at(0);
-      }
-      catch (...)
-      {
-        cerr << "Can't get first point from polygon" << endl;
-        continue;
-      }
-      try
-      {
-        p2 = polygon.at(1);
-      }
-      catch(...)
-      {
-        cerr << "Can't get second point from polygon" << endl;
-        continue;
-      }
-      try
-      {
-        p3 = polygon.at(2);
-      }
-      catch(...)
-      {
-        cerr << "Can't get third point from polygon" << endl;
-        continue;
-      }
-      try
-      {
-        p4 = polygon.at(3);
-      }
-      catch(...)
-      {
-        cerr << "Can't get fourth point from polygon" << endl;
-        continue;
-      }
-      line(image, p1, p2, color, lineWidth, CV_AA); 
-      line(image, p2, p3, color, lineWidth, CV_AA); 
-      line(image, p3, p4, color, lineWidth, CV_AA); 
-      line(image, p4, p1, color, lineWidth, CV_AA); 
-    }
+    POSERECT <Point2f> rect = bpi->getPartPolygon();
+    line(temp, rect.point1, rect.point2, Scalar(255, 0, 0), lineWidth, CV_AA);
+    line(temp, rect.point2, rect.point3, Scalar(0, 255, 0), lineWidth, CV_AA);
+    line(temp, rect.point3, rect.point4, Scalar(0, 0, 255), lineWidth, CV_AA);
+    line(temp, rect.point4, rect.point1, Scalar(255, 0, 255), lineWidth, CV_AA);
   }
-  for (lls = labels.begin(); lls != labels.end(); ++lls)
+  string fileName = tempFileName;
+  stringstream ssTemp;
+  ssTemp << frameID << ".skeleton.png";
+  fileName += ssTemp.str();
+
+  cerr << "Writing file " << fileName << endl;
+
+  imwrite(fileName, temp);
+
+  temp.release();
+
+  for (vector <vector <LimbLabel> >::iterator lls = labels.begin(); lls != labels.end(); ++lls)
   {
+    int i = 0;
     if (lls->size() == 0)
     {
       continue;
     }
-    for (ls = lls->begin(); ls != lls->end(); ++ls)
+    for (vector <LimbLabel>::iterator ls = lls->begin(); ls != lls->end(); ++ls)
     {
+      int j = 0;
       Point2f p1, p2, p3, p4;
       vector <Point2f> polygon;
       try
       {
-       polygon = ls->getPolygon();
+        polygon = ls->getPolygon();
       }
-      catch(...)
+      catch (...)
       {
         cerr << "Can't get polygon" << endl;
         continue;
@@ -787,7 +750,7 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       {
         p2 = polygon.at(1);
       }
-      catch(...)
+      catch (...)
       {
         cerr << "Can't get second point from polygon" << endl;
         continue;
@@ -805,22 +768,109 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       {
         p4 = polygon.at(3);
       }
-      catch(...)
+      catch (...)
       {
         cerr << "Can't get fourth point from polygon" << endl;
         continue;
       }
-      line(image, p1, p2, optimalColor, lineWidth, CV_AA); 
-      line(image, p2, p3, optimalColor, lineWidth, CV_AA); 
-      line(image, p3, p4, optimalColor, lineWidth, CV_AA); 
-      line(image, p4, p1, optimalColor, lineWidth, CV_AA); 
+
+      Mat temp = tempImage;
+      line(temp, p1, p2, Scalar(255, 0, 0), lineWidth, CV_AA);
+      line(temp, p2, p3, Scalar(0, 255, 0), lineWidth, CV_AA);
+      line(temp, p3, p4, Scalar(0, 0, 255), lineWidth, CV_AA);
+      line(temp, p4, p1, Scalar(255, 0, 255), lineWidth, CV_AA);
+
+      string fileName = tempFileName;
+      stringstream ssTemp;
+      ssTemp << frameID << "." << i << "." << j << ".png";
+      fileName += ssTemp.str();
+
+      cerr << "Writing file " << fileName << endl;
+
+      imwrite(fileName, temp);
+
+      temp.release();
+
+      line(image, p1, p2, color, lineWidth, CV_AA);
+      line(image, p2, p3, color, lineWidth, CV_AA);
+      line(image, p3, p4, color, lineWidth, CV_AA);
+      line(image, p4, p1, color, lineWidth, CV_AA);
+
+      j++;
+    }
+    i++;
+  }
+  for (vector <vector <LimbLabel> >::iterator lls = labels.begin(); lls != labels.end(); ++lls)
+  {
+    if (lls->size() == 0)
+    {
+      continue;
+    }
+    for (vector <LimbLabel>::iterator ls = lls->begin(); ls != lls->end(); ++ls)
+    {
+      Point2f p1, p2, p3, p4;
+      vector <Point2f> polygon;
+      try
+      {
+        polygon = ls->getPolygon();
+      }
+      catch (...)
+      {
+        cerr << "Can't get polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p1 = polygon.at(0);
+      }
+      catch (...)
+      {
+        cerr << "Can't get first point from polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p2 = polygon.at(1);
+      }
+      catch (...)
+      {
+        cerr << "Can't get second point from polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p3 = polygon.at(2);
+      }
+      catch (...)
+      {
+        cerr << "Can't get third point from polygon" << endl;
+        continue;
+      }
+      try
+      {
+        p4 = polygon.at(3);
+      }
+      catch (...)
+      {
+        cerr << "Can't get fourth point from polygon" << endl;
+        continue;
+      }
+      line(image, p1, p2, optimalColor, lineWidth, CV_AA);
+      line(image, p2, p3, optimalColor, lineWidth, CV_AA);
+      line(image, p3, p4, optimalColor, lineWidth, CV_AA);
+      line(image, p4, p1, optimalColor, lineWidth, CV_AA);
       break;
     }
   }
-  
+
   cerr << "Writing file " << outFileName << endl;
 
-  return imwrite(outFileName, image);
+  bool result = imwrite(outFileName, image);
+
+  image.release();
+  tempImage.release();
+
+  return result;
 }
 
 void ProjectLoader::ResizeImage(Mat &image, int32_t &cols, int32_t &rows)

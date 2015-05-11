@@ -180,7 +180,11 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
   frames = _frames;
 
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
   params.emplace(sDebugLevel, debugLevel);
@@ -251,7 +255,11 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   const float useHoGdet = 1.0f;
   const string sUseHoGdet = "useHoGdet";
 
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
   const float rotationThreshold = 0.025f;

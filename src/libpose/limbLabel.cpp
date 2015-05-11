@@ -124,14 +124,7 @@ bool LimbLabel::containsPoint(Point2f pt)
 
     POSERECT <Point2f> poserect(polygon[0], polygon[1], polygon[2], polygon[3]);
 
-    int result = poserect.containsPoint(pt);
-
-    if(result!=-1)
-        return true;
-    else
-        return false;
-
-    return false;
+    return (poserect.containsPoint(pt) != -1);
 }
 
 void LimbLabel::addScore(Score detectionScore)

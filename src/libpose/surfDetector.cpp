@@ -25,7 +25,11 @@ void SurfDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
   frames = _frames;
 
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
   const uint32_t minHessian = 500;
   const string sMinHessian = "minHessian";
@@ -87,7 +91,11 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   const float useSURFdet = 1.0f;
   const string sUseSURFdet = "useSURFdet";
 
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
   const float rotationThreshold = 0.025f;
