@@ -722,9 +722,9 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
     {
       continue;
     }
+    int j = 0;
     for (vector <LimbLabel>::iterator ls = lls->begin(); ls != lls->end(); ++ls)
     {
-      int j = 0;
       Point2f p1, p2, p3, p4;
       vector <Point2f> polygon;
       try
