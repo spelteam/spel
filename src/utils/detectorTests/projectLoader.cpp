@@ -685,8 +685,8 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
   Mat image, tempImage;
   try
   {
-    image = frame->getImage();
-    tempImage = image;
+    image = frame->getImage().clone();
+    tempImage = image.clone();
   }
   catch (...)
   {
@@ -696,7 +696,7 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
 
   Skeleton s = frame->getSkeleton();
   tree <BodyPart> bp = s.getPartTree();
-  Mat temp = tempImage;
+  Mat temp = tempImage.clone();
   for (tree<BodyPart>::iterator bpi = bp.begin(); bpi != bp.end(); ++bpi)
   {
     Point2f j1, j0;  // temporary adjacent joints   
@@ -829,7 +829,7 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
         continue;
       }
 
-      Mat temp = tempImage;
+      Mat temp = tempImage.clone();
       line(temp, p1, p2, Scalar(255, 0, 0), lineWidth, CV_AA);
       line(temp, p2, p3, Scalar(0, 255, 0), lineWidth, CV_AA);
       line(temp, p3, p4, Scalar(0, 0, 255), lineWidth, CV_AA);
