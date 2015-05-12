@@ -627,10 +627,11 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
           if (!blackPixel)
           { // Scan the possible rotation zone
-            for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
+            for (float rot = theta - deltaTheta/*minTheta*/; rot < theta + deltaTheta/*maxTheta*/; rot += stepTheta)
             {
-              if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
-              {
+              /*if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
+              {*/
                 // Create a new label vector and build it label
                 Point2f p0 = Point2f(0, 0); // the point of unit vector
                 Point2f p1 = Point2f(1.0, 0); // the point of unit vector
@@ -641,7 +642,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
                 p0 = Point2f(x, y) - mid; // shift the vector to current point
                 LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
                 sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
-              }
+              /*}*/
             }
           }
         }
@@ -1284,7 +1285,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   Mat imgMat = frame->getImage(); // copy image from the frame
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5; // segment center
   float boneLength = getBoneLength(j0, j1); // distance between joints
-  float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));// tilt angle
+  float rot = float(PoseHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));// tilt angle
   POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1); // expected bodypart location area?
   uint32_t totalPixels = 0;
   uint32_t pixelsInMask = 0;

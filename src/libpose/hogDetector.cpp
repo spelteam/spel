@@ -404,10 +404,11 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           bool blackPixel = mintensity < 10;
           if (!blackPixel)
           {
-            for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
+            for (float rot = theta - deltaTheta/*minTheta*/; rot < theta + deltaTheta/*maxTheta*/; rot += stepTheta)
             {
-              if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
-              {
+              /*if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
+              {*/
                 Point2f p0 = Point2f(0, 0);
                 Point2f p1 = Point2f(1.0, 0);
                 p1 *= boneLength;
@@ -432,7 +433,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
                 }
                 LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
                 sortedLabels.push_back(generatedLabel);
-              }
+              //}
             }
           }
         }
