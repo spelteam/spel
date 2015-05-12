@@ -19,7 +19,7 @@ ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
       stringstream ss;
       ss << "Couldn't find partHistogramm " << "[" << r << "]";
       throw logic_error(ss.str());
-    }    
+    }
     try
     {
       bgHistogramm.at(r).resize(nBins);
@@ -27,7 +27,7 @@ ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
     catch (...)
     {
       stringstream ss;
-      ss << "Couldn't find bgHistogramm " << "[" << r << "]";     
+      ss << "Couldn't find bgHistogramm " << "[" << r << "]";
       throw logic_error(ss.str());
     }
     for (uint8_t g = 0; g < nBins; g++)
@@ -210,13 +210,13 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       {
         stringstream ss;
         ss << "Can't get LWRatio value";
-        if (debugLevelParam >=1)
+        if (debugLevelParam >= 1)
           cerr << ERROR_HEADER << ss.str() << endl;
         throw logic_error(ss.str());
       }
       Point2f direction = j1 - j0; // used as estimation of the vector's direction
       float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
-      iteratorBodyPart->setRotationSearchRange(rotationAngle);     
+      iteratorBodyPart->setRotationSearchRange(rotationAngle);
       POSERECT <Point2f> poserect = getBodyPartRect(*iteratorBodyPart, j0, j1);
       polygons.insert(pair <int32_t, POSERECT <Point2f>>(iteratorBodyPart->getPartID(), poserect));
       polyDepth.insert(pair <int32_t, float>(iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getSpaceLocation().z));
@@ -294,7 +294,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
           try
           {
             vector <float> partDepths;
-            multimap <int32_t, float>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);            
+            multimap <int32_t, float>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);
             transform(lower, upper, back_inserter(partDepths), [](std::pair <int32_t, bool> const &pair) { return pair.second; }); // copy "polyDepth" to "PartDepth"
             // Checkig polygons overlapping
             for (vector <float>::iterator iteratorPartDepths = partDepths.begin(); iteratorPartDepths != partDepths.end(); ++iteratorPartDepths)
@@ -524,14 +524,14 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   map <int32_t, Mat> pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
   map <int32_t, Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
   Mat maskMat = frame->getMask(); // copy mask from the frame
-  
+
   // For all body parts
   for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   { //Temporary variables
     vector <LimbLabel> labels;
     vector <LimbLabel> sortedLabels;
     Point2f j0, j1;
-    
+
     try
     {
       j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation(); // copy current bodypart parent joint
@@ -545,7 +545,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
-    
+
     float boneLength = getBoneLength(j0, j1); // distance between nodes
     float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart); // current body part polygon width
     Point2f direction = j1 - j0; // direction of bodypart vector
@@ -554,7 +554,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     if (minDist < 2) minDist = 2; // the minimal linear step
     float searchDistance = iteratorBodyPart->getSearchRadius();
     try
-    {      
+    {
       if (searchDistance <= 0)
         searchDistance = boneLength * params.at(sSearchDistCoeff); // the limiting of search area
     }
@@ -628,21 +628,18 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           if (!blackPixel)
           { // Scan the possible rotation zone
             float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
-            for (float rot = theta - deltaTheta/*minTheta*/; rot < theta + deltaTheta/*maxTheta*/; rot += stepTheta)
+            for (float rot = theta - deltaTheta; rot < theta + deltaTheta; rot += stepTheta)
             {
-              /*if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
-              {*/
-                // Create a new label vector and build it label
-                Point2f p0 = Point2f(0, 0); // the point of unit vector
-                Point2f p1 = Point2f(1.0, 0); // the point of unit vector
-                p1 *= boneLength; // change the vector length 
-                p1 = PoseHelper::rotatePoint2D(p1, p0, rot); // rotate the vector
-                Point2f mid = 0.5 * p1; // center of the vector
-                p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
-                p0 = Point2f(x, y) - mid; // shift the vector to current point
-                LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
-                sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
-              /*}*/
+              // Create a new label vector and build it label
+              Point2f p0 = Point2f(0, 0); // the point of unit vector
+              Point2f p1 = Point2f(1.0, 0); // the point of unit vector
+              p1 *= boneLength; // change the vector length 
+              p1 = PoseHelper::rotatePoint2D(p1, p0, rot); // rotate the vector
+              Point2f mid = 0.5 * p1; // center of the vector
+              p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
+              p0 = Point2f(x, y) - mid; // shift the vector to current point
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
+              sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
             }
           }
         }
@@ -1183,7 +1180,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
     Mat tt;
     try
     { // Matrix, that contains relative frequency of the pixels colors reiteration for current body part
-      tt = pixelDistributions.at(iteratorBodyPart->getPartID()); 
+      tt = pixelDistributions.at(iteratorBodyPart->getPartID());
     }
     catch (...)
     {
@@ -1279,7 +1276,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
 }
 
 LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet)
-{ 
+{
   vector <Point3i> partPixelColours;
   Mat maskMat = frame->getMask(); // copy mask from the frame 
   Mat imgMat = frame->getImage(); // copy image from the frame
@@ -1297,7 +1294,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   stringstream detectorName;
   detectorName << getID();
   try
-  { 
+  {
     model = partModels.at(bodyPart.getPartID()); // copy part model for the "bodyPart"
   }
   catch (...)

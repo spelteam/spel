@@ -227,20 +227,17 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
           if (!blackPixel)
           {
             float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
-            for (float rot = theta - deltaTheta/*minTheta*/; rot < theta + deltaTheta/*maxTheta*/; rot += stepTheta)
+            for (float rot = theta - deltaTheta; rot < theta + deltaTheta; rot += stepTheta)
             {
-              /*if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
-              {*/
-                Point2f p0 = Point2f(0, 0);
-                Point2f p1 = Point2f(1.0, 0);
-                p1 *= boneLength;
-                p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
-                Point2f mid = 0.5 * p1;
-                p1 = p1 + Point2f(x, y) - mid;
-                p0 = Point2f(x, y) - mid;               
-                LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet);
-                sortedLabels.push_back(generatedLabel);
-              /*}*/
+              Point2f p0 = Point2f(0, 0);
+              Point2f p1 = Point2f(1.0, 0);
+              p1 *= boneLength;
+              p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
+              Point2f mid = 0.5 * p1;
+              p1 = p1 + Point2f(x, y) - mid;
+              p0 = Point2f(x, y) - mid;
+              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet);
+              sortedLabels.push_back(generatedLabel);
             }
           }
         }
@@ -256,7 +253,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
         p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
-        p0 = Point2f(suggestStart.x, suggestStart.y) - mid;       
+        p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
         LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet);
         sortedLabels.push_back(generatedLabel);
       }
