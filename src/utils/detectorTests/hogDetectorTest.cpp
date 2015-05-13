@@ -38,6 +38,23 @@ int main (int argc, char **argv)
   vector <Frame*> allFrames = projectLoader.getFrames();
   vector<Frame*> trainFrames;
   int8_t kfCount = 0;
+
+  try
+  {
+    Sequence *seq = new Sequence(0, "hogDetector", allFrames);
+    if (seq != 0)
+    {
+      seq->estimateUniformScale(params);
+      seq->computeInterpolation(params);
+      delete seq;
+    }
+  }
+  catch (exception &e)
+  {
+    cerr << e.what() << endl;
+    return -1;
+  }
+
   for (vector <Frame*>::iterator frame = allFrames.begin(); frame != allFrames.end(); ++frame)
   {
     if ((*frame)->getFrametype() != KEYFRAME && (*frame)->getFrametype() != LOCKFRAME && kfCount == 1)
@@ -59,13 +76,6 @@ int main (int argc, char **argv)
     try
     {
       detector.train(trainFrames, params);
-      Sequence *seq = new Sequence(0, "hogDetector", projectLoader.getFrames());
-      if (seq != 0)
-      {
-        seq->estimateUniformScale(params);
-        seq->computeInterpolation(params);
-        delete seq;
-      }
     }
     catch (exception &e)
     {

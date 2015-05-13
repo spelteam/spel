@@ -162,8 +162,16 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
     vector<Frame*> frames = projectLoader.getFrames();
 
-    //Run "Train()"
     map <string, float> params;
+    Sequence *seq = new Sequence(0, "colorHistDetector", frames);
+    if (seq != 0)
+    {
+      seq->estimateUniformScale(params);
+      seq->computeInterpolation(params);
+      delete seq;
+    }
+
+    //Run "Train()"
     ColorHistDetector detector;
     detector.train(frames, params);
 
