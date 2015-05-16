@@ -502,6 +502,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const float rotationThreshold = 0.025f;
   const string sRotationThreshold = "rotationThreshold";
 
+  const float isWeakTreshhold = 0.1f;
+  const string sIsWeakTreshhold = "isWeakTreshhold";
+
 
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
@@ -514,6 +517,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sUseCSdet, useCSdet);
   params.emplace(sDebugLevel, debugLevel);
   params.emplace(sRotationThreshold, rotationThreshold);
+  params.emplace(sIsWeakTreshhold, isWeakTreshhold);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
@@ -524,6 +528,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   map <int32_t, Mat> pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
   map <int32_t, Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
   Mat maskMat = frame->getMask(); // copy mask from the frame
+
+  stringstream detectorName;
+  detectorName << getID();
 
   // For all body parts
   for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
@@ -730,6 +737,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       }
       locations.release();
     }
+    PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels); // add current point labels
   }
   map <int32_t, Mat>::iterator i;

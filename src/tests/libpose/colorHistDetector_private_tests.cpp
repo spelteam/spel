@@ -422,8 +422,6 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     EXPECT_EQ(limbLabel_e.getScores(), limbLabel_a.getScores());
     EXPECT_EQ(limbLabel_e.getPolygon(), limbLabel_a.getPolygon());
     EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
-    EXPECT_EQ(limbLabel_e.getIsWeak(), limbLabel_a.getIsWeak());
-    EXPECT_EQ(limbLabel_e.getIsWeak(), limbLabel_a.getIsWeak());
     EXPECT_EQ(model.bgHistogramm, detector.partModels[partID].bgHistogramm);
 
 // Testing function "detect"

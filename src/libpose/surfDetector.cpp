@@ -101,6 +101,9 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   const float rotationThreshold = 0.025f;
   const string sRotationThreshold = "rotationThreshold";
 
+  const float isWeakTreshhold = 0.1f;
+  const string sIsWeakTreshhold = "isWeakTreshhold";
+
   // first we need to check all used params
   params.emplace(sMinHessian, minHessian);
   params.emplace(sSearchDistCoeff, searchDistCoeff);
@@ -113,8 +116,12 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   params.emplace(sUseSURFdet, useSURFdet);
   params.emplace(sDebugLevel, debugLevel);
   params.emplace(sRotationThreshold, rotationThreshold);
+  params.emplace(sIsWeakTreshhold, isWeakTreshhold);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
+
+  stringstream detectorName;
+  detectorName << getID();
 
   vector <vector <LimbLabel> > t;
 
@@ -327,6 +334,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
       }
       locations.release();
     }
+    PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels);
   }
   return merge(limbLabels, t);
@@ -402,13 +410,37 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
 #if OpenCV_VERSION_MAJOR == 3
   Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
   detector->detect(partImage, partModel.keyPoints);
-  Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
-  extractor->compute(partImage, partModel.keyPoints, partModel.descriptors);
+  if (partModel.keyPoints.empty())
+  {
+    if (debugLevelParam >= 2)
+      cerr << ERROR_HEADER << "Couldn't detect keypoints of body part " << bodyPart.getPartID() << endl;
+  }
+  else
+  {
+    Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+    extractor->compute(partImage, partModel.keyPoints, partModel.descriptors);
+    if (partModel.descriptors.empty() && debugLevelParam >= 2)
+    {
+      cerr << ERROR_HEADER << "Couldn't compute descriptors of body part " << bodyPart.getPartID() << endl;
+    }
+  }
 #else
   SurfFeatureDetector detector(minHessian);
   detector.detect(partImage, partModel.keyPoints);
-  SurfDescriptorExtractor extractor;
-  extractor.compute(partImage, partModel.keyPoints, partModel.descriptors);
+  if (partModel.keyPoints.empty())
+  {
+    if (debugLevelParam >= 2)
+      cerr << ERROR_HEADER << "Couldn't detect keypoints of body part " << bodyPart.getPartID() << endl;
+  }
+  else
+  {
+    SurfDescriptorExtractor extractor;
+    extractor.compute(partImage, partModel.keyPoints, partModel.descriptors);
+    if (partModel.descriptors.empty() && debugLevelParam >= 2)
+    {
+      cerr << ERROR_HEADER << "Couldn't compute descriptors of body part " << bodyPart.getPartID() << endl;
+    }
+  }
 #endif
   return partModel;
 }
@@ -478,6 +510,13 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
 
 float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1)
 {
+  if (model.descriptors.empty())
+  {
+    if (debugLevelParam >= 2)
+      cerr << ERROR_HEADER << "Model descriptors are empty" << endl;
+    return -1.0f;
+  }
+
   float score = 0;
   uint32_t count = 0;
   FlannBasedMatcher matcher;
@@ -498,19 +537,30 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
       }
       else
       {
-        matcher.knnMatch(partModel->second.descriptors, model.descriptors, matches, 2);
-        float s = 0;
-        for (uint32_t i = 0; i < matches.size(); i++)
+        if (partModel->second.descriptors.empty())
         {
-          if ((matches[i][0].distance < 0.6*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
-          {
-            s += matches[i][0].distance / coeff;
-          }
+          if (debugLevelParam >= 2)
+            cerr << ERROR_HEADER << "PartModel descriptors are empty" << endl;
+          count--;
         }
-        score += s / matches.size();
+        else
+        {
+          matcher.knnMatch(partModel->second.descriptors, model.descriptors, matches, 2);
+          float s = 0;
+          for (uint32_t i = 0; i < matches.size(); i++)
+          {
+            if ((matches[i][0].distance < 0.6*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
+            {
+              s += matches[i][0].distance / coeff;
+            }
+          }
+          score += s / matches.size();
+        }
         break;
       }
     }
   }
+  if (count == 0)
+    return -1.0f;
   return score /= count;
 }

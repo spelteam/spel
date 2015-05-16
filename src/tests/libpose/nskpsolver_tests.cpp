@@ -52,16 +52,13 @@ TEST(nskpsolverTests, ScoreCostAndJointCost)
 //Testing function "computeScoreCost"
 
     //scores[0] = score1Value, isWeak = true, isOccluded = false, 
-    label1.isWeak = true;
     EXPECT_EQ(0, S.computeScoreCost(label1, params));
 
     //scores[0] = score1Value, isWeak = false, isOccluded = false, 
-    label1.isWeak = false;//no other way to change the value of this field?!
     EXPECT_EQ(score1Value, S.computeScoreCost(label1, params));
 
     //scores is empty, isWeak = false, isOccluded = false, 
     LimbLabel label2;
-    label1.isWeak = false;
     label1.isOccluded = false;
     EXPECT_EQ(0, S.computeScoreCost(label2, params));
 
@@ -133,8 +130,6 @@ TEST(nskpsolverTests, evaluateSolution)
     int dx = 60;
     LimbLabel label1(id, center, angle, polygon, scores, isOccluded);
     LimbLabel label2(id+1, center, angle, shiftPolygon(polygon, dx, 0), scores, isOccluded);
-    label1.isWeak = false;//no other way to change the value of this field?!
-    label2.isWeak = false;//no other way to change the value of this field?!
 
     //Create labels vector
     vector<LimbLabel> labels;
@@ -168,7 +163,6 @@ TEST(nskpsolverTests, evaluateSolution)
     //30% of "labels[1]" not in mask
     float e = 0.3; // Relative shift
     LimbLabel label3(id+1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
-    label3.isWeak = false;//no other way to change the value of this field?!
     labels[1] = label3;
 
     double ActualValue = S.evaluateSolution(frame, labels, params);
@@ -181,7 +175,6 @@ TEST(nskpsolverTests, evaluateSolution)
     //"labels[1]" is badly lokalised
     e = 0.9; // Relative shift of "label[1]"
     LimbLabel label4(id+1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
-    label4.isWeak = false;//no other way to change the value of this field?!
     labels[1] = label4;
 
     ActualValue = S.evaluateSolution(frame, labels, params);

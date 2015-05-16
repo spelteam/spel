@@ -117,7 +117,7 @@ void Project::solveFrames(){
         for( const LimbLabel& label : labels ){
             out << "Limb|Id: " << label.getLimbID() << endl;
             out << "Limb|Is occluded: " << label.getIsOccluded() << endl;
-            out << "Limb|Is weak: " << label.getIsWeak() << endl;
+            //out << "Limb|Is weak: " << label.getIsWeak() << endl;
             out << "Limb|Angle: " << label.getAngle() << endl;
             out << "Limb|Center: " << label.getCenter().x << " " << label.getCenter().y << endl;
             out << "Limb|Polygon: " << endl;

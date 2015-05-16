@@ -45,11 +45,11 @@ class LimbLabel
     Point2f getCenter(void) const;
 ///get the label scores
     vector<Score> getScores(void) const;
+    void setScores(vector <Score> _scores);
     int getLimbID(void) const;
     float getAngle(void) const;
     vector <Point2f> getPolygon(void) const;
     bool getIsOccluded(void) const;
-    bool getIsWeak(void) const;
     float getAvgScore(void) const;
 
     bool containsPoint(Point2f pt);
@@ -72,10 +72,6 @@ class LimbLabel
     vector<Point2f> polygon;
 /// signify label is for an occluded limb
     bool isOccluded;
-/// signify label is from a badly localised part i.e. all very weak or all very similar detection scores
-    bool isWeak; 
-//point in polygon test
-//    int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy);
 };
 
 #endif  // _LIBPOSE_LIMBLABEL_HPP_

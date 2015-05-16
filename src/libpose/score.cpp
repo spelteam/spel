@@ -7,6 +7,7 @@ Score::Score(void)
   score = 0;
   detName = "";
   coeff = 1.0f;
+  isWeak = false;
 }
 
 // constructor with params
@@ -15,6 +16,7 @@ Score::Score(float sc, string name, float _coeff)
   score = sc;
   detName = name;
   coeff = _coeff;
+  isWeak = false;
 }
 
 Score &Score::operator=(const Score &s)
@@ -26,6 +28,7 @@ Score &Score::operator=(const Score &s)
   this->detName = s.getDetName();
   this->score = s.getScore();
   this->coeff = s.getCoeff();
+  this->isWeak = s.getIsWeak();
   return *this;
 }
 
@@ -77,4 +80,13 @@ float Score::getCoeff(void) const
 void Score::setCoeff(float _coeff)
 {
   coeff = _coeff;
+}
+
+bool Score::getIsWeak(void) const
+{
+  return isWeak;
+}
+void Score::setIsWeak(bool _isWeak)
+{
+  isWeak = _isWeak;
 }

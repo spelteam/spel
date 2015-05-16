@@ -493,7 +493,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
 
     string hogName = "18500";
 
-    if(label.getIsOccluded() || label.getIsWeak()) //if it's occluded, return zero
+    if(label.getIsOccluded()/* || label.getIsWeak()*/) //if it's occluded, return zero
         return 0;
     if(scores.size()>0)
         return lambda*scores[0].getScore();
@@ -785,7 +785,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
         float labelRatio = 1.0-(float)badLabelPixels/(float)labelPixels; //high is good
 
-        if(labelRatio<badLabelThresh && !label->getIsWeak() && !label->getIsOccluded()) //not weak, not occluded, badly localised
+        if(labelRatio<badLabelThresh /*&& !label->getIsWeak()*/ && !label->getIsOccluded()) //not weak, not occluded, badly localised
             badLabelScores.push_back(Point2f(label->getLimbID(), labelRatio));
     }
 

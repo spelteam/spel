@@ -11,7 +11,6 @@ LimbLabel::LimbLabel()
     for(int i=0; i<4; ++i)
         polygon.push_back(Point2f(0,0));
     isOccluded = true;
-    isWeak = true;
 }
 
 LimbLabel::LimbLabel(const LimbLabel& ll)
@@ -22,7 +21,6 @@ LimbLabel::LimbLabel(const LimbLabel& ll)
   scores = ll.getScores();
   polygon = ll.getPolygon();
   isOccluded = ll.getIsOccluded();
-  isWeak = ll.getIsWeak();
 }
 
 LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded)
@@ -33,7 +31,6 @@ LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _po
   polygon = _polygon;
   scores = _scores;
   isOccluded = _isOccluded;
-  isWeak = true;
 }
 LimbLabel &LimbLabel::operator=(const LimbLabel &ll)
 {
@@ -47,7 +44,6 @@ LimbLabel &LimbLabel::operator=(const LimbLabel &ll)
   this->scores = ll.getScores();
   this->polygon = ll.getPolygon();
   this->isOccluded = ll.getIsOccluded();
-  this->isWeak = ll.getIsWeak();
   return *this;
 }
 
@@ -59,6 +55,11 @@ Point2f LimbLabel::getCenter(void) const
 vector<Score> LimbLabel::getScores(void) const
 {
   return scores;
+}
+
+void LimbLabel::setScores(vector <Score> _scores)
+{
+  scores = _scores;
 }
 
 int LimbLabel::getLimbID(void) const
@@ -79,11 +80,6 @@ vector <Point2f> LimbLabel::getPolygon(void) const
 bool LimbLabel::getIsOccluded(void) const
 {
   return isOccluded;
-}
-
-bool LimbLabel::getIsWeak(void) const
-{
-  return isWeak;
 }
 
 bool LimbLabel::operator < (const LimbLabel &ll) const

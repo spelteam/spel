@@ -265,6 +265,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   const float rotationThreshold = 0.025f;
   const string sRotationThreshold = "rotationThreshold";
 
+  const float isWeakTreshhold = 0.1f;
+  const string sIsWeakTreshhold = "isWeakTreshhold";
+
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -276,6 +279,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sUseHoGdet, useHoGdet);
   params.emplace(sDebugLevel, debugLevel);
   params.emplace(sRotationThreshold, rotationThreshold);
+  params.emplace(sIsWeakTreshhold, isWeakTreshhold);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
@@ -293,6 +297,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   Size padding = Size(32, 32);
   int derivAperture = 1;
   int histogramNormType = HOGDescriptor::L2Hys;
+
+  stringstream detectorName;
+  detectorName << getID();
 
   vector <vector <LimbLabel> > t;
 
@@ -535,6 +542,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
       }
       locations.release();
     }
+    PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels);
   }
   return merge(limbLabels, t);
