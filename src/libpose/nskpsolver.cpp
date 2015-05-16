@@ -525,6 +525,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
         else if(scores[i].getDetName()==surfName)
             finalScore = finalScore+scores[i].getScore()*useSURF;
     }
+    return finalScore;
 }
 
 //compute distance to parent limb label
