@@ -27,6 +27,9 @@ TEST(nskpsolverTests, findFrameIndexById)
 
 TEST(nskpsolverTests, ScoreCostAndJointCost)
 {
+    string hogName = "18500";
+    string csName = "4409412";
+    string surfName = "21316";
     int id = 0;
     Point2f center = Point2f(10, 10);
     float angle = 0;
@@ -37,8 +40,8 @@ TEST(nskpsolverTests, ScoreCostAndJointCost)
     float LimbLength = polygon[1].y - polygon[0].y;
     vector <Score> scores;
 
-    Score score1(score1Value, "", scoreCoeff);
-    Score score2(score2Value, "", scoreCoeff);
+    Score score1(score1Value, csName, scoreCoeff);
+    Score score2(score2Value, hogName, scoreCoeff);
 
     scores.push_back(score1);
     scores.push_back(score2);
@@ -47,6 +50,8 @@ TEST(nskpsolverTests, ScoreCostAndJointCost)
 
     map<string, float> params;
     params.emplace("imageCoeff", 1.0);
+    params.emplace("useCSdet", 1.0);
+    params.emplace("useHoGdet", 0.0);
     NSKPSolver S;
 
 //Testing function "computeScoreCost"

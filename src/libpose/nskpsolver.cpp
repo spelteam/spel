@@ -100,27 +100,27 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
 
     //detector enablers
-    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
+    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
     params.emplace("maxPartCandidates", 5000); //set the max number of part candidates to allow into the solver
 
     //detector search parameters
     params.emplace("propagateToLockframes", 0); //don't propagate from lockframes, only from keyframes
-    params.emplace("baseRotationRange", 1); //search angle range of +/- 60 degrees
-    params.emplace("baseSearchRadius", 10); //search a radius of 100 pixels
+    params.emplace("baseRotationRange", 50); //search angle range of +/- 60 degrees
+    params.emplace("baseSearchRadius", 20); //search a radius of 100 pixels
     params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
 
     //solver sensitivity parameters
-    params.emplace("imageCoeff", 0.3); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 0.0); //set solver body part connectivity sensitivity
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
     //solver eval parameters
-    params.emplace("acceptLockframeThreshold", 0.5); //set up the lockframe accept threshold by mask coverage
+    params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
     float depthRotationCoeff = params.at("partDepthRotationCoeff");
     float baseRotationRange = params.at("baseRotationRange");
@@ -185,6 +185,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     continue;
                 else if(frames[*mstIter]->getFrametype()==LOCKFRAME && !propagateToLockframes) //skip lockframes, unless explicitly requested
                     continue;
+                //map<int, vector<LimbLabel> > labels;
                 vector<vector<LimbLabel> > labels, tempLabels;
                 vector<vector<LimbLabel> >::iterator labelPartsIter;
 
@@ -215,7 +216,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     int depth = partTree.depth(partIter);
 
                     float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
-                    float searchRange = baseSearchRadius;
+                    float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
 
                     partIter->setRotationSearchRange(rotationRange);
                     partIter->setSearchRadius(searchRange);
@@ -231,6 +232,20 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 {
                     labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
                 }
+
+                for(uint32_t i=0; i<labels.size(); ++i)
+                {
+                    for(uint32_t j=0; j<labels.size();++j)
+                    {
+                        if(labels[j].at(0).getLimbID()==i)
+                            tempLabels.push_back(labels[j]);
+                    }
+                }
+                labels = tempLabels;
+//                for(uint32_t i=0; i<labels.size();++i)
+//                {
+//                    labels.emplace(labels[i][0].getPartID(), labels[i]);
+//                }
 // //temp coment this out
 //                for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
 //                {
@@ -322,7 +337,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                         int cj = partIter->getParentJoint();
                         if(pj==cj)
                         {
-                            //then it's connected to child
+                            //then current parent is connected to paren
                             toChild=true;
                         }
 
@@ -477,28 +492,39 @@ uint32_t NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
-//    params.emplace("imageCoeff", 0);
-//    params.emplace("useHoGdet", 1.0);
-//    params.emplace("useCSdet", 0);
+//    if(label.getIsOccluded() )// || label.getIsWeak()) //if it's occluded, return zero
+//        return 0;
+
+    string hogName = "18500";
+    string csName = "4409412";
+    string surfName = "21316";
+
+    params.emplace("imageCoeff", 1.0);
+    params.emplace("useCSdet", 1.0);
+    params.emplace("useHoGdet", 0.0);
+    params.emplace("useSURFdet", 0.0);
 
     float lambda = params.at("imageCoeff");
 
     //@FIX
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
-    //float useSURF = params.at("useSURF");
+    float useSURF = params.at("useSURFdet");
 
     //TODO: Fix score combinations
     vector<Score> scores = label.getScores();
 
-    string hogName = "18500";
-
-    if(label.getIsOccluded()/* || label.getIsWeak()*/) //if it's occluded, return zero
-        return 0;
-    if(scores.size()>0)
-        return lambda*scores[0].getScore();
-    else //if no scores present return -1
-        return 0;
+    //compute the weighted sum of scores
+    float finalScore=0;
+    for(uint32_t i=0; i<scores.size(); ++i)
+    {
+        if(scores[i].getDetName()==hogName)
+            finalScore = finalScore+scores[i].getScore()*useHoG;
+        else if(scores[i].getDetName()==csName)
+            finalScore = finalScore+scores[i].getScore()*useCS;
+        else if(scores[i].getDetName()==surfName)
+            finalScore = finalScore+scores[i].getScore()*useSURF;
+    }
 }
 
 //compute distance to parent limb label
@@ -528,8 +554,13 @@ float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& 
     //emplace default
     params.emplace("jointCoeff", 0.5);
     params.emplace("jointLeeway", 0.05);
+    params.emplace("debugLevel", 1);
+
+    //read params
     float lambda = params.at("jointCoeff");
-    float leeway = params.at("jointLeeway");
+    int debugLevel = params.at("debugLevel");
+
+    //float leeway = params.at("jointLeeway");
     Point2f p0, p1, c0, c1;
 
     //@FIX this is really too simplistic, connecting these points
@@ -537,7 +568,7 @@ float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& 
     parent.getEndpoints(p0,p1);
 
     //child length
-    float clen = sqrt(pow(c0.x-c1.x, 2)+pow(c0.y-c1.y, 2));
+    //float clen = sqrt(pow(c0.x-c1.x, 2)+pow(c0.y-c1.y, 2));
 
     //normalise this?
     //give some leeway
@@ -549,6 +580,11 @@ float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& 
 //    if(score<(clen*leeway)/max) //any distnace below leeway is zero
 //        score=0;
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
+
+    //output a sentence about who connected to whom and what the score was
+    if(debugLevel>=1 && (child.getLimbID()==7 || child.getLimbID()==6) && !toChild)
+        cerr << "Part " << child.getLimbID() << " is connecting to part " << parent.getLimbID() << " PARENT joint" << endl;
+
     return lambda*score;
 }
 

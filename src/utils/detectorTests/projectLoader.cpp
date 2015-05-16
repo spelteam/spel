@@ -546,6 +546,8 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   {
     Point2f p1, p2, p3, p4;
     vector <Point2f> polygon;
+    Point2f c0,c1;
+    ls->getEndpoints(c0, c1);
     try
     {
       polygon = ls->getPolygon();
@@ -601,6 +603,9 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     line(image, p2, p3, Scalar(0, 255, 0), lineWidth, CV_AA);
     line(image, p3, p4, Scalar(0, 0, 255), lineWidth, CV_AA);
     line(image, p4, p1, Scalar(255, 0, 255), lineWidth, CV_AA);
+
+    circle(image, c0, 2, Scalar(255, 0, 255), lineWidth, CV_AA);
+    circle(image, c1, 2, Scalar(0, 255, 0), lineWidth, CV_AA);
   }
 
   //solvlets are draw, now draw the skeleton from parent frame
@@ -621,31 +626,33 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   tree<BodyPart> partTree = parentSkel.getPartTree();
 
   //draw the skeletal prior
-  for (tree<BodyPart>::iterator partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
-  {
-    //get joints
-    int j0, j1;
-    j0 = partIter->getParentJoint();
-    j1 = partIter->getChildJoint();
+//  for (tree<BodyPart>::iterator partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
+//  {
+//    //get joints
+//    int j0, j1;
+//    j0 = partIter->getParentJoint();
+//    j1 = partIter->getChildJoint();
 
-    Point2f p0, p1;
+//    Point2f p0, p1;
 
-    p0 = parentSkel.getBodyJoint(j0)->getImageLocation();
-    p1 = parentSkel.getBodyJoint(j1)->getImageLocation();
+//    p0 = parentSkel.getBodyJoint(j0)->getImageLocation();
+//    p1 = parentSkel.getBodyJoint(j1)->getImageLocation();
 
-    line(image, p0, p1, Scalar(0, 255, 255), lineWidth, CV_AA);
+//    line(image, p0, p1, Scalar(0, 255, 255), lineWidth, CV_AA);
 
-    float pixelRadius = partIter->getSearchRadius();
-    float angleRadius = partIter->getRotationSearchRange();
+//    //draw the child and parent joints
+//    circle(image, p0, 2, Scalar(255, 0, 255), lineWidth, CV_AA);
+//    circle(image, p1, 2, Scalar(0, 255, 0), lineWidth, CV_AA);
 
-    circle(image, 0.5*p0 + 0.5*p1, (int)pixelRadius, Scalar(0, 0, 0), lineWidth, CV_AA);
-    //draw upright black halfcircle
-    //compute
+//    //draw angle arcs
+//    float pixelRadius = partIter->getSearchRadius();
+//    float angleRadius = partIter->getRotationSearchRange();
 
-    double startAngleUpright = PoseHelper::angle2D((p1 - p0).x, (p1 - p0).y, 1.0, 0.0)*180.0 / M_PI;
-    ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - angleRadius, startAngleUpright + angleRadius, Scalar(255, 255, 255), lineWidth, CV_AA);
-    //ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,-startAngleUpright+180.0,startAngleUpright+180+angleRadius,Scalar(0,255,0),lineWidth,CV_AA);
-  }
+//    circle(image, 0.5*p0 + 0.5*p1, (int)pixelRadius, Scalar(0, 0, 0), lineWidth, CV_AA);
+//    double startAngleUpright = PoseHelper::angle2D((p1 - p0).x, (p1 - p0).y, 1.0, 0.0)*180.0 / M_PI;
+//    ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - angleRadius, startAngleUpright + angleRadius, Scalar(255, 255, 255), lineWidth*0.5, CV_AA);
+//    ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,-startAngleUpright+180.0,startAngleUpright+180+angleRadius,Scalar(0,255,0),lineWidth,CV_AA);
+//  }
 
   //  //draw the skeleton resulting from solve
   //  partTree = skel.getPartTree();

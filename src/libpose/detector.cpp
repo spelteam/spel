@@ -57,11 +57,26 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
   c2 = Point2f(boneLength, 0.5f * boxWidth);
   c3 = Point2f(boneLength, -0.5f * boxWidth);
   c4 = Point2f(0.f, -0.5f * boxWidth);
-  polyCenter = Point2f(boneLength * 0.5f, 0.f);
-  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
-  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
-  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
-  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
+
+//  polyCenter = Point2f(boneLength * 0.5f, 0.f);
+//  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
+//  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
+//  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
+//  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
+
+
+  c1 = PoseHelper::rotatePoint2D(c1, Point2f(0,0), angle);
+  c2 = PoseHelper::rotatePoint2D(c2, Point2f(0,0), angle);
+  c3 = PoseHelper::rotatePoint2D(c3, Point2f(0,0), angle);
+  c4 = PoseHelper::rotatePoint2D(c4, Point2f(0,0), angle);
+
+  polyCenter = 0.25*c1+0.25*c2+0.25*c3+0.25*c4;
+
+  c1=c1-polyCenter+boxCenter;
+  c2=c2-polyCenter+boxCenter;
+  c3=c3-polyCenter+boxCenter;
+  c4=c4-polyCenter+boxCenter;
+
   return POSERECT <Point2f>(c1, c2, c3, c4);
 }
 
