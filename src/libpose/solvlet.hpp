@@ -22,6 +22,7 @@ class Solvlet
     void setFrameID(int _id);
 
     vector<LimbLabel> getLabels(void) const;
+    const vector<LimbLabel>* getLabelsPtr() const;
     void setLabels(vector<LimbLabel> _labels);
 
     Skeleton toSkeleton(const Skeleton &example);

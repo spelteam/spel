@@ -40,9 +40,9 @@ class BodyPart
     void setSearchRadius(float _searchRadius);
     POSERECT <Point2f> getPartPolygon(void);
     void setPartPolygon(POSERECT <Point2f> _partPolygon);
-    float getLWRatio(void);
+    float getLWRatio(void) const;
     void setLWRatio(float _lwRatio);
-    float getRelativeLength(void);
+    float getRelativeLength(void) const;
     void setRelativeLength(float _relativeLength);
     float getRotationSearchRange(void);
     void setRotationSearchRange(float _rotationAngle);

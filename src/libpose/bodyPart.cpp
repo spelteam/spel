@@ -192,7 +192,7 @@ void BodyPart::setPartPolygon(POSERECT <Point2f> _partPolygon)
   partPolygon = _partPolygon;
 }
 
-float BodyPart::getLWRatio(void)
+float BodyPart::getLWRatio(void) const
 {
   return lwRatio;
 }
@@ -202,7 +202,7 @@ void BodyPart::setLWRatio(float _lwRatio)
   lwRatio = _lwRatio;
 }
 
-float BodyPart::getRelativeLength(void)
+float BodyPart::getRelativeLength(void) const
 {
   return relativeLength;
 }

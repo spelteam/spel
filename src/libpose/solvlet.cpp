@@ -45,6 +45,11 @@ vector<LimbLabel> Solvlet::getLabels(void) const
 {
 	return labels;
 }
+
+const vector<LimbLabel>* Solvlet::getLabelsPtr() const{
+    return &labels;
+}
+
 void Solvlet::setLabels(vector<LimbLabel> _labels)
 {
 	labels = _labels;
