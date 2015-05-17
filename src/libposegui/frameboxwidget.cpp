@@ -12,6 +12,7 @@ FrameBoxWidget::FrameBoxWidget(QWidget *parent ) :
     changeViewer = new QPushButton(this);
     changeViewer->setIcon(QPixmap(QString(":/root/resources/icons/view2d.png")));
     changeViewer->setToolTip("Change view to 2D/3D");
+    changeViewer->setEnabled(false);
 
     frametypeSelector = new QPushButton(this);
     frametypeSelector->setIcon(QPixmap(QString(":/root/resources/icons/key_free.png")));
@@ -20,7 +21,7 @@ FrameBoxWidget::FrameBoxWidget(QWidget *parent ) :
     maskEditor = new QPushButton(this);
     maskEditor->setIcon(QPixmap(QString(":/root/resources/icons/big_mask.png")));
     maskEditor->setToolTip("Create/Edit mask");
-
+    maskEditor->setEnabled(false);
     //TODO:[T] change options
     itemSkaler = new QSlider(Qt::Orientation::Horizontal, this);
     itemSkaler->setToolTip("Scale body joints/parts");
@@ -28,6 +29,7 @@ FrameBoxWidget::FrameBoxWidget(QWidget *parent ) :
     itemSkaler->setMaximum(100);
     itemSkaler->setSingleStep(1);
     itemSkaler->setPageStep(1);
+    itemSkaler->setEnabled(false);
     //TODO:[T] chagne options
     maskViewer = new QSlider(Qt::Orientation::Horizontal, this);
     maskViewer->setToolTip("Set opacity of the mask");
@@ -35,6 +37,7 @@ FrameBoxWidget::FrameBoxWidget(QWidget *parent ) :
     maskViewer->setMaximum(255);
     maskViewer->setSingleStep(1);
     maskViewer->setPageStep(1);
+    maskViewer->setEnabled(false);
     //layouts
     MainLayout = new QHBoxLayout();
     MainLayout->addWidget(changeViewer);

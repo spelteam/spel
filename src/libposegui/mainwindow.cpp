@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //view
     ui->setupUi(this);
     framesView = new FrameTableWidget();
-    editTools = new ToolBoxWidget();
+    //editTools = new ToolBoxWidget();
     solveTools = new SolveBoxWidget();
     frameTools = new FrameBoxWidget(framesView);
     currFrame = new FrameView2D();
@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     FrameLayout->addWidget(currFrame->view,10);
 
     ToolLayout = new QHBoxLayout;
-    ToolLayout->addWidget(editTools,1);
+    //ToolLayout->addWidget(editTools,1);
     ToolLayout->addLayout(FrameLayout,8);
     ToolLayout->addWidget(solveTools,1);
 
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     MainLayout->addWidget(progressBar,1);
     ui->centralWidget->setLayout(MainLayout);
     //set styles for group boxes
-    this->setStyleSheet( Utility::fileToString(":/root/resources/stylesheets/Toolbox.qss") );
+    this->setStyleSheet( posegui::Utility::fileToString(":/root/resources/stylesheets/Toolbox.qss") );
     //connect
     Project::getInstance();//connect events at Project constructor
     //loading
@@ -90,13 +90,17 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete framesView;
-    delete editTools;
+    //delete editTools;
     delete solveTools;
     delete frameTools;
     delete  currFrame;
 }
 
 //PROTECTED
+
+void MainWindow::closeEvent(QCloseEvent *){
+    Project::getInstance().close();
+}
 
 //PRIVATE
 

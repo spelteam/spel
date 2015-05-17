@@ -26,7 +26,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+protected:
+    void closeEvent(QCloseEvent *) override;
 private slots:
     void on_actionClose_triggered();
 
@@ -39,7 +40,7 @@ private:
     //view
     Ui::MainWindow *ui;
     FrameTableWidget *framesView;
-    ToolBoxWidget *editTools;
+    //ToolBoxWidget *editTools;
     SolveBoxWidget *solveTools;
     FrameBoxWidget *frameTools;
     FrameView2D *currFrame;
