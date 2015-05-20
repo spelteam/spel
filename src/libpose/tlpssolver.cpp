@@ -4,6 +4,7 @@
 #include "lockframe.hpp"
 #include "colorHistDetector.hpp"
 #include "hogDetector.hpp"
+#include "surfDetector.hpp"
 #include "math.h"
 #include "interpolation.hpp"
 
@@ -34,19 +35,44 @@ vector<Solvlet> TLPSSolver::solve(Sequence &frames) //inherited virtual
 
 vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params) //inherited virtual
 {
-    params.emplace("debugLevel", 1); //set the default debug info level
-    params.emplace("useHoGdet", 1); //set the default debug info level
-    params.emplace("useCSdet", 0); //set the default debug info level
-    params.emplace("useSURFdet", 0); //set the default debug info level
-    params.emplace("maxPartCandidates", 300); //set the default debug info level
+    //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
+    params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
 
-    uint32_t maxPartCandidates = params.at("maxPartCandidates");
+    //detector enablers
+    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+    params.emplace("maxPartCandidates", 5000); //set the max number of part candidates to allow into the solver
+
+    //detector search parameters
+    params.emplace("baseRotationRange", 50); //search angle range of +/- 60 degrees
+    params.emplace("baseSearchRadius", 20); //search a radius of 100 pixels
+    params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
+    params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
+    params.emplace("partShiftCoeff", 1.5); //search radius multiplier of distance between part in current and prev frames
+    params.emplace("partRotationCoeff", 1.5); //rotation radius multiplier of distance between part in current and prev frames
+
+    //solver sensitivity parameters
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+    params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
+    params.emplace("tempCoeff", 0.0); //set the temporal link coefficient
+    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+    params.emplace("anchorCoeff", 0.0); //set the anchor coefficient cost
+
+    //solver eval parameters
+    params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
+
+    float baseRotationRange = params.at("baseRotationRange");
+    float baseRotationStep = params.at("baseRotationStep");
+    int baseSearchRadius = params.at("baseSearchRadius");
+    float partShiftCoeff = params.at("partShiftCoeff");
+    float partRotationCoeff = params.at("partRotationCoeff");
+
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
-    int debugLevel = params.at("debugLevel");
-
-    sequence.computeInterpolation(params); //interpolate the sequences
-
+    float useSURF = params.at("useSURFdet");
+    uint32_t debugLevel = params.at("debugLevel");
     //first slice up the sequences
     if(debugLevel>=1)
         cout << "TLPSSolver started, slicing sequence..." << endl;
@@ -72,11 +98,9 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
             detectors.push_back(new HogDetector());
         if(useCS)
             detectors.push_back(new ColorHistDetector());
-        //train detectors
-        //        Detector * testDet;
-        //        if(useHoG)
-        //            testDet = new HogDetector();
-        //ColorHistDetector chDetector;
+        if(useSURF)
+            detectors.push_back(new SurfDetector());
+
         vector<Frame*> trainingFrames;
         trainingFrames.push_back(seqSlice.front()); //set training frame by index
         trainingFrames.push_back(seqSlice.back());
@@ -111,17 +135,28 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                 labels = detectors[i]->detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
             }
 
-            for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+            //now sort them in the correct oder
+            for(uint32_t i=0; i<labels.size(); ++i)
             {
-                vector<LimbLabel> temp;
-                for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+                for(uint32_t j=0; j<labels.size();++j)
                 {
-                    temp.push_back(labelPartsIter->at(currentSize));
+                    if(labels[j].at(0).getLimbID()==i)
+                        tempLabels.push_back(labels[j]);
                 }
-                tempLabels.push_back(temp);
             }
+            labels = tempLabels;
 
-            detections[currentFrame] = tempLabels; //store all detections into detections
+//            for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+//            {
+//                vector<LimbLabel> temp;
+//                for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+//                {
+//                    temp.push_back(labelPartsIter->at(currentSize));
+//                }
+//                tempLabels.push_back(temp);
+//            }
+
+            detections[currentFrame] = labels; //store all detections into detections
         }
 
         vector<size_t> numbersOfLabels; //numbers of labels per part
@@ -148,8 +183,49 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
         //now do the factors
         for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
         {
-            tree<BodyPart> partTree = seqSlice[currentFrame]->getSkeleton().getPartTree();
-            tree<BodyPart>::iterator partIter, parentPartIter;
+            Skeleton tempSkel = seqSlice[currentFrame]->getSkeleton(); //this frame interpolated skeleton
+            Skeleton pSkel = seqSlice[currentFrame-1]->getSkeleton(); //previous frame interpolated skeleton
+            tree<BodyPart> partTree = tempSkel.getPartTree();
+            tree<BodyPart> prevPartTree = pSkel.getPartTree();
+            tree<BodyPart>::iterator partIter, parentPartIter, prevPartIter;
+
+            partIter=partTree.begin();
+            prevPartIter=prevPartTree.begin();
+
+            while(partIter!=partTree.end() && prevPartIter!= prevPartTree.end())
+            {
+                //compute prev part angle
+                Point2f p0, p1, c0, c1;
+                p0 = pSkel.getBodyJoint(prevPartIter->getParentJoint())->getImageLocation();
+                p1 = pSkel.getBodyJoint(prevPartIter->getChildJoint())->getImageLocation();
+
+                c0 = tempSkel.getBodyJoint(partIter->getParentJoint())->getImageLocation();
+                c1 = tempSkel.getBodyJoint(partIter->getChildJoint())->getImageLocation();
+                //compute prev part centre shift
+                Point2f partCentre = 0.5*c0+0.5*c1;
+                Point2f prevPartCentre = 0.5*p0+0.5*p1;
+
+                Point2f partShift = partCentre-prevPartCentre;
+
+                //set the search range based on distance body part centre has moved between previous frame and this frame
+                float searchRange = sqrt(partShift.x*partShift.x+partShift.y*partShift.y)*partShiftCoeff;
+
+                //bow compute the rotation angle change
+                float partAngle = float(PoseHelper::angle2D(1.0, 0, c1.x - c0.x, c1.y - c0.y) * (180.0 / M_PI));
+                float prevAngle = float(PoseHelper::angle2D(1.0, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+
+                //set search radius based on part rotation between previous frame and this frame
+                float rotationRange = (partAngle-prevAngle)*partRotationCoeff;
+
+                partIter->setRotationSearchRange(rotationRange);
+                partIter->setSearchRadius(searchRange);
+
+                partIter++;
+                prevPartIter++;
+            }
+
+            tempSkel.setPartTree(partTree); //set the part tree for the skel
+            seqSlice[currentFrame]->setSkeleton(tempSkel); //set the skeleton for the frame
 
             //construct the image score cost factors
             //label score cost
@@ -168,8 +244,6 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                 for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
                 {
                     float cost = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
-                    if(cost==0)
-                        cost = FLT_MIN;
                     scoreCostFunc(i) = cost;
                 }
 
@@ -179,14 +253,23 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
                 if(currentFrame == 1) //anchor to first skeleton in sequence
                 {
+                    float anchorMin=FLT_MAX, anchorMax=0;
+                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i)
+                    {
+                        float val = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params);
+
+                        if(val<anchorMin)
+                            anchorMin = val;
+                        if(val>anchorMax && val != FLT_MAX)
+                            anchorMax = val;
+                    }
+
                     //we already know the shape from the previous functions
                     ExplicitFunction<float> anchorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
                     for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
                     {
-                        float cost = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params);
-                        if(cost==0)
-                            cost = FLT_MIN;
+                        float cost = computeNormAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params, anchorMax);
                         anchorCostFunc(i) = cost;
                     }
 
@@ -198,14 +281,22 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                 //anchor to last frame of the slice (i.e. to frame=seqSlice.size()-1
                 else if(currentFrame==(seqSlice.size()-2)) //anchor to
                 {
+                    float anchorMin=FLT_MAX, anchorMax=0;
+                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i)
+                    {
+                        float val = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[seqSlice.size()-1], params);
+
+                        if(val<anchorMin)
+                            anchorMin = val;
+                        if(val>anchorMax && val != FLT_MAX)
+                            anchorMax = val;
+                    }
                     //we already know the shape from the previous functions
                     ExplicitFunction<float> anchorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
                     for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
                     {
-                        float cost = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[seqSlice.size()-1], params);
-                        if(cost==0)
-                            cost = FLT_MIN;
+                        float cost = computeNormAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[seqSlice.size()-1], params, anchorMax);
                         anchorCostFunc(i) = cost;
                     }
 
@@ -225,14 +316,37 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                     size_t jointCostShape[]={labels[parentPartIter->getPartID()].size(), labels[partIter->getPartID()].size()}; //number of labels
                     ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
 
+                    //first figure out which of the current body part's joints should be in common with the parent body part
+
+                    bool toChild=false;
+                    int pj = parentPartIter->getChildJoint();
+                    int cj = partIter->getParentJoint();
+                    if(pj==cj)
+                    {
+                        //then current parent is connected to paren
+                        toChild=true;
+                    }
+
+                    float jointMin=FLT_MAX, jointMax=0;
+                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+                    {
+                        for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
+                        {
+                            float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, toChild);
+
+                            if(val<jointMin)
+                                jointMin = val;
+                            if(val>jointMax && val != FLT_MAX)
+                                jointMax = val;
+                        }
+                    }
+
                     for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
                     {
                         for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
                         {
                             //for every child/parent pair, compute score
-                            float cost = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params);
-                            if(cost==0)
-                                cost = FLT_MIN;
+                            float cost = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
                             jointCostFunc(j, i) = cost;
                         }
                     }
@@ -245,6 +359,21 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                 //futre temporal link (if not anchored)
                 if(currentFrame<seqSlice.size()-2)
                 {
+
+                    float tempMin=FLT_MAX, tempMax=0;
+                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+                    {
+                        for(uint32_t j=0; j<detections[currentFrame+1][partIter->getPartID()].size(); ++j)
+                        {
+                            float val = computeFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame+1][partIter->getPartID()].at(j), params);
+
+                            if(val<tempMin)
+                                tempMin = val;
+                            if(val>tempMax && val != FLT_MAX)
+                                tempMax = val;
+                        }
+                    }
+
                     varIndices.clear();
                     varIndices.push_back((currentFrame-1)*partTree.size()+partIter->getPartID()); //push back parent partID as the second variable index
                     varIndices.push_back((currentFrame)*partTree.size()+partIter->getPartID());
@@ -256,9 +385,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                     {
                         for(uint32_t j=0; j<detections[currentFrame+1][partIter->getPartID()].size(); ++j)
                         {
-                            float cost = computeFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame+1][partIter->getPartID()].at(j), params);
-                            if(cost==0)
-                                cost = FLT_MIN;
+                            float cost = computeNormFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame+1][partIter->getPartID()].at(j), params, tempMax);
                             futureTempCostFunc(i,j) = cost;
                         }
                     }
@@ -341,7 +468,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
         cout << sequenceSolvlets.size() << " slices solved." << endl;
     //sequence solvlets now contain all the solvlets for the entire sequence
 
-    //rearrange this into one vector of solvlets before returning
+    //rearrange this into one vector of solvlets for evaluation
     vector<Solvlet> retSolve;
     for(uint32_t i=0; i<sequenceSolvlets.size();++i)
     {
@@ -351,13 +478,177 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
         }
     }
 
+    vector<Frame*> frames = sequence.getFrames();
+
+    float acceptLockframeThreshold = params.at("acceptLockframeThreshold");
+    if(acceptLockframeThreshold>0) //if it's greater than zero, we want to evaluate solves before returning them
+    {
+        vector<Solvlet> passedSolves;
+        for(uint32_t i=0; i<retSolve.size();++i)
+        {
+            Solvlet solvlet=retSolve[i];
+            float score=evaluateSolution(frames[retSolve[i].getFrameID()],
+                    solvlet.getLabels(), params);
+
+            if(score>=acceptLockframeThreshold) //if the frame passed the test
+            {
+                passedSolves.push_back(solvlet);
+                //generate lockframe
+
+                //set lockframe to frame
+                int thisFrameID  = solvlet.getFrameID();
+                int parentFrameID = thisFrameID;//this frame is it's own parent frame, since this is a temporal solve
+
+                Lockframe * lockframe = new Lockframe();
+                lockframe->setImage(frames[thisFrameID]->getImage());
+                lockframe->setMask(frames[thisFrameID]->getMask());
+                lockframe->setID(thisFrameID);
+                Skeleton parentSkel = frames[parentFrameID]->getSkeleton(); //use skeleton to mimic the structure of
+                Skeleton skel = solvlet.toSkeleton(parentSkel);
+                //parent skeleton is the basis, this will copy scale and other params, but have different locations
+                lockframe->setSkeleton(skel);
+                lockframe->setParentFrameID(parentFrameID);
+
+                frames[thisFrameID] = lockframe;
+            }
+        }
+        retSolve = passedSolves; //return these solves
+    }
+
     return retSolve;
 }
 
 float TLPSSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params)
 {
-    //Solution evaluator - how should this work? What should it return? What should it do?
-    return 0;
+    // /*
+    //   There should clearly be several factors that affect the outcome of an evaluation:
+    //   1) Mask coverage
+    //   2) Parts falling outside mask range
+    //   3) ?
+
+    //   */
+
+    //engaged pixles - the total number of pixels that are either within a limb label of within the mask
+    //correct pixels - those pixles that are black and outside a label, and white and inside a label
+    //incorrect pixels - those pixels that are black and inside a label, and white and outside a label
+    //score = correct/(correct+incorrect)
+
+    //emplace defaults
+    params.emplace("badLabelThresh", 0.4); //if less than 40% of the pixels are in the mask, label this label bad
+    params.emplace("debugLevel", 1);
+
+    int debugLevel = params.at("debugLevel");
+
+    Mat mask = frame->getMask();
+    int correctPixels=0, incorrectPixels=0;
+    int pixelsInMask=0;
+    int coveredPixelsInMask=0;
+    int incorrectlyCoveredPixels=0;
+    int missedPixels=0;
+
+    for(int i=0; i<mask.cols; ++i) //at every col - x
+    {
+        for(int j=0; j<mask.rows; ++j) //and every row - y
+        {
+            //int test = labels[0].containsPoint(Point2f(480,100));
+            //check whether pixel hit a label from solution
+            bool labelHit=false;
+            for(vector<LimbLabel>::iterator label=labels.begin(); label!=labels.end(); ++label)
+            {
+                if(label->containsPoint(Point2f(i,j))) //this is done in x,y coords
+                {
+                    labelHit=true;
+                    //break;
+                }
+            }
+
+            //check pixel colour
+            int intensity = mask.at<uchar>(j, i); //this is done with reve
+            bool blackPixel=(intensity<10);
+
+            if(!blackPixel)
+                pixelsInMask++;
+
+            if(blackPixel && labelHit) //if black in label, incorrect
+            {
+                incorrectPixels++;
+                incorrectlyCoveredPixels++;
+            }
+            else if(!blackPixel && !labelHit) //if white not in label, incorret
+            {
+                incorrectPixels++;
+                missedPixels++;
+            }
+            else if(!blackPixel && labelHit)//otherwise correct
+            {
+                correctPixels++;
+                coveredPixelsInMask++;
+            }
+            //            else //black pixel and not label hit
+            //                correctPixels++; //don't count these at all?
+        }
+    }
+
+
+    double solutionEval = (float)correctPixels/((float)correctPixels+(float)incorrectPixels);
+
+    if(debugLevel>=1)
+        cerr << "Solution evaluation score - " << solutionEval << endl;
+
+    //now check for critical part failures - label mostly outside of mask
+
+    vector<Point2f> badLabelScores;
+    float badLabelThresh = params.at("badLabelThresh");
+
+    for(vector<LimbLabel>::iterator label = labels.begin(); label!=labels.end(); ++label)
+    {
+        vector<Point2f> poly = label->getPolygon(); //get the label polygon
+        //compute min and max x and y
+        //float xMin, xMax, yMin, yMax;
+        vector<float> xS = {poly[0].x, poly[1].x, poly[2].x, poly[3].x};
+        vector<float> yS = {poly[0].y, poly[1].y, poly[2].y, poly[3].y};
+        auto xMin = min_element(xS.begin(), xS.end());
+        auto xMax = max_element(xS.begin(), xS.end());
+
+        auto yMin = min_element(yS.begin(), yS.end());
+        auto yMax = max_element(yS.begin(), yS.end());
+
+        int labelPixels=0;
+        int badLabelPixels=0;
+
+        for(int x=*xMin; x<*xMax; ++x)
+        {
+            for(int y=*yMin; y<*yMax; ++y)
+            {
+                if(label->containsPoint(Point2f(x,y)))
+                {
+                    int intensity = mask.at<uchar>(y, x); //this is done with reverse y,x
+                    bool blackPixel=(intensity<10);
+                    labelPixels++;
+                    if(blackPixel)
+                        ++badLabelPixels;
+                }
+            }
+        }
+
+        float labelRatio = 1.0-(float)badLabelPixels/(float)labelPixels; //high is good
+
+        if(labelRatio<badLabelThresh /*&& !label->getIsWeak()*/ && !label->getIsOccluded()) //not weak, not occluded, badly localised
+            badLabelScores.push_back(Point2f(label->getLimbID(), labelRatio));
+    }
+
+    if(debugLevel>=1)
+    {
+        for(vector<Point2f>::iterator badL=badLabelScores.begin(); badL!=badLabelScores.end(); ++badL)
+        {
+            cerr << "Part " << badL->x << " is badly localised, with score " << badL->y << endl;
+        }
+    }
+
+//    if(badLabelScores.size()!=0) //make the solution eval fail if a part is badly localised
+//        solutionEval=solutionEval-1.0;
+
+    return solutionEval;
 }
 
 int TLPSSolver::findFrameIndexById(int id, vector<Frame*> frames)
@@ -370,54 +661,134 @@ int TLPSSolver::findFrameIndexById(int id, vector<Frame*> frames)
     return -1;
 }
 
+//compute label score
 float TLPSSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
-    //@FIX
-    params.emplace("imageCoeff", 0.5);
-    params.emplace("scoreIndex", 0);
+//    if(label.getIsOccluded() )// || label.getIsWeak()) //if it's occluded, return zero
+//        return 0;
+
+    string hogName = "18500";
+    string csName = "4409412";
+    string surfName = "21316";
+
+    params.emplace("imageCoeff", 1.0);
+    params.emplace("useCSdet", 1.0);
+    params.emplace("useHoGdet", 0.0);
+    params.emplace("useSURFdet", 0.0);
+
     float lambda = params.at("imageCoeff");
-    float scoreIndex = params.at("scoreIndex");
-    //for now, just return the first available score
+
+    //@FIX
+    float useHoG = params.at("useHoGdet");
+    float useCS = params.at("useCSdet");
+    float useSURF = params.at("useSURFdet");
+
+    //TODO: Fix score combinations
     vector<Score> scores = label.getScores();
-    if(scores.size()>0)
+
+    //compute the weighted sum of scores
+    float finalScore=0;
+    for(uint32_t i=0; i<scores.size(); ++i)
     {
-        return lambda*scores[scoreIndex].getScore();
+        if(scores[i].getDetName()==hogName)
+            finalScore = finalScore+scores[i].getScore()*useHoG;
+        else if(scores[i].getDetName()==csName)
+            finalScore = finalScore+scores[i].getScore()*useCS;
+        else if(scores[i].getDetName()==surfName)
+            finalScore = finalScore+scores[i].getScore()*useSURF;
     }
-    else //if no scores present return -1
-        return -1;
+
+    return finalScore;
 }
 
-float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params)
+//compute distance to parent limb label
+float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, bool toChild)
 {
     //emplace default
-    params.emplace("jointCoeff", 0.5);
-    float lambda = params.at("jointCoeff");
-    //@PARAM there should be a parameter that sets the joint connectivity penalty constant (alpha)
-    //compute the joint joining cost for the skeleton
+    //params.emplace("jointCoeff", 0.5);
+    //float lambda = params.at("jointCoeff");
     Point2f p0, p1, c0, c1;
 
     //@FIX this is really too simplistic, connecting these points
     child.getEndpoints(c0,c1);
     parent.getEndpoints(p0,p1);
 
+    //normalise this?
+
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
-    return lambda*(pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2));
+    if(toChild)
+        return sqrt(pow((c0.x-p1.x), 2)+pow((c0.y-p1.y), 2));
+    else //otherwise we're connected to the parent's parent body part
+        return sqrt(pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2));
 }
 
-float TLPSSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, Skeleton& skeleton, map<string, float> params)
+float TLPSSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float max, bool toChild)
 {
     //emplace default
-    params.emplace("priorCoeff", 0.5);
-    float lambda = params.at("priorCoeff");
-    //@PARAM there should be a parameter that sets the strength of the penalty when deviating from the prior
-    //compute the cost to interpolation prior
-    Point2f p0, p1;
+    params.emplace("jointCoeff", 0.5);
+    params.emplace("jointLeeway", 0.05);
+    params.emplace("debugLevel", 1);
+
+    //read params
+    float lambda = params.at("jointCoeff");
+    int debugLevel = params.at("debugLevel");
+
+    //float leeway = params.at("jointLeeway");
+    Point2f p0, p1, c0, c1;
+
+    //@FIX this is really too simplistic, connecting these points
+    child.getEndpoints(c0,c1);
+    parent.getEndpoints(p0,p1);
+
+    //child length
+    //float clen = sqrt(pow(c0.x-c1.x, 2)+pow(c0.y-c1.y, 2));
+
+    //normalise this?
+    //give some leeway
+    float score = 0;
+    if(toChild) //connected to parent's child joint
+        score = sqrt(pow(c0.x-p1.x, 2)+pow(c0.y-p1.y, 2))/max;
+    else //else connected to parent's parent joint
+        score = sqrt(pow(c0.x-p0.x, 2)+pow(c0.y-p0.y, 2))/max;
+//    if(score<(clen*leeway)/max) //any distnace below leeway is zero
+//        score=0;
+    //return the squared distance from the lower parent joint p1, to the upper child joint c0
+
+    //output a sentence about who connected to whom and what the score was
+    if(debugLevel>=1 && (child.getLimbID()==7 || child.getLimbID()==6) && !toChild)
+        cerr << "Part " << child.getLimbID() << " is connecting to part " << parent.getLimbID() << " PARENT joint" << endl;
+
+    return lambda*score;
+}
+
+float TLPSSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params)
+{
+    //  params.emplace("priorCoeff", 0.0);
+    //	float lambda = params.at("priorCoeff");
+    Point2f p0,p1, pp0, pp1;
     label.getEndpoints(p0,p1);
-    Point2f pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
-    Point2f pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
+    pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
+    pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
+
+    //normalise this cost?
 
     //return the sum of squared distances between the corresponding joints, prior to label
-    return lambda*(pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2));
+    return pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2);
+}
+
+float TLPSSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float max)
+{
+    params.emplace("priorCoeff", 0.0);
+    float lambda = params.at("priorCoeff");
+    Point2f p0,p1, pp0, pp1;
+    label.getEndpoints(p0,p1);
+    pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
+    pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
+
+    //normalise this cost?
+
+    //return the sum of squared distances between the corresponding joints, prior to label
+    return lambda*((pow((p0.x-pp0.x), 2)+pow((p0.y-pp0.y), 2)+pow((p1.x-pp1.x), 2)+pow((p1.y-pp1.y), 2))/max);
 }
 
 float TLPSSolver::computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, map<string, float> params)
@@ -436,7 +807,26 @@ float TLPSSolver::computePastTempCost(const LimbLabel& thisLabel, const LimbLabe
     pastLabel.getEndpoints(p0,p1);
 
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
-    return lambda*(pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2)+pow((c1.x-p1.x), 2)+pow((c1.y-p1.y), 2));
+    return (pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2)+pow((c1.x-p1.x), 2)+pow((c1.y-p1.y), 2));
+}
+
+float TLPSSolver::computeNormPastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, map<string, float> params, float max)
+{
+    //emplace default
+    params.emplace("tempCoeff", 0.5);
+    float lambda = params.at("tempCoeff");
+    //compute the temporal connection cost to label in the past
+
+    //@PARAM there should be a parameter that sets the temporal cost constant (beta)
+    //compute the joint joining cost for the skeleton
+    Point2f p0, p1, c0, c1;
+
+    //@FIX this is really too simplistic, connecting these points
+    thisLabel.getEndpoints(c0,c1);
+    pastLabel.getEndpoints(p0,p1);
+
+    //return the squared distance from the lower parent joint p1, to the upper child joint c0
+    return lambda*((pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2)+pow((c1.x-p1.x), 2)+pow((c1.y-p1.y), 2))/max);
 }
 
 float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, map<string, float> params)
@@ -452,10 +842,26 @@ float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLa
     thisLabel.getEndpoints(c0,c1);
     futureLabel.getEndpoints(p0,p1);
 
-    float score = lambda*(pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2)+pow((c1.x-p1.x), 2)+pow((c1.y-p1.y), 2));
+    float score = (pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2)+pow((c1.x-p1.x), 2)+pow((c1.y-p1.y), 2));
+    return score;
+}
+
+float TLPSSolver::computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, map<string, float> params, float max)
+{
+    //emplace default
+    params.emplace("tempCoeff", 0.5);
+    float lambda = params.at("tempCoeff");
+    //compute temporal connection cost to label in the future
+    //@PARAM there needs to be a beta param here as well
+    Point2f p0, p1, c0, c1;
+
+    //@FIX this is really too simplistic, connecting these points
+    thisLabel.getEndpoints(c0,c1);
+    futureLabel.getEndpoints(p0,p1);
+
+    float score = lambda*((pow((c0.x-p0.x), 2)+pow((c0.y-p0.y), 2)+pow((c1.x-p1.x), 2)+pow((c1.y-p1.y), 2))/max);
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
-    if(score==0)
-        cerr<<"Zero Score!" << endl;
+
     return score;
 }
 
@@ -477,7 +883,29 @@ float TLPSSolver::computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, m
     for(size_t i=0; i<partPolygon.size(); ++i)
         score+= pow(partPolygon[i].x-labelPolygon[i].x, 2)+pow(partPolygon[i].y-labelPolygon[i].y,2);
 
-    return lambda*score;
+    return score;
+    //compute the cost of anchoring this label
+}
+
+float TLPSSolver::computeNormAnchorCost(const LimbLabel& thisLabel, Frame* anchor, map<string, float> params, float max)
+{
+    //emploace default
+    params.emplace("anchorCoeff", 1.0);
+    float lambda = params.at("anchorCoeff");
+
+    int limbId = thisLabel.getLimbID();
+
+    vector<Point2f> partPolygon = anchor->getPartPolygon(limbId);
+    vector<Point2f> labelPolygon = thisLabel.getPolygon();
+
+    assert(partPolygon.size()==labelPolygon.size());
+
+    //return the error between these'
+    float score=0;
+    for(size_t i=0; i<partPolygon.size(); ++i)
+        score+= pow(partPolygon[i].x-labelPolygon[i].x, 2)+pow(partPolygon[i].y-labelPolygon[i].y,2);
+
+    return lambda*score/max;
     //compute the cost of anchoring this label
 }
 

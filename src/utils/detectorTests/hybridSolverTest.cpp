@@ -9,7 +9,7 @@ int main (int argc, char **argv)
 {
     if (argc != 3)
     {
-        cout << "Usage nskpSolverTest [project.xml] [out directory]" << endl;
+        cout << "Usage hybridSolverTest [project.xml] [out directory]" << endl;
         return -1;
     }
     string curFolder = argv[1];
@@ -36,8 +36,6 @@ int main (int argc, char **argv)
     map <string, float> params; //use the default params
     params.emplace("debugLevel", 1); //set the debug setting to highest (0,1,2,3)
 
-    vector<Solvlet> solve;
-
     vector <Frame*> vFrames = projectLoader.getFrames();
     Sequence seq(0, "test", vFrames);
 
@@ -56,26 +54,49 @@ int main (int argc, char **argv)
         ism.buildImageSimilarityMatrix(vFrames);
         ism.write(("testISM.ism"));
     }
-    solve = nSolver.solve(seq, params, ism);
+    params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
+    params.emplace("acceptLockframeThreshold", 0.52); //set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+
+    vector<Solvlet> finalSolve;
+    int prevSolveSize=0;
+    do
+    {
+        prevSolveSize=finalSolve.size(); //set size of the final solve
+
+        vector<Solvlet> nskpSolve, tlpsSolve;
+        //do an iterative NSKP solve
+        nskpSolve = nSolver.solve(seq, params, ism);
+
+        for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end();++s)
+            finalSolve.push_back(*s);
+
+        //then, do a temporal solve
+        seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
+
+        tlpsSolve = tSolver.solve(seq, params);
+
+        for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=nskpSolve.end();++s)
+            finalSolve.push_back(*s);
+
+    } while(finalSolve.size()>prevSolveSize);
+
 
     //draw the solution
-    for(uint32_t i=0; i<solve.size();++i)
+    for(uint32_t i=0; i<finalSolve.size();++i)
     {
-        Frame* frame = seq.getFrames()[solve[i].getFrameID()];
+        Frame* frame = seq.getFrames()[finalSolve[i].getFrameID()];
         Frame* parent = seq.getFrames()[frame->getParentFrameID()];
 
-        projectLoader.drawLockframeSolvlets(ism, solve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
+        projectLoader.drawLockframeSolvlets(ism, finalSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
     }
 
-    seq.computeInterpolation(params);
-    solve = tSolver.solve(seq, params);
 
-    for(uint32_t i=0; i<solve.size();++i)
-    {
-        Frame* frame = vFrames[solve[i].getFrameID()];
+//    for(uint32_t i=0; i<solve.size();++i)
+//    {
+//        Frame* frame = vFrames[solve[i].getFrameID()];
 
-        projectLoader.drawFrameSolvlets(solve[i], frame, argv[2], Scalar(0,0,255), 1);
-    }
+//        projectLoader.drawFrameSolvlets(solve[i], frame, argv[2], Scalar(0,0,255), 1);
+//    }
 
     return 0;
 }

@@ -42,7 +42,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float> params)
 vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
 {
     //parametrise the number of times frames get propagated
-    params.emplace("nskpIters", 1); //set number of iterations, 0 to iterate until no new lockframes are introduced
+    params.emplace("nskpIters", 2); //set number of iterations, 0 to iterate until no new lockframes are introduced
 
     uint32_t nskpIters=params.at("nskpIters");
     if(nskpIters==0)
@@ -52,16 +52,22 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     sequence.computeInterpolation(params); //interpolate the sequence first
     //propagate keyframes
     vector<Frame*> propagatedFrames = sequence.getFrames();
+
     uint32_t lockframesLastIter=0;
-    for(uint32_t i=0; i<nskpIters; ++i)
+    vector<int> ignore; //frames to ignore during propagation
+
+    for(uint32_t iteration=0; iteration<nskpIters; ++iteration)
     {
-        if(i>=nskpIters)
+        if(iteration>=nskpIters)
             break;
 
-        vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism);
+        vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism, ignore);
 
+        //add the new solves to the return vector
         for(vector<Solvlet>::iterator s=sol.begin(); s!=sol.end();++s)
+        {
             solvlets.push_back(*s);
+        }
 
         //calculate number of lockframes in the sequence
         uint32_t numLockframes=0;
@@ -73,7 +79,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 
         if(numLockframes==lockframesLastIter) //terminate loop if no more lockframes are generated
         {
-            cerr << "Terminating keyframe propagation after " << i << " iterations." << endl;
+            cerr << "Terminating keyframe propagation after " << iteration << " iterations." << endl;
             break;
         }
         lockframesLastIter=numLockframes;
@@ -81,7 +87,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 
     //create tlps solver
     TLPSSolver tlps;
-    //sequence.setFrames(propagatedFrames);
+    sequence.setFrames(propagatedFrames);
 
     //the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
@@ -90,7 +96,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     //return tlps.solve(sequence, params);
 }
 
-vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism)
+vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix& ism, vector<int>& ignore)
 {
     // //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
     // float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
@@ -98,6 +104,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
+    params.emplace("propagateFromLockframes", 1); //don't propagate from lockframes, only from keyframes
 
     //detector enablers
     params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
@@ -106,9 +113,9 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("maxPartCandidates", 5000); //set the max number of part candidates to allow into the solver
 
     //detector search parameters
-    params.emplace("propagateToLockframes", 0); //don't propagate from lockframes, only from keyframes
+
     params.emplace("baseRotationRange", 50); //search angle range of +/- 60 degrees
-    params.emplace("baseSearchRadius", 20); //search a radius of 100 pixels
+    params.emplace("baseSearchRadius", 10); //search a radius of 100 pixels
     params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
@@ -127,12 +134,11 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     float baseRotationStep = params.at("baseRotationStep");
     int baseSearchRadius = params.at("baseSearchRadius");
 
-
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
     float useSURF = params.at("useSURFdet");
     uint32_t debugLevel = params.at("debugLevel");
-    bool propagateToLockframes=params.at("propagateToLockframes");
+    bool propagateFromLockframes=params.at("propagateFromLockframes");
 
     struct SolvletScore
     {
@@ -148,7 +154,6 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
         allSolves.push_back(vector<SolvletScore>()); //empty vector to every frame slot
     }
 
-
     vector<Frame*> lockframes;
 
     //build frame MSTs by ID's as in ISM
@@ -157,8 +162,21 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     for(uint32_t frameId=0; frameId<frames.size(); ++frameId)
     {
-        if(frames[frameId]->getFrametype()!=0x02) //as long as it's not an interpolated frame, try to propagate from it
+        bool isIgnored=false;
+        for(uint32_t i=0; i<ignore.size(); ++i)
         {
+            if(ignore[i]==frames[frameId]->getID())
+            {
+                isIgnored=true;
+                break;
+            }
+        }
+
+        if(frames[frameId]->getFrametype()!=INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
+                && (frames[frameId]->getFrametype()!=LOCKFRAME || propagateFromLockframes)) //and, if it's a lockframe, and solving from lockframes is allowed
+        {
+            ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
+
             tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
             tree<int>::iterator mstIter;
             //do OpenGM solve for single factor graph
@@ -181,9 +199,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
             for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
             {
-                if(frames[*mstIter]->getFrametype()==KEYFRAME) //skip keyframes
-                    continue;
-                else if(frames[*mstIter]->getFrametype()==LOCKFRAME && !propagateToLockframes) //skip lockframes, unless explicitly requested
+                if(frames[*mstIter]->getFrametype()==KEYFRAME || frames[*mstIter]->getFrametype()==LOCKFRAME) //don't push to existing keyframes and lockframes
                     continue;
                 //map<int, vector<LimbLabel> > labels;
                 vector<vector<LimbLabel> > labels, tempLabels;
@@ -468,8 +484,12 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     for(uint32_t i=0; i<lockframes.size();++i)
     {
-        *(frames[lockframes[i]->getID()]) = *(lockframes.at(i)); //make pointers point to the correct objects
-        solvlets.push_back(bestSolves[i].solvlet);
+        if(frames[lockframes[i]->getID()]->getFrametype()!=LOCKFRAME
+                && frames[lockframes[i]->getID()]->getFrametype()!=KEYFRAME) //never replace keyframes and existing lockframes
+        {
+            frames[lockframes[i]->getID()] = lockframes.at(i); //make pointers point to the correct objects
+            solvlets.push_back(bestSolves[i].solvlet);
+        }
     }
 
     cerr << "Generated " << lockframes.size() << " lockframes!" << endl;
@@ -723,7 +743,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     //score = correct/(correct+incorrect)
 
     //emplace defaults
-    params.emplace("badLabelThresh", 0.4); //if less than 40% of the pixels are in the mask, label this label bad
+    params.emplace("badLabelThresh", 0.52); //if less than 52% of the pixels are in the mask, label this label bad
     params.emplace("debugLevel", 1);
 
     int debugLevel = params.at("debugLevel");
@@ -781,9 +801,6 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
     double solutionEval = (float)correctPixels/((float)correctPixels+(float)incorrectPixels);
 
-    if(debugLevel>=1)
-        cerr << "Solution evaluation score - " << solutionEval << endl;
-
     //now check for critical part failures - label mostly outside of mask
 
     vector<Point2f> badLabelScores;
@@ -834,8 +851,11 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
         }
     }
 
-//    if(badLabelScores.size()!=0) //make the solution eval fail if a part is badly localised
-//        solutionEval=solutionEval-1.0;
+    if(badLabelScores.size()!=0) //make the solution eval fail if a part is badly localised
+        solutionEval=solutionEval-1.0;
+
+    if(debugLevel>=1)
+        cerr << "Solution evaluation score - " << solutionEval << endl;
 
     return solutionEval;
 }
