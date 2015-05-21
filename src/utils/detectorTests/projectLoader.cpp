@@ -1057,7 +1057,11 @@ bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector
 
 Mat ProjectLoader::drawHoGDescriptors(HogDetector::PartModel model, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins)
 {
-  Mat img = model.partImage.clone();
+  const int imgScale = 10;
+  const int descriptorScale = 3;
+
+  Mat img;
+  resize(model.partImage, img, Size(model.partImage.cols * imgScale, model.partImage.rows * imgScale));
   float radRangeForOneBin = 3.14 / (float)nbins;
   int cells_in_x_dir = model.partImage.cols / cellSize.width;
   int cells_in_y_dir = model.partImage.rows / cellSize.height;
@@ -1072,7 +1076,7 @@ Mat ProjectLoader::drawHoGDescriptors(HogDetector::PartModel model, Scalar lineC
       int mx = drawX + cellSize.width / 2;
       int my = drawY + cellSize.height / 2;
 
-      rectangle(img, Point(drawX, drawY), Point((drawX + cellSize.width), (drawY + cellSize.height)), lineColor, lineWidth);
+      rectangle(img, Point(drawX * imgScale, drawY * imgScale), Point((drawX  * imgScale + cellSize.width * imgScale), (drawY  * imgScale + cellSize.height * imgScale)), lineColor, lineWidth);
 
       // draw in each cell all 9 gradient strengths
       for (int bin = 0; bin < nbins; bin++)
@@ -1087,18 +1091,16 @@ Mat ProjectLoader::drawHoGDescriptors(HogDetector::PartModel model, Scalar lineC
 
         float dirVecX = cos(currRad);
         float dirVecY = sin(currRad);
-        float maxVecLen = cellSize.width / 2;
-        float scale = 1.0f;//viz_factor; // just a visual_imagealization scale,
-        // to see the lines better
+        float maxVecLen = cellSize.width / 2;       
 
         // compute line coordinates
-        float x1 = mx - dirVecX * currentGradStrength * maxVecLen * scale;
-        float y1 = my - dirVecY * currentGradStrength * maxVecLen * scale;
-        float x2 = mx + dirVecX * currentGradStrength * maxVecLen * scale;
-        float y2 = my + dirVecY * currentGradStrength * maxVecLen * scale;
+        float x1 = mx - dirVecX * currentGradStrength * maxVecLen * descriptorScale;
+        float y1 = my - dirVecY * currentGradStrength * maxVecLen * descriptorScale;
+        float x2 = mx + dirVecX * currentGradStrength * maxVecLen * descriptorScale;
+        float y2 = my + dirVecY * currentGradStrength * maxVecLen * descriptorScale;
 
         // draw gradient visual_imagealization
-        line(img, Point(x1/**scaleFactor*/, y1/**scaleFactor*/), Point(x2/**scaleFactor*/, y2/**scaleFactor*/), descriptorColor, descriptorWidth);
+        line(img, Point(x1 * imgScale, y1 * imgScale), Point(x2 * imgScale, y2 * imgScale), descriptorColor, descriptorWidth);
 
       } // for (all bins)
 
