@@ -148,6 +148,7 @@ int main (int argc, char **argv)
           labels = detector.detect(f, detectParams, labels);
           projectLoader.Save(labels, argv[2], f->getID());
           projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
+          projectLoader.drawHoGDescriptors(detector.getPartModels(), detector.getLabelModels(), argv[2], Scalar(255, 0, 0), Scalar(0, 255, 0), 1, 1, detector.getCellSize(), detector.getnbins());
         }
         catch (exception &e)
         {

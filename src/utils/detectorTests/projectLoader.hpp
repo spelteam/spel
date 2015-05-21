@@ -18,6 +18,7 @@
 #include <interpolation.hpp>
 #include <solvlet.hpp>
 #include <imagesimilaritymatrix.hpp>
+#include <hogDetector.hpp>
 
 using namespace std;
 using namespace tinyxml2;
@@ -32,6 +33,8 @@ class ProjectLoader
     bool Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth);
     bool drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth);
     bool drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentframe, string outFolder, Scalar color, int lineWidth);
+    bool drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector::PartModel>> partModels, map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> labelModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins);
+    Mat drawHoGDescriptors(HogDetector::PartModel model, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins);
     void static ResizeImage(Mat &image, int32_t &cols, int32_t &rows);
     vector <Frame*> getFrames(void);
   private:

@@ -546,7 +546,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   {
     Point2f p1, p2, p3, p4;
     vector <Point2f> polygon;
-    Point2f c0,c1;
+    Point2f c0, c1;
     ls->getEndpoints(c0, c1);
     try
     {
@@ -640,9 +640,9 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
 
     line(image, p0, p1, Scalar(0, 255, 255), lineWidth, CV_AA);
 
-//    //draw the child and parent joints
-//    circle(image, p0, 2, Scalar(255, 0, 255), lineWidth, CV_AA);
-//    circle(image, p1, 2, Scalar(0, 255, 0), lineWidth, CV_AA);
+    //    //draw the child and parent joints
+    //    circle(image, p0, 2, Scalar(255, 0, 255), lineWidth, CV_AA);
+    //    circle(image, p1, 2, Scalar(0, 255, 0), lineWidth, CV_AA);
 
     //draw angle arcs
     float pixelRadius = partIter->getSearchRadius();
@@ -651,7 +651,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     circle(image, 0.5*p0 + 0.5*p1, (int)pixelRadius, Scalar(0, 0, 0, 100), lineWidth, CV_AA);
     double startAngleUpright = PoseHelper::angle2D((p1 - p0).x, (p1 - p0).y, 1.0, 0.0)*180.0 / M_PI;
     ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - angleRadius, startAngleUpright + angleRadius, Scalar(255, 255, 255, 100), lineWidth*0.5, CV_AA);
-    ellipse(image,0.5*p0+0.5*p1,cv::Size((int)pixelRadius,(int)pixelRadius),0,-startAngleUpright+180.0,startAngleUpright+180+angleRadius,Scalar(0,255,0, 100),lineWidth,CV_AA);
+    ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, -startAngleUpright + 180.0, startAngleUpright + 180 + angleRadius, Scalar(0, 255, 0, 100), lineWidth, CV_AA);
   }
 
   //  //draw the skeleton resulting from solve
@@ -680,7 +680,6 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
 
 bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
 {
-
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
@@ -1008,4 +1007,103 @@ void ProjectLoader::AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <B
       ++i;
     }
   }
+}
+
+bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector::PartModel>> partModels, map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> labelModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins)
+{
+  string outFileName = curFolder + outFolder;
+  if (outFileName[outFileName.size()] != '/')
+    outFileName += "/";
+  outFileName += "hog.";
+  for (map <uint32_t, map <uint32_t, HogDetector::PartModel>>::iterator i = partModels.begin(); i != partModels.end(); ++i)
+  {
+    for (map <uint32_t, HogDetector::PartModel>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+    {
+      string tempFileName = outFileName;
+      stringstream ss;
+      ss << i->first << "." << j->first;
+      ss << ".png";
+      tempFileName += ss.str();
+      Mat img = drawHoGDescriptors(j->second, lineColor, descriptorColor, lineWidth, descriptorWidth, cellSize, nbins);
+
+      cerr << "Writing file " << tempFileName << endl;
+      imwrite(tempFileName, img);
+      img.release();
+    }
+  }
+  for (map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>>::iterator i = labelModels.begin(); i != labelModels.end(); ++i)
+  {
+    for (map <uint32_t, vector <HogDetector::PartModel>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+    {
+      int c = 0;
+      for (vector <HogDetector::PartModel>::iterator n = j->second.begin(); n != j->second.end(); ++n)
+      {
+        string tempFileName = outFileName;
+        stringstream ss;
+        ss << i->first << "." << j->first << "." << c;
+        ss << ".png";
+        tempFileName += ss.str();
+        Mat img = drawHoGDescriptors(*n, lineColor, descriptorColor, lineWidth, descriptorWidth, cellSize, nbins);
+
+        cerr << "Writing file " << tempFileName << endl;
+        imwrite(tempFileName, img);
+        img.release();
+        c++;
+      }
+    }
+  }
+  return true;
+}
+
+Mat ProjectLoader::drawHoGDescriptors(HogDetector::PartModel model, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins)
+{
+  Mat img = model.partImage.clone();
+  float radRangeForOneBin = 3.14 / (float)nbins;
+  int cells_in_x_dir = model.partImage.cols / cellSize.width;
+  int cells_in_y_dir = model.partImage.rows / cellSize.height;
+
+  for (int celly = 0; celly < cells_in_y_dir; celly++)
+  {
+    for (int cellx = 0; cellx < cells_in_x_dir; cellx++)
+    {
+      int drawX = cellx * cellSize.width;
+      int drawY = celly * cellSize.height;
+
+      int mx = drawX + cellSize.width / 2;
+      int my = drawY + cellSize.height / 2;
+
+      rectangle(img, Point(drawX, drawY), Point((drawX + cellSize.width), (drawY + cellSize.height)), lineColor, lineWidth);
+
+      // draw in each cell all 9 gradient strengths
+      for (int bin = 0; bin < nbins; bin++)
+      {
+        float currentGradStrength = model.gradientStrengths.at(celly).at(cellx).at(bin);
+
+        // no line to draw?
+        if (currentGradStrength == 0)
+          continue;
+
+        float currRad = bin * radRangeForOneBin + radRangeForOneBin / 2;
+
+        float dirVecX = cos(currRad);
+        float dirVecY = sin(currRad);
+        float maxVecLen = cellSize.width / 2;
+        float scale = 1.0f;//viz_factor; // just a visual_imagealization scale,
+        // to see the lines better
+
+        // compute line coordinates
+        float x1 = mx - dirVecX * currentGradStrength * maxVecLen * scale;
+        float y1 = my - dirVecY * currentGradStrength * maxVecLen * scale;
+        float x2 = mx + dirVecX * currentGradStrength * maxVecLen * scale;
+        float y2 = my + dirVecY * currentGradStrength * maxVecLen * scale;
+
+        // draw gradient visual_imagealization
+        line(img, Point(x1/**scaleFactor*/, y1/**scaleFactor*/), Point(x2/**scaleFactor*/, y2/**scaleFactor*/), descriptorColor, descriptorWidth);
+
+      } // for (all bins)
+
+    } // for (cellx)
+  } // for (celly)
+
+  return img;
 }
