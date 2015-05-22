@@ -1,6 +1,10 @@
 #ifndef _LIBPOSE_HOGDETECTOR_HPP_
 #define _LIBPOSE_HOGDETECTOR_HPP_
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
+
 #include <opencv2/opencv.hpp>
 #include "detector.hpp"
 
@@ -16,6 +20,9 @@ class HogDetector : public Detector
       POSERECT <Point2f> partModelRect;
       vector <vector <vector <float>>> gradientStrengths;
       Mat partImage;
+#ifdef DEBUG
+      vector<float> descriptors;
+#endif  // DEBUG
     };
   public:
     HogDetector(void);
@@ -29,6 +36,15 @@ class HogDetector : public Detector
     Size getCellSize(void);
     uint8_t getnbins(void);
   private:
+#ifdef DEBUG
+    FRIEND_TEST(HOGDetectorTests, computeDescriptor);
+    FRIEND_TEST(HOGDetectorTests, computeDescriptors);
+    FRIEND_TEST(HOGDetectorTests, getMaxBodyPartHeightWidth);
+    FRIEND_TEST(HOGDetectorTests, train);
+    FRIEND_TEST(HOGDetectorTests, generateLabel);
+    FRIEND_TEST(HogDetectorTest, detect);
+    FRIEND_TEST(HOGDetectorTests, compare);
+#endif  // DEBUG
     int id;
     Size savedCellSize;
     uint8_t savednbins;

@@ -85,6 +85,8 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
   Mat partImage = Mat(size, CV_8UC3, Scalar(0, 0, 0));
   Point2f center = initialRect.GetCenter<Point2f>();
   Point2f newCenter = Point2f(0.5f * size.width, 0.5f * size.height);
+  int width = imgSource.size().width; // !!! For testing
+  int height = imgSource.size().height; // !!! For testing
   for (int32_t x = 0; x < size.width; x++)
   {
     for (int32_t y = 0; y < size.height; y++)
@@ -93,8 +95,12 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
       try
       {
         p = PoseHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
-        Vec3b color = imgSource.at<Vec3b>((int)round(p.y), (int)round(p.x));
-        partImage.at<Vec3b>(y, x) = color;
+        if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
+            if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
+            {
+                Vec3b color = imgSource.at<Vec3b>((int)round(p.y), (int)round(p.x));
+                partImage.at<Vec3b>(y, x) = color;
+            }
       }
       catch (...)
       {

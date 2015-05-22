@@ -56,6 +56,10 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
 
   detector.compute(partImageResized, descriptors);
 
+#ifdef DEBUG
+      partModel.descriptors = descriptors;
+#endif  // DEBUG
+
   vector <vector <uint32_t>> counter;
 
   uint32_t i, j, b;
