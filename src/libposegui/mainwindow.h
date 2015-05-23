@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFutureWatcher>
 
 
 namespace Ui {
@@ -32,6 +33,10 @@ private slots:
     void on_actionClose_triggered();
 
     void on_actionOpen_triggered();
+    void on_actionSave_triggered();
+
+    void on_actionSave_as_triggered();
+
 private:
     //layouts
     QVBoxLayout *FrameLayout;
@@ -46,6 +51,7 @@ private:
     FrameView2D *currFrame;
     //utilites
     QProgressBar *progressBar;
+    QFutureWatcher<void> watcher;
 };
 
 #endif // MAINWINDOW_H

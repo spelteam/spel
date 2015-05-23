@@ -1,9 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QtConcurrent/QtConcurrent>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QProgressBar>
 
 #include "frametablewidget.h"
@@ -14,7 +16,9 @@
 
 #include "project.h"
 #include "utility.h"
+#include "exceptions.h"
 
+using namespace posegui;
 //PUBLIC
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -31,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //utilites
     progressBar = new QProgressBar();
     progressBar->setVisible(false);
+    progressBar->setTextVisible(true);
     progressBar->setMinimum(0);
     progressBar->setMaximum(100);
     //layouts
@@ -76,14 +81,18 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(&Project::getInstance(),&Project::keyframeUpdated,
                      solveTools,&SolveBoxWidget::keyframeUpdatedEvent);
     //task progress
-    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::started,
+    QObject::connect(&watcher,&QFutureWatcher<void>::started,
                      progressBar, &QProgressBar::show);
-    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::finished,
+    QObject::connect(&watcher,&QFutureWatcher<void>::finished,
                      progressBar, &QProgressBar::hide);
-    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::finished,
-                     solveTools,&SolveBoxWidget::solveFinishedEvent);
-    QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::progressValueChanged,
+    //QObject::connect(&Project::getInstance().futureWatcher,&QFutureWatcher<void>::finished,
+    //                 solveTools,&SolveBoxWidget::solveFinishedEvent);
+    //TODO:[!] update solve status !!!!
+    QObject::connect(&watcher,&QFutureWatcher<void>::progressValueChanged,
                      progressBar, &QProgressBar::setValue);
+    QObject::connect(&watcher,&QFutureWatcher<void>::progressTextChanged,
+                     progressBar, &QProgressBar::setFormat);
+
 }
 
 MainWindow::~MainWindow()
@@ -131,27 +140,70 @@ void MainWindow::on_actionOpen_triggered()
     //       "D:/Documents/Work/Libpose/src/tests/testdata1/trijumpSD_new.xml";
     //try to open project
     ui->statusBar->showMessage("Loading project");
-
-    QTime timer;
-    timer.start();
-    Project::ErrorCode errCode = Project::getInstance().open(
-       projectFilename
-    );
-    int elapsed = timer.elapsed();
-    if( errCode != Project::ErrorCode::SUCCESS ){
+    try{
+        QTime timer;
+        timer.start();
+        Project& project = Project::getInstance();
+        QFuture<void> future =
+                QtConcurrent::run(&project,&Project::open,projectFilename,&watcher);
+        watcher.setFuture(future);
+        watcher.waitForFinished();
+        int elapsed = timer.elapsed();
+        //load project to GUI
+        Project::getInstance().load();
+        ui->statusBar->showMessage("Project was loaded: "+QString::number(elapsed));
+    } catch( const QException& e ){
         QMessageBox messageBox;
         messageBox.setWindowTitle(this->windowTitle());
-        messageBox.setText(Project::getInstance().getLastError());
+        messageBox.setText(QString(e.what()));
         messageBox.setIcon(QMessageBox::Critical);
         messageBox.exec();
-    } else{
+    }
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    try{
+        QTime timer;
+        timer.start();
+        Project& project = Project::getInstance();
+        QFuture<void> future =
+                QtConcurrent::run(&project,&Project::save,&watcher);
+        watcher.setFuture(future);
+        watcher.waitForFinished();
+        int elapsed = timer.elapsed();
+        ui->statusBar->showMessage("Project was saved: "+QString::number(elapsed));
+    } catch( const QException& e ){
         QMessageBox messageBox;
         messageBox.setWindowTitle(this->windowTitle());
-        messageBox.setText("All ok");
-        messageBox.setIcon(QMessageBox::Information);
+        messageBox.setText(QString(e.what()));
+        messageBox.setIcon(QMessageBox::Critical);
         messageBox.exec();
-        //load project to GUI
-       Project::getInstance().load();
-       ui->statusBar->showMessage("Project was loaded: "+QString::number(elapsed));
+    }
+}
+
+void MainWindow::on_actionSave_as_triggered()
+{
+    try{
+        QTime timer;
+        timer.start();
+        Project& project = Project::getInstance();
+        QString filename = QInputDialog::getText(
+            this, //parent
+            "Save project", //title
+            "Enter filename:" //label
+        );
+        QFuture<void> future =
+                QtConcurrent::run(&project,&Project::save,filename,&watcher);
+        watcher.setFuture(future);
+        watcher.waitForFinished();
+        int elapsed = timer.elapsed();
+        ui->statusBar->showMessage("Project was saved: "+QString::number(elapsed));
+    } catch( const QException& e ){
+        QMessageBox messageBox;
+        messageBox.setWindowTitle(this->windowTitle());
+        messageBox.setText(QString(e.what()));
+        messageBox.setIcon(QMessageBox::Critical);
+        messageBox.exec();
     }
 }
