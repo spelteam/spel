@@ -32,3 +32,40 @@ double PoseHelper::interpolateFloat(double prevAngle, double nextAngle, int step
         t=0;
     return prevAngle*(1-t)+nextAngle*t;
 }
+
+void PoseHelper::RecalculateScoreIsWeak(vector <LimbLabel> &labels, string detectorName, float varianceTreshold)
+{
+  vector <float> scoreValues;
+  float avg = 0;
+  for (vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
+  {
+    vector <Score> scores = i->getScores();
+    for (vector <Score>::iterator j = scores.begin(); j != scores.end(); ++j)
+    {
+      if (j->getDetName() == detectorName)
+      {
+        scoreValues.push_back(j->getScore());
+        avg += j->getScore();
+      }
+    }
+  }
+  avg /= scoreValues.size();
+  float sum = 0;
+  for (vector <float>::iterator i = scoreValues.begin(); i != scoreValues.end(); ++i)
+  {
+    sum += pow((*i) - avg, 2);
+  }
+  float variance = sqrt(sum / (scoreValues.size() - 1));
+  for (vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
+  {
+    vector <Score> scores = i->getScores();
+    for (vector <Score>::iterator j = scores.begin(); j != scores.end(); ++j)
+    {
+      if (j->getDetName() == detectorName)
+      {
+        j->setIsWeak(variance < varianceTreshold);
+      }
+    }
+    i->setScores(scores);
+  }
+}

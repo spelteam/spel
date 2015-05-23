@@ -162,8 +162,16 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
     vector<Frame*> frames = projectLoader.getFrames();
 
-    //Run "Train()"
     map <string, float> params;
+    Sequence *seq = new Sequence(0, "colorHistDetector", frames);
+    if (seq != 0)
+    {
+      seq->estimateUniformScale(params);
+      seq->computeInterpolation(params);
+      delete seq;
+    }
+
+    //Run "Train()"
     ColorHistDetector detector;
     detector.train(frames, params);
 
@@ -414,8 +422,6 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     EXPECT_EQ(limbLabel_e.getScores(), limbLabel_a.getScores());
     EXPECT_EQ(limbLabel_e.getPolygon(), limbLabel_a.getPolygon());
     EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
-    EXPECT_EQ(limbLabel_e.getIsWeak(), limbLabel_a.getIsWeak());
-    EXPECT_EQ(limbLabel_e.getIsWeak(), limbLabel_a.getIsWeak());
     EXPECT_EQ(model.bgHistogramm, detector.partModels[partID].bgHistogramm);
 
 // Testing function "detect"

@@ -12,6 +12,8 @@
 #endif
 #include <tree.hh>
 
+#include "limbLabel.hpp"
+
 using namespace std;
 using namespace cv;
 
@@ -89,6 +91,8 @@ class PoseHelper
         ++it;
       }
     }
+
+    static void RecalculateScoreIsWeak(vector <LimbLabel> &labels, string detectorName, float varianceTreshold);
 };
 
 template <class T>

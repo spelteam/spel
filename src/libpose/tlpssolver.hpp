@@ -53,11 +53,17 @@ private:
 
     int findFrameIndexById(int id, vector<Frame*> frames);
     float computeScoreCost(const LimbLabel& label, map<string, float> params);
-    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params);
-    float computePriorCost(const LimbLabel& label, const BodyPart& prior, Skeleton& skeleton, map<string, float> params);
+    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, bool toChild);
+    float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, map<string, float> params, float jointMax, bool toChild);
+    float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params);
+    float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float max);
+
     float computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, map<string, float> params);
+    float computeNormPastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, map<string, float> params, float jointMax);
     float computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, map<string, float> params);
+    float computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, map<string, float> params, float max);
     float computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, map<string, float> params);
+    float computeNormAnchorCost(const LimbLabel& thisLabel, Frame* anchor, map<string, float> params, float jointMax);
 
     ///separate the sequence into slices, for temporal solve
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);

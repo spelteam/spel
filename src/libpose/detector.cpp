@@ -51,17 +51,32 @@ POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Poin
       boxWidth = boxWidth + blockSize.width - ((int)boxWidth % blockSize.height) - 1;
     }
   }
-  float angle = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+  float angle = float(PoseHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
   Point2f c1, c2, c3, c4, polyCenter;
   c1 = Point2f(0.f, 0.5f * boxWidth);
   c2 = Point2f(boneLength, 0.5f * boxWidth);
   c3 = Point2f(boneLength, -0.5f * boxWidth);
   c4 = Point2f(0.f, -0.5f * boxWidth);
-  polyCenter = Point2f(boneLength * 0.5f, 0.f);
-  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
-  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
-  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
-  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
+
+//  polyCenter = Point2f(boneLength * 0.5f, 0.f);
+//  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
+//  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
+//  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
+//  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
+
+
+  c1 = PoseHelper::rotatePoint2D(c1, Point2f(0,0), angle);
+  c2 = PoseHelper::rotatePoint2D(c2, Point2f(0,0), angle);
+  c3 = PoseHelper::rotatePoint2D(c3, Point2f(0,0), angle);
+  c4 = PoseHelper::rotatePoint2D(c4, Point2f(0,0), angle);
+
+  polyCenter = 0.25*c1+0.25*c2+0.25*c3+0.25*c4;
+
+  c1=c1-polyCenter+boxCenter;
+  c2=c2-polyCenter+boxCenter;
+  c3=c3-polyCenter+boxCenter;
+  c4=c4-polyCenter+boxCenter;
+
   return POSERECT <Point2f>(c1, c2, c3, c4);
 }
 
@@ -70,6 +85,8 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
   Mat partImage = Mat(size, CV_8UC3, Scalar(0, 0, 0));
   Point2f center = initialRect.GetCenter<Point2f>();
   Point2f newCenter = Point2f(0.5f * size.width, 0.5f * size.height);
+  int width = imgSource.size().width; // !!! For testing
+  int height = imgSource.size().height; // !!! For testing
   for (int32_t x = 0; x < size.width; x++)
   {
     for (int32_t y = 0; y < size.height; y++)
@@ -78,8 +95,12 @@ Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRec
       try
       {
         p = PoseHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
-        Vec3b color = imgSource.at<Vec3b>((int)round(p.y), (int)round(p.x));
-        partImage.at<Vec3b>(y, x) = color;
+        if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
+            if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
+            {
+                Vec3b color = imgSource.at<Vec3b>((int)round(p.y), (int)round(p.x));
+                partImage.at<Vec3b>(y, x) = color;
+            }
       }
       catch (...)
       {

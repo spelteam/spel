@@ -42,7 +42,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float> params)
 vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
 {
     //parametrise the number of times frames get propagated
-    params.emplace("nskpIters", 1); //set number of iterations, 0 to iterate until no new lockframes are introduced
+    params.emplace("nskpIters", 2); //set number of iterations, 0 to iterate until no new lockframes are introduced
 
     uint32_t nskpIters=params.at("nskpIters");
     if(nskpIters==0)
@@ -52,16 +52,22 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     sequence.computeInterpolation(params); //interpolate the sequence first
     //propagate keyframes
     vector<Frame*> propagatedFrames = sequence.getFrames();
+
     uint32_t lockframesLastIter=0;
-    for(uint32_t i=0; i<nskpIters; ++i)
+    vector<int> ignore; //frames to ignore during propagation
+
+    for(uint32_t iteration=0; iteration<nskpIters; ++iteration)
     {
-        if(i>=nskpIters)
+        if(iteration>=nskpIters)
             break;
 
-        vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism);
+        vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism, ignore);
 
+        //add the new solves to the return vector
         for(vector<Solvlet>::iterator s=sol.begin(); s!=sol.end();++s)
+        {
             solvlets.push_back(*s);
+        }
 
         //calculate number of lockframes in the sequence
         uint32_t numLockframes=0;
@@ -73,7 +79,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 
         if(numLockframes==lockframesLastIter) //terminate loop if no more lockframes are generated
         {
-            cerr << "Terminating keyframe propagation after " << i << " iterations." << endl;
+            cerr << "Terminating keyframe propagation after " << iteration << " iterations." << endl;
             break;
         }
         lockframesLastIter=numLockframes;
@@ -81,7 +87,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 
     //create tlps solver
     TLPSSolver tlps;
-    //sequence.setFrames(propagatedFrames);
+    sequence.setFrames(propagatedFrames);
 
     //the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
@@ -90,7 +96,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     //return tlps.solve(sequence, params);
 }
 
-vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism)
+vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix& ism, vector<int>& ignore)
 {
     // //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
     // float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
@@ -98,41 +104,41 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
+    params.emplace("propagateFromLockframes", 1); //don't propagate from lockframes, only from keyframes
 
     //detector enablers
-    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useSURFdet", 0); //determine whether SURF detector is used and with what coefficient
+    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
     params.emplace("maxPartCandidates", 5000); //set the max number of part candidates to allow into the solver
 
     //detector search parameters
-    params.emplace("propagateToLockframes", 0); //don't propagate from lockframes, only from keyframes
-    params.emplace("baseRotationRange", 1); //search angle range of +/- 60 degrees
+
+    params.emplace("baseRotationRange", 50); //search angle range of +/- 60 degrees
     params.emplace("baseSearchRadius", 10); //search a radius of 100 pixels
     params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
 
     //solver sensitivity parameters
-    params.emplace("imageCoeff", 0.3); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 0.0); //set solver body part connectivity sensitivity
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
     //solver eval parameters
-    params.emplace("acceptLockframeThreshold", 0.5); //set up the lockframe accept threshold by mask coverage
+    params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
     float depthRotationCoeff = params.at("partDepthRotationCoeff");
     float baseRotationRange = params.at("baseRotationRange");
     float baseRotationStep = params.at("baseRotationStep");
     int baseSearchRadius = params.at("baseSearchRadius");
 
-
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
     float useSURF = params.at("useSURFdet");
     uint32_t debugLevel = params.at("debugLevel");
-    bool propagateToLockframes=params.at("propagateToLockframes");
+    bool propagateFromLockframes=params.at("propagateFromLockframes");
 
     struct SolvletScore
     {
@@ -148,7 +154,6 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
         allSolves.push_back(vector<SolvletScore>()); //empty vector to every frame slot
     }
 
-
     vector<Frame*> lockframes;
 
     //build frame MSTs by ID's as in ISM
@@ -157,8 +162,21 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     for(uint32_t frameId=0; frameId<frames.size(); ++frameId)
     {
-        if(frames[frameId]->getFrametype()!=0x02) //as long as it's not an interpolated frame, try to propagate from it
+        bool isIgnored=false;
+        for(uint32_t i=0; i<ignore.size(); ++i)
         {
+            if(ignore[i]==frames[frameId]->getID())
+            {
+                isIgnored=true;
+                break;
+            }
+        }
+
+        if(frames[frameId]->getFrametype()!=INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
+                && (frames[frameId]->getFrametype()!=LOCKFRAME || propagateFromLockframes)) //and, if it's a lockframe, and solving from lockframes is allowed
+        {
+            ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
+
             tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
             tree<int>::iterator mstIter;
             //do OpenGM solve for single factor graph
@@ -181,10 +199,9 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
             for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
             {
-                if(frames[*mstIter]->getFrametype()==KEYFRAME) //skip keyframes
+                if(frames[*mstIter]->getFrametype()==KEYFRAME || frames[*mstIter]->getFrametype()==LOCKFRAME) //don't push to existing keyframes and lockframes
                     continue;
-                else if(frames[*mstIter]->getFrametype()==LOCKFRAME && !propagateToLockframes) //skip lockframes, unless explicitly requested
-                    continue;
+                //map<int, vector<LimbLabel> > labels;
                 vector<vector<LimbLabel> > labels, tempLabels;
                 vector<vector<LimbLabel> >::iterator labelPartsIter;
 
@@ -215,7 +232,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     int depth = partTree.depth(partIter);
 
                     float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
-                    float searchRange = baseSearchRadius;
+                    float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
 
                     partIter->setRotationSearchRange(rotationRange);
                     partIter->setSearchRadius(searchRange);
@@ -231,6 +248,20 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 {
                     labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
                 }
+
+                for(uint32_t i=0; i<labels.size(); ++i)
+                {
+                    for(uint32_t j=0; j<labels.size();++j)
+                    {
+                        if(labels[j].at(0).getLimbID()==i)
+                            tempLabels.push_back(labels[j]);
+                    }
+                }
+                labels = tempLabels;
+//                for(uint32_t i=0; i<labels.size();++i)
+//                {
+//                    labels.emplace(labels[i][0].getPartID(), labels[i]);
+//                }
 // //temp coment this out
 //                for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
 //                {
@@ -322,7 +353,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                         int cj = partIter->getParentJoint();
                         if(pj==cj)
                         {
-                            //then it's connected to child
+                            //then current parent is connected to paren
                             toChild=true;
                         }
 
@@ -453,8 +484,12 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     for(uint32_t i=0; i<lockframes.size();++i)
     {
-        *(frames[lockframes[i]->getID()]) = *(lockframes.at(i)); //make pointers point to the correct objects
-        solvlets.push_back(bestSolves[i].solvlet);
+        if(frames[lockframes[i]->getID()]->getFrametype()!=LOCKFRAME
+                && frames[lockframes[i]->getID()]->getFrametype()!=KEYFRAME) //never replace keyframes and existing lockframes
+        {
+            frames[lockframes[i]->getID()] = lockframes.at(i); //make pointers point to the correct objects
+            solvlets.push_back(bestSolves[i].solvlet);
+        }
     }
 
     cerr << "Generated " << lockframes.size() << " lockframes!" << endl;
@@ -477,28 +512,40 @@ uint32_t NSKPSolver::findFrameIndexById(int id, vector<Frame*> frames)
 //compute label score
 float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> params)
 {
-//    params.emplace("imageCoeff", 0);
-//    params.emplace("useHoGdet", 1.0);
-//    params.emplace("useCSdet", 0);
+//    if(label.getIsOccluded() )// || label.getIsWeak()) //if it's occluded, return zero
+//        return 0;
+
+    string hogName = "18500";
+    string csName = "4409412";
+    string surfName = "21316";
+
+    params.emplace("imageCoeff", 1.0);
+    params.emplace("useCSdet", 1.0);
+    params.emplace("useHoGdet", 0.0);
+    params.emplace("useSURFdet", 0.0);
 
     float lambda = params.at("imageCoeff");
 
     //@FIX
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
-    //float useSURF = params.at("useSURF");
+    float useSURF = params.at("useSURFdet");
 
     //TODO: Fix score combinations
     vector<Score> scores = label.getScores();
 
-    string hogName = "18500";
-
-    if(label.getIsOccluded() || label.getIsWeak()) //if it's occluded, return zero
-        return 0;
-    if(scores.size()>0)
-        return lambda*scores[0].getScore();
-    else //if no scores present return -1
-        return 0;
+    //compute the weighted sum of scores
+    float finalScore=0;
+    for(uint32_t i=0; i<scores.size(); ++i)
+    {
+        if(scores[i].getDetName()==hogName)
+            finalScore = finalScore+scores[i].getScore()*useHoG;
+        else if(scores[i].getDetName()==csName)
+            finalScore = finalScore+scores[i].getScore()*useCS;
+        else if(scores[i].getDetName()==surfName)
+            finalScore = finalScore+scores[i].getScore()*useSURF;
+    }
+    return finalScore;
 }
 
 //compute distance to parent limb label
@@ -528,8 +575,13 @@ float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& 
     //emplace default
     params.emplace("jointCoeff", 0.5);
     params.emplace("jointLeeway", 0.05);
+    params.emplace("debugLevel", 1);
+
+    //read params
     float lambda = params.at("jointCoeff");
-    float leeway = params.at("jointLeeway");
+    int debugLevel = params.at("debugLevel");
+
+    //float leeway = params.at("jointLeeway");
     Point2f p0, p1, c0, c1;
 
     //@FIX this is really too simplistic, connecting these points
@@ -537,7 +589,7 @@ float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& 
     parent.getEndpoints(p0,p1);
 
     //child length
-    float clen = sqrt(pow(c0.x-c1.x, 2)+pow(c0.y-c1.y, 2));
+    //float clen = sqrt(pow(c0.x-c1.x, 2)+pow(c0.y-c1.y, 2));
 
     //normalise this?
     //give some leeway
@@ -549,6 +601,11 @@ float NSKPSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& 
 //    if(score<(clen*leeway)/max) //any distnace below leeway is zero
 //        score=0;
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
+
+    //output a sentence about who connected to whom and what the score was
+    if(debugLevel>=1 && (child.getLimbID()==7 || child.getLimbID()==6) && !toChild)
+        cerr << "Part " << child.getLimbID() << " is connecting to part " << parent.getLimbID() << " PARENT joint" << endl;
+
     return lambda*score;
 }
 
@@ -686,7 +743,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     //score = correct/(correct+incorrect)
 
     //emplace defaults
-    params.emplace("badLabelThresh", 0.4); //if less than 40% of the pixels are in the mask, label this label bad
+    params.emplace("badLabelThresh", 0.52); //if less than 52% of the pixels are in the mask, label this label bad
     params.emplace("debugLevel", 1);
 
     int debugLevel = params.at("debugLevel");
@@ -744,9 +801,6 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
     double solutionEval = (float)correctPixels/((float)correctPixels+(float)incorrectPixels);
 
-    if(debugLevel>=1)
-        cerr << "Solution evaluation score - " << solutionEval << endl;
-
     //now check for critical part failures - label mostly outside of mask
 
     vector<Point2f> badLabelScores;
@@ -785,7 +839,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
         float labelRatio = 1.0-(float)badLabelPixels/(float)labelPixels; //high is good
 
-        if(labelRatio<badLabelThresh && !label->getIsWeak() && !label->getIsOccluded()) //not weak, not occluded, badly localised
+        if(labelRatio<badLabelThresh /*&& !label->getIsWeak()*/ && !label->getIsOccluded()) //not weak, not occluded, badly localised
             badLabelScores.push_back(Point2f(label->getLimbID(), labelRatio));
     }
 
@@ -797,8 +851,11 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
         }
     }
 
-//    if(badLabelScores.size()!=0) //make the solution eval fail if a part is badly localised
-//        solutionEval=solutionEval-1.0;
+    if(badLabelScores.size()!=0) //make the solution eval fail if a part is badly localised
+        solutionEval=solutionEval-1.0;
+
+    if(debugLevel>=1)
+        cerr << "Solution evaluation score - " << solutionEval << endl;
 
     return solutionEval;
 }

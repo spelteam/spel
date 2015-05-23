@@ -27,7 +27,7 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   else
   {
     boneLength = boneLength + blockSize.width - ((int)boneLength % blockSize.width);
-  }  
+  }
   float boneWidth = getBoneWidth(boneLength, bodyPart);
   if (boneWidth < blockSize.height)
   {
@@ -49,8 +49,121 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
   Mat partImageResized = Mat(wndSize.height, wndSize.width, CV_8UC3, Scalar(255, 255, 255));
   resize(partImage, partImageResized, wndSize);
+  partModel.partImage = partImageResized.clone();
   HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
-  detector.compute(partImageResized, partModel.descriptors);  
+
+  vector <float> descriptors;
+
+  detector.compute(partImageResized, descriptors);
+
+#ifdef DEBUG
+      partModel.descriptors = descriptors;
+#endif  // DEBUG
+
+  vector <vector <uint32_t>> counter;
+
+  uint32_t i, j, b;
+
+  try
+  {
+    for (i = 0; i < wndSize.height; i += cellSize.height)
+    {
+      partModel.gradientStrengths.push_back(vector <vector <float>>());
+      counter.push_back(vector <uint32_t>());
+      for (j = 0; j < wndSize.width; j += cellSize.width)
+      {
+        partModel.gradientStrengths.at(i / cellSize.height).push_back(vector <float>());
+        counter.at(i / cellSize.height).push_back(0);
+        for (b = 0; b < nbins; b++)
+        {
+          partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).push_back(0.0f);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    stringstream ss;
+    ss << "Can't get gradientStrengths at [" << i / cellSize.height << "][" << j / cellSize.width << "]";
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif // DEBUG
+    throw logic_error(ss.str());
+  }
+
+  uint32_t d = 0, n, k, r, c;
+  try
+  {
+    // window rows
+    for (n = 0; n + blockStride.height < wndSize.height; n += blockStride.height)
+    {
+      // window cols
+      for (k = 0; k + blockStride.width < wndSize.width; k += blockStride.width)
+      {
+        // block rows
+        for (r = n; r < n + blockSize.height; r += cellSize.height)
+        {
+          // block cols
+          for (c = k; c < k + blockSize.width; c += cellSize.width)
+          {
+            // nbins
+            for (b = 0; b < nbins; b++)
+            {
+              partModel.gradientStrengths.at(r / cellSize.height).at(c / cellSize.width).at(b) += descriptors.at(d);
+              if (b == 0)
+              {
+                counter.at(r / cellSize.height).at(c / cellSize.width)++;
+              }
+              d++;
+            }
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    stringstream ss;
+    ss << "Descriptor parse error:" << endl << "Window row:\t" << n << "\tWindow col:\t" << k << endl << "Block row:\t" << r << "\tBlock col:\t" << c << endl << "NBins:\t" << b << endl;
+    ss << "Total image rows:\t" << wndSize.height << "\tTotal image cols:\t" << wndSize.width << endl;
+    ss << "Total descriptors:\t" << descriptors.size() << endl;   
+    ss << "Trying to get descriptor at:\t" << d << endl;
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif // DEBUG
+    throw logic_error(ss.str());
+  }
+
+  try
+  {
+    for (uint32_t i = 0; i < wndSize.height; i += cellSize.height)
+    {
+      for (uint32_t j = 0; j < wndSize.width; j += cellSize.width)
+      {
+        for (uint8_t b = 0; b < nbins; b++)
+        {
+          if (counter.at(i / cellSize.height).at(j / cellSize.width) == 0)
+          {
+            partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) = 0;
+          }
+          else
+          {
+            partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) /= counter.at(i / cellSize.height).at(j / cellSize.width);
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    stringstream ss;
+    ss << "Can't get gradientStrengths at [" << i / cellSize.height << "][" << j / cellSize.width << "]";
+#ifdef DEBUG
+    cerr << ERROR_HEADER << ss.str() << endl;
+#endif // DEBUG
+    throw logic_error(ss.str());
+  }
+
   return partModel;
 }
 
@@ -60,7 +173,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
   Size wndSize;
   Skeleton skeleton = frame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
-  Mat imgMat = frame->getImage();  
+  Mat imgMat = frame->getImage();
   for (tree <BodyPart>::iterator part = partTree.begin(); part != partTree.end(); ++part)
   {
     try
@@ -101,7 +214,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
     part->setRotationSearchRange(rotationAngle);
     try
-    {      
+    {
       parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
     }
     catch (logic_error err)
@@ -171,7 +284,7 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
   for (map <uint32_t, Size>::iterator part = result.begin(); part != result.end(); ++part)
   {
     part->second.width += (blockSize.width - part->second.width % blockSize.width);
-    part->second.height += (blockSize.height -  part->second.height % blockSize.height);
+    part->second.height += (blockSize.height - part->second.height % blockSize.height);
   }
   return result;
 }
@@ -180,19 +293,23 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
   frames = _frames;
 
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
   params.emplace(sDebugLevel, debugLevel);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
-//TODO(Vitaliy Koshura): Make some of them as detector params
+  //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
-  Size blockStride = Size(8,8);
-  Size cellSize = Size(8,8);
+  Size blockStride = Size(8, 8);
+  Size cellSize = Size(8, 8);
   Size wndSize = Size(64, 128);
-  const int nbins = 9;
+  const uint8_t nbins = 9;
   double wndSigma = -1;
   double thresholdL2hys = 0.2;
   bool gammaCorrection = true;
@@ -201,6 +318,9 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
   Size padding = Size(32, 32);
   int derivAperture = 1;
   int histogramNormType = HOGDescriptor::L2Hys;
+
+  savedCellSize = cellSize;
+  savednbins = nbins;
 
   partSize = getMaxBodyPartHeightWidth(_frames, blockSize);
 
@@ -216,7 +336,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     try
     {
-      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>> ((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
+      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
     }
     catch (...)
     {
@@ -251,11 +371,18 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   const float useHoGdet = 1.0f;
   const string sUseHoGdet = "useHoGdet";
 
+#ifdef DEBUG
   const uint8_t debugLevel = 5;
+#else
+  const uint8_t debugLevel = 1;
+#endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
   const float rotationThreshold = 0.025f;
   const string sRotationThreshold = "rotationThreshold";
+
+  const float isWeakTreshhold = 0.1f;
+  const string sIsWeakTreshhold = "isWeakTreshhold";
 
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
@@ -268,15 +395,16 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sUseHoGdet, useHoGdet);
   params.emplace(sDebugLevel, debugLevel);
   params.emplace(sRotationThreshold, rotationThreshold);
+  params.emplace(sIsWeakTreshhold, isWeakTreshhold);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
-//TODO(Vitaliy Koshura): Make some of them as detector params
+  //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
-  Size blockStride = Size(8,8);
-  Size cellSize = Size(8,8);
+  Size blockStride = Size(8, 8);
+  Size cellSize = Size(8, 8);
   Size wndSize = Size(64, 128);
-  const int nbins = 9;
+  const uint8_t nbins = 9;
   double wndSigma = -1;
   double thresholdL2hys = 0.2;
   bool gammaCorrection = true;
@@ -285,6 +413,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   Size padding = Size(32, 32);
   int derivAperture = 1;
   int histogramNormType = HOGDescriptor::L2Hys;
+
+  stringstream detectorName;
+  detectorName << getID();
 
   vector <vector <LimbLabel> > t;
 
@@ -301,7 +432,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
     Point2f j0, j1;
-    
+
     try
     {
       j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation();
@@ -396,35 +527,33 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           bool blackPixel = mintensity < 10;
           if (!blackPixel)
           {
-            for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
+            for (float rot = theta - deltaTheta; rot < theta + deltaTheta; rot += stepTheta)
             {
-              if (abs(rot) < abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold))
+              Point2f p0 = Point2f(0, 0);
+              Point2f p1 = Point2f(1.0, 0);
+              p1 *= boneLength;
+              p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
+              Point2f mid = 0.5 * p1;
+              p1 = p1 + Point2f(x, y) - mid;
+              p0 = Point2f(x, y) - mid;
+              Size size;
+              try
               {
-                Point2f p0 = Point2f(0, 0);
-                Point2f p1 = Point2f(1.0, 0);
-                p1 *= boneLength;
-                p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
-                Point2f mid = 0.5 * p1;
-                p1 = p1 + Point2f(x, y) - mid;
-                p0 = Point2f(x, y) - mid;
-                Size size;
-                try
-                {
-                  size = partSize.at(iteratorBodyPart->getPartID());
-                }
-                catch (...)
-                {
-                  stringstream ss;
-                  ss << "Can't get partSize for body part " << iteratorBodyPart->getPartID();
-                  if (debugLevelParam >= 1)
-                  {
-                    cerr << ERROR_HEADER << ss.str() << endl;
-                    throw logic_error(ss.str());
-                  }
-                }
-                LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
-                sortedLabels.push_back(generatedLabel);
+                size = partSize.at(iteratorBodyPart->getPartID());
               }
+              catch (...)
+              {
+                stringstream ss;
+                ss << "Can't get partSize for body part " << iteratorBodyPart->getPartID();
+                if (debugLevelParam >= 1)
+                {
+                  cerr << ERROR_HEADER << ss.str() << endl;
+                  throw logic_error(ss.str());
+                }
+              }
+              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet, nbins);
+              sortedLabels.push_back(generatedLabel);
             }
           }
         }
@@ -456,7 +585,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             throw logic_error(ss.str());
           }
         }
-        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet);
+        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet, nbins);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -529,13 +658,15 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
       }
       locations.release();
     }
+    PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels);
   }
   return merge(limbLabels, t);
 }
 
-LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet)
+LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet, uint8_t nbins)
 {
+  labelModels[frame->getID()][bodyPart.getPartID()].push_back(descriptors);
   vector <Score> s;
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
   float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
@@ -590,20 +721,19 @@ LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0
   }
   maskMat.release();
   imgMat.release();
-  float score = compare(bodyPart, descriptors);
-  score += inMaskPixels / totalPixels;
+  float score = compare(bodyPart, descriptors, nbins);
+  score *= ((float)inMaskPixels / (float)totalPixels);
   Score sc(score, detectorName.str(), _useHoGdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
 }
 
-float HogDetector::compare(BodyPart bodyPart, PartModel model)
+float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins)
 {
   float score = 0;
-  uint32_t count = 0;
+  uint32_t totalcount = 0;
   for (map <uint32_t, map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
   {
-    count++;
     for (map <uint32_t, PartModel>::iterator partModel = framePartModels->second.begin(); partModel != framePartModels->second.end(); ++partModel)
     {
       if (partModel->first != static_cast <uint32_t> (bodyPart.getPartID()))
@@ -612,33 +742,70 @@ float HogDetector::compare(BodyPart bodyPart, PartModel model)
       }
       else
       {
-        if (model.descriptors.size() != partModel->second.descriptors.size())
+        if (model.gradientStrengths.size() != partModel->second.gradientStrengths.size())
         {
           stringstream ss;
-          ss << "Invalid descriptor count. Need: " << partModel->second.descriptors.size() << ". Have: " << model.descriptors.size();
+          ss << "Invalid descriptor count. Need: " << model.gradientStrengths.size() << ". Have: " << partModel->second.gradientStrengths.size();
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
         }
-        for (uint32_t i = 0; i < model.descriptors.size(); ++i)
+        uint32_t count = 0;
+        for (uint32_t i = 0; i < model.gradientStrengths.size(); i++)
         {
-          try
-          {
-            score += pow(model.descriptors.at(i) - partModel->second.descriptors.at(i), 2);
-          }
-          catch (...)
+          if (model.gradientStrengths.at(i).size() != partModel->second.gradientStrengths.at(i).size())
           {
             stringstream ss;
-            ss << "Can't get some descriptor at " << i;
+            ss << "Invalid descriptor count. Need: " << model.gradientStrengths.at(i).size() << ". Have: " << partModel->second.gradientStrengths.at(i).size();
             if (debugLevelParam >= 1)
               cerr << ERROR_HEADER << ss.str() << endl;
             throw logic_error(ss.str());
           }
+          for (uint32_t j = 0; j < model.gradientStrengths.at(i).size(); j++)
+          {
+            for (uint8_t b = 0; b < nbins; b++)
+            {
+              try
+              {
+                count++;
+                score += abs(model.gradientStrengths.at(i).at(j).at(b) - partModel->second.gradientStrengths.at(i).at(j).at(b));
+                //score += sqrt(pow(model.gradientStrengths.at(i).at(j).at(b), 2) - pow(partModel->second.gradientStrengths.at(i).at(j).at(b), 2));
+              }
+              catch (...)
+              {
+                stringstream ss;
+                ss << "Can't get some descriptor at [" << i << "][" << j << "][" << b << "]";
+                if (debugLevelParam >= 1)
+                  cerr << ERROR_HEADER << ss.str() << endl;
+                throw logic_error(ss.str());
+              }
+            }
+          }
         }
-        score /= model.descriptors.size();
+        totalcount += count;
         break;
       }
     }
   }
-  return score /= count;
+  return score /= totalcount;
+}
+
+map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> HogDetector::getLabelModels(void)
+{
+  return labelModels;
+}
+
+map <uint32_t, map <uint32_t, HogDetector::PartModel>> HogDetector::getPartModels(void)
+{
+  return partModels;
+}
+
+Size HogDetector::getCellSize(void)
+{
+  return savedCellSize;
+}
+
+uint8_t HogDetector::getnbins(void)
+{
+  return savednbins;
 }

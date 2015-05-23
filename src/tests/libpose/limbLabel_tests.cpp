@@ -35,7 +35,6 @@ TEST(limbLabel, ConstructorTest)
     EXPECT_EQ(label1.getPolygon(), label2.getPolygon());
     EXPECT_EQ(label1.getScores(), label2.getScores());
     EXPECT_EQ(label1.getIsOccluded(), label2.getIsOccluded());
-    EXPECT_EQ(label1.getIsWeak(), label2.getIsWeak());
 
     //Testing operator "="
     LimbLabel label3;
@@ -46,7 +45,6 @@ TEST(limbLabel, ConstructorTest)
     EXPECT_EQ(label1.getPolygon(), label3.getPolygon());
     EXPECT_EQ(label1.getScores(), label3.getScores());
     EXPECT_EQ(label1.getIsOccluded(), label3.getIsOccluded());
-    EXPECT_EQ(label1.getIsWeak(), label3.getIsWeak());
 
     //Testing function getAvgScore()
     float avgScore = (score1Value + score2Value)*scoreCoeff/2;

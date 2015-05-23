@@ -60,7 +60,7 @@ private:
     FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost); 
     FRIEND_TEST(nskpsolverTests, evaluateSolution);
 #endif  // DEBUG
-    vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism);
+    vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism, vector<int> &ignore);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
     
     vector<Point2i> suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params);
