@@ -22,6 +22,8 @@
 
 #ifdef UNIX
 #include "errno.h"
+#include <sys/stat.h>
+#include <unistd.h>
 #endif  // UNIX
 #ifdef WINDOWS
 #include <Windows.h>
