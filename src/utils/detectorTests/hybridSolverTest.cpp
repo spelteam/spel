@@ -54,8 +54,19 @@ int main (int argc, char **argv)
         ism.buildImageSimilarityMatrix(vFrames);
         ism.write(("testISM.ism"));
     }
+
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+
+    params.emplace("useCSdet", 0.5); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
     params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
     params.emplace("acceptLockframeThreshold", 0.52); //set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+    params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+    params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
 
     vector<Solvlet> finalSolve;
     int prevSolveSize=0;
@@ -67,7 +78,16 @@ int main (int argc, char **argv)
         //do an iterative NSKP solve
         nskpSolve = nSolver.solve(seq, params, ism);
 
-        for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end();++s)
+        //draw the solution
+        for(uint32_t i=0; i<nskpSolve.size();++i)
+        {
+            Frame* frame = seq.getFrames()[nskpSolve[i].getFrameID()];
+            Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+
+            projectLoader.drawLockframeSolvlets(ism, nskpSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
+        }
+
+        for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
             finalSolve.push_back(*s);
 
         //then, do a temporal solve
@@ -75,20 +95,28 @@ int main (int argc, char **argv)
 
         tlpsSolve = tSolver.solve(seq, params);
 
-        for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=nskpSolve.end();++s)
+        for(uint32_t i=0; i<tlpsSolve.size();++i)
+        {
+            Frame* frame = seq.getFrames()[tlpsSolve[i].getFrameID()];
+            Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+
+            projectLoader.drawLockframeSolvlets(ism, tlpsSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
+        }
+
+        for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
             finalSolve.push_back(*s);
 
     } while(finalSolve.size()>prevSolveSize);
 
 
-    //draw the solution
-    for(uint32_t i=0; i<finalSolve.size();++i)
-    {
-        Frame* frame = seq.getFrames()[finalSolve[i].getFrameID()];
-        Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+//    //draw the solution
+//    for(uint32_t i=0; i<finalSolve.size();++i)
+//    {
+//        Frame* frame = seq.getFrames()[finalSolve[i].getFrameID()];
+//        Frame* parent = seq.getFrames()[frame->getParentFrameID()];
 
-        projectLoader.drawLockframeSolvlets(ism, finalSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
-    }
+//        projectLoader.drawLockframeSolvlets(ism, finalSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
+//    }
 
 
 //    for(uint32_t i=0; i<solve.size();++i)

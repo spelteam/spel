@@ -6,10 +6,10 @@
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG
 
+#include "projectLoader.hpp"
 #include <gtest/gtest.h>
 #include <detector.hpp>
-#include <HogDetector.hpp>
-#include "projectLoader.hpp"
+#include <hogDetector.hpp>
 #include "limbLabel.hpp"
 
 vector <vector <vector <float>>> decodeDescriptor(vector<float> descriptors, Size wndSize, Size blockSize, Size blockStride, Size cellSize, int nbins)
@@ -55,11 +55,11 @@ vector <vector <vector <float>>> decodeDescriptor(vector<float> descriptors, Siz
 
 map<int, Point2f> getImageLocations(Skeleton skeleton)
 {
-	map<int, Point2f> Locations;
-	tree <BodyJoint> jointTree = skeleton.getJointTree();
-	for (tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
-		Locations.emplace(pair<int, Point2f>(i->getLimbID(), i->getImageLocation()));
-	return Locations;
+    map<int, Point2f> Locations;
+    tree <BodyJoint> jointTree = skeleton.getJointTree();
+    for (tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
+        Locations.emplace(pair<int, Point2f>(i->getLimbID(), i->getImageLocation()));
+    return Locations;
 }
 
 class _LimbIDCompare

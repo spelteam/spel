@@ -10,15 +10,6 @@
 #include "skeleton.hpp"
 #include "projectLoader.hpp"
 
-map<int, Point2f> getImageLocations(Skeleton skeleton)
-{
-    map<int, Point2f> Locations;
-    tree <BodyJoint> jointTree = skeleton.getJointTree();
-    for (tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
-        Locations.emplace(pair<int, Point2f>(i->getLimbID(), i->getImageLocation()));
-    return Locations;
-}
-
 TEST(FramesTests, Constructors)
 {
     Frame* frame = new Lockframe();
@@ -169,6 +160,15 @@ TEST(FramesTests, GetAndSet)
     delete frame;    
 }
 
+map<int, Point2f> getImageLocations_ft(Skeleton skeleton)
+{
+    map<int, Point2f> Locations;
+    tree <BodyJoint> jointTree = skeleton.getJointTree();
+    for (tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
+        Locations.emplace(pair<int, Point2f>(i->getLimbID(), i->getImageLocation()));
+    return Locations;
+}
+
 TEST(FramesTests, shiftSkeleton2D)
 {
     String FilePath;
@@ -191,13 +191,13 @@ TEST(FramesTests, shiftSkeleton2D)
 
     //Create shifted points vector 
     Point2f shift(10, 10);
-    map<int, Point2f> locations_expected = getImageLocations(skeleton);
+    map<int, Point2f> locations_expected = getImageLocations_ft(skeleton);
     for (int i = 0; i < locations_expected.size(); i++)
         locations_expected[i] += shift;
 
     //Run "shiftSkeleton2D"
     frame->shiftSkeleton2D(shift);
-    map<int, Point2f> locations_actual = getImageLocations(frame->getSkeleton());
+    map<int, Point2f> locations_actual = getImageLocations_ft(frame->getSkeleton());
 
     EXPECT_EQ(locations_expected, locations_actual) << " Skeleton shift error?!\n* Impact of 'skeleton.infer3D' not considered in this test!";
     //Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test!;

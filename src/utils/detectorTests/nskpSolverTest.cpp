@@ -47,6 +47,23 @@ int main (int argc, char **argv)
 
     NSKPSolver nSolver;
     TLPSSolver tSolver;
+
+    //global settings
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+
+    //detector settings
+    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
+    //solver settings
+    params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
+    params.emplace("acceptLockframeThreshold", 0.52); //set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+    params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+    params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params
     //ImageSimilarityMatrix ism(vFrames);
@@ -67,15 +84,15 @@ int main (int argc, char **argv)
         projectLoader.drawLockframeSolvlets(ism, solve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
     }
 
-    seq.computeInterpolation(params);
-    solve = tSolver.solve(seq, params);
+//    seq.computeInterpolation(params);
+//    solve = tSolver.solve(seq, params);
 
-    for(uint32_t i=0; i<solve.size();++i)
-    {
-        Frame* frame = vFrames[solve[i].getFrameID()];
+//    for(uint32_t i=0; i<solve.size();++i)
+//    {
+//        Frame* frame = vFrames[solve[i].getFrameID()];
 
-        projectLoader.drawFrameSolvlets(solve[i], frame, argv[2], Scalar(0,0,255), 1);
-    }
+//        projectLoader.drawFrameSolvlets(solve[i], frame, argv[2], Scalar(0,0,255), 1);
+//    }
 
     return 0;
 }

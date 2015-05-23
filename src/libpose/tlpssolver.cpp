@@ -94,10 +94,10 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
 
         vector<Detector*> detectors;
-        if(useHoG)
-            detectors.push_back(new HogDetector());
         if(useCS)
             detectors.push_back(new ColorHistDetector());
+        if(useHoG)
+            detectors.push_back(new HogDetector());
         if(useSURF)
             detectors.push_back(new SurfDetector());
 
@@ -279,7 +279,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
                 }
 
                 //anchor to last frame of the slice (i.e. to frame=seqSlice.size()-1
-                else if(currentFrame==(seqSlice.size()-2)) //anchor to
+                if(currentFrame==(seqSlice.size()-2)) //anchor to
                 {
                     float anchorMin=FLT_MAX, anchorMax=0;
                     for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i)
@@ -515,6 +515,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
         retSolve = passedSolves; //return these solves
     }
 
+    sequence.setFrames(frames);
     return retSolve;
 }
 
@@ -690,12 +691,17 @@ float TLPSSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
     float finalScore=0;
     for(uint32_t i=0; i<scores.size(); ++i)
     {
+        float score = scores[i].getScore();
+        if(scores[i].getScore()==-1)//if score is -1, set it to 1
+        {
+            score=1.0;
+        }
         if(scores[i].getDetName()==hogName)
-            finalScore = finalScore+scores[i].getScore()*useHoG;
+            finalScore = finalScore+score*useHoG;
         else if(scores[i].getDetName()==csName)
-            finalScore = finalScore+scores[i].getScore()*useCS;
+            finalScore = finalScore+score*useCS;
         else if(scores[i].getDetName()==surfName)
-            finalScore = finalScore+scores[i].getScore()*useSURF;
+            finalScore = finalScore+score*useSURF;
     }
 
     return finalScore;

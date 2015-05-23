@@ -119,6 +119,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
     params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
+    params.emplace("anchorBindDistance", 1); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+    params.emplace("anchorBindCoeff", 0.5); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
 
     //solver sensitivity parameters
     params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
@@ -133,6 +135,10 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     float baseRotationRange = params.at("baseRotationRange");
     float baseRotationStep = params.at("baseRotationStep");
     int baseSearchRadius = params.at("baseSearchRadius");
+
+    //paramaters for soft binding to existing keyframes/lockframes
+    int anchorBindDistance = params.at("anchorBindDistance");
+    float anchorBindCoeff = params.at("anchorBindCoeff");
 
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
@@ -182,10 +188,10 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
             //do OpenGM solve for single factor graph
 
             vector<Detector*> detectors;
-            if(useHoG)
-                detectors.push_back(new HogDetector());
             if(useCS)
                 detectors.push_back(new ColorHistDetector());
+            if(useHoG)
+                detectors.push_back(new HogDetector());
             if(useSURF)
                 detectors.push_back(new SurfDetector());
 
@@ -224,15 +230,46 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 tree<BodyPart> partTree = skeleton.getPartTree();
                 tree<BodyPart>::iterator partIter, parentPartIter;
 
+                //TODO: add check for keyframe or lockframe proximity to angular search radius estimator
+
+                //first determine whether this frame is close to an existing keyframe or lockframe
+
+//                int anchorBindDistance = params.at("anchorBindDistance");
+//                float anchorBindCoeff = params.at("anchorBindCoeff");
+
+
+//                for(uint32_t bindIndex=-anchorBindDistance; bindIndex<=anchorBindDistance; ++bindIndex)
+//                {
+//                    if((*mstIter+bindIndex)>0 && (*mstIter+bindIndex)<frames.size())
+//                    {
+//                        if(frames[*mstIter+bindIndex]->getFrametype()!=INTERPOLATIONFRAME) //if it's a keyframe or a lockframe
+//                        {
+//                            isBound=true;
+//                        }
+//                    }
+//                }
+                bool isBound=false;
+                //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
+                if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance)
+                    isBound=true;
+
+                //if so, set bool to true, and get the frame ID that we are close to
+
                 for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
                 {
                     //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
                     //and based on node depth (deeper nodes have a higher distance)
                     //this should rely on parameters e.g.
+
+
+                    //else
                     int depth = partTree.depth(partIter);
 
                     float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
                     float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
+
+                    if(isBound) //if we're close to the anchor, restrict the rotation range
+                        rotationRange = rotationRange*anchorBindCoeff;
 
                     partIter->setRotationSearchRange(rotationRange);
                     partIter->setSearchRadius(searchRange);
@@ -538,12 +575,18 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
     float finalScore=0;
     for(uint32_t i=0; i<scores.size(); ++i)
     {
+        float score = scores[i].getScore();
+        if(scores[i].getScore()==-1)//if score is -1, set it to 1
+        {
+            score=1.0; //set a high cost for invalid scores
+        }
         if(scores[i].getDetName()==hogName)
-            finalScore = finalScore+scores[i].getScore()*useHoG;
+            finalScore = finalScore+score*useHoG;
         else if(scores[i].getDetName()==csName)
-            finalScore = finalScore+scores[i].getScore()*useCS;
+            finalScore = finalScore+score*useCS;
         else if(scores[i].getDetName()==surfName)
-            finalScore = finalScore+scores[i].getScore()*useSURF;
+            finalScore = finalScore+score*useSURF;
+
     }
     return finalScore;
 }
