@@ -857,16 +857,18 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       line(temp, p4, p1, Scalar(255, 0, 255), lineWidth, CV_AA);
 
       string fileName = tempFileName;
-      fileName += "raw";
+      fileName += "raw/";
       CreateDirectorySystemIndependent(fileName);
       stringstream ssTemp;
       ssTemp << frameID << "/";
       fileName += ssTemp.str();
       CreateDirectorySystemIndependent(fileName);
+      ssTemp.str(string());
       ssTemp.clear();
       ssTemp << ls->getLimbID() << "/";
       fileName += ssTemp.str();
       CreateDirectorySystemIndependent(fileName);
+      ssTemp.str(string());
       ssTemp.clear();
       ssTemp << j << ".png";
       fileName += ssTemp.str();
@@ -1058,6 +1060,7 @@ bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector
       ss << i->first << "/";
       out += ss.str();
       CreateDirectorySystemIndependent(out);
+      ss.str(string());
       ss.clear();
       ss << j->first << ".png";
       out += ss.str();
@@ -1085,10 +1088,12 @@ bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector
         ss << i->first << "/";
         out += ss.str();
         CreateDirectorySystemIndependent(out);
+        ss.str(string());
         ss.clear();
         ss << j->first << "/";
         out += ss.str();
         CreateDirectorySystemIndependent(out);
+        ss.str(string());
         ss.clear();
         ss << c << ".png";
         out += ss.str();
