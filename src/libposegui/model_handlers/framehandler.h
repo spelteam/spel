@@ -6,7 +6,7 @@
 
 class QDomElement;
 class QDomDocument;
-class FrameAttrStorage;
+struct FrameAttrStorage;
 
 namespace posegui {
 

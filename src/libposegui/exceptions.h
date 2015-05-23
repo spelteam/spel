@@ -4,6 +4,13 @@
 #include <QString>
 #include <QException>
 
+//noexcept doesn't supported by MSVC
+#ifndef _MSC_VER
+#define NOEXCEPT noexcept
+#else
+#define NOEXCEPT
+#endif
+
 namespace posegui {
 
 class FileNotOpen : public QException
@@ -20,7 +27,7 @@ public:
     void raise() const{
         throw *this;
     }
-    const char* what() const noexcept{
+    const char* what() const NOEXCEPT{
         return msg;
     }
 private:
@@ -41,7 +48,7 @@ public:
     void raise() const{
         throw *this;
     }
-    const char* what() const noexcept{
+    const char* what() const NOEXCEPT{
         return msg;
     }
 private:
@@ -62,7 +69,7 @@ public:
     void raise() const{
         throw *this;
     }
-    const char* what() const noexcept{
+    const char* what() const NOEXCEPT{
         return msg;
     }
 private:
@@ -83,7 +90,7 @@ public:
     void raise() const{
         throw *this;
     }
-    const char* what() const noexcept{
+    const char* what() const NOEXCEPT{
         return msg;
     }
 private:
@@ -104,7 +111,7 @@ public:
     void raise() const{
         throw *this;
     }
-    const char* what() const noexcept{
+    const char* what() const NOEXCEPT{
         return msg;
     }
 private:
