@@ -5,13 +5,13 @@
 #include <fstream>
 #include <list>
 
-#include <tinyxml2.h>
 #include <opencv2/opencv.hpp>
 #if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #include <opencv2/imgproc/imgproc_c.h>
 #endif
 
+#include <tinyxml2.h>
 #include <tree_util.hh>
 #include <detector.hpp>
 #include <keyframe.hpp>
@@ -19,6 +19,13 @@
 #include <solvlet.hpp>
 #include <imagesimilaritymatrix.hpp>
 #include <hogDetector.hpp>
+
+#ifdef UNIX
+#include "errno.h"
+#endif  // UNIX
+#ifdef WINDOWS
+#include <Windows.h>
+#endif // WINDOWS
 
 using namespace std;
 using namespace tinyxml2;
@@ -52,6 +59,7 @@ class ProjectLoader
     void BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &root);
     void AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &parent);
 
+    bool CreateDirectorySystemIndependent(string dirName);
 };
 
 #endif  // _PROJECT_LOADER_HPP_

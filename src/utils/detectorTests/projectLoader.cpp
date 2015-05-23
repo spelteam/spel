@@ -55,7 +55,7 @@ bool ProjectLoader::Load(string fileName)
   const string bodyJointXParam = "x";
   const string bodyJointYParam = "y";
 
-  XMLDocument project;
+  tinyxml2::XMLDocument project;
   XMLError status = project.LoadFile(fileName.c_str());
   if (status != 0)
   {
@@ -431,6 +431,10 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
+  outFileName += "img/";
+  CreateDirectorySystemIndependent(outFileName);
+  outFileName += "frameSolvlets/";
+  CreateDirectorySystemIndependent(outFileName);
   stringstream ss;
   ss << frame->getID();
   ss << ".png";
@@ -523,6 +527,10 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
+  outFileName += "img/";
+  CreateDirectorySystemIndependent(outFileName);
+  outFileName += "lockframeSolvlets/";
+  CreateDirectorySystemIndependent(outFileName);
   stringstream ss;
   ss << frame->getID();
   ss << ".png";
@@ -683,7 +691,12 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
+  outFileName += "img/";
+  CreateDirectorySystemIndependent(outFileName);
+  outFileName += "detectorOutput/";
+  CreateDirectorySystemIndependent(outFileName);
   string tempFileName = outFileName;
+
   stringstream ss;
   ss << frameID;
   ss << ".png";
@@ -768,8 +781,10 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
     line(temp, rect.point4, rect.point1, Scalar(255, 0, 255), lineWidth, CV_AA);
   }
   string fileName = tempFileName;
+  fileName += "skeleton/";
+  CreateDirectorySystemIndependent(fileName);
   stringstream ssTemp;
-  ssTemp << frameID << ".skeleton.png";
+  ssTemp << frameID << ".png";
   fileName += ssTemp.str();
 
   cerr << "Writing file " << fileName << endl;
@@ -842,8 +857,18 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       line(temp, p4, p1, Scalar(255, 0, 255), lineWidth, CV_AA);
 
       string fileName = tempFileName;
+      fileName += "raw";
+      CreateDirectorySystemIndependent(fileName);
       stringstream ssTemp;
-      ssTemp << frameID << "." << ls->getLimbID() << "." << j << ".png";
+      ssTemp << frameID << "/";
+      fileName += ssTemp.str();
+      CreateDirectorySystemIndependent(fileName);
+      ssTemp.clear();
+      ssTemp << ls->getLimbID() << "/";
+      fileName += ssTemp.str();
+      CreateDirectorySystemIndependent(fileName);
+      ssTemp.clear();
+      ssTemp << j << ".png";
       fileName += ssTemp.str();
 
       cerr << "Writing file " << fileName << endl;
@@ -1014,23 +1039,40 @@ bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector
   string outFileName = curFolder + outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
-  outFileName += "hog.";
+  outFileName += "img/";
+  CreateDirectorySystemIndependent(outFileName);
+  outFileName += "hog/";
+  CreateDirectorySystemIndependent(outFileName);
+
+  string tempFileName = outFileName;
+
+  outFileName += "partModels/";
+  CreateDirectorySystemIndependent(outFileName);
+
   for (map <uint32_t, map <uint32_t, HogDetector::PartModel>>::iterator i = partModels.begin(); i != partModels.end(); ++i)
   {
     for (map <uint32_t, HogDetector::PartModel>::iterator j = i->second.begin(); j != i->second.end(); ++j)
     {
-      string tempFileName = outFileName;
+      string out = outFileName;
       stringstream ss;
-      ss << i->first << "." << j->first;
-      ss << ".png";
-      tempFileName += ss.str();
+      ss << i->first << "/";
+      out += ss.str();
+      CreateDirectorySystemIndependent(out);
+      ss.clear();
+      ss << j->first << ".png";
+      out += ss.str();
       Mat img = drawHoGDescriptors(j->second, lineColor, descriptorColor, lineWidth, descriptorWidth, cellSize, nbins);
 
-      cerr << "Writing file " << tempFileName << endl;
-      imwrite(tempFileName, img);
+      cerr << "Writing file " << out << endl;
+      imwrite(out, img);
       img.release();
     }
   }
+
+  outFileName = tempFileName;
+  outFileName += "labelModels/";
+  CreateDirectorySystemIndependent(outFileName);
+
   for (map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>>::iterator i = labelModels.begin(); i != labelModels.end(); ++i)
   {
     for (map <uint32_t, vector <HogDetector::PartModel>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
@@ -1038,15 +1080,22 @@ bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector
       int c = 0;
       for (vector <HogDetector::PartModel>::iterator n = j->second.begin(); n != j->second.end(); ++n)
       {
-        string tempFileName = outFileName;
+        string out = outFileName;
         stringstream ss;
-        ss << i->first << "." << j->first << "." << c;
-        ss << ".png";
-        tempFileName += ss.str();
+        ss << i->first << "/";
+        out += ss.str();
+        CreateDirectorySystemIndependent(out);
+        ss.clear();
+        ss << j->first << "/";
+        out += ss.str();
+        CreateDirectorySystemIndependent(out);
+        ss.clear();
+        ss << c << ".png";
+        out += ss.str();
         Mat img = drawHoGDescriptors(*n, lineColor, descriptorColor, lineWidth, descriptorWidth, cellSize, nbins);
 
-        cerr << "Writing file " << tempFileName << endl;
-        imwrite(tempFileName, img);
+        cerr << "Writing file " << out << endl;
+        imwrite(out, img);
         img.release();
         c++;
       }
@@ -1091,7 +1140,7 @@ Mat ProjectLoader::drawHoGDescriptors(HogDetector::PartModel model, Scalar lineC
 
         float dirVecX = cos(currRad);
         float dirVecY = sin(currRad);
-        float maxVecLen = cellSize.width / 2;       
+        float maxVecLen = cellSize.width / 2;
 
         // compute line coordinates
         float x1 = mx - dirVecX * currentGradStrength * maxVecLen * descriptorScale;
@@ -1108,4 +1157,32 @@ Mat ProjectLoader::drawHoGDescriptors(HogDetector::PartModel model, Scalar lineC
   } // for (celly)
 
   return img;
+}
+
+bool ProjectLoader::CreateDirectorySystemIndependent(string dirName)
+{
+#ifdef WINDOWS
+  if (SetCurrentDirectory(dirName.c_str()) == 0)
+  {
+    // there is no such directory.
+    // try to make this directory
+    if ((CreateDirectory(dirName.c_str(), NULL) == 0) &&
+      (GetLastError() == ERROR_ALREADY_EXISTS))
+    {
+      return false;
+    }
+  }
+  return true;
+#endif // WINDOWS
+#ifdef UNIX
+  if (chdir(dirName.c_str()) != 0)
+  {
+    if ((mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
+      != 0) && (errno == EACCES))
+    {
+      return false;
+    }
+  }
+  return true;
+#endif // UNIX
 }

@@ -57,7 +57,7 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   detector.compute(partImageResized, descriptors);
 
 #ifdef DEBUG
-      partModel.descriptors = descriptors;
+  partModel.descriptors = descriptors;
 #endif  // DEBUG
 
   vector <vector <uint32_t>> counter;
@@ -126,7 +126,7 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
     stringstream ss;
     ss << "Descriptor parse error:" << endl << "Window row:\t" << n << "\tWindow col:\t" << k << endl << "Block row:\t" << r << "\tBlock col:\t" << c << endl << "NBins:\t" << b << endl;
     ss << "Total image rows:\t" << wndSize.height << "\tTotal image cols:\t" << wndSize.width << endl;
-    ss << "Total descriptors:\t" << descriptors.size() << endl;   
+    ss << "Total descriptors:\t" << descriptors.size() << endl;
     ss << "Trying to get descriptor at:\t" << d << endl;
 #ifdef DEBUG
     cerr << ERROR_HEADER << ss.str() << endl;
@@ -430,6 +430,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     vector <LimbLabel> labels;
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
+    map <LimbLabel, PartModel> descriptorMap;
     vector <vector <LimbLabel>> allLabels;
     Point2f j0, j1;
 
@@ -552,8 +553,10 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
                   throw logic_error(ss.str());
                 }
               }
-              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet, nbins);
+              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
               sortedLabels.push_back(generatedLabel);
+              descriptorMap.insert(pair <LimbLabel, PartModel> (generatedLabel, generatedPartModel));
             }
           }
         }
@@ -585,8 +588,10 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             throw logic_error(ss.str());
           }
         }
-        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType), useHoGdet, nbins);
+        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
         sortedLabels.push_back(generatedLabel);
+        descriptorMap.insert(pair <LimbLabel, PartModel> (generatedLabel, generatedPartModel));
       }
     }
     float uniqueLocationCandidates = 0;
@@ -635,6 +640,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             try
             {
               labels.push_back(sortedLabels.at(i));
+              labelModels[frame->getID()][iteratorBodyPart->getPartID()].push_back(descriptorMap.at(sortedLabels.at(i)));
             }
             catch (...)
             {
@@ -666,7 +672,6 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
 
 LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet, uint8_t nbins)
 {
-  labelModels[frame->getID()][bodyPart.getPartID()].push_back(descriptors);
   vector <Score> s;
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
   float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
