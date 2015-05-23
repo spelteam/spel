@@ -1167,26 +1167,17 @@ Mat ProjectLoader::drawHoGDescriptors(HogDetector::PartModel model, Scalar lineC
 bool ProjectLoader::CreateDirectorySystemIndependent(string dirName)
 {
 #ifdef WINDOWS
-  if (SetCurrentDirectory(dirName.c_str()) == 0)
+  if ((CreateDirectory(dirName.c_str(), NULL) == 0) &&
+    (GetLastError() == ERROR_ALREADY_EXISTS))
   {
-    // there is no such directory.
-    // try to make this directory
-    if ((CreateDirectory(dirName.c_str(), NULL) == 0) &&
-      (GetLastError() == ERROR_ALREADY_EXISTS))
-    {
-      return false;
-    }
+    return false;
   }
   return true;
 #endif // WINDOWS
 #ifdef UNIX
-  if (chdir(dirName.c_str()) != 0)
+  if ((mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) && (errno == EACCES))
   {
-    if ((mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
-      != 0) && (errno == EACCES))
-    {
-      return false;
-    }
+    return false;
   }
   return true;
 #endif // UNIX
