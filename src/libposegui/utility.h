@@ -12,6 +12,8 @@
 #include <bodyjointitem.h>
 #include <bodypartitem.h>
 
+namespace posegui {
+
 class Utility : public QObject
 {
     Q_OBJECT
@@ -36,9 +38,14 @@ public:
 
     static void resizeImage( cv::Mat& image, int32_t& cols, int32_t& rows );
 
-    static bool isJointItem( QList<QGraphicsItem*>::iterator& it );
-    static bool isSkeletonItem( QList<QGraphicsItem*>::iterator it );
+    static bool isJointItem( const QList<QGraphicsItem*>::iterator& it );
+    static bool isSkeletonItem( const QList<QGraphicsItem*>::iterator& it );
     static QColor blendColors( const QColor& first, const QColor& second );
+
+    static void buildBodyPartTree(std::vector<BodyPart> &bodyList,
+                                          tree<BodyPart> &bodyParts);
 };
+
+}
 
 #endif // UTILITY_H

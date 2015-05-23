@@ -12,7 +12,7 @@
 FRAMETYPE BodyPartItem::Frametype = INTERPOLATIONFRAME;
 
 BodyPartItem::BodyPartItem(BodyPart *bodyPart, BodyJointItem *parentJoint,
-                           BodyJointItem *childJoint)
+                           BodyJointItem *childJoint )
     : source(parentJoint),
       dest(childJoint),
       bodyPart(bodyPart)
@@ -67,12 +67,12 @@ void BodyPartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
         break;
     }
     if( !bodyPart->getIsOccluded() ){
-        color = Utility::blendColors(color,Palette::notOccluded);
+        color = posegui::Utility::blendColors(color,Palette::notOccluded);
     }
     qreal width = 0;
 
     if( option->state & QStyle::State_MouseOver ){
-        color = Utility::blendColors(color,Palette::selected);
+        color = posegui::Utility::blendColors(color,Palette::selected);
         width = 0.7;
     }
     painter->setPen(QPen(color,width));

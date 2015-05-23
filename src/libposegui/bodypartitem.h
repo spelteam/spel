@@ -6,6 +6,7 @@
 
 class BodyJointItem;
 class BodyPart;
+class LimbLabel;
 
 class BodyPartItem : public QGraphicsItem
 {
@@ -19,8 +20,8 @@ private:
         static QColor selected;
     };
 public:
-    BodyPartItem( BodyPart *bodyPart, BodyJointItem *parentJoint,
-                  BodyJointItem *childJoint );
+    BodyPartItem(BodyPart *bodyPart, BodyJointItem *parentJoint,
+                  BodyJointItem *childJoint);
     ~BodyPartItem();
 signals:
     void updatePart(BodyPartItem *partItem);

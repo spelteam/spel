@@ -1,11 +1,13 @@
 #include "frameview2d.h"
 #include "bodyjointitem.h"
 #include "bodypartitem.h"
+#include "limblabelitem.h"
 #include "project.h"
 #include "utility.h"
 #include <QBitmap>
 #include <QWheelEvent>
 
+using posegui::Project;
 //PUBLIC
 #include <QDebug>
 
@@ -59,10 +61,10 @@ void FrameView2D::pickFrameEvent(int num){
 //PRIVATE
 
 void FrameView2D::loadFrameImage(int num){
-    FilenamePath paths = Project::getInstance().getPaths()[num];
+    auto projectPaths = Project::getInstance().getPaths();
     auto projectFolder = Project::getInstance().getProjectFolder();
-    QString imgPath = projectFolder+FilenamePath::imgFolderPath+paths.imgPath;
-    QString maskPath = projectFolder+FilenamePath::maskFolderPath+paths.maskPath;
+    QString imgPath = projectFolder+projectPaths.imgFolderPath+projectPaths.paths[num].imgPath;
+    QString maskPath = projectFolder+projectPaths.maskFolderPath+projectPaths.paths[num].maskPath;
 
     QImage img, mask;
     if( img.load(imgPath) && mask.load(maskPath) ){
@@ -96,7 +98,7 @@ void FrameView2D::loadFrameSkeleton(int num){
     //clear frame
     auto itemList = scene->items();
     for( auto it = itemList.begin(); it != itemList.end(); ++it){
-        if( Utility::isSkeletonItem(it) ){
+        if( posegui::Utility::isSkeletonItem(it) ){
             scene->removeItem(*it);
         }
     }
@@ -121,9 +123,9 @@ void FrameView2D::loadFrameSkeleton(int num){
     while( pit != bodyParts->end() ){
         BodyPart *part = &(*pit);
         BodyJointItem* child =
-                Utility::getJointItemById(scene->items(),part->getChildJoint());
+                posegui::Utility::getJointItemById(scene->items(),part->getChildJoint());
         BodyJointItem* parent =
-                Utility::getJointItemById(scene->items(),part->getParentJoint());
+                posegui::Utility::getJointItemById(scene->items(),part->getParentJoint());
         if( !child || !parent ){
             qDebug() << "Error! Joints not exist!" << endl;
             return;
@@ -132,6 +134,15 @@ void FrameView2D::loadFrameSkeleton(int num){
         scene->addItem(newItem);
 
         ++pit;
+    }
+    //load limp labels
+    auto labels = Project::getInstance().getLabels(num);
+    if( labels != nullptr ){
+        qDebug() << "Limb label NOT null" << endl;
+        for( LimbLabel label : *labels ){
+            LimbLabelItem* limbLabelItem = new LimbLabelItem(&label);
+            scene->addItem(limbLabelItem);
+        }
     }
 }
 
@@ -154,7 +165,7 @@ void FrameView2D::FrameGraphicsView::wheelEvent(QWheelEvent *event){
         // Zooming out
         scale(1.0 / scaleFactor, 1.0 / scaleFactor);
     }
-    //update();
+    update();
 }
 
 void FrameView2D::FrameGraphicsView::mousePressEvent(QMouseEvent *event){

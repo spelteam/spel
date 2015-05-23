@@ -1,7 +1,10 @@
 #include "utility.h"
 
 #include <QFile>
-#include <QtGlobal>
+#include "projectattr.h"
+#include "exceptions.h"
+
+namespace posegui {
 
 Utility::Utility(QObject *parent) : QObject(parent)
 {
@@ -74,11 +77,11 @@ void Utility::resizeImage(Mat &image, int32_t &cols, int32_t &rows){
     }
 }
 
-bool Utility::isJointItem(QList<QGraphicsItem*>::iterator& it){
+bool Utility::isJointItem(const QList<QGraphicsItem*>::iterator &it){
     return dynamic_cast<BodyJointItem*>(*it);
 }
 
-bool Utility::isSkeletonItem(QList<QGraphicsItem*>::iterator it){
+bool Utility::isSkeletonItem(const QList<QGraphicsItem*>::iterator &it){
     return dynamic_cast<BodyJointItem*>(*it) ||
             dynamic_cast<BodyPartItem*>(*it);
 }
@@ -91,5 +94,65 @@ QColor Utility::blendColors(const QColor &first, const QColor &second){
     mix.setAlpha( ( first.alpha()+second.alpha() )/2 );
 
     return mix;
+}
+
+void Utility::buildBodyPartTree(std::vector<BodyPart> &bodyList,
+                                              tree<BodyPart> &bodyParts)
+{
+    tree<BodyPart>::iterator root = bodyParts.begin();
+    tree<BodyPart>::iterator currNode;
+    bool isRootExist = false;
+    //find root element
+    for( auto it = bodyList.begin(); it != bodyList.end(); ++it ){
+        if( it->getPartID() == BODY_PART_ROOT_ID ){
+            currNode = bodyParts.insert( root, *it );
+            bodyList.erase(it);
+            isRootExist = true;
+            break;
+        }
+    }
+    if( !isRootExist ){
+        throw InvalidProjectStructure("Root element of skeleton doesn't exist");
+    }
+    std::queue<tree<BodyPart>::iterator> availableJoints;
+    //add body parts to root element
+    bodyList.erase( std::remove_if( bodyList.begin(), bodyList.end(),
+    [&]( const BodyPart &bodyPart ){
+        //check whether current body part is a child of root element
+        if( currNode->getParentJoint() == bodyPart.getParentJoint() ||
+                currNode->getChildJoint() == bodyPart.getParentJoint() )
+        {
+            //add body part to tree
+            availableJoints.push(bodyParts.append_child(currNode, bodyPart));
+            //remove current body part from list
+            //and go next body part
+            return true;
+        } else{
+            //go next body part
+            return false;
+        }
+    }), bodyList.end() );
+    //add body parts to rest part of tree
+    while( !availableJoints.empty() ){
+        //get current body part
+       currNode = availableJoints.front();
+       availableJoints.pop();
+       //add body parts to tree
+       //and remove from list
+       bodyList.erase( std::remove_if(bodyList.begin(),bodyList.end(),
+       [&]( const BodyPart &bodyPart ){
+           if( currNode->getChildJoint() == bodyPart.getParentJoint() ){
+               availableJoints.push(bodyParts.append_child(currNode, bodyPart));
+               return true;
+           } else{
+               return false;
+           }
+       }), bodyList.end());
+    }
+    if( !bodyList.empty() ){
+        throw InvalidProjectStructure("Some of body parts are invalid. Can't add to tree");
+    }
+}
+
 }
 

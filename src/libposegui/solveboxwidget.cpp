@@ -3,6 +3,7 @@
 #include "project.h"
 #include <QtConcurrent/QtConcurrent>
 
+using posegui::Project;
 //PUBLIC
 
 SolveBoxWidget::SolveBoxWidget(QWidget *parent) :

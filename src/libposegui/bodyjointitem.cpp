@@ -8,6 +8,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 
+using posegui::Project;
 //PUBLIC
 
 FRAMETYPE BodyJointItem::Frametype = INTERPOLATIONFRAME;
@@ -58,7 +59,7 @@ void BodyJointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     QColor color = joint->getDepthSign() ? Palette::inDepth : Palette::outDepth;
     qreal width = 0;
     if( option->state & (QStyle::State_MouseOver | QStyle::State_Selected) ){
-        color = Utility::blendColors(color,Palette::selected);
+        color = posegui::Utility::blendColors(color,Palette::selected);
         width = 0.7;
     }
     QBrush brush = QBrush(color,Qt::SolidPattern);

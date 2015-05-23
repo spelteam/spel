@@ -2,6 +2,7 @@
 #include "project.h"
 #include "frametablewidget.h"
 
+using posegui::Project;
 //TODO:[!] naked STRINGS!!!
 FrameBoxWidget::FrameBoxWidget(QWidget *parent ) :
     QGroupBox(parent),

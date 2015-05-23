@@ -7,6 +7,8 @@
 #include "project.h"
 #include "utility.h"
 
+using posegui::Project;
+
 FrameTableWidget::FrameTableWidget(QWidget *parent) :
     QTableWidget(parent)
 {
@@ -27,12 +29,12 @@ FrameTableWidget::FrameTableWidget(QWidget *parent) :
 void FrameTableWidget::loadProjectEvent(){
     qDebug() << "Frame table view loading" << endl;
     //load images
-    auto paths = Project::getInstance().getPaths();
+    auto projectPaths = Project::getInstance().getPaths();
     auto projectFolder = Project::getInstance().getProjectFolder();
-    for( int i = 0; i != paths.size(); i++ ){
+    for( int i = 0; i != projectPaths.paths.size(); i++ ){
         QImage img, mask;
-        QString currImgPath = projectFolder+FilenamePath::imgFolderPath+paths[i].imgPath;
-        QString currMaskPath = projectFolder+FilenamePath::maskFolderPath+paths[i].maskPath;
+        QString currImgPath = projectFolder+projectPaths.imgFolderPath+projectPaths.paths[i].imgPath;
+        QString currMaskPath = projectFolder+projectPaths.maskFolderPath+projectPaths.paths[i].maskPath;
         if( img.load(currImgPath) && mask.load(currMaskPath) ){
             QLabel* item = new QLabel();
             QPixmap pixmap = QPixmap::fromImage(img)
@@ -46,9 +48,9 @@ void FrameTableWidget::loadProjectEvent(){
 
             //check whether keyframe
             if( Project::getInstance().getFrame(i)->getFrametype()== FRAMETYPE::KEYFRAME){
-                item->setStyleSheet(Utility::fileToString(":/root/resources/stylesheets/Keyframe.qss"));
+                item->setStyleSheet(posegui::Utility::fileToString(":/root/resources/stylesheets/Keyframe.qss"));
             } else{
-                item->setStyleSheet(Utility::fileToString(":/root/resources/stylesheets/Interframe.qss"));
+                item->setStyleSheet(posegui::Utility::fileToString(":/root/resources/stylesheets/Interframe.qss"));
             }
             //add new column
             this->insertColumn(i);
@@ -82,10 +84,10 @@ void FrameTableWidget::changeFrametypeEvent(int num){
     auto frame = Project::getInstance().getFrame(num);
     if( frame->getFrametype() == KEYFRAME ){
         this->cellWidget(0,num)
-                ->setStyleSheet(Utility::fileToString(":/root/resources/stylesheets/Keyframe.qss"));
+                ->setStyleSheet(posegui::Utility::fileToString(":/root/resources/stylesheets/Keyframe.qss"));
     } else{
         this->cellWidget(0,num)
-                ->setStyleSheet(Utility::fileToString(":/root/resources/stylesheets/Interframe.qss"));
+                ->setStyleSheet(posegui::Utility::fileToString(":/root/resources/stylesheets/Interframe.qss"));
     }
     //repick frame
     pickFrame(num);
