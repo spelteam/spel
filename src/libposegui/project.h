@@ -2,12 +2,11 @@
 #define PROJECT_H
 
 #include <QObject>
-#include <QString>
-#include <QHash>
 #include <QDomDocument>
 #include <QFutureWatcher>
 
 #include <frame.hpp>
+#include <solvlet.hpp>
 
 #if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/imgcodecs/imgcodecs_c.h>
@@ -15,18 +14,12 @@
 
 #include <memory>
 #include <vector>
-#include <functional>
+#include "filepathstorage.h"
+#include "projectattrstorage.h"
 
-struct FilenamePath{
-    static QString imgFolderPath;
-    static QString maskFolderPath;
+namespace posegui {
 
-    QString imgPath;
-    QString maskPath;
-    QString camPath;
-};
-
-
+//TODO:[!] Merge frame and paths into single data structure
 class Project : public QObject
 {
     Q_OBJECT
@@ -54,34 +47,34 @@ public:
     Project& operator=( const Project&& ) = delete;
 private:
     explicit Project(QObject *parent = 0);
-
 signals:
     void create();
-    Project::ErrorCode open( const QString& filename );
     void load();
     void close();
-    void save();
 
     void keyframeUpdated();
-
 public slots:
     //void interpolateFramesEvent();
 private slots:
-    Project::ErrorCode openProjectEvent( const QString& filename );
     void loadProjectEvent();
     void closeProjectEvent();
-
 public:
     static Project& getInstance();
+
+    void open( const QString& filename, QFutureWatcher<void>* watcher = nullptr );
+
+    void save( QFutureWatcher<void>* watcher = nullptr );
+
+    void save( const QString& filename, QFutureWatcher<void>* watcher = nullptr );
 
     const QString& getProjectFolder() const;
 
     std::vector<Frame*> getFrames() const;
     Frame* getFrame( int num ) const;
 
-    const QHash<int, FilenamePath>& getPaths() const;
+    const std::vector<LimbLabel>* getLabels( int num ) const;
 
-    const QString& getLastError() const;
+    const FilePathStorage& getPaths() const;
 
     ProjectState getState() const;
 
@@ -90,37 +83,23 @@ public:
 
     void interpolateFrames();
     void solveFrames();
-
 private:
-    //loading skeleton
-    Project::ErrorCode loadSkeleton(const QDomDocument &document);
-    Project::ErrorCode loadHeaderJoints( QDomElement &elem, tree<BodyJoint> &joints);
-    Project::ErrorCode loadHeaderParts( QDomElement &elem, tree<BodyPart> &bodyParts,
-                                          const tree<BodyJoint> &checkJoints );
-
-    //loading frames
-    Project::ErrorCode loadFrames(const QDomDocument &document);
-    Project::ErrorCode loadKeyframeJoints( QDomElement &elem, tree<BodyJoint> &joints,
-                                             float colsFactor, float rowsFactor);
-    Project::ErrorCode loadKeyframeParts( QDomElement &elem, tree<BodyPart> &bodyParts);
     //open project helpers
     void setProjectFolder( const QString &filename );
-    Project::ErrorCode readProjectXml( const QString &filename, QDomDocument &document );
-    Project::ErrorCode validateProjectXml( const QDomDocument &document );
-    //build structure of skeleton
-    Project::ErrorCode buildBodyPartTree(std::vector<BodyPart> &bodyList,
-                                          tree<BodyPart> &bodyParts);
+    void setProjectFilename( const QString &filename );
 public:
     //thread
     QFutureWatcher<void> futureWatcher;
 private:
     std::vector<FramePtr> frames;
-    QHash<int, FilenamePath> paths;
+    std::vector<Solvlet> solve;
     SkeletonPtr skeleton;
-    QString projectFolder;
+    FilePathStorage projectPaths;
+    ProjectAttrStorage settings;
     ProjectState currState = ProjectState::CLOSED;
-    QString lastError;
 };
+
+}
 
 #endif // PROJECT_H
 
