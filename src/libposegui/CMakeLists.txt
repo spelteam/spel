@@ -2,8 +2,6 @@
 # Creates a libpose graphic user interface 
 cmake_minimum_required(VERSION 2.8.11)
 
-#project(LibposeGUI)
-
 #set clang
     #SET (CMAKE_C_COMPILER             "/usr/bin/clang")
     #SET (CMAKE_C_FLAGS                "-Wall -std=c++11")
@@ -75,10 +73,33 @@ LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC utility.cpp)
 #Custom graphick items
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC bodyjointitem.cpp)
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC bodypartitem.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC limblabelitem.cpp)
 #Xml message handler
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC xmlmessagehandler.cpp)
 #Attributes of xml project
-LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC projectattr.h)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC projectattr.cpp)
+#Documents
+#LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC poseguidocument.h)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC projectdocument.cpp)
+#Exceptions
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC exceptions.h)
+#Model handlers
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/modelhandler.h)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodyjointhandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodyparthandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodyjointheaderhandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodypartheaderhandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/framehandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/projecthandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodyjointsheaderhandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodypartsheaderhandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodyjointshandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/bodypartshandler.cpp)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC model_handlers/frameshandler.cpp)
+#Transitional classes
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC frameattrstorage.h)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC projectattrstorage.h)
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC filepathstorage.h)
 
 #Add forms
 QT5_WRAP_UI(UIS_HDRS
