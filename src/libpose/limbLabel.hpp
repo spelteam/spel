@@ -50,7 +50,7 @@ class LimbLabel
     float getAngle(void) const;
     vector <Point2f> getPolygon(void) const;
     bool getIsOccluded(void) const;
-    float getAvgScore(void) const;
+    float getAvgScore(bool bNegativeToPositive = false) const;
 
     bool containsPoint(Point2f pt);
   private:

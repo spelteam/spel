@@ -84,22 +84,22 @@ bool LimbLabel::getIsOccluded(void) const
 
 bool LimbLabel::operator < (const LimbLabel &ll) const
 {
-  return getAvgScore() < ll.getAvgScore();
+  return getAvgScore(true) < ll.getAvgScore(true);
 }
 
 bool LimbLabel::operator > (const LimbLabel &ll) const
 {
-  return getAvgScore() > ll.getAvgScore();
+  return getAvgScore(true) > ll.getAvgScore(true);
 }
 
-float LimbLabel::getAvgScore(void) const
+float LimbLabel::getAvgScore(bool bNegativeToPositive) const
 {
   float sum = 0;
   uint32_t count = 0;
   for_each(scores.begin(), scores.end(), [&](Score s)
   {
     count++;
-    sum += s.getScore() * s.getCoeff();
+    sum += (bNegativeToPositive ? abs(s.getScore()) : s.getScore()) * s.getCoeff();
   });
   return ((count > 0) ? (sum / count) : 0.0f);
 }
