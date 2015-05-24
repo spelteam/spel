@@ -35,6 +35,10 @@ vector<Solvlet> TLPSSolver::solve(Sequence &frames) //inherited virtual
 
 vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params) //inherited virtual
 {
+    if(sequence.getFrames().size()==0)
+        return vector<Solvlet>();
+
+    Mat image(sequence.getFrames()[0]->getImage());
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
 
@@ -46,9 +50,13 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
     //detector search parameters
     params.emplace("baseRotationRange", 50); //search angle range of +/- 60 degrees
-    params.emplace("baseSearchRadius", 20); //search a radius of 100 pixels
-    params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
-    params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
+    float baseRotationRange = params.at("baseRotationRange");
+    params.emplace("baseRotationStep", baseRotationRange/5.0); //search with angle step of 10 degrees
+
+    params.emplace("baseSearchRadius", image.rows/30.0); //search a radius of 100 pixels
+    int baseSearchRadius = params.at("baseSearchRadius");
+    params.emplace("baseSearchStep", baseSearchRadius/10.0); //search in a grid every 10 pixels
+
     params.emplace("partShiftCoeff", 1.5); //search radius multiplier of distance between part in current and prev frames
     params.emplace("partRotationCoeff", 1.5); //rotation radius multiplier of distance between part in current and prev frames
 
@@ -58,14 +66,13 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
     params.emplace("tempCoeff", 0.0); //set the temporal link coefficient
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
-    params.emplace("anchorCoeff", 0.0); //set the anchor coefficient cost
+    params.emplace("anchorCoeff", 1.0); //set the anchor coefficient cost
 
     //solver eval parameters
     params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
-    float baseRotationRange = params.at("baseRotationRange");
     float baseRotationStep = params.at("baseRotationStep");
-    int baseSearchRadius = params.at("baseSearchRadius");
+
     float partShiftCoeff = params.at("partShiftCoeff");
     float partRotationCoeff = params.at("partRotationCoeff");
 
@@ -689,20 +696,35 @@ float TLPSSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
 
     //compute the weighted sum of scores
     float finalScore=0;
+    bool hogFound=false;
+    bool csFound=false;
+    bool surfFound=false;
     for(uint32_t i=0; i<scores.size(); ++i)
     {
         float score = scores[i].getScore();
         if(scores[i].getScore()==-1)//if score is -1, set it to 1
         {
-            score=1.0;
+            score=1.0; //set a high cost for invalid scores
         }
         if(scores[i].getDetName()==hogName)
+        {
             finalScore = finalScore+score*useHoG;
+            hogFound=true;
+        }
         else if(scores[i].getDetName()==csName)
+        {
             finalScore = finalScore+score*useCS;
+            csFound=true;
+        }
         else if(scores[i].getDetName()==surfName)
+        {
             finalScore = finalScore+score*useSURF;
+            surfFound=true;
+        }
     }
+
+    //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
+    finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);
 
     return finalScore;
 }

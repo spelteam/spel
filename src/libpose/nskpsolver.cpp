@@ -6,6 +6,7 @@
 #include "hogDetector.hpp"
 #include "surfDetector.hpp"
 #include "tlpssolver.hpp"
+#include <algorithm>
 
 //using namespace opengm;
 
@@ -39,7 +40,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float> params)
     return this->solve(sequence, params, ISM);
 }
 
-vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism) //inherited virtual
+vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism)//, function<float(float)> progressFunc) //inherited virtual
 {
     //parametrise the number of times frames get propagated
     params.emplace("nskpIters", 2); //set number of iterations, 0 to iterate until no new lockframes are introduced
@@ -56,6 +57,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     uint32_t lockframesLastIter=0;
     vector<int> ignore; //frames to ignore during propagation
 
+    //progressFunc(0.0);
     for(uint32_t iteration=0; iteration<nskpIters; ++iteration)
     {
         if(iteration>=nskpIters)
@@ -84,9 +86,10 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
         }
         lockframesLastIter=numLockframes;
     }
+    //progressFunc(1.0);
 
     //create tlps solver
-    TLPSSolver tlps;
+    //TLPSSolver tlps;
     sequence.setFrames(propagatedFrames);
 
     //the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
@@ -98,6 +101,9 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 
 vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix& ism, vector<int>& ignore)
 {
+    if(frames.size()==0)
+        return vector<Solvlet>();
+    Mat image = frames[0]->getImage();
     // //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
     // float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
     // int mst_max_size=params.at("mst_max_size"); //@FIXME PARAM this is a param, not static
@@ -114,17 +120,23 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     //detector search parameters
 
-    params.emplace("baseRotationRange", 50); //search angle range of +/- 60 degrees
-    params.emplace("baseSearchRadius", 10); //search a radius of 100 pixels
-    params.emplace("baseSearchStep", 10); //search in a grid every 10 pixels
-    params.emplace("baseRotationStep", 10); //search with angle step of 10 degrees
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
-    params.emplace("anchorBindDistance", 1); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+    params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
     params.emplace("anchorBindCoeff", 0.5); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+    params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
+
+    //detector search parameters
+    params.emplace("baseRotationRange", 50); //search angle range of +/- 50 degrees
+    float baseRotationRange = params.at("baseRotationRange");
+    params.emplace("baseRotationStep", baseRotationRange/5.0); //search with angle step of 10 degrees
+
+    params.emplace("baseSearchRadius", image.rows/30.0); //search a radius of 100 pixels
+    int baseSearchRadius = params.at("baseSearchRadius");
+    params.emplace("baseSearchStep", baseSearchRadius/10.0); //search in a grid every 10 pixels
 
     //solver sensitivity parameters
     params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+    params.emplace("jointCoeff", 0.5); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
@@ -132,13 +144,14 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
     float depthRotationCoeff = params.at("partDepthRotationCoeff");
-    float baseRotationRange = params.at("baseRotationRange");
+
     float baseRotationStep = params.at("baseRotationStep");
-    int baseSearchRadius = params.at("baseSearchRadius");
+    float baseSearchStep = params.at("baseSearchStep");
 
     //paramaters for soft binding to existing keyframes/lockframes
     int anchorBindDistance = params.at("anchorBindDistance");
     float anchorBindCoeff = params.at("anchorBindCoeff");
+    bool bindToLockframes = params.at("bindToLockframes");
 
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
@@ -231,26 +244,11 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 tree<BodyPart>::iterator partIter, parentPartIter;
 
                 //TODO: add check for keyframe or lockframe proximity to angular search radius estimator
-
-                //first determine whether this frame is close to an existing keyframe or lockframe
-
-//                int anchorBindDistance = params.at("anchorBindDistance");
-//                float anchorBindCoeff = params.at("anchorBindCoeff");
-
-
-//                for(uint32_t bindIndex=-anchorBindDistance; bindIndex<=anchorBindDistance; ++bindIndex)
-//                {
-//                    if((*mstIter+bindIndex)>0 && (*mstIter+bindIndex)<frames.size())
-//                    {
-//                        if(frames[*mstIter+bindIndex]->getFrametype()!=INTERPOLATIONFRAME) //if it's a keyframe or a lockframe
-//                        {
-//                            isBound=true;
-//                        }
-//                    }
-//                }
                 bool isBound=false;
                 //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
-                if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance)
+                //and is the frame we are propagating from, a keyframe? (check only if we disallow bind to lockframes
+                if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
+                        (bindToLockframes || (frames[frameId]->getFrametype()==KEYFRAME))) //and whether we are actually allowed to bind
                     isBound=true;
 
                 //if so, set bool to true, and get the frame ID that we are close to
@@ -260,7 +258,6 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
                     //and based on node depth (deeper nodes have a higher distance)
                     //this should rely on parameters e.g.
-
 
                     //else
                     int depth = partTree.depth(partIter);
@@ -573,6 +570,9 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
 
     //compute the weighted sum of scores
     float finalScore=0;
+    bool hogFound=false;
+    bool csFound=false;
+    bool surfFound=false;
     for(uint32_t i=0; i<scores.size(); ++i)
     {
         float score = scores[i].getScore();
@@ -581,13 +581,25 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
             score=1.0; //set a high cost for invalid scores
         }
         if(scores[i].getDetName()==hogName)
+        {
             finalScore = finalScore+score*useHoG;
+            hogFound=true;
+        }
         else if(scores[i].getDetName()==csName)
+        {
             finalScore = finalScore+score*useCS;
+            csFound=true;
+        }
         else if(scores[i].getDetName()==surfName)
+        {
             finalScore = finalScore+score*useSURF;
-
+            surfFound=true;
+        }
     }
+
+    //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
+    finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);
+
     return finalScore;
 }
 
