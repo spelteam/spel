@@ -727,7 +727,7 @@ LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0
   maskMat.release();
   imgMat.release();
   float score = compare(bodyPart, descriptors, nbins);
-  score *= ((float)inMaskPixels / (float)totalPixels);
+  score *= (1 - ((float)inMaskPixels / (float)totalPixels));
   Score sc(score, detectorName.str(), _useHoGdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
@@ -792,7 +792,7 @@ float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins)
       }
     }
   }
-  return score /= totalcount;
+  return score / totalcount;
 }
 
 map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> HogDetector::getLabelModels(void)
