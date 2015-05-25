@@ -434,3 +434,117 @@ TEST(DetectorTests, getBoneWidth)
     cout << length;
     EXPECT_EQ(length / lwRatio, width);
 }
+
+//Temporary test
+TEST(DetectorTests, merge)
+{
+    Point2f center = Point2f(10, 10);
+    vector<Point2f> polygon = { center, Point2f(6, 18), Point2f(14, 18), Point2f(14, 2) };
+    bool isOccluded = false;
+    float scoreCoeff = 1;
+
+    // Create input vectors
+    int partsCount = 16;
+    vector<float> A_angles = { 1, 2, 3, 4, 5 };
+    vector<float> B_angles = { 1, 1, 2, 2, 2, 3, 4, 2, 5 };
+    vector<map<int, vector<Score>>> All_scores;
+    All_scores.reserve(partsCount);
+    vector <vector <LimbLabel>> A;
+    vector <vector <LimbLabel>> B;
+
+    for (int LimbID = 0; LimbID < partsCount; LimbID++)
+    {
+        vector <LimbLabel> A_temp, B_temp;
+        map<int, vector<Score>> label_scores;
+        for (int labelID = 0; labelID < A_angles.size(); labelID++)
+        {
+            int k = A_angles[labelID];
+            Score score1(k / 10, "", scoreCoeff);
+            Score score2(k / 10 + 2, "", scoreCoeff);
+            vector <Score> scores;
+            scores.push_back(score1);
+            scores.push_back(score2);
+            LimbLabel label(LimbID, center*k, A_angles[labelID], polygon, scores, isOccluded);
+            A_temp.push_back(label);
+            label_scores[k - 1].push_back(score1);
+            label_scores[k - 1].push_back(score2);
+            scores.clear();
+        }
+        for (int labelID = 0; labelID < B_angles.size(); labelID++)
+        {
+            int k = B_angles[labelID];
+            Score score1(k / 10, "", scoreCoeff);
+            Score score2(k / 10 + 2, "", scoreCoeff);
+            vector <Score> scores;
+            scores.push_back(score1);
+            scores.push_back(score2);
+            Point2f Center = center*k;
+            LimbLabel label(LimbID, center*k, B_angles[labelID], polygon, scores, isOccluded);
+            B_temp.push_back(label);
+            label_scores[k - 1].push_back(score1);
+            label_scores[k - 1].push_back(score2);
+            scores.clear();
+        }
+        Score score(10, "", scoreCoeff);
+        vector <Score> scores;
+        scores.push_back(score);
+        LimbLabel label(LimbID, Point2f(0,0), 2, polygon, scores, isOccluded);
+        B_temp.push_back(label);
+        label_scores[label_scores.size()].push_back(score);
+        All_scores.push_back(label_scores);
+        A.push_back(A_temp);
+        B.push_back(B_temp);
+        A_temp.clear();
+        B_temp.clear();
+        label_scores.clear();
+    }
+
+    // Create expected vector
+    vector<float> All_angles = { 1, 2, 3, 4, 5 };
+    vector <vector <LimbLabel>> Expected;
+    for (int LimbID = 0; LimbID < partsCount; LimbID++)
+    {
+        vector <LimbLabel> temp;
+        for (int labelID = 0; labelID < All_angles.size(); labelID++)
+        {
+            float k = All_angles[labelID];
+            Score score1(k / 10, "", scoreCoeff);
+            Score score2(k / 10 + 2, "", scoreCoeff);
+            vector <Score> scores;
+            scores.push_back(score1);
+            scores.push_back(score2);
+            LimbLabel label(LimbID, center*k, All_angles[labelID], polygon, scores, isOccluded);
+            temp.push_back(label);
+            scores.clear();
+        }
+        Score score(10, "", scoreCoeff);
+        vector <Score> scores;
+        scores.push_back(score);
+        LimbLabel label(LimbID, Point2f(0, 0), 2, polygon, scores, isOccluded);
+        temp.push_back(label);
+        Expected.push_back(temp);
+        temp.clear();
+    }
+
+    // Calculate actual value 
+    TestingDetector detector;
+    vector <vector <LimbLabel>> Actual = detector.merge(A, B);
+
+    // Compare
+    EXPECT_EQ(Expected.size(), Actual.size());
+    cout << Expected.size() << endl;
+    cout << Expected[0].size() << endl;
+    for (int limbID = 0; limbID < partsCount; limbID++)
+    {
+        EXPECT_EQ(Expected[limbID].size(), Actual[limbID].size());
+        for (int labelID = 0; labelID < Expected[limbID].size(); labelID++)
+        {
+            EXPECT_EQ(Expected[limbID][labelID].getLimbID(), Actual[limbID][labelID].getLimbID());
+            EXPECT_EQ(Expected[limbID][labelID].getCenter(), Actual[limbID][labelID].getCenter());
+            EXPECT_EQ(Expected[limbID][labelID].getAngle(), Actual[limbID][labelID].getAngle());
+            EXPECT_EQ(All_scores[limbID][labelID], Actual[limbID][labelID].getScores());
+            EXPECT_EQ(Expected[limbID][labelID].getPolygon(), Actual[limbID][labelID].getPolygon());
+        }
+    }
+}
+
