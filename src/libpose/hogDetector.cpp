@@ -792,7 +792,7 @@ float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins)
       }
     }
   }
-  return score / totalcount;
+  return (score / (float)totalcount);
 }
 
 map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> HogDetector::getLabelModels(void)
