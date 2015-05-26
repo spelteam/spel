@@ -148,7 +148,7 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
           }
           else
           {
-            partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) /= counter.at(i / cellSize.height).at(j / cellSize.width);
+            partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) /= ((float)counter.at(i / cellSize.height).at(j / cellSize.width));
           }
         }
       }
@@ -727,7 +727,7 @@ LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0
   maskMat.release();
   imgMat.release();
   float score = compare(bodyPart, descriptors, nbins);
-  score *= (1 - ((float)inMaskPixels / (float)totalPixels));
+  //score *= (1.0f - ((float)inMaskPixels / (float)totalPixels));
   Score sc(score, detectorName.str(), _useHoGdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);

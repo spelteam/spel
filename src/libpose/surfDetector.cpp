@@ -502,7 +502,7 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
   maskMat.release();
   imgMat.release();
   float score = compare(bodyPart, partModel, j0, j1);
-  score *= (1 - ((float)inMaskPixels / (float)totalPixels));
+  //score *= (1.0f - ((float)inMaskPixels / (float)totalPixels));
   Score sc(score, detectorName.str(), _useSURFdet);
   s.push_back(sc);
   return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
