@@ -17,7 +17,7 @@ void HogDetector::setID(int _id)
   id = _id;
 }
 
-HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
+HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages)
 {
   float boneLength = getBoneLength(j0, j1);
   if (boneLength < blockSize.width)
@@ -49,12 +49,25 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
   Mat partImageResized = Mat(wndSize.height, wndSize.width, CV_8UC3, Scalar(255, 255, 255));
   resize(partImage, partImageResized, wndSize);
-  partModel.partImage = partImageResized.clone();
+  if (bGrayImages)
+  {
+#if OpenCV_VERSION_MAJOR == 2
+    cvtColor(partImageResized, partModel.partImage, CV_BGR2GRAY);
+#elif OpenCV_VERSION_MAJOR >= 3
+    cvtColor(partImageResized, partModel.partImage, COLOR_BGR2GRAY);
+#else
+#error "Unsupported version of OpenCV"
+#endif
+  }
+  else
+  {
+    partModel.partImage = partImageResized.clone();
+  }
   HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
 
   vector <float> descriptors;
 
-  detector.compute(partImageResized, descriptors);
+  detector.compute(partModel.partImage, descriptors);
 
 #ifdef DEBUG
   partModel.descriptors = descriptors;
@@ -167,7 +180,7 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   return partModel;
 }
 
-map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
+map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages)
 {
   map <uint32_t, PartModel> parts;
   Size wndSize;
@@ -215,7 +228,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     part->setRotationSearchRange(rotationAngle);
     try
     {
-      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
+      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages)));
     }
     catch (logic_error err)
     {
@@ -304,6 +317,12 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
+  const bool grayImages = false;
+
+  const string sGrayImages = "grayImages";
+
+  params.emplace(sGrayImages, grayImages == true ? 1.0f : 0.0f);
+
   //TODO(Vitaliy Koshura): Make some of them as detector params
   Size blockSize = Size(16, 16);
   Size blockStride = Size(8, 8);
@@ -336,7 +355,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     try
     {
-      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
+      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f)));
     }
     catch (...)
     {
@@ -384,6 +403,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   const float isWeakTreshhold = 0.1f;
   const string sIsWeakTreshhold = "isWeakTreshhold";
 
+  const bool grayImages = false;
+  const string sGrayImages = "grayImages";
+
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -396,6 +418,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sDebugLevel, debugLevel);
   params.emplace(sRotationThreshold, rotationThreshold);
   params.emplace(sIsWeakTreshhold, isWeakTreshhold);
+  params.emplace(sGrayImages, grayImages == true ? 1.0f : 0.0f);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
@@ -553,7 +576,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
                   throw logic_error(ss.str());
                 }
               }
-              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
               LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
               sortedLabels.push_back(generatedLabel);
               descriptorMap.insert(pair <LimbLabel, PartModel> (generatedLabel, generatedPartModel));
@@ -588,7 +611,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             throw logic_error(ss.str());
           }
         }
-        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
         LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
         sortedLabels.push_back(generatedLabel);
         descriptorMap.insert(pair <LimbLabel, PartModel> (generatedLabel, generatedPartModel));

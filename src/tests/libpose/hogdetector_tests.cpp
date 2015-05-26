@@ -137,11 +137,12 @@ TEST(HOGDetectorTests, computeDescriptor)
 	Size padding = Size(32, 32);
 	int derivAperture = 1;
 	int histogramNormType = HOGDescriptor::L2Hys;
+  bool bGrayImages = false;
 
 	//Calculate actual value
 	HogDetector D;
 	HogDetector::PartModel partModel;
-	partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+  partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
 
 	//Calculate expected value
 	vector<float> descriptorsValues;
@@ -200,12 +201,13 @@ TEST(HOGDetectorTests, computeDescriptors)
 	Size padding = Size(32, 32);
 	int derivAperture = 1;
 	int histogramNormType = HOGDescriptor::L2Hys;
+  bool bGrayImages = false;
 
 	//Calculate actual value
 	HogDetector D;
 	D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize);
 	map <uint32_t, HogDetector::PartModel> partModels;
-	partModels = D.computeDescriptors(frames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+  partModels = D.computeDescriptors(frames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
 
 	//Calculate expected value
 	vector<vector<float>> allDescriptors;
