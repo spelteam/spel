@@ -45,6 +45,7 @@ class ProjectLoader
     Mat drawHoGDescriptors(HogDetector::PartModel model, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins);
     void static ResizeImage(Mat &image, int32_t &cols, int32_t &rows);
     vector <Frame*> getFrames(void);
+    string getProjectTitle();
   private:
     string projectTitle;
     string imgFolderPath;

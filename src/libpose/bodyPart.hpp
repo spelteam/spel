@@ -36,14 +36,18 @@ class BodyPart
     void setIsOccluded(bool _isOccluded);
     float getExpectedDistance(void) const;
     void setExpectedDistance(float _expectedDistance);
-    float getSearchRadius(void) const;
-    void setSearchRadius(float _searchRadius);
+
     POSERECT <Point2f> getPartPolygon(void);
     void setPartPolygon(POSERECT <Point2f> _partPolygon);
     float getLWRatio(void) const;
     void setLWRatio(float _lwRatio);
     float getRelativeLength(void) const;
     void setRelativeLength(float _relativeLength);
+
+    //search parameters
+    float getSearchRadius(void) const;
+    void setSearchRadius(float _searchRadius);
+
     float getRotationSearchRange(void);
     void setRotationSearchRange(float _rotationAngle);
   private:

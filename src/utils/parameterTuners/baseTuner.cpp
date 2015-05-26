@@ -2,6 +2,7 @@
 #include <nskpsolver.hpp>
 #include <tlpssolver.hpp>
 #include "projectLoader.hpp"
+#include <string>
 
 using namespace std;
 
@@ -9,7 +10,7 @@ int main (int argc, char **argv)
 {
     if (argc != 3)
     {
-        cout << "Usage hybridSolverTest [project.xml] [out directory]" << endl;
+        cout << "Usage baseTuner [project.xml] [out directory]" << endl;
         return -1;
     }
     string curFolder = argv[1];
@@ -33,98 +34,67 @@ int main (int argc, char **argv)
         return -1;
     }
 
-    map <string, float> params; //use the default params
-    params.emplace("debugLevel", 1); //set the debug setting to highest (0,1,2,3)
+    float jointCoeff_min=0.0, jointCoeff_max=1.0, jointCoeff_step=0.1,
+            baseRotationRange_min=10, baseRotationRange_max=180, baseRotationRange_step=10,
+            partDepthRotationCoeff_min=1.0, partDepthRotationCoeff_max=2.0, partDepthRotationCoeff_step=0.1;
 
-    vector <Frame*> vFrames = projectLoader.getFrames();
-    Sequence seq(0, "test", vFrames);
-
-    //now test inrepolation for this sequence
-    seq.estimateUniformScale(params);
-    seq.computeInterpolation(params);
-
-    NSKPSolver nSolver;
-    TLPSSolver tSolver;
-    cout << "Solving using NSKPSolver..." << endl;
-    //solve with some default params
-    //ImageSimilarityMatrix ism(vFrames);
-    ImageSimilarityMatrix ism;
-    if(!ism.read("testISM.ism"))
+    for(float baseRotationRange = baseRotationRange_min; baseRotationRange<=baseRotationRange_max; baseRotationRange+=baseRotationRange_step)
     {
-        ism.buildImageSimilarityMatrix(vFrames);
-        ism.write(("testISM.ism"));
+        for(float jointCoeff=jointCoeff_min; jointCoeff<=jointCoeff_max; jointCoeff+=jointCoeff_step)
+        {
+            for(float partDepthRotationCoeff=partDepthRotationCoeff_min; partDepthRotationCoeff<=partDepthRotationCoeff_max; partDepthRotationCoeff+=partDepthRotationCoeff_step)
+            {
+                vector <Frame*> vFrames = projectLoader.getFrames();
+                Sequence seq(0, "test", vFrames);
+
+                NSKPSolver nSolver;
+                cout << "Solving using NSKPSolver..." << endl;
+                //solve with some default params
+                //ImageSimilarityMatrix ism(vFrames);
+                ImageSimilarityMatrix ism;
+                if(!ism.read("testISM.ism"))
+                {
+                    ism.buildImageSimilarityMatrix(vFrames);
+                    ism.write(("testISM.ism"));
+                }
+
+                map <string, float> params; //use the default params
+                params.emplace("debugLevel", 1); //set the debug setting to highest (0,1,2,3)
+
+                params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+                params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+                params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+
+                params.emplace("useCSdet", 0.5); //determine if ColHist detector is used and with what coefficient
+                params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+                params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
+                params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
+                params.emplace("acceptLockframeThreshold", 0.52); //set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+                params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+                params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+
+                params.emplace("baseRotationRange", 50); //search angle range of +/- 50 degrees
+
+                vector<Solvlet> nskpSolve;
+                //do an iterative NSKP solve
+                nskpSolve = nSolver.solve(seq, params, ism);
+
+                string baseOutFolder(argv[2]);
+                baseOutFolder = baseOutFolder + "/" + to_string(baseRotationRange)+"_"+to_string(jointCoeff)+"_"+to_string(partDepthRotationCoeff);
+                //draw the solution
+                for(uint32_t i=0; i<nskpSolve.size();++i)
+                {
+                    Frame* frame = seq.getFrames()[nskpSolve[i].getFrameID()];
+                    Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+
+                    projectLoader.drawLockframeSolvlets(ism, nskpSolve[i], frame, parent, baseOutFolder.c_str(), Scalar(0,0,255), 1);
+                }
+                //export the resulting skeletons from these labels
+           }
+        }
     }
 
-    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
-    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
-
-    params.emplace("useCSdet", 0.5); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
-
-    params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
-    params.emplace("acceptLockframeThreshold", 0.52); //set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
-    params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
-    params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
-
-    vector<Solvlet> finalSolve;
-    int prevSolveSize=0;
-    do
-    {
-        prevSolveSize=finalSolve.size(); //set size of the final solve
-
-        vector<Solvlet> nskpSolve, tlpsSolve;
-        //do an iterative NSKP solve
-        nskpSolve = nSolver.solve(seq, params, ism);
-
-        //draw the solution
-        for(uint32_t i=0; i<nskpSolve.size();++i)
-        {
-            Frame* frame = seq.getFrames()[nskpSolve[i].getFrameID()];
-            Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-
-            projectLoader.drawLockframeSolvlets(ism, nskpSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
-        }
-
-        for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
-            finalSolve.push_back(*s);
-
-        //then, do a temporal solve
-        seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
-
-        tlpsSolve = tSolver.solve(seq, params);
-
-        for(uint32_t i=0; i<tlpsSolve.size();++i)
-        {
-            Frame* frame = seq.getFrames()[tlpsSolve[i].getFrameID()];
-            Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-
-            projectLoader.drawLockframeSolvlets(ism, tlpsSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
-        }
-
-        for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
-            finalSolve.push_back(*s);
-
-    } while(finalSolve.size()>prevSolveSize);
-
-
-//    //draw the solution
-//    for(uint32_t i=0; i<finalSolve.size();++i)
-//    {
-//        Frame* frame = seq.getFrames()[finalSolve[i].getFrameID()];
-//        Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-
-//        projectLoader.drawLockframeSolvlets(ism, finalSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
-//    }
-
-
-//    for(uint32_t i=0; i<solve.size();++i)
-//    {
-//        Frame* frame = vFrames[solve[i].getFrameID()];
-
-//        projectLoader.drawFrameSolvlets(solve[i], frame, argv[2], Scalar(0,0,255), 1);
-//    }
 
     return 0;
 }

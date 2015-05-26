@@ -84,12 +84,12 @@ bool LimbLabel::getIsOccluded(void) const
 
 bool LimbLabel::operator < (const LimbLabel &ll) const
 {
-  return getAvgScore(true) < ll.getAvgScore(true);
+  return getAvgScore(true) < ll.getAvgScore(true); //true?
 }
 
 bool LimbLabel::operator > (const LimbLabel &ll) const
 {
-  return getAvgScore(true) > ll.getAvgScore(true);
+  return getAvgScore(true) > ll.getAvgScore(true); //true?
 }
 
 float LimbLabel::getAvgScore(bool bNegativeToPositive) const
@@ -126,4 +126,24 @@ bool LimbLabel::containsPoint(Point2f pt)
 void LimbLabel::addScore(Score detectionScore)
 {
   scores.push_back(detectionScore);
+}
+
+string LimbLabel::toString()
+{
+    string retString="";
+    retString+=to_string(limbID)+" ";
+    retString+=to_string(center.x)+" "+to_string(center.y)+" ";
+    retString+=to_string(angle)+" ";
+    Point2f c0,c1;
+    this->getEndpoints(c0,c1);
+    retString+=to_string(c0.x)+" "+to_string(c0.y)+" ";
+    retString+=to_string(c1.x)+" "+to_string(c1.y)+" ";
+    retString+=to_string(isOccluded)+" ";
+    for(int i=0;i<scores.size();++i)
+    {
+       retString+=scores[i].getDetName()+" ";
+       retString+=to_string(scores[i].getScore())+" ";
+    }
+
+    return retString;
 }

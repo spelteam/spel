@@ -50,18 +50,20 @@ int main (int argc, char **argv)
 
     //global settings
     params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 0.8); //set solver body part connectivity sensitivity
+    params.emplace("jointCoeff", 0.6); //set solver body part connectivity sensitivity
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
     //detector settings
-    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
+    params.emplace("grayImages", 1); // use grayscale images for HoG?
 
     //solver settings
     params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
-    params.emplace("acceptLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
-    params.emplace("badLabelThresh", 0.0); //set bad label threshold, which will force solution discard at 0.45
+    params.emplace("acceptLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+    params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
     params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
 
     params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
@@ -72,10 +74,11 @@ int main (int argc, char **argv)
     //solve with some default params
     //ImageSimilarityMatrix ism(vFrames);
     ImageSimilarityMatrix ism;
-    if(!ism.read("testISM.ism"))
+    string ismFile(projectLoader.getProjectTitle()+".ism");
+    if(!ism.read(ismFile))
     {
         ism.buildImageSimilarityMatrix(vFrames);
-        ism.write(("testISM.ism"));
+        ism.write(ismFile);
     }
     solve = nSolver.solve(seq, params, ism);
 

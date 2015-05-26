@@ -129,6 +129,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("baseRotationRange", 50); //search angle range of +/- 50 degrees
     float baseRotationRange = params.at("baseRotationRange");
     params.emplace("baseRotationStep", baseRotationRange/5.0); //search with angle step of 10 degrees
+     params.emplace("stepTheta", baseRotationRange/5.0); //search in a grid every 10 pixels
 
     params.emplace("baseSearchRadius", image.rows/30.0); //search a radius of 100 pixels
     int baseSearchRadius = params.at("baseSearchRadius");
@@ -234,6 +235,8 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                 //compute the shift between the frame we are propagating from and the current frame
                 Point2f shift = ism.getShift(frames[frameId]->getID(),frames[*mstIter]->getID());
 
+//                if(frameId==34)
+//                    cout << shift.x << " " << shift.y << endl;
 
                 Skeleton skeleton = lockframe->getSkeleton();
 
