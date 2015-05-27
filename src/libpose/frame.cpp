@@ -106,3 +106,28 @@ void Frame::setParentFrameID(int _parentFrameID)
 {
     parentFrameID = _parentFrameID;
 }
+
+float Frame::Resize(uint32_t maxHeight)
+{
+  float factor = (float)maxHeight / (float)image.rows;
+  if (image.rows != maxHeight)
+  {
+    resize(image, image, cvSize(image.cols * factor, image.rows * factor));
+    tree <BodyJoint> joints = skeleton.getJointTree();
+    for (tree <BodyJoint>::iterator j = joints.begin(); j != joints.end(); ++j)
+    {
+      Point2f location = j->getImageLocation();
+      location.x *= factor;
+      location.y *= factor;
+      j->setImageLocation(location);
+    }
+    skeleton.setJointTree(joints);
+    skeleton.infer3D();
+  }
+  if (mask.rows != maxHeight)
+  {
+    float factor = (float)maxHeight / (float)mask.rows;
+    resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
+  }
+  return factor;
+}

@@ -138,6 +138,13 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   partModels.clear();
   // Find skeleton from first keyframe or lockframe
   Skeleton skeleton;
+
+  const string sMaxFrameHeight = "maxFrameHeight";
+
+  params.emplace(sMaxFrameHeight, frames.at(0)->getImage().rows);
+
+  maxFrameHeight = params.at(sMaxFrameHeight);
+
   bool bFind = false; // flag, indicate the presence of marked frame in the sequence
   for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
   {
@@ -155,10 +162,12 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       cerr << ERROR_HEADER << "No neither keyframes nor lockframes" << endl;
     throw logic_error("No neither keyframes nor lockframes");
   }
+
   tree <BodyPart> partTree;
   // Handling all frames
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
+    (*frameNum)->Resize(params.at(sMaxFrameHeight));
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
     {
       continue; // skip unmarked frames
@@ -521,6 +530,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
+  float resizeFactor = frame->Resize(maxFrameHeight);
+
   vector <vector <LimbLabel> > t;
   Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
   tree <BodyPart> partTree = skeleton.getPartTree(); // copy tree of bodypart from the skeleton
@@ -645,7 +656,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
               Point2f mid = 0.5 * p1; // center of the vector
               p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
               p0 = Point2f(x, y) - mid; // shift the vector to current point
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet, resizeFactor); // build  the vector label
               sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
             }
           }
@@ -663,7 +674,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         Point2f mid = 0.5 * p1; // center of the vector
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
-        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet);
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet, resizeFactor);
         sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
       }
     }
@@ -1283,7 +1294,7 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
   return pixelLabels;
 }
 
-LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet)
+LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet, float resizeFactor)
 {
   vector <Point3i> partPixelColours;
   Mat maskMat = frame->getMask(); // copy mask from the frame 
@@ -1324,7 +1335,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     Score sc(-1.0f, detectorName.str(), _useCSdet);
     vector <Score> s;
     s.push_back(sc);
-    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
   }
   float xmax, ymax, xmin, ymin;
   rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
@@ -1356,7 +1367,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
               Score sc(-1.0f, detectorName.str(), _useCSdet);
               vector <Score> s;
               s.push_back(sc);
-              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
             }
             bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
@@ -1376,7 +1387,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
                 Score sc(-1.0f, detectorName.str(), _useCSdet);
                 vector <Score> s;
                 s.push_back(sc);
-                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
               }
               pixDistNum++; // counting of the all scanned pixels
               try
@@ -1398,7 +1409,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
                 Score sc(-1.0f, detectorName.str(), _useCSdet);
                 vector <Score> s;
                 s.push_back(sc);
-                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
               }
               // copy colors components of the current pixel
               Vec3b intensity = imgMat.at<Vec3b>(j, i);
@@ -1430,14 +1441,14 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
     Score sc(score, detectorName.str(), _useCSdet); // create the score
     vector <Score> s;
     s.push_back(sc); // the set of scores
-    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);// create the limb label
+    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false, resizeFactor);// create the limb label
   }
   if (debugLevelParam >= 2)
     cerr << ERROR_HEADER << "Dirty label!" << endl;
   Score sc(-1.0f, detectorName.str(), _useCSdet);
   vector <Score> s;
   s.push_back(sc);
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
 }
 
 //Used only as prevent a warning for "const uint8_t nBins";

@@ -37,6 +37,7 @@ class Frame
     virtual FRAMETYPE getFrametype(void) = 0;
     int getParentFrameID(void);
     void setParentFrameID(int _parentFrameID);
+    float Resize(uint32_t maxHeight);
   private:
     int id;
     Mat image;

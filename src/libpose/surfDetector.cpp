@@ -37,10 +37,17 @@ void SurfDetector::train(vector <Frame*> _frames, map <string, float> params)
   params.emplace(sDebugLevel, debugLevel);
   params.emplace(sMinHessian, minHessian);
 
+  const string sMaxFrameHeight = "maxFrameHeight";
+
+  params.emplace(sMaxFrameHeight, frames.at(0)->getImage().rows);
+
+  maxFrameHeight = params.at(sMaxFrameHeight);
+
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
+    (*frameNum)->Resize(params.at(sMaxFrameHeight));
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
     {
       continue;
@@ -124,6 +131,8 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   detectorName << getID();
 
   vector <vector <LimbLabel> > t;
+
+  float resizeFactor = frame->Resize(maxFrameHeight);
 
   Skeleton skeleton = frame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
@@ -243,7 +252,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet);
+              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet, resizeFactor);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -261,7 +270,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet);
+        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet, resizeFactor);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -445,7 +454,7 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   return partModel;
 }
 
-LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet)
+LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet, float resizeFactor)
 {
   vector <Score> s;
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
@@ -487,7 +496,7 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
                 cerr << ERROR_HEADER << "Dirty label!" << endl;
               Score sc(-1.0f, detectorName.str(), _useSURFdet);
               s.push_back(sc);
-              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
             }
             bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
@@ -505,7 +514,7 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
   //score *= (1.0f - ((float)inMaskPixels / (float)totalPixels));
   Score sc(score, detectorName.str(), _useSURFdet);
   s.push_back(sc);
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s);
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false, resizeFactor);
 }
 
 float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1)

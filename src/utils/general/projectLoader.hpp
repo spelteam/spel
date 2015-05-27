@@ -33,35 +33,35 @@ using namespace tinyxml2;
 
 class ProjectLoader
 {
-  public:
-    ProjectLoader(string _curFolder);
-    void SetCurFolder(string _curFolder);
-    bool Load(string fileName);
-    bool Save(vector <vector <LimbLabel>> labels, string outFolder, int frameID);
-    bool Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth);
-    bool drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth);
-    bool drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentframe, string outFolder, Scalar color, int lineWidth);
-    bool drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector::PartModel>> partModels, map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> labelModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins);
-    Mat drawHoGDescriptors(HogDetector::PartModel model, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins);
-    void static ResizeImage(Mat &image, int32_t &cols, int32_t &rows);
-    vector <Frame*> getFrames(void);
-    string getProjectTitle();
-  private:
-    string projectTitle;
-    string imgFolderPath;
-    string maskFolderPath;
-    string camFolderPath;
-    bool allowScaling;
-    string simMathPath;
-    string exportPath;
+public:
+  ProjectLoader(string _curFolder);
+  void SetCurFolder(string _curFolder);
+  bool Load(string fileName);
+  bool Save(vector <vector <LimbLabel>> labels, string outFolder, int frameID);
+  bool Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth);
+  bool drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth);
+  bool drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentframe, string outFolder, Scalar color, int lineWidth);
+  bool drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector::PartModel>> partModels, map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> labelModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins);
+  Mat drawHoGDescriptors(HogDetector::PartModel model, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins);
+  void static ResizeImage(Mat &image, int32_t &cols, int32_t &rows);
+  vector <Frame*> getFrames(void);
+  string getProjectTitle();
+private:
+  string projectTitle;
+  string imgFolderPath;
+  string maskFolderPath;
+  string camFolderPath;
+  bool allowScaling;
+  string simMathPath;
+  string exportPath;
 
-    string curFolder;
-    vector <Frame*> vFrames;
+  string curFolder;
+  vector <Frame*> vFrames;
 
-    void BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &root);
-    void AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &parent);
+  void BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &root);
+  void AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &parent);
 
-    bool CreateDirectorySystemIndependent(string dirName);
+  bool CreateDirectorySystemIndependent(string dirName);
 };
 
 #endif  // _PROJECT_LOADER_HPP_
