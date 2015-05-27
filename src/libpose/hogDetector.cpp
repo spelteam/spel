@@ -350,12 +350,14 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
   partSize = getMaxBodyPartHeightWidth(_frames, blockSize);
 
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
-  {
-    (*frameNum)->Resize(params.at(sMaxFrameHeight));
+  {    
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
     {
       continue;
     }
+
+    int originalSize = (*frameNum)->getImage().rows;
+    (*frameNum)->Resize(params.at(sMaxFrameHeight));
 
     if (debugLevelParam >= 2)
       cerr << "Training on frame " << (*frameNum)->getID() << endl;
@@ -365,9 +367,10 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
       partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f)));
     }
     catch (...)
-    {
-      break;
+    {    
     }
+
+    (*frameNum)->Resize(originalSize);
   }
 }
 
@@ -449,6 +452,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
 
   vector <vector <LimbLabel> > t;
 
+  int originalSize = frame->getImage().rows;
   float resizeFactor = frame->Resize(maxFrameHeight);
 
   Skeleton skeleton = frame->getSkeleton();
@@ -699,6 +703,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels);
   }
+  frame->Resize(originalSize);
   return merge(limbLabels, t);
 }
 

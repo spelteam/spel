@@ -167,11 +167,14 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
   // Handling all frames
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
-    (*frameNum)->Resize(params.at(sMaxFrameHeight));
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
     {
       continue; // skip unmarked frames
     }
+
+    int originalSize = (*frameNum)->getImage().rows;
+    (*frameNum)->Resize(params.at(sMaxFrameHeight));
+
     if (debugLevelParam >= 2)
       cerr << "Training on frame " << (*frameNum)->getID() << endl;
     // Create local variables
@@ -469,6 +472,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       }
 
     }
+    (*frameNum)->Resize(originalSize);
     maskMat.release();
     imgMat.release();
   }
@@ -529,6 +533,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sIsWeakTreshhold, isWeakTreshhold);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
+
+  int originalSize = frame->getImage().rows;
 
   float resizeFactor = frame->Resize(maxFrameHeight);
 
@@ -757,6 +763,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     i->second.release();
   }
   maskMat.release();
+
+  frame->Resize(originalSize);
+
   return merge(limbLabels, t);
 }
 
