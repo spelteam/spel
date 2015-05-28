@@ -245,7 +245,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
   return parts;
 }
 
-map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize)
+map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize, float resizeFactor)
 {
   map <uint32_t, Size> result;
   for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
@@ -281,7 +281,7 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
       float boneWidth = 0;
       boneWidth = getBoneWidth(boneLength, *bodyPart);
 
-      Size maxSize = Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
+      Size maxSize = Size(static_cast <uint32_t> (boneLength * resizeFactor), static_cast <uint32_t> (boneWidth * resizeFactor));
       if (result.size() > 0)
       {
         try
@@ -290,7 +290,7 @@ map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> fram
         }
         catch (...){}
       }
-      result[bodyPart->getPartID()] = Size(max(maxSize.width, static_cast <int> (boneLength)), max(maxSize.height, static_cast <int> (boneWidth)));
+      result[bodyPart->getPartID()] = Size(max(maxSize.width, static_cast <int> (boneLength * resizeFactor)), max(maxSize.height, static_cast <int> (boneWidth * resizeFactor)));
     }
   }
   // normalize
@@ -347,8 +347,6 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
   savedCellSize = cellSize;
   savednbins = nbins;
 
-  partSize = getMaxBodyPartHeightWidth(_frames, blockSize);
-
   bool bFirstConversion = true;
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
@@ -373,14 +371,9 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     if (bFirstConversion)
     {
-      for (map <uint32_t, Size>::iterator i = partSize.begin(); i != partSize.end(); ++i)
-      {
-        i->second.height *= scale;
-        i->second.width *= scale;
-      }
+      partSize = getMaxBodyPartHeightWidth(_frames, blockSize, scale);
       bFirstConversion = false;
     }
-
 
     if (debugLevelParam >= 2)
       cerr << "Training on frame " << workFrame->getID() << endl;
