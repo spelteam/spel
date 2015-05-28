@@ -173,15 +173,26 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
     }
 
     int originalSize = (*frameNum)->getImage().rows;
-    (*frameNum)->Resize(params.at(sMaxFrameHeight));
+
+    Frame *workFrame = 0;
+    if ((*frameNum)->getFrametype() == KEYFRAME)
+      workFrame = new Keyframe();
+    else if ((*frameNum)->getFrametype() == LOCKFRAME)
+      workFrame = new Lockframe();
+    else if ((*frameNum)->getFrametype() == INTERPOLATIONFRAME)
+      workFrame = new Interpolation();
+
+    workFrame = (*frameNum)->clone(workFrame);
+
+    workFrame->Resize(params.at(sMaxFrameHeight));
 
     if (debugLevelParam >= 2)
-      cerr << "Training on frame " << (*frameNum)->getID() << endl;
+      cerr << "Training on frame " << workFrame->getID() << endl;
     // Create local variables
     map <int32_t, vector <Point3i>> partPixelColours; // the set of RGB-colours of pixel's for current body part
     map <int32_t, vector <Point3i>> bgPixelColours; // the set of RGB-colours for a pixels of background
     map <int32_t, int> blankPixels;  // pixels outside the mask
-    skeleton = (*frameNum)->getSkeleton(); // copy marking from current frame
+    skeleton = workFrame->getSkeleton(); // copy marking from current frame
     multimap <int32_t, POSERECT <Point2f>> polygons;  // polygons for this frame
     multimap <int32_t, float> polyDepth; // used for evaluation of overlapped polygons
     partTree = skeleton.getPartTree(); // the skeleton body parts
@@ -234,9 +245,9 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       polyDepth.insert(pair <int32_t, float>(iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getSpaceLocation().z));
     }
     skeleton.setPartTree(partTree);
-    (*frameNum)->setSkeleton(skeleton);
-    Mat maskMat = (*frameNum)->getMask(); // copy mask from the current frame
-    Mat imgMat = (*frameNum)->getImage(); // copy image from the current frame
+    workFrame->setSkeleton(skeleton);
+    Mat maskMat = workFrame->getMask(); // copy mask from the current frame
+    Mat imgMat = workFrame->getImage(); // copy image from the current frame
     // Range over all pixels of the frame
     for (int32_t i = 0; i < imgMat.cols; i++)
     {
@@ -472,7 +483,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       }
 
     }
-    (*frameNum)->Resize(originalSize);
+    delete workFrame;
     maskMat.release();
     imgMat.release();
   }
@@ -521,7 +532,6 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   const float searchStepCoeff = 0.2f;
   const string sSearchStepCoeff = "searchStepCoeff";
 
-
   // first we need to check all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
@@ -539,16 +549,26 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
   int originalSize = frame->getImage().rows;
+  
+  Frame *workFrame = 0;
+  if (frame->getFrametype() == KEYFRAME)
+    workFrame = new Keyframe();
+  else if (frame->getFrametype() == LOCKFRAME)
+    workFrame = new Lockframe();
+  else if (frame->getFrametype() == INTERPOLATIONFRAME)
+    workFrame = new Interpolation();
 
-  float resizeFactor = frame->Resize(maxFrameHeight);
+  workFrame = frame->clone(workFrame);
+
+  float resizeFactor = workFrame->Resize(maxFrameHeight);
 
   vector <vector <LimbLabel> > t;
-  Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
+  Skeleton skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
   tree <BodyPart> partTree = skeleton.getPartTree(); // copy tree of bodypart from the skeleton
 
-  map <int32_t, Mat> pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
-  map <int32_t, Mat> pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
-  Mat maskMat = frame->getMask(); // copy mask from the frame
+  map <int32_t, Mat> pixelDistributions = buildPixelDistributions(workFrame); // matrix contains the probability that the particular pixel belongs to current bodypart
+  map <int32_t, Mat> pixelLabels = buildPixelLabels(workFrame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
+  Mat maskMat = workFrame->getMask(); // copy mask from the frame
 
   stringstream detectorName;
   detectorName << getID();
@@ -666,7 +686,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
               Point2f mid = 0.5 * p1; // center of the vector
               p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
               p0 = Point2f(x, y) - mid; // shift the vector to current point
-              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet, resizeFactor); // build  the vector label
+              LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, workFrame, pixelDistributions, pixelLabels, p0, p1, useCSdet, 1.0f); // build  the vector label
               sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
             }
           }
@@ -684,7 +704,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         Point2f mid = 0.5 * p1; // center of the vector
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
-        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, frame, pixelDistributions, pixelLabels, p0, p1, useCSdet, resizeFactor);
+        LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, workFrame, pixelDistributions, pixelLabels, p0, p1, useCSdet, 1.0f);
         sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
       }
     }
@@ -704,10 +724,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     if (sortedLabels.size() > 0) // if labels vector is not empty
     {
       sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
-      Mat locations(frame->getImage().rows, frame->getImage().cols, DataType<uint32_t>::type); // create the temporary matrix
-      for (int32_t i = 0; i < frame->getImage().cols; i++)
+      Mat locations(workFrame->getImage().rows, workFrame->getImage().cols, DataType<uint32_t>::type); // create the temporary matrix
+      for (int32_t i = 0; i < workFrame->getImage().cols; i++)
       {
-        for (int32_t j = 0; j < frame->getImage().rows; j++)
+        for (int32_t j = 0; j < workFrame->getImage().rows; j++)
         {
           try
           {
@@ -768,7 +788,15 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   }
   maskMat.release();
 
-  frame->Resize(originalSize);
+  delete workFrame;
+
+  for (vector <vector <LimbLabel>>::iterator i = t.begin(); i != t.end(); ++i)
+  {
+    for (vector <LimbLabel>::iterator j = i->begin(); j != i->end(); ++j)
+    {
+      j->Resize(pow(resizeFactor, -1));
+    }
+  }
 
   return merge(limbLabels, t);
 }

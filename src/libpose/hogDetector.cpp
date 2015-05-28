@@ -350,27 +350,39 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
   partSize = getMaxBodyPartHeightWidth(_frames, blockSize);
 
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
-  {    
+  {
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
     {
       continue;
     }
 
     int originalSize = (*frameNum)->getImage().rows;
-    (*frameNum)->Resize(params.at(sMaxFrameHeight));
+
+    Frame *workFrame = 0;
+    if ((*frameNum)->getFrametype() == KEYFRAME)
+      workFrame = new Keyframe();
+    else if ((*frameNum)->getFrametype() == LOCKFRAME)
+      workFrame = new Lockframe();
+    else if ((*frameNum)->getFrametype() == INTERPOLATIONFRAME)
+      workFrame = new Interpolation();
+
+    workFrame = (*frameNum)->clone(workFrame);
+
+    workFrame->Resize(params.at(sMaxFrameHeight));
 
     if (debugLevelParam >= 2)
-      cerr << "Training on frame " << (*frameNum)->getID() << endl;
+      cerr << "Training on frame " << workFrame->getID() << endl;
 
     try
     {
-      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>((*frameNum)->getID(), computeDescriptors(*frameNum, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f)));
+      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f)));
     }
     catch (...)
-    {    
+    {
+      break;
     }
 
-    (*frameNum)->Resize(originalSize);
+    delete workFrame;
   }
 }
 
@@ -457,13 +469,24 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   vector <vector <LimbLabel> > t;
 
   int originalSize = frame->getImage().rows;
-  float resizeFactor = frame->Resize(maxFrameHeight);
 
-  Skeleton skeleton = frame->getSkeleton();
+  Frame *workFrame = 0;
+  if (frame->getFrametype() == KEYFRAME)
+    workFrame = new Keyframe();
+  else if (frame->getFrametype() == LOCKFRAME)
+    workFrame = new Lockframe();
+  else if (frame->getFrametype() == INTERPOLATIONFRAME)
+    workFrame = new Interpolation();
+
+  workFrame = frame->clone(workFrame);
+
+  float resizeFactor = workFrame->Resize(maxFrameHeight);
+
+  Skeleton skeleton = workFrame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
   tree <BodyPart>::iterator iteratorBodyPart;
 
-  Mat maskMat = frame->getMask();
+  Mat maskMat = workFrame->getMask();
 
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
@@ -593,10 +616,10 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
                   throw logic_error(ss.str());
                 }
               }
-              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
-              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins, resizeFactor);
+              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
+              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins, 1.0f);
               sortedLabels.push_back(generatedLabel);
-              descriptorMap.insert(pair <LimbLabel, PartModel> (generatedLabel, generatedPartModel));
+              descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
             }
           }
         }
@@ -628,10 +651,10 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             throw logic_error(ss.str());
           }
         }
-        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
-        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins, resizeFactor);
+        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
+        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins, 1.0f);
         sortedLabels.push_back(generatedLabel);
-        descriptorMap.insert(pair <LimbLabel, PartModel> (generatedLabel, generatedPartModel));
+        descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
       }
     }
     float uniqueLocationCandidates = 0;
@@ -650,10 +673,10 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     if (sortedLabels.size() > 0)
     {
       sort(sortedLabels.begin(), sortedLabels.end());
-      Mat locations(frame->getImage().cols, frame->getImage().rows, DataType<uint32_t>::type);
-      for (int32_t i = 0; i < frame->getImage().cols; i++)
+      Mat locations(workFrame->getImage().cols, workFrame->getImage().rows, DataType<uint32_t>::type);
+      for (int32_t i = 0; i < workFrame->getImage().cols; i++)
       {
-        for (int32_t j = 0; j < frame->getImage().rows; j++)
+        for (int32_t j = 0; j < workFrame->getImage().rows; j++)
         {
           try
           {
@@ -680,7 +703,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
             try
             {
               labels.push_back(sortedLabels.at(i));
-              labelModels[frame->getID()][iteratorBodyPart->getPartID()].push_back(descriptorMap.at(sortedLabels.at(i)));
+              labelModels[workFrame->getID()][iteratorBodyPart->getPartID()].push_back(descriptorMap.at(sortedLabels.at(i)));
             }
             catch (...)
             {
@@ -707,7 +730,17 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
     PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels);
   }
-  frame->Resize(originalSize);
+
+  delete workFrame;
+
+  for (vector <vector <LimbLabel>>::iterator i = t.begin(); i != t.end(); ++i)
+  {
+    for (vector <LimbLabel>::iterator j = i->begin(); j != i->end(); ++j)
+    {
+      j->Resize(pow(resizeFactor, -1));
+    }
+  }
+
   return merge(limbLabels, t);
 }
 

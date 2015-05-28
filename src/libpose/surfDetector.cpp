@@ -47,27 +47,39 @@ void SurfDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
-    
+
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
     {
       continue;
     }
 
     int originalSize = (*frameNum)->getImage().rows;
-    (*frameNum)->Resize(params.at(sMaxFrameHeight));
+
+    Frame *workFrame = 0;
+    if ((*frameNum)->getFrametype() == KEYFRAME)
+      workFrame = new Keyframe();
+    else if ((*frameNum)->getFrametype() == LOCKFRAME)
+      workFrame = new Lockframe();
+    else if ((*frameNum)->getFrametype() == INTERPOLATIONFRAME)
+      workFrame = new Interpolation();
+
+    workFrame = (*frameNum)->clone(workFrame);
+
+    workFrame->Resize(params.at(sMaxFrameHeight));
 
     if (debugLevelParam >= 2)
-      cerr << "Training on frame " << (*frameNum)->getID() << endl;
+      cerr << "Training on frame " << workFrame->getID() << endl;
 
     try
     {
-      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>((*frameNum)->getID(), computeDescriptors(*frameNum, minHessian)));
+      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, minHessian)));
     }
     catch (...)
-    {      
+    {
+      break;
     }
 
-    (*frameNum)->Resize(originalSize);
+    delete workFrame;
   }
 
 }
@@ -141,13 +153,24 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   vector <vector <LimbLabel> > t;
 
   int originalSize = frame->getImage().rows;
-  float resizeFactor = frame->Resize(maxFrameHeight);
 
-  Skeleton skeleton = frame->getSkeleton();
+  Frame *workFrame = 0;
+  if (frame->getFrametype() == KEYFRAME)
+    workFrame = new Keyframe();
+  else if (frame->getFrametype() == LOCKFRAME)
+    workFrame = new Lockframe();
+  else if (frame->getFrametype() == INTERPOLATIONFRAME)
+    workFrame = new Interpolation();
+
+  workFrame = frame->clone(workFrame);
+
+  float resizeFactor = workFrame->Resize(maxFrameHeight);
+
+  Skeleton skeleton = workFrame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
   tree <BodyPart>::iterator iteratorBodyPart;
 
-  Mat maskMat = frame->getMask();
+  Mat maskMat = workFrame->getMask();
 
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
@@ -261,7 +284,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet, resizeFactor);
+              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet, 1.0f);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -279,7 +302,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(frame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, frame->getImage(), minHessian), useSURFdet, resizeFactor);
+        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet, 1.0f);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -299,10 +322,10 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
     if (sortedLabels.size() > 0)
     {
       sort(sortedLabels.begin(), sortedLabels.end());
-      Mat locations(frame->getImage().cols, frame->getImage().rows, DataType<uint32_t>::type);
-      for (int32_t i = 0; i < frame->getImage().cols; i++)
+      Mat locations(workFrame->getImage().cols, workFrame->getImage().rows, DataType<uint32_t>::type);
+      for (int32_t i = 0; i < workFrame->getImage().cols; i++)
       {
-        for (int32_t j = 0; j < frame->getImage().rows; j++)
+        for (int32_t j = 0; j < workFrame->getImage().rows; j++)
         {
           try
           {
@@ -355,7 +378,17 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
     PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels);
   }
-  frame->Resize(originalSize);
+
+  delete workFrame;
+
+  for (vector <vector <LimbLabel>>::iterator i = t.begin(); i != t.end(); ++i)
+  {
+    for (vector <LimbLabel>::iterator j = i->begin(); j != i->end(); ++j)
+    {
+      j->Resize(pow(resizeFactor, -1));
+    }
+  }
+
   return merge(limbLabels, t);
 }
 

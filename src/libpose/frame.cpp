@@ -112,7 +112,10 @@ float Frame::Resize(uint32_t maxHeight)
   float factor = (float)maxHeight / (float)image.rows;
   if (image.rows != maxHeight)
   {
-    resize(image, image, cvSize(image.cols * factor, image.rows * factor));
+    Mat newImage;
+    resize(image, newImage, cvSize(image.cols * factor, image.rows * factor));
+    image.release();
+    image = newImage.clone();
     tree <BodyJoint> joints = skeleton.getJointTree();
     for (tree <BodyJoint>::iterator j = joints.begin(); j != joints.end(); ++j)
     {
@@ -126,8 +129,21 @@ float Frame::Resize(uint32_t maxHeight)
   }
   if (mask.rows != maxHeight)
   {
+    Mat newMask;
     float factor = (float)maxHeight / (float)mask.rows;
-    resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
+    resize(mask, newMask, cvSize(mask.cols * factor, mask.rows * factor));
+    mask.release();
+    mask = newMask.clone();
   }
   return factor;
+}
+
+Frame *Frame::clone(Frame *dest)
+{
+  dest->setGroundPoint(this->groundPoint);
+  dest->setID(this->id);
+  dest->setImage(this->image.clone());
+  dest->setMask(this->mask.clone());
+  dest->setParentFrameID(this->parentFrameID);
+  dest->setSkeleton(this->skeleton);
 }

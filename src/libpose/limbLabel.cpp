@@ -3,14 +3,14 @@
 
 LimbLabel::LimbLabel()
 {
-    limbID = -1;
-    center = Point2f(0,0);
-    angle = 0;
-    scores = vector<Score>();
-    polygon = vector<Point2f>();
-    for(int i=0; i<4; ++i)
-        polygon.push_back(Point2f(0,0));
-    isOccluded = true;
+  limbID = -1;
+  center = Point2f(0, 0);
+  angle = 0;
+  scores = vector<Score>();
+  polygon = vector<Point2f>();
+  for (int i = 0; i < 4; ++i)
+    polygon.push_back(Point2f(0, 0));
+  isOccluded = true;
 }
 
 LimbLabel::LimbLabel(const LimbLabel& ll)
@@ -26,14 +26,14 @@ LimbLabel::LimbLabel(const LimbLabel& ll)
 LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded, float resizeFactor)
 {
   limbID = _id;
-  center.x = _centre.x / resizeFactor;
-  center.y = _centre.y / resizeFactor;
+  center.x = _centre.x * resizeFactor;
+  center.y = _centre.y * resizeFactor;
   angle = _angle;
   polygon = _polygon;
   for (vector <Point2f>::iterator p = polygon.begin(); p != polygon.end(); ++p)
   {
-    p->x /= resizeFactor;
-    p->y /= resizeFactor;
+    p->x *= resizeFactor;
+    p->y *= resizeFactor;
   }
   scores = _scores;
   isOccluded = _isOccluded;
@@ -112,21 +112,21 @@ float LimbLabel::getAvgScore(bool bNegativeToPositive) const
 
 void LimbLabel::getEndpoints(Point2f &p0, Point2f &p1) const
 {
-    //0-1 R, 1-2 G, 2-3 B, 3-0 P
-    p0 = 0.5*polygon[3]+0.5*polygon[0]; //pink = parent
-    p1 = 0.5*polygon[1]+0.5*polygon[2]; //green = child
+  //0-1 R, 1-2 G, 2-3 B, 3-0 P
+  p0 = 0.5*polygon[3] + 0.5*polygon[0]; //pink = parent
+  p1 = 0.5*polygon[1] + 0.5*polygon[2]; //green = child
 
 
-    return; // this function needs to update the two endpoints passed into it
+  return; // this function needs to update the two endpoints passed into it
 }
 
 bool LimbLabel::containsPoint(Point2f pt)
 {
-    //decide whether this point belongs to this polygon or not
+  //decide whether this point belongs to this polygon or not
 
-    POSERECT <Point2f> poserect(polygon[0], polygon[1], polygon[2], polygon[3]);
+  POSERECT <Point2f> poserect(polygon[0], polygon[1], polygon[2], polygon[3]);
 
-    return (poserect.containsPoint(pt) != -1);
+  return (poserect.containsPoint(pt) != -1);
 }
 
 void LimbLabel::addScore(Score detectionScore)
@@ -136,20 +136,31 @@ void LimbLabel::addScore(Score detectionScore)
 
 string LimbLabel::toString()
 {
-    string retString="";
-    retString+=to_string(limbID)+" ";
-    retString+=to_string(center.x)+" "+to_string(center.y)+" ";
-    retString+=to_string(angle)+" ";
-    Point2f c0,c1;
-    this->getEndpoints(c0,c1);
-    retString+=to_string(c0.x)+" "+to_string(c0.y)+" ";
-    retString+=to_string(c1.x)+" "+to_string(c1.y)+" ";
-    retString+=to_string(isOccluded)+" ";
-    for(int i=0;i<scores.size();++i)
-    {
-       retString+=scores[i].getDetName()+" ";
-       retString+=to_string(scores[i].getScore())+" ";
-    }
+  string retString = "";
+  retString += to_string(limbID) + " ";
+  retString += to_string(center.x) + " " + to_string(center.y) + " ";
+  retString += to_string(angle) + " ";
+  Point2f c0, c1;
+  this->getEndpoints(c0, c1);
+  retString += to_string(c0.x) + " " + to_string(c0.y) + " ";
+  retString += to_string(c1.x) + " " + to_string(c1.y) + " ";
+  retString += to_string(isOccluded) + " ";
+  for (int i = 0; i < scores.size(); ++i)
+  {
+    retString += scores[i].getDetName() + " ";
+    retString += to_string(scores[i].getScore()) + " ";
+  }
 
-    return retString;
+  return retString;
+}
+
+void LimbLabel::Resize(float factor)
+{
+  center.x *= factor;
+  center.y *= factor;
+  for (vector <Point2f>::iterator p = polygon.begin(); p != polygon.end(); ++p)
+  {
+    p->x *= factor;
+    p->y *= factor;
+  }
 }

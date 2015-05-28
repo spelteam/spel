@@ -38,6 +38,7 @@ class Frame
     int getParentFrameID(void);
     void setParentFrameID(int _parentFrameID);
     float Resize(uint32_t maxHeight);
+    Frame *clone(Frame *dest);
   private:
     int id;
     Mat image;

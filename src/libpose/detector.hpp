@@ -14,6 +14,9 @@
 #include "limbLabel.hpp"
 #include "poseHelper.hpp"
 #include "sequence.hpp"
+#include "keyframe.hpp"
+#include "lockframe.hpp"
+#include "interpolation.hpp"
 
 class Detector
 {
