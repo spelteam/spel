@@ -35,6 +35,8 @@ int main (int argc, char **argv)
   map <string, float> params;
   params.emplace("debugLevel", 3);
 
+  params.emplace("maxFrameHeight", 420); //scale to 420p
+
   vector <Frame*> allFrames = projectLoader.getFrames();
   vector<Frame*> trainFrames;
   int8_t kfCount = 0;
