@@ -349,6 +349,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   partSize = getMaxBodyPartHeightWidth(_frames, blockSize);
 
+  bool bFirstConversion = true;
   for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
   {
     if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
@@ -368,7 +369,18 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     workFrame = (*frameNum)->clone(workFrame);
 
-    workFrame->Resize(params.at(sMaxFrameHeight));
+    float scale = workFrame->Resize(params.at(sMaxFrameHeight));
+
+    if (bFirstConversion)
+    {
+      for (map <uint32_t, Size>::iterator i = partSize.begin(); i != partSize.end(); ++i)
+      {
+        i->second.height *= scale;
+        i->second.width *= scale;
+      }
+      bFirstConversion = false;
+    }
+
 
     if (debugLevelParam >= 2)
       cerr << "Training on frame " << workFrame->getID() << endl;
