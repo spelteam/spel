@@ -54,14 +54,14 @@ int main (int argc, char **argv)
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
     //detector settings
-    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.1); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
     params.emplace("grayImages", 1); // use grayscale images for HoG?
 
     //solver settings
-    params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
+    params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
     params.emplace("acceptLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
     params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
     params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
@@ -69,7 +69,7 @@ int main (int argc, char **argv)
     params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
     params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
     params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
-    params.emplace("maxFrameHeight", 288); //scale to 420p
+    params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params

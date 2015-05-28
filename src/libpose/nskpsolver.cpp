@@ -345,33 +345,34 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
                     suppFactors++;
 
-                    ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
+                    //Comment out prior cost factors for the moment
+//                    ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-                    //precompute the maxium and minimum for normalisation
-                    float priorMin=FLT_MAX, priorMax=0;
-                    vector<LimbLabel>::iterator lbl;
-                    //vector<float> priorCostFuncValues;
-                    for(lbl=labels[partIter->getPartID()].begin(); lbl!=labels[partIter->getPartID()].end(); ++lbl) //for each label in for this part
-                    {
-                        float val = computePriorCost(*lbl, *partIter, skeleton, params);
+//                    //precompute the maxium and minimum for normalisation
+//                    float priorMin=FLT_MAX, priorMax=0;
+//                    vector<LimbLabel>::iterator lbl;
+//                    //vector<float> priorCostFuncValues;
+//                    for(lbl=labels[partIter->getPartID()].begin(); lbl!=labels[partIter->getPartID()].end(); ++lbl) //for each label in for this part
+//                    {
+//                        float val = computePriorCost(*lbl, *partIter, skeleton, params);
 
-                        if(val<priorMin)
-                            priorMin = val;
-                        if(val>priorMax && val!=FLT_MAX)
-                            priorMax = val;
+//                        if(val<priorMin)
+//                            priorMin = val;
+//                        if(val>priorMax && val!=FLT_MAX)
+//                            priorMax = val;
 
-                        //priorCostFuncValues.push_back(val);
-                    }
+//                        //priorCostFuncValues.push_back(val);
+//                    }
 
-                    //now set up the solutions
-                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                    {
-                        priorCostFunc(i) = computeNormPriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params, priorMin, priorMax);
-                    }
+//                    //now set up the solutions
+//                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+//                    {
+//                        priorCostFunc(i) = computeNormPriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params, priorMin, priorMax);
+//                    }
 
-                    Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
-                    gm.addFactor(priorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                    priorFactors++;
+//                    Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
+//                    gm.addFactor(priorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+//                    priorFactors++;
 
                     if(partIter!=partTree.begin()) //if iterator is not on root node, there is always a parent body part
                     {
@@ -428,12 +429,12 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     float k;
                     k=skeleton.getPartTree().size(); //number of bones
                     float expectedSuppFactors=k; //n*k
-                    float expectedPriorFactors=k; //n*k
+                    //float expectedPriorFactors=k; //n*k
                     float expectedJointFactors=(k-1); //n*(k-1)
 
                     assert(expectedSuppFactors==suppFactors);
                     assert(expectedJointFactors==jointFactors);
-                    assert(priorFactors==expectedPriorFactors);
+                    //assert(priorFactors==expectedPriorFactors);
                 }
 
                 // set up the optimizer (loopy belief propagation)
