@@ -146,4 +146,5 @@ Frame *Frame::clone(Frame *dest)
   dest->setMask(this->mask.clone());
   dest->setParentFrameID(this->parentFrameID);
   dest->setSkeleton(this->skeleton);
+  return dest;
 }
