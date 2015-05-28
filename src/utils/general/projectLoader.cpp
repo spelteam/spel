@@ -374,7 +374,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
       continue;
     }
     ofstream outFile;
-    string outFileName = curFolder + outFolder;
+    string outFileName = outFolder;
     if (outFileName[outFileName.size()] != '/')
       outFileName += "/";
     stringstream ss;
@@ -428,7 +428,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
 bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth)
 {
   //draw
-  string outFileName = curFolder + outFolder;
+  string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
   outFileName += "img/";
@@ -524,7 +524,7 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
 bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
 {
   //draw
-  string outFileName = curFolder + outFolder;
+  string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
   outFileName += "img/";
@@ -708,7 +708,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
 
 bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
 {
-  string outFileName = curFolder + outFolder;
+  string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
   outFileName += "img/";
@@ -1058,7 +1058,7 @@ void ProjectLoader::AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <B
 
 bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector::PartModel>> partModels, map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> labelModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins)
 {
-  string outFileName = curFolder + outFolder;
+  string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
   outFileName += "img/";
