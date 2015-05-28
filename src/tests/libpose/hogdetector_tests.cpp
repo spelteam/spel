@@ -205,7 +205,7 @@ TEST(HOGDetectorTests, computeDescriptors)
 
   //Calculate actual value
   HogDetector D;
-  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize);
+  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
   map <uint32_t, HogDetector::PartModel> partModels;
   partModels = D.computeDescriptors(frames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
 
@@ -290,7 +290,7 @@ TEST(HOGDetectorTests, getMaxBodyPartHeightWidth)
 
   //Calculate actual parts size
   HogDetector D;
-  map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(frames, blockSize);
+  map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
   EXPECT_EQ(partsSize, partsSize_actual);
 }
 
@@ -336,7 +336,7 @@ TEST(HOGDetectorTests, train)
 
   //Calculate actual value
   HogDetector D;
-  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize);
+  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
   map<string, float> params;
   D.train(frames, params);
 
@@ -423,7 +423,7 @@ TEST(HOGDetectorTests, generateLabel)
 
   //Calculate actual value
   HogDetector D;
-  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize);
+  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
   map<string, float> params;
   D.train(frames, params);
   bool useHOGDet = true;
@@ -509,7 +509,7 @@ TEST(HogDetectorTest, detect)
 
   // Run "detect"
   HogDetector D;
-  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize);
+  D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
   map<string, float> params;
   D.train(frames, params);
   vector<vector<LimbLabel>> limbLabels;
