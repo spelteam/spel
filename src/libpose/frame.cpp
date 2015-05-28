@@ -117,6 +117,8 @@ float Frame::Resize(uint32_t maxHeight)
     image.release();
     image = newImage.clone();
     tree <BodyJoint> joints = skeleton.getJointTree();
+    tree <BodyPart> parts = skeleton.getPartTree();
+
     for (tree <BodyJoint>::iterator j = joints.begin(); j != joints.end(); ++j)
     {
       Point2f location = j->getImageLocation();
@@ -126,6 +128,12 @@ float Frame::Resize(uint32_t maxHeight)
     }
     skeleton.setJointTree(joints);
     skeleton.infer3D();
+    for(tree<BodyPart>::iterator p=parts.begin(); p!=parts.end();++p)
+    {
+        //update the search radius to match the new scaling
+        p->setSearchRadius(p->getSearchRadius()*factor);
+    }
+    skeleton.setPartTree(parts);
   }
   if (mask.rows != maxHeight)
   {
