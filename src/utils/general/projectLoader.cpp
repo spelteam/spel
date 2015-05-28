@@ -374,6 +374,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
       continue;
     }
     ofstream outFile;
+    CreateDirectorySystemIndependent(outFolder);
     string outFileName = outFolder;
     if (outFileName[outFileName.size()] != '/')
       outFileName += "/";
@@ -428,6 +429,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
 bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth)
 {
   //draw
+  CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
@@ -524,6 +526,7 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
 bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
 {
   //draw
+  CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
@@ -708,6 +711,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
 
 bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
 {
+  CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
@@ -1058,6 +1062,7 @@ void ProjectLoader::AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <B
 
 bool ProjectLoader::drawHoGDescriptors(map <uint32_t, map <uint32_t, HogDetector::PartModel>> partModels, map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> labelModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins)
 {
+  CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
