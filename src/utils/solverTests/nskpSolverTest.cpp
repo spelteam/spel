@@ -69,7 +69,7 @@ int main (int argc, char **argv)
     params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
     params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
     params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
-    params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+    //params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params

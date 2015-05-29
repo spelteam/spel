@@ -229,6 +229,8 @@ int main (int argc, char **argv)
 
         detectors.push_back(new HogDetector());
         detNames.push_back("HoG");
+        detectors.push_back(new HogDetector());
+        detNames.push_back("grayHoG");
 
         detectors.push_back(new ColorHistDetector());
         detNames.push_back("ColorHist");
@@ -254,7 +256,10 @@ int main (int argc, char **argv)
 
             outFile+=tuneName;
             outFile+="_";
+            outFile+=*tuneType;
+            outFile+="_";
             outFile+=detNames[d];
+            outFile+=".err";
 
             //open file for writing
             ofstream out;
@@ -278,6 +283,10 @@ int main (int argc, char **argv)
                         params.emplace("maxTheta", 190); //+orientation
                         params.emplace("stepTheta", 10); //orientation step
                         params.emplace("uniqueLocationCandidates", 10);
+                        if(detNames[d]=="grayHog")
+                            params.emplace("grayImages", 1);
+                        else
+                            params.emplace("grayImages", 0);
 
 
                         //there is now a solvlet at each frame for this detector
@@ -323,7 +332,10 @@ int main (int argc, char **argv)
 
             outFile+=tuneName;
             outFile+="_";
+            outFile+=*tuneType;
+            outFile+="_";
             outFile+=detNames[d];
+            outFile+=".err";
 
             //open file for writing
             ofstream outRot;
@@ -384,7 +396,10 @@ int main (int argc, char **argv)
             tuneName="localCandidates";
             outFile+=tuneName;
             outFile+="_";
+            outFile+=*tuneType;
+            outFile+="_";
             outFile+=detNames[d];
+            outFile+=".err";
 
             //open file for writing
             ofstream outLoc;
@@ -439,11 +454,14 @@ int main (int argc, char **argv)
             }
 
             //image resizing tuning
-            outFile=curFolder+"/"+argv[3]+"/"+projectLoader.getProjectTitle()+"/";
+            outFile=string(argv[3])+"/"+projectLoader.getProjectTitle()+"/";
             tuneName="imgResize";
             outFile+=tuneName;
             outFile+="_";
+            outFile+=*tuneType;
+            outFile+="_";
             outFile+=detNames[d];
+            outFile+=".err";
 
             //open file for writing
             ofstream outRes;
