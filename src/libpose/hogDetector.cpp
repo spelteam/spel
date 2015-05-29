@@ -622,7 +622,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
                 }
               }
               PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
-              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins, 1.0f);
+              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
               sortedLabels.push_back(generatedLabel);
               descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
             }
@@ -657,7 +657,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           }
         }
         PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
-        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins, 1.0f);
+        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
         sortedLabels.push_back(generatedLabel);
         descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
       }
@@ -749,7 +749,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   return merge(limbLabels, t);
 }
 
-LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet, uint8_t nbins, float resizeFactor)
+LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet, uint8_t nbins)
 {
   vector <Score> s;
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
@@ -791,7 +791,7 @@ LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0
                 cerr << ERROR_HEADER << "Dirty label!" << endl;
               Score sc(-1.0f, detectorName.str(), _useHoGdet);
               s.push_back(sc);
-              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
+              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
             }
             bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
@@ -809,7 +809,7 @@ LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0
   //score *= (1.0f - ((float)inMaskPixels / (float)totalPixels));
   Score sc(score, detectorName.str(), _useHoGdet);
   s.push_back(sc);
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false, resizeFactor);
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false);
 }
 
 float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins)

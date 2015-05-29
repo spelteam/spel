@@ -428,7 +428,7 @@ TEST(HOGDetectorTests, generateLabel)
   D.train(frames, params);
   bool useHOGDet = true;
   HogDetector::PartModel partModel = D.getPartModels()[0][partID];
-  LimbLabel label_actual = D.generateLabel(frames[FirstKeyframe], bodyPart, p0, p1, partModel, useHOGDet, nbins, 1.0f);
+  LimbLabel label_actual = D.generateLabel(frames[FirstKeyframe], bodyPart, p0, p1, partModel, useHOGDet, nbins);
 
 
   //Create expected LimbLabel value

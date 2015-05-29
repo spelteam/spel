@@ -284,7 +284,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet, 1.0f);
+              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -302,7 +302,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet, 1.0f);
+        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -497,7 +497,7 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   return partModel;
 }
 
-LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet, float resizeFactor)
+LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet)
 {
   vector <Score> s;
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
@@ -539,7 +539,7 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
                 cerr << ERROR_HEADER << "Dirty label!" << endl;
               Score sc(-1.0f, detectorName.str(), _useSURFdet);
               s.push_back(sc);
-              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true, resizeFactor); // create the limb label
+              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
             }
             bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
@@ -557,7 +557,7 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
   //score *= (1.0f - ((float)inMaskPixels / (float)totalPixels));
   Score sc(score, detectorName.str(), _useSURFdet);
   s.push_back(sc);
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false, resizeFactor);
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false);
 }
 
 float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1)
