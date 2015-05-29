@@ -46,7 +46,7 @@ class SurfDetector : public Detector
     map <uint32_t, map <uint32_t, PartModel>> partModels;
     map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
     PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian);
-    LimbLabel generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet, float resizeFactor);
+    LimbLabel generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet);
     float compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1);
 };
 

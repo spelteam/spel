@@ -23,18 +23,12 @@ LimbLabel::LimbLabel(const LimbLabel& ll)
   isOccluded = ll.getIsOccluded();
 }
 
-LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded, float resizeFactor)
+LimbLabel::LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded)
 {
   limbID = _id;
-  center.x = _centre.x * resizeFactor;
-  center.y = _centre.y * resizeFactor;
+  center = _centre;
   angle = _angle;
   polygon = _polygon;
-  for (vector <Point2f>::iterator p = polygon.begin(); p != polygon.end(); ++p)
-  {
-    p->x *= resizeFactor;
-    p->y *= resizeFactor;
-  }
   scores = _scores;
   isOccluded = _isOccluded;
 }

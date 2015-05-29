@@ -413,7 +413,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
     limbLabel_e = LimbLabel(partID, boxCenter, rot, rect.asVector(), s);
   }
 
-  LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), frames[0], pixelDistributions, pixelLabels, p0, p1, 1.0f, 1.0f);
+  LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), frames[0], pixelDistributions, pixelLabels, p0, p1, 1.0f);
 
   EXPECT_EQ(limbLabel_e.getLimbID(), limbLabel_a.getLimbID());
   EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
