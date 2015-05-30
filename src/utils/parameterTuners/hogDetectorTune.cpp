@@ -86,6 +86,8 @@ int main (int argc, char **argv)
 
                         params.emplace("baseRotationRange", baseRotationRange); //search angle range of +/- 50 degrees
 
+                        params.emplace("debugLevel", 0); //orientation step
+
                         vector<Solvlet> nskpSolve;
                         //do an iterative NSKP solve
                         nskpSolve = nSolver.solve(seq, params, ism);

@@ -530,10 +530,10 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
-  outFileName += "img/";
-  CreateDirectorySystemIndependent(outFileName);
-  outFileName += "lockframeSolvlets/";
-  CreateDirectorySystemIndependent(outFileName);
+//  outFileName += "img/";
+//  CreateDirectorySystemIndependent(outFileName);
+//  outFileName += "lockframeSolvlets/";
+//  CreateDirectorySystemIndependent(outFileName);
 
   string labelsFileName = outFileName + to_string(frame->getID()) + ".bpsol";
   outFileName += to_string(frame->getID()) + ".png";

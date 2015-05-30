@@ -46,6 +46,8 @@ public:
   void static ResizeImage(Mat &image, int32_t &cols, int32_t &rows);
   vector <Frame*> getFrames(void);
   string getProjectTitle();
+  bool CreateDirectorySystemIndependent(string dirName);
+
 private:
   string projectTitle;
   string imgFolderPath;
@@ -61,7 +63,7 @@ private:
   void BuildBodyPartTree(list <BodyPart> vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &root);
   void AddChildBodyPartsToTree(list <BodyPart> &vBodyParts, tree <BodyPart> &trBodyPart, tree <BodyPart>::iterator &parent);
 
-  bool CreateDirectorySystemIndependent(string dirName);
+
 };
 
 #endif  // _PROJECT_LOADER_HPP_

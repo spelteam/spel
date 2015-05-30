@@ -8,7 +8,6 @@
 #include "hogDetector.hpp"
 
 using namespace std;
-
 Mat computeErrorToGT(vector<Solvlet> solves, vector<Frame*> keyframes) //return squared error from solve to GT
 {
     Mat errorMatrix;
@@ -62,6 +61,13 @@ Mat computeErrorToGT(vector<Solvlet> solves, vector<Frame*> keyframes) //return 
 
 vector<Solvlet> doInterpolationDetectMix(vector<Detector*> detectors, vector<Frame*> vFrames, map<string,float> params)
 {
+    //emplace zeros by default
+    params.emplace("useHoGdet", 0);
+    params.emplace("useCSet", 0);
+    params.emplace("useSURFdet", 0);
+
+    int numDetectors=1*(params.at("useHoGdet")!=0) + 1.0*(params.at("useSURFdet")!=0) + 1.0*(params.at("useCSdet")!=0);
+
     vector<Solvlet> solvlets;
     Sequence seq(0, "test", vFrames);
     seq.estimateUniformScale(params);
@@ -78,7 +84,11 @@ vector<Solvlet> doInterpolationDetectMix(vector<Detector*> detectors, vector<Fra
         vector<LimbLabel> bestLabels;
         for(vector<vector<LimbLabel> >::iterator pl=labels.begin(); pl!=labels.end(); ++pl)
         {
-            bestLabels.push_back(pl->at(0)); //push back the top scoring label for this part
+            for(vector<LimbLabel>::iterator l=pl->begin(); l!=pl->end(); ++l)
+            {
+                if(l->getScores().size()==numDetectors) //if we have the right number of scores in the score vector
+                    bestLabels.push_back(*l); //push back the top scoring label for this part
+            }
         }
 
         //now set solvlet
@@ -92,6 +102,13 @@ vector<Solvlet> doInterpolationDetectMix(vector<Detector*> detectors, vector<Fra
 
 vector<Solvlet> doPropagationDetectMix(vector<Detector*> detectors, vector<Frame*> vFrames, ImageSimilarityMatrix ism, map<string,float> params)
 {
+    //emplace zeros by default
+    params.emplace("useHoGdet", 0);
+    params.emplace("useCSet", 0);
+    params.emplace("useSURFdet", 0);
+
+    int numDetectors=1*(params.at("useHoGdet")!=0) + 1.0*(params.at("useSURFdet")!=0) + 1.0*(params.at("useCSdet")!=0);
+
     vector<Solvlet> solvlets;
     Sequence seq(0, "test", vFrames);
     seq.estimateUniformScale(params);
@@ -137,7 +154,11 @@ vector<Solvlet> doPropagationDetectMix(vector<Detector*> detectors, vector<Frame
         vector<LimbLabel> bestLabels;
         for(vector<vector<LimbLabel> >::iterator pl=labels.begin(); pl!=labels.end(); ++pl)
         {
-            bestLabels.push_back(pl->at(0)); //push back the top scoring label for this part
+            for(vector<LimbLabel>::iterator l=pl->begin(); l!=pl->end(); ++l)
+            {
+                if(l->getScores().size()==numDetectors) //if we have the right number of scores in the score vector
+                    bestLabels.push_back(*l); //push back the top scoring label for this part
+            }
         }
 
         //now set solvlet
@@ -231,6 +252,7 @@ int main (int argc, char **argv)
         detectors.push_back(new ColorHistDetector());
         detNames.push_back("ColorHist");
 
+
 //        detectors.push_back(new SurfDetector()); //don't use SURF for now
 //        detNames.push_back("SURF");
 
@@ -242,11 +264,12 @@ int main (int argc, char **argv)
 
         for(uint32_t i=0; i<detectors.size(); ++i)
         {
-            detectors[i]->train(trainingFrames, map<string,float>()); //don't pass any training params (there aren't any anyway)
+            map<string,float> dp;
+            if(detNames[i]=="HoG") //use grayscale images for HoG
+                dp.emplace("grayImages", 1);
+            detectors[i]->train(trainingFrames, dp); //don't pass any training params (there aren't any anyway)
         }
 
-//        for(uint32_t d=0; d<detectors.size(); ++d) //go through every detector
-//        {
             string outFile=string(argv[3])+"/"+projectLoader.getProjectTitle()+"/";
             string tuneName="detectorMix";
 
@@ -273,8 +296,7 @@ int main (int argc, char **argv)
                         params.emplace("useHoGdet", (1.0-csCoeff)); //determine if HoG descriptor is used and with what coefficient
                         params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
-                        params.emplace("grayImages", 1);
-
+                        params.emplace("debugLevel", 0); //orientation step
 
                         //there is now a solvlet at each frame for this detector
 
@@ -303,6 +325,7 @@ int main (int argc, char **argv)
                             }
                             out << endl; //newline at the end of the block
                         }
+                        errors.release();
                 }
 
                 out.close();

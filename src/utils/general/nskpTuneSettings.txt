@@ -1,0 +1,4 @@
+testdata1/trijumpSD_tune.xml 
+testdata1/trijumpSD_tune_GT.xml 
+nskpSolverTune_out
+jointCoeff 0.0 1.0 0.1

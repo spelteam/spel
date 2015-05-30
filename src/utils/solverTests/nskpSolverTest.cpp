@@ -61,7 +61,7 @@ int main (int argc, char **argv)
     params.emplace("grayImages", 1); // use grayscale images for HoG?
 
     //solver settings
-    params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
+    params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
     params.emplace("acceptLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
     params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
     params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
@@ -70,6 +70,7 @@ int main (int argc, char **argv)
     params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
     params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
     //params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+
 
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params
