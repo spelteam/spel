@@ -172,6 +172,34 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
 
   Mat maskMat = workFrame->getMask();
 
+  Mat imgMat = workFrame->getImage();
+
+  vector <KeyPoint> keyPoints;
+
+#if OpenCV_VERSION_MAJOR == 3
+  Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
+  detector->detect(imgMat, keyPoints);
+  if (keyPoints.empty())
+  {
+    stringstream ss;
+    ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
+#else
+  SurfFeatureDetector detector(minHessian);
+  detector.detect(imgMat, keyPoints);
+  if (keyPoints.empty())
+  {
+    stringstream ss;
+    ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
+#endif
+
   for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
   {
     vector <LimbLabel> labels;
@@ -284,7 +312,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet);
+              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -302,7 +330,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), minHessian), useSURFdet);
+        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -398,6 +426,32 @@ map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(Frame *
   Skeleton skeleton = frame->getSkeleton();
   tree <BodyPart> partTree = skeleton.getPartTree();
   Mat imgMat = frame->getImage();
+  vector <KeyPoint> keyPoints;
+
+#if OpenCV_VERSION_MAJOR == 3
+  Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
+  detector->detect(imgMat, keyPoints);
+  if (keyPoints.empty())
+  {
+    stringstream ss;
+    ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
+#else
+  SurfFeatureDetector detector(minHessian);
+  detector.detect(imgMat, keyPoints);
+  if (keyPoints.empty())
+  {
+    stringstream ss;
+    ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
+#endif
+
   for (tree <BodyPart>::iterator part = partTree.begin(); part != partTree.end(); ++part)
   {
     Point2f j0, j1;
@@ -427,7 +481,7 @@ map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(Frame *
     part->setRotationSearchRange(rotationAngle);
     try
     {
-      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, minHessian)));
+      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, minHessian, keyPoints)));
     }
     catch (logic_error err)
     {
@@ -444,24 +498,26 @@ map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(Frame *
   return parts;
 }
 
-SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian)
+SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian, vector <KeyPoint> keyPoints)
 {
   float boneLength = getBoneLength(j0, j1);
   float boneWidth = getBoneWidth(boneLength, bodyPart);
   Size originalSize = Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
   POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1, originalSize);
 
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  Point2f direction = j1 - j0;
-  float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
   PartModel partModel;
   partModel.partModelRect = rect;
-  Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
+
+  for (vector <KeyPoint>::iterator kp = keyPoints.begin(); kp != keyPoints.end(); ++kp)
+  {
+    if (rect.containsPoint(kp->pt))
+    {
+      partModel.keyPoints.push_back(*kp);
+    }
+  }
 
 #if OpenCV_VERSION_MAJOR == 3
   Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
-  detector->detect(partImage, partModel.keyPoints);
   if (partModel.keyPoints.empty())
   {
     if (debugLevelParam >= 2)
@@ -470,7 +526,7 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   else
   {
     Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
-    extractor->compute(partImage, partModel.keyPoints, partModel.descriptors);
+    extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
     if (partModel.descriptors.empty() && debugLevelParam >= 2)
     {
       cerr << ERROR_HEADER << "Couldn't compute descriptors of body part " << bodyPart.getPartID() << endl;
@@ -478,7 +534,6 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   }
 #else
   SurfFeatureDetector detector(minHessian);
-  detector.detect(partImage, partModel.keyPoints);
   if (partModel.keyPoints.empty())
   {
     if (debugLevelParam >= 2)
@@ -487,7 +542,7 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   else
   {
     SurfDescriptorExtractor extractor;
-    extractor.compute(partImage, partModel.keyPoints, partModel.descriptors);
+    extractor.compute(imgMat, partModel.keyPoints, partModel.descriptors);
     if (partModel.descriptors.empty() && debugLevelParam >= 2)
     {
       cerr << ERROR_HEADER << "Couldn't compute descriptors of body part " << bodyPart.getPartID() << endl;
@@ -592,7 +647,7 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
         if (partModel->second.descriptors.empty())
         {
           if (debugLevelParam >= 2)
-            cerr << ERROR_HEADER << "PartModel descriptors are empty" << endl;
+            cerr << ERROR_HEADER << "PartModel descriptors of body part [" << partModel->first << "] are empty" << endl;
           count--;
         }
         else
