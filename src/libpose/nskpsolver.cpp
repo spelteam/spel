@@ -116,7 +116,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
     params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
-    params.emplace("maxPartCandidates", 5000); //set the max number of part candidates to allow into the solver
+    params.emplace("maxPartCandidates", 200); //set the max number of part candidates to allow into the solver
 
     //detector search parameters
 
@@ -285,6 +285,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
                 }
 
+                //sort labels
                 for(uint32_t i=0; i<labels.size(); ++i)
                 {
                     for(uint32_t j=0; j<labels.size();++j)
@@ -294,26 +295,37 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
                     }
                 }
                 labels = tempLabels;
-//                for(uint32_t i=0; i<labels.size();++i)
-//                {
-//                    labels.emplace(labels[i][0].getPartID(), labels[i]);
-//                }
+                tempLabels.clear();
+
 // //temp coment this out
-//                for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
-//                {
-//                    uint32_t maxPartCandidates = params.at("maxPartCandidates");
-//                    vector<LimbLabel> temp;
+                for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+                {
 
-//                    if((labelPartsIter->at(0)).getIsWeak() || (labelPartsIter->at(0)).getIsOccluded()) //if weak or occluded, add all labels
-//                        maxPartCandidates = labelPartsIter->size();
-//                    for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
-//                    {
-//                        temp.push_back(labelPartsIter->at(currentSize));
-//                    }
-//                    tempLabels.push_back(temp);
-//                }
+                    vector<LimbLabel> temp;
 
-//                labels = tempLabels;
+                    uint32_t maxPartCandidates=params.at("maxPartCandidates");
+
+                    if((labelPartsIter->at(0)).getIsOccluded())
+                        maxPartCandidates = labelPartsIter->size();
+
+                    for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+                    {
+                        LimbLabel label=labelPartsIter->at(currentSize);
+                        vector<Score> scores=label.getScores();
+
+                        for(uint32_t s=0; s<scores.size(); ++s)
+                        {
+                            if(scores[s].getIsWeak())
+                                maxPartCandidates = labelPartsIter->size();
+                        }
+
+                        temp.push_back(label);
+
+                    }
+                    tempLabels.push_back(temp);
+                }
+
+                labels = tempLabels;
 
                 vector<size_t> numbersOfLabels; //numbers of labels per part
 
@@ -727,8 +739,9 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 
 //suggest maximum number of keyframes
 //function should return vector with suggested keyframe numbers
-vector<Point2i> NSKPSolver::suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params)
+vector<Point2i> NSKPSolver::suggestKeyframes(ImageSimilarityMatrix ism, map<string, float> params)
 {
+    vector<MinSpanningTree> mstVec = buildFrameMSTs(ism, params);
     vector<vector<uint32_t> > orderedList;
     for(uint32_t i=0; i<mstVec.size(); ++i)
     {

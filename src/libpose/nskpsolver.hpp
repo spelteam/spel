@@ -50,6 +50,9 @@ public:
     vector<Solvlet> solve(Sequence &frames, map<string, float>  params);
     ///inherited virtual
     vector<Solvlet> solve(Sequence& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM);
+
+    vector<Point2i> suggestKeyframes(ImageSimilarityMatrix ism, map<string, float> params);
+
     //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
@@ -63,7 +66,6 @@ private:
     vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism, vector<int> &ignore);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
     
-    vector<Point2i> suggestKeyframes(vector<MinSpanningTree>& mstVec, map<string, float> params);
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params);
 
     uint32_t findFrameIndexById(int id, vector<Frame*> frames);
