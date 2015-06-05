@@ -202,3 +202,125 @@ TEST(FramesTests, shiftSkeleton2D)
     EXPECT_EQ(locations_expected, locations_actual) << " Skeleton shift error?!\n* Impact of 'skeleton.infer3D' not considered in this test!";
     //Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test!;
 }
+/**/
+TEST(FramesTests, Resize)
+{
+    String FilePath;
+    FilePath = "posetests_TestData/CHDTrainTestData/";
+
+#if defined(WINDOWS) && defined(_MSC_VER)
+    if (IsDebuggerPresent())
+        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+#endif
+
+    //Load the input data
+    ProjectLoader projectLoader(FilePath);
+    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
+    vector<Frame*> frames = projectLoader.getFrames();
+
+    //Copy skeleton from keyframe
+    Frame* frame = frames[0];
+    Skeleton skeleton = frame->getSkeleton();
+    tree<BodyPart> PartTree = skeleton.getPartTree();
+
+    // Copy image from keyframe
+    Mat image = frame->getImage();
+
+
+    // Set resize coefficient
+    float X = 2.0f;
+
+    //Set new image height
+    int oldHeight = image.size().height;
+    uint32_t newHeight = X*oldHeight;
+
+    //Create scalling points vector 
+    Point2f shift(10, 10);
+    map<int, Point2f> locations_expected = getImageLocations_ft(skeleton);
+    for (int i = 0; i < locations_expected.size(); i++)
+        locations_expected[i] *= X;
+
+    //Run "Resize"
+    frame->Resize(newHeight);
+    map<int, Point2f> locations_actual = getImageLocations_ft(frame->getSkeleton());
+
+    //Compare joints locations
+    EXPECT_EQ(locations_expected, locations_actual) << " Skeleton resize error?!\n* Impact of 'skeleton.infer3D' not considered in this test!";
+    //Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test!;
+
+    //Compare image size
+    Size oldSize = image.size();
+    Size newImageSize = frame->getImage().size();
+    Size newMaskSize = frame->getMask().size();
+    EXPECT_EQ(oldSize.height*X, newImageSize.height);
+    EXPECT_EQ(oldSize.width*X, newImageSize.width);
+    EXPECT_EQ(oldSize.height*X, newMaskSize.height);
+    EXPECT_EQ(oldSize.width*X, newMaskSize.width);
+
+    //Compare parts search radius
+    map <int, float> expected_searchRadius;
+    for (tree<BodyPart>::iterator p = PartTree.begin(); p != PartTree.end(); ++p)
+        expected_searchRadius.emplace(pair<int, float>(p->getPartID(), p->getSearchRadius()*X));
+
+    map <int, float> actual_searchRadius;
+    tree<BodyPart> newPartTree = frame->getSkeleton().getPartTree();
+    for (tree<BodyPart>::iterator p = newPartTree.begin(); p != newPartTree.end(); ++p)
+        actual_searchRadius.emplace(pair<int, float>(p->getPartID(), p->getSearchRadius()*X));
+
+    EXPECT_EQ(expected_searchRadius, actual_searchRadius);	
+}
+
+TEST(FramesTests, Clone)
+{
+    String FilePath;
+    FilePath = "posetests_TestData/CHDTrainTestData/";
+
+#if defined(WINDOWS) && defined(_MSC_VER)
+    if (IsDebuggerPresent())
+        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+#endif
+
+    //Load the input data
+    ProjectLoader projectLoader(FilePath);
+    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
+    vector<Frame*> frames = projectLoader.getFrames();
+
+    //Copy keyframe
+    Frame* frame0 = frames[0];
+    Mat image0 = frame0->getImage();
+    Mat mask0 = frame0->getMask();
+    imwrite("image_temp.bmp", image0);
+    imwrite("mask_temp.bmp", image0);
+    image0 = imread("image_temp.bmp");
+    mask0 = imread("mask_temp.bmp");
+    
+    //Clone "frame0"
+    Frame* frame1 = frame0->clone(frame0);
+
+
+    //Compare 
+    EXPECT_EQ(frame0->getID(), frame1->getID());
+    EXPECT_EQ(frame0->getGroundPoint(), frame1->getGroundPoint());
+    EXPECT_EQ(frame0->getParentFrameID(), frame1->getParentFrameID());
+    EXPECT_EQ(frame0->getSkeleton(), frame1->getSkeleton());
+
+    Mat image1 = frame1->getImage();
+    Mat mask1 = frame1->getMask();
+    bool ImagesIsEqual = true, MasksIsEqual = true;
+    Size size = frame0->getImage().size();
+    for (int y = 0; y < size.height-1; y++)
+        for (int x = 0; x < size.width-1; x++)
+        {
+            ImagesIsEqual = image0.at<Vec3b>(y, x) == image0.at<Vec3b>(y, x);
+            MasksIsEqual = mask0.at<Vec3b>(y, x) == mask0.at<Vec3b>(y, x);
+
+        }
+    EXPECT_TRUE(ImagesIsEqual);
+    EXPECT_TRUE(MasksIsEqual);
+
+    image0.release();
+    mask0.release();
+    image1.release();
+    mask1.release();
+
+}

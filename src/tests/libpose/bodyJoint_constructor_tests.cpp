@@ -24,5 +24,13 @@ TEST(bodyJointTest, ConstructorTest)
   EXPECT_EQ(f3, bj2.getSpaceLocation());
   EXPECT_FALSE(bj2.getDepthSign());
 
+  //Testing constructor "BodyJoint(BodyJoint)"
+  BodyJoint bj3(bj2);
+  EXPECT_EQ(limbID, bj3.getLimbID());
+  EXPECT_EQ(jointName, bj3.getJointName());
+  EXPECT_EQ(imageLocation, bj3.getImageLocation());
+  EXPECT_EQ(f3, bj3.getSpaceLocation());
+  EXPECT_FALSE(bj3.getDepthSign());
+
 }
 

@@ -41,5 +41,15 @@ TEST(bodyPartTest, ConstructorTest)
   EXPECT_EQ(childJoint, bp4.getChildJoint());
   EXPECT_TRUE(bp4.getIsOccluded());
   EXPECT_EQ(spaceLength, bp4.getExpectedDistance());
+
+  //Testing constructor "BodyPart()"
+  BodyPart bp5(bp4);
+  EXPECT_EQ(partID, bp5.getPartID());
+  EXPECT_EQ(partName, bp5.getPartName());
+  EXPECT_EQ(parentJoint, bp5.getParentJoint());
+  EXPECT_EQ(childJoint, bp5.getChildJoint());
+  EXPECT_TRUE(bp5.getIsOccluded());
+  EXPECT_EQ(spaceLength, bp5.getExpectedDistance());
+  EXPECT_FALSE(&bp4 == &bp5);
 }
 

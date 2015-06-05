@@ -11,7 +11,10 @@ TEST(bodyPartTest, GetAndSetTest)
   float expectedDistance = 1.343f;
   POSERECT <Point2f> polygon (Point2f(1.0f, 2.0f), Point2f(2.0f, 3.0f), Point2f(3.0f, 4.0f), Point2f(4.0f, 5.0f));
   float lwRatio = 1.3f;
-  float relativeLength = 0.5f;
+  float relativeLength = 0.6f;
+
+  float searchRadius = 0.5f;
+  float rotationSearchRange = 3.14f;
 
   bp1.setPartID(partID);
   bp1.setPartName(partName);
@@ -22,6 +25,9 @@ TEST(bodyPartTest, GetAndSetTest)
   bp1.setPartPolygon(polygon);
   bp1.setLWRatio(lwRatio);
   bp1.setRelativeLength(relativeLength);
+  bp1.setSearchRadius(searchRadius);
+  bp1.setRotationSearchRange(rotationSearchRange);
+
 
   EXPECT_EQ(partID, bp1.getPartID());
   EXPECT_EQ(partName, bp1.getPartName());
@@ -32,5 +38,7 @@ TEST(bodyPartTest, GetAndSetTest)
   EXPECT_EQ(polygon, bp1.getPartPolygon());
   EXPECT_EQ(lwRatio, bp1.getLWRatio());
   EXPECT_EQ(relativeLength, bp1.getRelativeLength());
+  EXPECT_EQ(searchRadius, bp1.getSearchRadius());
+  EXPECT_EQ(rotationSearchRange, bp1.getRotationSearchRange());
 }
 
