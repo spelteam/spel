@@ -5,6 +5,9 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#ifdef WINDOWS
+#include <random>
+#endif
 
 using namespace std;
 
