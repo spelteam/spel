@@ -5,7 +5,7 @@
 #include "bodyJoint.hpp"
 #include "skeleton.cpp"*/
 
-TEST(colorHistDetectorTest, Operators)
+TEST(colorHistDetectorTestO, Operators)
 {
     // Create frames
     int framesCount = 4, rows = 30, cols = 40;
