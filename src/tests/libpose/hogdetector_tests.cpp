@@ -678,3 +678,168 @@ TEST(HOGDetectorTests, compare)
   x = float(1.0 / (float)N);
   EXPECT_EQ(x, score);
 }
+
+TEST(HOGDetectorTests, getLabelModels)
+{
+    // Create "LabelModels"
+    Size imageSize = Size(4, 3);
+    const int F = 3, P = 10, L = 20, I = 5, K = 6, N = 7;
+    map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> expected_LabelModels;
+    for (uint32_t f = 0; f < F; f++)
+    {
+      map <uint32_t, vector <HogDetector::PartModel>> temp_Parts;
+      for (uint32_t p = 0; p < P; p++)
+      {
+        vector<HogDetector::PartModel> temp_Labels;
+        for (int l = 0; l < L; l++)
+        {
+          HogDetector::PartModel X;
+          X.partModelRect = POSERECT<Point2f>(Point2f(f, f), Point2f(p, p), Point2f(l, l), Point2f(0, 0));
+          X.partImage = Mat(imageSize, CV_8UC3, Scalar(f, p , l));
+          for (int i = 0; i < I; i++)
+          {
+            vector <vector <float>> temp_k;
+            for (int k = 0; k < K; k++)
+            {
+              vector <float> temp_n;
+              for (int n = 0; n < N; n++)
+                temp_n.push_back(p + f + l);
+              temp_k.push_back(temp_n);
+              temp_n.clear();
+            }
+            X.gradientStrengths.push_back(temp_k);
+            temp_k.clear();
+          }
+          temp_Labels.push_back(X);
+        }
+        temp_Parts.emplace(pair<uint32_t, vector <HogDetector::PartModel>>(p, temp_Labels));
+        temp_Labels.clear();
+      }
+      expected_LabelModels.emplace(pair<uint32_t, map <uint32_t, vector <HogDetector::PartModel>>>(f, temp_Parts));
+      temp_Parts.clear();
+    }
+
+    //Create "HogDetector"
+    HogDetector detector;
+    detector.labelModels = expected_LabelModels;
+
+    for (uint32_t f = 0; f < F; f++)
+      for (uint32_t p = 0; p < P; p++)
+        for (int l = 0; l < L; l++)
+        {
+          detector.labelModels[f][p][l].partImage.release();
+          detector.labelModels[f][p][l].partImage = expected_LabelModels[f][p][l].partImage.clone();
+        }
+
+    //Get "LabelModels"
+    map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> actual_LabelModels;
+    actual_LabelModels = detector.getLabelModels();
+
+    //Compare
+    for (uint32_t f = 0; f < F; f++)
+      for (uint32_t p = 0; p < P; p++)
+        for (int l = 0; l < L; l++)
+        {
+          EXPECT_EQ(expected_LabelModels[f][p][l].partModelRect, detector.labelModels[f][p][l].partModelRect);
+          EXPECT_EQ(expected_LabelModels[f][p][l].gradientStrengths, detector.labelModels[f][p][l].gradientStrengths);
+          Size image_size = expected_LabelModels[f][p][l].partImage.size();
+          /* bool ImagesIsEqual = true;
+          for (int y = 0; y < image_size.height; y++)
+            for (int x = 0; x < image_size.width; x++)
+                ImagesIsEqual = (expected_LabelModels[f][p][l].partImage.at<Vec3b>(y, x) == actual_LabelModels[f][p][l].partImage.at<Vec3b>(y, x));
+          
+          EXPECT_TRUE(ImagesIsEqual);
+          */
+          EXPECT_EQ(expected_LabelModels[f][p][l].partImage.at<Vec3b>(0, 0), actual_LabelModels[f][p][l].partImage.at<Vec3b>(0, 0));
+        }			
+
+    expected_LabelModels.clear();
+}
+
+TEST(HOGDetectorTests, getPartModels)
+{
+    //Create "PartModels"
+    Size imageSize = Size(4, 3);
+    const int F = 3, P = 10, L = 20, I = 5, K = 6, N = 7;
+    HogDetector::PartModel X;
+    map <uint32_t, map <uint32_t, HogDetector::PartModel>> expected_PartModels;
+    for (uint32_t f = 0; f < F; f++)
+    {
+      map <uint32_t, HogDetector::PartModel> temp_Parts;
+      for (uint32_t p = 0; p < P; p++)
+      {
+        HogDetector::PartModel X;
+        X.partModelRect = POSERECT<Point2f>(Point2f(f, f), Point2f(p, p), Point2f(0, 0), Point2f(0, 0));
+        X.partImage = Mat(imageSize, CV_8UC3, Scalar(f, p, 0));
+        for (int i = 0; i < I; i++)
+        {
+          vector <vector <float>> temp_k;
+          for (int k = 0; k < K; k++)
+            {
+              vector <float> temp_n;
+              for (int n = 0; n < N; n++)
+                temp_n.push_back(p + f + i + k);
+              temp_k.push_back(temp_n);
+              temp_n.clear();
+            }
+            X.gradientStrengths.push_back(temp_k);
+            temp_k.clear();
+        }
+        temp_Parts.emplace(pair<uint32_t, HogDetector::PartModel>(p, X));
+      }
+      expected_PartModels.emplace(pair<uint32_t, map <uint32_t, HogDetector::PartModel>>(f, temp_Parts));
+      temp_Parts.clear();
+    }
+
+    //Create "HogDetector"
+    HogDetector detector;
+    detector.partModels = expected_PartModels;
+
+    for (uint32_t f = 0; f < F; f++)
+      for (uint32_t p = 0; p < P; p++)
+      {
+        detector.partModels[f][p].partImage.release();
+        detector.partModels[f][p].partImage = expected_PartModels[f][p].partImage.clone();
+      }
+
+    //Get "PartModels"
+    map <uint32_t, map <uint32_t, HogDetector::PartModel>> actual_PartModels;
+    actual_PartModels = detector.getPartModels();
+
+    //Compare
+    for (uint32_t f = 0; f < F; f++)
+      for (uint32_t p = 0; p < P; p++)
+        for (int l = 0; l < L; l++)
+          {
+            EXPECT_EQ(expected_PartModels[f][p].partModelRect, detector.partModels[f][p].partModelRect);
+            EXPECT_EQ(expected_PartModels[f][p].gradientStrengths, detector.partModels[f][p].gradientStrengths);
+            Size image_size = expected_PartModels[f][p].partImage.size();		
+            /*bool ImagesIsEqual = true;
+            for (int y = 0; y < image_size.height; y++)
+              for (int x = 0; x < image_size.width; x++)
+                ImagesIsEqual = (expected_PartModels[f][p].partImage.at<Vec3b>(y, x) == actual_PartModels[f][p].partImage.at<Vec3b>(y, x));
+            EXPECT_TRUE(ImagesIsEqual);
+            */
+            EXPECT_EQ(expected_PartModels[f][p].partImage.at<Vec3b>(0, 0), actual_PartModels[f][p].partImage.at<Vec3b>(0, 0));
+          }
+
+    expected_PartModels.clear();
+}
+
+TEST(HOGDetectorTests, getCellSize)
+{
+    HogDetector detector;
+    Size size = Size(8, 8);
+    detector.savedCellSize = size;
+
+    EXPECT_EQ(size, detector.getCellSize());
+}
+
+TEST(HOGDetectorTests, getNBins)
+{
+    HogDetector detector;
+    uint8_t nBins = 8;
+    detector.savednbins = nBins;
+
+    EXPECT_EQ(nBins, detector.getnbins());
+}

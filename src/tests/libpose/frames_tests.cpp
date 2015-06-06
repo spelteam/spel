@@ -223,14 +223,9 @@ TEST(FramesTests, Resize)
     Skeleton skeleton = frame->getSkeleton();
     tree<BodyPart> PartTree = skeleton.getPartTree();
 
-    // Copy image from keyframe
-    Mat image = frame->getImage();
-
-
-    // Set resize coefficient
+    // Set resize coefficient and new image height
     float X = 2.0f;
-
-    //Set new image height
+    Mat image = frame->getImage().clone();
     int oldHeight = image.size().height;
     uint32_t newHeight = X*oldHeight;
 
@@ -297,7 +292,6 @@ TEST(FramesTests, Clone)
     //Clone "frame0"
     Frame* frame1 = frame0->clone(frame0);
 
-
     //Compare 
     EXPECT_EQ(frame0->getID(), frame1->getID());
     EXPECT_EQ(frame0->getGroundPoint(), frame1->getGroundPoint());
@@ -309,11 +303,10 @@ TEST(FramesTests, Clone)
     bool ImagesIsEqual = true, MasksIsEqual = true;
     Size size = frame0->getImage().size();
     for (int y = 0; y < size.height-1; y++)
-        for (int x = 0; x < size.width-1; x++)
+      for (int x = 0; x < size.width-1; x++)
         {
-            ImagesIsEqual = image0.at<Vec3b>(y, x) == image0.at<Vec3b>(y, x);
-            MasksIsEqual = mask0.at<Vec3b>(y, x) == mask0.at<Vec3b>(y, x);
-
+          ImagesIsEqual = (image0.at<Vec3b>(y, x) == image0.at<Vec3b>(y, x));
+          MasksIsEqual = (mask0.at<Vec3b>(y, x) == mask0.at<Vec3b>(y, x));
         }
     EXPECT_TRUE(ImagesIsEqual);
     EXPECT_TRUE(MasksIsEqual);

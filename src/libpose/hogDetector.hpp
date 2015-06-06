@@ -44,6 +44,10 @@ class HogDetector : public Detector
     FRIEND_TEST(HOGDetectorTests, generateLabel);
     FRIEND_TEST(HogDetectorTest, detect);
     FRIEND_TEST(HOGDetectorTests, compare);
+    FRIEND_TEST(HOGDetectorTests, getLabelModels);
+    FRIEND_TEST(HOGDetectorTests, getPartModels);
+    FRIEND_TEST(HOGDetectorTests, getCellSize);
+    FRIEND_TEST(HOGDetectorTests, getNBins);
 #endif  // DEBUG
     int id;
     Size savedCellSize;
