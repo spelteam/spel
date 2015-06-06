@@ -412,15 +412,6 @@ int main (int argc, char **argv)
                 //do an iterative NSKP solve
                 nskpSolve = nSolver.solve(seq, params, ism);
 
-                //draw the solution
-                for(uint32_t i=0; i<nskpSolve.size();++i)
-                {
-                    Frame* frame = seq.getFrames()[nskpSolve[i].getFrameID()];
-                    Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-
-                    projectLoader.drawLockframeSolvlets(ism, nskpSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
-                }
-
                 for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
                     finalSolve.push_back(*s);
 
@@ -428,14 +419,6 @@ int main (int argc, char **argv)
                 seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
 
                 tlpsSolve = tSolver.solve(seq, params);
-
-                for(uint32_t i=0; i<tlpsSolve.size();++i)
-                {
-                    Frame* frame = seq.getFrames()[tlpsSolve[i].getFrameID()];
-                    Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-
-                    projectLoader.drawLockframeSolvlets(ism, tlpsSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
-                }
 
                 for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
                     finalSolve.push_back(*s);
