@@ -394,17 +394,60 @@ int main (int argc, char **argv)
         NSKPSolver nSolver;
         TLPSSolver tSolver;
 
-        vector<Solvlet> nskpSolve;
+        vector<Solvlet> fSolve;
         //do an iterative NSKP solve
         if(solverName=="TLPSSolver")
-            nskpSolve = tSolver.solve(seq, params);
-        else
-            nskpSolve = nSolver.solve(seq, params, ism);
+            fSolve = tSolver.solve(seq, params);
+        else if(solverName=="NSKPSolver")
+            fSolve = nSolver.solve(seq, params, ism);
+        else if(solverName=="hybridSolver")
+        {
+            vector<Solvlet> finalSolve;
+            int prevSolveSize=0;
+            do
+            {
+                prevSolveSize=finalSolve.size(); //set size of the final solve
+
+                vector<Solvlet> nskpSolve, tlpsSolve;
+                //do an iterative NSKP solve
+                nskpSolve = nSolver.solve(seq, params, ism);
+
+                //draw the solution
+                for(uint32_t i=0; i<nskpSolve.size();++i)
+                {
+                    Frame* frame = seq.getFrames()[nskpSolve[i].getFrameID()];
+                    Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+
+                    projectLoader.drawLockframeSolvlets(ism, nskpSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
+                }
+
+                for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
+                    finalSolve.push_back(*s);
+
+                //then, do a temporal solve
+                seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
+
+                tlpsSolve = tSolver.solve(seq, params);
+
+                for(uint32_t i=0; i<tlpsSolve.size();++i)
+                {
+                    Frame* frame = seq.getFrames()[tlpsSolve[i].getFrameID()];
+                    Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+
+                    projectLoader.drawLockframeSolvlets(ism, tlpsSolve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
+                }
+
+                for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
+                    finalSolve.push_back(*s);
+
+            } while(finalSolve.size()>prevSolveSize);
+            fSolve = finalSolve;
+        }
 
         //now do the error analysis
         Mat errors;
-        if(nskpSolve.size()>0)
-            errors = computeErrorToGT(nskpSolve, gtFrames);
+        if(fSolve.size()>0)
+            errors = computeErrorToGT(fSolve, gtFrames);
 
         out << param << endl;
         out << "{" << endl;
@@ -413,7 +456,7 @@ int main (int argc, char **argv)
         {
             //this is a row in the output file
             //frameID p1Value p2Value p3Value .. pNValue limb1RMS limb2RMS limb3RMS limb4RMS ... limbKRMS meanRMS evalScore
-            out << nskpSolve[row].getFrameID() << " ";
+            out << fSolve[row].getFrameID() << " ";
             for(uint32_t col=0; col<errors.cols; ++col)
             {
                 //this is an item of the row
@@ -421,10 +464,10 @@ int main (int argc, char **argv)
             }
             out << endl; //newline at the end of the block
 
-            Frame* frame = seq.getFrames()[nskpSolve[row].getFrameID()];
+            Frame* frame = seq.getFrames()[fSolve[row].getFrameID()];
             Frame* parent = seq.getFrames()[frame->getParentFrameID()];
 
-            gtLoader.drawLockframeSolvlets(ism, nskpSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 1);
+            gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 1);
         }
 
         out << "}" << endl;

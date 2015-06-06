@@ -32,6 +32,10 @@ parser.add_argument('IN', action="store")
 parser.add_argument('OUT', action="store")
 parseResult = parser.parse_args()
 
+projectName =  parseResult.IN.strip().split('/')[-1]
+projectName = projectName[:-4]
+print projectName
+
 outFile = parseResult.OUT
 
 fo = open(outFile, 'a')
@@ -53,7 +57,7 @@ partRelativeLength = [1.48, 0.0647, 0.2694, 0.2694, 0.0647, 0.2694, 0.2694, 1.48
 
 #First write the XML header with limb structure
 fo.write('<?xml version="1.0"?>\n')
-fo.write('<Project name="H3.6M_SEQ_NAME" imgFolderPath="./seq/" maskFolderPath="./mask/" camFolderPath="" allowScaling="true"  simMatPath="" exportPath="">\n')
+fo.write('<Project name="'+projectName+'" imgFolderPath="./img/'+projectName+'/" maskFolderPath="./mask/'+projectName+'/" camFolderPath="" allowScaling="true"  simMatPath="" exportPath="">\n')
 fo.write(' <BodyJoints>\n')
 
 for i in range(17):
@@ -71,7 +75,7 @@ fo.write(' </BodyParts>\n')
 
 fo.write(' <Frames>\n')
 
-frameCounter=0
+frameCounter=1
 for frame in data:
 
 	#fig = plt.figure()
@@ -121,7 +125,7 @@ for frame in data:
 	fo.write('   </BodyParts>\n')
 	fo.write('  </Frame>\n')
 	frameCounter+=1
-	#break
+	break
 
 fo.write(' </Frames>\n')
 fo.write('</Project>')
