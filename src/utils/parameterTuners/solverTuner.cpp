@@ -200,10 +200,12 @@ int main (int argc, char **argv)
     gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
     baseOutFolder += "/" + paramName + "/";
     gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
+    baseOutFolder+="/" + solverName + "/";
+    gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
     baseOutFolder+= gtLoader.getProjectTitle() +"/";
     gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
 
-    ofstream out(baseOutFolder+"/"+solverName+"_"+paramName+".err");
+    ofstream out(baseOutFolder+"/"+paramName+"_"+solverName+"_"+gtLoader.getProjectTitle()+".err");
 
 //    Project: ../../../src/utils/general/testdata1/trijumpSDGT.xml
 
