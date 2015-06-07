@@ -742,6 +742,8 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 vector<Point2i> NSKPSolver::suggestKeyframes(ImageSimilarityMatrix ism, map<string, float> params)
 {
     vector<MinSpanningTree> mstVec = buildFrameMSTs(ism, params);
+    params.emplace("minKeyframeDist", 5); //don't suggest keyframes that are too close together
+    int minKeyframeDist=params.at("minKeyframeDist");
     vector<vector<uint32_t> > orderedList;
     for(uint32_t i=0; i<mstVec.size(); ++i)
     {
@@ -794,8 +796,31 @@ vector<Point2i> NSKPSolver::suggestKeyframes(ImageSimilarityMatrix ism, map<stri
             }
         }
     }
+    //now tidy up the frame order by forcing minimum keyframe distance
+    vector<Point2i> aux;
+    aux.push_back(frameOrder[0]);
+    for(vector<Point2i>::iterator i=frameOrder.begin(); i!=frameOrder.end();++i)
+    {
+        int isOk=true;
+        int thisFrame = i->x;
+        for(vector<Point2i>::iterator j=aux.begin(); j!=aux.end();++j)
+        {
+            int thatFrame=j->x;
+
+            if(abs(thisFrame-thatFrame)<minKeyframeDist)
+            {
+                isOk=false;
+                break;
+            }
+        }
+
+        if(isOk) //if it's ok so far, add it to final
+            aux.push_back(*i);
+    }
     //return the resulting vector
-    return frameOrder;
+
+
+    return aux;
 }
 
 float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params)

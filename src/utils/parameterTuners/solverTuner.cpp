@@ -9,8 +9,6 @@
 #include <random>
 #endif
 
-#define NUM_THREADS 1
-
 using namespace std;
 
 Mat computeErrorToGT(vector<Solvlet> solves, vector<Frame*> keyframes) //return squared error from solve to GT
@@ -91,181 +89,6 @@ void addKeyframeNoise(vector<Frame*>& frames, float mean, float sd, float max)
             frames[i]->setSkeleton(skel); //set perturbed skel to frame
         }
     }
-}
-
-vector<Solvlet> getSolve(const vector<Frame*>& gtFrames, vector<Frame*>& vFrames, vector<int> requestedKeyframes, vector<Point2i> suggestedKeyframes,
-                         string paramName, float param, string balanceParamName, string solverName, float mean, float sd,
-                         float max, ImageSimilarityMatrix ism, map<string,float> defaultParams)
-{
-    vector<int> actualKeyframes;
-    //build the sequence based on
-    vFrames.clear();
-
-
-    for(uint32_t i=0; i<gtFrames.size(); ++i) //init
-    {
-        Frame * fp = new Interpolation();
-        vFrames.push_back(fp);
-    }
-
-    //insert any specified keyframes
-    for(uint32_t i=0; i<requestedKeyframes.size();++i)
-    {
-        if(requestedKeyframes[i]!=-1) //if it's not an automatic one
-        {
-            int frameID=requestedKeyframes[i];
-            //delete vFrames[requestedKeyframes[i]]; //free memory
-            vFrames[frameID] = new Keyframe(); //assign new keyframe
-            //copy all the data
-\
-            vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
-            vFrames[frameID]->setID(gtFrames[frameID]->getID());
-            vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-            vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
-
-            actualKeyframes.push_back(frameID);
-        }
-    }
-
-    //insert the automatically suggested keyframes, if any
-    for(uint32_t i=0; i<requestedKeyframes.size();++i)
-    {
-        if(requestedKeyframes[i]==-1) //if it's not an automatic one
-        {
-            //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
-            for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
-            {
-                int frameID=fi->x;
-                bool alreadyPresent=false;
-                for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
-                {
-                    if(*ak==fi->x)
-                    {
-                        alreadyPresent=true;
-                        break;
-                    }
-                }
-                if(alreadyPresent==false) //not present yet
-                {
-                    //add it
-
-                    //delete vFrames[requestedKeyframes[i]]; //free memory
-                    vFrames[frameID] = new Keyframe(); //assign new keyframe
-                    //copy all the data
-    \
-                    vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
-                    vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                    vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                    vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
-
-                    actualKeyframes.push_back(frameID);
-
-                    //break
-                    break;
-                }
-            }
-        }
-    }
-
-    //fill in the rest with interpolation frames
-    for(uint32_t i=0; i<vFrames.size(); ++i)
-    {
-        if(vFrames[i]->getFrametype()!=KEYFRAME) //if not keyframes
-        {
-            int frameID=i;
-            //delete vFrames[requestedKeyframes[i]]; //free memory
-            vFrames[frameID] = new Interpolation(); //assign new keyframe
-            //copy all the data
-\
-            vFrames[frameID]->setID(gtFrames[frameID]->getID());
-            vFrames[frameID]->setImage(gtFrames[frameID]->getImage().clone()); //deep copy image
-            vFrames[frameID]->setMask(gtFrames[frameID]->getMask().clone()); //deep copy mask
-
-            actualKeyframes.push_back(frameID);
-        }
-    }
-
-    //the new frame set has been generated, and can be used for solving
-
-    cout << "Solving with " << paramName << " at " << param << endl;
-
-    if(paramName=="gaussianNoise") //if we're testing gaussian noise
-    {
-        addKeyframeNoise(vFrames, mean, sd, max); //mean = min, sd = step, max = max
-    }
-
-    map <string, float> params=defaultParams; //transfer the default params
-
-    //emplace general defaults
-    params.emplace(paramName, param); //emplace the param we're testing
-    if(balanceParamName!="none") //if there is a balance param, emplace it too
-        params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
-
-    //global settings
-    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 0.0); //set solver body part connectivity sensitivity
-    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
-
-    //detector settings
-    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
-    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
-
-    params.emplace("grayImages", 1); // use grayscale images for HoG?
-
-    //solver settings
-    params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
-    params.emplace("acceptLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
-    params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
-    params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
-
-    params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
-    params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
-    params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
-    params.emplace("maxFrameHeight", 280); //scale to 288p - same size as trijump video seq, for detection
-
-    Sequence seq(0, "test", vFrames);
-
-    seq.estimateUniformScale(params);
-    seq.computeInterpolation(params);
-
-    NSKPSolver nSolver;
-    TLPSSolver tSolver;
-
-    vector<Solvlet> fSolve;
-    //do an iterative NSKP solve
-    if(solverName=="TLPSSolver")
-        fSolve = tSolver.solve(seq, params);
-    else if(solverName=="NSKPSolver")
-        fSolve = nSolver.solve(seq, params, ism);
-    else if(solverName=="hybridSolver")
-    {
-        vector<Solvlet> finalSolve;
-        int prevSolveSize=0;
-        do
-        {
-            prevSolveSize=finalSolve.size(); //set size of the final solve
-
-            vector<Solvlet> nskpSolve, tlpsSolve;
-            //do an iterative NSKP solve
-            nskpSolve = nSolver.solve(seq, params, ism);
-
-            for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
-                finalSolve.push_back(*s);
-
-            //then, do a temporal solve
-            seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
-
-            tlpsSolve = tSolver.solve(seq, params);
-
-            for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
-                finalSolve.push_back(*s);
-
-        } while(finalSolve.size()>prevSolveSize);
-        fSolve = finalSolve;
-    }
-
-    return fSolve;
 }
 
 int main (int argc, char **argv)
@@ -371,6 +194,7 @@ int main (int argc, char **argv)
     {
         ism.buildImageSimilarityMatrix(gtLoader.getFrames());
         ism.write(ismFile);
+        exit(0); //terminate
     }
 
     string baseOutFolder(outFold);
@@ -439,10 +263,179 @@ int main (int argc, char **argv)
     //now print this matrix to file
     for(float param = param_min; param<=param_max; param+=param_step) //do 100 trials for gaussian noise
     {
-        vector<Frame*> vFrames;
-        vector<Solvlet> fSolve = getSolve(gtFrames, vFrames, requestedKeyframes, suggestedKeyframes,
-                                          paramName, param, balanceParamName, solverName, mean, sd,
-                                          max, ism, defaultParams);
+        vector<int> actualKeyframes;
+        //build the sequence based on
+        vector <Frame*> vFrames;
+
+        for(uint32_t i=0; i<gtFrames.size(); ++i) //init
+        {
+            Frame * fp = new Interpolation();
+            vFrames.push_back(fp);
+        }
+
+        //insert any specified keyframes
+        for(uint32_t i=0; i<requestedKeyframes.size();++i)
+        {
+            if(requestedKeyframes[i]!=-1) //if it's not an automatic one
+            {
+                int frameID=requestedKeyframes[i];
+                //delete vFrames[requestedKeyframes[i]]; //free memory
+                vFrames[frameID] = new Keyframe(); //assign new keyframe
+                //copy all the data
+\
+                vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+                vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
+                vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+
+                actualKeyframes.push_back(frameID);
+            }
+        }
+
+        //insert the automatically suggested keyframes, if any
+        for(uint32_t i=0; i<requestedKeyframes.size();++i)
+        {
+            if(requestedKeyframes[i]==-1) //if it's not an automatic one
+            {
+                //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
+                for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+                {
+                    int frameID=fi->x;
+                    bool alreadyPresent=false;
+                    for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
+                    {
+                        if(*ak==fi->x)
+                        {
+                            alreadyPresent=true;
+                            break;
+                        }
+                    }
+                    if(alreadyPresent==false) //not present yet
+                    {
+                        //add it
+
+                        //delete vFrames[requestedKeyframes[i]]; //free memory
+                        vFrames[frameID] = new Keyframe(); //assign new keyframe
+                        //copy all the data
+        \
+                        vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+                        vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                        vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
+                        vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+
+                        actualKeyframes.push_back(frameID);
+
+                        //break
+                        break;
+                    }
+                }
+            }
+        }
+
+        //fill in the rest with interpolation frames
+        for(uint32_t i=0; i<vFrames.size(); ++i)
+        {
+            if(vFrames[i]->getFrametype()!=KEYFRAME) //if not keyframes
+            {
+                int frameID=i;
+                //delete vFrames[requestedKeyframes[i]]; //free memory
+                vFrames[frameID] = new Interpolation(); //assign new keyframe
+                //copy all the data
+\
+                vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                vFrames[frameID]->setImage(gtFrames[frameID]->getImage().clone()); //deep copy image
+                vFrames[frameID]->setMask(gtFrames[frameID]->getMask().clone()); //deep copy mask
+
+                //actualKeyframes.push_back(frameID);
+            }
+        }
+
+        //the new frame set has been generated, and can be used for solving
+
+        cout << "Solving with " << paramName << " at " << param << endl;
+        cout << "Keyframes: " << " ";
+        for(uint32_t i=0; i<actualKeyframes.size();++i)
+        {
+            cout << actualKeyframes[i] << " ";
+        }
+        cout << endl;
+
+        if(paramName=="gaussianNoise") //if we're testing gaussian noise
+        {
+            addKeyframeNoise(vFrames, mean, sd, max); //mean = min, sd = step, max = max
+        }
+
+        map <string, float> params=defaultParams; //transfer the default params
+
+        //emplace general defaults
+        params.emplace(paramName, param); //emplace the param we're testing
+        if(balanceParamName!="none") //if there is a balance param, emplace it too
+            params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
+
+        //global settings
+        params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+        params.emplace("jointCoeff", 0.0); //set solver body part connectivity sensitivity
+        params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+
+        //detector settings
+        params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+        params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+        params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
+        params.emplace("grayImages", 1); // use grayscale images for HoG?
+
+        //solver settings
+        params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
+        params.emplace("acceptLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+        params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+        params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+
+        params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+        params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+        params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
+        params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+
+        Sequence seq(0, "test", vFrames);
+
+        seq.estimateUniformScale(params);
+        seq.computeInterpolation(params);
+
+        NSKPSolver nSolver;
+        TLPSSolver tSolver;
+
+        vector<Solvlet> fSolve;
+        //do an iterative NSKP solve
+        if(solverName=="TLPSSolver")
+            fSolve = tSolver.solve(seq, params);
+        else if(solverName=="NSKPSolver")
+            fSolve = nSolver.solve(seq, params, ism);
+        else if(solverName=="hybridSolver")
+        {
+            vector<Solvlet> finalSolve;
+            int prevSolveSize=0;
+            do
+            {
+                prevSolveSize=finalSolve.size(); //set size of the final solve
+
+                vector<Solvlet> nskpSolve, tlpsSolve;
+                //do an iterative NSKP solve
+                nskpSolve = nSolver.solve(seq, params, ism);
+
+                for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
+                    finalSolve.push_back(*s);
+
+                //then, do a temporal solve
+                seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
+
+                tlpsSolve = tSolver.solve(seq, params);
+
+                for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
+                    finalSolve.push_back(*s);
+
+            } while(finalSolve.size()>prevSolveSize);
+            fSolve = finalSolve;
+        }
+
         //now do the error analysis
         Mat errors;
         if(fSolve.size()>0)
@@ -463,8 +456,8 @@ int main (int argc, char **argv)
             }
             out << endl; //newline at the end of the block
 
-            Frame* frame = vFrames[fSolve[row].getFrameID()];
-            Frame* parent = vFrames[frame->getParentFrameID()];
+            Frame* frame = seq.getFrames()[fSolve[row].getFrameID()];
+            Frame* parent = seq.getFrames()[frame->getParentFrameID()];
 
             gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 1);
         }
