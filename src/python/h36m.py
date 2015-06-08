@@ -26,17 +26,17 @@ def usage():
 	print("This utility is a tool for reading and convering 2D joint location GT data from H3.6M dataset into simple text files.")
 	print("Example usage: ./h36m.py ~/file.cdf file.txt")
 
-parser = argparse.ArgumentParser(description='2 non-optional argument')
+parser = argparse.ArgumentParser(description='1 non-optional argument')
 
 parser.add_argument('IN', action="store")
-parser.add_argument('OUT', action="store")
+#parser.add_argument('OUT', action="store")
 parseResult = parser.parse_args()
 
-projectName =  parseResult.IN.strip().split('/')[-1]
+projectName = parseResult.IN.strip().split('/')[-1]
 projectName = projectName[:-4]
 print projectName
 
-outFile = parseResult.OUT
+outFile = projectName+"_GT.xml"
 
 fo = open(outFile, 'a')
 
@@ -57,7 +57,7 @@ partRelativeLength = [1.48, 0.0647, 0.2694, 0.2694, 0.0647, 0.2694, 0.2694, 1.48
 
 #First write the XML header with limb structure
 fo.write('<?xml version="1.0"?>\n')
-fo.write('<Project name="'+projectName+'" imgFolderPath="./img/'+projectName+'/" maskFolderPath="./mask/'+projectName+'/" camFolderPath="" allowScaling="true"  simMatPath="" exportPath="">\n')
+fo.write('<Project name="'+projectName+'" imgFolderPath="../img/'+projectName+'/" maskFolderPath="../mask/'+projectName+'/" camFolderPath="" allowScaling="true"  simMatPath="" exportPath="">\n')
 fo.write(' <BodyJoints>\n')
 
 for i in range(17):
@@ -125,7 +125,7 @@ for frame in data:
 	fo.write('   </BodyParts>\n')
 	fo.write('  </Frame>\n')
 	frameCounter+=1
-	break
+	#break
 
 fo.write(' </Frames>\n')
 fo.write('</Project>')

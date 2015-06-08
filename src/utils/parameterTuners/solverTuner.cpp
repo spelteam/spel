@@ -1,3 +1,4 @@
+#include <future>
 #include <iostream>
 #include <nskpsolver.hpp>
 #include <tlpssolver.hpp>
@@ -261,6 +262,8 @@ int main (int argc, char **argv)
     }
 
     //now print this matrix to file
+    //paralellize this
+
     for(float param = param_min; param<=param_max; param+=param_step) //do 100 trials for gaussian noise
     {
         vector<int> actualKeyframes;

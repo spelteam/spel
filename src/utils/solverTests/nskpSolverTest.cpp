@@ -54,8 +54,8 @@ int main (int argc, char **argv)
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
     //detector settings
-    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useHoGdet", 0.1); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
     params.emplace("grayImages", 1); // use grayscale images for HoG?
