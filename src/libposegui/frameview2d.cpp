@@ -15,7 +15,7 @@ FrameView2D::FrameView2D(QWidget *parent) :
     QWidget(parent),
     frameImage(nullptr),
     frameMask(nullptr),
-    opacityValue(255)//TODO:[!] set to zero
+    opacityValue(0)
 {
     scene = new QGraphicsScene;
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -97,7 +97,6 @@ void FrameView2D::loadFrameImage(int num){
     }
 }
 
-//TODO: [!] Load skeleton, (save?)
 void FrameView2D::loadFrameSkeleton(int num){
     //clear frame view
     auto itemList = scene->items();
