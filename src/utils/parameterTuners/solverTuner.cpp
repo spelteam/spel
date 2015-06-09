@@ -1,3 +1,4 @@
+#include <future>
 #include <iostream>
 #include <nskpsolver.hpp>
 #include <tlpssolver.hpp>
@@ -194,6 +195,7 @@ int main (int argc, char **argv)
     {
         ism.buildImageSimilarityMatrix(gtLoader.getFrames());
         ism.write(ismFile);
+        exit(0); //terminate
     }
 
     string baseOutFolder(outFold);
@@ -260,6 +262,8 @@ int main (int argc, char **argv)
     }
 
     //now print this matrix to file
+    //paralellize this
+
     for(float param = param_min; param<=param_max; param+=param_step) //do 100 trials for gaussian noise
     {
         vector<int> actualKeyframes;
@@ -345,13 +349,19 @@ int main (int argc, char **argv)
                 vFrames[frameID]->setImage(gtFrames[frameID]->getImage().clone()); //deep copy image
                 vFrames[frameID]->setMask(gtFrames[frameID]->getMask().clone()); //deep copy mask
 
-                actualKeyframes.push_back(frameID);
+                //actualKeyframes.push_back(frameID);
             }
         }
 
         //the new frame set has been generated, and can be used for solving
 
         cout << "Solving with " << paramName << " at " << param << endl;
+        cout << "Keyframes: " << " ";
+        for(uint32_t i=0; i<actualKeyframes.size();++i)
+        {
+            cout << actualKeyframes[i] << " ";
+        }
+        cout << endl;
 
         if(paramName=="gaussianNoise") //if we're testing gaussian noise
         {
@@ -386,7 +396,7 @@ int main (int argc, char **argv)
         params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
         params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
         params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
-        //params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+        params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
         Sequence seq(0, "test", vFrames);
 

@@ -52,6 +52,9 @@ class ImageSimilarityMatrix
 
 
   private:
+
+    void computeMSMcell(const vector<Frame*>& frames, int i, int j);
+    void computeISMcell(const vector<Frame*>& frames, int i, int j);
     ///the image similarity matrix
     Mat imageSimilarityMatrix;
     Mat imageShiftMatrix;

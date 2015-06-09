@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include <nskpsolver.hpp>
 #include <tlpssolver.hpp>
 #include "projectLoader.hpp"
@@ -7,6 +8,10 @@ using namespace std;
 
 int main (int argc, char **argv)
 {
+    ios_base::sync_with_stdio(false); //turn off syncing of stdio for async operation
+    unsigned int n = std::thread::hardware_concurrency();
+    std::cout << n << " concurrent threads are supported.\n";
+
     if (argc != 3)
     {
         cout << "Usage nskpSolverTest [project.xml] [out directory]" << endl;
@@ -54,8 +59,8 @@ int main (int argc, char **argv)
     params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
     //detector settings
-    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useHoGdet", 0.1); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
     params.emplace("grayImages", 1); // use grayscale images for HoG?

@@ -30,6 +30,13 @@ using namespace cv;
 
 class NSKPSolver: Solver
 {
+    typedef struct SolvletScore
+    {
+      Solvlet solvlet;
+      float score;
+      int parentFrame;
+    } SolvletScore;
+
     ///define the space
     typedef opengm::DiscreteSpace<> Space;
     ///define the model
@@ -77,6 +84,8 @@ private:
     float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params);
     float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float min, float max);
 
+    vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const vector<Frame *> frames, map<string,float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int> &ignore);
+    int test(int frameId, const vector<Frame*>& frames, map<string,float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore); //test function
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 
