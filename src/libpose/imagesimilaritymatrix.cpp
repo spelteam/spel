@@ -429,6 +429,8 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
             imageSimilarityMatrix.at<float>(i,j) = 0;
         }
     }
+    //store the futures
+    vector<future<void> > futures;
 
     //set-up finished
 
@@ -437,11 +439,14 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
     {
         for(uint32_t j=0; j<frames.size(); ++j)
         {
-
-            computeMSMcell(frames, i, j);
-
+            futures.push_back(std::async(&ImageSimilarityMatrix::computeMSMcell, this, frames, i, j));
         }
     }
+
+    for(auto &e : futures) {
+         e.get();
+    }
+
     return;
 }
 

@@ -8,6 +8,7 @@
 #include "tlpssolver.hpp"
 #include <algorithm>
 #include <chrono>
+#include <future>
 
 //using namespace opengm;
 using namespace std::chrono;
@@ -101,7 +102,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     //return tlps.solve(sequence, params);
 }
 
-vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, vector<Frame*>& frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore)
+vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const vector<Frame*> frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore)
 {
     vector<NSKPSolver::SolvletScore> allSolves;
     Mat image = frames[0]->getImage();
@@ -489,7 +490,13 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, vector<
             delete lockframe; //delete the unused pointer now
         }
     }
+
     return allSolves;
+}
+
+int NSKPSolver::test(int frameId, const vector<Frame *> &frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int> &ignore)
+{
+    return 0;
 }
 
 vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix& ism, vector<int>& ignore)
@@ -517,15 +524,41 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 
+//    vector<future<vector<NSKPSolver::SolvletScore> > > futures;
+
+    vector<future<vector<SolvletScore> > > futures;
+
     cerr << "Set-up time " << duration << endl;
     for(uint32_t frameId=0; frameId<frames.size(); ++frameId)
     {
-        vector<SolvletScore> solves=propagateFrame(frameId, frames, params, ism, trees, ignore);
-        if(solves.size()>0)
-            allSolves[solves[0].solvlet.getFrameID()]=solves;
+        int captureIndex=frameId;
+        //[&] { a.foo(100); }
+        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
+        futures.push_back(std::async([=, &ignore]()->vector<NSKPSolver::SolvletScore>
+        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore);}));
+    }
+
+    vector<vector<SolvletScore> > temp;
+    for(auto &e : futures) {;
+        try {
+           e.wait();
+           temp.push_back(e.get());
+           //std::cout << "You entered: " << x << '\n';
+         }
+         catch (std::exception&) {
+           std::cout << "[exception caught]";
+         }
+//         if(solves.size()>0)
+//             allSolves[solves[0].solvlet.getFrameID()]=solves;
     }
 
     //now paralellize this
+
+    for(uint32_t i=0;i<temp.size();++i)
+    {
+        if(temp[i].size()>0)
+            allSolves[temp[i].at(0).solvlet.getFrameID()] = temp[i];
+    }
 
     //now extract the best solves
     vector<SolvletScore> bestSolves;

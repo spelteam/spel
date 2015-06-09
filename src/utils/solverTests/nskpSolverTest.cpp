@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include <nskpsolver.hpp>
 #include <tlpssolver.hpp>
 #include "projectLoader.hpp"
@@ -7,6 +8,10 @@ using namespace std;
 
 int main (int argc, char **argv)
 {
+    ios_base::sync_with_stdio(false); //turn off syncing of stdio for async operation
+    unsigned int n = std::thread::hardware_concurrency();
+    std::cout << n << " concurrent threads are supported.\n";
+
     if (argc != 3)
     {
         cout << "Usage nskpSolverTest [project.xml] [out directory]" << endl;
