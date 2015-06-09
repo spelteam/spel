@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     MainLayout->addWidget(progressBar,1);
     ui->centralWidget->setLayout(MainLayout);
     //set styles for group boxes
-    this->setStyleSheet( posegui::Utility::fileToString(":/root/resources/stylesheets/Toolbox.qss") );
+    this->setStyleSheet( posegui::Utility::fileToString(":/root/resources/stylesheets/GroupBoxMain.qss") );
     //connect
     Project::getInstance();//connect events at Project constructor
     //loading
@@ -134,7 +134,7 @@ void MainWindow::on_actionOpen_triggered()
 
 	//linux testing path
     //QString projectFilename =
-    //        "/files/Documents/Work/Libpose/src/utils/detectorTests/testdata1/trijumpSD_new.xml";
+    //        "/files/Documents/Work/Libpose/pose-build/tests/posetests_TestData/testdata1/trijumpSD_new.xml";
     //windows testing path
     //QString projectFilename =
     //       "D:/Documents/Work/Libpose/src/tests/testdata1/trijumpSD_new.xml";
