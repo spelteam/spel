@@ -42,7 +42,7 @@ void BodyPartItem::adjust(){
 QRectF BodyPartItem::boundingRect() const{
     if( !source || !dest ) return QRectF();
 
-    qreal offset = 0.5;
+    qreal offset = 0.3;
     return QRectF(source->pos(), dest->pos())
             .normalized()
             .adjusted(-offset, -offset, offset, offset);
@@ -69,7 +69,7 @@ void BodyPartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     if( !bodyPart->getIsOccluded() ){
         color = posegui::Utility::blendColors(color,Palette::notOccluded);
     }
-    qreal width = 0;
+    qreal width = 0.5;
 
     if( option->state & QStyle::State_MouseOver ){
         color = posegui::Utility::blendColors(color,Palette::selected);
@@ -77,10 +77,8 @@ void BodyPartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     }
     painter->setPen(QPen(color,width));
     painter->drawLine( source->pos(), dest->pos() );
-    //qreal offset = 0.5;
-    /*painter->drawRect(QRectF(source->pos(), dest->pos())
-                      .normalized()
-                      .adjusted(-offset, -offset, offset, offset));*/
+    //for test purposes
+    //painter->drawRect(boundingRect());
 
 }
 

@@ -17,6 +17,10 @@ public:
     void setDocument( const QDomDocument &document );
     const QDomDocument& getDocument() const;
 private:
+    ///
+    /// \brief Checking whether xml file is valid
+    /// http://www.w3schools.com/schema/
+    ///
     void validate();
 private:
     QDomDocument document;

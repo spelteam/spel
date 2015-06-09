@@ -1,3 +1,4 @@
+#include <QTime>
 #include <QDir>
 #include <nskpsolver.hpp>
 #include <tlpssolver.hpp>
@@ -144,9 +145,11 @@ Frame* Project::getFrame(int num) const{
 const std::vector<LimbLabel> *Project::getLabels(int num) const{
     const std::vector<LimbLabel>* result = nullptr;
     int frameId = getFrame(num)->getID();
+    qDebug() << "Solvlets was generating for next frames:" << endl;
     for( const Solvlet& solvlet : solve ){
         if( solvlet.getFrameID() == frameId ){
             result = solvlet.getLabelsPtr();
+            qDebug() << "frameId: " << frameId << endl;
             break;
         }
     }
@@ -194,17 +197,44 @@ void Project::interpolateFrames(){
 void Project::solveFrames(){
     //test interpolation
     interpolateFrames();
+    QTime timer;
+    timer.start();
     //run solver
     std::vector<Solvlet> solve;
     NSKPSolver solver;
-    Sequence seq(0, "test", getFrames());
     map <string, float> params; //use the default params
 
     params.emplace("debugLevel", 3); //set the debug setting to highest (0,1,2,3)
-    solve = solver.solve(seq,params);
+    Sequence seq(0, "test", getFrames());
+    seq.estimateUniformScale(params);
+    seq.computeInterpolation(params);
+    //global settings
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+
+    //detector settings
+    params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
+    //solver settings
+    params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
+    params.emplace("acceptLockframeThreshold", 0.52); //set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+    params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+    params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+    //nskp solver solve
+    ImageSimilarityMatrix ism;
+    if(!ism.read("testISM.ism"))
+    {
+        ism.buildImageSimilarityMatrix(getFrames());
+        ism.write(("testISM.ism"));
+    }
+    solve = solver.solve(seq,params,ism);
     //draw solution
-    /*QFile file("solve.txt");
+    QFile file("solve.txt");
     if( !file.open(QIODevice::WriteOnly | QIODevice::Text) ){
+        qDebug() << "Cannot open file" << endl;
         return;
     }
     QTextStream out(&file);
@@ -228,7 +258,8 @@ void Project::solveFrames(){
             out << "\n";
         }
         out << "\n\n\n";
-    }*/
+    }
+    file.close();
     /*for( const Solvlet& solvlet : solve ){
         qDebug() << "Solvlet Frame id: " << solvlet.getFrameID() << endl;
         auto frameIterator = std::find_if(frames.begin(), frames.end(),
@@ -243,7 +274,8 @@ void Project::solveFrames(){
 
     }*/
     this->solve = solve;
-    qDebug() << "Finished" << endl;
+    int elapsed = timer.elapsed();
+    qDebug() << "Solve is finished: " + QString::number(elapsed) << endl;
 }
 
 

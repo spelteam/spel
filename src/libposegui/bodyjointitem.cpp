@@ -9,6 +9,7 @@
 #include <QGraphicsSceneMouseEvent>
 
 using posegui::Project;
+
 //PUBLIC
 
 FRAMETYPE BodyJointItem::Frametype = INTERPOLATIONFRAME;

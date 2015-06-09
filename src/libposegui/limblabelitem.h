@@ -2,12 +2,21 @@
 #define LIMBLABELITEM_H
 
 #include <QGraphicsItem>
-#include <solvlet.hpp>
+#include <frame.hpp>
+
+class LimbLabel;
 
 class LimbLabelItem : public QGraphicsItem
 {
+private:
+    struct Palette{
+        static QColor interpolation;
+        static QColor lockframe;
+        static QColor keyframe;
+        static QColor selected;
+    };
 public:
-    LimbLabelItem( const LimbLabel* label, QGraphicsItem * parent = 0 );
+    LimbLabelItem( LimbLabel label, QGraphicsItem * parent = 0 );
     ~LimbLabelItem();
 public:
     enum { Type = UserType + 3 };
@@ -19,8 +28,10 @@ public:
                 QWidget *widget = 0 ) override;
 private:
     void updateToolTip();
+public:
+    static FRAMETYPE Frametype;
 private:
-    const LimbLabel* label;
+    const LimbLabel label;
 };
 
 #endif // LIMBLABELITEM_H

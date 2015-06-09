@@ -41,10 +41,10 @@ protected:
 
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-public:
-    static FRAMETYPE Frametype;
 private:
     void updateToolTip();
+public:
+    static FRAMETYPE Frametype;
 private:
     QList<BodyPartItem*> partList;
     qreal radius = 1.0;
