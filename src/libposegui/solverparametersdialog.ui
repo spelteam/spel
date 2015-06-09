@@ -1073,18 +1073,12 @@ QGroupBox::title{
            </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="dspbDebugLvl">
-            <property name="decimals">
-             <number>3</number>
-            </property>
+           <widget class="QSpinBox" name="spbDebugLvl">
             <property name="maximum">
-             <double>4.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>1.000000000000000</double>
+             <number>4</number>
             </property>
             <property name="value">
-             <double>1.000000000000000</double>
+             <number>1</number>
             </property>
            </widget>
           </item>
