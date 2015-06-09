@@ -55,6 +55,8 @@ find_package(Qt5OpenGL)
 #Main files
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC main.cpp)
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC mainwindow.cpp)
+#Forms
+LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC solverparametersdialog.cpp)
 #Custom layouts
 LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC flowlayout.cpp)
 #Custom group boxes
@@ -104,6 +106,7 @@ LIST(APPEND ${LIBPOSEGUI_MODULE}_SRC filepathstorage.h)
 #Add forms
 QT5_WRAP_UI(UIS_HDRS
     mainwindow.ui
+    solverparametersdialog.ui
 )
 
 #Add resources files

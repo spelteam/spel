@@ -1,5 +1,6 @@
 #include "solveboxwidget.h"
 
+#include "solverparametersdialog.h"
 #include "project.h"
 #include <QtConcurrent/QtConcurrent>
 
@@ -24,7 +25,7 @@ SolveBoxWidget::SolveBoxWidget(QWidget *parent) :
     MainLayout->addWidget(interpolator);
     MainLayout->addWidget(solver);
     //settings
-    this->setEnabled(false);
+    this->setEnabled(true);//TODO:[!]Set to false
     this->setLayout(MainLayout);
     //connect
     QObject::connect(interpolator,&QPushButton::clicked,
@@ -63,7 +64,9 @@ void SolveBoxWidget::interpolatorClicked(){
 }
 
 void SolveBoxWidget::solverClicked(){
-    QFuture<void> some = QtConcurrent::run(&Project::getInstance(),&Project::solveFrames);
+    SolverParametersDialog paramsDialog(this);
+    paramsDialog.exec();
+    /*QFuture<void> some = QtConcurrent::run(&Project::getInstance(),&Project::solveFrames);
     Project::getInstance().futureWatcher.setFuture(some);
-    solver->setEnabled(false);
+    solver->setEnabled(false);*/
 }

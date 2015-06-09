@@ -11,12 +11,13 @@
         <file>resources/icons/view2d.png</file>
         <file>resources/icons/key_lock.png</file>
         <file>resources/icons/key_free.png</file>
-        <file>resources/stylesheets/Toolbox.qss</file>
         <file>resources/xml/project.xsd</file>
         <file>resources/stylesheets/Interframe.qss</file>
         <file>resources/stylesheets/Keyframe.qss</file>
         <file>resources/stylesheets/Lockframe.qss</file>
         <file>resources/icons/interpolation.png</file>
         <file>resources/icons/solving.png</file>
+        <file>resources/stylesheets/GroupBox2.qss</file>
+        <file>resources/stylesheets/GroupBoxMain.qss</file>
     </qresource>
 </RCC>
