@@ -4,6 +4,8 @@
 #include "projectattr.h"
 #include "exceptions.h"
 
+#include <limblabelitem.h>
+
 namespace posegui {
 
 Utility::Utility(QObject *parent) : QObject(parent)
@@ -83,7 +85,8 @@ bool Utility::isJointItem(const QList<QGraphicsItem*>::iterator &it){
 
 bool Utility::isSkeletonItem(const QList<QGraphicsItem*>::iterator &it){
     return dynamic_cast<BodyJointItem*>(*it) ||
-            dynamic_cast<BodyPartItem*>(*it);
+            dynamic_cast<BodyPartItem*>(*it) ||
+            dynamic_cast<LimbLabelItem*>(*it);
 }
 
 QColor Utility::blendColors(const QColor &first, const QColor &second){
@@ -152,6 +155,20 @@ void Utility::buildBodyPartTree(std::vector<BodyPart> &bodyList,
     if( !bodyList.empty() ){
         throw InvalidProjectStructure("Some of body parts are invalid. Can't add to tree");
     }
+}
+
+QPixmap Utility::loadMask(QImage mask, int opacity){
+    //set white pixels as transparent
+    QBitmap bitmap = QBitmap::fromImage(mask)
+            .createMaskFromColor(qRgb(255,255,255));
+    //set alpha channel to mask
+    QImage alphaValues(mask.size(),QImage::Format_ARGB32_Premultiplied);
+    alphaValues.fill(qRgb(opacity,opacity,opacity));
+    mask.setAlphaChannel(alphaValues);
+    QPixmap maskPixmap = QPixmap::fromImage(mask);
+    maskPixmap.setMask(bitmap);
+
+    return maskPixmap;
 }
 
 }

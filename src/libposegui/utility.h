@@ -6,6 +6,9 @@
 #include <QString>
 #include <QDomDocument>
 #include <QColor>
+#include <QPixmap>
+#include <QImage>
+#include <QBitmap>
 
 #include <bodyJoint.hpp>
 #include <bodyPart.hpp>
@@ -44,6 +47,8 @@ public:
 
     static void buildBodyPartTree(std::vector<BodyPart> &bodyList,
                                           tree<BodyPart> &bodyParts);
+
+    static QPixmap loadMask(QImage mask, int opacity);
 };
 
 }

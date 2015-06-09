@@ -58,5 +58,8 @@ private:
 
 private:
     QGraphicsPixmapItem* frameImage;
+    QGraphicsPixmapItem* frameMask;
+    QImage frameMaskOrig;
+    int opacityValue;
 };
 #endif // FRAMEVIEW2D_H

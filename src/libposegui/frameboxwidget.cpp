@@ -38,7 +38,7 @@ FrameBoxWidget::FrameBoxWidget(QWidget *parent ) :
     maskViewer->setMaximum(255);
     maskViewer->setSingleStep(1);
     maskViewer->setPageStep(1);
-    maskViewer->setEnabled(false);
+    maskViewer->setEnabled(true);
     //layouts
     MainLayout = new QHBoxLayout();
     MainLayout->addWidget(changeViewer);

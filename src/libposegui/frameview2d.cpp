@@ -13,7 +13,9 @@ using posegui::Project;
 
 FrameView2D::FrameView2D(QWidget *parent) :
     QWidget(parent),
-    frameImage(nullptr)
+    frameImage(nullptr),
+    frameMask(nullptr),
+    opacityValue(255)//TODO:[!] set to zero
 {
     scene = new QGraphicsScene;
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -50,7 +52,11 @@ void FrameView2D::scaleItemsEvent(int value){
 }
 
 void FrameView2D::changeMaskOpacityEvent(int value){
-    //TEMP
+    opacityValue = value;
+    if(frameImage){
+        using posegui::Utility;
+        frameMask->setPixmap(Utility::loadMask(frameMaskOrig,opacityValue));
+    }
 }
 
 void FrameView2D::pickFrameEvent(int num){
@@ -68,24 +74,22 @@ void FrameView2D::loadFrameImage(int num){
 
     QImage img, mask;
     if( img.load(imgPath) && mask.load(maskPath) ){
-        //TODO: [L] Write pixmap here!
+        //save orig mask
+        frameMaskOrig = mask;
+        using posegui::Utility;
         if(frameImage){
             //frameImage exist on view
-            QPixmap pixmap = QPixmap::fromImage(img);
-            /*QBitmap bitmap = QBitmap::fromImage(mask)
-                    .createMaskFromColor({0,0,0,255});
-            pixmap.setMask(bitmap);*/
-            frameImage->setPixmap(pixmap);
+            frameImage->setPixmap(QPixmap::fromImage(img));
+            frameMask->setPixmap(Utility::loadMask(mask,opacityValue));
         } else{
             //frameImage not exist on view
-            QPixmap pixmap = QPixmap::fromImage(img);
-           /* QBitmap bitmap = QBitmap::fromImage(mask)
-                    .createMaskFromColor({0,0,0,255});
-            pixmap.setMask(bitmap);*/
-            frameImage = scene->addPixmap(pixmap);
+            QPixmap imgPixmap = QPixmap::fromImage(img);
+            frameImage = scene->addPixmap(imgPixmap);
+            frameMask = scene->addPixmap(Utility::loadMask(mask,opacityValue));
             frameImage->setZValue(-1.0);
+            frameMask->setZValue(-0.9);
             //set scene bounded rect
-            scene->setSceneRect(pixmap.rect());
+            scene->setSceneRect(imgPixmap.rect());
         }
         view->update();
     } else{
@@ -95,15 +99,16 @@ void FrameView2D::loadFrameImage(int num){
 
 //TODO: [!] Load skeleton, (save?)
 void FrameView2D::loadFrameSkeleton(int num){
-    //clear frame
+    //clear frame view
     auto itemList = scene->items();
     for( auto it = itemList.begin(); it != itemList.end(); ++it){
         if( posegui::Utility::isSkeletonItem(it) ){
             scene->removeItem(*it);
         }
     }
-    //load skeleton
+    //get frame
     auto frame = Project::getInstance().getFrame(num);
+    //load skeleton
     BodyJointItem::Frametype = frame->getFrametype();
     auto bodyJoints = frame->getSkeletonPtr()
             ->getJointTreePtr();
@@ -136,11 +141,12 @@ void FrameView2D::loadFrameSkeleton(int num){
         ++pit;
     }
     //load limp labels
+    LimbLabelItem::Frametype = LOCKFRAME;
     auto labels = Project::getInstance().getLabels(num);
     if( labels != nullptr ){
         qDebug() << "Limb label NOT null" << endl;
         for( LimbLabel label : *labels ){
-            LimbLabelItem* limbLabelItem = new LimbLabelItem(&label);
+            LimbLabelItem* limbLabelItem = new LimbLabelItem(label);
             scene->addItem(limbLabelItem);
         }
     }
