@@ -16,6 +16,7 @@ const QString BodyPartHeaderAttrs::PRTJOINT = "parentJointId";
 const QString BodyPartHeaderAttrs::LWRATIO = "lwRatio";
 const QString BodyPartHeaderAttrs::EXPECT_DIST = "expectedDistance";
 const QString BodyPartHeaderAttrs::REL_LENGTH = "relativeLength";
+const int BodyPartHeaderAttrs::ROOT_ID = 0;
 //body joint
 const QString BodyJointAttrs::JOINTS_TAG = "BodyJoints";
 const QString BodyJointAttrs::JOINT_TAG = "BodyJoint";

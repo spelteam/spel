@@ -107,7 +107,7 @@ void Utility::buildBodyPartTree(std::vector<BodyPart> &bodyList,
     bool isRootExist = false;
     //find root element
     for( auto it = bodyList.begin(); it != bodyList.end(); ++it ){
-        if( it->getPartID() == BODY_PART_ROOT_ID ){
+        if( it->getPartID() == BodyPartHeaderAttrs::ROOT_ID ){
             currNode = bodyParts.insert( root, *it );
             bodyList.erase(it);
             isRootExist = true;
