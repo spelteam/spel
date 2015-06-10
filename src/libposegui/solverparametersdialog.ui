@@ -45,8 +45,8 @@ QGroupBox::title{
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>444</width>
-        <height>607</height>
+        <width>460</width>
+        <height>587</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,6,1">
@@ -99,15 +99,15 @@ QGroupBox::title{
        <item>
         <widget class="QToolBox" name="tlbParamsTabs">
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="detectorPage">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>426</width>
-            <height>309</height>
+            <width>442</width>
+            <height>293</height>
            </rect>
           </property>
           <attribute name="label">
@@ -125,6 +125,43 @@ QGroupBox::title{
               <string/>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QGroupBox" name="grbMaxFrameHeight">
+                <property name="title">
+                 <string/>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_22">
+                 <item>
+                  <widget class="QLabel" name="lblMaxFrameHeight">
+                   <property name="font">
+                    <font>
+                     <italic>true</italic>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Max Frame Height</string>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="spbMaxFrameHeight">
+                   <property name="minimum">
+                    <number>120</number>
+                   </property>
+                   <property name="maximum">
+                    <number>1080</number>
+                   </property>
+                   <property name="singleStep">
+                    <number>120</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
               <item>
                <widget class="QGroupBox" name="grbUseCSDet">
                 <property name="title">
@@ -267,18 +304,15 @@ QGroupBox::title{
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="dspbMaxPartCandidates">
-                   <property name="decimals">
-                    <number>3</number>
-                   </property>
+                  <widget class="QSpinBox" name="spbMaxPartCandidates">
                    <property name="maximum">
-                    <double>1000000.000000000000000</double>
+                    <number>100000000</number>
                    </property>
                    <property name="singleStep">
-                    <double>100.000000000000000</double>
+                    <number>100</number>
                    </property>
                    <property name="value">
-                    <double>2000.000000000000000</double>
+                    <number>2000</number>
                    </property>
                   </widget>
                  </item>
@@ -295,8 +329,8 @@ QGroupBox::title{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>426</width>
-            <height>309</height>
+            <width>442</width>
+            <height>293</height>
            </rect>
           </property>
           <attribute name="label">
@@ -460,18 +494,15 @@ QGroupBox::title{
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="dspbBaseRotStep8">
-                   <property name="decimals">
-                    <number>3</number>
-                   </property>
+                  <widget class="QSpinBox" name="spbBaseRotStep">
                    <property name="maximum">
-                    <double>4.000000000000000</double>
+                    <number>180</number>
                    </property>
                    <property name="singleStep">
-                    <double>1.000000000000000</double>
+                    <number>10</number>
                    </property>
                    <property name="value">
-                    <double>1.000000000000000</double>
+                    <number>50</number>
                    </property>
                   </widget>
                  </item>
@@ -531,8 +562,8 @@ QGroupBox::title{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>426</width>
-            <height>309</height>
+            <width>442</width>
+            <height>293</height>
            </rect>
           </property>
           <attribute name="label">
@@ -715,8 +746,8 @@ QGroupBox::title{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>413</width>
-            <height>400</height>
+            <width>429</width>
+            <height>391</height>
            </rect>
           </property>
           <attribute name="label">
@@ -952,7 +983,7 @@ QGroupBox::title{
                     <double>1.000000000000000</double>
                    </property>
                    <property name="value">
-                    <double>1.000000000000000</double>
+                    <double>0.000000000000000</double>
                    </property>
                   </widget>
                  </item>

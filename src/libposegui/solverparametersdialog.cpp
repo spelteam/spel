@@ -19,7 +19,7 @@ SolverParametersDialog::~SolverParametersDialog()
 {
     delete ui;
 }
-
+//TODO:[!]Fix some params from Double to Int values
 void SolverParametersDialog::on_cbbChooseSolver_currentIndexChanged(int index)
 {
     //swap solver params(NSKP & TLPS)
