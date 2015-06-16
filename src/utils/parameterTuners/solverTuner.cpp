@@ -616,7 +616,7 @@ int main (int argc, char **argv)
             } while(finalSolve.size()>prevSolveSize);
             fSolve = finalSolve;
         }
-        else if(solverName="none") //then we are just doing a detector test!
+        else if(solverName=="none") //then we are just doing a detector test!
         {
             if(params.at("useCSdet"))
             {
