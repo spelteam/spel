@@ -22,8 +22,8 @@ class ImageSimilarityMatrix
     ///destructor
     ~ImageSimilarityMatrix(void);
 
-    void buildImageSimilarityMatrix(const vector<Frame*>& frames);
-    void buildMaskSimilarityMatrix(const vector<Frame*>& frames);
+    void buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight=0);
+    void buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight=0);
 
     bool read(string filename);
     bool write(string filename) const;
@@ -31,6 +31,7 @@ class ImageSimilarityMatrix
     float min() const;
     float mean() const;
     float max() const;
+    float stddev() const;
 
     float at(int row, int col) const;
     Point2f getShift(int row, int col) const;
@@ -43,6 +44,8 @@ class ImageSimilarityMatrix
     bool operator!=(const ImageSimilarityMatrix &s) const;
     ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s);
 
+    Mat clone(); //return a Mat clone of ISM
+
     // template <class T> inline std::string to_string (const T& t) 
     // {
     //     std::stringstream ss;
@@ -53,8 +56,8 @@ class ImageSimilarityMatrix
 
   private:
 
-    void computeMSMcell(const vector<Frame*>& frames, int i, int j);
-    void computeISMcell(const vector<Frame*>& frames, int i, int j);
+    void computeMSMcell(Frame* left, Frame* right, int maxFrameHeight);
+    void computeISMcell(Frame* left, Frame* right, int maxFrameHeight);
     ///the image similarity matrix
     Mat imageSimilarityMatrix;
     Mat imageShiftMatrix;

@@ -145,6 +145,10 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
     //solver eval parameters
     params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
+    //restrict problem size
+    params.emplace("maxFrameHeight", 288);  //emplace if not defined
+
+
     float depthRotationCoeff = params.at("partDepthRotationCoeff");
 
     float baseRotationStep = params.at("baseRotationStep");
@@ -201,8 +205,8 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
 
             //t1 = high_resolution_clock::now();
 
-            if(frames[*mstIter]->getFrametype()==KEYFRAME || frames[*mstIter]->getFrametype()==LOCKFRAME) //don't push to existing keyframes and lockframes
-                continue;
+            if(frames[*mstIter]->getFrametype()==KEYFRAME || frames[*mstIter]->getFrametype()==LOCKFRAME || *mstIter==frameId) //don't push to existing keyframes and lockframes
+                continue; //also ignore mst frame if it's this frame
             //map<int, vector<LimbLabel> > labels;
             vector<vector<LimbLabel> > labels, tempLabels;
             vector<vector<LimbLabel> >::iterator labelPartsIter;
@@ -918,10 +922,26 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     //emplace defaults
     params.emplace("badLabelThresh", 0.52); //if less than 52% of the pixels are in the mask, label this label bad
     params.emplace("debugLevel", 1);
+    params.emplace("maxFrameHeight", 288);  //emplace if not defined
 
+    int maxFrameHeight = params.at("maxFrameHeight");
     int debugLevel = params.at("debugLevel");
 
-    Mat mask = frame->getMask();
+    Mat mask = frame->getMask().clone();
+
+    float factor=1;
+    //compute the scaling factor
+    if(maxFrameHeight!=0)
+    {
+        factor = (float)maxFrameHeight / (float)mask.rows;
+
+        resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
+    }
+    for(vector<LimbLabel>::iterator label=labels.begin(); label!=labels.end(); ++label)
+    {
+        label->Resize(factor);
+    }
+
     int correctPixels=0, incorrectPixels=0;
     int pixelsInMask=0;
     int coveredPixelsInMask=0;
@@ -1028,7 +1048,7 @@ float NSKPSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
         solutionEval=solutionEval-1.0;
 
     if(debugLevel>=1)
-        cerr << "Solution evaluation score - " << solutionEval << endl;
+        cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << endl;
 
     return solutionEval;
 }

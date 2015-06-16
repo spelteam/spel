@@ -12,6 +12,181 @@
 
 using namespace std;
 
+Mat computeLabelErrorStatToGT(vector<vector<vector<LimbLabel> > > solves, vector<Frame*> keyframes) //return squared error from solve to GT
+{
+    Mat errorMatrix;
+    if(!solves.size()==keyframes.size())
+    {
+        cerr<<"Number of solves and number of keyframes do not match!" << endl;
+        return errorMatrix;
+    }
+
+    errorMatrix.create(keyframes.size(), solves[0].size(), CV_32FC2); //2 channel 32 bit float
+
+    //vector<vector<float> > globalPartErrors;
+
+    for(uint32_t i=0; i<keyframes.size();++i) //for every frame
+    {
+        //float frameRMS=0;
+        Skeleton kSkel = keyframes[i]->getSkeleton();
+        tree<BodyPart> partTree = kSkel.getPartTree();
+
+
+        //vector<float> partErrors;
+        vector<vector<LimbLabel> > labels = solves[i]; //get all labels for this frame
+
+//        Mat partErrors;
+//        partErrors.create(1, labels.size(), DataType<float>::type); //labels.size() = num body parts
+        for(tree<BodyPart>::iterator partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for every bodypart
+        {
+            //for each body part
+            //get the GT points
+            Mat partErrors;
+            //labels[partIter->getPartID()].size() = num labels for this part
+            partErrors.create(1, labels[partIter->getPartID()].size(), DataType<float>::type);
+
+            Point2f t0(kSkel.getBodyJoint(partIter->getParentJoint())->getImageLocation());
+            Point2f t1(kSkel.getBodyJoint(partIter->getChildJoint())->getImageLocation());
+
+            int lblCount=0;
+            for(vector<LimbLabel>::iterator label=labels[partIter->getPartID()].begin(); label!=labels[partIter->getPartID()].end(); ++label)
+            {
+                //for each label
+                Point2f p0,p1;
+                label->getEndpoints(p0,p1);
+
+                //dist(p0gt, p0sim)*0.5+dist(p1gt, p1sim)*0.5;
+                float d0 = PoseHelper::distSquared(p0,t0); //dist between parent joints
+                float d1 = PoseHelper::distSquared(p1,t1); //dist between child joints
+
+                partErrors.at<float>(0,lblCount)=sqrt(0.5*d0+0.5*d1); //average error for the two joints
+                lblCount++;
+            }
+
+
+            //now analyse the part error vector
+            Scalar mean, stddev;
+            meanStdDev(partErrors, mean, stddev);
+
+            Vec2d store(mean[0], stddev[0]);
+
+            cout << mean[0] << " " << stddev[0] << endl;
+
+            errorMatrix.at<Vec2f>(i,partIter->getPartID()) = store;
+            partErrors.release();
+        }
+
+        //globalPartErrors.push_back(partErrors);
+        //frameRMS=sqrt(frameRMS/(float)solves.size()); //the RMS error for this frame
+
+        //write this frame to file
+    }
+    return errorMatrix;
+}
+
+vector<vector<vector<LimbLabel> > > doInterpolationDetect(Detector* detector, vector<Frame*> vFrames, map<string,float> params)
+{
+    vector<vector<vector<LimbLabel> > > allLabels;
+    //vector<Solvlet> solvlets;
+    Sequence seq(0, "test", vFrames);
+    seq.estimateUniformScale(params);
+    seq.computeInterpolation(params);
+
+    vector<Frame*> frames = seq.getFrames();
+    for(uint32_t frame=0; frame<frames.size(); ++frame)
+    {
+        vector<vector<LimbLabel> > labels, tempLabels;
+        labels = detector->detect(frames[frame], params, labels); //detect labels based on keyframe training
+
+        //sort the label
+        for(uint32_t i=0; i<labels.size(); ++i)
+        {
+            for(uint32_t j=0; j<labels.size();++j)
+            {
+                if(labels[j].at(0).getLimbID()==i)
+                    tempLabels.push_back(labels[j]);
+            }
+        }
+        labels = tempLabels;
+
+        allLabels.push_back(labels);
+    }
+    return allLabels;
+}
+
+vector<vector<vector<LimbLabel> > > doPropagationDetect(Detector* detector, vector<Frame*> vFrames, ImageSimilarityMatrix ism, map<string,float> params)
+{
+    vector<vector<vector<LimbLabel> > > allLabels;
+    //vector<Solvlet> solvlets;
+    Sequence seq(0, "test", vFrames);
+    seq.estimateUniformScale(params);
+    seq.computeInterpolation(params);
+
+    int kfr=-1;
+    vector<Frame*> frames = seq.getFrames();
+    for(uint32_t i=0; i<frames.size(); ++i)
+    {
+        if(frames[i]->getFrametype()==KEYFRAME)
+        {
+            kfr=i;
+            break;
+        }
+    }
+    if(kfr==-1)
+    {
+        cerr<< "No keyframes found!" << endl;
+        return allLabels;
+    }
+
+    //propagate the zero keyframe
+
+
+    for(uint32_t frame=0; frame<frames.size(); ++frame)
+    {
+        Frame * lockframe = new Interpolation();
+        //Skeleton shiftedPrior = frames[frameId]->getSkeleton();
+        lockframe->setSkeleton(frames[kfr]->getSkeleton());
+        lockframe->setID(frames[frame]->getID());
+        lockframe->setImage(frames[frame]->getImage());
+        lockframe->setMask(frames[frame]->getMask());
+
+        //compute the shift between the frame we are propagating from and the current frame
+        Point2f shift = ism.getShift(frames[kfr]->getID(),frames[frame]->getID());
+        lockframe->shiftSkeleton2D(shift);
+
+        vector<vector<LimbLabel> > labels, tempLabels;
+        labels = detector->detect(lockframe, params, labels); //detect labels based on keyframe training
+
+        //sort the label
+        for(uint32_t i=0; i<labels.size(); ++i)
+        {
+            for(uint32_t j=0; j<labels.size();++j)
+            {
+                if(labels[j].at(0).getLimbID()==i)
+                    tempLabels.push_back(labels[j]);
+            }
+        }
+        labels = tempLabels;
+        //now take the best from each frame into a Solvlet
+//        Solvlet solvlet;
+//        vector<LimbLabel> bestLabels;
+//        for(vector<vector<LimbLabel> >::iterator pl=labels.begin(); pl!=labels.end(); ++pl)
+//        {
+//            bestLabels.push_back(pl->at(0)); //push back the top scoring label for this part
+//        }
+
+//        //now set solvlet
+//        solvlet.setLabels(bestLabels);
+//        solvlet.setFrameID(frame);
+//        //and push to solvlets
+//        solvlets.push_back(solvlet);
+        allLabels.push_back(labels);
+    }
+    return allLabels;
+}
+
+
+
 Mat computeErrorToGT(vector<Solvlet> solves, vector<Frame*> keyframes) //return squared error from solve to GT
 {
     Mat errorMatrix;
@@ -398,6 +573,9 @@ int main (int argc, char **argv)
         params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
         params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
+        params.emplace("maxPartCandidates", 50); //set the max number of part candidates to allow into the solver
+        params.emplace("mstThresh", 3.5); //set the max number of part candidates to allow into the solver
+
         Sequence seq(0, "test", vFrames);
 
         seq.estimateUniformScale(params);
@@ -437,6 +615,23 @@ int main (int argc, char **argv)
 
             } while(finalSolve.size()>prevSolveSize);
             fSolve = finalSolve;
+        }
+        else if(solverName="none") //then we are just doing a detector test!
+        {
+            if(params.at("useCSdet"))
+            {
+
+            }
+            if(params.at("useHoGdet"))
+            {
+
+            }
+            if(params.at("useSURFdet"))
+            {
+
+            }
+
+
         }
 
         //now do the error analysis

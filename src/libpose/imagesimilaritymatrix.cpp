@@ -174,8 +174,9 @@ bool ImageSimilarityMatrix::write(string filename) const
     }
 }
 
-void ImageSimilarityMatrix::computeISMcell(const vector<Frame*>& frames, int i, int j)
+void ImageSimilarityMatrix::computeISMcell(Frame* left, Frame* right, int maxFrameHeight)
 {
+    int i=left->getID(), j=right->getID();
     //only do this loop if
     if(j>i)
         return;
@@ -185,13 +186,25 @@ void ImageSimilarityMatrix::computeISMcell(const vector<Frame*>& frames, int i, 
         imageSimilarityMatrix.at<float>(i,j) = 0;
         return;
     }
-
     //load images, compute similarity, store to matrix
-    Mat imgMatOne=frames[i]->getImage();
-    Mat imgMatTwo=frames[j]->getImage();
+    Mat imgMatOne=left->getImage().clone();
+    Mat imgMatTwo=right->getImage().clone();
 
-    Mat maskMatOne=frames[i]->getMask();
-    Mat maskMatTwo=frames[j]->getMask();
+    Mat maskMatOne=left->getMask().clone();
+    Mat maskMatTwo=right->getMask().clone();
+
+    float factor=1;
+    //compute the scaling factor
+    if(maxFrameHeight!=0)
+    {
+        factor = (float)maxFrameHeight / (float)imgMatOne.rows;
+
+        resize(imgMatOne, imgMatOne, cvSize(imgMatOne.cols * factor, imgMatOne.rows * factor));
+        resize(imgMatTwo, imgMatTwo, cvSize(imgMatTwo.cols * factor, imgMatTwo.rows * factor));
+
+        resize(maskMatOne, maskMatOne, cvSize(maskMatOne.cols * factor, maskMatOne.rows * factor));
+        resize(maskMatTwo, maskMatTwo, cvSize(maskMatTwo.cols * factor, maskMatTwo.rows * factor));
+    }
 
     Point2f cOne, cTwo;
     float mSizeOne=0, mSizeTwo=0;
@@ -230,6 +243,7 @@ void ImageSimilarityMatrix::computeISMcell(const vector<Frame*>& frames, int i, 
 
     //cOne and cTwo now have the centres
     dX = cTwo-cOne;
+    dX=dX*pow(factor, -1.0);
 
     //so, dX+cOne = cTwo
     //and cOne = cTwo-dX
@@ -310,8 +324,9 @@ void ImageSimilarityMatrix::computeISMcell(const vector<Frame*>& frames, int i, 
     return;
 }
 
-void ImageSimilarityMatrix::computeMSMcell(const vector<Frame*>& frames, int i, int j)
+void ImageSimilarityMatrix::computeMSMcell(Frame* left, Frame* right, int maxFrameHeight)
 {
+    int i=left->getID(), j=right->getID();
     //only do this loop if
     if(j>i)
         return;
@@ -322,8 +337,19 @@ void ImageSimilarityMatrix::computeMSMcell(const vector<Frame*>& frames, int i, 
         return;
     }
 
-    Mat maskMatOne=frames[i]->getMask();
-    Mat maskMatTwo=frames[j]->getMask();
+    Mat maskMatOne=left->getMask().clone();
+    Mat maskMatTwo=right->getMask().clone();
+
+    float factor=1;
+    //compute the scaling factor
+    if(maxFrameHeight!=0)
+    {
+        factor = (float)maxFrameHeight / (float)maskMatOne.rows;
+
+        resize(maskMatOne, maskMatOne, cvSize(maskMatOne.cols * factor, maskMatOne.rows * factor));
+        resize(maskMatTwo, maskMatTwo, cvSize(maskMatTwo.cols * factor, maskMatTwo.rows * factor));
+    }
+
 
     Point2f cOne, cTwo;
     float mSizeOne=0, mSizeTwo=0;
@@ -365,9 +391,10 @@ void ImageSimilarityMatrix::computeMSMcell(const vector<Frame*>& frames, int i, 
 
     //cOne and cTwo now have the centres
     dX = cTwo-cOne;
+    dX = dX*pow(factor, -1.0);
 
-    imageShiftMatrix.at<Point2f>(i,j) = Point2f(dX.y, dX.x);;
-    imageShiftMatrix.at<Point2f>(j,i) = Point2f(-dX.y, -dX.x);;
+    imageShiftMatrix.at<Point2f>(i,j) = Point2f(dX.y, dX.x);
+    imageShiftMatrix.at<Point2f>(j,i) = Point2f(-dX.y, -dX.x);
 
     //so, dX+cOne = cTwo
     //and cOne = cTwo-dX
@@ -414,7 +441,7 @@ void ImageSimilarityMatrix::computeMSMcell(const vector<Frame*>& frames, int i, 
     return;
 }
 
-void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& frames)
+void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight)
 {
      //create matrices and fill with zeros
     // imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
@@ -439,7 +466,9 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
     {
         for(uint32_t j=0; j<frames.size(); ++j)
         {
-            futures.push_back(std::async(&ImageSimilarityMatrix::computeMSMcell, this, frames, i, j));
+            Frame* left=frames[i];
+            Frame* right=frames[j];
+            futures.push_back(std::async(&ImageSimilarityMatrix::computeMSMcell, this, left, right, maxFrameHeight));
         }
     }
 
@@ -450,7 +479,7 @@ void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& fram
     return;
 }
 
-void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& frames)
+void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight)
 {
     cerr << "building ISM matrix" <<endl;
     //create matrices and fill with zeros
@@ -476,7 +505,9 @@ void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& fra
     {
         for(uint32_t j=0; j<frames.size(); ++j)
         {
-            futures.push_back(std::async(&ImageSimilarityMatrix::computeISMcell, this, frames, i, j));
+            Frame* left = frames[i];
+            Frame* right = frames[j];
+            futures.push_back(std::async(&ImageSimilarityMatrix::computeISMcell, this, left, right, maxFrameHeight));
             //computeISMcell(frames, i, j);
         }
     }
@@ -542,6 +573,28 @@ float ImageSimilarityMatrix::mean() const//find the non-zero minimum in the imag
     return mean;
 }
 
+float ImageSimilarityMatrix::stddev() const
+{
+    float mean = this->mean();
+    float sum=0;
+    float count=0;
+    for(int i=0; i<imageSimilarityMatrix.rows; ++i)
+    {
+        for(int j=0; j<imageSimilarityMatrix.cols; ++j)
+        {
+            float val = imageSimilarityMatrix.at<float>(i,j);
+            if(val!=0 && i!=j)
+            {
+                count++;
+                sum+=pow(val-mean, 2);
+            }
+        }
+    }
+    float sd = sum/count;
+    // cout << "THE MEAN FOR THIS ISM IS: " << mean << endl;
+    return sqrt(sd);
+}
+
 float ImageSimilarityMatrix::getPathCost(vector<int> path) const//get cost for path through ISM
 {
     //check that the path is valid
@@ -565,4 +618,9 @@ float ImageSimilarityMatrix::getPathCost(vector<int> path) const//get cost for p
 uint32_t ImageSimilarityMatrix::size() const
 {
     return imageSimilarityMatrix.rows;
+}
+
+Mat ImageSimilarityMatrix::clone()
+{
+    return imageSimilarityMatrix.clone();
 }

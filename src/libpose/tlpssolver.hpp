@@ -22,7 +22,7 @@ using namespace opengm;
 #define PI 3.14159265
 
 ///define the space and the model
-class TLPSSolver: Solver
+class TLPSSolver: public Solver
 {
 
     ///define the space

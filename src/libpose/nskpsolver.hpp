@@ -28,7 +28,7 @@ using namespace cv;
 
 ///define the space and the model
 
-class NSKPSolver: Solver
+class NSKPSolver: public Solver
 {
     typedef struct SolvletScore
     {
