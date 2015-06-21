@@ -71,6 +71,8 @@ void Sequence::computeInterpolation(map<string, float> &params)
 {
     params.emplace("useDefaultScale", 1);
     params.emplace("defaultScale", 180);
+    params.emplace("interpolate2d", 0);
+    bool interpolate2d=params.at("interpolate2d");
 
     float defaultScale =  params.at("defaultScale");
     float useDefaultScale = params.at("useDefaultScale");
@@ -122,7 +124,79 @@ void Sequence::computeInterpolation(map<string, float> &params)
 
     for(uint32_t i=0; i<slices.size(); ++i)
     {
-        interpolateSlice(slices[i], params);
+        if(!interpolate2d)
+            interpolateSlice(slices[i], params);
+        else
+            interpolateSlice2D(slices[i], params);
+    }
+}
+
+vector<Frame*> Sequence::interpolateSlice2D(vector<Frame*> slice, map<string, float> params)
+{
+    params.emplace("debugLevel", 1);
+    int debugLevel = params.at("debugLevel");
+
+    //check that the slice contains a keyframe/lockframe at each end
+    assert(slice.front()->getFrametype()==LOCKFRAME || slice.front()->getFrametype()==KEYFRAME);
+    assert(slice.back()->getFrametype()==LOCKFRAME || slice.back()->getFrametype()==KEYFRAME);
+
+    for(uint32_t i=1; i<slice.size()-1; ++i)
+    {
+        assert(slice[i]->getFrametype()!=KEYFRAME && slice[i]->getFrametype()!=LOCKFRAME); //if the inbetween frames are not keyframes and lockframes
+    }
+
+    Skeleton prevSkel = slice.front()->getSkeleton();
+    Skeleton futureSkel = slice.back()->getSkeleton();
+    tree<BodyJoint> prevJointTree, futureJointTree;
+
+    prevJointTree = prevSkel.getJointTree();
+    futureJointTree = futureSkel.getJointTree();
+
+    vector<Point2f> prevJoints;
+    vector<Point2f> futureJoints;
+
+    for(uint32_t i=0; i<prevJointTree.size(); ++i)
+    {
+        prevJoints.push_back(Point2f());
+        futureJoints.push_back(Point2f());
+    }
+
+    //set prevJoints
+    for(tree<BodyJoint>::iterator jt=prevJointTree.begin(); jt!=prevJointTree.end(); ++jt)
+    {
+        prevJoints[jt->getLimbID()] = jt->getImageLocation();
+    }
+
+    //set futureJoints
+    for(tree<BodyJoint>::iterator jt=futureJointTree.begin(); jt!=futureJointTree.end(); ++jt)
+    {
+        futureJoints[jt->getLimbID()] = jt->getImageLocation();
+    }
+
+    //compute interpolation
+    for(uint32_t i=1; i<slice.size()-1; ++i)
+    {
+        Skeleton interpolatedSkeleton = prevSkel;
+        tree<BodyJoint> jointTree = interpolatedSkeleton.getJointTree();
+        for(tree<BodyJoint>::iterator jt=jointTree.begin(); jt!=jointTree.end(); ++jt)
+        {
+            jt->setImageLocation(prevJoints[jt->getLimbID()]*0.5+futureJoints[jt->getLimbID()]*0.5);
+        }
+        interpolatedSkeleton.setJointTree(jointTree);
+
+        slice[i]->setSkeleton(interpolatedSkeleton);
+
+        //frame type should be updated to interpolaion
+        Interpolation interpolatedFrame;
+        interpolatedSkeleton.infer3D(); //infer 3D from the interpolated 2D joints
+        interpolatedFrame.setSkeleton(interpolatedSkeleton);
+        interpolatedFrame.setID(slice[i]->getID());
+        interpolatedFrame.setMask(slice[i]->getMask());
+        interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
+        interpolatedFrame.setImage(slice[i]->getImage());
+
+        //delete slice[i];
+        *slice[i] = interpolatedFrame;
     }
 }
 

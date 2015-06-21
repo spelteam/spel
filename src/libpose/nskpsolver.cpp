@@ -200,6 +200,8 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             detectors[i]->train(trainingFrames, params);
         }
 
+        //@TODO: This may need to be modified to propagate not from root frame, but from parent frame
+        //but only if the solve was successful, otherwise propagate from the root frame
         for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
         {
 
@@ -211,18 +213,44 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             vector<vector<LimbLabel> > labels, tempLabels;
             vector<vector<LimbLabel> >::iterator labelPartsIter;
 
+            //check whether parent is a lockframe
+            bool parentIsLockframe=false;
+            int parentIsSolved=-1;
+            if(mstIter!=mst.begin())
+            {
+                if(frames[*mst.parent(mstIter)]->getFrametype()==LOCKFRAME || frames[*mst.parent(mstIter)]->getFrametype()==KEYFRAME)
+                    parentIsLockframe=true;
+                for(uint32_t i=0; i<allSolves.size(); ++i) //check among accepted solutions
+                {
+                    if(allSolves[i].solvlet.getFrameID()==*mst.parent(mstIter)) //if one fits, use it as prior
+                        parentIsSolved = i;
+                }
+            }
+
+            parentIsSolved=-1;
+
             Frame * lockframe = new Lockframe();
-            //Skeleton shiftedPrior = frames[frameId]->getSkeleton();
-            lockframe->setSkeleton(frames[frameId]->getSkeleton());
+
+            if(parentIsSolved!=-1) //if solved, set the prior to the solve
+                lockframe->setSkeleton(allSolves.at(parentIsSolved).solvlet.toSkeleton(frames[frameId]->getSkeleton()));
+            else if(parentIsLockframe) //if the parent of this node is a lockframe, use it as a prior
+                lockframe->setSkeleton(frames[*mst.parent(mstIter)]->getSkeleton());
+            else //otherwise use the root frame as a prior
+                lockframe->setSkeleton(frames[frameId]->getSkeleton());
+
+
             lockframe->setID(frames[*mstIter]->getID());
             lockframe->setImage(frames[*mstIter]->getImage());
             lockframe->setMask(frames[*mstIter]->getMask());
 
             //compute the shift between the frame we are propagating from and the current frame
-            Point2f shift = ism.getShift(frames[frameId]->getID(),frames[*mstIter]->getID());
-
-//                if(frameId==34)
-//                    cout << shift.x << " " << shift.y << endl;
+            Point2f shift;
+            if(parentIsSolved!=-1)
+                shift = ism.getShift(allSolves.at(parentIsSolved).solvlet.getFrameID(),frames[*mstIter]->getID());
+            else if(parentIsLockframe)
+                shift = ism.getShift(frames[*mst.parent(mstIter)]->getID(),frames[*mstIter]->getID());
+            else
+                shift = ism.getShift(frames[frameId]->getID(),frames[*mstIter]->getID());
 
             Skeleton skeleton = lockframe->getSkeleton();
 
@@ -233,12 +261,12 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             tree<BodyPart>::iterator partIter, parentPartIter;
 
             //TODO: add check for keyframe or lockframe proximity to angular search radius estimator
-            bool isBound=false;
-            //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
-            //and is the frame we are propagating from, a keyframe? (check only if we disallow bind to lockframes
-            if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
-                    (bindToLockframes || (frames[frameId]->getFrametype()==KEYFRAME))) //and whether we are actually allowed to bind
-                isBound=true;
+//            bool isBound=false;
+//            //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
+//            //and is the frame we are propagating from, a keyframe? (check only if we disallow bind to lockframes
+//            if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
+//                    (bindToLockframes || (frames[frameId]->getFrametype()==KEYFRAME))) //and whether we are actually allowed to bind
+//                isBound=true;
 
             //if so, set bool to true, and get the frame ID that we are close to
 
@@ -254,8 +282,8 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
                 float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
                 float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
 
-                if(isBound) //if we're close to the anchor, restrict the rotation range
-                    rotationRange = rotationRange*anchorBindCoeff;
+//                if(isBound) //if we're close to the anchor, restrict the rotation range
+//                    rotationRange = rotationRange*anchorBindCoeff;
 
                 partIter->setRotationSearchRange(rotationRange);
                 partIter->setSearchRadius(searchRange);
@@ -263,7 +291,11 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             }
             skeleton.setPartTree(partTree);
             lockframe->setSkeleton(skeleton);
-            frames[frameId]->setSkeleton(skeleton);
+
+            if(parentIsLockframe)
+                frames[*mst.parent(mstIter)]->setSkeleton(skeleton);
+            else
+                frames[frameId]->setSkeleton(skeleton);
 
             lockframe->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
 
@@ -480,7 +512,12 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             Solvlet solvlet(*mstIter, solutionLabels);
             SolvletScore ss;
             ss.solvlet = solvlet;
-            ss.parentFrame=frames[frameId]->getID();
+            if(parentIsSolved!=-1)
+                ss.parentFrame=allSolves.at(parentIsSolved).solvlet.getFrameID();
+            else if(parentIsLockframe)
+                ss.parentFrame=frames[*mst.parent(mstIter)]->getID();
+            else
+                ss.parentFrame=frames[frameId]->getID();
             cerr << "done solving!" << endl;
             ss.score=evaluateSolution(frames[solvlet.getFrameID()],
                     solvlet.getLabels(), params);
@@ -796,9 +833,25 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 {
     //emplace defaults
     params.emplace("treeSize", ism.size()); //no size limit
-    params.emplace("simThresh", 2.5); //set similarity as multiple of minimum, MUST be >=1
+
+    //float mean = ism.mean();
+    float sd = ism.stddev();
+    float min = ism.min();
+
+    //cout << "ISM Mean " << mean << " sd " << sd << " min " << min << endl;
+
+    //cout << "The min is " << (mean-min)/sd << " deviations away from mean. " << endl;
+    //cout << "One sd is " << sd/min << " of min." << endl;
+
+    float simThreshD = 1.0+3.5*sd/min;
+
+    //cout << "Seeting simThresh to " << simThresh << endl;
+
+    params.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
+
+    //params.emplace("mstThresh", 2.5); //set similarity as multiple of minimum, MUST be >=1
     int treeSize = params.at("treeSize");
-    float simThresh = params.at("simThresh");
+    float simThresh = params.at("mstThresh");
     vector<MinSpanningTree> frameMST;
     for(uint32_t i=0; i<ism.size(); ++i)
     {
@@ -823,7 +876,7 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 vector<Point2i> NSKPSolver::suggestKeyframes(ImageSimilarityMatrix ism, map<string, float> params)
 {
     vector<MinSpanningTree> mstVec = buildFrameMSTs(ism, params);
-    params.emplace("minKeyframeDist", 5); //don't suggest keyframes that are too close together
+    params.emplace("minKeyframeDist", 1); //don't suggest keyframes that are too close together
     int minKeyframeDist=params.at("minKeyframeDist");
     vector<vector<uint32_t> > orderedList;
     for(uint32_t i=0; i<mstVec.size(); ++i)
@@ -846,17 +899,17 @@ vector<Point2i> NSKPSolver::suggestKeyframes(ImageSimilarityMatrix ism, map<stri
     {
         //find the largest frame MST:
         uint32_t maxSize=0;
-        uint32_t idx=-1;
+        int idx=-1;
         for(uint32_t i=0; i<orderedList.size(); ++i)
         {
-            if(orderedList[i].size()> maxSize)
+            if(orderedList[i].size() > maxSize)
             {
                 idx = i;
                 maxSize = orderedList[i].size();
             }
         }
         //if there largest vector remaining is of legnth zero, stop
-        if(maxSize==1)
+        if(maxSize<=1)
             break;
 
 

@@ -67,7 +67,7 @@ int main (int argc, char **argv)
 
     //solver settings
     params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
-    params.emplace("acceptLockframeThreshold", 0.50); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+    params.emplace("acceptLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
     params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
     params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
 
@@ -98,7 +98,11 @@ int main (int argc, char **argv)
     cout << "The min is " << (mean-min)/sd << " deviations away from mean. " << endl;
     cout << "One sd is " << sd/min << " of min." << endl;
 
-    params.emplace("simThresh", 5); //set similarity as multiple of minimum, MUST be >=1
+    float simThresh = 1.0+3.5*sd/min;
+
+    cout << "Seeting mstThresh to " << simThresh << endl;
+
+    params.emplace("mstThresh", 1.0+3.5*sd/min); //set similarity as multiple of minimum, MUST be >=1
     //params.emplace("treeSize", 5); //no size limit
 
     solve = nSolver.solve(seq, params, ism);

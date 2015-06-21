@@ -26,6 +26,7 @@ public:
     
 private:
     vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
+    vector<Frame*> interpolateSlice2D(vector<Frame*> slice, map<string, float> params);
     /// detection score
     vector<Frame*> frames;
     ///sequence name

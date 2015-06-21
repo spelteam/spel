@@ -1,25 +1,21 @@
-Project: ../../../src/utils/general/testdata1/trijumpSDGT.xml
+Project: ../../../dev/src/utils/general/testdata1/trijumpSDGT.xml
 
 OutDir: solverTuner_out
 
-SolverName: NSKPSolver
+SolverName: interpolationDetect
 
-NumKeyframes: 3
-KeyframeNumbers: -1 -1 -1
+NumKeyframes: 2
+KeyframeNumbers: -1 -1
 
-TestParameter: jointCoeff 
+TestParameter: useCSdet 
 ParameterMin: 0.0 
 ParameterMax: 1.0 
 ParameterStep: 0.1
 
-BalanceParameter: imageCoeff
+BalanceParameter: useHoGdet
 
-NumOtherParams: 2
-useCSdet 0.1
-useHoGdet 1.0
-
-
-
+NumOtherParams: 1
+useSURFdet 0.0
 ---------------------------------------------------------------------------------------------
 This file defines test rules for the solverTuner module, and is required as input. 
 

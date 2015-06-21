@@ -94,6 +94,7 @@ bool LimbLabel::operator > (const LimbLabel &ll) const
 
 float LimbLabel::getAvgScore(bool bNegativeToPositive) const
 {
+  //@TODO: fix if multiple scores are added
   float sum = 0;
   uint32_t count = 0;
   for_each(scores.begin(), scores.end(), [&](Score s)

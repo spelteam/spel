@@ -64,7 +64,7 @@ bool Score::operator>(const Score &s) const
 
 bool Score::operator==(const Score &s) const
 {
-  return (this->score * this->coeff == s.getScore() * s.getCoeff());
+  return (this->score * this->coeff == s.getScore() * s.getCoeff() && this->detName==s.getDetName());
 }
 
 bool Score::operator!=(const Score &s) const

@@ -22,25 +22,19 @@ using namespace cv;
 class LimbLabel
 {
 public:
-  //TODO (Vitaliy Koshura): Need implementation
   LimbLabel();
   LimbLabel(const LimbLabel& ll);
   LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded = false);
 
   /// output labels as printable string
-  //TODO (Vitaliy Koshura): Need implementation
   string toString();
   LimbLabel & operator = (const LimbLabel &ll);
-  //TODO (Vitaliy Koshura): Need implementation
   bool operator == (const LimbLabel &ll) const;
-  //TODO (Vitaliy Koshura): Need implementation
   bool operator != (const LimbLabel &ll) const;
   bool operator < (const LimbLabel &ll) const;
   bool operator > (const LimbLabel &ll) const;
   // compute the endpoints of the limb that this label would produce
-  //TODO (Vitaliy Koshura): Need implementation
   void getEndpoints(Point2f &p0, Point2f &p1) const;
-  //TODO (Vitaliy Koshura): Need implementation
   void addScore(Score detectionScore);
   Point2f getCenter(void) const;
   ///get the label scores

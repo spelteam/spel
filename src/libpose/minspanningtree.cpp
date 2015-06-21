@@ -46,7 +46,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
     graphNodes.push_back(rootNode);
     mst.insert(imgLoc, rootNode); //insert root node
     float absoluteMin = ism.min();
-    while(mst.size() != static_cast<size_t>(treeSize) && mst.size()< static_cast<size_t>(ism.size())) //do this until the tree is complete
+    while(mst.size()<= static_cast<size_t>(treeSize) && mst.size()< static_cast<size_t>(ism.size())) //do this until the tree is complete
     {
         //cout << "in..." << endl;
         Point2i minLoc(-1,-1);
@@ -54,6 +54,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
         //for each node currently in the graph
         for(uint32_t i=0; i<graphNodes.size(); ++i)
         {
+            //find minimum connection node b not yet in graph
             for(uint32_t j=0; j<ism.size(); ++j)
             {
                 int x=graphNodes[i];
@@ -69,7 +70,7 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
                     }
                 }
             }
-            //find minimum connection node b not yet in graph
+
         }
 
         //insert minimum connection node into graph
@@ -87,14 +88,20 @@ void MinSpanningTree::build(const ImageSimilarityMatrix& ism, int rootNode, int 
             //check the path cost condition
             vector<int> path;
             path = kptree::find_path_nodes(mst, mst.begin(), imgLoc);
-            float pathCost = ism.getPathCost(path);
-            //float nodeCost = ism.at(rootNode, *imgLoc);
-            if( pathCost > absoluteMin*threshold) //stop building tree if we reach threshold
+            //float pathCost = ism.getPathCost(path);
+            float nodeCost = ism.at(*imgLoc, minLoc.y);
+//            if( pathCost > absoluteMin*threshold) //stop building tree if we reach threshold
+//                break;
+            float thresh = absoluteMin*threshold;
+            bool pass = nodeCost<thresh;
+            float diff = nodeCost-thresh;
+            if(pass) //either the minimum cost node satisfies this condition and is pushed
+            {
+                mst.append_child(imgLoc, minLoc.y);
+                graphNodes.push_back(minLoc.y);
+            } //or the condition cannot be satisfied, and the tree is completed
+            else
                 break;
-//            if(nodeCost<absoluteMin*threshold)
-//                mst.append_child(mst.begin(), imgLoc);
-            mst.append_child(imgLoc, minLoc.y);
-            graphNodes.push_back(minLoc.y);
         }
     }
 //    for(uint32_t i=0; i<ism.size(); ++i)
