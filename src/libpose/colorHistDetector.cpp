@@ -492,44 +492,44 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
 // Returns a labels vector of possible body parts position
 vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
-  const float searchDistCoeff = 0.5;
+  float searchDistCoeff = 0.5;
   const string sSearchDistCoeff = "searchDistCoeff";
 
-  const float minTheta = 90; // border for search 
+  float minTheta = 90; // border for search
   const string sMinTheta = "minTheta";
 
-  const float maxTheta = 100; // border for search 
+  float maxTheta = 100; // border for search
   const string sMaxTheta = "maxTheta";
 
-  const float stepTheta = 10; // angular step of search 
+  float stepTheta = 10; // angular step of search
   const string sStepTheta = "stepTheta";
 
-  const uint32_t uniqueLocationCandidates = 4; // limiting the choice of the solutions number for each bodypart 
+  uint32_t uniqueLocationCandidates = 4; // limiting the choice of the solutions number for each bodypart
   const string sUniqueLocationCandidates = "uniqueLocationCandidates";
 
-  const float scaleParam = 1; // scaling coefficient
+  float scaleParam = 1; // scaling coefficient
   const string sScaleParam = "scaleParam";
 
-  const float searchDistCoeffMult = 1.25;
+  float searchDistCoeffMult = 1.25;
   const string sSearchDistCoeffMult = "searchDistCoeffMult";
 
-  const float useCSdet = 1.0f;
+  float useCSdet = 1.0f;
   const string sUseCSdet = "useCSdet";
 
 #ifdef DEBUG
-  const uint8_t debugLevel = 5;
+  uint8_t debugLevel = 5;
 #else
-  const uint8_t debugLevel = 1;
+  uint8_t debugLevel = 1;
 #endif // DEBUG
-  const string sDebugLevel = "debugLevel";
+  string sDebugLevel = "debugLevel";
 
-  const float rotationThreshold = 0.025f;
+  float rotationThreshold = 0.025f;
   const string sRotationThreshold = "rotationThreshold";
 
-  const float isWeakTreshhold = 0.1f;
+  float isWeakTreshhold = 0.1f;
   const string sIsWeakTreshhold = "isWeakTreshhold";
 
-  const float searchStepCoeff = 0.2f;
+  float searchStepCoeff = 0.2f;
   const string sSearchStepCoeff = "searchStepCoeff";
 
   // first we need to check all used params
@@ -546,6 +546,21 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   params.emplace(sIsWeakTreshhold, isWeakTreshhold);
   params.emplace(sSearchStepCoeff, searchStepCoeff);
 
+  //now set actual param values
+  useCSdet = params.at(sUseCSdet);
+  searchDistCoeff = params.at(sSearchDistCoeff);
+
+  minTheta = params.at(sMinTheta);
+  maxTheta = params.at(sMaxTheta);
+  stepTheta = params.at(sStepTheta);
+  uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
+  scaleParam = params.at(sScaleParam);
+  searchDistCoeffMult = params.at(sSearchDistCoeffMult);
+  useCSdet = params.at(sUseCSdet);
+  debugLevel = params.at(sDebugLevel);
+  rotationThreshold = params.at(sRotationThreshold);
+  isWeakTreshhold = params.at(sIsWeakTreshhold);
+  searchStepCoeff = params.at(sSearchStepCoeff);
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
   int originalSize = frame->getImage().rows;
@@ -1472,7 +1487,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float inMaskSupportScore = 0;
   pixDistAvg /= (float)pixDistNum;  // average "distributions"
   float inMaskSuppWeight = 0.5;
-  if (partPixelColours.size() > 0)
+  if (partPixelColours.size() > 0 && totalPixelLabelScore > 0 && totalPixels>10)
   {
     supportScore = (float)totalPixelLabelScore / (float)totalPixels;
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;

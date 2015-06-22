@@ -104,9 +104,6 @@ vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> dete
 
                 for(uint32_t k=0; k<scores.size();++k)
                 {
-                    if(scores[k].getScore()==0)
-                        cout << "WAOH" << endl;
-
                     if(scores[k].getDetName()==hogName)
                         hogFound=true;
                     else if(scores[k].getDetName()==csName)
@@ -114,9 +111,6 @@ vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> dete
                     else if(scores[k].getDetName()==surfName)
                         surfFound=true;
                 }
-
-//                if(scores.size()<2)
-//                    cout << "WAOH" << endl;
 
                 if(!surfFound && useSURF)
                 {
@@ -134,13 +128,12 @@ vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> dete
                     Score sc(1.0, hogName, useHoG);
                     tempLabels[i][j].addScore(sc);
                 }
+
             }
+            sort(tempLabels[i].begin(), tempLabels[i].end());
         }
 
         labels = tempLabels;
-
-        sort(labels.begin(), labels.end());
-
         allLabels.push_back(labels);
     }
     return allLabels;
@@ -253,11 +246,11 @@ vector<vector<vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detect
                 }
 
             }
+            sort(tempLabels[i].begin(), tempLabels[i].end());
         }
 
         labels = tempLabels;
 
-        sort(labels.begin(), labels.end());
         allLabels.push_back(labels);
     }
     return allLabels;
@@ -759,6 +752,11 @@ int main (int argc, char **argv)
                             surfScore=1.0;
 
                         finalScore=csScore*useCS+hogScore*useHoG+surfScore*useSURF;
+                        float avgScore = partLabels[e].getAvgScore();
+
+//                        if(row==15)
+//                            partLabels[0] > partLabels[1];
+
 
                         //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
                         //finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);

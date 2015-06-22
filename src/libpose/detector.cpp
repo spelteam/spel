@@ -249,6 +249,8 @@ vector <vector <LimbLabel>> Detector::merge(vector <vector <LimbLabel>> first, v
                 {
                    if(m->first==scores[i].getDetName()) //name
                    {
+                       if(scores[i].getScore()==-1) //change all -1 to 1
+                           scores[i].setScore(1.0);
                        detFound=true;
                        break;
                    }

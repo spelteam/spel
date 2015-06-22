@@ -393,50 +393,50 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
 vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
-  const float searchDistCoeff = 0.5;
+  float searchDistCoeff = 0.5;
   const string sSearchDistCoeff = "searchDistCoeff";
 
-  const float minTheta = 90;
+  float minTheta = 90;
   const string sMinTheta = "minTheta";
 
-  const float maxTheta = 100;
+  float maxTheta = 100;
   const string sMaxTheta = "maxTheta";
 
-  const float stepTheta = 10;
+  float stepTheta = 10;
   const string sStepTheta = "stepTheta";
 
-  const uint32_t uniqueLocationCandidates = 4;
+  uint32_t uniqueLocationCandidates = 4;
   const string sUniqueLocationCandidates = "uniqueLocationCandidates";
 
-  const float scaleParam = 1;
+  float scaleParam = 1;
   const string sScaleParam = "scaleParam";
 
-  const float searchDistCoeffMult = 1.25;
+  float searchDistCoeffMult = 1.25;
   const string sSearchDistCoeffMult = "searchDistCoeffMult";
 
-  const float useHoGdet = 1.0f;
+  float useHoGdet = 1.0f;
   const string sUseHoGdet = "useHoGdet";
 
 #ifdef DEBUG
-  const uint8_t debugLevel = 5;
+  uint8_t debugLevel = 5;
 #else
-  const uint8_t debugLevel = 1;
+  uint8_t debugLevel = 1;
 #endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
-  const float rotationThreshold = 0.025f;
+  float rotationThreshold = 0.025f;
   const string sRotationThreshold = "rotationThreshold";
 
-  const float isWeakTreshhold = 0.1f;
+  float isWeakTreshhold = 0.1f;
   const string sIsWeakTreshhold = "isWeakTreshhold";
 
-  const bool grayImages = false;
+  bool grayImages = false;
   const string sGrayImages = "grayImages";
 
-  const float searchStepCoeff = 0.2f;
+  float searchStepCoeff = 0.2f;
   const string sSearchStepCoeff = "searchStepCoeff";
 
-  // first we need to check all used params
+  // first we need to set all used params
   params.emplace(sSearchDistCoeff, searchDistCoeff);
   params.emplace(sMinTheta, minTheta);
   params.emplace(sMaxTheta, maxTheta);
@@ -450,6 +450,21 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
   params.emplace(sIsWeakTreshhold, isWeakTreshhold);
   params.emplace(sGrayImages, grayImages == true ? 1.0f : 0.0f);
   params.emplace(sSearchStepCoeff, searchStepCoeff);
+
+  //now set actual param values
+  searchDistCoeff = params.at(sSearchDistCoeff);
+  minTheta = params.at(sMinTheta);
+  maxTheta = params.at(sMaxTheta);
+  stepTheta = params.at(sStepTheta);
+  uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
+  scaleParam = params.at(sScaleParam);
+  searchDistCoeffMult = params.at(sSearchDistCoeffMult);
+  useHoGdet = params.at(sUseHoGdet);
+  debugLevel = params.at(sDebugLevel);
+  rotationThreshold = params.at(sRotationThreshold);
+  isWeakTreshhold = params.at(sIsWeakTreshhold);
+  grayImages = params.at(sGrayImages);
+  searchStepCoeff = params.at(sSearchStepCoeff);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 

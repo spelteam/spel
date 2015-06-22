@@ -96,13 +96,15 @@ float LimbLabel::getAvgScore(bool bNegativeToPositive) const
 {
   //@TODO: fix if multiple scores are added
   float sum = 0;
-  uint32_t count = 0;
+  float count = 0;
   for_each(scores.begin(), scores.end(), [&](Score s)
   {
     count++;
     sum += (bNegativeToPositive ? abs(s.getScore()) : s.getScore()) * s.getCoeff();
   });
-  return ((count > 0) ? (sum / count) : 0.0f);
+
+  //float result = ((count > 0) ? (sum / count) : 0.0f);
+  return sum;
 }
 
 void LimbLabel::getEndpoints(Point2f &p0, Point2f &p1) const

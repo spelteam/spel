@@ -709,7 +709,7 @@ float NSKPSolver::computeScoreCost(const LimbLabel& label, map<string, float> pa
     for(uint32_t i=0; i<scores.size(); ++i)
     {
         float score = scores[i].getScore();
-        if(scores[i].getScore()==-1)//if score is -1, set it to 1
+        if(scores[i].getScore()==-1.0)//if score is -1, set it to 1
         {
             score=1.0; //set a high cost for invalid scores
         }
