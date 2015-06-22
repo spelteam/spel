@@ -198,6 +198,7 @@ vector<Frame*> Sequence::interpolateSlice2D(vector<Frame*> slice, map<string, fl
         //delete slice[i];
         *slice[i] = interpolatedFrame;
     }
+    return slice;
 }
 
 vector<Frame*> Sequence::interpolateSlice(vector<Frame*> slice, map<string, float> params)
