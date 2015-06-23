@@ -305,8 +305,7 @@ int main (int argc, char **argv)
         return -1;
     }
 
-    /* Generate a new random seed from system time - do this once in your constructor */
-    srand(time(0));
+    auto startSetup = chrono::steady_clock::now();
 
     //do file parsing
     ifstream in(argv[1]);
@@ -469,21 +468,51 @@ int main (int argc, char **argv)
     float ismSd = ism.stddev();
     float ismMin = ism.min();
 
+    cout << "ISM Mean " << ismMean << " sd " << ismSd << " min " << ismMin << endl;
+
+    cout << "The min is " << (ismMean-ismMin)/ismSd << " deviations away from mean. " << endl;
+    cout << "One sd is " << ismSd/ismMin << " of min." << endl;
+
+    auto endSetup = chrono::steady_clock::now();
+
+    // Store the time difference between start and end
+    auto diffSetup = endSetup - startSetup;
+
+    cout << "Set-up finished in " << chrono::duration <double, milli> (diffSetup).count()  << " ms" << endl;
+
+
+//    for(uint32_t frameId=0; frameId<frames.size(); ++frameId)
+//    {
+//        int captureIndex=frameId;
+//        //[&] { a.foo(100); }
+//        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
+//        futures.push_back(std::async([=, &ignore]()->vector<NSKPSolver::SolvletScore>
+//        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore);}));
+//    }
+
+//    vector<vector<SolvletScore> > temp;
+//    for(auto &e : futures) {;
+//        try {
+//           e.wait();
+//           temp.push_back(e.get());
+//           //std::cout << "You entered: " << x << '\n';
+//         }
+//         catch (std::exception&) {
+//           std::cout << "[exception caught]";
+//         }
+////         if(solves.size()>0)
+////             allSolves[solves[0].solvlet.getFrameID()]=solves;
+//    }
+
+
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
+        cout << paramName << " at " << param << " started..." << endl;
+        auto start = chrono::steady_clock::now();
+
         map <string, float> params=defaultParams; //transfer the default params
 
         float simThreshD = 1.0+3.0*ismSd/ismMin;
-
-        if(param == param_min) //only print this once, since there i just one ISM
-        {
-            cout << "ISM Mean " << ismMean << " sd " << ismSd << " min " << ismMin << endl;
-
-            cout << "The min is " << (ismMean-ismMin)/ismSd << " deviations away from mean. " << endl;
-            cout << "One sd is " << ismSd/ismMin << " of min." << endl;
-
-            cout << "Setting simThresh to " << simThreshD << endl;
-        }
 
         params.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
 
@@ -579,13 +608,16 @@ int main (int argc, char **argv)
 
         //the new frame set has been generated, and can be used for solving
 
-        cout << "Detecting with " << paramName << " at " << param << endl;
-        cout << "Keyframes: " << " ";
-        for(uint32_t i=0; i<actualKeyframes.size();++i)
+        if(param==param_min)
         {
-            cout << actualKeyframes[i] << " ";
+            cout << "Keyframes: " << " ";
+
+            for(uint32_t i=0; i<actualKeyframes.size();++i)
+            {
+                cout << actualKeyframes[i] << " ";
+            }
+            cout << endl;
         }
-        cout << endl;
 
         if(paramName=="gaussianNoise") //if we're testing gaussian noise
         {
@@ -659,10 +691,18 @@ int main (int argc, char **argv)
         }
         //trimmed.push_back(temp[0]);
 
-        cout << "Training detector..." <<endl;
+        auto endSeqBuild = chrono::steady_clock::now();
+
+        // Store the time difference between start and end
+        auto diffSeqBuild = endSeqBuild - start;
+
+        cout << "\tSequence built in " << chrono::duration <double, milli> (diffSeqBuild).count()  << " ms" << endl;
+
+        cout << "\tTraining detector..." <<endl;
 
         if(detectorName=="interpolationDetect") //then we are just doing a detector test!
         {
+
             vector<Frame*> trainingFrames;
             trainingFrames.push_back(trimmed[0]);
             trainingFrames.push_back(trimmed[trimmed.size()-1]);
@@ -670,8 +710,22 @@ int main (int argc, char **argv)
             for(uint32_t i=0; i<detectors.size(); ++i)
                 detectors[i]->train(trainingFrames, params);
 
-            cout << "Detecting..." << endl;
+            auto endTrain = chrono::steady_clock::now();
+
+            // Store the time difference between start and end
+            auto diffTrain = endTrain - endSeqBuild;
+
+            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffTrain).count()  << " ms" << endl;
+
+            cout << "\tDetecting..." << endl;
             labels = doInterpolationDetect(detectors, trimmed, params);
+
+            auto endDetect = chrono::steady_clock::now();
+
+            // Store the time difference between start and end
+            auto diffDetect = endDetect - endTrain;
+
+            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
         }
 
         else if(detectorName=="propagationDetect")
@@ -684,8 +738,22 @@ int main (int argc, char **argv)
             for(uint32_t i=0; i<detectors.size(); ++i)
                 detectors[i]->train(trainingFrames, params);
 
-            cout << "Detecting..." << endl;
+            auto endTrain = chrono::steady_clock::now();
+
+            // Store the time difference between start and end
+            auto diffTrain = endTrain - endSeqBuild;
+
+            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffTrain).count()  << " ms" << endl;
+
+            cout << "\tDetecting..." << endl;
             labels = doPropagationDetect(detectors,trimmed, ism, params);
+
+            auto endDetect = chrono::steady_clock::now();
+
+            // Store the time difference between start and end
+            auto diffDetect = endDetect - endTrain;
+
+            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
         }
 
         out << param << endl;
@@ -789,7 +857,12 @@ int main (int argc, char **argv)
         }
         vFrames.clear();
 
-        cout << "Param value " << param << " finished." << endl;
+        auto end = chrono::steady_clock::now();
+
+        // Store the time difference between start and end
+        auto diff = end - start;
+
+        cout << paramName << " at " << param << " finished in " << chrono::duration <double, milli> (diff).count()  << " ms" << endl;
     }
     out.close();
 

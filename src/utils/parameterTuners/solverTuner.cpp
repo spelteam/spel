@@ -8,7 +8,7 @@
 #include "hogDetector.hpp"
 #include <string>
 #include <cstdlib>
-#include <ctime>
+#include <chrono>
 #ifdef WINDOWS
 #include <random>
 #endif
@@ -346,8 +346,7 @@ int main (int argc, char **argv)
         return -1;
     }
 
-    /* Generate a new random seed from system time - do this once in your constructor */
-    srand(time(0));
+    auto startSetup = chrono::steady_clock::now();
 
     //do file parsing
     ifstream in(argv[1]);
@@ -525,8 +524,19 @@ int main (int argc, char **argv)
     //now print this matrix to file
     //paralellize this
 
+
+    auto endSetup = chrono::steady_clock::now();
+
+    // Store the time difference between start and end
+    auto diffSetup = endSetup - startSetup;
+
+    cout << " Set-up finished in " << chrono::duration <double, milli> (diffSetup).count()  << " ms" << endl;
+
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
+
+        auto start = chrono::steady_clock::now();
+
         vector<int> actualKeyframes;
         //build the sequence based on
         vector <Frame*> vFrames;
@@ -672,6 +682,13 @@ int main (int argc, char **argv)
         NSKPSolver nSolver;
         TLPSSolver tSolver;
 
+        auto endSeqBuild = chrono::steady_clock::now();
+
+        // Store the time difference between start and end
+        auto diffSeqBuild = endSeqBuild - start;
+
+        cout << "Sequence built in " << chrono::duration <double, milli> (diffSeqBuild).count()  << " ms" << endl;
+
         vector<vector<vector<LimbLabel> > > labels; //used for detetor tuning
         vector<Frame*> trimmed; //trim the sequence by removing starting and trailing non-keyframes
         vector<Solvlet> fSolve; //used for solver tuning
@@ -706,192 +723,37 @@ int main (int argc, char **argv)
             } while(finalSolve.size()>prevSolveSize);
             fSolve = finalSolve;
         }
-        else
-        {
-            vector<Detector*> detectors;
-            if(params.at("useCSdet"))
-            {
-                Detector * d = new ColorHistDetector();
-                detectors.push_back(d);
-            }
-            if(params.at("useHoGdet"))
-            {
-                Detector * d = new HogDetector();
-                detectors.push_back(d);
-            }
-            if(params.at("useSURFdet"))
-            {
-                Detector * d = new SurfDetector();
-                detectors.push_back(d);
-            }
-
-            bool firstKeyframeSeen = false;
-
-            vector<Frame*> temp;
-            for(uint32_t i=0; i<vFrames.size(); ++i)
-            {
-                if(vFrames[i]->getFrametype()==KEYFRAME)
-                {
-                    //set the flag to true
-                    firstKeyframeSeen=true;
-
-                    //push back this keyframe at the end
-                    temp.push_back(vFrames[i]);
-
-                    //go through all temp and push them back
-                    for(uint32_t j=0; j<temp.size(); ++j)
-                        trimmed.push_back(temp[j]);
-                    //clear out temp
-                    temp.clear();
-                }
-                else if(firstKeyframeSeen) //if not keyframe, just push to temp vector
-                {
-                    temp.push_back(vFrames[i]);
-                }
-            }
-            //trimmed.push_back(temp[0]);
-
-            if(solverName=="interpolationDetect") //then we are just doing a detector test!
-            {
-                vector<Frame*> trainingFrames;
-                trainingFrames.push_back(trimmed[0]);
-                trainingFrames.push_back(trimmed[trimmed.size()-1]);
-                //train detectors
-                for(uint32_t i=0; i<detectors.size(); ++i)
-                    detectors[i]->train(trainingFrames, params);
-
-                labels = doInterpolationDetect(detectors, trimmed, params);
-            }
-
-            else if(solverName=="propagationDetect")
-            {
-                //train detectors
-                vector<Frame*> trainingFrames;
-                trainingFrames.push_back(trimmed[0]);
-                trainingFrames.push_back(trimmed[trimmed.size()-1]);
-                //train detectors
-                for(uint32_t i=0; i<detectors.size(); ++i)
-                    detectors[i]->train(trainingFrames, params);
-
-                labels = doPropagationDetect(detectors,trimmed, ism, params);
-            }
-        }
 
         //now do the error solve and file output logic
-        if(solverName=="TLPSSolver" || solverName=="NSKPSolver" || solverName=="hybridSolver")
+
+        Mat errors; //used for storing errors
+        if(fSolve.size()>0)
+            errors = computeErrorToGT(fSolve, gtFrames);
+
+        out << param << endl;
+        out << "{" << endl;
+
+        for(uint32_t row=0; row<errors.rows; ++row)
         {
-            Mat errors; //used for storing errors
-            if(fSolve.size()>0)
-                errors = computeErrorToGT(fSolve, gtFrames);
-
-            out << param << endl;
-            out << "{" << endl;
-
-            for(uint32_t row=0; row<errors.rows; ++row)
+            //this is a row in the output file
+            //frameID p1Value p2Value p3Value .. pNValue limb1RMS limb2RMS limb3RMS limb4RMS ... limbKRMS meanRMS evalScore
+            out << fSolve[row].getFrameID() << " ";
+            for(uint32_t col=0; col<errors.cols; ++col)
             {
-                //this is a row in the output file
-                //frameID p1Value p2Value p3Value .. pNValue limb1RMS limb2RMS limb3RMS limb4RMS ... limbKRMS meanRMS evalScore
-                out << fSolve[row].getFrameID() << " ";
-                for(uint32_t col=0; col<errors.cols; ++col)
-                {
-                    //this is an item of the row
-                    out << errors.at<float>(row,col) << " ";
-                }
-                out << endl; //newline at the end of the block
-
-                Frame* frame = seq.getFrames()[fSolve[row].getFrameID()];
-                Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-
-                gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 1);
+                //this is an item of the row
+                out << errors.at<float>(row,col) << " ";
             }
+            out << endl; //newline at the end of the block
 
-            out << "}" << endl;
-            //release errors
-            errors.release();
+            Frame* frame = seq.getFrames()[fSolve[row].getFrameID()];
+            Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+
+            gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 1);
         }
-        else if(solverName=="interpolationDetect" || solverName=="propagationDetect")
-        {
 
-            out << param << endl;
-            out << "{" << endl;
-            for(uint32_t l=0; l< labels.size(); ++l)
-            {
-                out << "\t" << trimmed[l]->getID() << endl;
-                out << "\t[" << endl;
-                //for every frame
-                vector<vector<LimbLabel> > frameLabels = labels[l]; //frame labels
-                vector<vector<float> > frameErrors; //frame errors
-                frameErrors = computeLabelErrorStatToGT(frameLabels, gtFrames[l]);
-
-                for(uint32_t row=0; row<frameErrors.size(); ++row)
-                {
-                    vector<LimbLabel> partLabels = frameLabels[row];
-                    if(partLabels.size()>0)
-                    {
-                        out << "\t\t" << partLabels[0].getLimbID() << endl;
-                        out << "\t\t(" << endl;
-                        vector<float> partErrors = frameErrors[row]; //errors for a part
-
-                        for(uint32_t e=0; e<partErrors.size(); ++e)
-                        {
-                            //this is a row in the output file
-                            //rank labelScore labelError
-
-                            string hogName = "18500";
-                            string csName = "4409412";
-                            string surfName = "21316";
-
-                            vector<Score> scores = partLabels[e].getScores();
-
-                            float useHoG = params.at("useHoGdet");
-                            float useCS = params.at("useCSdet");
-                            float useSURF = params.at("useSURFdet");
-
-                            //compute the weighted sum of scores
-                            float finalScore=0;
-                            bool hogFound=false;
-                            bool csFound=false;
-                            bool surfFound=false;
-                            for(uint32_t i=0; i<scores.size(); ++i)
-                            {
-                                float score = scores[i].getScore();
-                                if(scores[i].getScore()==-1)//if score is -1, set it to 1
-                                {
-                                    score=1.0; //set a high cost for invalid scores
-                                }
-                                if(scores[i].getDetName()==hogName)
-                                {
-                                    finalScore = finalScore+score*useHoG;
-                                    hogFound=true;
-                                }
-                                else if(scores[i].getDetName()==csName)
-                                {
-                                    finalScore = finalScore+score*useCS;
-                                    csFound=true;
-                                }
-                                else if(scores[i].getDetName()==surfName)
-                                {
-                                    finalScore = finalScore+score*useSURF;
-                                    surfFound=true;
-                                }
-                            }
-
-                            //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
-                            finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);
-
-                            out << "\t\t\t" << e << " " << finalScore << " " << partErrors[e] << endl;
-                        }
-
-                        out << "\t\t)" << endl;
-                    }
-
-                }
-
-                out << "\t]" << endl;
-            }
-            out << "}" << endl;
-
-        }
+        out << "}" << endl;
+        //release errors
+        errors.release();
 
         //delete sequence
         for(uint32_t i=0; i<vFrames.size(); ++i)
@@ -900,7 +762,12 @@ int main (int argc, char **argv)
         }
         vFrames.clear();
 
-        cout << "Param value " << param << " finished." << endl;
+        auto end = chrono::steady_clock::now();
+
+        // Store the time difference between start and end
+        auto diff = end - start;
+
+        cout << paramName << " at " << param << " finished in " << chrono::duration <double, milli> (diff).count()  << " ms" << endl;
     }
 
     out.close();
