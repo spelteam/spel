@@ -106,7 +106,7 @@ dx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
 dx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
-ax = fig.add_subplot(111, projection='3d')
+ax = fig.add_subplot(111)#, projection='2d')
 ax.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 ax.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
@@ -124,7 +124,14 @@ for i in range(numParams):
 
 	#print 'NUM FRAMES:'
 	#print numFrames
+
+
+	x = []
+	y = []
+	z = []
+
 	for j in range(numFrames):
+
 
 		numParts = len(result[i][1][j][1])
 		
@@ -142,14 +149,8 @@ for i in range(numParams):
 			col = "#%06x" % random.randint(0,0xFFFFFF)
 			minError=1000000000
 			minIndex=-1.0
-			x = []
-			y = []
-			z = []
+
 			for l in range(numLabels):
-				#print int(result[i][1][j][1][k][1][l][0])
-				x.append(float(result[i][1][j][1][k][1][l][0]))
-				y.append(float(result[i][1][j][1][k][1][l][2]))
-				z.append(float(result[i][1][j][1][k][1][l][1]))
 				
 				if float(result[i][1][j][1][k][1][l][2]) < minError:
 					minError = float(result[i][1][j][1][k][1][l][2])
@@ -158,21 +159,34 @@ for i in range(numParams):
 			avgMinIndex+=minIndex
 			
 
-			#dx.scatter(x,y, z, marker='o', s=15, color=col, alpha=1.0) #draw each label
-			#print k
-			#break
+
 		avgMinIndex=float(avgMinIndex)/float(numParts)
 
 		print avgMinIndex
-		ax.scatter(float(result[i][0]), int(result[i][1][j][0]), avgMinIndex, marker='o', s=15, color=pcol, alpha=1.0) #draw min ranks
+
+		#print int(result[i][1][j][1][k][1][l][0])
+		x.append(float(result[i][0]))
+		y.append(int(result[i][1][j][0]))
+		z.append(avgMinIndex)
+
+		#ax.scatter(float(result[i][0]), int(result[i][1][j][0]), avgMinIndex, marker='o', s=15, color=pcol, alpha=1.0) #draw min ranks
+		ax.scatter(int(result[i][1][j][0]), avgMinIndex, marker='o', s=15, color=pcol, alpha=1.0) #draw min ranks
+	#ax.plot(x, y, z, color=pcol, alpha=1.0) #draw min ranks
+	ax.plot(y, z, color=pcol, alpha=1.0, label=str(result[i][0])) #draw min ranks
+
 
 dx.set_xlabel('Label Rank', fontsize=35)
 dx.set_ylabel('RMS Error (pixel^2)', fontsize=35)
 dx.set_zlabel('Detector Score', fontsize=35)
 
-ax.set_xlabel('Param Value', fontsize=35)
-ax.set_ylabel('Frame Number', fontsize=35)
-ax.set_zlabel('Avg Min Index', fontsize=35)
+ax.set_xlabel('Frame Number', fontsize=35)
+ax.set_ylabel('Avg. Min Index', fontsize=35)
+#ax.set_zlabel('Avg Min Index', fontsize=35)
+
+handles, labels = ax.get_legend_handles_labels()
+ax.legend(handles, labels)
+ax.grid()
+ax.legend()
 
 
 
