@@ -465,26 +465,29 @@ int main (int argc, char **argv)
     //now print this matrix to file
     //paralellize this
 
+    float ismMean = ism.mean();
+    float ismSd = ism.stddev();
+    float ismMin = ism.min();
+
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
-
         map <string, float> params=defaultParams; //transfer the default params
-
-        float ismMean = ism.mean();
-        float ismSd = ism.stddev();
-        float ismMin = ism.min();
-
-        cout << "ISM Mean " << ismMean << " sd " << ismSd << " min " << ismMin << endl;
-
-        cout << "The min is " << (ismMean-ismMin)/ismSd << " deviations away from mean. " << endl;
-        cout << "One sd is " << ismSd/ismMin << " of min." << endl;
 
         float simThreshD = 1.0+3.0*ismSd/ismMin;
 
-        cout << "Seeting simThresh to " << simThreshD << endl;
+        if(param == param_min) //only print this once, since there i just one ISM
+        {
+            cout << "ISM Mean " << ismMean << " sd " << ismSd << " min " << ismMin << endl;
+
+            cout << "The min is " << (ismMean-ismMin)/ismSd << " deviations away from mean. " << endl;
+            cout << "One sd is " << ismSd/ismMin << " of min." << endl;
+
+            cout << "Setting simThresh to " << simThreshD << endl;
+        }
 
         params.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
 
+        cout << "Creating test sequence..." << endl;
         vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
 
         vector<int> actualKeyframes;
@@ -576,7 +579,7 @@ int main (int argc, char **argv)
 
         //the new frame set has been generated, and can be used for solving
 
-        cout << "Solving with " << paramName << " at " << param << endl;
+        cout << "Detecting with " << paramName << " at " << param << endl;
         cout << "Keyframes: " << " ";
         for(uint32_t i=0; i<actualKeyframes.size();++i)
         {
@@ -588,8 +591,6 @@ int main (int argc, char **argv)
         {
             addKeyframeNoise(vFrames, mean, sd, max); //mean = min, sd = step, max = max
         }
-
-
 
         //emplace general defaults
         params.emplace(paramName, param); //emplace the param we're testing
@@ -658,6 +659,8 @@ int main (int argc, char **argv)
         }
         //trimmed.push_back(temp[0]);
 
+        cout << "Training detector..." <<endl;
+
         if(detectorName=="interpolationDetect") //then we are just doing a detector test!
         {
             vector<Frame*> trainingFrames;
@@ -667,6 +670,7 @@ int main (int argc, char **argv)
             for(uint32_t i=0; i<detectors.size(); ++i)
                 detectors[i]->train(trainingFrames, params);
 
+            cout << "Detecting..." << endl;
             labels = doInterpolationDetect(detectors, trimmed, params);
         }
 
@@ -680,6 +684,7 @@ int main (int argc, char **argv)
             for(uint32_t i=0; i<detectors.size(); ++i)
                 detectors[i]->train(trainingFrames, params);
 
+            cout << "Detecting..." << endl;
             labels = doPropagationDetect(detectors,trimmed, ism, params);
         }
 
