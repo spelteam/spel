@@ -41,6 +41,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
     Mat image(sequence.getFrames()[0]->getImage());
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
+    params.emplace("temporalWindowSize", 0); //0 for unlimited window size
 
     //detector enablers
     params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
@@ -71,6 +72,18 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
     //solver eval parameters
     params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
+    vector<Solvlet> solution;
+    //call the new function
+    if(params.at("temporalWindowSize")==0)
+        solution = solveGlobal(sequence, params);
+    else
+        solution = solveWindowed(sequence, params);
+
+    return solution;
+}
+
+vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> params) //inherited virtual
+{
     float baseRotationStep = params.at("baseRotationStep");
 
     float partShiftCoeff = params.at("partShiftCoeff");
@@ -93,6 +106,8 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
     if(debugLevel>=1)
         cout << "Solving slices..." << endl;
+
+
     for(uint32_t sliceNumber=0; sliceNumber<slices.size(); ++sliceNumber)
     {		//for every slice, build a factor grph
         if(debugLevel>=1)
@@ -524,6 +539,28 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
     sequence.setFrames(frames);
     return retSolve;
+}
+
+vector<Solvlet> TLPSSolver::solveWindowed(Sequence &sequence, map<string, float> params) //inherited virtual
+{
+
+    int tempWindowSize = params.at("temporalWindowSize");
+    float baseRotationStep = params.at("baseRotationStep");
+
+    float partShiftCoeff = params.at("partShiftCoeff");
+    float partRotationCoeff = params.at("partRotationCoeff");
+
+    float useHoG = params.at("useHoGdet");
+    float useCS = params.at("useCSdet");
+    float useSURF = params.at("useSURFdet");
+    uint32_t debugLevel = params.at("debugLevel");
+    //first slice up the sequences
+
+    vector<Solvlet> solution;
+
+    //set solution
+
+    return solution;
 }
 
 float TLPSSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params)

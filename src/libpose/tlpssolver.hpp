@@ -49,6 +49,9 @@ public:
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
 private:
 
+    vector<Solvlet> solveWindowed(Sequence &sequence, map<string, float> params); //inherited virtual
+    vector<Solvlet> solveGlobal(Sequence &sequence, map<string, float> params); //inherited virtual
+
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params);
 
     int findFrameIndexById(int id, vector<Frame*> frames);

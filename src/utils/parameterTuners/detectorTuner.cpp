@@ -784,8 +784,11 @@ int main (int argc, char **argv)
         }
         vFrames.clear();
 
+        cout << "Param value " << param << " finished." << endl;
     }
     out.close();
+
+    cout << "Tuning finished, terminating. " << endl;
 
     return 0;
 }
