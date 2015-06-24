@@ -725,7 +725,7 @@ int main (int argc, char **argv)
             // Store the time difference between start and end
             auto diffDetect = endDetect - endTrain;
 
-            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
+            cout << "\tDetections completed in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
         }
 
         else if(detectorName=="propagationDetect")
@@ -753,7 +753,7 @@ int main (int argc, char **argv)
             // Store the time difference between start and end
             auto diffDetect = endDetect - endTrain;
 
-            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
+            cout << "\tDetections completed in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
         }
 
         out << param << endl;

@@ -535,6 +535,12 @@ int main (int argc, char **argv)
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
 
+        int maxKeyframes=INT_MAX;
+        if(paramName=="numKeyframes")
+        {
+
+        }
+
         auto start = chrono::steady_clock::now();
 
         vector<int> actualKeyframes;
@@ -564,6 +570,8 @@ int main (int argc, char **argv)
 
                 actualKeyframes.push_back(frameID);
             }
+            if(actualKeyframes.size()>=maxKeyframes)
+                break; //sot adding keyuframes if we're at max, during the keyframe numbers test
         }
 
         //insert the automatically suggested keyframes, if any
@@ -604,6 +612,8 @@ int main (int argc, char **argv)
                     }
                 }
             }
+            if(actualKeyframes.size()>=maxKeyframes)
+                break; //sot adding keyuframes if we're at max, during the keyframe numbers test
         }
 
         //fill in the rest with interpolation frames
@@ -653,7 +663,7 @@ int main (int argc, char **argv)
 
         //detector settings
         params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
-        params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+        params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
         params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
@@ -723,6 +733,13 @@ int main (int argc, char **argv)
             } while(finalSolve.size()>prevSolveSize);
             fSolve = finalSolve;
         }
+
+        auto endSolve = chrono::steady_clock::now();
+
+        // Store the time difference between start and end
+        auto diffSolve = endSolve - endSeqBuild;
+
+        cout << "Squence solved in " << chrono::duration <double, milli> (diffSolve).count()  << " ms" << endl;
 
         //now do the error solve and file output logic
 
