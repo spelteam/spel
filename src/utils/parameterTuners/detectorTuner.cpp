@@ -394,7 +394,7 @@ int main (int argc, char **argv)
     vector <Frame*> gtFrames = gtLoader.getFrames(); //the ground truth frames to compare against
 
     ImageSimilarityMatrix ism;
-    string ismFile(gtLoader.getProjectTitle()+".ism");
+    string ismFile("ism/"+gtLoader.getProjectTitle()+".ism");
     if(!ism.read(ismFile))
     {
         ism.buildImageSimilarityMatrix(gtLoader.getFrames());
@@ -481,29 +481,9 @@ int main (int argc, char **argv)
     cout << "Set-up finished in " << chrono::duration <double, milli> (diffSetup).count()  << " ms" << endl;
 
 
-//    for(uint32_t frameId=0; frameId<frames.size(); ++frameId)
-//    {
-//        int captureIndex=frameId;
-//        //[&] { a.foo(100); }
-//        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
-//        futures.push_back(std::async([=, &ignore]()->vector<NSKPSolver::SolvletScore>
-//        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore);}));
-//    }
-
-//    vector<vector<SolvletScore> > temp;
-//    for(auto &e : futures) {;
-//        try {
-//           e.wait();
-//           temp.push_back(e.get());
-//           //std::cout << "You entered: " << x << '\n';
-//         }
-//         catch (std::exception&) {
-//           std::cout << "[exception caught]";
-//         }
-////         if(solves.size()>0)
-////             allSolves[solves[0].solvlet.getFrameID()]=solves;
-//    }
-
+    defaultParams.emplace("useCSdetMult", 1.0);
+    defaultParams.emplace("useHoGdetMult", 1.0);
+    defaultParams.emplace("useSURFdetMult", 1.0);
 
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
@@ -517,7 +497,16 @@ int main (int argc, char **argv)
         params.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
 
         cout << "Creating test sequence..." << endl;
-        vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
+
+        bool requireSuggestions=false;
+        for(auto i=0; i<requestedKeyframes.size(); ++i)
+            if(requestedKeyframes[i]==-1)
+                requireSuggestions=true;
+
+        vector<Point2i> suggestedKeyframes;
+
+        if(requireSuggestions)
+             suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
 
         vector<int> actualKeyframes;
         //build the sequence based on
@@ -630,9 +619,20 @@ int main (int argc, char **argv)
             params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
+        params.emplace("searchDistCoeff", 3.5); //use a larger default search radius
+        params.emplace("searchStepCoeff", 0.1); //use a smaller search step
+        params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
+        params.emplace("baseRotationRange", 90); //use base 90 degrees rotation range
+
         params.emplace("useSURFdet", 0.0);
         params.emplace("useCSdet", 0.0);
         params.emplace("useHoGdet", 0.0);
+
+        //now apply the multipliers, they are 1.0 by default
+        params.at("useSURFdet") = params.at("useSURFdet")*params.at("useSURFdetMult");
+        params.at("useCSdet") = params.at("useCSdet")* params.at("useCSdetMult");
+        params.at("useHoGdet") = params.at("useHoGdet")*params.at("useHoGdetMult");
+
         params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
         //params.emplace("searchDistCoeff", 3); //set search region to huge

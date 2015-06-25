@@ -435,7 +435,7 @@ int main (int argc, char **argv)
     vector <Frame*> gtFrames = gtLoader.getFrames(); //the ground truth frames to compare against
 
     ImageSimilarityMatrix ism;
-    string ismFile(gtLoader.getProjectTitle()+".ism");
+    string ismFile("ism/"+gtLoader.getProjectTitle()+".ism");
     if(!ism.read(ismFile))
     {
         ism.buildImageSimilarityMatrix(gtLoader.getFrames());
@@ -538,7 +538,7 @@ int main (int argc, char **argv)
         int maxKeyframes=INT_MAX;
         if(paramName=="numKeyframes")
         {
-
+            maxKeyframes = param;
         }
 
         auto start = chrono::steady_clock::now();

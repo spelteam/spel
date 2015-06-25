@@ -124,7 +124,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
 
     params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
     params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
-    params.emplace("anchorBindCoeff", 0.5); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+    params.emplace("anchorBindCoeff", 0.0); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
     params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
 
     //detector search parameters
