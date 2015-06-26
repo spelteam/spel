@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 #include <detector.hpp>
-#include <SurfDetector.hpp>
+#include <surfDetector.hpp>
 #include "projectLoader.hpp"
 #include "limbLabel.hpp"
 
@@ -68,10 +68,15 @@ TEST(surfDetectorTests, computeDescriptors)
     float boneLength = D.getBoneLength(p0, p1);
     float boneWidth = D.getBoneWidth(boneLength, bodyPart);
     POSERECT <Point2f> rect = D.getBodyPartRect(bodyPart, p0, p1, Size(boneLength, boneWidth)); 
-    SurfFeatureDetector D1(minHessian);
     //Frame keypoints
     vector <KeyPoint> expected_FrameKeyPoints; 
+#if OpenCV_VERSION_MAJOR == 3
+    Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
+    D1->detect(image, expected_FrameKeyPoints);
+#else
+    SurfFeatureDetector D1(minHessian);
     D1.detect(image, expected_FrameKeyPoints);
+#endif
     //Part keypoints
     vector <KeyPoint> expected_PartKeyPoints;
     for (int i = 0; i < expected_FrameKeyPoints.size(); i++)
@@ -79,9 +84,13 @@ TEST(surfDetectorTests, computeDescriptors)
         expected_PartKeyPoints.push_back(expected_FrameKeyPoints[i]);
     //Part descriptors
     Mat expected_PartDescriptors;
+#if OpenCV_VERSION_MAJOR == 3
+    Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+    extractor->compute(image, expected_PartKeyPoints, expected_PartDescriptors);
+#else
     SurfDescriptorExtractor extractor;
     extractor.compute(image, expected_PartKeyPoints, expected_PartDescriptors);
-
+#endif
 //Compare
 
     //Compare part rect
