@@ -71,6 +71,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC libpose/limbLabel_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/nskpsolver_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/frames_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/hogdetector_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/surfdetector_tests )
 
 LIST ( APPEND ${TESTS_MODULE}_LNK ${LIBPOSE_MODULE} )
 LIST ( APPEND ${TESTS_MODULE}_LNK ${OpenCV_LIBS} )
@@ -85,6 +86,7 @@ TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${${TESTS_MODULE}_LNK} )
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/testdata1 $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/testdata1 )
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/ImageRotationTestData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/ImageRotationTestData )
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/CHDTrainTestData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/CHDTrainTestData )
+ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/CHDTrainTestData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/SurfDetectorTestsData )
 
 # Installation instructions for the test module
 # Please specify the installation instructions sprcific

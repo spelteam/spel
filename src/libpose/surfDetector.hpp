@@ -19,6 +19,10 @@
 #endif
 #include "detector.hpp"
 
+#if OpenCV_VERSION_MAJOR == 3 && defined (HAVE_OPENCV_XFEATURES2D)
+using namespace xfeatures2d;
+#endif
+
 using namespace std;
 using namespace cv;
 
@@ -35,6 +39,13 @@ class SurfDetector : public Detector
     void train(vector <Frame*> _frames, map <string, float>);
     vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
   private:
+#ifdef DEBUG
+	  FRIEND_TEST(surfDetectorTests, computeDescriptors);
+	  FRIEND_TEST(surfDetectorTests, train);
+	  FRIEND_TEST(surfDetectorTests, generateLabel);
+	  FRIEND_TEST(surfDetectorTest, detect);
+	  FRIEND_TEST(surfDetectorTests, compare);
+#endif  // DEBUG
     int id;
     uint8_t debugLevelParam;
     struct PartModel
