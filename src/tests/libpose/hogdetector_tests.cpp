@@ -11,6 +11,7 @@
 #include <hogDetector.hpp>
 #include "projectLoader.hpp"
 #include "limbLabel.hpp"
+#include "poseHelper.hpp"
 
 vector <vector <vector <float>>> decodeDescriptor(vector<float> descriptors, Size wndSize, Size blockSize, Size blockStride, Size cellSize, int nbins)
 {
@@ -448,9 +449,11 @@ TEST(HOGDetectorTests, generateLabel)
   EXPECT_EQ(label_expected.getCenter(), label_actual.getCenter());
   EXPECT_EQ(label_expected.getPolygon(), label_actual.getPolygon());
   EXPECT_EQ(label_expected.getScores()[0].getScore(), label_actual.getScores()[0].getScore());
-  Skeleton S = frames[FirstKeyframe]->getSkeleton();
-  BodyPart *P = S.getBodyPart(partID);
-  EXPECT_EQ(P->getRotationSearchRange(), label_actual.getAngle());
+  //Skeleton S = frames[FirstKeyframe]->getSkeleton();
+  //BodyPart *P = S.getBodyPart(partID);
+  //EXPECT_EQ(P->getRotationSearchRange(), label_actual.getAngle());
+  float expected_angle = (float)(PoseHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * 180 / M_PI);
+  EXPECT_EQ(expected_angle, label_actual.getAngle());
 
   //Output debug inf
   cout << endl << "LimbID = " << label_expected.getLimbID() << endl;
