@@ -99,19 +99,17 @@ for dataItem in data:
 fig = plt.figure()
 
 
-
-dx = fig.add_subplot(111, projection='3d')
-dx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
-              alpha=0.5)
-dx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
-              alpha=0.5)
-
-ax = fig.add_subplot(111)#, projection='2d')
+ax = fig.add_subplot(211)#, projection='2d')
 ax.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 ax.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
+dx = fig.add_subplot(212)#, projection='3d')
+dx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+dx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
 
 # #for paramVal in result:
 # for frame in result[0][1]:
@@ -125,10 +123,10 @@ for i in range(numParams):
 	#print 'NUM FRAMES:'
 	#print numFrames
 
-
 	x = []
 	y = []
 	z = []
+	z2 = []
 
 	for j in range(numFrames):
 
@@ -137,7 +135,8 @@ for i in range(numParams):
 		
 		#print 'NUM PARTS'
 		#print numParts
-		avgMinIndex=0.0;
+		avgMinIndex=0.0
+		rmsError=0.0
 		for k in range(numParts):
 			
 			numLabels=len(result[i][1][j][1][k][1])
@@ -149,35 +148,40 @@ for i in range(numParams):
 			col = "#%06x" % random.randint(0,0xFFFFFF)
 			minError=1000000000
 			minIndex=-1.0
-
+			topError=float(result[i][1][j][1][k][1][0][2])
+			
 			for l in range(numLabels):
 				
 				if float(result[i][1][j][1][k][1][l][2]) < minError:
 					minError = float(result[i][1][j][1][k][1][l][2])
 					minIndex = int(result[i][1][j][1][k][1][l][0])
 
+			rmsError+=topError
 			avgMinIndex+=minIndex
 			
-
-
 		avgMinIndex=float(avgMinIndex)/float(numParts)
+		rmsError=math.sqrt(float(rmsError)/float(numParts))
 
 		print avgMinIndex
+		print rmsError
 
 		#print int(result[i][1][j][1][k][1][l][0])
 		x.append(float(result[i][0]))
 		y.append(int(result[i][1][j][0]))
 		z.append(avgMinIndex)
+		z2.append(rmsError)
 
 		#ax.scatter(float(result[i][0]), int(result[i][1][j][0]), avgMinIndex, marker='o', s=15, color=pcol, alpha=1.0) #draw min ranks
 		ax.scatter(int(result[i][1][j][0]), avgMinIndex, marker='o', s=15, color=pcol, alpha=1.0) #draw min ranks
+		dx.scatter(int(result[i][1][j][0]), rmsError, marker='o', s=15, color=pcol, alpha=1.0) #draw min ranks
 	#ax.plot(x, y, z, color=pcol, alpha=1.0) #draw min ranks
 	ax.plot(y, z, color=pcol, alpha=1.0, label=str(result[i][0])) #draw min ranks
+	dx.plot(y, z2, color=pcol, alpha=1.0, label=str(result[i][0])) #draw min ranks
 
 
-dx.set_xlabel('Label Rank', fontsize=35)
-dx.set_ylabel('RMS Error (pixel^2)', fontsize=35)
-dx.set_zlabel('Detector Score', fontsize=35)
+dx.set_xlabel('Frame Number', fontsize=35)
+dx.set_ylabel('RMS Error (pixels)', fontsize=35)
+#dx.set_zlabel('Detector Score', fontsize=35)
 
 ax.set_xlabel('Frame Number', fontsize=35)
 ax.set_ylabel('Avg. Min Index', fontsize=35)

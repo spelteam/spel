@@ -23,7 +23,7 @@ def pairwise(iterable):
 def usage():
 
 	print("Author: Mykyta Fastovets / poselib project / 2015")
-	print("This utility is a tool for reading and convering 2D joint location GT data from H3.6M dataset into simple text files.")
+	print("This utility is a tool for reading and convering 2D joint location GT data from H3.6M dataset into poseLib project files.")
 	print("Example usage: ./h36m.py ~/file.cdf file.txt")
 
 parser = argparse.ArgumentParser(description='1 non-optional argument')
