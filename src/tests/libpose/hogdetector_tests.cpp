@@ -463,7 +463,7 @@ TEST(HOGDetectorTests, generateLabel)
 
 }
 
-TEST(HogDetectorTest, detect)
+TEST(HOGDetectorTests, detect)
 {
 
   String FilePath;

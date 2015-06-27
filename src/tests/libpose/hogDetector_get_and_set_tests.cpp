@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <hogDetector.hpp>
 
-TEST(hogDetectorTest, GetAndSetTest)
+TEST(HOGDetectorTests, GetAndSetTest)
 {
   HogDetector hd;
   int id = 3;

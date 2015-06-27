@@ -42,7 +42,7 @@ class HogDetector : public Detector
     FRIEND_TEST(HOGDetectorTests, getMaxBodyPartHeightWidth);
     FRIEND_TEST(HOGDetectorTests, train);
     FRIEND_TEST(HOGDetectorTests, generateLabel);
-    FRIEND_TEST(HogDetectorTest, detect);
+    FRIEND_TEST(HOGDetectorTests, detect);
     FRIEND_TEST(HOGDetectorTests, compare);
     FRIEND_TEST(HOGDetectorTests, getLabelModels);
     FRIEND_TEST(HOGDetectorTests, getPartModels);
