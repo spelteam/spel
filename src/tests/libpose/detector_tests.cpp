@@ -532,7 +532,7 @@ TEST(DetectorTests, merge)
   for (int p = 0; p < C.size(); p++)
     for (int i = 0; i < C[p].size(); i++)
     {
-      //Search equal polygon value in curent part labels
+      //Search equal polygon values in curent part labels
       for (int k = 0; k < C[p].size(); k++)
         if (i != k) EXPECT_FALSE(C[p][i].getPolygon() == C[p][k].getPolygon()) << "partID = "<< p << ": polygons of label_Num "<< i << " and " << k << "is equal" << endl ;
       vector<Score> LimbScores = C[p][i].getScores();
