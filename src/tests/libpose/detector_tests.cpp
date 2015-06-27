@@ -4,8 +4,10 @@
 #include <gtest/gtest.h>
 #include <detector.hpp>
 #include <colorHistDetector.hpp>
+#include <fstream>
 
 using namespace cv;
+using namespace std;
 
 class TestingDetector : public ColorHistDetector
 {
@@ -435,116 +437,109 @@ TEST(DetectorTests, getBoneWidth)
   EXPECT_EQ(length / lwRatio, width);
 }
 
-//Temporary test
-TEST(DetectorTests, merge)
+//Output limbLabels set into text file
+void PutLimbLabels(ofstream &fout, vector <vector <LimbLabel>> X)
 {
-  Point2f center = Point2f(10, 10);
-  vector<Point2f> polygon = { center, Point2f(6, 18), Point2f(14, 18), Point2f(14, 2) };
-  bool isOccluded = false;
-  float scoreCoeff = 1;
+    for (int p = 0; p < X.size(); p++)
+    {
+        for (int i = 0; i < X[p].size(); i++)
+        {
+            fout << endl << "  limbID " << X[p][i].getLimbID() << ", angle " << X[p][i].getAngle() << ", poligon" << X[p][i].getPolygon() << ", scores ";
+            vector<Score> S = X[p][i].getScores();
+            for (int k = 0; k < S.size(); k++)
+                fout << S[k].getScore() << ", ";
+        }
+        fout << endl;
+    }
+  fout << endl << "===========================================" << endl;
+}
 
-  // Create input vectors
-  int partsCount = 16;
-  vector<float> A_angles = { 1, 2, 3, 4, 5 };
-  vector<float> B_angles = { 1, 1, 2, 2, 2, 3, 4, 2, 5 };
-  vector<map<int, vector<Score>>> All_scores;
-  All_scores.reserve(partsCount);
+//Temporary test. Data loss is not checked - only repeating
+TEST(DetectorTests, merge)
+{ 
   vector <vector <LimbLabel>> A;
   vector <vector <LimbLabel>> B;
 
-  for (int LimbID = 0; LimbID < partsCount; LimbID++)
+  //Create polygons
+  int polygonsCount = 10;
+  vector<vector<Point2f>> Polygons;
+  for (int i = 0; i < polygonsCount; i++)
+    Polygons.push_back(vector<Point2f> { Point2f(i, i) });
+
+  //Craeate set of limbLabels "A"
+  int partsCount = 2;
+  int A_size = 9;
+  for (int p = 0; p < partsCount; p++)
   {
-    vector <LimbLabel> A_temp, B_temp;
-    map<int, vector<Score>> label_scores;
-    for (int labelID = 0; labelID < A_angles.size(); labelID++)
+    vector<LimbLabel> temp_partLabels;
+    for (int i = 0; i < A_size; i++)
     {
-      int k = A_angles[labelID];
-      Score score1(k / 10, "", scoreCoeff);
-      Score score2(k / 10 + 2, "", scoreCoeff);
-      vector <Score> scores;
-      scores.push_back(score1);
-      scores.push_back(score2);
-      LimbLabel label(LimbID, center*k, A_angles[labelID], polygon, scores, isOccluded);
-      A_temp.push_back(label);
-      label_scores[k - 1].push_back(score1);
-      label_scores[k - 1].push_back(score2);
-      scores.clear();
+      int N = (Polygons.size() - 1)*rand() / RAND_MAX;
+      LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(float((rand())*100 / RAND_MAX)/100, "", 1)});
+      temp_partLabels.push_back(temp_label);
     }
-    for (int labelID = 0; labelID < B_angles.size(); labelID++)
-    {
-      int k = B_angles[labelID];
-      Score score1(k / 10, "", scoreCoeff);
-      Score score2(k / 10 + 2, "", scoreCoeff);
-      vector <Score> scores;
-      scores.push_back(score1);
-      scores.push_back(score2);
-      Point2f Center = center*k;
-      LimbLabel label(LimbID, center*k, B_angles[labelID], polygon, scores, isOccluded);
-      B_temp.push_back(label);
-      label_scores[k - 1].push_back(score1);
-      label_scores[k - 1].push_back(score2);
-      scores.clear();
-    }
-    Score score(10, "", scoreCoeff);
-    vector <Score> scores;
-    scores.push_back(score);
-    LimbLabel label(LimbID, Point2f(0, 0), 2, polygon, scores, isOccluded);
-    B_temp.push_back(label);
-    label_scores[label_scores.size()].push_back(score);
-    All_scores.push_back(label_scores);
-    A.push_back(A_temp);
-    B.push_back(B_temp);
-    A_temp.clear();
-    B_temp.clear();
-    label_scores.clear();
+    A.push_back(temp_partLabels);
   }
 
-  // Create expected vector
-  vector<float> All_angles = { 1, 2, 3, 4, 5 };
-  vector <vector <LimbLabel>> Expected;
-  for (int LimbID = 0; LimbID < partsCount; LimbID++)
+  //Craeate set of limbLabels "B"
+  int B_size = 9;
+  for (int p = 0; p < partsCount; p++)
   {
-    vector <LimbLabel> temp;
-    for (int labelID = 0; labelID < All_angles.size(); labelID++)
-    {
-      float k = All_angles[labelID];
-      Score score1(k / 10, "", scoreCoeff);
-      Score score2(k / 10 + 2, "", scoreCoeff);
-      vector <Score> scores;
-      scores.push_back(score1);
-      scores.push_back(score2);
-      LimbLabel label(LimbID, center*k, All_angles[labelID], polygon, scores, isOccluded);
-      temp.push_back(label);
-      scores.clear();
-    }
-    Score score(10, "", scoreCoeff);
-    vector <Score> scores;
-    scores.push_back(score);
-    LimbLabel label(LimbID, Point2f(0, 0), 2, polygon, scores, isOccluded);
-    temp.push_back(label);
-    Expected.push_back(temp);
-    temp.clear();
+      vector<LimbLabel> temp_partLabels;
+      for (int i = 0; i < B_size; i++)
+      {
+          int N = (Polygons.size() - 1)*rand() / RAND_MAX;
+          LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(float((rand()) * 100 / RAND_MAX) / 100, "", 1)});
+          temp_partLabels.push_back(temp_label);
+      }
+      B.push_back(temp_partLabels);
   }
 
-  // Calculate actual value 
-  TestingDetector detector;
-  vector <vector <LimbLabel>> Actual = detector.merge(A, B);
+  //Run "merge"
+  ColorHistDetector D;
+  vector <vector <LimbLabel>> H = D.merge(A, B);
+  vector <vector <LimbLabel>> A1 = D.merge(A, A);
+  vector <vector <LimbLabel>> B1 = D.merge(B, B);
+  vector <vector <LimbLabel>> C = D.merge(A1, B1);
 
-  // Compare
-  EXPECT_EQ(Expected.size(), Actual.size());
-  cout << Expected.size() << endl;
-  cout << Expected[0].size() << endl;
-  for (int limbID = 0; limbID < partsCount; limbID++)
-  {
-    EXPECT_EQ(Expected[limbID].size(), Actual[limbID].size());
-    for (int labelID = 0; labelID < Expected[limbID].size(); labelID++)
+  //Put all input and output labels sets into text file
+  ofstream fout("Detector_merge.txt");
+
+  fout << "LimbLabels set A:" << endl;
+  PutLimbLabels(fout, A);
+
+  fout << "LimbLabels set B:" << endl;
+  PutLimbLabels(fout, B);
+
+  fout << "merge(A, B):" << endl;
+  PutLimbLabels(fout, H);
+
+  fout << "merge(A, A):" << endl;
+  PutLimbLabels(fout, A1);
+
+  fout << "merge(B, B):" << endl;
+  PutLimbLabels(fout, B1);
+
+  fout << "merge(merge(A, A), merge(B,B)):" << endl;
+  PutLimbLabels(fout, C);
+
+  fout.close();
+
+  cout << "See input abd output limbLabels values in the file  'Detector_merge.txt'\n";
+
+
+  //Compare
+  for (int p = 0; p < C.size(); p++)
+    for (int i = 0; i < C[p].size(); i++)
     {
-      EXPECT_EQ(Expected[limbID][labelID].getLimbID(), Actual[limbID][labelID].getLimbID());
-      EXPECT_EQ(Expected[limbID][labelID].getCenter(), Actual[limbID][labelID].getCenter());
-      EXPECT_EQ(Expected[limbID][labelID].getAngle(), Actual[limbID][labelID].getAngle());
-      EXPECT_EQ(All_scores[limbID][labelID], Actual[limbID][labelID].getScores());
-      EXPECT_EQ(Expected[limbID][labelID].getPolygon(), Actual[limbID][labelID].getPolygon());
+      //Search equal polygon value in curent part labels
+      for (int k = 0; k < C[p].size(); k++)
+        if (i != k) EXPECT_FALSE(C[p][i].getPolygon() == C[p][k].getPolygon()) << "partID = "<< p << ": polygons of label_Num "<< i << " and " << k << "is equal" << endl ;
+      vector<Score> LimbScores = C[p][i].getScores();
+      //Search equal scores in curent label
+      for (int k = 0; k < LimbScores.size(); k++)
+        for (int t = 0; t < LimbScores.size(); t++)
+            if (t != k) EXPECT_FALSE(LimbScores[k] == LimbScores[t]) << ", PartID = " << p << ": Equal scores in label with Num = " << i << endl;
     }
-  }
 }
 
