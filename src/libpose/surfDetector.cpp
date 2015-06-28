@@ -659,7 +659,7 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
       }
       else
       {
-        if (partModel->second.descriptors.empty())
+        if (partModel->second.descriptors.empty() || model.descriptors.empty())
         {
           if (debugLevelParam >= 2)
             cerr << ERROR_HEADER << "PartModel descriptors of body part [" << partModel->first << "] are empty" << endl;
