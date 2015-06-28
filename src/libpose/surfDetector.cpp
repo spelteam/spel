@@ -525,7 +525,7 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
 
   for (vector <KeyPoint>::iterator kp = keyPoints.begin(); kp != keyPoints.end(); ++kp)
   {
-    if (rect.containsPoint(kp->pt))
+    if (rect.containsPoint(kp->pt) > 0)
     {
       partModel.keyPoints.push_back(*kp);
     }
