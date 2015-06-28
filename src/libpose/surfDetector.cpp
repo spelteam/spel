@@ -532,7 +532,6 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   }
 
 #if OpenCV_VERSION_MAJOR == 3
-  Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
   if (partModel.keyPoints.empty())
   {
     if (debugLevelParam >= 2)
@@ -548,7 +547,6 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
     }
   }
 #else
-  SurfFeatureDetector detector(minHessian);
   if (partModel.keyPoints.empty())
   {
     if (debugLevelParam >= 2)
@@ -667,16 +665,33 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
         }
         else
         {
-          matcher.knnMatch(partModel->second.descriptors, model.descriptors, matches, 2);
-          float s = 0;
-          for (uint32_t i = 0; i < matches.size(); i++)
+          try
           {
-            if ((matches[i][0].distance < 0.6*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
+            if (partModel->second.descriptors.rows > 1 && model.descriptors.rows > 1)
             {
-              s += matches[i][0].distance / coeff;
+              matcher.knnMatch(partModel->second.descriptors, model.descriptors, matches, 2);
+              float s = 0;
+              for (uint32_t i = 0; i < matches.size(); i++)
+              {
+                if ((matches[i][0].distance < 0.6*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
+                {
+                  s += matches[i][0].distance / coeff;
+                }
+              }
+              score += s / matches.size();
+            }
+            else
+            {
+              cerr << ERROR_HEADER << "Can't match descriptors of body part [" << partModel->first << "]: Not enough descriptors" << endl;
+              count--;
             }
           }
-          score += s / matches.size();
+          catch (...)
+          {
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << "Can't match descriptors of body part [" << partModel->first << "]" << endl;
+            count--;
+          }
         }
         break;
       }
