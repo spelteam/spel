@@ -41,8 +41,8 @@ void SurfDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   params.emplace(sMaxFrameHeight, frames.at(0)->getImage().rows);
 
-  //maxFrameHeight = params.at(sMaxFrameHeight);
-  maxFrameHeight=frames.at(0)->getImage().rows; //@TODO fix this later
+  maxFrameHeight = params.at(sMaxFrameHeight);
+  //maxFrameHeight=frames.at(0)->getImage().rows; //@TODO fix this later
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
