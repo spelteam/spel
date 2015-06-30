@@ -654,7 +654,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           if (!blackPixel)
           { // Scan the possible rotation zone
             float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
-            for (float rot = theta - deltaTheta; rot < theta + deltaTheta; rot += stepTheta)
+            float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
+            float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
+            for (float rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
             {
               // Create a new label vector and build it label
               Point2f p0 = Point2f(0, 0); // the point of unit vector

@@ -257,44 +257,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
       if (debugLevelParam >= 1)
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
-    }
-    float minTheta = 0, maxTheta = 0, stepTheta = 0;
-    try
-    {
-      minTheta = params.at(sMinTheta);
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sMinTheta << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    try
-    {
-      maxTheta = params.at(sMaxTheta);
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sMaxTheta << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    try
-    {
-      stepTheta = params.at(sStepTheta);
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sStepTheta << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
+    }    
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
     for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
     {
@@ -319,7 +282,10 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
           if (!blackPixel)
           {
             float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
-            for (float rot = theta - deltaTheta; rot < theta + deltaTheta; rot += stepTheta)
+            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
+            float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
+            float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
+            for (float rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
             {
               Point2f p0 = Point2f(0, 0);
               Point2f p1 = Point2f(1.0, 0);
