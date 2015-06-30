@@ -18,33 +18,33 @@ BodyPart::BodyPart(void)
 
 //copy constructor
 BodyPart::BodyPart(const BodyPart &bodyPart)
-    : partID(bodyPart.partID),
-      partName(bodyPart.partName),
-      parentJoint(bodyPart.parentJoint),
-      childJoint(bodyPart.childJoint),
-      isOccluded(bodyPart.isOccluded),
-      expectedDistance(bodyPart.expectedDistance),
-      partPolygon(bodyPart.partPolygon),
-      lwRatio(bodyPart.lwRatio),
-      relativeLength(bodyPart.relativeLength),
-      searchRadius(bodyPart.searchRadius),
-      rotationSearchRange(bodyPart.rotationSearchRange)
+  : partID(bodyPart.partID),
+  partName(bodyPart.partName),
+  parentJoint(bodyPart.parentJoint),
+  childJoint(bodyPart.childJoint),
+  isOccluded(bodyPart.isOccluded),
+  expectedDistance(bodyPart.expectedDistance),
+  partPolygon(bodyPart.partPolygon),
+  lwRatio(bodyPart.lwRatio),
+  relativeLength(bodyPart.relativeLength),
+  searchRadius(bodyPart.searchRadius),
+  rotationSearchRange(bodyPart.rotationSearchRange)
 {
 }
 
 //move constructor
 BodyPart::BodyPart(BodyPart &&bodyPart)
-    : partID(std::move(bodyPart.partID)),
-      partName(std::move(bodyPart.partName)),
-      parentJoint(std::move(bodyPart.parentJoint)),
-      childJoint(std::move(bodyPart.childJoint)),
-      isOccluded(std::move(bodyPart.isOccluded)),
-      expectedDistance(std::move(bodyPart.expectedDistance)),
-      partPolygon(std::move(bodyPart.partPolygon)),
-      lwRatio(std::move(bodyPart.lwRatio)),
-      relativeLength(std::move(bodyPart.relativeLength)),
-      searchRadius(std::move(bodyPart.searchRadius)),
-      rotationSearchRange(std::move(bodyPart.rotationSearchRange))
+  : partID(std::move(bodyPart.partID)),
+  partName(std::move(bodyPart.partName)),
+  parentJoint(std::move(bodyPart.parentJoint)),
+  childJoint(std::move(bodyPart.childJoint)),
+  isOccluded(std::move(bodyPart.isOccluded)),
+  expectedDistance(std::move(bodyPart.expectedDistance)),
+  partPolygon(std::move(bodyPart.partPolygon)),
+  lwRatio(std::move(bodyPart.lwRatio)),
+  relativeLength(std::move(bodyPart.relativeLength)),
+  searchRadius(std::move(bodyPart.searchRadius)),
+  rotationSearchRange(std::move(bodyPart.rotationSearchRange))
 
 {
 }
@@ -134,36 +134,36 @@ void BodyPart::setExpectedDistance(float _expectedDistance)
   expectedDistance = _expectedDistance;
 }
 
-BodyPart& BodyPart::operator=( const BodyPart& bodyPart ){
-    if( &bodyPart == this ) return *this;
+BodyPart& BodyPart::operator=(const BodyPart& bodyPart){
+  if (&bodyPart == this) return *this;
 
-    partID = bodyPart.partID;
-    partName = bodyPart.partName;
-    parentJoint = bodyPart.parentJoint;
-    childJoint = bodyPart.childJoint;
-    isOccluded = bodyPart.isOccluded;
-    expectedDistance = bodyPart.expectedDistance;
-    partPolygon = bodyPart.partPolygon;
-    lwRatio = bodyPart.lwRatio;
-    relativeLength = bodyPart.relativeLength;
-    searchRadius = bodyPart.searchRadius;
-    rotationSearchRange = bodyPart.rotationSearchRange;
-    return *this;
+  partID = bodyPart.partID;
+  partName = bodyPart.partName;
+  parentJoint = bodyPart.parentJoint;
+  childJoint = bodyPart.childJoint;
+  isOccluded = bodyPart.isOccluded;
+  expectedDistance = bodyPart.expectedDistance;
+  partPolygon = bodyPart.partPolygon;
+  lwRatio = bodyPart.lwRatio;
+  relativeLength = bodyPart.relativeLength;
+  searchRadius = bodyPart.searchRadius;
+  rotationSearchRange = bodyPart.rotationSearchRange;
+  return *this;
 }
 
-BodyPart& BodyPart::operator=( BodyPart&& bodyPart ){
-    partID = std::move(bodyPart.partID);
-    std::swap( partName, bodyPart.partName );
-    parentJoint = std::move(bodyPart.parentJoint);
-    childJoint = std::move(bodyPart.childJoint);
-    isOccluded = std::move(bodyPart.isOccluded);
-    expectedDistance = std::move(bodyPart.expectedDistance);
-    std::swap( partPolygon, bodyPart.partPolygon );
-    lwRatio = std::move(bodyPart.lwRatio);
-    relativeLength = std::move(bodyPart.relativeLength);
-    searchRadius = std::move(bodyPart.searchRadius);
-    rotationSearchRange = std::move(bodyPart.rotationSearchRange);
-    return *this;
+BodyPart& BodyPart::operator=(BodyPart&& bodyPart){
+  partID = std::move(bodyPart.partID);
+  std::swap(partName, bodyPart.partName);
+  parentJoint = std::move(bodyPart.parentJoint);
+  childJoint = std::move(bodyPart.childJoint);
+  isOccluded = std::move(bodyPart.isOccluded);
+  expectedDistance = std::move(bodyPart.expectedDistance);
+  std::swap(partPolygon, bodyPart.partPolygon);
+  lwRatio = std::move(bodyPart.lwRatio);
+  relativeLength = std::move(bodyPart.relativeLength);
+  searchRadius = std::move(bodyPart.searchRadius);
+  rotationSearchRange = std::move(bodyPart.rotationSearchRange);
+  return *this;
 }
 
 bool BodyPart::operator==(const BodyPart &bp) const
@@ -178,8 +178,8 @@ bool BodyPart::operator!=(const BodyPart &bp) const
 
 std::ostream& operator<<(std::ostream& os, const BodyPart &bp)
 {
-    std::string s = std::to_string(bp.getPartID());
-    return os<<s;
+  std::string s = std::to_string(bp.getPartID());
+  return os << s;
 }
 
 POSERECT <Point2f> BodyPart::getPartPolygon(void)

@@ -6,8 +6,8 @@ BodyJoint::BodyJoint(void)
 {
   setLimbID(0);
   setJointName("");
-  setImageLocation({0.0, 0.0});
-  setSpaceLocation({0.0, 0.0, 0.0});
+  setImageLocation({ 0.0, 0.0 });
+  setSpaceLocation({ 0.0, 0.0, 0.0 });
   setDepthSign(false);
 }
 
@@ -23,21 +23,21 @@ BodyJoint::BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc, bool
 
 //copy constructor
 BodyJoint::BodyJoint(const BodyJoint &bodyJoint)
-    : limbID(bodyJoint.limbID),
-      jointName(bodyJoint.jointName),
-      imageLocation(bodyJoint.imageLocation),
-      spaceLocation(bodyJoint.spaceLocation),
-      depthSign(bodyJoint.depthSign)
+  : limbID(bodyJoint.limbID),
+  jointName(bodyJoint.jointName),
+  imageLocation(bodyJoint.imageLocation),
+  spaceLocation(bodyJoint.spaceLocation),
+  depthSign(bodyJoint.depthSign)
 {
 }
 
 //move constructor
 BodyJoint::BodyJoint(BodyJoint &&bodyJoint)
-    : limbID( std::move(bodyJoint.limbID) ),
-      jointName( std::move(bodyJoint.jointName) ),
-      imageLocation( std::move(bodyJoint.imageLocation) ),
-      spaceLocation( std::move(bodyJoint.spaceLocation) ),
-      depthSign( std::move(bodyJoint.depthSign) )
+  : limbID(std::move(bodyJoint.limbID)),
+  jointName(std::move(bodyJoint.jointName)),
+  imageLocation(std::move(bodyJoint.imageLocation)),
+  spaceLocation(std::move(bodyJoint.spaceLocation)),
+  depthSign(std::move(bodyJoint.depthSign))
 {
 }
 
@@ -91,26 +91,26 @@ void BodyJoint::setDepthSign(bool _depthSign)
   depthSign = _depthSign;
 }
 
-BodyJoint& BodyJoint::operator=( const BodyJoint& bodyJoint ){
-    if( &bodyJoint == this ) return *this;
+BodyJoint& BodyJoint::operator=(const BodyJoint& bodyJoint){
+  if (&bodyJoint == this) return *this;
 
-    limbID = bodyJoint.limbID;
-    jointName = bodyJoint.jointName;
-    imageLocation = bodyJoint.imageLocation;
-    spaceLocation = bodyJoint.spaceLocation;
-    depthSign = bodyJoint.depthSign;
+  limbID = bodyJoint.limbID;
+  jointName = bodyJoint.jointName;
+  imageLocation = bodyJoint.imageLocation;
+  spaceLocation = bodyJoint.spaceLocation;
+  depthSign = bodyJoint.depthSign;
 
-    return *this;
+  return *this;
 }
 
-BodyJoint& BodyJoint::operator=( BodyJoint&& bodyJoint ){
-    limbID = std::move( bodyJoint.limbID );
-    std::swap( jointName, bodyJoint.jointName );
-    std::swap( imageLocation, bodyJoint.imageLocation );
-    std::swap( spaceLocation, bodyJoint.spaceLocation );
-    depthSign = std::move( bodyJoint.depthSign );
+BodyJoint& BodyJoint::operator=(BodyJoint&& bodyJoint){
+  limbID = std::move(bodyJoint.limbID);
+  std::swap(jointName, bodyJoint.jointName);
+  std::swap(imageLocation, bodyJoint.imageLocation);
+  std::swap(spaceLocation, bodyJoint.spaceLocation);
+  depthSign = std::move(bodyJoint.depthSign);
 
-    return *this;
+  return *this;
 }
 
 bool BodyJoint::operator==(const BodyJoint &bj) const

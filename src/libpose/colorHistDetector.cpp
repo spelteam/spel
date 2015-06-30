@@ -564,7 +564,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
   int originalSize = frame->getImage().rows;
-  
+
   Frame *workFrame = 0;
   if (frame->getFrametype() == KEYFRAME)
     workFrame = new Keyframe();
@@ -668,7 +668,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
 
               LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, workFrame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
 
-              if(generatedLabel.getPolygon().size()!=4 || generatedLabel.getScores().size()<1 || generatedLabel.getScores().size() > 3)
+              if (generatedLabel.getPolygon().size() != 4 || generatedLabel.getScores().size() < 1 || generatedLabel.getScores().size() > 3)
               {
                 cerr << "here it is..." << endl;
               }
@@ -732,10 +732,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       // For all "sortedLabels"
       for (uint32_t i = 0; i < sortedLabels.size(); i++)
       {
-          if(sortedLabels[i].getPolygon().size()!=4 || sortedLabels[i].getScores().size()<1 || sortedLabels[i].getScores().size() > 3)
-          {
-            cerr << "here it is..." << endl;
-          }
+        if (sortedLabels[i].getPolygon().size() != 4 || sortedLabels[i].getScores().size() < 1 || sortedLabels[i].getScores().size() > 3)
+        {
+          cerr << "here it is..." << endl;
+        }
 
         uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x; // copy center coordinates of current label
         uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y; // copy center coordinates of current label
@@ -766,7 +766,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
         }
-        if(sortedLabels[i].getPolygon().size()!=4 || sortedLabels[i].getScores().size()<1 || sortedLabels[i].getScores().size() > 3)
+        if (sortedLabels[i].getPolygon().size() != 4 || sortedLabels[i].getScores().size() < 1 || sortedLabels[i].getScores().size() > 3)
         {
           cerr << "here it is..." << endl;
         }
@@ -774,10 +774,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       locations.release();
       for (uint32_t i = 0; i < labels.size(); i++)
       {
-          if(labels[i].getPolygon().size()!=4 || labels[i].getScores().size()<1 || labels[i].getScores().size() > 3)
-          {
-            cerr << "here it is..." << endl;
-          }
+        if (labels[i].getPolygon().size() != 4 || labels[i].getScores().size() < 1 || labels[i].getScores().size() > 3)
+        {
+          cerr << "here it is..." << endl;
+        }
       }
     }
     PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
@@ -785,10 +785,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
 
     for (uint32_t i = 0; i < sortedLabels.size(); i++)
     {
-        if(sortedLabels[i].getPolygon().size()!=4 || sortedLabels[i].getScores().size()<1 || sortedLabels[i].getScores().size() > 3)
-        {
-          cerr << "here it is..." << endl;
-        }
+      if (sortedLabels[i].getPolygon().size() != 4 || sortedLabels[i].getScores().size() < 1 || sortedLabels[i].getScores().size() > 3)
+      {
+        cerr << "here it is..." << endl;
+      }
     }
   }
   map <int32_t, Mat>::iterator i;
@@ -804,9 +804,9 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   {
     for (auto j = 0; j < t.at(i).size(); ++j)
     {
-        LimbLabel label = t.at(i).at(j);
-        label.Resize(pow(resizeFactor, -1));
-        t[i][j]=label;
+      LimbLabel label = t.at(i).at(j);
+      label.Resize(pow(resizeFactor, -1));
+      t[i][j] = label;
     }
   }
 
@@ -1484,7 +1484,7 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   float inMaskSupportScore = 0;
   pixDistAvg /= (float)pixDistNum;  // average "distributions"
   float inMaskSuppWeight = 0.5;
-  if (partPixelColours.size() > 0 && totalPixelLabelScore > 0 && totalPixels>10)
+  if (partPixelColours.size() > 0 && totalPixelLabelScore > 0 && totalPixels > 10)
   {
     supportScore = (float)totalPixelLabelScore / (float)totalPixels;
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
