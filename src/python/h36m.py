@@ -92,7 +92,6 @@ for frame in data:
 	#print rawFrameData
 	#image = imread('/home/mfastovets/phd/H3.6M/img0001.png')
 	#plt.imshow(image, zorder=0);
-	
 
 
 

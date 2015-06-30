@@ -137,10 +137,25 @@ for i in range(numParams):
 		#print numParts
 		avgMinIndex=0.0
 		rmsError=0.0
+
+		rmsErrorsByPercentage=[]
+		rmsErrorsByPercentage.append(0) #1
+		rmsErrorsByPercentage.append(0) #10
+		rmsErrorsByPercentage.append(0) #20
+		rmsErrorsByPercentage.append(0) #30
+		rmsErrorsByPercentage.append(0) #40
+		rmsErrorsByPercentage.append(0) #50
+		rmsErrorsByPercentage.append(0) #60
+		rmsErrorsByPercentage.append(0) #70
+		rmsErrorsByPercentage.append(0) #80
+		rmsErrorsByPercentage.append(0) #90
+		rmsErrorsByPercentage.append(0) #100
+
 		for k in range(numParts):
 			
 			numLabels=len(result[i][1][j][1][k][1])
 
+			tenth=int(float(numLabels)/10.0)
 			#print numLabels
 			#raw_input('test')
 			#print 'NUM LABELS'
@@ -150,7 +165,9 @@ for i in range(numParams):
 			minIndex=-1.0
 			topError=float(result[i][1][j][1][k][1][0][2])
 			
+			rmsErrorsByPercentage[0]+=topError
 			for l in range(numLabels):
+
 				
 				if float(result[i][1][j][1][k][1][l][2]) < minError:
 					minError = float(result[i][1][j][1][k][1][l][2])

@@ -679,6 +679,16 @@ int main (int argc, char **argv)
         params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
         params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
+
+        params.emplace("grayImages", 1); // use grayscale images for HoG?
+        params.emplace("searchDistCoeff", 3.5); //use a larger default search radius
+        params.emplace("searchStepCoeff", 0.1); //use a smaller search step
+        params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
+        params.emplace("baseRotationRange", 90); //use base 90 degrees rotation range
+
+        params.emplace("minTheta", params.at("baseRotationRange"));
+        params.emplace("stepTheta", params.at("baseRotationStep"));
+
         params.emplace("maxPartCandidates", 50); //set the max number of part candidates to allow into the solver
         //params.emplace("searchDistCoeff", 3); //set search region to huge
 

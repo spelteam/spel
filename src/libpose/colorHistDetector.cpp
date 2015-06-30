@@ -701,7 +701,15 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
               Point2f mid = 0.5 * p1; // center of the vector
               p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
               p0 = Point2f(x, y) - mid; // shift the vector to current point
+
+
               LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, workFrame, pixelDistributions, pixelLabels, p0, p1, useCSdet); // build  the vector label
+
+              if(generatedLabel.getPolygon().size()!=4 || generatedLabel.getScores().size()<1 || generatedLabel.getScores().size() > 3)
+              {
+                cerr << "here it is..." << endl;
+              }
+
               sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
             }
           }
@@ -761,6 +769,11 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       // For all "sortedLabels"
       for (uint32_t i = 0; i < sortedLabels.size(); i++)
       {
+          if(sortedLabels[i].getPolygon().size()!=4 || sortedLabels[i].getScores().size()<1 || sortedLabels[i].getScores().size() > 3)
+          {
+            cerr << "here it is..." << endl;
+          }
+
         uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x; // copy center coordinates of current label
         uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y; // copy center coordinates of current label
         try
@@ -790,11 +803,30 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
         }
+        if(sortedLabels[i].getPolygon().size()!=4 || sortedLabels[i].getScores().size()<1 || sortedLabels[i].getScores().size() > 3)
+        {
+          cerr << "here it is..." << endl;
+        }
       }
       locations.release();
+      for (uint32_t i = 0; i < labels.size(); i++)
+      {
+          if(labels[i].getPolygon().size()!=4 || labels[i].getScores().size()<1 || labels[i].getScores().size() > 3)
+          {
+            cerr << "here it is..." << endl;
+          }
+      }
     }
     PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
     t.push_back(labels); // add current point labels
+
+    for (uint32_t i = 0; i < sortedLabels.size(); i++)
+    {
+        if(sortedLabels[i].getPolygon().size()!=4 || sortedLabels[i].getScores().size()<1 || sortedLabels[i].getScores().size() > 3)
+        {
+          cerr << "here it is..." << endl;
+        }
+    }
   }
   map <int32_t, Mat>::iterator i;
   for (i = pixelDistributions.begin(); i != pixelDistributions.end(); ++i)
@@ -805,11 +837,13 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
 
   delete workFrame;
 
-  for (vector <vector <LimbLabel>>::iterator i = t.begin(); i != t.end(); ++i)
+  for (auto i = 0; i < t.size(); ++i)
   {
-    for (vector <LimbLabel>::iterator j = i->begin(); j != i->end(); ++j)
+    for (auto j = 0; j < t.at(i).size(); ++j)
     {
-      j->Resize(pow(resizeFactor, -1));
+        LimbLabel label = t.at(i).at(j);
+        label.Resize(pow(resizeFactor, -1));
+        t[i][j]=label;
     }
   }
 

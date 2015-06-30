@@ -619,10 +619,13 @@ int main (int argc, char **argv)
             params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 3.5); //use a larger default search radius
+        params.emplace("searchDistCoeff", 3.0); //use a larger default search radius
         params.emplace("searchStepCoeff", 0.1); //use a smaller search step
         params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
         params.emplace("baseRotationRange", 90); //use base 90 degrees rotation range
+
+        params.emplace("minTheta", params.at("baseRotationRange"));
+        params.emplace("stepTheta", params.at("baseRotationStep"));
 
         params.emplace("useSURFdet", 0.0);
         params.emplace("useCSdet", 0.0);
@@ -702,7 +705,6 @@ int main (int argc, char **argv)
 
         if(detectorName=="interpolationDetect") //then we are just doing a detector test!
         {
-
             vector<Frame*> trainingFrames;
             trainingFrames.push_back(trimmed[0]);
             trainingFrames.push_back(trimmed[trimmed.size()-1]);
@@ -837,7 +839,13 @@ int main (int argc, char **argv)
                         //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
                         //finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);
 
-                        out << "\t\t\t" << e << " " << finalScore << " " << partErrors[e] << " " << csScore*useCS << " " <<  hogScore*useHoG << " " << surfScore*useSURF << endl;
+                        vector<Point2f> poly = partLabels[e].getPolygon();
+
+                        out << "\t\t\t" << e << " " << finalScore << " " << partErrors[e] << " " << csScore*useCS << " " <<  hogScore*useHoG << " " << surfScore*useSURF << " ";
+
+                        for(auto i=0; i<poly.size();++i)
+                            out << poly[i].x << " " << poly[i].y << " ";
+                        out << endl;
                     }
 
                     out << "\t\t)" << endl;
@@ -865,6 +873,10 @@ int main (int argc, char **argv)
         cout << paramName << " at " << param << " finished in " << chrono::duration <double, milli> (diff).count()  << " ms" << endl;
     }
     out.close();
+
+    for(auto i=0; i<gtFrames.size(); ++i)
+        delete gtFrames[i];
+    gtFrames.clear();
 
     cout << "Tuning finished, terminating. " << endl;
 

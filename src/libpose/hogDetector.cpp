@@ -551,7 +551,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
-    float minTheta = 0, maxTheta = 0, stepTheta = 0;
+    //float minTheta = 0, maxTheta = 0, stepTheta = 0;
     try
     {
       minTheta = params.at(sMinTheta);
