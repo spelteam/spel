@@ -629,43 +629,6 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
-    float minTheta = 0, maxTheta = 0, stepTheta = 0;
-    try
-    {
-      minTheta = params.at(sMinTheta); // the start angle for searching
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sMinTheta << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    try
-    {
-      maxTheta = params.at(sMaxTheta);  // the end angle for searching
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sMaxTheta << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    try
-    {
-      stepTheta = params.at(sStepTheta); // angular search step
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sStepTheta << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0; // reference point - the bodypart center
     // Scan the area around the reference point
     for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)

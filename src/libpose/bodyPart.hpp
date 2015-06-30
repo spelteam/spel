@@ -14,8 +14,8 @@ class BodyPart
 {
   public:
     BodyPart(void);
-    BodyPart( const BodyPart& bodyPart );
-    BodyPart( BodyPart&& bodyPart );
+    BodyPart(const BodyPart& bodyPart);
+    BodyPart(BodyPart&& bodyPart);
     BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
     BodyPart& operator=( const BodyPart& bodyPart );
     BodyPart& operator=( BodyPart&& bodyPart );
@@ -48,7 +48,7 @@ class BodyPart
     float getSearchRadius(void) const;
     void setSearchRadius(float _searchRadius);
 
-    float getRotationSearchRange(void);
+    float getRotationSearchRange(void) const;
     void setRotationSearchRange(float _rotationAngle);
   private:
 /// identifier, must be unique within the limits of class
@@ -61,7 +61,7 @@ class BodyPart
     int childJoint;
 /// when "true" - then this body part is overlapped in a frame, used in the skeleton recovery algorithm
     bool isOccluded;
-/// expected distance to parent bodypart, as a multiplier of this part's le
+/// expected distance to parent bodypart, as a multiplier of this part's length
     float expectedDistance;
 /// rectangle is used as simplified representation of body part 
     POSERECT <Point2f> partPolygon;
