@@ -653,7 +653,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
           bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
           if (!blackPixel)
           { // Scan the possible rotation zone
-            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
+            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange());// + abs(rotationThreshold);
             float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
             float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
             for (float rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
