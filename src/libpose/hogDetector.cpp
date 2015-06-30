@@ -424,7 +424,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
 #endif // DEBUG
   const string sDebugLevel = "debugLevel";
 
-  float rotationThreshold = 0.025f;
+  float rotationThreshold = 0.095f;
   const string sRotationThreshold = "rotationThreshold";
 
   float isWeakTreshhold = 0.1f;
@@ -575,7 +575,7 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           if (!blackPixel)
           {
             float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
-            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
+            //float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
             float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
             float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
             for (float rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)

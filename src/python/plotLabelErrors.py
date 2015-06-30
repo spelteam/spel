@@ -99,16 +99,22 @@ for dataItem in data:
 fig = plt.figure()
 
 
-ax = fig.add_subplot(211)#, projection='2d')
+ax = fig.add_subplot(311)#, projection='2d')
 ax.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 ax.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
-dx = fig.add_subplot(212)#, projection='3d')
+dx = fig.add_subplot(312)#, projection='3d')
 dx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 dx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+
+ex = fig.add_subplot(312)#, projection='3d')
+ex.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+ex.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
 # #for paramVal in result:
@@ -166,12 +172,37 @@ for i in range(numParams):
 			topError=float(result[i][1][j][1][k][1][0][2])
 			
 			rmsErrorsByPercentage[0]+=topError
+
 			for l in range(numLabels):
 
-				
+				#divide by n*tenth-1
+
+				# if l<tenth:
+				# 	rmsErrorsByPercentage[1]+=float(result[i][1][j][1][k][1][l][2])
+				# if l<2*tenth:
+				# 	rmsErrorsByPercentage[2]+=float(result[i][1][j][1][k][1][l][2])
+				# if l<3*tenth:
+				# 	rmsErrorsByPercentage[3]+=float(result[i][1][j][1][k][1][l][2])
+				# if l<4*tenth:
+				# 	rmsErrorsByPercentage[4]+=float(result[i][1][j][1][k][1][l][2])
+				# if l<5*tenth:
+				# 	rmsErrorsByPercentage[5]+=float(result[i][1][j][1][k][1][l][2])
+				# if l<6*tenth:
+				# 	rmsErrorsByPercentage[6]+=float(result[i][1][j][1][k][1][l][2])
+				# if l<7*tenth:
+				# 	rmsErrorsByPercentage[7]+=float(result[i][1][j][1][k][1][l][2])
+				# if l<8*tenth:
+				# 	rmsErrorsByPercentage[8]+=float(result[i][1][j][1][k][1][l][2])
+
+				# rmsErrorsByPercentage[9]+=float(result[i][1][j][1][k][1][l][2])
+					
 				if float(result[i][1][j][1][k][1][l][2]) < minError:
 					minError = float(result[i][1][j][1][k][1][l][2])
 					minIndex = int(result[i][1][j][1][k][1][l][0])
+
+			# for e in range(len(rmsErrorsByPercentage)):
+			# 	if e!=0:
+			# 		rmsErrorsByPercentage[e] = math.sqrt(rmsErrorsByPercentage[e]/(e*tenth-1))
 
 			rmsError+=topError
 			avgMinIndex+=minIndex
@@ -200,8 +231,11 @@ dx.set_xlabel('Frame Number', fontsize=35)
 dx.set_ylabel('RMS Error (pixels)', fontsize=35)
 #dx.set_zlabel('Detector Score', fontsize=35)
 
-ax.set_xlabel('Frame Number', fontsize=35)
+#ax.set_xlabel('Frame Number', fontsize=35)
 ax.set_ylabel('Avg. Min Index', fontsize=35)
+
+ex.set_xlabel('Frame Number', fontsize=35)
+ex.set_ylabel('Avg. Min Index', fontsize=35)
 #ax.set_zlabel('Avg Min Index', fontsize=35)
 
 handles, labels = ax.get_legend_handles_labels()

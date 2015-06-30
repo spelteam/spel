@@ -74,8 +74,9 @@ vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> dete
         {
             for(uint32_t j=0; j<labels.size();++j)
             {
-                if(labels[j].at(0).getLimbID()==i)
-                    tempLabels.push_back(labels[j]);
+                if(labels[j].size()>0)
+                    if(labels[j].at(0).getLimbID()==i)
+                        tempLabels.push_back(labels[j]);
             }        //detector settings
             params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
             params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
@@ -624,6 +625,7 @@ int main (int argc, char **argv)
         params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
         params.emplace("baseRotationRange", 90); //use base 90 degrees rotation range
 
+        params.emplace("maxTheta", params.at("baseRotationRange"));
         params.emplace("minTheta", params.at("baseRotationRange"));
         params.emplace("stepTheta", params.at("baseRotationStep"));
 

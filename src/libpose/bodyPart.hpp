@@ -48,7 +48,7 @@ public:
   float getSearchRadius(void) const;
   void setSearchRadius(float _searchRadius);
 
-  float getRotationSearchRange(void) const;
+  float getRotationSearchRange(void);
   void setRotationSearchRange(float _rotationAngle);
 private:
   /// identifier, must be unique within the limits of class
