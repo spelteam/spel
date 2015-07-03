@@ -46,18 +46,25 @@ class SurfDetector : public Detector
 	  FRIEND_TEST(surfDetectorTests, compare);
 #endif  // DEBUG
     int id;
-    uint8_t debugLevelParam;
     struct PartModel
     {
       POSERECT <Point2f> partModelRect;
       vector <KeyPoint> keyPoints;
       Mat descriptors;
     };
+
+    // Variables for score comparer
+    BodyPart *comparer_bodyPart = 0;;
+    PartModel *comparer_model = 0;
+    Point2f *comparer_j0 = 0;
+    Point2f *comparer_j1 = 0;
+
     map <uint32_t, map <uint32_t, PartModel>> partModels;
     map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
     PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian, vector <KeyPoint> keyPoints);
     LimbLabel generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet);
     float compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1);
+    float compare(void);
 };
 
 #endif  // _LIBPOSE_SURFDETECTOR_HPP_

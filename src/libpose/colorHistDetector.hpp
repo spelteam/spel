@@ -47,7 +47,6 @@ private:
   int id;
   const uint8_t nBins;
   map <int32_t, PartModel> partModels;
-  uint8_t debugLevelParam;
   float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
   void setPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors);
   void addPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);
@@ -58,6 +57,17 @@ private:
   map <int32_t, Mat> buildPixelDistributions(Frame *frame);
   map <int32_t, Mat> buildPixelLabels(Frame *frame, map <int32_t, Mat> pixelDistributions);
   LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet);
+
+  // Variables for score comparer
+  BodyPart *comparer_bodyPart = 0;
+  Frame **comparer_frame = 0;
+  map <int32_t, Mat> *comparer_pixelDistributions = 0;
+  map <int32_t, Mat> *comparer_pixelLabels = 0;
+  Point2f *comparer_j0 = 0;
+  Point2f *comparer_j1 = 0;
+
+  float compare(void);
+  float compare(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1);
 };
 
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

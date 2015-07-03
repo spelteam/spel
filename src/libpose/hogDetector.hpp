@@ -52,10 +52,14 @@ class HogDetector : public Detector
     int id;
     Size savedCellSize;
     uint8_t savednbins;
-    uint8_t debugLevelParam;
     map <uint32_t, Size> partSize;
     map <uint32_t, map <uint32_t, PartModel>> partModels;
     map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;
+
+    // Variables for score comparer
+    BodyPart *comparer_bodyPart = 0;
+    PartModel *comparer_model = 0;
+    uint8_t *comparer_nbins = 0;
 
     LimbLabel generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet, uint8_t nbins);
 
@@ -63,6 +67,7 @@ class HogDetector : public Detector
     PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages);
     map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages);
     float compare(BodyPart bodyPart, PartModel partModel, uint8_t nbins);
+    float compare(void);
 };
 
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

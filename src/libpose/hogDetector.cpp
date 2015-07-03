@@ -575,10 +575,9 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
           if (!blackPixel)
           {
             float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange());// + abs(rotationThreshold);
-            //float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange()) + abs(rotationThreshold);
             float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
             float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
-            for (float rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
+            for (float rot = theta - minLocalTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
             {
               Point2f p0 = Point2f(0, 0);
               Point2f p1 = Point2f(1.0, 0);
@@ -714,7 +713,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
       locations.release();
     }
     PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
-    t.push_back(labels);
+    if (labels.size() > 0)
+      t.push_back(labels);
   }
 
   delete workFrame;
@@ -732,65 +732,33 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
 
 LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet, uint8_t nbins)
 {
-  vector <Score> s;
-  Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-  float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
-  POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1);
   stringstream detectorName;
   detectorName << getID();
 
-  uint32_t totalPixels = 0;
-  uint32_t inMaskPixels = 0;
-  float boneLength = getBoneLength(j0, j1); // distance between joints
-  Mat imgMat = frame->getImage(); // copy image from the frame
-  Mat maskMat = frame->getMask(); // copy mask from the frame 
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
+  comparer_bodyPart = &bodyPart;
+  comparer_model = &descriptors;
+  comparer_nbins = &nbins;
 
-  // Scan the area near the bodypart center
-  for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
+  LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), _useHoGdet);
+
+  comparer_bodyPart = 0;
+  comparer_model = 0;
+  comparer_nbins = 0;
+
+  return label;
+}
+
+float HogDetector::compare(void)
+{
+  if (comparer_bodyPart == 0 || comparer_model == 0 || comparer_nbins == 0)
   {
-    for (int32_t j = int32_t(boxCenter.y - boneLength * 0.5); j < int32_t(boxCenter.y + boneLength * 0.5); j++)
-    {
-      if (i < maskMat.cols && j < maskMat.rows) // if the point is within the image
-      {
-        if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
-        {
-          if (rect.containsPoint(Point2f((float)i, (float)j)) > 0) // if the point belongs to the rectangle
-          {
-            totalPixels++; // counting of the contained pixels
-            uint8_t mintensity = 0;
-            try
-            {
-              mintensity = maskMat.at<uint8_t>(j, i); // copy current point mask value 
-            }
-            catch (...)
-            {
-              maskMat.release();
-              imgMat.release();
-              if (debugLevelParam >= 2)
-                cerr << ERROR_HEADER << "Dirty label!" << endl;
-              Score sc(-1.0f, detectorName.str(), _useHoGdet);
-              s.push_back(sc);
-              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
-            }
-            bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
-            if (!blackPixel)
-            {
-              inMaskPixels++; // counting of the all scanned pixels
-            }
-          }
-        }
-      }
-    }
+    stringstream ss;
+    ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_model == 0 ? "comparer_model == 0 " : "") << (comparer_nbins == 0 ? "comparer_nbins == 0" : "") << endl;
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
   }
-  maskMat.release();
-  imgMat.release();
-  float score = compare(bodyPart, descriptors, nbins);
-  //score *= (1.0f - ((float)inMaskPixels / (float)totalPixels));
-  Score sc(score, detectorName.str(), _useHoGdet);
-  s.push_back(sc);
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false);
+  return compare(*comparer_bodyPart, *comparer_model, *comparer_nbins);
 }
 
 float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins)

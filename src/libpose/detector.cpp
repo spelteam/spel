@@ -295,3 +295,16 @@ vector <vector <LimbLabel>> Detector::merge(vector <vector <LimbLabel>> first, v
 
   return result;
 }
+
+LimbLabel Detector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, string detectorName, float _usedet)
+{
+  vector <Score> s;
+  Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
+  float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+  POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1);
+  
+  float score = compare();
+  Score sc(score, detectorName, _usedet);
+  s.push_back(sc);
+  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
+}

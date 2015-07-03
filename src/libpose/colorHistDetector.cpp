@@ -683,7 +683,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     }
     if (sortedLabels.size() == 0) // if labels for current body part is not builded
     {
-      for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
+      for (float rot = theta - minTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
       {
         Point2f p0 = Point2f(0, 0); // the point of unit vector
         Point2f p1 = Point2f(1.0, 0); // the point of unit vector
@@ -783,7 +783,8 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
       }
     }
     PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
-    t.push_back(labels); // add current point labels
+    if (labels.size() > 0)
+      t.push_back(labels); // add current point labels
 
     for (uint32_t i = 0; i < sortedLabels.size(); i++)
     {
@@ -1349,24 +1350,41 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
   return pixelLabels;
 }
 
-LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet)
+float ColorHistDetector::compare(void)
 {
-  vector <Point3i> partPixelColours;
+  if (comparer_bodyPart == 0 || comparer_frame == 0 || comparer_pixelDistributions == 0 || comparer_pixelLabels == 0 || comparer_j0 == 0 || comparer_j1 == 0)
+  {
+    stringstream ss;
+    ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_frame == 0 ? "comparer_frame == 0 " : "") << (comparer_pixelDistributions == 0 ? "comparer_pixelDistributions == 0" : "") << (comparer_pixelLabels == 0 ? "comparer_pixelLabels == 0" : "") << (comparer_j0 == 0 ? "comparer_j0 == 0" : "") << (comparer_j1 == 0 ? "comparer_j1 == 0" : "") << endl;
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
+  try
+  {
+    return compare(*comparer_bodyPart, *comparer_frame, *comparer_pixelDistributions, *comparer_pixelLabels, *comparer_j0, *comparer_j1);
+  }
+  catch (...)
+  {
+    if (debugLevelParam >= 1)
+      cerr << ERROR_HEADER << "Dirty Label" << endl;
+    return -1.0f;
+  }
+}
+
+float ColorHistDetector::compare(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1)
+{
   Mat maskMat = frame->getMask(); // copy mask from the frame 
   Mat imgMat = frame->getImage(); // copy image from the frame
   Point2f boxCenter = j0 * 0.5 + j1 * 0.5; // segment center
   float boneLength = getBoneLength(j0, j1); // distance between joints
-  float rot = float(PoseHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));// tilt angle
   POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1); // expected bodypart location area?
   uint32_t totalPixels = 0;
   uint32_t pixelsInMask = 0;
-  uint32_t pixelsWithLabel = 0;
   float totalPixelLabelScore = 0;
   float pixDistAvg = 0;
   float pixDistNum = 0;
   PartModel model;
-  stringstream detectorName;
-  detectorName << getID();
   try
   {
     model = partModels.at(bodyPart.getPartID()); // copy part model for the "bodyPart"
@@ -1385,15 +1403,45 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   {
     maskMat.release();
     imgMat.release();
+    stringstream ss;
+    ss << "Couldn't get avgSampleSizeFg";
     if (debugLevelParam >= 2)
-      cerr << ERROR_HEADER << "Dirty label!" << endl;
-    Score sc(-1.0f, detectorName.str(), _useCSdet);
-    vector <Score> s;
-    s.push_back(sc);
-    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
   }
   float xmax, ymax, xmin, ymin;
   rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
+  Mat bodyPartPixelDistribution;
+  try
+  {
+    bodyPartPixelDistribution = pixelDistributions.at(bodyPart.getPartID());
+  }
+  catch (...)
+  {
+    maskMat.release();
+    imgMat.release();
+    stringstream ss;
+    ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "]";
+    if (debugLevelParam >= 2)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
+  Mat bodyPartLixelLabels;
+  try
+  {
+    bodyPartLixelLabels = pixelLabels.at(bodyPart.getPartID());
+  }
+  catch (...)
+  {
+    maskMat.release();
+    imgMat.release();
+    bodyPartPixelDistribution.release();
+    stringstream ss;
+    ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "]";
+    if (debugLevelParam >= 2)
+      cerr << ERROR_HEADER << ss.str() << endl;
+    throw logic_error(ss.str());
+  }
   // Scan the area near the bodypart center
   for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
   {
@@ -1415,65 +1463,54 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
             {
               maskMat.release();
               imgMat.release();
-              if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << "Can't get maskMat [" << j << "][" << i << "]" << endl;
+              bodyPartPixelDistribution.release();
+              bodyPartLixelLabels.release();
+              stringstream ss;
+              ss << "Can't get maskMat [" << j << "][" << i << "]";
               if (debugLevelParam >= 2)
-                cerr << ERROR_HEADER << "Dirty label!" << endl;
-              Score sc(-1.0f, detectorName.str(), _useCSdet);
-              vector <Score> s;
-              s.push_back(sc);
-              return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+                cerr << ERROR_HEADER << ss.str() << endl;
+              throw logic_error(ss.str());
             }
             bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
             {
               try
               {
-                pixDistAvg += pixelDistributions.at(bodyPart.getPartID()).at<float>(j, i); // Accumulation the "distributions" of contained pixels
+                pixDistAvg += bodyPartPixelDistribution.at<float>(j, i); // Accumulation the "distributions" of contained pixels
               }
               catch (...)
               {
                 maskMat.release();
                 imgMat.release();
-                if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << j << "][" << i << "]" << endl;
+                bodyPartPixelDistribution.release();
+                bodyPartLixelLabels.release();
+                stringstream ss;
+                ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << j << "][" << i << "]";
                 if (debugLevelParam >= 2)
-                  cerr << ERROR_HEADER << "Dirty label!" << endl;
-                Score sc(-1.0f, detectorName.str(), _useCSdet);
-                vector <Score> s;
-                s.push_back(sc);
-                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+                  cerr << ERROR_HEADER << ss.str() << endl;
+                throw logic_error(ss.str());
               }
               pixDistNum++; // counting of the all scanned pixels
               try
               {
-                if (pixelLabels.at(bodyPart.getPartID()).at<float>(j, i))
+                if (bodyPartLixelLabels.at<float>(j, i))
                 {
-                  pixelsWithLabel++;
-                  totalPixelLabelScore += pixelLabels.at(bodyPart.getPartID()).at<float>(j, i); // Accumulation of the pixel labels
+                  totalPixelLabelScore += bodyPartLixelLabels.at<float>(j, i); // Accumulation of the pixel labels
                 }
               }
               catch (...)
               {
                 maskMat.release();
                 imgMat.release();
-                if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << j << "][" << i << "]" << endl;
+                bodyPartPixelDistribution.release();
+                bodyPartLixelLabels.release();
+                stringstream ss;
+                ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << j << "][" << i << "]";
                 if (debugLevelParam >= 2)
-                  cerr << ERROR_HEADER << "Dirty label!" << endl;
-                Score sc(-1.0f, detectorName.str(), _useCSdet);
-                vector <Score> s;
-                s.push_back(sc);
-                return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+                  cerr << ERROR_HEADER << ss.str() << endl;
+                throw logic_error(ss.str());
               }
-              // copy colors components of the current pixel
-              Vec3b intensity = imgMat.at<Vec3b>(j, i);
-              uint8_t blue = intensity.val[0];
-              uint8_t green = intensity.val[1];
-              uint8_t red = intensity.val[2];
-              Point3i ptColor(red, green, blue);
               pixelsInMask++; // counting pixels within the mask
-              partPixelColours.push_back(ptColor); // insert part pixel color into colorset
             }
           }
         }
@@ -1482,28 +1519,48 @@ LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map 
   }
   maskMat.release();
   imgMat.release();
+  bodyPartPixelDistribution.release();
+  bodyPartLixelLabels.release();
   float supportScore = 0;
   float inMaskSupportScore = 0;
   pixDistAvg /= (float)pixDistNum;  // average "distributions"
   float inMaskSuppWeight = 0.5;
-  if (partPixelColours.size() > 0 && totalPixelLabelScore > 0 && totalPixels > 10)
+  if (totalPixelLabelScore > 0 && totalPixels > 10)
   {
     supportScore = (float)totalPixelLabelScore / (float)totalPixels;
     inMaskSupportScore = (float)totalPixelLabelScore / (float)pixelsInMask;
-    PartModel model(nBins);
-    setPartHistogramm(model, partPixelColours); // Build the part histogram
     float score = 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + inMaskSuppWeight * inMaskSupportScore);
-    Score sc(score, detectorName.str(), _useCSdet); // create the score
-    vector <Score> s;
-    s.push_back(sc); // the set of scores
-    return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, false);// create the limb label
+    return score;
   }
+  stringstream ss;
+  ss << "Dirty label!";
   if (debugLevelParam >= 2)
-    cerr << ERROR_HEADER << "Dirty label!" << endl;
-  Score sc(-1.0f, detectorName.str(), _useCSdet);
-  vector <Score> s;
-  s.push_back(sc);
-  return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, true); // create the limb label
+    cerr << ERROR_HEADER << ss.str() << endl;
+  throw logic_error(ss.str());
+}
+
+LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet)
+{
+  stringstream detectorName;
+  detectorName << getID();
+
+  comparer_bodyPart = &bodyPart;
+  comparer_frame = &frame;
+  comparer_pixelDistributions = &pixelDistributions;
+  comparer_pixelLabels = &pixelLabels;
+  comparer_j0 = &j0;
+  comparer_j1 = &j1;
+
+  LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), _useCSdet);
+
+  comparer_bodyPart = 0;
+  comparer_frame = 0;
+  comparer_pixelDistributions = 0;
+  comparer_pixelLabels = 0;
+  comparer_j0 = 0;
+  comparer_j1 = 0;
+
+  return label;
 }
 
 //Used only as prevent a warning for "const uint8_t nBins";
