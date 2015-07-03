@@ -1364,10 +1364,10 @@ float ColorHistDetector::compare(void)
   {
     return compare(*comparer_bodyPart, *comparer_frame, *comparer_pixelDistributions, *comparer_pixelLabels, *comparer_j0, *comparer_j1);
   }
-  catch (...)
+  catch (exception ex)
   {
     if (debugLevelParam >= 1)
-      cerr << ERROR_HEADER << "Dirty Label" << endl;
+      cerr << ERROR_HEADER << "Dirty Label: " << ex.what() << endl;
     return -1.0f;
   }
 }
