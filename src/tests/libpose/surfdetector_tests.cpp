@@ -189,9 +189,14 @@ TEST(surfDetectorTests, train)
     D.train(frames, params);
 
     //Calculate expected value
-    SurfFeatureDetector D1(minHessian);
     vector <KeyPoint> keyPoints;
+#if OpenCV_VERSION_MAJOR == 3
+    Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
+    D1->detect(image, keyPoints);
+#else
+    SurfFeatureDetector D1(minHessian);
     D1.detect(image, keyPoints);
+#endif    
     map<uint32_t, Mat> expected_descriptors;
     map<uint32_t, vector<Point2f>> expected_rects;
     map<uint32_t, vector<KeyPoint>> expected_Keypoints;
@@ -214,9 +219,14 @@ TEST(surfDetectorTests, train)
           temp.push_back(keyPoints[i]);
       expected_Keypoints.emplace(pair<uint32_t, vector<KeyPoint>>(partID, temp));
 
-      SurfDescriptorExtractor extractor;
       Mat temp_descriptors;
+#if OpenCV_VERSION_MAJOR == 3
+      Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+      extractor->compute(image, expected_Keypoints[partID], temp_descriptors);
+#else
+      SurfDescriptorExtractor extractor;
       extractor.compute(image, expected_Keypoints[partID], temp_descriptors);
+#endif
       expected_descriptors.emplace(pair<uint32_t, Mat>(partID, temp_descriptors.clone()));
       temp_descriptors.release();
       temp.clear();
@@ -297,9 +307,14 @@ TEST(surfDetectorTests, compare)
     SurfDetector::PartModel partModel0 = PartModels[partID];
 
     //Create a bad part models for selected body part
-    SurfFeatureDetector D1(minHessian);
     vector <KeyPoint> _keyPoints;
+#if OpenCV_VERSION_MAJOR == 3
+    Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
+    D1->detect(image, _keyPoints);
+#else
+    SurfFeatureDetector D1(minHessian);    
     D1.detect(image, _keyPoints);
+#endif
 
     Point2f shift1(100, 40), shift2(-100, 0);
     float boneLength = D.getBoneLength(p0, p1);
