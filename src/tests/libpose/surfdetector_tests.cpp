@@ -315,11 +315,15 @@ TEST(surfDetectorTests, compare)
       if (partModel2.partModelRect.containsPoint(_keyPoints[i].pt) > 0)
         partModel2.keyPoints.push_back(_keyPoints[i]);
     }
-
+#if OpenCV_VERSION_MAJOR == 3
+    Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+    extractor->compute(image, partModel1.keyPoints, partModel1.descriptors);
+    extractor->compute(image, partModel2.keyPoints, partModel2.descriptors);
+#else
     SurfDescriptorExtractor extractor;
     extractor.compute(image, partModel1.keyPoints, partModel1.descriptors);
     extractor.compute(image, partModel2.keyPoints, partModel2.descriptors);
-
+#endif
     //Put expected and actual polygons and keypoints into image file
     Mat KeyPoints_image, PartKeyPoints;
 
