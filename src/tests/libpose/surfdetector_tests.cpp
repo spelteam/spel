@@ -191,7 +191,7 @@ TEST(surfDetectorTests, train)
     //Calculate expected value
     vector <KeyPoint> keyPoints;
 #if OpenCV_VERSION_MAJOR == 3
-    Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
+    Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
     D1->detect(image, keyPoints);
 #else
     SurfFeatureDetector D1(minHessian);
@@ -309,7 +309,7 @@ TEST(surfDetectorTests, compare)
     //Create a bad part models for selected body part
     vector <KeyPoint> _keyPoints;
 #if OpenCV_VERSION_MAJOR == 3
-    Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
+    Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
     D1->detect(image, _keyPoints);
 #else
     SurfFeatureDetector D1(minHessian);    
