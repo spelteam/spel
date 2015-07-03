@@ -43,7 +43,6 @@ class SurfDetector : public Detector
 	  FRIEND_TEST(surfDetectorTests, computeDescriptors);
 	  FRIEND_TEST(surfDetectorTests, train);
 	  FRIEND_TEST(surfDetectorTests, generateLabel);
-	  FRIEND_TEST(surfDetectorTest, detect);
 	  FRIEND_TEST(surfDetectorTests, compare);
 #endif  // DEBUG
     int id;

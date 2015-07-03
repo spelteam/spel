@@ -86,24 +86,24 @@
   <Frame id="1" imgPath="0000.png" maskPath="mask0000.pgm" camPath="0000.camu" isKeyframe="false" gpX="" gpY=""/>
   <Frame id="2" imgPath="0000.png" maskPath="mask0000.pgm" camPath="0000.camu" isKeyframe="true" gpX="" gpY="">
    <BodyJoints>
-    <BodyJoint x="479" y="97" depthSign="false" id="0"/>
-    <BodyJoint x="489" y="51" depthSign="false"  id="1"/>
-    <BodyJoint x="487" y="99" depthSign="false" id="2"/>
-    <BodyJoint x="474" y="94" depthSign="true" id="3"/>
-    <BodyJoint x="488" y="44" depthSign="false" id="4"/>
-    <BodyJoint x="508" y="55" depthSign="false" id="5"/>
-    <BodyJoint x="478" y="44" depthSign="true" id="6"/>
-    <BodyJoint x="444" y="126" depthSign="false" id="7"/>
-    <BodyJoint x="467" y="134" depthSign="true" id="8"/>
-    <BodyJoint x="489" y="30" depthSign="false" id="9"/>
-    <BodyJoint x="499" y="67" depthSign="false" id="10"/>
-    <BodyJoint x="454" y="36" depthSign="true" id="11"/>
-    <BodyJoint x="495" y="124" depthSign="false" id="12"/>
-    <BodyJoint x="473" y="177" depthSign="true" id="13"/>
-    <BodyJoint x="470" y="68" depthSign="false" id="14"/>
-    <BodyJoint x="427" y="35" depthSign="false" id="15"/>
-    <BodyJoint x="507" y="134" depthSign="false" id="16"/>
-    <BodyJoint x="449" y="184" depthSign="true" id="17"/>
+    <BodyJoint x="476" y="120" depthSign="false" id="0"/>
+    <BodyJoint x="482" y="75" depthSign="false" id="1"/>
+    <BodyJoint x="481" y="120" depthSign="false" id="2"/>
+    <BodyJoint x="471" y="118" depthSign="true" id="3"/>
+    <BodyJoint x="482" y="67" depthSign="false" id="4"/>
+    <BodyJoint x="495" y="77" depthSign="false" id="5"/>
+    <BodyJoint x="477" y="67" depthSign="true" id="6"/>
+    <BodyJoint x="500" y="156" depthSign="false" id="7"/>
+    <BodyJoint x="430" y="141" depthSign="true" id="8"/>
+    <BodyJoint x="482" y="51" depthSign="false" id="9"/>
+    <BodyJoint x="472" y="87" depthSign="false" id="10"/>
+    <BodyJoint x="468" y="58" depthSign="true" id="11"/>
+    <BodyJoint x="541" y="133" depthSign="false" id="12"/>
+    <BodyJoint x="413" y="184" depthSign="true" id="13"/>
+    <BodyJoint x="440" y="79" depthSign="false" id="14"/>
+    <BodyJoint x="453" y="58" depthSign="false" id="15"/>
+    <BodyJoint x="559" y="143" depthSign="false" id="16"/>
+    <BodyJoint x="389" y="182" depthSign="true" id="17"/>
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
