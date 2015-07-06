@@ -1,5 +1,7 @@
 #include "projectRunner.hpp"
 
+using namespace std;
+
 ProjectRunner::ProjectRunner(string _testName)
 {
   testName = _testName;
@@ -7,11 +9,22 @@ ProjectRunner::ProjectRunner(string _testName)
 
 int ProjectRunner::Run(int argc, char **argv)
 {
-  if (argc != 3)
+  if (argc < 3)
   {
-    cout << "Usage " << argv[0] << " [project.xml] [out directory]" << endl;
+    cout << "Usage " << argv[0] << " [project.xml] [out directory] [--no-draw]" << endl;
     return -1;
   }
+
+  bool bDraw = true;
+  if (argc > 3)
+  {
+    for (int i = 3; i < argc; i++)
+    {
+      if (strcmp(argv[i], "--no-draw") == 0)
+        bDraw = false;
+    }
+  }
+
   string curFolder = argv[1];
   curFolder = curFolder.substr(0, curFolder.find_last_of("/"));
   if (curFolder.back() != '/')
@@ -146,7 +159,8 @@ int ProjectRunner::Run(int argc, char **argv)
           cout << "Detecting frame " << f->getID() << "..." << endl;
           labels = detect(f, detectParams, labels);
           projectLoader.Save(labels, argv[2], f->getID());
-          projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
+          if (bDraw)
+            projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
         }
         catch (exception &e)
         {
