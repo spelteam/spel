@@ -734,6 +734,11 @@ bool ProjectLoader::drawSkeleton(Frame *frame, string outFolder, Scalar color, i
 
   tree<BodyPart> partTree = skel.getPartTree();
 
+  Scalar col((0, 255, 255)); //yellow for frames
+
+  if(frame->getFrametype()==KEYFRAME)
+      col = Scalar(0, 0, 255); //red for keyframes
+
   //draw the skeletal prior
   for (tree<BodyPart>::iterator partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
   {
@@ -747,11 +752,11 @@ bool ProjectLoader::drawSkeleton(Frame *frame, string outFolder, Scalar color, i
     p0 = skel.getBodyJoint(j0)->getImageLocation();
     p1 = skel.getBodyJoint(j1)->getImageLocation();
 
-    line(image, p0, p1, Scalar(0, 255, 255), lineWidth, CV_AA);
+    line(image, p0, p1, col, lineWidth, CV_AA);
 
     //    //draw the child and parent joints
-    //    circle(image, p0, 2, Scalar(255, 0, 255), lineWidth, CV_AA);
-    //    circle(image, p1, 2, Scalar(0, 255, 0), lineWidth, CV_AA);
+    circle(image, p0, lineWidth, col, lineWidth, CV_AA);
+    circle(image, p1, lineWidth, col, lineWidth, CV_AA);
 
     //draw angle arcs
     //float pixelRadius = partIter->getSearchRadius();
