@@ -11,7 +11,7 @@ int ProjectRunner::Run(int argc, char **argv)
 {
   if (argc < 3)
   {
-    cout << "Usage " << argv[0] << " [project.xml] [out directory] [--no-draw]" << endl;
+    cout << "Usage:\t" << argv[0] << " [project.xml] [out directory] [--no-draw]" << endl;
     return -1;
   }
 
