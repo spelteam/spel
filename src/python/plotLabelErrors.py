@@ -109,7 +109,24 @@ percentileParamErrors=[]
 
 #print result
 nParts = 0
+
+
+tme=[] #top scoring #1 ranked label ERROR, for each param, we want this to be low
+tms=[] #top scoring #1 ranked label SCORE, for each param, we want this to be low
+
+tmi=[] #lowest error label index within percentTopLabels, for each param, we want this to be low
+tmig=[] #lowest error label index GLOBALLY, for each param, we want this to be low
+
+nal=[] #number of acceptable labels within percentTopLabels, we want this to be high, accept thresh defined in detectorTuner
+
+
+
 for i in range(numParams):
+
+	tme.append([])
+	tmi.append([])
+	tms.append([])
+
 
 	topErr=[]
 	topCnt=[]
@@ -175,6 +192,9 @@ for i in range(numParams):
 				minIndex=-1.0
 				topError=float(result[i][1][j][1][k][1][0][2])
 
+				topMinErr=1000000000
+				topMinIndex=-1.0
+
 				rms=[]
 				cnts=[]
 				
@@ -188,6 +208,7 @@ for i in range(numParams):
 				for l in range(numLabels):
 					
 					errVal = float(result[i][1][j][1][k][1][l][2])
+					scoreVal = float(result[i][1][j][1][k][1][l][1])
 
 					if l<numTopLables:
 						topErrAbs[l]+=errVal
@@ -202,6 +223,10 @@ for i in range(numParams):
 						cnts[1]+=1
 						rTest+=errVal
 						rCount+=1
+						if errVal < topMinErr:
+							topMinErr = errVal
+							topMinIndex = l
+
 					if l<tenth*2:
 						rms[2]+=errVal #add error
 						cnts[2]+=1
@@ -240,6 +265,10 @@ for i in range(numParams):
 
 				rmsError+=topError
 				avgMinIndex+=minIndex
+
+				tme[i].append(topErr) #take the top labe's error
+				tmi[i].append(topMinIndex) #store the index of the lowest label within 10%
+				tms[i].append(scoreVal)
 
 				partFrameErrors.append(partErrors)
 		
@@ -318,32 +347,34 @@ for i in range(numParams):
 #raw_input('here')
 
 #Do plotting
-fig = plt.figure(1, figsize=(28.8, 16.2), dpi=600)
+fig1 = plt.figure(1, figsize=(24.2, 10.8), dpi=600)
+fig2 = plt.figure(2, figsize=(44.2, 10.8), dpi=600)
+fig3 = plt.figure(3, figsize=(44.2, 10.8), dpi=600)
 
-ax = fig.add_subplot(211)#, projection='2d')
-ax.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+ax1 = fig1.add_subplot(111)#, projection='2d')
+ax1.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
-ax.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
-              alpha=0.5)
-bx = fig.add_subplot(212)#, projection='2d')
-bx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
-              alpha=0.5)
-bx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+ax1.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
 
-fig2 = plt.figure(2, figsize=(28.8, 16.2), dpi=600)
-cx = fig2.add_subplot(211)#, projection='3d')
-cx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+ax2 = fig2.add_subplot(111)#, projection='2d')
+ax2.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
-cx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+ax2.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
-dx = fig2.add_subplot(212)#, projection='3d')
-dx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+ax3 = fig2.add_subplot(111)#, projection='3d')
+ax3.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
-dx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+ax3.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
+
+# dx = fig2.add_subplot(212)#, projection='3d')
+# dx.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+#               alpha=0.5)
+# dx.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+#               alpha=0.5)
 
 
 pcol = [(0.94,0.64,1.0),(0.0,0.46,0.86),(0.6,0.25,0.0),(0.3,0,0.36),(0.1,0.1,0.1),(0,0.36,0.19),(0.17,0.8,0.28),(1,0.8,0.6),
@@ -373,38 +404,59 @@ for i in range(numParams):
 	pp.append(percentileParamErrors[i][1])
 
 	
-	cx.plot(range(numTopLables), topErrorsP[i], color=pcol[i], alpha=1.0, label=str(result[i][0])) #draw min ranks
-	dx.plot(range(numTopLables), topErrorsA[i], color=pcol[i], alpha=1.0, label=str(result[i][0])) #draw min ranks
-
-ax.plot(paramVals, pp, color='red', alpha=1.0)#, label=str(ev)) #a point at each parameters setting, where ev is the percentile 0=1, 1=10,..., 10=100
-
-for p in range(nParts):
-
-	if p==0 or p>5: #=0 or p>5: # don't plot the useless parts
-		bx.plot(paramVals, pc[p], color=pcol[p], alpha=1.0, label=str(p))#, label=str(ev)) #a point at each parameters setting, where ev is the percentile 0=1, 1=10,..., 10=100
+	cx.plot(range(numTopLables), topErrorsP[i], color=pcol[i], alpha=1.0, label=str(result[i][0]), linewidth=4.0) #draw min ranks
+	#dx.plot(range(numTopLables), topErrorsA[i], color=pcol[i], alpha=1.0, label=str(result[i][0]), linewidth=4.0) #draw min ranks
 
 
-#ax.set_xlabel(paramName+' value', fontsize=18)
-ax.set_ylabel('RMS Error (pixels)', fontsize=18)
 
-bx.set_xlabel(paramName+' value', fontsize=18)
-bx.set_ylabel('RMS Error (pixels)', fontsize=18)
+# for p in range(nParts):
 
-cx.set_xlabel('Label Rank (%)', fontsize=18)
-cx.set_ylabel('RMS Error (pixels)', fontsize=18)
+# 	if p==0 or p>5: #=0 or p>5: # don't plot the useless parts
+# 		bx.plot(paramVals, pc[p], color=pcol[p], alpha=1.0, label='Part '+str(p), linewidth=4.0)#, label=str(ev)) #a point at each parameters setting, where ev is the percentile 0=1, 1=10,..., 10=100
 
-dx.set_xlabel('Label Rank', fontsize=18)
-dx.set_ylabel('RMS Error (pixels)', fontsize=18)
+#bx.plot(paramVals, pp, color='red', alpha=1.0, label='Average', linewidth=6.0)#, label=str(ev)) #a point at each parameters setting, where ev is the percentile 0=1, 1=10,..., 10=100
+
+ax.boxplot(tmi)
+bx.boxplot(tme)
+
+bx.set_xticklabels(paramVals)
+ax.set_xticklabels(paramVals)
+
+
+ax.set_xlabel(paramName+' value', fontsize=18)
+ax.set_ylabel('Detection Rank', fontsize=18)
+
+plt.rc('legend',**{'fontsize':20})
+
+
+plt.tick_params(axis='both', which='major', labelsize=20)
+plt.tick_params(axis='both', which='minor', labelsize=20)
+
+bx.set_xlabel(paramName+' value', fontsize=25)
+bx.set_ylabel('Detection RMS Error (pixels)', fontsize=25)
+
+cx.set_xlabel('Label Rank (%)', fontsize=25)
+cx.set_ylabel('RMS Error (pixels)', fontsize=25)
+
+# dx.set_xlabel('Label Rank', fontsize=18)
+# dx.set_ylabel('RMS Error (pixels)', fontsize=18)
 
 handles1, labels1 = bx.get_legend_handles_labels()
 bx.legend(handles1, labels1)
 bx.grid()
-bx.legend()
+bx.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+          ncol=3, fancybox=True, shadow=True)
+bx.get_legend().set_title(title="Part")
 
 handles, labels = cx.get_legend_handles_labels()
 cx.legend(handles, labels)
 cx.grid()
-cx.legend()
+cx.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+          ncol=3, fancybox=True, shadow=True)
+cx.get_legend().set_title(title=str(paramName)+" value")
+
+plt.setp(cx.get_legend().get_title(),fontsize=24)
+plt.setp(bx.get_legend().get_title(),fontsize=24)
 
 print errFile.split('.')
 
@@ -415,8 +467,8 @@ plot2Save = '..'+errFile.split('.')[2]+'_q.png'
 #plotSave = errFile.split('.')[0]+'_s.png'
 #plot2Save = errFile.split('.')[0]+'_q.png'
 
-fig.suptitle(plotTitle, fontsize=30)
-fig2.suptitle(plotTitle, fontsize=30)
+fig.suptitle("Top 10%  labels vs Error ", fontsize=35)
+fig2.suptitle("Error vs Label Rank", fontsize=30)
 
 fig.savefig(plotSave, bbox_inches='tight')
 fig2.savefig(plot2Save, bbox_inches='tight')
