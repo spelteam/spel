@@ -39,10 +39,10 @@ void SurfDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   const string sMaxFrameHeight = "maxFrameHeight";
 
-  params.emplace(sMaxFrameHeight, frames.at(0)->getImage().rows);
+  params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
 
   maxFrameHeight = params.at(sMaxFrameHeight);
-  //maxFrameHeight=frames.at(0)->getImage().rows; //@TODO fix this later
+  //maxFrameHeight=frames.at(0)->getFrameSize().height; //@TODO fix this later
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
@@ -54,7 +54,7 @@ void SurfDetector::train(vector <Frame*> _frames, map <string, float> params)
       continue;
     }
 
-    int originalSize = (*frameNum)->getImage().rows;
+    int originalSize = (*frameNum)->getFrameSize().height;
 
     Frame *workFrame = 0;
     if ((*frameNum)->getFrametype() == KEYFRAME)
@@ -168,7 +168,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
 
   vector <vector <LimbLabel> > t;
 
-  int originalSize = frame->getImage().rows;
+  int originalSize = frame->getFrameSize().height;
 
   Frame *workFrame = 0;
   if (frame->getFrametype() == KEYFRAME)
@@ -331,10 +331,10 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
     if (sortedLabels.size() > 0)
     {
       sort(sortedLabels.begin(), sortedLabels.end());
-      Mat locations(workFrame->getImage().cols, workFrame->getImage().rows, DataType<uint32_t>::type);
-      for (int32_t i = 0; i < workFrame->getImage().cols; i++)
+      Mat locations(workFrame->getFrameSize().width, workFrame->getFrameSize().height, DataType<uint32_t>::type);
+      for (int32_t i = 0; i < workFrame->getFrameSize().width; i++)
       {
-        for (int32_t j = 0; j < workFrame->getImage().rows; j++)
+        for (int32_t j = 0; j < workFrame->getFrameSize().height; j++)
         {
           try
           {

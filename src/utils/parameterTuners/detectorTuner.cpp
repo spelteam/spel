@@ -649,7 +649,7 @@ int main (int argc, char **argv)
         seq.estimateUniformScale(params);
         seq.computeInterpolation(params);
 
-        float lineWidth = (float)vFrames[0]->getImage().rows/210.0;
+        float lineWidth = (float)vFrames[0]->getFrameSize().height/210.0;
 
 //        if(param==param_min || paramName=="numKeyframes") //only draw once, unless we're testing number of keyframes
 //        {

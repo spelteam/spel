@@ -37,7 +37,7 @@ public:
   float getExpectedDistance(void) const;
   void setExpectedDistance(float _expectedDistance);
 
-  POSERECT <Point2f> getPartPolygon(void);
+  POSERECT <Point2f> getPartPolygon(void) const;
   void setPartPolygon(POSERECT <Point2f> _partPolygon);
   float getLWRatio(void) const;
   void setLWRatio(float _lwRatio);
@@ -48,7 +48,7 @@ public:
   float getSearchRadius(void) const;
   void setSearchRadius(float _searchRadius);
 
-  float getRotationSearchRange(void);
+  float getRotationSearchRange(void) const;
   void setRotationSearchRange(float _rotationAngle);
 private:
   /// identifier, must be unique within the limits of class

@@ -182,7 +182,7 @@ std::ostream& operator<<(std::ostream& os, const BodyPart &bp)
   return os << s;
 }
 
-POSERECT <Point2f> BodyPart::getPartPolygon(void)
+POSERECT <Point2f> BodyPart::getPartPolygon(void) const
 {
   return partPolygon;
 }
@@ -212,7 +212,7 @@ void BodyPart::setRelativeLength(float _relativeLength)
   relativeLength = _relativeLength;
 }
 
-float BodyPart::getRotationSearchRange(void)
+float BodyPart::getRotationSearchRange(void) const
 {
   return rotationSearchRange;
 }

@@ -141,7 +141,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
 
   const string sMaxFrameHeight = "maxFrameHeight";
 
-  params.emplace(sMaxFrameHeight, frames.at(0)->getImage().rows);
+  params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
 
   maxFrameHeight = params.at(sMaxFrameHeight);
 
@@ -172,7 +172,7 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
       continue; // skip unmarked frames
     }
 
-    int originalSize = (*frameNum)->getImage().rows;
+    int originalSize = (*frameNum)->getFrameSize().height;
 
     Frame *workFrame = 0;
     if ((*frameNum)->getFrametype() == KEYFRAME)
@@ -563,7 +563,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
   searchStepCoeff = params.at(sSearchStepCoeff);
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
-  int originalSize = frame->getImage().rows;
+  int originalSize = frame->getFrameSize().height;
 
   Frame *workFrame = 0;
   if (frame->getFrametype() == KEYFRAME)
@@ -712,10 +712,10 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
     if (sortedLabels.size() > 0) // if labels vector is not empty
     {
       sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
-      Mat locations(workFrame->getImage().rows, workFrame->getImage().cols, DataType<uint32_t>::type); // create the temporary matrix
-      for (int32_t i = 0; i < workFrame->getImage().cols; i++)
+      Mat locations(workFrame->getFrameSize().height, workFrame->getFrameSize().width, DataType<uint32_t>::type); // create the temporary matrix
+      for (int32_t i = 0; i < workFrame->getFrameSize().width; i++)
       {
-        for (int32_t j = 0; j < workFrame->getImage().rows; j++)
+        for (int32_t j = 0; j < workFrame->getFrameSize().height; j++)
         {
           try
           {
