@@ -649,7 +649,7 @@ int main (int argc, char **argv)
         seq.estimateUniformScale(params);
         seq.computeInterpolation(params);
 
-        float lineWidth = (float)vFrames[0]->getFrameSize().height/210.0;
+//        float lineWidth = (float)vFrames[0]->getImage().rows/210.0;
 
 //        if(param==param_min || paramName=="numKeyframes") //only draw once, unless we're testing number of keyframes
 //        {
@@ -788,10 +788,16 @@ int main (int argc, char **argv)
                     out << "\t\t(" << endl;
                     vector<float> partErrors = frameErrors[row]; //errors for a part
 
+                    BodyPart * bp = vFrames[l]->getSkeleton().getBodyPart(partLabels[0].getLimbID());
+                    float partWidth = bp->getRelativeLength()/bp->getLWRatio()*vFrames[l]->getSkeleton().getScale();
+                    float acceptThresh=025;
+
                     for(uint32_t e=0; e<partErrors.size(); ++e)
                     {
                         //this is a row in the output file
                         //rank labelScore labelError
+
+
 
                         string hogName = "18500";
                         string csName = "4409412";
@@ -840,7 +846,7 @@ int main (int argc, char **argv)
                             surfScore=1.0;
 
                         finalScore=csScore*useCS+hogScore*useHoG+surfScore*useSURF;
-                        float avgScore = partLabels[e].getAvgScore();
+                        //float avgScore = partLabels[e].getAvgScore();
 
 //                        if(row==15)
 //                            partLabels[0] > partLabels[1];
@@ -850,8 +856,11 @@ int main (int argc, char **argv)
                         //finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);
 
                         vector<Point2f> poly = partLabels[e].getPolygon();
+                        bool isAccepted = false;
+                        if(e <= partWidth*acceptThresh)
+                            isAccepted = true;
 
-                        out << "\t\t\t" << e << " " << finalScore << " " << partErrors[e] << " " << csScore*useCS << " " <<  hogScore*useHoG << " " << surfScore*useSURF << " ";
+                        out << "\t\t\t" << e << " " << finalScore << " " << partErrors[e] << " " << isAccepted << " " << csScore*useCS << " " <<  hogScore*useHoG << " " << surfScore*useSURF << " ";
 
                         for(auto i=0; i<poly.size();++i)
                             out << poly[i].x << " " << poly[i].y << " ";
