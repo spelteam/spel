@@ -160,7 +160,10 @@ int ProjectRunner::Run(int argc, char **argv)
           labels = detect(f, detectParams, labels);
           projectLoader.Save(labels, argv[2], f->getID());
           if (bDraw)
+          {
             projectLoader.Draw(labels, f, argv[2], f->getID(), Scalar(0, 0, 0), Scalar(0, 0, 255), 2);
+            DrawSpecific(argv[2]);
+          }
         }
         catch (exception &e)
         {
