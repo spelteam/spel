@@ -131,6 +131,9 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   float searchStepCoeff = 0.2f;
   const string sSearchStepCoeff = "searchStepCoeff";
 
+  float knnMatchCoeff = 0.8f;
+  const string sKnnMatchCoeff = "knnMathCoeff";
+
   // first we need to check all used params
   params.emplace(sMinHessian, minHessian);
   params.emplace(sSearchDistCoeff, searchDistCoeff);
@@ -145,6 +148,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   params.emplace(sRotationThreshold, rotationThreshold);
   params.emplace(sIsWeakTreshhold, isWeakTreshhold);
   params.emplace(sSearchStepCoeff, searchStepCoeff);
+  params.emplace(sKnnMatchCoeff, knnMatchCoeff);
 
   //now set actual param values
   minHessian = params.at(sMinHessian);
@@ -160,6 +164,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   rotationThreshold = params.at(sRotationThreshold);
   isWeakTreshhold = params.at(sIsWeakTreshhold);
   searchStepCoeff = params.at(sSearchStepCoeff);
+  knnMatchCoeff = params.at(sKnnMatchCoeff);
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
@@ -257,7 +262,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
       if (debugLevelParam >= 1)
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
-    }    
+    }
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
     for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
     {
@@ -293,7 +298,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet);
+              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet, knnMatchCoeff);
               sortedLabels.push_back(generatedLabel);
             }
           }
@@ -311,7 +316,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet);
+        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet, knnMatchCoeff);
         sortedLabels.push_back(generatedLabel);
       }
     }
@@ -532,7 +537,7 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   return partModel;
 }
 
-LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet)
+LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet, float knnMatchCoeff)
 {
   stringstream detectorName;
   detectorName << getID();
@@ -541,6 +546,7 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
   comparer_model = &partModel;
   comparer_j0 = &j0;
   comparer_j1 = &j1;
+  comparer_knnMatchCoeff = &knnMatchCoeff;
 
   LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), _useSURFdet);
 
@@ -548,6 +554,7 @@ LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j
   comparer_model = 0;
   comparer_j0 = 0;
   comparer_j1 = 0;
+  comparer_knnMatchCoeff = 0;
 
   return label;
 }
@@ -562,10 +569,10 @@ float SurfDetector::compare(void)
       cerr << ERROR_HEADER << ss.str() << endl;
     throw logic_error(ss.str());
   }
-  return compare(*comparer_bodyPart, *comparer_model, *comparer_j0, *comparer_j1);
+  return compare(*comparer_bodyPart, *comparer_model, *comparer_j0, *comparer_j1, *comparer_knnMatchCoeff);
 }
 
-float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1)
+float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1, float knnMatchCoeff)
 {
   if (model.descriptors.empty())
   {
@@ -581,7 +588,6 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
 
   float length = getBoneLength(j0, j1);
   float width = getBoneWidth(length, bodyPart);
-  float coeff = sqrt(pow(length, 2) + pow(width, 2));
 
   for (map <uint32_t, map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
   {
@@ -610,9 +616,9 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
               float s = 0;
               for (uint32_t i = 0; i < matches.size(); i++)
               {
-                if ((matches[i][0].distance < 0.6*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
+                if ((matches[i][0].distance < knnMatchCoeff * (matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
                 {
-                  s += matches[i][0].distance / coeff;
+                  s += matches[i][0].distance;
                 }
               }
               score += s / matches.size();

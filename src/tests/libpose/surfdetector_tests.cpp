@@ -354,9 +354,9 @@ TEST(surfDetectorTests, compare)
     D.train(frames, params);
 
     //Run "compare" function
-    float score0 = D.compare(bodyPart, partModel0, p0, p1);
-    float score1 = D.compare(bodyPart, partModel1, p0 + shift1, p1 + shift1);
-    float score2 = D.compare(bodyPart, partModel2, p0 + shift2, p1 + shift2);
+    float score0 = D.compare(bodyPart, partModel0, p0, p1, 0.8);
+    float score1 = D.compare(bodyPart, partModel1, p0 + shift1, p1 + shift1, 0.8);
+    float score2 = D.compare(bodyPart, partModel2, p0 + shift2, p1 + shift2, 0.8);
     
     //Put results
     cout << "\npartModel0.keyPoints.size = " << partModel0.keyPoints.size() << endl;
