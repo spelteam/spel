@@ -613,7 +613,7 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
           {
             if (partModel->second.descriptors.rows > 1 && model.descriptors.rows > 1)
             {
-              matcher.knnMatch(partModel->second.descriptors, model.descriptors, matches, 2);
+              matcher.knnMatch(model.descriptors, partModel->second.descriptors, matches, 2);
               float s = 0;
               for (uint32_t i = 0; i < matches.size(); i++)
               {
