@@ -588,6 +588,7 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
 
   float length = getBoneLength(j0, j1);
   float width = getBoneWidth(length, bodyPart);
+  float coeff = sqrt(pow(length, 2) + pow(width, 2));
 
   for (map <uint32_t, map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
   {
@@ -618,7 +619,7 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
               {
                 if ((matches[i][0].distance < knnMatchCoeff * (matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
                 {
-                  s += matches[i][0].distance;
+                  s += matches[i][0].distance / coeff;
                 }
               }
               score += s / matches.size();
