@@ -311,7 +311,7 @@ LimbLabel Detector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, str
 
 Frame *Detector::getFrame(uint32_t frameId)
 {
-  for each (auto f in frames)
+  for (auto f : frames)
   {
     if (f->getID() == frameId)
       return f;
