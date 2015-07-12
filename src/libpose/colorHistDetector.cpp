@@ -467,8 +467,8 @@ void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> param
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
         }
-        addPartHistogramm(partModel, partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
-        addBackgroundHistogramm(partModel, bgPixelColoursVector); // building histograms for current bodypart background colours
+        addPartHistogram(partModel, partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
+        addBackgroundHistogram(partModel, bgPixelColoursVector); // building histograms for current bodypart background colours
         partModels.at(partNumber) = partModel; // copy result to part models set
         if (debugLevelParam >= 2)
           cerr << "Found part model: " << partNumber << endl;
@@ -841,7 +841,7 @@ float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partMo
 }
 
 // Build into the "partModel" a histogram of the color set "partColors"
-void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors)
+void ColorHistDetector::setPartHistogram(PartModel &partModel, const vector <Point3i> &partColors)
 {
   // do not add sample if the number of pixels is zero
   if (partColors.size() == 0)
@@ -930,7 +930,7 @@ void ColorHistDetector::setPartHistogramm(PartModel &partModel, const vector <Po
 }
 
 // Take stock of the additional set of colors in the histogram
-void ColorHistDetector::addPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels)
+void ColorHistDetector::addPartHistogram(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels)
 {
   if (partColors.size() == 0) //do not add sample if the number of pixels is zero
     return;
@@ -1096,7 +1096,7 @@ float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, c
 }
 
 // Background histogram
-void ColorHistDetector::addBackgroundHistogramm(PartModel &partModel, const vector <Point3i> &bgColors)
+void ColorHistDetector::addBackgroundHistogram(PartModel &partModel, const vector <Point3i> &bgColors)
 {
   if (bgColors.size() == 0)
     return;

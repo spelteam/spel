@@ -49,9 +49,9 @@ private:
   const uint8_t nBins;
   map <int32_t, PartModel> partModels;
   float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
-  void setPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors);
-  void addPartHistogramm(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);
-  void addBackgroundHistogramm(PartModel &partModel, const vector <Point3i> &bgColors);
+  void setPartHistogram(PartModel &partModel, const vector <Point3i> &partColors);
+  void addPartHistogram(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);
+  void addBackgroundHistogram(PartModel &partModel, const vector <Point3i> &bgColors);
   float getAvgSampleSizeFg(const PartModel &partModel);
   float getAvgSampleSizeFgBetween(const PartModel &partModel, uint32_t s1, uint32_t s2);
   float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel);
