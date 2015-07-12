@@ -96,10 +96,10 @@ TEST(colorHistDetectorTest, Constructors)
   uint8_t _nBins = 10;
   const int maxIndex = _nBins - 1;
   ColorHistDetector::PartModel x0(_nBins);
-  EXPECT_EQ(0.0f, x0.partHistogramm[maxIndex][maxIndex][maxIndex]);
-  EXPECT_EQ(x0.nBins, x0.partHistogramm[maxIndex][maxIndex].size());
-  EXPECT_EQ(0.0f, x0.bgHistogramm[maxIndex][maxIndex][maxIndex]);
-  EXPECT_EQ(x0.nBins, x0.bgHistogramm[maxIndex][maxIndex].size());
+  EXPECT_EQ(0.0f, x0.partHistogram[maxIndex][maxIndex][maxIndex]);
+  EXPECT_EQ(x0.nBins, x0.partHistogram[maxIndex][maxIndex].size());
+  EXPECT_EQ(0.0f, x0.bgHistogram[maxIndex][maxIndex][maxIndex]);
+  EXPECT_EQ(x0.nBins, x0.bgHistogram[maxIndex][maxIndex].size());
 
   //Testing "ColorHistDetector" constructor with parameter "_nBins"
   ColorHistDetector chd1(_nBins);
@@ -115,8 +115,8 @@ TEST(colorHistDetectorTest, computePixelBelongingLikelihood)
   uint8_t t = i / _factor;
   ColorHistDetector chd2(nBins);
   ColorHistDetector::PartModel z(nBins);
-  z.partHistogramm[t][t][t] = 3.14f;
-  EXPECT_EQ(z.partHistogramm[t][t][t], chd2.computePixelBelongingLikelihood(z, i, i, i));
+  z.partHistogram[t][t][t] = 3.14f;
+  EXPECT_EQ(z.partHistogram[t][t][t], chd2.computePixelBelongingLikelihood(z, i, i, i));
   EXPECT_EQ(0.f, chd2.computePixelBelongingLikelihood(z, outside, outside, outside));
 }
 
@@ -134,8 +134,8 @@ TEST(colorHistDetectorTest, Operators)
   x.bgSampleSizes.push_back(98);
   x.fgBlankSizes.push_back(30);
   ColorHistDetector::PartModel y = x;
-  EXPECT_EQ(x.partHistogramm, y.partHistogramm);
-  EXPECT_EQ(x.bgHistogramm, y.bgHistogramm);
+  EXPECT_EQ(x.partHistogram, y.partHistogram);
+  EXPECT_EQ(x.bgHistogram, y.bgHistogram);
   EXPECT_EQ(x.sizeFG, y.sizeFG);
   EXPECT_EQ(x.fgNumSamples, y.fgNumSamples);
   EXPECT_EQ(x.bgNumSamples, y.bgNumSamples);
@@ -210,21 +210,21 @@ TEST(colorHistDetectorTest, bulkyFunctions)
   //Copy part model
   ColorHistDetector::PartModel model = detector.partModels.at(partID);
 
-  //Testing function "setPartHistogramm"
+  //Testing function "setpartHistogram"
   ColorHistDetector::PartModel partModel_expected(nBins), partModel_actual(nBins);
   partModel_expected.sizeFG = Colors.size();
   partModel_expected.fgNumSamples = 1;
   partModel_expected.fgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
   for (uint32_t i = 0; i < Colors.size(); i++)
-    partModel_expected.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+    partModel_expected.partHistogram[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
   for (uint8_t r = 0; r < partModel_expected.nBins; r++)
     for (uint8_t g = 0; g < partModel_expected.nBins; g++)
       for (uint8_t b = 0; b < partModel_expected.nBins; b++)
-        partModel_expected.partHistogramm[r][g][b] /= Colors.size();
+        partModel_expected.partHistogram[r][g][b] /= Colors.size();
 
   detector.setPartHistogram(partModel_actual, Colors);
-  EXPECT_EQ(partModel_expected.partHistogramm, partModel_actual.partHistogramm);
-  EXPECT_EQ(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+  EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
+  EXPECT_EQ(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
   EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
   EXPECT_EQ(partModel_expected.fgNumSamples, partModel_actual.fgNumSamples);
   EXPECT_EQ(partModel_expected.bgNumSamples, partModel_actual.bgNumSamples);
@@ -232,26 +232,26 @@ TEST(colorHistDetectorTest, bulkyFunctions)
   EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
   EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
 
-  // Testing function "addPartHistogramm"
+  // Testing function "addpartHistogram"
   uint32_t nBlankPixels = 10;
   for (uint8_t r = 0; r < partModel_expected.nBins; r++)
     for (uint8_t g = 0; g < partModel_expected.nBins; g++)
       for (uint8_t b = 0; b < partModel_expected.nBins; b++)
-        partModel_expected.partHistogramm[r][g][b] *= partModel_expected.sizeFG;
+        partModel_expected.partHistogram[r][g][b] *= partModel_expected.sizeFG;
   partModel_expected.sizeFG += static_cast <uint32_t> (Colors.size());
   partModel_expected.fgNumSamples++;
   partModel_expected.fgSampleSizes.push_back(Colors.size());
   for (uint32_t i = 0; i < Colors.size(); i++)
-    partModel_expected.partHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+    partModel_expected.partHistogram[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
   for (uint8_t r = 0; r < partModel_expected.nBins; r++)
     for (uint8_t g = 0; g < partModel_expected.nBins; g++)
       for (uint8_t b = 0; b < partModel_expected.nBins; b++)
-        partModel_expected.partHistogramm[r][g][b] /= partModel_expected.sizeFG;
+        partModel_expected.partHistogram[r][g][b] /= partModel_expected.sizeFG;
   partModel_expected.fgBlankSizes.push_back(nBlankPixels);
 
   detector.addPartHistogram(partModel_actual, Colors, nBlankPixels);
-  EXPECT_EQ(partModel_expected.partHistogramm, partModel_actual.partHistogramm);
-  EXPECT_EQ(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+  EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
+  EXPECT_EQ(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
   EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
   EXPECT_EQ(partModel_expected.fgNumSamples, partModel_actual.fgNumSamples);
   EXPECT_EQ(partModel_expected.bgNumSamples, partModel_actual.bgNumSamples);
@@ -277,7 +277,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
   for (uint8_t r = 0; r < partModel_expected.nBins; r++)
     for (uint8_t g = 0; g < partModel_expected.nBins; g++)
       for (uint8_t b = 0; b < partModel_expected.nBins; b++)
-        distance += pow(partModel_expected.partHistogramm[r][g][b] - partModel_expected.partHistogramm[r][g][b], 2.0f);
+        distance += pow(partModel_expected.partHistogram[r][g][b] - partModel_expected.partHistogram[r][g][b], 2.0f);
   f = detector.matchPartHistogramsED(partModel_expected, partModel_expected);
   EXPECT_EQ(sqrt(distance), f);
 
@@ -286,22 +286,22 @@ TEST(colorHistDetectorTest, bulkyFunctions)
   for (uint8_t r = 0; r < partModel_expected.nBins; r++)
     for (uint8_t g = 0; g < partModel_expected.nBins; g++)
       for (uint8_t b = 0; b < partModel_expected.nBins; b++)
-        partModel_expected.bgHistogramm[r][g][b] *= partModel_expected.sizeBG;
+        partModel_expected.bgHistogram[r][g][b] *= partModel_expected.sizeBG;
   partModel_expected.sizeBG += static_cast <uint32_t> (Colors.size());
   partModel_expected.bgNumSamples++;
   partModel_expected.bgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
   for (uint32_t i = 0; i < Colors.size(); i++)
-    partModel_expected.bgHistogramm[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+    partModel_expected.bgHistogram[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
   for (uint8_t r = 0; r < partModel_expected.nBins; r++)
     for (uint8_t g = 0; g < partModel_expected.nBins; g++)
       for (uint8_t b = 0; b < partModel_expected.nBins; b++)
-        partModel_expected.bgHistogramm[r][g][b] /= (float)partModel_expected.sizeBG;
+        partModel_expected.bgHistogram[r][g][b] /= (float)partModel_expected.sizeBG;
 
   detector.addBackgroundHistogram(partModel_actual, cEmpty);
-  EXPECT_NE(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+  EXPECT_NE(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
   detector.addBackgroundHistogram(partModel_actual, Colors);
-  EXPECT_EQ(partModel_expected.partHistogramm, partModel_actual.partHistogramm);
-  EXPECT_EQ(partModel_expected.bgHistogramm, partModel_actual.bgHistogramm);
+  EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
+  EXPECT_EQ(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
   EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
   EXPECT_EQ(partModel_expected.fgNumSamples, partModel_actual.fgNumSamples);
   EXPECT_EQ(partModel_expected.bgNumSamples, partModel_actual.bgNumSamples);
@@ -322,7 +322,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
       uint8_t mintensity = mask.at<uint8_t>(y, x);
       bool blackPixel = mintensity < 10;
 
-      t.at<float>(y, x) = blackPixel ? 0 : partModel.partHistogramm.at(red / factor).at(green / factor).at(blue / factor); // (x, y)  or (y, x) !? ?
+      t.at<float>(y, x) = blackPixel ? 0 : partModel.partHistogram.at(red / factor).at(green / factor).at(blue / factor); // (x, y)  or (y, x) !? ?
       //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
     }
 
@@ -422,7 +422,7 @@ TEST(colorHistDetectorTest, bulkyFunctions)
   EXPECT_EQ(limbLabel_e.getScores(), limbLabel_a.getScores());
   EXPECT_EQ(limbLabel_e.getPolygon(), limbLabel_a.getPolygon());
   EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
-  EXPECT_EQ(model.bgHistogramm, detector.partModels[partID].bgHistogramm);
+  EXPECT_EQ(model.bgHistogram, detector.partModels[partID].bgHistogram);
 
   // Testing function "detect"
 
