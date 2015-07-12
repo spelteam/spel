@@ -41,7 +41,7 @@ protected:
   };
 public:
   SurfDetector(void);
-  int getID(void);
+  int getID(void) const;
   void setID(int _id);
   void train(vector <Frame*> _frames, map <string, float>);
   vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);

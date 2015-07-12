@@ -7,7 +7,7 @@ HogDetector::HogDetector(void)
   id = 0x4844;
 }
 
-int HogDetector::getID(void)
+int HogDetector::getID(void) const
 {
   return id;
 }

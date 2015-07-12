@@ -10,7 +10,7 @@ SurfDetector::SurfDetector(void)
 #endif
 }
 
-int SurfDetector::getID(void)
+int SurfDetector::getID(void) const
 {
   return id;
 }

@@ -22,7 +22,7 @@
 class Detector
 {
   public:
-    virtual int getID(void) = 0;
+    virtual int getID(void) const = 0;
     virtual void setID(int _id) = 0;
     virtual void train(vector <Frame*> frames, map <string, float> params) = 0;
     virtual vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels) = 0;
