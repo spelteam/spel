@@ -227,6 +227,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
     vector <Point2f> uniqueLocations;
     vector <LimbLabel> sortedLabels;
     vector <vector <LimbLabel>> allLabels;
+    map <LimbLabel, PartModel> descriptorMap;
     Point2f j0, j1;
 
     try
@@ -298,8 +299,10 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
               Point2f mid = 0.5 * p1;
               p1 = p1 + Point2f(x, y) - mid;
               p0 = Point2f(x, y) - mid;
-              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet, knnMatchCoeff);
+              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints);
+              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useSURFdet, knnMatchCoeff);
               sortedLabels.push_back(generatedLabel);
+              descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
             }
           }
         }
@@ -316,8 +319,10 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
         Point2f mid = 0.5 * p1;
         p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
         p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints), useSURFdet, knnMatchCoeff);
+        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints);
+        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useSURFdet, knnMatchCoeff);
         sortedLabels.push_back(generatedLabel);
+        descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
       }
     }
     float uniqueLocationCandidates = 0;
@@ -366,6 +371,7 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
             try
             {
               labels.push_back(sortedLabels.at(i));
+              labelModels[workFrame->getID()][iteratorBodyPart->getPartID()].push_back(descriptorMap.at(sortedLabels.at(i)));
             }
             catch (...)
             {
@@ -645,4 +651,14 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
   if (count == 0)
     return -1.0f;
   return (score / (float)count);
+}
+
+map <uint32_t, map <uint32_t, SurfDetector::PartModel>> SurfDetector::getPartModels(void)
+{
+  return partModels;
+}
+
+map <uint32_t, map <uint32_t, vector <SurfDetector::PartModel>>> SurfDetector::getLabelModels(void)
+{
+  return labelModels;
 }

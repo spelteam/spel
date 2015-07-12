@@ -32,40 +32,46 @@ using namespace xfeatures2d;
 
 class SurfDetector : public Detector
 {
-  public:
-    SurfDetector(void);
-    int getID(void);
-    void setID(int _id);
-    void train(vector <Frame*> _frames, map <string, float>);
-    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
-  private:
+protected:
+  struct PartModel
+  {
+    POSERECT <Point2f> partModelRect;
+    vector <KeyPoint> keyPoints;
+    Mat descriptors;
+  };
+public:
+  SurfDetector(void);
+  int getID(void);
+  void setID(int _id);
+  void train(vector <Frame*> _frames, map <string, float>);
+  vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
+  map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
+  map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
+
+private:
 #ifdef DEBUG
-	  FRIEND_TEST(surfDetectorTests, computeDescriptors);
-	  FRIEND_TEST(surfDetectorTests, train);
-	  FRIEND_TEST(surfDetectorTests, generateLabel);
-	  FRIEND_TEST(surfDetectorTests, compare);
+  FRIEND_TEST(surfDetectorTests, computeDescriptors);
+  FRIEND_TEST(surfDetectorTests, train);
+  FRIEND_TEST(surfDetectorTests, generateLabel);
+  FRIEND_TEST(surfDetectorTests, compare);
 #endif  // DEBUG
-    int id;
-    struct PartModel
-    {
-      POSERECT <Point2f> partModelRect;
-      vector <KeyPoint> keyPoints;
-      Mat descriptors;
-    };
+  int id;
 
-    // Variables for score comparer
-    BodyPart *comparer_bodyPart = 0;;
-    PartModel *comparer_model = 0;
-    Point2f *comparer_j0 = 0;
-    Point2f *comparer_j1 = 0;
-    float *comparer_knnMatchCoeff = 0;
+  // Variables for score comparer
+  BodyPart *comparer_bodyPart = 0;;
+  PartModel *comparer_model = 0;
+  Point2f *comparer_j0 = 0;
+  Point2f *comparer_j1 = 0;
+  float *comparer_knnMatchCoeff = 0;
 
-    map <uint32_t, map <uint32_t, PartModel>> partModels;
-    map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
-    PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian, vector <KeyPoint> keyPoints);
-    LimbLabel generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet, float knnMatchCoeff);
-    float compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1, float knnMatchCoeff);
-    float compare(void);
+  map <uint32_t, map <uint32_t, PartModel>> partModels;
+  map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;
+
+  map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
+  PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian, vector <KeyPoint> keyPoints);
+  LimbLabel generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet, float knnMatchCoeff);
+  float compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1, float knnMatchCoeff);
+  float compare(void);
 };
 
 #endif  // _LIBPOSE_SURFDETECTOR_HPP_

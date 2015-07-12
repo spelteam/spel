@@ -13,8 +13,7 @@ using namespace cv;
 
 class HogDetector : public Detector
 {
-  friend class HoGDetectorTest;
-  private:
+  protected:
     struct PartModel
     {
       POSERECT <Point2f> partModelRect;
