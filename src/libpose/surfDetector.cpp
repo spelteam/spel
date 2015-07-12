@@ -598,7 +598,6 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
 
   for (map <uint32_t, map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
   {
-    count++;
     for (map <uint32_t, PartModel>::iterator partModel = framePartModels->second.begin(); partModel != framePartModels->second.end(); ++partModel)
     {
       if (partModel->first != static_cast <uint32_t> (bodyPart.getPartID()))
@@ -611,7 +610,6 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
         {
           if (debugLevelParam >= 2)
             cerr << ERROR_HEADER << "PartModel descriptors of body part [" << partModel->first << "] are empty" << endl;
-          count--;
         }
         else
         {
@@ -626,6 +624,7 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
                 if ((matches[i][0].distance < knnMatchCoeff * (matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
                 {
                   s += matches[i][0].distance / coeff;
+                  count++;
                 }
               }
               score += s / matches.size();
@@ -634,14 +633,12 @@ float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Poin
             {
               if (debugLevelParam >= 1)
                 cerr << ERROR_HEADER << "Can't match descriptors of body part [" << partModel->first << "]: Not enough descriptors" << endl;
-              count--;
             }
           }
           catch (...)
           {
             if (debugLevelParam >= 1)
               cerr << ERROR_HEADER << "Can't match descriptors of body part [" << partModel->first << "]" << endl;
-            count--;
           }
         }
         break;
