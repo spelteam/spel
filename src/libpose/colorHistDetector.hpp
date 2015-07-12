@@ -17,8 +17,8 @@ protected:
   {
     PartModel(uint8_t _nBins = 8);
     uint8_t nBins;
-    vector <vector <vector <float>>> partHistogramm;
-    vector <vector <vector <float>>> bgHistogramm;
+    vector <vector <vector <float>>> partHistogram;
+    vector <vector <vector <float>>> bgHistogram;
     uint32_t sizeFG;
     uint32_t sizeBG;
     uint32_t fgNumSamples;

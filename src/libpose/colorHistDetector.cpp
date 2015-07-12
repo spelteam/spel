@@ -3,75 +3,75 @@
 #define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 
 // PartModel Constructor 
-// Initialization "partHistogramm" and "bgHistogramm" with _nBins^3 elements capacity 3-D arrays 
+// Initialization "partHistogram" and "bgHistogram" with _nBins^3 elements capacity 3-D arrays 
 ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
 {
-  partHistogramm.resize(nBins);
-  bgHistogramm.resize(nBins);
+  partHistogram.resize(nBins);
+  bgHistogram.resize(nBins);
   for (uint8_t r = 0; r < nBins; r++)
   {
     try
     {
-      partHistogramm.at(r).resize(nBins);
+      partHistogram.at(r).resize(nBins);
     }
     catch (...)
     {
       stringstream ss;
-      ss << "Couldn't find partHistogramm " << "[" << r << "]";
+      ss << "Couldn't find partHistogram " << "[" << r << "]";
       throw logic_error(ss.str());
     }
     try
     {
-      bgHistogramm.at(r).resize(nBins);
+      bgHistogram.at(r).resize(nBins);
     }
     catch (...)
     {
       stringstream ss;
-      ss << "Couldn't find bgHistogramm " << "[" << r << "]";
+      ss << "Couldn't find bgHistogram " << "[" << r << "]";
       throw logic_error(ss.str());
     }
     for (uint8_t g = 0; g < nBins; g++)
     {
       try
       {
-        partHistogramm.at(r).at(g).resize(nBins);
+        partHistogram.at(r).at(g).resize(nBins);
       }
       catch (...)
       {
         stringstream ss;
-        ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "]";
+        ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "]";
         throw logic_error(ss.str());
       }
       try
       {
-        bgHistogramm.at(r).at(g).resize(nBins);
+        bgHistogram.at(r).at(g).resize(nBins);
       }
       catch (...)
       {
         stringstream ss;
-        ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "]";
+        ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "]";
         throw logic_error(ss.str());
       }
       for (int b = 0; b < nBins; b++)
       {
         try
         {
-          partHistogramm.at(r).at(g).at(b) = 0.0;
+          partHistogram.at(r).at(g).at(b) = 0.0;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
           throw logic_error(ss.str());
         }
         try
         {
-          bgHistogramm.at(r).at(g).at(b) = 0.0;
+          bgHistogram.at(r).at(g).at(b) = 0.0;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
           throw logic_error(ss.str());
         }
       }
@@ -84,8 +84,8 @@ ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
 ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(const PartModel &model)
 {
   this->nBins = model.nBins;
-  this->partHistogramm = model.partHistogramm;
-  this->bgHistogramm = model.bgHistogramm;
+  this->partHistogram = model.partHistogram;
+  this->bgHistogram = model.bgHistogram;
   this->sizeFG = model.sizeFG;
   this->sizeBG = model.sizeBG;
   this->fgNumSamples = model.fgNumSamples;
@@ -828,12 +828,12 @@ float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partMo
   uint8_t factor = static_cast<uint8_t> (ceil(pow(2, 8) / partModel.nBins));
   try
   {
-    return partModel.partHistogramm.at(r / factor).at(g / factor).at(b / factor); // relative frequency of current color reiteration 
+    return partModel.partHistogram.at(r / factor).at(g / factor).at(b / factor); // relative frequency of current color reiteration 
   }
   catch (...)
   {
     stringstream ss;
-    ss << "Couldn't find partHistogramm " << "[" << (int)r / factor << "][" << (int)g / factor << "][" << (int)b / factor << "]";
+    ss << "Couldn't find partHistogram " << "[" << (int)r / factor << "][" << (int)g / factor << "][" << (int)b / factor << "]";
     if (debugLevelParam >= 1)
       cerr << ERROR_HEADER << ss.str() << endl;
     throw logic_error(ss.str());
@@ -861,12 +861,12 @@ void ColorHistDetector::setPartHistogram(PartModel &partModel, const vector <Poi
       {
         try
         {
-          partModel.partHistogramm.at(r).at(g).at(b) = 0.0;
+          partModel.partHistogram.at(r).at(g).at(b) = 0.0;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -894,12 +894,12 @@ void ColorHistDetector::setPartHistogram(PartModel &partModel, const vector <Poi
     }
     try
     {
-      partModel.partHistogramm.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+      partModel.partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
     }
     catch (...)
     {
       stringstream ss;
-      ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+      ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
       if (debugLevelParam >= 1)
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
@@ -914,12 +914,12 @@ void ColorHistDetector::setPartHistogram(PartModel &partModel, const vector <Poi
         // normalise the histograms
         try
         {
-          partModel.partHistogramm.at(r).at(g).at(b) /= partModel.sizeFG;
+          partModel.partHistogram.at(r).at(g).at(b) /= partModel.sizeFG;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -943,12 +943,12 @@ void ColorHistDetector::addPartHistogram(PartModel &partModel, const vector <Poi
       {
         try
         {
-          partModel.partHistogramm.at(r).at(g).at(b) *= partModel.sizeFG; // converting the colors relative frequency into the pixels number
+          partModel.partHistogram.at(r).at(g).at(b) *= partModel.sizeFG; // converting the colors relative frequency into the pixels number
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -984,12 +984,12 @@ void ColorHistDetector::addPartHistogram(PartModel &partModel, const vector <Poi
     uint8_t b = static_cast<uint8_t> (color.z / factor);
     try
     {
-      partModel.partHistogramm.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+      partModel.partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
     }
     catch (...)
     {
       stringstream ss;
-      ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+      ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
       if (debugLevelParam >= 1)
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
@@ -1006,12 +1006,12 @@ void ColorHistDetector::addPartHistogram(PartModel &partModel, const vector <Poi
         //normalise the histograms
         try
         {
-          partModel.partHistogramm.at(r).at(g).at(b) /= partModel.sizeFG;
+          partModel.partHistogram.at(r).at(g).at(b) /= partModel.sizeFG;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -1079,12 +1079,12 @@ float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, c
         // accumulation of the Euclidean distances between the points
         try
         {
-          distance += pow(partModel.partHistogramm.at(r).at(g).at(b) - partModelPrev.partHistogramm.at(r).at(g).at(b), 2);
+          distance += pow(partModel.partHistogram.at(r).at(g).at(b) - partModelPrev.partHistogram.at(r).at(g).at(b), 2);
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find partHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -1109,12 +1109,12 @@ void ColorHistDetector::addBackgroundHistogram(PartModel &partModel, const vecto
       {
         try
         {
-          partModel.bgHistogramm.at(r).at(g).at(b) *= partModel.sizeBG;
+          partModel.bgHistogram.at(r).at(g).at(b) *= partModel.sizeBG;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());
@@ -1143,12 +1143,12 @@ void ColorHistDetector::addBackgroundHistogram(PartModel &partModel, const vecto
     }
     try
     {
-      partModel.bgHistogramm.at(color.x / factor).at(color.y / factor).at(color.z / factor)++; // increment the frequency of interval, that this color have hit
+      partModel.bgHistogram.at(color.x / factor).at(color.y / factor).at(color.z / factor)++; // increment the frequency of interval, that this color have hit
     }
     catch (...)
     {
       stringstream ss;
-      ss << "Couldn't find bgHistogramm " << "[" << color.x / factor << "][" << color.y / factor << "][" << color.z / factor << "]";
+      ss << "Couldn't find bgHistogram " << "[" << color.x / factor << "][" << color.y / factor << "][" << color.z / factor << "]";
       if (debugLevelParam >= 1)
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
@@ -1163,12 +1163,12 @@ void ColorHistDetector::addBackgroundHistogram(PartModel &partModel, const vecto
       {
         try
         {
-          partModel.bgHistogramm.at(r).at(g).at(b) /= (float)partModel.sizeBG;
+          partModel.bgHistogram.at(r).at(g).at(b) /= (float)partModel.sizeBG;
         }
         catch (...)
         {
           stringstream ss;
-          ss << "Couldn't find bgHistogramm " << "[" << r << "][" << g << "][" << b << "]";
+          ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
           if (debugLevelParam >= 1)
             cerr << ERROR_HEADER << ss.str() << endl;
           throw logic_error(ss.str());

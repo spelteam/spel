@@ -18,7 +18,7 @@
 class CHD : public ColorHistDetector
 {
 public:
-  vector <vector <vector <float>>> GetPartHistogramm(int Part_id);
+  vector <vector <vector <float>>> GetpartHistogram(int Part_id);
 };
 
 // Colorspace scaling coefficientModel.nBins
@@ -221,7 +221,7 @@ TEST(colorHistDetectorTest, Train)
             int c = 50 + i * 10;
             image1.at<Vec3b>(y, x) = Vec3b(c, c, c);
             Vec3b color = image.at<Vec3b>(y, x);
-            Model.partHistogramm[color[0] / factor][color[1] / factor][color[2] / factor]++;
+            Model.partHistogram[color[0] / factor][color[1] / factor][color[2] / factor]++;
             Model.sizeFG++;
           }
         }
@@ -245,8 +245,8 @@ TEST(colorHistDetectorTest, Train)
       for (int g = 0; g < nBins; g++)
         for (int b = 0; b < nBins; b++)
         {
-          int expected = int(partModels[i].partHistogramm[b][g][r]);
-          int actual = int(detector.partModels[i].partHistogramm[r][g][b] * detector.partModels[i].sizeFG / KeyframesCount);
+          int expected = int(partModels[i].partHistogram[b][g][r]);
+          int actual = int(detector.partModels[i].partHistogram[r][g][b] * detector.partModels[i].sizeFG / KeyframesCount);
           if (abs(expected - actual) > delta)
           {
             cout << "Part[" << i << "]." << "Histogram[" << r << ", " << g << ", " << b << "]:    Expected = " << expected << ",   Actual = " << actual << endl;
@@ -265,7 +265,7 @@ TEST(colorHistDetectorTest, Train)
   for (int i = 0; i < partModels.size(); i++)
   {
     fout << endl << "Rect[" << i << "]:" << endl;
-    PutHistogramm(fout, partModels[i].partHistogramm, 1);
+    PutHistogramm(fout, partModels[i].partHistogram, 1);
   }
 
   fout << "\n-----------Actual histogramm-----------\n";
@@ -273,7 +273,7 @@ TEST(colorHistDetectorTest, Train)
   for (int i = 0; i < detector.partModels.size(); i++)
   {
     fout << endl << "Rect[" << i << "]:" << endl;
-    PutHistogramm(fout, detector.partModels[i].partHistogramm, detector.partModels[i].sizeFG / KeyframesCount);
+    PutHistogramm(fout, detector.partModels[i].partHistogram, detector.partModels[i].sizeFG / KeyframesCount);
   }
 
   fout << "\n------------Occluded polygons-----------\nSorted by layer\n";

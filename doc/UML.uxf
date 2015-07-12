@@ -337,10 +337,10 @@ operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;</pane
       <x>920</x>
       <y>1208</y>
       <w>552</w>
-      <h>280</h>
+      <h>288</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>536;24;24;264</additional_attributes>
+    <additional_attributes>536;24;24;272</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
@@ -482,93 +482,6 @@ bg=orange</panel_attributes>
 +PHPoint(pt: CvPoint3D32f&amp;);
 +PHPoint(v: Vec&lt;T, 3&gt;&amp;);
 +operator&lt;(pt: PHPoint3&amp;): bool;</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>608</x>
-        <y>1912</y>
-        <w>848</w>
-        <h>184</h>
-      </coordinates>
-      <panel_attributes>PartModel
---
-+nBins: byte
-+partHistogramm: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
-+gbHistogramm: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
-+sizeFg: int
-+sizeBG: int;
-+fgNumSamples: int
-+bgNumSamples: int
-+fgSampleSizes: vector&lt;uint32_t&gt;
-+bgSampleSizes: vector&lt;uint32_t&gt;
-+gfBlankSizes: vector&lt;uint32_t&gt;
---
-PartModel(_nBins: uint8_t)
-operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>608</x>
-        <y>1584</y>
-        <w>848</w>
-        <h>320</h>
-      </coordinates>
-      <panel_attributes>ColorHistDetector
---
-+id: int;
-+nBins: uint8_t
-+partModels: map &lt;int, PartModel&gt;
-+debugLevelParam: uint8_t
---
-+ColorHistDetector(_nBins: int8_t)
-+getId(): int
-+setId(int _id) 
-+train(_frames: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;)
-+detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
-+getNBins(): byte
-+getFrames: vector &lt;Frame*&gt;
-operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
-+computePixelBelongingLikelihood(partModel: PartModel&amp;, r: byte, g: byte, b: byte): float
-+setPartHistogramm(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;)
-+addPartHistogramm(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;, nBlankPixels: int)
-+addBackgroundHistogramm(partModel: PartModel&amp;, bgColors: vector &lt;Point3i&gt;)
-+getAvgSampleSizeFg(partModel: PartModel&amp;): float
-+getAvgSampleSizeFgBetween(partModel: PartModel&amp;, s1: int, s2: int): float
-+matchPartHistogramsED(partModelPrev: PartModel&amp;, partModel: PartModel&amp;): float
-+buildPixelDistributions(frame: Frame*): map &lt;int, Mat&gt;
-+buildPixelLabels(frame: Frame*, pixelDistributions: map&lt;int, Mat&gt;): map &lt;int, Mat&gt;
-+generateLabel(bodyPart: BodyPart, frame: Frame, pixelDistributions: map &lt;int, Mat&gt;, pixelLabels: map &lt;int, Mat&gt;, j0: Point2f, j1 : Point2f, _useCSdet: float): LimbLabel</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Note</type>
-      <coordinates>
-        <x>608</x>
-        <y>1496</y>
-        <w>552</w>
-        <h>56</h>
-      </coordinates>
-      <panel_attributes>*Potentially to remove *
--- fgNumSamples contain duplicated data that can be accessed 
-   from fgSampleSizes.size()
-bg=yellow</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>600</x>
-        <y>1456</y>
-        <w>864</w>
-        <h>656</h>
-      </coordinates>
-      <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
@@ -973,6 +886,86 @@ bg=orange</panel_attributes>
       </coordinates>
       <panel_attributes>*Skeletal Structure*
 bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>608</x>
+        <y>1912</y>
+        <w>848</w>
+        <h>184</h>
+      </coordinates>
+      <panel_attributes>PartModel
+--
++nBins: byte
++partHistogram: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
++bgHistogram: vector&lt;vector&lt;vector&lt;float&gt;&gt;&gt;
++sizeFg: int
++sizeBG: int;
++fgNumSamples: int
++bgNumSamples: int
++fgSampleSizes: vector&lt;uint32_t&gt;
++bgSampleSizes: vector&lt;uint32_t&gt;
++gfBlankSizes: vector&lt;uint32_t&gt;
+--
+PartModel(_nBins: uint8_t)
+operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>608</x>
+        <y>1488</y>
+        <w>848</w>
+        <h>408</h>
+      </coordinates>
+      <panel_attributes>ColorHistDetector
+--
++id: int;
++nBins: uint8_t
++partModels: map &lt;int, PartModel&gt;
++comparer_bodyPart: BodyPart*
++comparer_frame: Frame**
++comparer_pixelDistributions: map &lt;int32_t, Mat&gt;*
++comparer_pixelLabels: map &lt;int32_t, Mat&gt;*
++comparer_j0: Point2f*
++comparer_j1: Point2f*
+--
++ColorHistDetector(_nBins: int8_t)
++getId(): int
++setId(int _id) 
++train(_frames: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;)
++detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
++getNBins(): byte
++getFrames: vector &lt;Frame*&gt;
+operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
++computePixelBelongingLikelihood(partModel: PartModel&amp;, r: byte, g: byte, b: byte): float
++setPartHistogram(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;)
++addPartHistogram(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;, nBlankPixels: int)
++addBackgroundHistogram(partModel: PartModel&amp;, bgColors: vector &lt;Point3i&gt;)
++getAvgSampleSizeFg(partModel: PartModel&amp;): float
++getAvgSampleSizeFgBetween(partModel: PartModel&amp;, s1: int, s2: int): float
++matchPartHistogramsED(partModelPrev: PartModel&amp;, partModel: PartModel&amp;): float
++buildPixelDistributions(frame: Frame*): map &lt;int, Mat&gt;
++buildPixelLabels(frame: Frame*, pixelDistributions: map&lt;int, Mat&gt;): map &lt;int, Mat&gt;
++generateLabel(bodyPart: BodyPart, frame: Frame, pixelDistributions: map &lt;int, Mat&gt;, pixelLabels: map &lt;int, Mat&gt;, j0: Point2f, j1 : Point2f, _useCSdet: float): LimbLabel
++compare(): float
++compare(bodyPart: BodyPart, frame: Frame*, pixelDistributions: map &lt;int32_t, Mat&gt;, pixelLabels: map &lt;int32_t, Mat&gt;, j0: Point2f, j1: Point2f): float</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>600</x>
+        <y>1464</y>
+        <w>864</w>
+        <h>656</h>
+      </coordinates>
+      <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>

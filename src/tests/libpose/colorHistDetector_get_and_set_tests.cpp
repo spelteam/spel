@@ -25,7 +25,7 @@ TEST(colorHistDetectorTest, GetAndSetTest)
 /*
 
 // we can't test setter so test only getter (setter will be automatically tested by other tests. I hope so...)
-// should return zero because of clean class without partHistogramm.
+// should return zero because of clean class without partHistogram.
   EXPECT_EQ(0, chd.getSizeFG());
 */
 
