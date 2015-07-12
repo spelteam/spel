@@ -81,7 +81,7 @@ ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
 }
 
 // Copy all fields of the "PartModel" structure
-ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(PartModel &model)
+ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(const PartModel &model)
 {
   this->nBins = model.nBins;
   this->partHistogramm = model.partHistogramm;
@@ -103,7 +103,7 @@ ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
 }
 
 // Returns unique ID of "ColorHistDetector" object
-int ColorHistDetector::getID(void)
+int ColorHistDetector::getID(void) const
 {
   return id;
 }
@@ -817,7 +817,7 @@ vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string
 }
 
 // Return nBins
-uint8_t ColorHistDetector::getNBins(void)
+uint8_t ColorHistDetector::getNBins(void) const
 {
   return nBins;
 }

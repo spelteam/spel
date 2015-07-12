@@ -12,23 +12,7 @@ using namespace cv;
 
 class ColorHistDetector : public Detector
 {
-public:
-  ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
-  int getID(void);
-  void setID(int _id);
-  void train(vector <Frame*> _frames, map <string, float> params);
-  vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
-  uint8_t getNBins(void);
-  vector <Frame*> getFrames() const;
-  ColorHistDetector &operator=(const ColorHistDetector &c);
-private:
-#ifdef DEBUG
-  FRIEND_TEST(colorHistDetectorTest, Constructors);
-  FRIEND_TEST(colorHistDetectorTest, computePixelBelongingLikelihood);
-  FRIEND_TEST(colorHistDetectorTest, Operators);
-  FRIEND_TEST(colorHistDetectorTest, bulkyFunctions);
-  FRIEND_TEST(colorHistDetectorTest, Train);
-#endif  // DEBUG
+protected:
   struct PartModel
   {
     PartModel(uint8_t _nBins = 8);
@@ -42,8 +26,25 @@ private:
     vector <uint32_t> fgSampleSizes;
     vector <uint32_t> bgSampleSizes;
     vector <uint32_t> fgBlankSizes;
-    PartModel &operator=(PartModel &model);
+    PartModel &operator=(const PartModel &model);
   };
+public:
+  ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
+  int getID(void) const;
+  void setID(int _id);
+  void train(vector <Frame*> _frames, map <string, float> params);
+  vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
+  uint8_t getNBins(void) const;
+  vector <Frame*> getFrames(void) const;
+  ColorHistDetector &operator=(const ColorHistDetector &c);
+private:
+#ifdef DEBUG
+  FRIEND_TEST(colorHistDetectorTest, Constructors);
+  FRIEND_TEST(colorHistDetectorTest, computePixelBelongingLikelihood);
+  FRIEND_TEST(colorHistDetectorTest, Operators);
+  FRIEND_TEST(colorHistDetectorTest, bulkyFunctions);
+  FRIEND_TEST(colorHistDetectorTest, Train);
+#endif  // DEBUG
   int id;
   const uint8_t nBins;
   map <int32_t, PartModel> partModels;
