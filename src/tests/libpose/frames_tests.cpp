@@ -36,7 +36,7 @@ TEST(FramesTests, FramePointerComparer)
         frames[i]->setID(rand());
     }
     frames.push_back(new Keyframe());
-    sort(frames.begin(), frames.end(), FramePointerComparer());
+    sort(frames.begin(), frames.end(), Frame::FramePointerComparer);
     bool FramesIsSorted = true;
     int id = frames[0]->getID();
     for (int i = 0; i < frames.size(); i++)

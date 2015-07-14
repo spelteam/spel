@@ -194,3 +194,8 @@ Size Frame::getMaskSize(void) const
 {
   return maskSize;
 }
+
+bool Frame::FramePointerComparer(Frame *frame1, Frame *frame2)
+{
+  return frame1->getID() < frame2->getID();
+}

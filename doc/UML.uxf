@@ -75,14 +75,16 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>1232</x>
-      <y>1048</y>
+      <x>1288</x>
+      <y>1024</y>
       <w>920</w>
-      <h>184</h>
+      <h>208</h>
     </coordinates>
     <panel_attributes>/Detector/
 --
 +frames: vector&lt;Frame*&gt;
++maxFrameHeight: uint32_t
++debugLevelParam: uint8_t
 --
 /+getId(): int/
 /+setId(int _id)/
@@ -92,7 +94,9 @@ bg=blue</panel_attributes>
 +getBoneLength(begin: Point2f, end: Point2f): float;
 +getBoneWidth(length: float, bpdyPart: BpodyPart): float;
 +getBodyPartRect(bodyPart: BodyPart, j0: Point2f, j1: Point2f, blockSize: Size): POSERECT &lt;Point2f&gt;
-+rotateImageToDefault(imgSource: Mat, initialRectL POSERECT &lt;Point2f&gt;&amp;, angle: float, size: Size): Mat;</panel_attributes>
++rotateImageToDefault(imgSource: Mat, initialRectL POSERECT &lt;Point2f&gt;&amp;, angle: float, size: Size): Mat;
++generateLabel(bodyPart: BodyPart, j0: Point2f, j1: Point2f, detectorName: string, _usedet: float): LimbLabel
+/+compare(): float/</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -336,33 +340,33 @@ operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;</pane
     <coordinates>
       <x>920</x>
       <y>1208</y>
-      <w>552</w>
+      <w>832</w>
       <h>288</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>536;24;24;272</additional_attributes>
+    <additional_attributes>816;24;24;272</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>1440</x>
+      <x>1672</x>
       <y>1208</y>
-      <w>272</w>
+      <w>112</w>
       <h>384</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>24;24;256;368</additional_attributes>
+    <additional_attributes>96;24;24;368</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>1456</x>
+      <x>1800</x>
       <y>1208</y>
-      <w>856</w>
+      <w>512</w>
       <h>368</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>24;24;840;352</additional_attributes>
+    <additional_attributes>24;24;496;352</additional_attributes>
   </element>
   <group>
     <element>
@@ -540,166 +544,18 @@ bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
   </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>544</x>
-        <y>2424</y>
-        <w>224</w>
-        <h>64</h>
-      </coordinates>
-      <panel_attributes>Lockframe
---
-+frameType: FRAMETYPE
---
-+Lockframe()
-+getFrametype(): FRAMETYPE</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>576</x>
-        <y>2168</y>
-        <w>256</w>
-        <h>32</h>
-      </coordinates>
-      <panel_attributes>SimpleClassFramePointerComparer
---
---
-operator()(frame1: Frame*, frame2: Frame*): bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>288</x>
-        <y>2424</y>
-        <w>224</w>
-        <h>64</h>
-      </coordinates>
-      <panel_attributes>Interpolation
---
-+frameType: FRAMETYPE
---
-+Interpolation()
-+getFrametype(): FRAMETYPE</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>256</x>
-        <y>2136</y>
-        <w>288</w>
-        <h>256</h>
-      </coordinates>
-      <panel_attributes>/Frame/
---
--id: int
--image: cv:Mat 
--mask: cv:Mat
--skeleton: Skeleton
--groundPoint: Point2f
---
-+Frame()
-+~Frame()
-+getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
-+getID(): int
-+setID(_id: int)
-+getImage(): Mat
-+setImage(_image: Mat)
-+getMask(): Mat
-+setMask(_mask: Mat)
-+getSkeleton(): Skeleton
-+setSkeleton(_skeleton: Skeleton)
-+getGroundPoint(): Point2f
-+setGroundPoint(_groundPoint: Point2f)
-/+getFrametype(): FRAMETYPE/</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>32</x>
-        <y>2424</y>
-        <w>224</w>
-        <h>64</h>
-      </coordinates>
-      <panel_attributes>Keyframe
---
-+frameType: FRAMETYPE
---
-+Keyframe()
-+getFrametype(): FRAMETYPE</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>104</x>
-        <y>2368</y>
-        <w>296</w>
-        <h>72</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>280;24;24;56</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>368</x>
-        <y>2368</y>
-        <w>48</w>
-        <h>72</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;32;56</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>384</x>
-        <y>2368</y>
-        <w>288</w>
-        <h>72</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;272;56</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>64</x>
-        <y>2136</y>
-        <w>160</w>
-        <h>64</h>
-      </coordinates>
-      <panel_attributes>Frame Type
---
-KEYFRAME
-LOCKFRAME
-INTERPOLATIONFRAME
-bg=gray
-fg=red</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <group>
-      <element>
-        <type>com.umlet.element.Package</type>
-        <coordinates>
-          <x>24</x>
-          <y>2120</y>
-          <w>848</w>
-          <h>424</h>
-        </coordinates>
-        <panel_attributes>Frame
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>24</x>
+      <y>2112</y>
+      <w>848</w>
+      <h>632</h>
+    </coordinates>
+    <panel_attributes>Frame
 bg=orange</panel_attributes>
-        <additional_attributes/>
-      </element>
-    </group>
-  </group>
+    <additional_attributes/>
+  </element>
   <group>
     <element>
       <type>com.umlet.element.Class</type>
@@ -967,6 +823,151 @@ operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
       </coordinates>
       <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>64</x>
+        <y>2136</y>
+        <w>160</w>
+        <h>64</h>
+      </coordinates>
+      <panel_attributes>Frame Type
+--
+KEYFRAME
+LOCKFRAME
+INTERPOLATIONFRAME
+bg=gray
+fg=red</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>256</x>
+        <y>2136</y>
+        <w>288</w>
+        <h>448</h>
+      </coordinates>
+      <panel_attributes>/Frame/
+--
+-id: int
+-image: cv:Mat 
+-mask: cv:Mat
+-skeleton: Skeleton
+-groundPoint: Point2f
+-parentFrameID: int 
+-imageSize: Size 
+-maskSize: Size
+--
++Frame()
++~Frame()
++getPartPolygon(partId: int): vector&lt;cv:Point2f&gt;
++getID(): int
++setID(_id: int)
++getImage(): Mat
++setImage(_image: Mat)
++getMask(): Mat
++setMask(_mask: Mat)
++getSkeleton(): Skeleton
++getSkeletonPtr(): Skeleton*
++shiftSkeleton2D(shift:Point2f)
++setSkeleton(_skeleton: Skeleton)
++getGroundPoint(): Point2f
++setGroundPoint(_groundPoint: Point2f)
+/+getFrametype(): FRAMETYPE/
++getParentFrameID(): int
++setParentFrameID(_parentFrameID: float)
++Resize(maxHeight: uint32_t): float
++clone(dest: Frame*): Frame*
++getFrameSize(): Size
++getImageSize(): Size
++getMaskSize(): Size
++FramePointerComparer(frame1: Frame*, frame2: Frame*):bool</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>32</x>
+        <y>2664</y>
+        <w>224</w>
+        <h>64</h>
+      </coordinates>
+      <panel_attributes>Keyframe
+--
++frameType: FRAMETYPE
+--
++Keyframe()
++getFrametype(): FRAMETYPE</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>104</x>
+        <y>2560</y>
+        <w>296</w>
+        <h>120</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>280;24;24;104</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>280</x>
+        <y>2664</y>
+        <w>224</w>
+        <h>64</h>
+      </coordinates>
+      <panel_attributes>Interpolation
+--
++frameType: FRAMETYPE
+--
++Interpolation()
++getFrametype(): FRAMETYPE</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>368</x>
+        <y>2560</y>
+        <w>40</w>
+        <h>120</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>24;24;24;104</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>560</x>
+        <y>2664</y>
+        <w>224</w>
+        <h>64</h>
+      </coordinates>
+      <panel_attributes>Lockframe
+--
++frameType: FRAMETYPE
+--
++Lockframe()
++getFrametype(): FRAMETYPE</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>368</x>
+        <y>2560</y>
+        <w>320</w>
+        <h>120</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>24;24;304;104</additional_attributes>
     </element>
   </group>
 </diagram>

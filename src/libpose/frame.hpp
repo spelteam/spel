@@ -42,6 +42,7 @@ class Frame
     Size getFrameSize(void) const;
     Size getImageSize(void) const;
     Size getMaskSize(void) const;
+    static bool FramePointerComparer(Frame *frame1, Frame *frame2);
   private:
     int id;
     Mat image;
@@ -51,15 +52,6 @@ class Frame
     int parentFrameID; //the ID of the frame this lockframe was derived from
     Size imageSize = Size(-1, -1);
     Size maskSize = Size(-1, -1);
-};
-
-class FramePointerComparer
-{
-  public:
-    bool operator () (Frame *frame1, Frame *frame2)
-    {
-      return frame1->getID() < frame2->getID();
-    }
 };
 
 #endif  // _LIBPOSE_FRAME_HPP_

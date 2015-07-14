@@ -118,7 +118,7 @@ void ColorHistDetector::setID(int _id)
 void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> params)
 {
   frames = _frames; // vector of pointers - presents a sequence of frames
-  sort(frames.begin(), frames.end(), FramePointerComparer()); // sorting frames by id
+  sort(frames.begin(), frames.end(), Frame::FramePointerComparer); // sorting frames by id
   //const float scaleParam = 1; // scaling coefficient
   //const string sScaleParam = "scaleParam";
 #ifdef DEBUG
