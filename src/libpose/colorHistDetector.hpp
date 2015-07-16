@@ -48,6 +48,10 @@ private:
   int id;
   const uint8_t nBins;
   map <int32_t, PartModel> partModels;
+  float useCSdet = 1.0f;
+  map <int32_t, Mat> pixelDistributions;
+  map <int32_t, Mat> pixelLabels;
+
   float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
   void setPartHistogram(PartModel &partModel, const vector <Point3i> &partColors);
   void addPartHistogram(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);
@@ -57,7 +61,7 @@ private:
   float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel);
   map <int32_t, Mat> buildPixelDistributions(Frame *frame);
   map <int32_t, Mat> buildPixelLabels(Frame *frame, map <int32_t, Mat> pixelDistributions);
-  LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1, float _useCSdet);
+  LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
 
   // Variables for score comparer
   BodyPart *comparer_bodyPart = 0;

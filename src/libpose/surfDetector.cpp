@@ -88,114 +88,21 @@ void SurfDetector::train(vector <Frame*> _frames, map <string, float> params)
 //TODO (Vitaliy Koshura): Write real implementation here
 vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
-  uint32_t minHessian = 500;
   const string sMinHessian = "minHessian";
-
-  float searchDistCoeff = 0.5;
-  const string sSearchDistCoeff = "searchDistCoeff";
-
-  float minTheta = 90;
-  const string sMinTheta = "minTheta";
-
-  float maxTheta = 100;
-  const string sMaxTheta = "maxTheta";
-
-  float stepTheta = 10;
-  const string sStepTheta = "stepTheta";
-
-  uint32_t uniqueLocationCandidates = 4;
-  const string sUniqueLocationCandidates = "uniqueLocationCandidates";
-
-  float scaleParam = 1;
-  const string sScaleParam = "scaleParam";
-
-  float searchDistCoeffMult = 1.25;
-  const string sSearchDistCoeffMult = "searchDistCoeffMult";
-
-  float useSURFdet = 1.0f;
   const string sUseSURFdet = "useSURFdet";
-
-#ifdef DEBUG
-  uint8_t debugLevel = 5;
-#else
-  uint8_t debugLevel = 1;
-#endif // DEBUG
-  string sDebugLevel = "debugLevel";
-
-  float rotationThreshold = 0.025f;
-  const string sRotationThreshold = "rotationThreshold";
-
-  float isWeakTreshhold = 0.1f;
-  const string sIsWeakTreshhold = "isWeakTreshhold";
-
-  float searchStepCoeff = 0.2f;
-  const string sSearchStepCoeff = "searchStepCoeff";
-
-  float knnMatchCoeff = 0.8f;
   const string sKnnMatchCoeff = "knnMathCoeff";
 
   // first we need to check all used params
   params.emplace(sMinHessian, minHessian);
-  params.emplace(sSearchDistCoeff, searchDistCoeff);
-  params.emplace(sMinTheta, minTheta);
-  params.emplace(sMaxTheta, maxTheta);
-  params.emplace(sStepTheta, stepTheta);
-  params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
-  params.emplace(sScaleParam, scaleParam);
-  params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
   params.emplace(sUseSURFdet, useSURFdet);
-  params.emplace(sDebugLevel, debugLevel);
-  params.emplace(sRotationThreshold, rotationThreshold);
-  params.emplace(sIsWeakTreshhold, isWeakTreshhold);
-  params.emplace(sSearchStepCoeff, searchStepCoeff);
   params.emplace(sKnnMatchCoeff, knnMatchCoeff);
 
   //now set actual param values
   minHessian = params.at(sMinHessian);
-  searchDistCoeff = params.at(sSearchDistCoeff);
-  minTheta = params.at(sMinTheta);
-  maxTheta = params.at(sMaxTheta);
-  stepTheta = params.at(sStepTheta);
-  uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
-  scaleParam = params.at(sScaleParam);
-  searchDistCoeffMult = params.at(sSearchDistCoeffMult);
   useSURFdet = params.at(sUseSURFdet);
-  debugLevel = params.at(sDebugLevel);
-  rotationThreshold = params.at(sRotationThreshold);
-  isWeakTreshhold = params.at(sIsWeakTreshhold);
-  searchStepCoeff = params.at(sSearchStepCoeff);
   knnMatchCoeff = params.at(sKnnMatchCoeff);
 
-  debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
-
-  stringstream detectorName;
-  detectorName << getID();
-
-  vector <vector <LimbLabel> > t;
-
-  int originalSize = frame->getFrameSize().height;
-
-  Frame *workFrame = 0;
-  if (frame->getFrametype() == KEYFRAME)
-    workFrame = new Keyframe();
-  else if (frame->getFrametype() == LOCKFRAME)
-    workFrame = new Lockframe();
-  else if (frame->getFrametype() == INTERPOLATIONFRAME)
-    workFrame = new Interpolation();
-
-  workFrame = frame->clone(workFrame);
-
-  float resizeFactor = workFrame->Resize(maxFrameHeight);
-
-  Skeleton skeleton = workFrame->getSkeleton();
-  tree <BodyPart> partTree = skeleton.getPartTree();
-  tree <BodyPart>::iterator iteratorBodyPart;
-
-  Mat maskMat = workFrame->getMask();
-
-  Mat imgMat = workFrame->getImage();
-
-  vector <KeyPoint> keyPoints;
+  Mat imgMat = frame->getImage();
 
 #if OpenCV_VERSION_MAJOR == 3
   Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);
@@ -221,198 +128,11 @@ vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, flo
   }
 #endif
 
-  for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
-  {
-    vector <LimbLabel> labels;
-    vector <Point2f> uniqueLocations;
-    vector <LimbLabel> sortedLabels;
-    vector <vector <LimbLabel>> allLabels;
-    map <LimbLabel, PartModel> descriptorMap;
-    Point2f j0, j1;
+  auto result = Detector::detect(frame, params, limbLabels);
 
-    try
-    {
-      j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation();
-      j1 = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint())->getImageLocation();
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Can't get joints";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
+  keyPoints.clear();
 
-    float boneLength = getBoneLength(j0, j1);
-    float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart);
-    Point2f direction = j1 - j0;
-    float theta = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
-    float minDist = boxWidth * params.at(sSearchStepCoeff);
-    if (minDist < 2) minDist = 2;
-    float searchDistance = iteratorBodyPart->getSearchRadius();
-    try
-    {
-      if (searchDistance <= 0)
-        searchDistance = boneLength * params.at(sSearchDistCoeff);
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sSearchDistCoeff << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    if (searchDistance <= 0)
-      searchDistance = minDist + 1;
-    Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
-    for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
-    {
-      for (float y = suggestStart.y - searchDistance * 0.5f; y < suggestStart.y + searchDistance * 0.5f; y += minDist)
-      {
-        if (x < maskMat.cols && y < maskMat.rows)
-        {
-          uint8_t mintensity = 0;
-          try
-          {
-            mintensity = maskMat.at<uint8_t>((int)y, (int)x);
-          }
-          catch (...)
-          {
-            stringstream ss;
-            ss << "Can't get value in maskMat at " << "[" << y << "][" << x << "]";
-            if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
-          }
-          bool blackPixel = mintensity < 10;
-          if (!blackPixel)
-          {
-            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange());// + abs(rotationThreshold);
-            float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
-            float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
-            for (float rot = theta - minLocalTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
-            {
-              Point2f p0 = Point2f(0, 0);
-              Point2f p1 = Point2f(1.0, 0);
-              p1 *= boneLength;
-              p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
-              Point2f mid = 0.5 * p1;
-              p1 = p1 + Point2f(x, y) - mid;
-              p0 = Point2f(x, y) - mid;
-              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints);
-              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useSURFdet, knnMatchCoeff);
-              sortedLabels.push_back(generatedLabel);
-              descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
-            }
-          }
-        }
-      }
-    }
-    if (sortedLabels.size() == 0)
-    {
-      for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
-      {
-        Point2f p0 = Point2f(0, 0);
-        Point2f p1 = Point2f(1.0, 0);
-        p1 *= boneLength;
-        p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
-        Point2f mid = 0.5 * p1;
-        p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
-        p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, imgMat, minHessian, keyPoints);
-        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useSURFdet, knnMatchCoeff);
-        sortedLabels.push_back(generatedLabel);
-        descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
-      }
-    }
-    float uniqueLocationCandidates = 0;
-    try
-    {
-      uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sUniqueLocationCandidates << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    if (sortedLabels.size() > 0)
-    {
-      sort(sortedLabels.begin(), sortedLabels.end());
-      Mat locations(workFrame->getFrameSize().width, workFrame->getFrameSize().height, DataType<uint32_t>::type);
-      for (int32_t i = 0; i < workFrame->getFrameSize().width; i++)
-      {
-        for (int32_t j = 0; j < workFrame->getFrameSize().height; j++)
-        {
-          try
-          {
-            locations.at<uint32_t>(i, j) = 0;
-          }
-          catch (...)
-          {
-            stringstream ss;
-            ss << "There is no value of locations at " << "[" << i << "][" << j << "]";
-            if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
-          }
-        }
-      }
-      for (uint32_t i = 0; i < sortedLabels.size(); i++)
-      {
-        uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x;
-        uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y;
-        try
-        {
-          if (locations.at<uint32_t>(x, y) < uniqueLocationCandidates)
-          {
-            try
-            {
-              labels.push_back(sortedLabels.at(i));
-              labelModels[workFrame->getID()][iteratorBodyPart->getPartID()].push_back(descriptorMap.at(sortedLabels.at(i)));
-            }
-            catch (...)
-            {
-              stringstream ss;
-              ss << "Maybe there is no value of sortedLabels at " << "[" << i << "]";
-              if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
-            }
-            locations.at<uint32_t>(x, y) += 1;
-          }
-        }
-        catch (...)
-        {
-          stringstream ss;
-          ss << "Maybe there is no value of locations at " << "[" << x << "][" << y << "]";
-          if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << ss.str() << endl;
-          throw logic_error(ss.str());
-        }
-      }
-      locations.release();
-    }
-    PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
-    if (labels.size() > 0)
-      t.push_back(labels);
-  }
-
-  delete workFrame;
-
-  for (vector <vector <LimbLabel>>::iterator i = t.begin(); i != t.end(); ++i)
-  {
-    for (vector <LimbLabel>::iterator j = i->begin(); j != i->end(); ++j)
-    {
-      j->Resize(pow(resizeFactor, -1));
-    }
-  }
-
-  return merge(limbLabels, t);
+  return result;
 }
 
 map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(Frame *frame, uint32_t minHessian)
@@ -545,24 +265,27 @@ SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, Poin
   return partModel;
 }
 
-LimbLabel SurfDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel partModel, float _useSURFdet, float knnMatchCoeff)
+LimbLabel SurfDetector::generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1)
 {
   stringstream detectorName;
   detectorName << getID();
 
   comparer_bodyPart = &bodyPart;
-  comparer_model = &partModel;
+
+  PartModel generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), minHessian, keyPoints);
+
+  comparer_model = &generatedPartModel;
   comparer_j0 = &j0;
   comparer_j1 = &j1;
-  comparer_knnMatchCoeff = &knnMatchCoeff;
 
-  LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), _useSURFdet);
+  LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useSURFdet);
+
+  labelModels[frame->getID()][bodyPart.getPartID()].push_back(generatedPartModel);
 
   comparer_bodyPart = 0;
   comparer_model = 0;
   comparer_j0 = 0;
   comparer_j1 = 0;
-  comparer_knnMatchCoeff = 0;
 
   return label;
 }
@@ -577,10 +300,10 @@ float SurfDetector::compare(void)
       cerr << ERROR_HEADER << ss.str() << endl;
     throw logic_error(ss.str());
   }
-  return compare(*comparer_bodyPart, *comparer_model, *comparer_j0, *comparer_j1, *comparer_knnMatchCoeff);
+  return compare(*comparer_bodyPart, *comparer_model, *comparer_j0, *comparer_j1);
 }
 
-float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1, float knnMatchCoeff)
+float SurfDetector::compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1)
 {
   if (model.descriptors.empty())
   {

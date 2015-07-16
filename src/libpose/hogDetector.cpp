@@ -17,7 +17,7 @@ void HogDetector::setID(int _id)
   id = _id;
 }
 
-HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages)
+HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
 {
   float boneLength = getBoneLength(j0, j1);
   if (boneLength < blockSize.width)
@@ -180,7 +180,7 @@ HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2
   return partModel;
 }
 
-map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages)
+map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
 {
   map <uint32_t, PartModel> parts;
   Size wndSize;
@@ -228,7 +228,7 @@ map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *fr
     part->setRotationSearchRange(rotationAngle);
     try
     {
-      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages)));
+      parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
     }
     catch (logic_error err)
     {
@@ -317,32 +317,15 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
   debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
-  const bool grayImages = false;
-
   const string sGrayImages = "grayImages";
 
-  params.emplace(sGrayImages, grayImages == true ? 1.0f : 0.0f);
+  params.emplace(sGrayImages, bGrayImages == true ? 1.0f : 0.0f);
 
   const string sMaxFrameHeight = "maxFrameHeight";
 
   params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
 
   maxFrameHeight = params.at(sMaxFrameHeight);
-
-  //TODO(Vitaliy Koshura): Make some of them as detector params
-  Size blockSize = Size(16, 16);
-  Size blockStride = Size(8, 8);
-  Size cellSize = Size(8, 8);
-  Size wndSize = Size(64, 128);
-  const uint8_t nbins = 9;
-  double wndSigma = -1;
-  double thresholdL2hys = 0.2;
-  bool gammaCorrection = true;
-  int nlevels = 64;
-  Size wndStride = Size(8, 8);
-  Size padding = Size(32, 32);
-  int derivAperture = 1;
-  int histogramNormType = HOGDescriptor::L2Hys;
 
   savedCellSize = cellSize;
   savednbins = nbins;
@@ -380,7 +363,7 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
     try
     {
-      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f)));
+      partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
     }
     catch (...)
     {
@@ -393,374 +376,65 @@ void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
 
 vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
-  float searchDistCoeff = 0.5;
-  const string sSearchDistCoeff = "searchDistCoeff";
-
-  float minTheta = 90;
-  const string sMinTheta = "minTheta";
-
-  float maxTheta = 100;
-  const string sMaxTheta = "maxTheta";
-
-  float stepTheta = 10;
-  const string sStepTheta = "stepTheta";
-
-  uint32_t uniqueLocationCandidates = 4;
-  const string sUniqueLocationCandidates = "uniqueLocationCandidates";
-
-  float scaleParam = 1;
-  const string sScaleParam = "scaleParam";
-
-  float searchDistCoeffMult = 1.25;
-  const string sSearchDistCoeffMult = "searchDistCoeffMult";
-
-  float useHoGdet = 1.0f;
   const string sUseHoGdet = "useHoGdet";
 
-#ifdef DEBUG
-  uint8_t debugLevel = 5;
-#else
-  uint8_t debugLevel = 1;
-#endif // DEBUG
-  const string sDebugLevel = "debugLevel";
-
-  float rotationThreshold = 0.095f;
-  const string sRotationThreshold = "rotationThreshold";
-
-  float isWeakTreshhold = 0.1f;
-  const string sIsWeakTreshhold = "isWeakTreshhold";
-
-  bool grayImages = false;
   const string sGrayImages = "grayImages";
 
-  float searchStepCoeff = 0.2f;
-  const string sSearchStepCoeff = "searchStepCoeff";
-
-  // first we need to set all used params
-  params.emplace(sSearchDistCoeff, searchDistCoeff);
-  params.emplace(sMinTheta, minTheta);
-  params.emplace(sMaxTheta, maxTheta);
-  params.emplace(sStepTheta, stepTheta);
-  params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
-  params.emplace(sScaleParam, scaleParam);
-  params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
   params.emplace(sUseHoGdet, useHoGdet);
-  params.emplace(sDebugLevel, debugLevel);
-  params.emplace(sRotationThreshold, rotationThreshold);
-  params.emplace(sIsWeakTreshhold, isWeakTreshhold);
-  params.emplace(sGrayImages, grayImages == true ? 1.0f : 0.0f);
-  params.emplace(sSearchStepCoeff, searchStepCoeff);
+  params.emplace(sGrayImages, bGrayImages == true ? 1.0f : 0.0f);
 
-  //now set actual param values
-  searchDistCoeff = params.at(sSearchDistCoeff);
-  minTheta = params.at(sMinTheta);
-  maxTheta = params.at(sMaxTheta);
-  stepTheta = params.at(sStepTheta);
-  uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
-  scaleParam = params.at(sScaleParam);
-  searchDistCoeffMult = params.at(sSearchDistCoeffMult);
   useHoGdet = params.at(sUseHoGdet);
-  debugLevel = params.at(sDebugLevel);
-  rotationThreshold = params.at(sRotationThreshold);
-  isWeakTreshhold = params.at(sIsWeakTreshhold);
-  grayImages = params.at(sGrayImages);
-  searchStepCoeff = params.at(sSearchStepCoeff);
 
-  debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
-
-  //TODO(Vitaliy Koshura): Make some of them as detector params
-  Size blockSize = Size(16, 16);
-  Size blockStride = Size(8, 8);
-  Size cellSize = Size(8, 8);
-  Size wndSize = Size(64, 128);
-  const uint8_t nbins = 9;
-  double wndSigma = -1;
-  double thresholdL2hys = 0.2;
-  bool gammaCorrection = true;
-  int nlevels = 64;
-  Size wndStride = Size(8, 8);
-  Size padding = Size(32, 32);
-  int derivAperture = 1;
-  int histogramNormType = HOGDescriptor::L2Hys;
-
-  stringstream detectorName;
-  detectorName << getID();
-
-  vector <vector <LimbLabel> > t;
-
-  int originalSize = frame->getFrameSize().height;
-
-  Frame *workFrame = 0;
-  if (frame->getFrametype() == KEYFRAME)
-    workFrame = new Keyframe();
-  else if (frame->getFrametype() == LOCKFRAME)
-    workFrame = new Lockframe();
-  else if (frame->getFrametype() == INTERPOLATIONFRAME)
-    workFrame = new Interpolation();
-
-  workFrame = frame->clone(workFrame);
-
-  float resizeFactor = workFrame->Resize(maxFrameHeight);
-
-  Skeleton skeleton = workFrame->getSkeleton();
-  tree <BodyPart> partTree = skeleton.getPartTree();
-  tree <BodyPart>::iterator iteratorBodyPart;
-
-  Mat maskMat = workFrame->getMask();
-
-  for (iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
-  {
-    vector <LimbLabel> labels;
-    vector <Point2f> uniqueLocations;
-    vector <LimbLabel> sortedLabels;
-    map <LimbLabel, PartModel> descriptorMap;
-    vector <vector <LimbLabel>> allLabels;
-    Point2f j0, j1;
-
-    try
-    {
-      j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation();
-      j1 = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint())->getImageLocation();
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Can't get joints";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-
-    float boneLength = getBoneLength(j0, j1);
-    float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart);
-    Point2f direction = j1 - j0;
-    float theta = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
-    float minDist = boxWidth * params.at(sSearchStepCoeff);
-    if (minDist < 2) minDist = 2;
-    float searchDistance = iteratorBodyPart->getSearchRadius();
-    try
-    {
-      if (searchDistance <= 0)
-        searchDistance = boneLength * params.at(sSearchDistCoeff);
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sSearchDistCoeff << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    if (searchDistance <= 0)
-      searchDistance = minDist + 1;
-    Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
-    for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
-    {
-      for (float y = suggestStart.y - searchDistance * 0.5f; y < suggestStart.y + searchDistance * 0.5f; y += minDist)
-      {
-        if (x < maskMat.cols && y < maskMat.rows)
-        {
-          uint8_t mintensity = 0;
-          try
-          {
-            mintensity = maskMat.at<uint8_t>((int)y, (int)x);
-          }
-          catch (...)
-          {
-            stringstream ss;
-            ss << "Can't get value in maskMat at " << "[" << y << "][" << x << "]";
-            if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
-          }
-          bool blackPixel = mintensity < 10;
-          if (!blackPixel)
-          {
-            float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange());// + abs(rotationThreshold);
-            float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
-            float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
-            for (float rot = theta - minLocalTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
-            {
-              Point2f p0 = Point2f(0, 0);
-              Point2f p1 = Point2f(1.0, 0);
-              p1 *= boneLength;
-              p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
-              Point2f mid = 0.5 * p1;
-              p1 = p1 + Point2f(x, y) - mid;
-              p0 = Point2f(x, y) - mid;
-              Size size;
-              try
-              {
-                size = partSize.at(iteratorBodyPart->getPartID());
-              }
-              catch (...)
-              {
-                stringstream ss;
-                ss << "Can't get partSize for body part " << iteratorBodyPart->getPartID();
-                if (debugLevelParam >= 1)
-                {
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                  throw logic_error(ss.str());
-                }
-              }
-              PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
-              LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
-              sortedLabels.push_back(generatedLabel);
-              descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
-            }
-          }
-        }
-      }
-    }
-    if (sortedLabels.size() == 0)
-    {
-      for (float rot = theta - minTheta; rot < theta + maxTheta; rot += stepTheta)
-      {
-        Point2f p0 = Point2f(0, 0);
-        Point2f p1 = Point2f(1.0, 0);
-        p1 *= boneLength;
-        p1 = PoseHelper::rotatePoint2D(p1, p0, rot);
-        Point2f mid = 0.5 * p1;
-        p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid;
-        p0 = Point2f(suggestStart.x, suggestStart.y) - mid;
-        Size size;
-        try
-        {
-          size = partSize.at(iteratorBodyPart->getPartID());
-        }
-        catch (...)
-        {
-          stringstream ss;
-          ss << "Can't get partSize for body part " << iteratorBodyPart->getPartID();
-          if (debugLevelParam >= 1)
-          {
-            cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
-          }
-        }
-        PartModel generatedPartModel = computeDescriptors(*iteratorBodyPart, p0, p1, workFrame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, params.at(sGrayImages) > 0.0f);
-        LimbLabel generatedLabel = generateLabel(workFrame, *iteratorBodyPart, p0, p1, generatedPartModel, useHoGdet, nbins);
-        sortedLabels.push_back(generatedLabel);
-        descriptorMap.insert(pair <LimbLabel, PartModel>(generatedLabel, generatedPartModel));
-      }
-    }
-    float uniqueLocationCandidates = 0;
-    try
-    {
-      uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
-    }
-    catch (...)
-    {
-      stringstream ss;
-      ss << "Maybe there is no '" << sUniqueLocationCandidates << "' param";
-      if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
-    }
-    if (sortedLabels.size() > 0)
-    {
-      sort(sortedLabels.begin(), sortedLabels.end());
-      Mat locations(workFrame->getFrameSize().width, workFrame->getFrameSize().height, DataType<uint32_t>::type);
-      for (int32_t i = 0; i < workFrame->getFrameSize().width; i++)
-      {
-        for (int32_t j = 0; j < workFrame->getFrameSize().height; j++)
-        {
-          try
-          {
-            locations.at<uint32_t>(i, j) = 0;
-          }
-          catch (...)
-          {
-            stringstream ss;
-            ss << "There is no value of locations at " << "[" << i << "][" << j << "]";
-            if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
-          }
-        }
-      }
-      for (uint32_t i = 0; i < sortedLabels.size(); i++)
-      {
-        uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x;
-        uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y;
-        try
-        {
-          if (locations.at<uint32_t>(x, y) < uniqueLocationCandidates)
-          {
-            try
-            {
-              labels.push_back(sortedLabels.at(i));
-              labelModels[workFrame->getID()][iteratorBodyPart->getPartID()].push_back(descriptorMap.at(sortedLabels.at(i)));
-            }
-            catch (...)
-            {
-              stringstream ss;
-              ss << "Maybe there is no value of sortedLabels at " << "[" << i << "]";
-              if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
-            }
-            locations.at<uint32_t>(x, y) += 1;
-          }
-        }
-        catch (...)
-        {
-          stringstream ss;
-          ss << "Maybe there is no value of locations at " << "[" << x << "][" << y << "]";
-          if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << ss.str() << endl;
-          throw logic_error(ss.str());
-        }
-      }
-      locations.release();
-    }
-    PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
-    if (labels.size() > 0)
-      t.push_back(labels);
-  }
-
-  delete workFrame;
-
-  for (vector <vector <LimbLabel>>::iterator i = t.begin(); i != t.end(); ++i)
-  {
-    for (vector <LimbLabel>::iterator j = i->begin(); j != i->end(); ++j)
-    {
-      j->Resize(pow(resizeFactor, -1));
-    }
-  }
-
-  return merge(limbLabels, t);
+  return Detector::detect(frame, params, limbLabels);
 }
 
-LimbLabel HogDetector::generateLabel(Frame *frame, BodyPart bodyPart, Point2f j0, Point2f j1, PartModel descriptors, float _useHoGdet, uint8_t nbins)
+LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1)
 {
   stringstream detectorName;
   detectorName << getID();
 
   comparer_bodyPart = &bodyPart;
-  comparer_model = &descriptors;
-  comparer_nbins = &nbins;
 
-  LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), _useHoGdet);
+  Size size;
+  try
+  {
+    size = partSize.at(bodyPart.getPartID());
+  }
+  catch (...)
+  {
+    stringstream ss;
+    ss << "Can't get partSize for body part " << bodyPart.getPartID();
+    if (debugLevelParam >= 1)
+    {
+      cerr << ERROR_HEADER << ss.str() << endl;
+      throw logic_error(ss.str());
+    }
+  }
+  PartModel generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+
+  comparer_model = &generatedPartModel;
+
+  LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useHoGdet);
+
+  labelModels[frame->getID()][bodyPart.getPartID()].push_back(generatedPartModel);
 
   comparer_bodyPart = 0;
   comparer_model = 0;
-  comparer_nbins = 0;
 
   return label;
 }
 
 float HogDetector::compare(void)
 {
-  if (comparer_bodyPart == 0 || comparer_model == 0 || comparer_nbins == 0)
+  if (comparer_bodyPart == 0 || comparer_model == 0)
   {
     stringstream ss;
-    ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_model == 0 ? "comparer_model == 0 " : "") << (comparer_nbins == 0 ? "comparer_nbins == 0" : "") << endl;
+    ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_model == 0 ? "comparer_model == 0" : "") << endl;
     if (debugLevelParam >= 1)
       cerr << ERROR_HEADER << ss.str() << endl;
     throw logic_error(ss.str());
   }
-  return compare(*comparer_bodyPart, *comparer_model, *comparer_nbins);
+  return compare(*comparer_bodyPart, *comparer_model, nbins);
 }
 
 float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins)
