@@ -143,7 +143,7 @@ TEST(HOGDetectorTests, computeDescriptor)
   //Calculate actual value
   HogDetector D;
   HogDetector::PartModel partModel;
-  partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
+  partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
 
   //Calculate expected value
   vector<float> descriptorsValues;
@@ -208,7 +208,7 @@ TEST(HOGDetectorTests, computeDescriptors)
   HogDetector D;
   D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
   map <uint32_t, HogDetector::PartModel> partModels;
-  partModels = D.computeDescriptors(frames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
+  partModels = D.computeDescriptors(frames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
 
   //Calculate expected value
   vector<vector<float>> allDescriptors;
@@ -429,7 +429,7 @@ TEST(HOGDetectorTests, generateLabel)
   D.train(frames, params);
   bool useHOGDet = true;
   HogDetector::PartModel partModel = D.getPartModels()[0][partID];
-  LimbLabel label_actual = D.generateLabel(frames[FirstKeyframe], bodyPart, p0, p1, partModel, useHOGDet, nbins);
+  LimbLabel label_actual = D.generateLabel(bodyPart, frames[FirstKeyframe], p0, p1);
 
 
   //Create expected LimbLabel value
