@@ -551,6 +551,8 @@ vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, floa
         cerr << ERROR_HEADER << ss.str() << endl;
       throw logic_error(ss.str());
     }
+    if (searchDistance <= 0)
+      searchDistance = minDist + 1;
     Point2f suggestStart = 0.5 * j1 + 0.5 * j0;
     for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
     {
