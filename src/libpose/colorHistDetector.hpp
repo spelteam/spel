@@ -66,8 +66,6 @@ private:
   // Variables for score comparer
   BodyPart *comparer_bodyPart = 0;
   Frame **comparer_frame = 0;
-  map <int32_t, Mat> *comparer_pixelDistributions = 0;
-  map <int32_t, Mat> *comparer_pixelLabels = 0;
   Point2f *comparer_j0 = 0;
   Point2f *comparer_j1 = 0;
 

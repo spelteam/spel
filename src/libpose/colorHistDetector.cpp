@@ -1055,17 +1055,17 @@ map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_
 
 float ColorHistDetector::compare(void)
 {
-  if (comparer_bodyPart == 0 || comparer_frame == 0 || comparer_pixelDistributions == 0 || comparer_pixelLabels == 0 || comparer_j0 == 0 || comparer_j1 == 0)
+  if (comparer_bodyPart == 0 || comparer_frame == 0 || comparer_j0 == 0 || comparer_j1 == 0)
   {
     stringstream ss;
-    ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_frame == 0 ? "comparer_frame == 0 " : "") << (comparer_pixelDistributions == 0 ? "comparer_pixelDistributions == 0" : "") << (comparer_pixelLabels == 0 ? "comparer_pixelLabels == 0" : "") << (comparer_j0 == 0 ? "comparer_j0 == 0" : "") << (comparer_j1 == 0 ? "comparer_j1 == 0" : "") << endl;
+    ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_frame == 0 ? "comparer_frame == 0 " : "") << (comparer_j0 == 0 ? "comparer_j0 == 0" : "") << (comparer_j1 == 0 ? "comparer_j1 == 0" : "") << endl;
     if (debugLevelParam >= 1)
       cerr << ERROR_HEADER << ss.str() << endl;
     throw logic_error(ss.str());
   }
   try
   {
-    return compare(*comparer_bodyPart, *comparer_frame, *comparer_pixelDistributions, *comparer_pixelLabels, *comparer_j0, *comparer_j1);
+    return compare(*comparer_bodyPart, *comparer_frame, pixelDistributions, pixelLabels, *comparer_j0, *comparer_j1);
   }
   catch (logic_error ex)
   {
