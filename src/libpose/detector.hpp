@@ -1,16 +1,17 @@
 #ifndef _LIBPOSE_DETECTOR_HPP_
 #define _LIBPOSE_DETECTOR_HPP_
 
+// STL
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #endif  // WINDOWS
-
 #include <vector>
 #include <map>
 #include <string>
 #include <exception>
 #include <functional>
+
 #include "frame.hpp"
 #include "limbLabel.hpp"
 #include "poseHelper.hpp"
@@ -19,8 +20,10 @@
 #include "lockframe.hpp"
 #include "interpolation.hpp"
 
-class Detector
+namespace SPEL
 {
+  class Detector
+  {
   public:
     virtual int getID(void) const = 0;
     virtual void setID(int _id) = 0;
@@ -39,7 +42,6 @@ class Detector
     virtual LimbLabel generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, string detectorName, float _usedet);
     virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *workFrame, Point2f p0, Point2f p1) = 0;
     virtual float compare(void) = 0;
-};
-
+  };
+}
 #endif  // _LIBPOSE_DETECTOR_HPP_
-

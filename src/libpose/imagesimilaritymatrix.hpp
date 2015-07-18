@@ -1,29 +1,39 @@
 #ifndef _IMAGESIMILARITYMATRIX_HPP_
 #define _IMAGESIMILARITYMATRIX_HPP_
 
+// STL
 #include <vector>
-#include "frame.hpp"
-#include <opencv2/opencv.hpp>
-#include <tree_util.hh>
 #include <string>
+#include <fstream>
+#include <future>
 
-using namespace std;
-using namespace cv;
+// OpenCV
+#include <opencv2/opencv.hpp>
 
-class ImageSimilarityMatrix
+// tree.hh
+#include <tree_util.hh>
+
+#include "frame.hpp"
+
+namespace SPEL
 {
+  using namespace std;
+  using namespace cv;
+
+  class ImageSimilarityMatrix
+  {
   public:
 
     ///constructors
     ImageSimilarityMatrix(void);
     ImageSimilarityMatrix(const ImageSimilarityMatrix& m);
     ImageSimilarityMatrix(const vector<Frame*>& frames);
-    
+
     ///destructor
     ~ImageSimilarityMatrix(void);
 
-    void buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight=0);
-    void buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight=0);
+    void buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
+    void buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
 
     bool read(string filename);
     bool write(string filename) const;
@@ -36,7 +46,7 @@ class ImageSimilarityMatrix
     float at(int row, int col) const;
     Point2f getShift(int row, int col) const;
     ///get cost for path through ISM
-    float getPathCost(vector<int> path) const; 
+    float getPathCost(vector<int> path) const;
 
     uint32_t size() const;
 
@@ -61,8 +71,8 @@ class ImageSimilarityMatrix
     ///the image similarity matrix
     Mat imageSimilarityMatrix;
     Mat imageShiftMatrix;
-    
-};
 
+  };
+}
 #endif  // _IMAGESIMILARITYMATRIX_HPP_
 

@@ -1,11 +1,14 @@
 #include "interpolation.hpp"
 
-Interpolation::Interpolation(void) : frameType(INTERPOLATIONFRAME)
+namespace SPEL
 {
-}
+  Interpolation::Interpolation(void) : frameType(INTERPOLATIONFRAME)
+  {
+  }
 
-FRAMETYPE Interpolation::getFrametype(void)
-{
-  return frameType;
-}
+  FRAMETYPE Interpolation::getFrametype(void)
+  {
+    return frameType;
+  }
 
+}

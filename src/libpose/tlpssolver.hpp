@@ -1,6 +1,11 @@
 #ifndef _TLPSSOLVER_HPP_
 #define _TLPSSOLVER_HPP_
 
+// STL
+#include <vector>
+#include <opencv2/opencv.hpp>
+#include <cmath>
+
 //OpenGM
 #include <opengm/graphicalmodel/graphicalmodel.hxx>
 #include <opengm/graphicalmodel/graphicalmodel_hdf5.hxx>
@@ -10,20 +15,29 @@
 #include <opengm/inference/messagepassing/messagepassing.hxx>
 #include <opengm/operations/minimizer.hxx>
 
-#include <vector>
-#include "solver.hpp"
-#include "solution.hpp"
-#include "frame.hpp"
-#include <opencv2/opencv.hpp>
+// Eigen3
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
-using namespace std;
-using namespace opengm;
+#include "solver.hpp"
+#include "frame.hpp"
+#include "lockframe.hpp"
+#include "colorHistDetector.hpp"
+#include "hogDetector.hpp"
+#include "surfDetector.hpp"
+#include "interpolation.hpp"
+
+namespace SPEL
+{
+  using namespace std;
+  using namespace opengm;
+  using namespace Eigen;
 
 #define PI 3.14159265
 
-///define the space and the model
-class TLPSSolver: public Solver
-{
+  ///define the space and the model
+  class TLPSSolver : public Solver
+  {
 
     ///define the space
     typedef opengm::DiscreteSpace<> Space;
@@ -35,7 +49,7 @@ class TLPSSolver: public Solver
     ///define the inference algorithm
     typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
-public:
+  public:
     TLPSSolver(void);
     ///inherited virtual
     ~TLPSSolver(void);
@@ -47,7 +61,7 @@ public:
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
-private:
+  private:
 
     vector<Solvlet> solveWindowed(Sequence &sequence, map<string, float> params); //inherited virtual
     vector<Solvlet> solveGlobal(Sequence &sequence, map<string, float> params); //inherited virtual
@@ -75,7 +89,9 @@ private:
     //private:
     //int id;
     //string name;
-};
+  };
+
+}
 
 #endif  // _TLPSSOLVER_HPP_
 
