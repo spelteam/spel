@@ -54,13 +54,13 @@ namespace SPEL
         }
       }
     }
-    avg = (avg - min) / scoreValues.size();
+    avg = (avg - min) / (float)scoreValues.size();
     float sum = 0;
     for (vector <float>::iterator i = scoreValues.begin(); i != scoreValues.end(); ++i)
     {
       sum += pow((*i) - avg, 2);
     }
-    float standardDiviation = sqrt(sum / (scoreValues.size() - 1)) / avg;
+    float standardDiviation = sqrt(sum / (float)(scoreValues.size() - 1)) / avg;
     bool isWeak = standardDiviation < standardDiviationTreshold;
     for (vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
     {
