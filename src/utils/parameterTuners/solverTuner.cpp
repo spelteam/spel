@@ -453,17 +453,20 @@ int main (int argc, char **argv)
     cout << "The min is " << (ismMean-ismMin)/ismSd << " deviations away from mean. " << endl;
     cout << "One sd is " << ismSd/ismMin << " of min." << endl;
 
-    float simThreshD = 1.0+3.0*ismSd/ismMin;
+    float numSdMinToMean=(ismMean-ismMin)/ismSd;
+    float sdPartMin = ismSd/ismMin;
+    float sdFactor=0.47;//go up half-way to mean from min
+    float simThreshD = 1.0+sdFactor*numSdMinToMean*sdPartMin;
 
-    cout << "Seeting simThresh to " << simThreshD << endl;
+    cout << "Setting simThresh to " << simThreshD << endl;
 
     defaultParams.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
 
     string baseOutFolder(outFold);
     gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
     baseOutFolder += "/" + paramName + "/";
-    gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
-    baseOutFolder+="/" + solverName + "/";
+    //gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
+    //baseOutFolder+="/" + solverName + "/";
     gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
     baseOutFolder+= gtLoader.getProjectTitle() +"/";
     gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
@@ -561,21 +564,27 @@ int main (int argc, char **argv)
             {
                 int frameID=requestedKeyframes[i];
                 //delete vFrames[requestedKeyframes[i]]; //free memory
-                vFrames[frameID] = new Keyframe(); //assign new keyframe
-                //copy all the data
-\
-                vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
-                vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+                if(frameID<gtFrames.size())
+                {
+                    vFrames[frameID] = new Keyframe(); //assign new keyframe
+                    //copy all the data
 
-                actualKeyframes.push_back(frameID);
+                    vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+                    vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                    vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
+                    vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+
+                    actualKeyframes.push_back(frameID);
+                }
             }
             if(actualKeyframes.size()>=maxKeyframes)
                 break; //sot adding keyuframes if we're at max, during the keyframe numbers test
         }
 
         //insert the automatically suggested keyframes, if any
+        int numKeyframesToTake = requestedKeyframes.size();
+        if(solverName=="TLPSSolver")
+            numKeyframesToTake = numKeyframesToTake/4; //take the int that is 1/4th of the num of keyframes
         for(uint32_t i=0; i<requestedKeyframes.size();++i)
         {
             if(requestedKeyframes[i]==-1) //if it's not an automatic one
@@ -663,8 +672,8 @@ int main (int argc, char **argv)
         params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
         //detector settings
-        params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
-        params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+        params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
+        params.emplace("useHoGdet", 10.0); //determine if HoG descriptor is used and with what coefficient
         params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
@@ -682,10 +691,10 @@ int main (int argc, char **argv)
 
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 3.5); //use a larger default search radius
-        params.emplace("searchStepCoeff", 0.1); //use a smaller search step
+        params.emplace("searchDistCoeff", 1.5); //use a larger default search radius
+        params.emplace("searchStepCoeff", 0.5); //use a smaller search step
         params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
-        params.emplace("baseRotationRange", 90); //use base 90 degrees rotation range
+        params.emplace("baseRotationRange", 40); //use base 90 degrees rotation range
 
         params.emplace("minTheta", params.at("baseRotationRange"));
         params.emplace("stepTheta", params.at("baseRotationStep"));

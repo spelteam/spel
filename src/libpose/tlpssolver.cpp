@@ -283,8 +283,115 @@ namespace SPEL
 
             for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
             {
+                for(uint32_t j=0; j<labels.size();++j)
+                {
+                    if(labels[j].at(0).getLimbID()==i)
+                        tempLabels.push_back(labels[j]);
+                }
+            }
+            labels = tempLabels;
+            tempLabels.clear();
+
+            for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+            {
+                vector<LimbLabel> temp;
+
+                uint32_t maxPartCandidates=params.at("maxPartCandidates");
+
+                if((labelPartsIter->at(0)).getIsOccluded())
+                    maxPartCandidates = labelPartsIter->size();
+
+                for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+                {
+                    LimbLabel label=labelPartsIter->at(currentSize);
+                        vector<Score> scores=label.getScores();
+
+                        for(uint32_t s=0; s<scores.size(); ++s)
+                        {
+                            if(scores[s].getIsWeak())
+                                maxPartCandidates = labelPartsIter->size();
+                        }
+
+                    temp.push_back(label);
+
+                }
+                tempLabels.push_back(temp);
+            }
+
+            labels = tempLabels;
+
+            detections[currentFrame] = labels; //store all detections into detections
+        }
+
+        labels = tempLabels;
+
+        vector<size_t> numbersOfLabels; //numbers of labels per part
+
+        //the first an last frames of detections are always empty
+
+        for(uint32_t i=0; i<detections.size(); ++i)
+        {
+            for(uint32_t j=0; j<detections[i].size(); ++j)
+            {
+                numbersOfLabels.push_back(detections[i][j].size());
+            }
+        } //numbers of labels now contains the numbers of labels, and their respective variations
+
+        //use this to shape the space, this will be rather large
+        Space space(numbersOfLabels.begin(), numbersOfLabels.end());
+        Model gm(space);
+
+        //OK
+
+        cerr << "Computing slice factors..." << endl;
+
+        int suppFactors=0, jointFactors=0, anchorFactors=0, tempFactors=0;
+        //now do the factors
+        for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
+        {
+            Skeleton tempSkel = seqSlice[currentFrame]->getSkeleton(); //this frame interpolated skeleton
+            Skeleton pSkel = seqSlice[currentFrame-1]->getSkeleton(); //previous frame interpolated skeleton
+            tree<BodyPart> partTree = tempSkel.getPartTree();
+            tree<BodyPart> prevPartTree = pSkel.getPartTree();
+            tree<BodyPart>::iterator partIter, parentPartIter, prevPartIter;
+
+            partIter=partTree.begin();
+            prevPartIter=prevPartTree.begin();
+
+            while(partIter!=partTree.end() && prevPartIter!= prevPartTree.end())
+            {
+                //compute prev part angle
+                Point2f p0, p1, c0, c1;
+                p0 = pSkel.getBodyJoint(prevPartIter->getParentJoint())->getImageLocation();
+                p1 = pSkel.getBodyJoint(prevPartIter->getChildJoint())->getImageLocation();
+
+                c0 = tempSkel.getBodyJoint(partIter->getParentJoint())->getImageLocation();
+                c1 = tempSkel.getBodyJoint(partIter->getChildJoint())->getImageLocation();
+                //compute prev part centre shift
+                Point2f partCentre = 0.5*c0+0.5*c1;
+                Point2f prevPartCentre = 0.5*p0+0.5*p1;
+
+                Point2f partShift = partCentre-prevPartCentre;
+
+                //set the search range based on distance body part centre has moved between previous frame and this frame
+                float searchRange = sqrt(partShift.x*partShift.x+partShift.y*partShift.y)*partShiftCoeff;
+
+                //bow compute the rotation angle change
+                float partAngle = float(PoseHelper::angle2D(1.0, 0, c1.x - c0.x, c1.y - c0.y) * (180.0 / M_PI));
+                float prevAngle = float(PoseHelper::angle2D(1.0, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+
+                //set search radius based on part rotation between previous frame and this frame
+                float rotationRange = (partAngle-prevAngle)*partRotationCoeff;
+
+                partIter->setRotationSearchRange(rotationRange);
+                partIter->setSearchRadius(searchRange);
+
+                partIter++;
+                prevPartIter++;
+=======
               float cost = computeNormAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params, anchorMax);
               anchorCostFunc(i) = cost;
+>>>>>>> other
             }
 
             Model::FunctionIdentifier anchorFid = gm.addFunction(anchorCostFunc); //explicit function add to graphical model

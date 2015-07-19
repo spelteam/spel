@@ -117,10 +117,15 @@ namespace SPEL
     params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
 
     //detector search parameters
-    params.emplace("baseRotationRange", 50); //search angle range of +/- 50 degrees
+    params.emplace("baseRotationRange", 40); //search angle range of +/- 40 degrees
     float baseRotationRange = params.at("baseRotationRange");
+<<<<<<< local
+    params.emplace("baseRotationStep", baseRotationRange/4.0); //search with angle step of 10 degrees, this a per-part range and overrides globals
+    params.emplace("stepTheta", baseRotationRange/4.0); //search in a grid every 10 pixels
+=======
     params.emplace("baseRotationStep", baseRotationRange / 5.0); //search with angle step of 10 degrees
     params.emplace("stepTheta", baseRotationRange / 5.0); //search in a grid every 10 pixels
+>>>>>>> other
 
     params.emplace("baseSearchRadius", image.rows / 30.0); //search a radius of 100 pixels
     int baseSearchRadius = params.at("baseSearchRadius");
@@ -438,11 +443,57 @@ namespace SPEL
 
             for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
             {
+<<<<<<< local
+                for(uint32_t j=0; j<labels.size();++j)
+                {
+                    if(labels[j].at(0).getLimbID()==i)
+                        tempLabels.push_back(labels[j]);
+                }
+            }
+            labels = tempLabels;
+            tempLabels.clear();
+
+//            t2 = high_resolution_clock::now();
+
+//            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+
+//            cerr << "Detection time "  << duration << endl;
+
+            //t1 = high_resolution_clock::now();
+
+// //temp coment this out
+            for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+            {
+
+                vector<LimbLabel> temp;
+
+                uint32_t maxPartCandidates=params.at("maxPartCandidates");
+
+                if((labelPartsIter->at(0)).getIsOccluded())
+                    maxPartCandidates = labelPartsIter->size();
+
+                for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+                {
+                    LimbLabel label=labelPartsIter->at(currentSize);
+                        vector<Score> scores=label.getScores();
+
+                        for(uint32_t s=0; s<scores.size(); ++s)
+                        {
+                            if(scores[s].getIsWeak())
+                                maxPartCandidates = labelPartsIter->size();
+                        }
+
+                    temp.push_back(label);
+
+                }
+                tempLabels.push_back(temp);
+=======
               for (uint32_t j = 0; j < labels[parentPartIter->getPartID()].size(); ++j)
               {
                 //for every child/parent pair, compute score
                 jointCostFunc(j, i) = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
               }
+>>>>>>> other
             }
 
             Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
@@ -837,7 +888,7 @@ namespace SPEL
 
     float simThreshD = 1.0 + 3.5*sd / min;
 
-    //cout << "Seeting simThresh to " << simThresh << endl;
+    //cout << "Setting simThresh to " << simThresh << endl;
 
     params.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
 

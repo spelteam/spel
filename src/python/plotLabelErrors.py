@@ -32,6 +32,8 @@ parseResult = parser.parse_args()
 #DATADIR contains that folder that contains all other data
 errFile = parseResult.ERRIN
 
+plotTitle = errFile.split('_')[-1].split('.')[0]
+
 print 'Reading '+errFile
 
 myFile = open(errFile) 
@@ -116,9 +118,9 @@ tms=[] #top scoring #1 ranked label SCORE, for each param, we want this to be lo
 
 tmi=[] #lowest error label index within percentTopLabels, for each param, we want this to be low
 tmig=[] #lowest error label index GLOBALLY, for each param, we want this to be low
+tmigp=[]
 
 nal=[] #number of acceptable labels within percentTopLabels, we want this to be high, accept thresh defined in detectorTuner
-
 
 
 for i in range(numParams):
@@ -126,6 +128,9 @@ for i in range(numParams):
 	tme.append([])
 	tmi.append([])
 	tms.append([])
+	tmig.append([])
+	nal.append([])
+	tmigp.append([])
 
 
 	topErr=[]
@@ -190,7 +195,8 @@ for i in range(numParams):
 				col = "#%06x" % random.randint(0,0xFFFFFF)
 				minError=1000000000
 				minIndex=-1.0
-				topError=float(result[i][1][j][1][k][1][0][2])
+
+				topScoreVal = float(result[i][1][j][1][k][1][0][1])
 
 				topMinErr=1000000000
 				topMinIndex=-1.0
@@ -202,23 +208,38 @@ for i in range(numParams):
 					rms.append(0)
 					cnts.append(0)
 
+
+				topError=float(result[i][1][j][1][k][1][0][2])
+				topErrors=[] #are the any other top errors with same support score?
+
 				rms[0] = topError #set the top error
 				cnts[0]=1
 
+				acceptCount=0
+
+
 				for l in range(numLabels):
 					
-					errVal = float(result[i][1][j][1][k][1][l][2])
-					scoreVal = float(result[i][1][j][1][k][1][l][1])
+					errVal = float(result[i][1][j][1][k][1][l][2]) #finalScore (support)
+					scoreVal = float(result[i][1][j][1][k][1][l][1]) #partError[e] (err to GT)
+					acceptVal = float(result[i][1][j][1][k][1][l][3]) #isAccepted (is this close enough?)
+
+					if errVal <= topError:
+						topErrors.append(errVal)
 
 					if l<numTopLables:
 						topErrAbs[l]+=errVal
 						topCntAbs[l]+=1
 
 					index=int(l/percent)
+					
+				#if errVal!=0: #don't count invalid error values (zero is practically impossible, treat as a bug)
+
 					topErr[index]+=errVal
 					topCnt[index]+=1
 
 					if l<tenth:
+
 						rms[1]+=errVal #add error
 						cnts[1]+=1
 						rTest+=errVal
@@ -226,6 +247,10 @@ for i in range(numParams):
 						if errVal < topMinErr:
 							topMinErr = errVal
 							topMinIndex = l
+
+						if errVal<10:
+							acceptCount+=1
+
 
 					if l<tenth*2:
 						rms[2]+=errVal #add error
@@ -266,9 +291,15 @@ for i in range(numParams):
 				rmsError+=topError
 				avgMinIndex+=minIndex
 
-				tme[i].append(topErr) #take the top labe's error
+				tme[i].append(topError) #take the top labels's error
+				for erv in topErrors:
+					tme[i].append(erv)
+
 				tmi[i].append(topMinIndex) #store the index of the lowest label within 10%
-				tms[i].append(scoreVal)
+				tms[i].append(topScoreVal)
+				tmig[i].append(minIndex)
+				tmigp[i].append(float(minIndex)/float(numLabels)*100.0)
+				nal[i].append(acceptCount)
 
 				partFrameErrors.append(partErrors)
 		
@@ -346,10 +377,15 @@ for i in range(numParams):
 #print partParamErrors
 #raw_input('here')
 
+figSize=(16, 9)
+figSize2=(19.20, 10.80)
 #Do plotting
-fig1 = plt.figure(1, figsize=(24.2, 10.8), dpi=600)
-fig2 = plt.figure(2, figsize=(44.2, 10.8), dpi=600)
-fig3 = plt.figure(3, figsize=(44.2, 10.8), dpi=600)
+fig1 = plt.figure(1, figsize=figSize, dpi=600)
+fig2 = plt.figure(2, figsize=figSize, dpi=600)
+fig3 = plt.figure(3, figsize=figSize, dpi=600)
+fig4 = plt.figure(4, figsize=figSize, dpi=600)
+fig5 = plt.figure(5, figsize=figSize, dpi=600)
+fig6 = plt.figure(6, figsize=figSize, dpi=600)
 
 ax1 = fig1.add_subplot(111)#, projection='2d')
 ax1.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
@@ -357,17 +393,34 @@ ax1.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
 ax1.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
-
 ax2 = fig2.add_subplot(111)#, projection='2d')
 ax2.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 ax2.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
-ax3 = fig2.add_subplot(111)#, projection='3d')
+ax3 = fig3.add_subplot(111)#, projection='3d')
 ax3.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 ax3.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+
+ax4 = fig4.add_subplot(111)#, projection='3d')
+ax4.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+ax4.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+
+ax5 = fig5.add_subplot(111)#, projection='3d')
+ax5.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+ax5.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+
+ax6 = fig6.add_subplot(111)#, projection='3d')
+ax6.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
+              alpha=0.5)
+ax6.xaxis.grid(True, linestyle='-', which='major', color='lightgrey',
               alpha=0.5)
 
 # dx = fig2.add_subplot(212)#, projection='3d')
@@ -404,7 +457,7 @@ for i in range(numParams):
 	pp.append(percentileParamErrors[i][1])
 
 	
-	cx.plot(range(numTopLables), topErrorsP[i], color=pcol[i], alpha=1.0, label=str(result[i][0]), linewidth=4.0) #draw min ranks
+	ax6.plot(range(numTopLables), topErrorsP[i], color=pcol[i], alpha=1.0, label=str(result[i][0]), linewidth=4.0) #label rank (%) vs error to GT
 	#dx.plot(range(numTopLables), topErrorsA[i], color=pcol[i], alpha=1.0, label=str(result[i][0]), linewidth=4.0) #draw min ranks
 
 
@@ -416,61 +469,116 @@ for i in range(numParams):
 
 #bx.plot(paramVals, pp, color='red', alpha=1.0, label='Average', linewidth=6.0)#, label=str(ev)) #a point at each parameters setting, where ev is the percentile 0=1, 1=10,..., 10=100
 
-ax.boxplot(tmi)
-bx.boxplot(tme)
+fontSizeLabels=20
+fontSizeTitle=35
+fontSizeTicks=20
 
-bx.set_xticklabels(paramVals)
-ax.set_xticklabels(paramVals)
+print tmi
 
+plt.tick_params(axis='both', which='major', labelsize=fontSizeTicks)
+plt.tick_params(axis='both', which='minor', labelsize=fontSizeTicks)
 
-ax.set_xlabel(paramName+' value', fontsize=18)
-ax.set_ylabel('Detection Rank', fontsize=18)
+ax1.boxplot(tmi) #within top 10%, min index
+ax1.set_xlabel(paramName+' value', fontsize=fontSizeLabels)
+ax1.set_ylabel('Min. error detection rank', fontsize=fontSizeLabels)
+ax1.set_xticklabels(paramVals)
+
+ax2.boxplot(tme) #number one label error
+ax2.set_xlabel(paramName+' value', fontsize=fontSizeLabels)
+ax2.set_ylabel('Detection RMS error (pix)', fontsize=fontSizeLabels)
+#plt.tick_params(axis='both', which='major', labelsize=fontSizeTicks)
+#plt.tick_params(axis='both', which='minor', labelsize=fontSizeTicks)
+ax2.set_xticklabels(paramVals)
+
+ax3.boxplot(tmigp) #globally, min index
+ax3.set_xlabel(paramName+' value', fontsize=fontSizeLabels)
+ax3.set_ylabel('Min. error detection rank', fontsize=fontSizeLabels)
+#plt3.tick_params(axis='both', which='major', labelsize=fontSizeTicks)
+#plt3.tick_params(axis='both', which='minor', labelsize=fontSizeTicks)
+ax3.set_xticklabels(paramVals)
+
+ax4.boxplot(tms) #number one label scores
+ax4.set_xlabel(paramName+' value', fontsize=fontSizeLabels)
+ax4.set_ylabel('Detection score', fontsize=fontSizeLabels)
+#plt4.tick_params(axis='both', which='major', labelsize=fontSizeTicks)
+#plt4.tick_params(axis='both', which='minor', labelsize=fontSizeTicks)
+ax4.set_xticklabels(paramVals)
+
+ax5.boxplot(nal) #number of acceptable detections within .25 of box width
+ax5.set_xlabel(paramName+' value', fontsize=fontSizeLabels)
+ax5.set_ylabel('Num. acceptable detections', fontsize=fontSizeLabels)
+#plt5.tick_params(axis='both', which='major', labelsize=fontSizeTicks)
+#plt5.tick_params(axis='both', which='minor', labelsize=fontSizeTicks)
+ax5.set_xticklabels(paramVals)
+
+#already plotted
+ax6.set_xlabel('Label rank (%)', fontsize=fontSizeLabels)
+ax6.set_ylabel('RMS error (pix)', fontsize=fontSizeLabels)
+#plt6.tick_params(axis='both', which='major', labelsize=fontSizeTicks)
+#plt6.tick_params(axis='both', which='minor', labelsize=fontSizeTicks)
+#ax6.set_xticklabels(paramVals)
+
+handles1, labels1 = ax6.get_legend_handles_labels()
+ax6.legend(handles1, labels1)
+ax6.grid()
+ax6.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+         ncol=3, fancybox=True, shadow=True)
+ax6.get_legend().set_title(title=paramName+" value")
 
 plt.rc('legend',**{'fontsize':20})
 
 
-plt.tick_params(axis='both', which='major', labelsize=20)
-plt.tick_params(axis='both', which='minor', labelsize=20)
+# plt.tick_params(axis='both', which='major', labelsize=20)
+# plt.tick_params(axis='both', which='minor', labelsize=20)
 
-bx.set_xlabel(paramName+' value', fontsize=25)
-bx.set_ylabel('Detection RMS Error (pixels)', fontsize=25)
+# bx.set_xlabel(paramName+' value', fontsize=25)
+# bx.set_ylabel('Detection RMS Error (pixels)', fontsize=25)
 
-cx.set_xlabel('Label Rank (%)', fontsize=25)
-cx.set_ylabel('RMS Error (pixels)', fontsize=25)
+# cx.set_xlabel('Label Rank (%)', fontsize=25)
+# cx.set_ylabel('RMS Error (pixels)', fontsize=25)
 
-# dx.set_xlabel('Label Rank', fontsize=18)
-# dx.set_ylabel('RMS Error (pixels)', fontsize=18)
+# # dx.set_xlabel('Label Rank', fontsize=18)
+# # dx.set_ylabel('RMS Error (pixels)', fontsize=18)
 
-handles1, labels1 = bx.get_legend_handles_labels()
-bx.legend(handles1, labels1)
-bx.grid()
-bx.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-          ncol=3, fancybox=True, shadow=True)
-bx.get_legend().set_title(title="Part")
+# handles1, labels1 = bx.get_legend_handles_labels()
+# bx.legend(handles1, labels1)
+# bx.grid()
+# bx.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+#           ncol=3, fancybox=True, shadow=True)
+# bx.get_legend().set_title(title="Part")
 
-handles, labels = cx.get_legend_handles_labels()
-cx.legend(handles, labels)
-cx.grid()
-cx.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-          ncol=3, fancybox=True, shadow=True)
-cx.get_legend().set_title(title=str(paramName)+" value")
+# handles, labels = cx.get_legend_handles_labels()
+# cx.legend(handles, labels)
+# cx.grid()
+# cx.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+#           ncol=3, fancybox=True, shadow=True)
+# cx.get_legend().set_title(title=str(paramName)+" value")
 
-plt.setp(cx.get_legend().get_title(),fontsize=24)
-plt.setp(bx.get_legend().get_title(),fontsize=24)
+# plt.setp(cx.get_legend().get_title(),fontsize=24)
+# plt.setp(bx.get_legend().get_title(),fontsize=24)
 
 print errFile.split('.')
 
 plotTitle = errFile.split('_')[-1].split('.')[0]
-plotSave = '..'+errFile.split('.')[2]+'_s.png'
-plot2Save = '..'+errFile.split('.')[2]+'_q.png'
+plotSave = '..'+errFile.split('.')[2]
 
 #plotSave = errFile.split('.')[0]+'_s.png'
 #plot2Save = errFile.split('.')[0]+'_q.png'
 
-fig.suptitle("Top 10%  labels vs Error ", fontsize=35)
-fig2.suptitle("Error vs Label Rank", fontsize=30)
+fig1.suptitle("Min Index in Top 10%", fontsize=fontSizeTitle)
+fig2.suptitle("Top Scoring Detection Error", fontsize=fontSizeTitle)
+fig3.suptitle("Global Min Index", fontsize=fontSizeTitle)
+fig4.suptitle("Top Scoring Detection Score", fontsize=fontSizeTitle)
+fig5.suptitle("Acceptable Detections in Top 10%", fontsize=fontSizeTitle)
+fig6.suptitle("Error vs Label Rank", fontsize=fontSizeTitle)
 
-fig.savefig(plotSave, bbox_inches='tight')
-fig2.savefig(plot2Save, bbox_inches='tight')
+
+fig1.savefig(plotSave+'_tmi.png', bbox_inches='tight')
+fig2.savefig(plotSave+'_tme.png', bbox_inches='tight')
+fig3.savefig(plotSave+'_tmig.png', bbox_inches='tight')
+fig4.savefig(plotSave+'_tms.png', bbox_inches='tight')
+fig5.savefig(plotSave+'_tme.png', bbox_inches='tight')
+fig6.savefig(plotSave+'_re.png', bbox_inches='tight')
+
 
 print 'Saved to '+ plotSave
