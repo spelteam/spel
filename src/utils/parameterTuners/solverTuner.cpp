@@ -14,6 +14,7 @@
 #endif
 
 using namespace std;
+using namespace SPEL;
 
 vector<vector<float> > computeLabelErrorStatToGT(vector<vector<LimbLabel> > labels, Frame* keyframe) //return squared error from solve to GT for one frame
 {
