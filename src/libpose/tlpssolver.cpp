@@ -76,461 +76,461 @@ namespace SPEL
 
   vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> params) //inherited virtual
   {
-      float baseRotationStep = params.at("baseRotationStep");
+    float baseRotationStep = params.at("baseRotationStep");
 
-      float partShiftCoeff = params.at("partShiftCoeff");
-      float partRotationCoeff = params.at("partRotationCoeff");
+    float partShiftCoeff = params.at("partShiftCoeff");
+    float partRotationCoeff = params.at("partRotationCoeff");
 
-      float useHoG = params.at("useHoGdet");
-      float useCS = params.at("useCSdet");
-      float useSURF = params.at("useSURFdet");
-      uint32_t debugLevel = params.at("debugLevel");
-      //first slice up the sequences
-      if(debugLevel>=1)
-          cout << "TLPSSolver started, slicing sequence..." << endl;
+    float useHoG = params.at("useHoGdet");
+    float useCS = params.at("useCSdet");
+    float useSURF = params.at("useSURFdet");
+    uint32_t debugLevel = params.at("debugLevel");
+    //first slice up the sequences
+    if (debugLevel >= 1)
+      cout << "TLPSSolver started, slicing sequence..." << endl;
 
-      vector<vector<Frame*> > slices = slice(sequence.getFrames());
+    vector<vector<Frame*> > slices = slice(sequence.getFrames());
 
-      if(debugLevel>=1)
-          cout << slices.size() << " sequence slices created." << endl;
+    if (debugLevel >= 1)
+      cout << slices.size() << " sequence slices created." << endl;
 
-      vector<vector<Solvlet> > sequenceSolvlets; //one vector of solvlets per slice
+    vector<vector<Solvlet> > sequenceSolvlets; //one vector of solvlets per slice
 
-      if(debugLevel>=1)
-          cout << "Solving slices..." << endl;
+    if (debugLevel >= 1)
+      cout << "Solving slices..." << endl;
 
 
-      for(uint32_t sliceNumber=0; sliceNumber<slices.size(); ++sliceNumber)
-      {		//for every slice, build a factor grph
-          if(debugLevel>=1)
-              cout << "Interpolating slice "<< sliceNumber << endl;
-          vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
+    for (uint32_t sliceNumber = 0; sliceNumber < slices.size(); ++sliceNumber)
+    {		//for every slice, build a factor grph
+      if (debugLevel >= 1)
+        cout << "Interpolating slice " << sliceNumber << endl;
+      vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
 
 
-          vector<Detector*> detectors;
-          if(useCS)
-              detectors.push_back(new ColorHistDetector());
-          if(useHoG)
-              detectors.push_back(new HogDetector());
-          if(useSURF)
-              detectors.push_back(new SurfDetector());
+      vector<Detector*> detectors;
+      if (useCS)
+        detectors.push_back(new ColorHistDetector());
+      if (useHoG)
+        detectors.push_back(new HogDetector());
+      if (useSURF)
+        detectors.push_back(new SurfDetector());
 
-          vector<Frame*> trainingFrames;
-          trainingFrames.push_back(seqSlice.front()); //set training frame by index
-          trainingFrames.push_back(seqSlice.back());
+      vector<Frame*> trainingFrames;
+      trainingFrames.push_back(seqSlice.front()); //set training frame by index
+      trainingFrames.push_back(seqSlice.back());
 
-          for(uint32_t i=0; i<detectors.size(); ++i)
-          {
-              detectors[i]->train(trainingFrames, params);
-          }
-
-          vector<vector<vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
-
-          //initialise first level
-          for (uint32_t i=0; i<seqSlice.size(); ++i) // access by reference, the type of i is int&
-          {
-              //init detections to contain all detects for the sequence slice
-              detections.push_back(vector<vector<LimbLabel> >());
-          }
-
-          //first do the detections, and store them
-
-          for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
-          {
-              //current frame represents the current frame, previous frame is currentFrame-1, next frame is currentFrame+1
-
-              cerr << "Detecting on frame " << seqSlice[currentFrame]->getID() << endl;
-
-              vector<vector<LimbLabel> > labels, tempLabels;
-              vector<vector<LimbLabel> >::iterator labelPartsIter;
-
-              for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
-              {
-                  labels = detectors[i]->detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
-              }
-
-              //now sort them in the correct oder
-              for(uint32_t i=0; i<labels.size(); ++i)
-              {
-                  for(uint32_t j=0; j<labels.size();++j)
-                  {
-                      if(labels[j].at(0).getLimbID()==i)
-                          tempLabels.push_back(labels[j]);
-                  }
-              }
-              labels = tempLabels;
-
-  //            for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
-  //            {
-  //                vector<LimbLabel> temp;
-  //                for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
-  //                {
-  //                    temp.push_back(labelPartsIter->at(currentSize));
-  //                }
-  //                tempLabels.push_back(temp);
-  //            }
-
-              detections[currentFrame] = labels; //store all detections into detections
-          }
-
-          vector<size_t> numbersOfLabels; //numbers of labels per part
-
-          //the first an last frames of detections are always empty
-
-          for(uint32_t i=0; i<detections.size(); ++i)
-          {
-              for(uint32_t j=0; j<detections[i].size(); ++j)
-              {
-                  numbersOfLabels.push_back(detections[i][j].size());
-              }
-          } //numbers of labels now contains the numbers of labels, and their respective variations
-
-          //use this to shape the space, this will be rather large
-          Space space(numbersOfLabels.begin(), numbersOfLabels.end());
-          Model gm(space);
-
-          //OK
-
-          cerr << "Computing slice factors..." << endl;
-
-          int suppFactors=0, jointFactors=0, anchorFactors=0, tempFactors=0;
-          //now do the factors
-          for(uint32_t currentFrame=1; currentFrame<seqSlice.size()-1; ++currentFrame) //for every frame but first and last
-          {
-              Skeleton tempSkel = seqSlice[currentFrame]->getSkeleton(); //this frame interpolated skeleton
-              Skeleton pSkel = seqSlice[currentFrame-1]->getSkeleton(); //previous frame interpolated skeleton
-              tree<BodyPart> partTree = tempSkel.getPartTree();
-              tree<BodyPart> prevPartTree = pSkel.getPartTree();
-              tree<BodyPart>::iterator partIter, parentPartIter, prevPartIter;
-
-              partIter=partTree.begin();
-              prevPartIter=prevPartTree.begin();
-
-              while(partIter!=partTree.end() && prevPartIter!= prevPartTree.end())
-              {
-                  //compute prev part angle
-                  Point2f p0, p1, c0, c1;
-                  p0 = pSkel.getBodyJoint(prevPartIter->getParentJoint())->getImageLocation();
-                  p1 = pSkel.getBodyJoint(prevPartIter->getChildJoint())->getImageLocation();
-
-                  c0 = tempSkel.getBodyJoint(partIter->getParentJoint())->getImageLocation();
-                  c1 = tempSkel.getBodyJoint(partIter->getChildJoint())->getImageLocation();
-                  //compute prev part centre shift
-                  Point2f partCentre = 0.5*c0+0.5*c1;
-                  Point2f prevPartCentre = 0.5*p0+0.5*p1;
-
-                  Point2f partShift = partCentre-prevPartCentre;
-
-                  //set the search range based on distance body part centre has moved between previous frame and this frame
-                  float searchRange = sqrt(partShift.x*partShift.x+partShift.y*partShift.y)*partShiftCoeff;
-
-                  //bow compute the rotation angle change
-                  float partAngle = float(PoseHelper::angle2D(1.0, 0, c1.x - c0.x, c1.y - c0.y) * (180.0 / M_PI));
-                  float prevAngle = float(PoseHelper::angle2D(1.0, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
-
-                  //set search radius based on part rotation between previous frame and this frame
-                  float rotationRange = (partAngle-prevAngle)*partRotationCoeff;
-
-                  partIter->setRotationSearchRange(rotationRange);
-                  partIter->setSearchRadius(searchRange);
-
-                  partIter++;
-                  prevPartIter++;
-              }
-
-              tempSkel.setPartTree(partTree); //set the part tree for the skel
-              seqSlice[currentFrame]->setSkeleton(tempSkel); //set the skeleton for the frame
-
-              //construct the image score cost factors
-              //label score cost
-              cerr << "Computing Factors at Frame " << seqSlice[currentFrame]->getID() << endl;
-              vector<vector<LimbLabel> > labels = detections[currentFrame];
-              for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for each of the detected parts
-              {
-                  vector<int> varIndices; //create vector of indices of variables
-                  int varID = (currentFrame-1)*partTree.size()+partIter->getPartID();
-                  varIndices.push_back(varID); //push first value in
-
-                  size_t scoreCostShape[]={labels[partIter->getPartID()].size()}; //number of labels
-
-                  ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
-
-                  for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                  {
-                      float cost = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
-                      scoreCostFunc(i) = cost;
-                  }
-
-                  Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
-                  gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                  suppFactors++;
-
-                  if(currentFrame == 1) //anchor to first skeleton in sequence
-                  {
-                      float anchorMin=FLT_MAX, anchorMax=0;
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i)
-                      {
-                          float val = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params);
-
-                          if(val<anchorMin)
-                              anchorMin = val;
-                          if(val>anchorMax && val != FLT_MAX)
-                              anchorMax = val;
-                      }
-
-                      //we already know the shape from the previous functions
-                      ExplicitFunction<float> anchorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
-
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          float cost = computeNormAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params, anchorMax);
-                          anchorCostFunc(i) = cost;
-                      }
-
-                      Model::FunctionIdentifier anchorFid = gm.addFunction(anchorCostFunc); //explicit function add to graphical model
-                      gm.addFactor(anchorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                      anchorFactors++;
-                  }
-
-                  //anchor to last frame of the slice (i.e. to frame=seqSlice.size()-1
-                  if(currentFrame==(seqSlice.size()-2)) //anchor to
-                  {
-                      float anchorMin=FLT_MAX, anchorMax=0;
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i)
-                      {
-                          float val = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[seqSlice.size()-1], params);
-
-                          if(val<anchorMin)
-                              anchorMin = val;
-                          if(val>anchorMax && val != FLT_MAX)
-                              anchorMax = val;
-                      }
-                      //we already know the shape from the previous functions
-                      ExplicitFunction<float> anchorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
-
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          float cost = computeNormAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[seqSlice.size()-1], params, anchorMax);
-                          anchorCostFunc(i) = cost;
-                      }
-
-                      Model::FunctionIdentifier anchorFid = gm.addFunction(anchorCostFunc); //explicit function add to graphical model
-                      gm.addFactor(anchorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                      anchorFactors++;
-                  }
-
-                  if(partIter!=partTree.begin()) //if iterator is not on root node, there is always a parent body part
-                  {
-                      //this factor needs to be in reverse order, for sorting purposes
-                      varIndices.clear();
-                      parentPartIter=partTree.parent(partIter); //find the parent of this part
-                      varIndices.push_back((currentFrame-1)*partTree.size()+parentPartIter->getPartID()); //push back parent partID as the second variable index
-                      varIndices.push_back(varID); //push first value in (parent, this)
-
-                      size_t jointCostShape[]={labels[parentPartIter->getPartID()].size(), labels[partIter->getPartID()].size()}; //number of labels
-                      ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
-
-                      //first figure out which of the current body part's joints should be in common with the parent body part
-
-                      bool toChild=false;
-                      int pj = parentPartIter->getChildJoint();
-                      int cj = partIter->getParentJoint();
-                      if(pj==cj)
-                      {
-                          //then current parent is connected to paren
-                          toChild=true;
-                      }
-
-                      float jointMin=FLT_MAX, jointMax=0;
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
-                          {
-                              float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, toChild);
-
-                              if(val<jointMin)
-                                  jointMin = val;
-                              if(val>jointMax && val != FLT_MAX)
-                                  jointMax = val;
-                          }
-                      }
-
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
-                          {
-                              //for every child/parent pair, compute score
-                              float cost = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
-                              jointCostFunc(j, i) = cost;
-                          }
-                      }
-
-                      Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
-                      gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                      jointFactors++;
-                  }
-
-                  //futre temporal link (if not anchored)
-                  if(currentFrame<seqSlice.size()-2)
-                  {
-
-                      float tempMin=FLT_MAX, tempMax=0;
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          for(uint32_t j=0; j<detections[currentFrame+1][partIter->getPartID()].size(); ++j)
-                          {
-                              float val = computeFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame+1][partIter->getPartID()].at(j), params);
-
-                              if(val<tempMin)
-                                  tempMin = val;
-                              if(val>tempMax && val != FLT_MAX)
-                                  tempMax = val;
-                          }
-                      }
-
-                      varIndices.clear();
-                      varIndices.push_back((currentFrame-1)*partTree.size()+partIter->getPartID()); //push back parent partID as the second variable index
-                      varIndices.push_back((currentFrame)*partTree.size()+partIter->getPartID());
-
-                      size_t futureCostShape[]={labels[partIter->getPartID()].size(), detections[currentFrame+1][partIter->getPartID()].size()}; //number of labels
-                      ExplicitFunction<float> futureTempCostFunc(futureCostShape, futureCostShape+2); //explicit function declare
-
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          for(uint32_t j=0; j<detections[currentFrame+1][partIter->getPartID()].size(); ++j)
-                          {
-                              float cost = computeNormFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame+1][partIter->getPartID()].at(j), params, tempMax);
-                              futureTempCostFunc(i,j) = cost;
-                          }
-                      }
-                      Model::FunctionIdentifier futureTempCostFid = gm.addFunction(futureTempCostFunc); //explicit function add to graphical model
-                      gm.addFactor(futureTempCostFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                      tempFactors++;
-                  }
-              }
-          }
-
-          if(debugLevel>=1)
-          {
-              float n,k;
-              n=seqSlice.size()-2; //num non-anchor frames
-              k=seqSlice.front()->getSkeleton().getPartTree().size(); //number of bones
-              float expectedSuppFactors=n*k; //n*k
-              float expectedJointFactors=n*(k-1); //n*(k-1)
-              float expectedAnchorFactors=2*k; //2*k
-              float expectedTempFactors=(n-1)*k; //(n-1)*k
-
-              assert(expectedSuppFactors==suppFactors);
-              assert(expectedJointFactors==jointFactors);
-              assert(expectedAnchorFactors==anchorFactors);
-              assert(expectedTempFactors==tempFactors);
-          }
-
-          cerr << "Solving slice factor graph" << endl;
-
-          //now solve the slice
-
-          if(debugLevel>=2)
-              opengm::hdf5::save(gm, "gm.h5", "tlps-gm");
-
-          const size_t maxNumberOfIterations = 100;
-          const double convergenceBound = 1e-7;
-          const double damping = 0.5;
-          BeliefPropagation::Parameter parameter(maxNumberOfIterations, convergenceBound, damping);
-          BeliefPropagation bp(gm, parameter);
-
-          // optimize (approximately)
-          BeliefPropagation::VerboseVisitorType visitor;
-          bp.infer(visitor);
-          //pass to solve function
-
-          // obtain the (approximate) argmin
-          vector<size_t> labeling((detections.size()-2)*detections[1].size()); //number of non-anchor frames * number of bodyparts
-          bp.arg(labeling);
-
-          vector<vector<LimbLabel> > solutionLabels;
-          for(uint32_t i=0; i<seqSlice.size(); ++i)
-          {
-              solutionLabels.push_back(vector<LimbLabel>());
-              // for(uint32_t j=0; j<detections[i].size(); ++j)
-              // {
-              // 	solutionLabels[i].push_back(
-              // }
-          }
-
-          for(uint32_t i=1; i<seqSlice.size()-1;++i) //frames
-          {
-              for(uint32_t j=0; j<detections[i].size(); ++j) //parts
-              {
-                  int solveId=(i-1)*detections[1].size()+j; //where to find the solution?
-                  solutionLabels[i].push_back(detections[i][j][labeling[solveId]]); //pupulate solution vector
-              }
-          }
-
-          vector<Solvlet> solvlets;
-          //now set up a solvlet for every frame
-          for(uint32_t i=1; i<seqSlice.size()-1;++i) //push all frames but keyframes into the solvlets
-          {
-              solvlets.push_back(Solvlet(seqSlice[i]->getID(), solutionLabels[i]));
-          }
-
-          sequenceSolvlets.push_back(solvlets);
-      }
-
-
-      if(debugLevel>=1)
-          cout << sequenceSolvlets.size() << " slices solved." << endl;
-      //sequence solvlets now contain all the solvlets for the entire sequence
-
-      //rearrange this into one vector of solvlets for evaluation
-      vector<Solvlet> retSolve;
-      for(uint32_t i=0; i<sequenceSolvlets.size();++i)
+      for (uint32_t i = 0; i < detectors.size(); ++i)
       {
-          for(uint32_t j=0; j<sequenceSolvlets[i].size(); ++j)
-          {
-              retSolve.push_back(sequenceSolvlets[i][j]);
-          }
+        detectors[i]->train(trainingFrames, params);
       }
 
-      vector<Frame*> frames = sequence.getFrames();
+      vector<vector<vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
 
-      float acceptLockframeThreshold = params.at("acceptLockframeThreshold");
-      if(acceptLockframeThreshold>0) //if it's greater than zero, we want to evaluate solves before returning them
+      //initialise first level
+      for (uint32_t i = 0; i < seqSlice.size(); ++i) // access by reference, the type of i is int&
       {
-          vector<Solvlet> passedSolves;
-          for(uint32_t i=0; i<retSolve.size();++i)
-          {
-              Solvlet solvlet=retSolve[i];
-              float score=evaluateSolution(frames[retSolve[i].getFrameID()],
-                      solvlet.getLabels(), params);
-
-              if(score>=acceptLockframeThreshold) //if the frame passed the test
-              {
-                  passedSolves.push_back(solvlet);
-                  //generate lockframe
-
-                  //set lockframe to frame
-                  int thisFrameID  = solvlet.getFrameID();
-                  int parentFrameID = thisFrameID;//this frame is it's own parent frame, since this is a temporal solve
-
-                  Lockframe * lockframe = new Lockframe();
-                  lockframe->setImage(frames[thisFrameID]->getImage());
-                  lockframe->setMask(frames[thisFrameID]->getMask());
-                  lockframe->setID(thisFrameID);
-                  Skeleton parentSkel = frames[parentFrameID]->getSkeleton(); //use skeleton to mimic the structure of
-                  Skeleton skel = solvlet.toSkeleton(parentSkel);
-                  //parent skeleton is the basis, this will copy scale and other params, but have different locations
-                  lockframe->setSkeleton(skel);
-                  lockframe->setParentFrameID(parentFrameID);
-
-                  frames[thisFrameID] = lockframe;
-              }
-          }
-          retSolve = passedSolves; //return these solves
+        //init detections to contain all detects for the sequence slice
+        detections.push_back(vector<vector<LimbLabel> >());
       }
 
-      sequence.setFrames(frames);
-      return retSolve;
+      //first do the detections, and store them
+
+      for (uint32_t currentFrame = 1; currentFrame < seqSlice.size() - 1; ++currentFrame) //for every frame but first and last
+      {
+        //current frame represents the current frame, previous frame is currentFrame-1, next frame is currentFrame+1
+
+        cerr << "Detecting on frame " << seqSlice[currentFrame]->getID() << endl;
+
+        vector<vector<LimbLabel> > labels, tempLabels;
+        vector<vector<LimbLabel> >::iterator labelPartsIter;
+
+        for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
+        {
+          labels = detectors[i]->detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
+        }
+
+        //now sort them in the correct oder
+        for (uint32_t i = 0; i < labels.size(); ++i)
+        {
+          for (uint32_t j = 0; j < labels.size(); ++j)
+          {
+            if (labels[j].at(0).getLimbID() == i)
+              tempLabels.push_back(labels[j]);
+          }
+        }
+        labels = tempLabels;
+
+        //            for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
+        //            {
+        //                vector<LimbLabel> temp;
+        //                for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
+        //                {
+        //                    temp.push_back(labelPartsIter->at(currentSize));
+        //                }
+        //                tempLabels.push_back(temp);
+        //            }
+
+        detections[currentFrame] = labels; //store all detections into detections
+      }
+
+      vector<size_t> numbersOfLabels; //numbers of labels per part
+
+      //the first an last frames of detections are always empty
+
+      for (uint32_t i = 0; i < detections.size(); ++i)
+      {
+        for (uint32_t j = 0; j < detections[i].size(); ++j)
+        {
+          numbersOfLabels.push_back(detections[i][j].size());
+        }
+      } //numbers of labels now contains the numbers of labels, and their respective variations
+
+      //use this to shape the space, this will be rather large
+      Space space(numbersOfLabels.begin(), numbersOfLabels.end());
+      Model gm(space);
+
+      //OK
+
+      cerr << "Computing slice factors..." << endl;
+
+      int suppFactors = 0, jointFactors = 0, anchorFactors = 0, tempFactors = 0;
+      //now do the factors
+      for (uint32_t currentFrame = 1; currentFrame < seqSlice.size() - 1; ++currentFrame) //for every frame but first and last
+      {
+        Skeleton tempSkel = seqSlice[currentFrame]->getSkeleton(); //this frame interpolated skeleton
+        Skeleton pSkel = seqSlice[currentFrame - 1]->getSkeleton(); //previous frame interpolated skeleton
+        tree<BodyPart> partTree = tempSkel.getPartTree();
+        tree<BodyPart> prevPartTree = pSkel.getPartTree();
+        tree<BodyPart>::iterator partIter, parentPartIter, prevPartIter;
+
+        partIter = partTree.begin();
+        prevPartIter = prevPartTree.begin();
+
+        while (partIter != partTree.end() && prevPartIter != prevPartTree.end())
+        {
+          //compute prev part angle
+          Point2f p0, p1, c0, c1;
+          p0 = pSkel.getBodyJoint(prevPartIter->getParentJoint())->getImageLocation();
+          p1 = pSkel.getBodyJoint(prevPartIter->getChildJoint())->getImageLocation();
+
+          c0 = tempSkel.getBodyJoint(partIter->getParentJoint())->getImageLocation();
+          c1 = tempSkel.getBodyJoint(partIter->getChildJoint())->getImageLocation();
+          //compute prev part centre shift
+          Point2f partCentre = 0.5*c0 + 0.5*c1;
+          Point2f prevPartCentre = 0.5*p0 + 0.5*p1;
+
+          Point2f partShift = partCentre - prevPartCentre;
+
+          //set the search range based on distance body part centre has moved between previous frame and this frame
+          float searchRange = sqrt(partShift.x*partShift.x + partShift.y*partShift.y)*partShiftCoeff;
+
+          //bow compute the rotation angle change
+          float partAngle = float(PoseHelper::angle2D(1.0, 0, c1.x - c0.x, c1.y - c0.y) * (180.0 / M_PI));
+          float prevAngle = float(PoseHelper::angle2D(1.0, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+
+          //set search radius based on part rotation between previous frame and this frame
+          float rotationRange = (partAngle - prevAngle)*partRotationCoeff;
+
+          partIter->setRotationSearchRange(rotationRange);
+          partIter->setSearchRadius(searchRange);
+
+          partIter++;
+          prevPartIter++;
+        }
+
+        tempSkel.setPartTree(partTree); //set the part tree for the skel
+        seqSlice[currentFrame]->setSkeleton(tempSkel); //set the skeleton for the frame
+
+        //construct the image score cost factors
+        //label score cost
+        cerr << "Computing Factors at Frame " << seqSlice[currentFrame]->getID() << endl;
+        vector<vector<LimbLabel> > labels = detections[currentFrame];
+        for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter) //for each of the detected parts
+        {
+          vector<int> varIndices; //create vector of indices of variables
+          int varID = (currentFrame - 1)*partTree.size() + partIter->getPartID();
+          varIndices.push_back(varID); //push first value in
+
+          size_t scoreCostShape[] = { labels[partIter->getPartID()].size() }; //number of labels
+
+          ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape + 1); //explicit function declare
+
+          for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+          {
+            float cost = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
+            scoreCostFunc(i) = cost;
+          }
+
+          Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
+          gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+          suppFactors++;
+
+          if (currentFrame == 1) //anchor to first skeleton in sequence
+          {
+            float anchorMin = FLT_MAX, anchorMax = 0;
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i)
+            {
+              float val = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params);
+
+              if (val < anchorMin)
+                anchorMin = val;
+              if (val > anchorMax && val != FLT_MAX)
+                anchorMax = val;
+            }
+
+            //we already know the shape from the previous functions
+            ExplicitFunction<float> anchorCostFunc(scoreCostShape, scoreCostShape + 1); //explicit function declare
+
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              float cost = computeNormAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[0], params, anchorMax);
+              anchorCostFunc(i) = cost;
+            }
+
+            Model::FunctionIdentifier anchorFid = gm.addFunction(anchorCostFunc); //explicit function add to graphical model
+            gm.addFactor(anchorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+            anchorFactors++;
+          }
+
+          //anchor to last frame of the slice (i.e. to frame=seqSlice.size()-1
+          if (currentFrame == (seqSlice.size() - 2)) //anchor to
+          {
+            float anchorMin = FLT_MAX, anchorMax = 0;
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i)
+            {
+              float val = computeAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[seqSlice.size() - 1], params);
+
+              if (val < anchorMin)
+                anchorMin = val;
+              if (val > anchorMax && val != FLT_MAX)
+                anchorMax = val;
+            }
+            //we already know the shape from the previous functions
+            ExplicitFunction<float> anchorCostFunc(scoreCostShape, scoreCostShape + 1); //explicit function declare
+
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              float cost = computeNormAnchorCost(labels[partIter->getPartID()].at(i), seqSlice[seqSlice.size() - 1], params, anchorMax);
+              anchorCostFunc(i) = cost;
+            }
+
+            Model::FunctionIdentifier anchorFid = gm.addFunction(anchorCostFunc); //explicit function add to graphical model
+            gm.addFactor(anchorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+            anchorFactors++;
+          }
+
+          if (partIter != partTree.begin()) //if iterator is not on root node, there is always a parent body part
+          {
+            //this factor needs to be in reverse order, for sorting purposes
+            varIndices.clear();
+            parentPartIter = partTree.parent(partIter); //find the parent of this part
+            varIndices.push_back((currentFrame - 1)*partTree.size() + parentPartIter->getPartID()); //push back parent partID as the second variable index
+            varIndices.push_back(varID); //push first value in (parent, this)
+
+            size_t jointCostShape[] = { labels[parentPartIter->getPartID()].size(), labels[partIter->getPartID()].size() }; //number of labels
+            ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape + 2); //explicit function declare
+
+            //first figure out which of the current body part's joints should be in common with the parent body part
+
+            bool toChild = false;
+            int pj = parentPartIter->getChildJoint();
+            int cj = partIter->getParentJoint();
+            if (pj == cj)
+            {
+              //then current parent is connected to paren
+              toChild = true;
+            }
+
+            float jointMin = FLT_MAX, jointMax = 0;
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              for (uint32_t j = 0; j < labels[parentPartIter->getPartID()].size(); ++j)
+              {
+                float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, toChild);
+
+                if (val < jointMin)
+                  jointMin = val;
+                if (val > jointMax && val != FLT_MAX)
+                  jointMax = val;
+              }
+            }
+
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              for (uint32_t j = 0; j < labels[parentPartIter->getPartID()].size(); ++j)
+              {
+                //for every child/parent pair, compute score
+                float cost = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
+                jointCostFunc(j, i) = cost;
+              }
+            }
+
+            Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
+            gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+            jointFactors++;
+          }
+
+          //futre temporal link (if not anchored)
+          if (currentFrame < seqSlice.size() - 2)
+          {
+
+            float tempMin = FLT_MAX, tempMax = 0;
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              for (uint32_t j = 0; j < detections[currentFrame + 1][partIter->getPartID()].size(); ++j)
+              {
+                float val = computeFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame + 1][partIter->getPartID()].at(j), params);
+
+                if (val < tempMin)
+                  tempMin = val;
+                if (val > tempMax && val != FLT_MAX)
+                  tempMax = val;
+              }
+            }
+
+            varIndices.clear();
+            varIndices.push_back((currentFrame - 1)*partTree.size() + partIter->getPartID()); //push back parent partID as the second variable index
+            varIndices.push_back((currentFrame)*partTree.size() + partIter->getPartID());
+
+            size_t futureCostShape[] = { labels[partIter->getPartID()].size(), detections[currentFrame + 1][partIter->getPartID()].size() }; //number of labels
+            ExplicitFunction<float> futureTempCostFunc(futureCostShape, futureCostShape + 2); //explicit function declare
+
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              for (uint32_t j = 0; j < detections[currentFrame + 1][partIter->getPartID()].size(); ++j)
+              {
+                float cost = computeNormFutureTempCost(labels[partIter->getPartID()].at(i), detections[currentFrame + 1][partIter->getPartID()].at(j), params, tempMax);
+                futureTempCostFunc(i, j) = cost;
+              }
+            }
+            Model::FunctionIdentifier futureTempCostFid = gm.addFunction(futureTempCostFunc); //explicit function add to graphical model
+            gm.addFactor(futureTempCostFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+            tempFactors++;
+          }
+        }
+      }
+
+      if (debugLevel >= 1)
+      {
+        float n, k;
+        n = seqSlice.size() - 2; //num non-anchor frames
+        k = seqSlice.front()->getSkeleton().getPartTree().size(); //number of bones
+        float expectedSuppFactors = n*k; //n*k
+        float expectedJointFactors = n*(k - 1); //n*(k-1)
+        float expectedAnchorFactors = 2 * k; //2*k
+        float expectedTempFactors = (n - 1)*k; //(n-1)*k
+
+        assert(expectedSuppFactors == suppFactors);
+        assert(expectedJointFactors == jointFactors);
+        assert(expectedAnchorFactors == anchorFactors);
+        assert(expectedTempFactors == tempFactors);
+      }
+
+      cerr << "Solving slice factor graph" << endl;
+
+      //now solve the slice
+
+      if (debugLevel >= 2)
+        opengm::hdf5::save(gm, "gm.h5", "tlps-gm");
+
+      const size_t maxNumberOfIterations = 100;
+      const double convergenceBound = 1e-7;
+      const double damping = 0.5;
+      BeliefPropagation::Parameter parameter(maxNumberOfIterations, convergenceBound, damping);
+      BeliefPropagation bp(gm, parameter);
+
+      // optimize (approximately)
+      BeliefPropagation::VerboseVisitorType visitor;
+      bp.infer(visitor);
+      //pass to solve function
+
+      // obtain the (approximate) argmin
+      vector<size_t> labeling((detections.size() - 2)*detections[1].size()); //number of non-anchor frames * number of bodyparts
+      bp.arg(labeling);
+
+      vector<vector<LimbLabel> > solutionLabels;
+      for (uint32_t i = 0; i < seqSlice.size(); ++i)
+      {
+        solutionLabels.push_back(vector<LimbLabel>());
+        // for(uint32_t j=0; j<detections[i].size(); ++j)
+        // {
+        // 	solutionLabels[i].push_back(
+        // }
+      }
+
+      for (uint32_t i = 1; i < seqSlice.size() - 1; ++i) //frames
+      {
+        for (uint32_t j = 0; j < detections[i].size(); ++j) //parts
+        {
+          int solveId = (i - 1)*detections[1].size() + j; //where to find the solution?
+          solutionLabels[i].push_back(detections[i][j][labeling[solveId]]); //pupulate solution vector
+        }
+      }
+
+      vector<Solvlet> solvlets;
+      //now set up a solvlet for every frame
+      for (uint32_t i = 1; i < seqSlice.size() - 1; ++i) //push all frames but keyframes into the solvlets
+      {
+        solvlets.push_back(Solvlet(seqSlice[i]->getID(), solutionLabels[i]));
+      }
+
+      sequenceSolvlets.push_back(solvlets);
+    }
+
+
+    if (debugLevel >= 1)
+      cout << sequenceSolvlets.size() << " slices solved." << endl;
+    //sequence solvlets now contain all the solvlets for the entire sequence
+
+    //rearrange this into one vector of solvlets for evaluation
+    vector<Solvlet> retSolve;
+    for (uint32_t i = 0; i < sequenceSolvlets.size(); ++i)
+    {
+      for (uint32_t j = 0; j < sequenceSolvlets[i].size(); ++j)
+      {
+        retSolve.push_back(sequenceSolvlets[i][j]);
+      }
+    }
+
+    vector<Frame*> frames = sequence.getFrames();
+
+    float acceptLockframeThreshold = params.at("acceptLockframeThreshold");
+    if (acceptLockframeThreshold > 0) //if it's greater than zero, we want to evaluate solves before returning them
+    {
+      vector<Solvlet> passedSolves;
+      for (uint32_t i = 0; i < retSolve.size(); ++i)
+      {
+        Solvlet solvlet = retSolve[i];
+        float score = evaluateSolution(frames[retSolve[i].getFrameID()],
+          solvlet.getLabels(), params);
+
+        if (score >= acceptLockframeThreshold) //if the frame passed the test
+        {
+          passedSolves.push_back(solvlet);
+          //generate lockframe
+
+          //set lockframe to frame
+          int thisFrameID = solvlet.getFrameID();
+          int parentFrameID = thisFrameID;//this frame is it's own parent frame, since this is a temporal solve
+
+          Lockframe * lockframe = new Lockframe();
+          lockframe->setImage(frames[thisFrameID]->getImage());
+          lockframe->setMask(frames[thisFrameID]->getMask());
+          lockframe->setID(thisFrameID);
+          Skeleton parentSkel = frames[parentFrameID]->getSkeleton(); //use skeleton to mimic the structure of
+          Skeleton skel = solvlet.toSkeleton(parentSkel);
+          //parent skeleton is the basis, this will copy scale and other params, but have different locations
+          lockframe->setSkeleton(skel);
+          lockframe->setParentFrameID(parentFrameID);
+
+          frames[thisFrameID] = lockframe;
+        }
+      }
+      retSolve = passedSolves; //return these solves
+    }
+
+    sequence.setFrames(frames);
+    return retSolve;
   }
 
 

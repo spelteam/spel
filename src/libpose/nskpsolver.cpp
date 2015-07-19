@@ -93,435 +93,435 @@ namespace SPEL
 
   vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const vector<Frame*> frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore)
   {
-      vector<NSKPSolver::SolvletScore> allSolves;
-      Mat image = frames[0]->getImage();
-      // //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
-      // float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
-      // int mst_max_size=params.at("mst_max_size"); //@FIXME PARAM this is a param, not static
+    vector<NSKPSolver::SolvletScore> allSolves;
+    Mat image = frames[0]->getImage();
+    // //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
+    // float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
+    // int mst_max_size=params.at("mst_max_size"); //@FIXME PARAM this is a param, not static
 
-      //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
-      params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
-      params.emplace("propagateFromLockframes", 1); //don't propagate from lockframes, only from keyframes
+    //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
+    params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
+    params.emplace("propagateFromLockframes", 1); //don't propagate from lockframes, only from keyframes
 
-      //detector enablers
-      params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
-      params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
-      params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
-      params.emplace("maxPartCandidates", 40); //set the max number of part candidates to allow into the solver
+    //detector enablers
+    params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+    params.emplace("maxPartCandidates", 40); //set the max number of part candidates to allow into the solver
 
-      //detector search parameters
+    //detector search parameters
 
-      params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
-      params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
-      params.emplace("anchorBindCoeff", 0.0); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
-      params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
+    params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
+    params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+    params.emplace("anchorBindCoeff", 0.0); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+    params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
 
-      //detector search parameters
-      params.emplace("baseRotationRange", 40); //search angle range of +/- 40 degrees
-      float baseRotationRange = params.at("baseRotationRange");
-      params.emplace("baseRotationStep", baseRotationRange/4.0); //search with angle step of 10 degrees, this a per-part range and overrides globals
-      params.emplace("stepTheta", baseRotationRange/4.0); //search in a grid every 10 pixels
+    //detector search parameters
+    params.emplace("baseRotationRange", 40); //search angle range of +/- 40 degrees
+    float baseRotationRange = params.at("baseRotationRange");
+    params.emplace("baseRotationStep", baseRotationRange / 4.0); //search with angle step of 10 degrees, this a per-part range and overrides globals
+    params.emplace("stepTheta", baseRotationRange / 4.0); //search in a grid every 10 pixels
 
-      params.emplace("baseSearchRadius", image.rows/30.0); //search a radius of 100 pixels
-      int baseSearchRadius = params.at("baseSearchRadius");
-      params.emplace("baseSearchStep", baseSearchRadius/10.0); //do 9-10 steps in each direction
-      //solver sensitivity parameters
-      params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
-      params.emplace("jointCoeff", 0.5); //set solver body part connectivity sensitivitymaxPartCandidates
-      params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
-      params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+    params.emplace("baseSearchRadius", image.rows / 30.0); //search a radius of 100 pixels
+    int baseSearchRadius = params.at("baseSearchRadius");
+    params.emplace("baseSearchStep", baseSearchRadius / 10.0); //do 9-10 steps in each direction
+    //solver sensitivity parameters
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 0.5); //set solver body part connectivity sensitivitymaxPartCandidates
+    params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
+    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
 
-      //solver eval parameters
-      params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
+    //solver eval parameters
+    params.emplace("acceptLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
-      //restrict problem size
-      params.emplace("maxFrameHeight", 288);  //emplace if not defined
+    //restrict problem size
+    params.emplace("maxFrameHeight", 288);  //emplace if not defined
 
 
-      float depthRotationCoeff = params.at("partDepthRotationCoeff");
+    float depthRotationCoeff = params.at("partDepthRotationCoeff");
 
-      float baseRotationStep = params.at("baseRotationStep");
-      float baseSearchStep = params.at("baseSearchStep");
+    float baseRotationStep = params.at("baseRotationStep");
+    float baseSearchStep = params.at("baseSearchStep");
 
-      //paramaters for soft binding to existing keyframes/lockframes
-      int anchorBindDistance = params.at("anchorBindDistance");
-      float anchorBindCoeff = params.at("anchorBindCoeff");
-      bool bindToLockframes = params.at("bindToLockframes");
+    //paramaters for soft binding to existing keyframes/lockframes
+    int anchorBindDistance = params.at("anchorBindDistance");
+    float anchorBindCoeff = params.at("anchorBindCoeff");
+    bool bindToLockframes = params.at("bindToLockframes");
 
-      float useHoG = params.at("useHoGdet");
-      float useCS = params.at("useCSdet");
-      float useSURF = params.at("useSURFdet");
-      uint32_t debugLevel = params.at("debugLevel");
-      bool propagateFromLockframes=params.at("propagateFromLockframes");
+    float useHoG = params.at("useHoGdet");
+    float useCS = params.at("useCSdet");
+    float useSURF = params.at("useSURFdet");
+    uint32_t debugLevel = params.at("debugLevel");
+    bool propagateFromLockframes = params.at("propagateFromLockframes");
 
-      bool isIgnored=false;
-      for(uint32_t i=0; i<ignore.size(); ++i)
+    bool isIgnored = false;
+    for (uint32_t i = 0; i < ignore.size(); ++i)
+    {
+      if (ignore[i] == frames[frameId]->getID())
       {
-          if(ignore[i]==frames[frameId]->getID())
-          {
-              isIgnored=true;
-              break;
-          }
+        isIgnored = true;
+        break;
+      }
+    }
+
+    if (frames[frameId]->getFrametype() != INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
+      && (frames[frameId]->getFrametype() != LOCKFRAME || propagateFromLockframes)) //and, if it's a lockframe, and solving from lockframes is allowed
+    {
+      ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
+
+      tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
+      tree<int>::iterator mstIter;
+      //do OpenGM solve for single factor graph
+
+      vector<Detector*> detectors;
+      if (useCS)
+        detectors.push_back(new ColorHistDetector());
+      if (useHoG)
+        detectors.push_back(new HogDetector());
+      if (useSURF)
+        detectors.push_back(new SurfDetector());
+
+      vector<Frame*> trainingFrames;
+      trainingFrames.push_back(frames[frameId]); //set training frame by index
+
+      for (uint32_t i = 0; i < detectors.size(); ++i)
+      {
+        detectors[i]->train(trainingFrames, params);
       }
 
-      if(frames[frameId]->getFrametype()!=INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
-              && (frames[frameId]->getFrametype()!=LOCKFRAME || propagateFromLockframes)) //and, if it's a lockframe, and solving from lockframes is allowed
+      //@TODO: This may need to be modified to propagate not from root frame, but from parent frame
+      //but only if the solve was successful, otherwise propagate from the root frame
+      for (mstIter = mst.begin(); mstIter != mst.end(); ++mstIter) //for each frame in the MST
       {
-          ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
 
-          tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
-          tree<int>::iterator mstIter;
-          //do OpenGM solve for single factor graph
+        //t1 = high_resolution_clock::now();
 
-          vector<Detector*> detectors;
-          if(useCS)
-              detectors.push_back(new ColorHistDetector());
-          if(useHoG)
-              detectors.push_back(new HogDetector());
-          if(useSURF)
-              detectors.push_back(new SurfDetector());
+        if (frames[*mstIter]->getFrametype() == KEYFRAME || frames[*mstIter]->getFrametype() == LOCKFRAME || *mstIter == frameId) //don't push to existing keyframes and lockframes
+          continue; //also ignore mst frame if it's this frame
+        //map<int, vector<LimbLabel> > labels;
+        vector<vector<LimbLabel> > labels, tempLabels;
+        vector<vector<LimbLabel> >::iterator labelPartsIter;
 
-          vector<Frame*> trainingFrames;
-          trainingFrames.push_back(frames[frameId]); //set training frame by index
-
-          for(uint32_t i=0; i<detectors.size(); ++i)
+        //check whether parent is a lockframe
+        bool parentIsLockframe = false;
+        int parentIsSolved = -1;
+        if (mstIter != mst.begin())
+        {
+          if (frames[*mst.parent(mstIter)]->getFrametype() == LOCKFRAME || frames[*mst.parent(mstIter)]->getFrametype() == KEYFRAME)
+            parentIsLockframe = true;
+          for (uint32_t i = 0; i < allSolves.size(); ++i) //check among accepted solutions
           {
-              detectors[i]->train(trainingFrames, params);
+            if (allSolves[i].solvlet.getFrameID() == *mst.parent(mstIter)) //if one fits, use it as prior
+              parentIsSolved = i;
+          }
+        }
+
+        parentIsSolved = -1;
+
+        Frame * lockframe = new Lockframe();
+
+        if (parentIsSolved != -1) //if solved, set the prior to the solve
+          lockframe->setSkeleton(allSolves.at(parentIsSolved).solvlet.toSkeleton(frames[frameId]->getSkeleton()));
+        else if (parentIsLockframe) //if the parent of this node is a lockframe, use it as a prior
+          lockframe->setSkeleton(frames[*mst.parent(mstIter)]->getSkeleton());
+        else //otherwise use the root frame as a prior
+          lockframe->setSkeleton(frames[frameId]->getSkeleton());
+
+
+        lockframe->setID(frames[*mstIter]->getID());
+        lockframe->setImage(frames[*mstIter]->getImage());
+        lockframe->setMask(frames[*mstIter]->getMask());
+
+        //compute the shift between the frame we are propagating from and the current frame
+        Point2f shift;
+        if (parentIsSolved != -1)
+          shift = ism.getShift(allSolves.at(parentIsSolved).solvlet.getFrameID(), frames[*mstIter]->getID());
+        else if (parentIsLockframe)
+          shift = ism.getShift(frames[*mst.parent(mstIter)]->getID(), frames[*mstIter]->getID());
+        else
+          shift = ism.getShift(frames[frameId]->getID(), frames[*mstIter]->getID());
+
+        Skeleton skeleton = lockframe->getSkeleton();
+
+        //now set up skeleton params, such as search radius and angle search radius for every part
+        //this should very depending on relative distance between frames
+        //for each body part
+        tree<BodyPart> partTree = skeleton.getPartTree();
+        tree<BodyPart>::iterator partIter, parentPartIter;
+
+        //TODO: add check for keyframe or lockframe proximity to angular search radius estimator
+        //            bool isBound=false;
+        //            //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
+        //            //and is the frame we are propagating from, a keyframe? (check only if we disallow bind to lockframes
+        //            if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
+        //                    (bindToLockframes || (frames[frameId]->getFrametype()==KEYFRAME))) //and whether we are actually allowed to bind
+        //                isBound=true;
+
+        //if so, set bool to true, and get the frame ID that we are close to
+
+        for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
+        {
+          //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
+          //and based on node depth (deeper nodes have a higher distance)
+          //this should rely on parameters e.g.
+
+          //else
+          int depth = partTree.depth(partIter);
+
+          float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
+          float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
+
+          //                if(isBound) //if we're close to the anchor, restrict the rotation range
+          //                    rotationRange = rotationRange*anchorBindCoeff;
+
+          partIter->setRotationSearchRange(rotationRange);
+          partIter->setSearchRadius(searchRange);
+
+        }
+        skeleton.setPartTree(partTree);
+        lockframe->setSkeleton(skeleton);
+
+        if (parentIsLockframe)
+          frames[*mst.parent(mstIter)]->setSkeleton(skeleton);
+        else
+          frames[frameId]->setSkeleton(skeleton);
+
+        lockframe->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
+
+        for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
+        {
+          labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
+        }
+
+        //sort labels
+        for (uint32_t i = 0; i < labels.size(); ++i)
+        {
+          for (uint32_t j = 0; j < labels.size(); ++j)
+          {
+            if (labels[j].at(0).getLimbID() == i)
+              tempLabels.push_back(labels[j]);
+          }
+        }
+        labels = tempLabels;
+        tempLabels.clear();
+
+        //            t2 = high_resolution_clock::now();
+
+        //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+
+        //            cerr << "Detection time "  << duration << endl;
+
+        //t1 = high_resolution_clock::now();
+
+        // //temp coment this out
+        for (labelPartsIter = labels.begin(); labelPartsIter != labels.end(); ++labelPartsIter) //now take the top labels
+        {
+
+          vector<LimbLabel> temp;
+
+          uint32_t maxPartCandidates = params.at("maxPartCandidates");
+
+          if ((labelPartsIter->at(0)).getIsOccluded())
+            maxPartCandidates = labelPartsIter->size();
+
+          for (uint32_t currentSize = 0; currentSize < maxPartCandidates && currentSize < labelPartsIter->size(); ++currentSize)
+          {
+            LimbLabel label = labelPartsIter->at(currentSize);
+            vector<Score> scores = label.getScores();
+
+            for (uint32_t s = 0; s < scores.size(); ++s)
+            {
+              if (scores[s].getIsWeak())
+                maxPartCandidates = labelPartsIter->size();
+            }
+
+            temp.push_back(label);
+
+          }
+          tempLabels.push_back(temp);
+        }
+
+        labels = tempLabels;
+
+        vector<size_t> numbersOfLabels; //numbers of labels per part
+
+        for (uint32_t i = 0; i < labels.size(); ++i)
+        {
+          numbersOfLabels.push_back(labels[i].size());
+        } //numbers of labels now contains the numbers
+
+        Space space(numbersOfLabels.begin(), numbersOfLabels.end());
+        Model gm(space);
+
+        uint32_t jointFactors = 0, suppFactors = 0, priorFactors = 0;
+        //label score cost
+        for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter) //for each of the detected parts
+        {
+          vector<int> varIndices; //create vector of indices of variables
+          varIndices.push_back(partIter->getPartID()); //push first value in
+
+          size_t scoreCostShape[] = { numbersOfLabels[partIter->getPartID()] }; //number of labels
+          ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape + 1); //explicit function declare
+
+          for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+          {
+            scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
           }
 
-          //@TODO: This may need to be modified to propagate not from root frame, but from parent frame
-          //but only if the solve was successful, otherwise propagate from the root frame
-          for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
+          Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
+          gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+          suppFactors++;
+
+          //Comment out prior cost factors for the moment
+          //                    ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
+
+          //                    //precompute the maxium and minimum for normalisation
+          //                    float priorMin=FLT_MAX, priorMax=0;
+          //                    vector<LimbLabel>::iterator lbl;
+          //                    //vector<float> priorCostFuncValues;
+          //                    for(lbl=labels[partIter->getPartID()].begin(); lbl!=labels[partIter->getPartID()].end(); ++lbl) //for each label in for this part
+          //                    {
+          //                        float val = computePriorCost(*lbl, *partIter, skeleton, params);
+
+          //                        if(val<priorMin)
+          //                            priorMin = val;
+          //                        if(val>priorMax && val!=FLT_MAX)
+          //                            priorMax = val;
+
+          //                        //priorCostFuncValues.push_back(val);
+          //                    }
+
+          //                    //now set up the solutions
+          //                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+          //                    {
+          //                        priorCostFunc(i) = computeNormPriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params, priorMin, priorMax);
+          //                    }
+
+          //                    Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
+          //                    gm.addFactor(priorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+          //                    priorFactors++;
+
+          if (partIter != partTree.begin()) //if iterator is not on root node, there is always a parent body part
           {
+            varIndices.clear();
+            parentPartIter = partTree.parent(partIter); //find the parent of this part
+            varIndices.push_back(parentPartIter->getPartID()); //push back parent partID as the second variable index
+            varIndices.push_back(partIter->getPartID()); //push first value in (parent, this)
 
-              //t1 = high_resolution_clock::now();
+            size_t jointCostShape[] = { numbersOfLabels[parentPartIter->getPartID()], numbersOfLabels[partIter->getPartID()] }; //number of labels
+            ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape + 2); //explicit function declare
 
-              if(frames[*mstIter]->getFrametype()==KEYFRAME || frames[*mstIter]->getFrametype()==LOCKFRAME || *mstIter==frameId) //don't push to existing keyframes and lockframes
-                  continue; //also ignore mst frame if it's this frame
-              //map<int, vector<LimbLabel> > labels;
-              vector<vector<LimbLabel> > labels, tempLabels;
-              vector<vector<LimbLabel> >::iterator labelPartsIter;
+            //first figure out which of the current body part's joints should be in common with the parent body part
 
-              //check whether parent is a lockframe
-              bool parentIsLockframe=false;
-              int parentIsSolved=-1;
-              if(mstIter!=mst.begin())
+            bool toChild = false;
+            int pj = parentPartIter->getChildJoint();
+            int cj = partIter->getParentJoint();
+            if (pj == cj)
+            {
+              //then current parent is connected to paren
+              toChild = true;
+            }
+
+            float jointMin = FLT_MAX, jointMax = 0;
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              for (uint32_t j = 0; j < labels[parentPartIter->getPartID()].size(); ++j)
               {
-                  if(frames[*mst.parent(mstIter)]->getFrametype()==LOCKFRAME || frames[*mst.parent(mstIter)]->getFrametype()==KEYFRAME)
-                      parentIsLockframe=true;
-                  for(uint32_t i=0; i<allSolves.size(); ++i) //check among accepted solutions
-                  {
-                      if(allSolves[i].solvlet.getFrameID()==*mst.parent(mstIter)) //if one fits, use it as prior
-                          parentIsSolved = i;
-                  }
+                float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, toChild);
+
+                if (val < jointMin)
+                  jointMin = val;
+                if (val > jointMax && val != FLT_MAX)
+                  jointMax = val;
               }
+            }
 
-              parentIsSolved=-1;
-
-              Frame * lockframe = new Lockframe();
-
-              if(parentIsSolved!=-1) //if solved, set the prior to the solve
-                  lockframe->setSkeleton(allSolves.at(parentIsSolved).solvlet.toSkeleton(frames[frameId]->getSkeleton()));
-              else if(parentIsLockframe) //if the parent of this node is a lockframe, use it as a prior
-                  lockframe->setSkeleton(frames[*mst.parent(mstIter)]->getSkeleton());
-              else //otherwise use the root frame as a prior
-                  lockframe->setSkeleton(frames[frameId]->getSkeleton());
-
-
-              lockframe->setID(frames[*mstIter]->getID());
-              lockframe->setImage(frames[*mstIter]->getImage());
-              lockframe->setMask(frames[*mstIter]->getMask());
-
-              //compute the shift between the frame we are propagating from and the current frame
-              Point2f shift;
-              if(parentIsSolved!=-1)
-                  shift = ism.getShift(allSolves.at(parentIsSolved).solvlet.getFrameID(),frames[*mstIter]->getID());
-              else if(parentIsLockframe)
-                  shift = ism.getShift(frames[*mst.parent(mstIter)]->getID(),frames[*mstIter]->getID());
-              else
-                  shift = ism.getShift(frames[frameId]->getID(),frames[*mstIter]->getID());
-
-              Skeleton skeleton = lockframe->getSkeleton();
-
-              //now set up skeleton params, such as search radius and angle search radius for every part
-              //this should very depending on relative distance between frames
-              //for each body part
-              tree<BodyPart> partTree = skeleton.getPartTree();
-              tree<BodyPart>::iterator partIter, parentPartIter;
-
-              //TODO: add check for keyframe or lockframe proximity to angular search radius estimator
-  //            bool isBound=false;
-  //            //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
-  //            //and is the frame we are propagating from, a keyframe? (check only if we disallow bind to lockframes
-  //            if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
-  //                    (bindToLockframes || (frames[frameId]->getFrametype()==KEYFRAME))) //and whether we are actually allowed to bind
-  //                isBound=true;
-
-              //if so, set bool to true, and get the frame ID that we are close to
-
-              for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+            {
+              for (uint32_t j = 0; j < labels[parentPartIter->getPartID()].size(); ++j)
               {
-                  //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
-                  //and based on node depth (deeper nodes have a higher distance)
-                  //this should rely on parameters e.g.
-
-                  //else
-                  int depth = partTree.depth(partIter);
-
-                  float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
-                  float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
-
-  //                if(isBound) //if we're close to the anchor, restrict the rotation range
-  //                    rotationRange = rotationRange*anchorBindCoeff;
-
-                  partIter->setRotationSearchRange(rotationRange);
-                  partIter->setSearchRadius(searchRange);
-
+                //for every child/parent pair, compute score
+                jointCostFunc(j, i) = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
               }
-              skeleton.setPartTree(partTree);
-              lockframe->setSkeleton(skeleton);
+            }
 
-              if(parentIsLockframe)
-                  frames[*mst.parent(mstIter)]->setSkeleton(skeleton);
-              else
-                  frames[frameId]->setSkeleton(skeleton);
-
-              lockframe->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
-
-              for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
-              {
-                  labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
-              }
-
-              //sort labels
-              for(uint32_t i=0; i<labels.size(); ++i)
-              {
-                  for(uint32_t j=0; j<labels.size();++j)
-                  {
-                      if(labels[j].at(0).getLimbID()==i)
-                          tempLabels.push_back(labels[j]);
-                  }
-              }
-              labels = tempLabels;
-              tempLabels.clear();
-
-  //            t2 = high_resolution_clock::now();
-
-  //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-
-  //            cerr << "Detection time "  << duration << endl;
-
-              //t1 = high_resolution_clock::now();
-
-  // //temp coment this out
-              for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
-              {
-
-                  vector<LimbLabel> temp;
-
-                  uint32_t maxPartCandidates=params.at("maxPartCandidates");
-
-                  if((labelPartsIter->at(0)).getIsOccluded())
-                      maxPartCandidates = labelPartsIter->size();
-
-                  for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
-                  {
-                      LimbLabel label=labelPartsIter->at(currentSize);
-                          vector<Score> scores=label.getScores();
-
-                          for(uint32_t s=0; s<scores.size(); ++s)
-                          {
-                              if(scores[s].getIsWeak())
-                                  maxPartCandidates = labelPartsIter->size();
-                          }
-
-                      temp.push_back(label);
-
-                  }
-                  tempLabels.push_back(temp);
-              }
-
-              labels = tempLabels;
-
-              vector<size_t> numbersOfLabels; //numbers of labels per part
-
-              for(uint32_t i=0; i<labels.size(); ++i)
-              {
-                  numbersOfLabels.push_back(labels[i].size());
-              } //numbers of labels now contains the numbers
-
-              Space space(numbersOfLabels.begin(), numbersOfLabels.end());
-              Model gm(space);
-
-              uint32_t jointFactors=0, suppFactors=0, priorFactors=0;
-              //label score cost
-              for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for each of the detected parts
-              {
-                  vector<int> varIndices; //create vector of indices of variables
-                  varIndices.push_back(partIter->getPartID()); //push first value in
-
-                  size_t scoreCostShape[]={numbersOfLabels[partIter->getPartID()]}; //number of labels
-                  ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
-
-                  for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                  {
-                      scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
-                  }
-
-                  Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
-                  gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                  suppFactors++;
-
-                  //Comment out prior cost factors for the moment
-  //                    ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
-
-  //                    //precompute the maxium and minimum for normalisation
-  //                    float priorMin=FLT_MAX, priorMax=0;
-  //                    vector<LimbLabel>::iterator lbl;
-  //                    //vector<float> priorCostFuncValues;
-  //                    for(lbl=labels[partIter->getPartID()].begin(); lbl!=labels[partIter->getPartID()].end(); ++lbl) //for each label in for this part
-  //                    {
-  //                        float val = computePriorCost(*lbl, *partIter, skeleton, params);
-
-  //                        if(val<priorMin)
-  //                            priorMin = val;
-  //                        if(val>priorMax && val!=FLT_MAX)
-  //                            priorMax = val;
-
-  //                        //priorCostFuncValues.push_back(val);
-  //                    }
-
-  //                    //now set up the solutions
-  //                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-  //                    {
-  //                        priorCostFunc(i) = computeNormPriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params, priorMin, priorMax);
-  //                    }
-
-  //                    Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
-  //                    gm.addFactor(priorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-  //                    priorFactors++;
-
-                  if(partIter!=partTree.begin()) //if iterator is not on root node, there is always a parent body part
-                  {
-                      varIndices.clear();
-                      parentPartIter=partTree.parent(partIter); //find the parent of this part
-                      varIndices.push_back(parentPartIter->getPartID()); //push back parent partID as the second variable index
-                      varIndices.push_back(partIter->getPartID()); //push first value in (parent, this)
-
-                      size_t jointCostShape[]={numbersOfLabels[parentPartIter->getPartID()], numbersOfLabels[partIter->getPartID()]}; //number of labels
-                      ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape+2); //explicit function declare
-
-                      //first figure out which of the current body part's joints should be in common with the parent body part
-
-                      bool toChild=false;
-                      int pj = parentPartIter->getChildJoint();
-                      int cj = partIter->getParentJoint();
-                      if(pj==cj)
-                      {
-                          //then current parent is connected to paren
-                          toChild=true;
-                      }
-
-                      float jointMin=FLT_MAX, jointMax=0;
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
-                          {
-                              float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, toChild);
-
-                              if(val<jointMin)
-                                  jointMin = val;
-                              if(val>jointMax && val != FLT_MAX)
-                                  jointMax = val;
-                          }
-                      }
-
-                      for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                      {
-                          for(uint32_t j=0; j<labels[parentPartIter->getPartID()].size(); ++j)
-                          {
-                              //for every child/parent pair, compute score
-                              jointCostFunc(j, i) = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
-                          }
-                      }
-
-                      Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
-                      gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                      jointFactors++;
-                  }
-              }
-
-              if(debugLevel>=1)
-              {
-                  float k;
-                  k=skeleton.getPartTree().size(); //number of bones
-                  float expectedSuppFactors=k; //n*k
-                  //float expectedPriorFactors=k; //n*k
-                  float expectedJointFactors=(k-1); //n*(k-1)
-
-                  assert(expectedSuppFactors==suppFactors);
-                  assert(expectedJointFactors==jointFactors);
-                  //assert(priorFactors==expectedPriorFactors);
-              }
-  //            t2 = high_resolution_clock::now();
-  //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-
-  //            cerr << "Factor Graph building time "  << duration << endl;
-
-              // set up the optimizer (loopy belief propagation)
-
-              //t1 = high_resolution_clock::now();
-              const size_t maxNumberOfIterations = 40;
-              const double convergenceBound = 1e-7;
-              const double damping = 0.1;
-              BeliefPropagation::Parameter parameter(maxNumberOfIterations, convergenceBound, damping);
-              BeliefPropagation bp(gm, parameter);
-
-              // optimize (approximately)
-              BeliefPropagation::VerboseVisitorType visitor;
-              bp.infer(visitor);
-
-              // obtain the (approximate) argmin
-              vector<size_t> labeling(labels.size());
-              bp.arg(labeling);
-
-              vector<LimbLabel> solutionLabels;
-              for(uint32_t i=0; i<labels.size();++i)
-              {
-                  solutionLabels.push_back(labels[i][labeling[i]]); //pupulate solution vector
-              }
-              //t2 = high_resolution_clock::now();
-
-  //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-  //            cerr << "Factor Graph solving time "  << duration << endl;
-
-  //            t1 = high_resolution_clock::now();
-
-              //labeling now contains the approximately optimal labels for this problem
-              Solvlet solvlet(*mstIter, solutionLabels);
-              SolvletScore ss;
-              ss.solvlet = solvlet;
-              if(parentIsSolved!=-1)
-                  ss.parentFrame=allSolves.at(parentIsSolved).solvlet.getFrameID();
-              else if(parentIsLockframe)
-                  ss.parentFrame=frames[*mst.parent(mstIter)]->getID();
-              else
-                  ss.parentFrame=frames[frameId]->getID();
-              cerr << "done solving!" << endl;
-              ss.score=evaluateSolution(frames[solvlet.getFrameID()],
-                      solvlet.getLabels(), params);
-              allSolves.push_back(ss);
-
-  //            t2 = high_resolution_clock::now();
-
-  //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-  //            cerr << "Solve evaluation time "  << duration << endl;
-
-              delete lockframe; //delete the unused pointer now
+            Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
+            gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+            jointFactors++;
           }
+        }
+
+        if (debugLevel >= 1)
+        {
+          float k;
+          k = skeleton.getPartTree().size(); //number of bones
+          float expectedSuppFactors = k; //n*k
+          //float expectedPriorFactors=k; //n*k
+          float expectedJointFactors = (k - 1); //n*(k-1)
+
+          assert(expectedSuppFactors == suppFactors);
+          assert(expectedJointFactors == jointFactors);
+          //assert(priorFactors==expectedPriorFactors);
+        }
+        //            t2 = high_resolution_clock::now();
+        //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+
+        //            cerr << "Factor Graph building time "  << duration << endl;
+
+        // set up the optimizer (loopy belief propagation)
+
+        //t1 = high_resolution_clock::now();
+        const size_t maxNumberOfIterations = 40;
+        const double convergenceBound = 1e-7;
+        const double damping = 0.1;
+        BeliefPropagation::Parameter parameter(maxNumberOfIterations, convergenceBound, damping);
+        BeliefPropagation bp(gm, parameter);
+
+        // optimize (approximately)
+        BeliefPropagation::VerboseVisitorType visitor;
+        bp.infer(visitor);
+
+        // obtain the (approximate) argmin
+        vector<size_t> labeling(labels.size());
+        bp.arg(labeling);
+
+        vector<LimbLabel> solutionLabels;
+        for (uint32_t i = 0; i < labels.size(); ++i)
+        {
+          solutionLabels.push_back(labels[i][labeling[i]]); //pupulate solution vector
+        }
+        //t2 = high_resolution_clock::now();
+
+        //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+        //            cerr << "Factor Graph solving time "  << duration << endl;
+
+        //            t1 = high_resolution_clock::now();
+
+        //labeling now contains the approximately optimal labels for this problem
+        Solvlet solvlet(*mstIter, solutionLabels);
+        SolvletScore ss;
+        ss.solvlet = solvlet;
+        if (parentIsSolved != -1)
+          ss.parentFrame = allSolves.at(parentIsSolved).solvlet.getFrameID();
+        else if (parentIsLockframe)
+          ss.parentFrame = frames[*mst.parent(mstIter)]->getID();
+        else
+          ss.parentFrame = frames[frameId]->getID();
+        cerr << "done solving!" << endl;
+        ss.score = evaluateSolution(frames[solvlet.getFrameID()],
+          solvlet.getLabels(), params);
+        allSolves.push_back(ss);
+
+        //            t2 = high_resolution_clock::now();
+
+        //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+        //            cerr << "Solve evaluation time "  << duration << endl;
+
+        delete lockframe; //delete the unused pointer now
       }
+    }
 
-      return allSolves;
+    return allSolves;
   }
 
   int NSKPSolver::test(int frameId, const vector<Frame *> &frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int> &ignore)
