@@ -1,7 +1,5 @@
 #include "minspanningtree.hpp"
 
-using namespace kptree;
-
 namespace SPEL
 {
 

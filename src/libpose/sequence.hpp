@@ -3,7 +3,7 @@
 
 // STL
 #include <string>
-#include <cmath>
+#include <math.h>
 
 // Eigen3
 #include <Eigen/Dense>

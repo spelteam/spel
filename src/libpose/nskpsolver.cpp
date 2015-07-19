@@ -2,8 +2,6 @@
 
 namespace SPEL
 {
-  using namespace std::chrono;
-
   NSKPSolver::NSKPSolver()
   {
     id = 1; //this should be unique

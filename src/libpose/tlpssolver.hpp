@@ -4,7 +4,7 @@
 // STL
 #include <vector>
 #include <opencv2/opencv.hpp>
-#include <cmath>
+#include <math.h>
 
 //OpenGM
 #include <opengm/graphicalmodel/graphicalmodel.hxx>

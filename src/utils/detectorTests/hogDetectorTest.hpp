@@ -3,6 +3,7 @@
 #include "projectRunner.hpp"
 
 using namespace std;
+using namespace SPEL;
 
 class HoGDetectorTest : public ProjectRunner, public HogDetector
 {

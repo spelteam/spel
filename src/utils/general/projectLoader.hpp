@@ -30,6 +30,7 @@
 
 using namespace std;
 using namespace tinyxml2;
+using namespace SPEL;
 
 class ProjectLoader
 {

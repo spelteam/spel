@@ -36,6 +36,7 @@
 namespace SPEL
 {
   using namespace std;
+  using namespace std::chrono;
   using namespace opengm;
   using namespace cv;
 
