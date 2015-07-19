@@ -6,7 +6,7 @@
 
 
 namespace Ui {
-class MainWindow;
+  class MainWindow;
 }
 //layouts
 class QHBoxLayout;
@@ -22,36 +22,36 @@ class QProgressBar;
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+  explicit MainWindow(QWidget *parent = 0);
+  ~MainWindow();
 protected:
-    void closeEvent(QCloseEvent *) override;
-private slots:
-    void on_actionClose_triggered();
+  void closeEvent(QCloseEvent *) override;
+  private slots:
+  void on_actionClose_triggered();
 
-    void on_actionOpen_triggered();
-    void on_actionSave_triggered();
+  void on_actionOpen_triggered();
+  void on_actionSave_triggered();
 
-    void on_actionSave_as_triggered();
+  void on_actionSave_as_triggered();
 
 private:
-    //layouts
-    QVBoxLayout *FrameLayout;
-    QHBoxLayout *ToolLayout;
-    QVBoxLayout *MainLayout;
-    //view
-    Ui::MainWindow *ui;
-    FrameTableWidget *framesView;
-    //ToolBoxWidget *editTools;
-    SolveBoxWidget *solveTools;
-    FrameBoxWidget *frameTools;
-    FrameView2D *currFrame;
-    //utilites
-    QProgressBar *progressBar;
-    QFutureWatcher<void> watcher;
+  //layouts
+  QVBoxLayout *FrameLayout;
+  QHBoxLayout *ToolLayout;
+  QVBoxLayout *MainLayout;
+  //view
+  Ui::MainWindow *ui;
+  FrameTableWidget *framesView;
+  //ToolBoxWidget *editTools;
+  SolveBoxWidget *solveTools;
+  FrameBoxWidget *frameTools;
+  FrameView2D *currFrame;
+  //utilites
+  QProgressBar *progressBar;
+  QFutureWatcher<void> watcher;
 };
 
 #endif // MAINWINDOW_H

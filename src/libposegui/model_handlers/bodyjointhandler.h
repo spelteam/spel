@@ -1,21 +1,21 @@
-    #ifndef BODYJOINTHANDLER_H
+#ifndef BODYJOINTHANDLER_H
 #define BODYJOINTHANDLER_H
 
 #include "modelhandler.h"
+#include <bodyJoint.hpp>
 
 class QDomElement;
 class QDomDocument;
-class BodyJoint;
 
 namespace posegui {
-
-class BodyJointHandler : public ModelHandler<BodyJoint,QDomElement,QDomDocument>
-{
-public:
-    BodyJoint read(const QDomElement &data) override;
-    QDomElement write(const BodyJoint &model, QDomDocument &controller) override;
+  using namespace SPEL;
+  class BodyJointHandler : public ModelHandler < SPEL::BodyJoint, QDomElement, QDomDocument >
+  {
+  public:
+    SPEL::BodyJoint read(const QDomElement &data) override;
+    QDomElement write(const SPEL::BodyJoint &model, QDomDocument &controller) override;
     virtual ~BodyJointHandler() override{}
-};
+  };
 
 }
 

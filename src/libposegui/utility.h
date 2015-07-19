@@ -17,39 +17,39 @@
 
 namespace posegui {
 
-class Utility : public QObject
-{
+  class Utility : public QObject
+  {
     Q_OBJECT
-public:
+  public:
     explicit Utility(QObject *parent = 0);
     ~Utility();
 
-signals:
+  signals:
 
-public slots:
+    public slots :
 
-public:
-    static QString fileToString( const QString& filename );
+  public:
+    static QString fileToString(const QString& filename);
 
     //static void loadXmlPart( const QDomElement& element, const QString& partTagName,
     //          std::function<void( const QDomElement&, int )> loadAttrs);
 
-    static BodyJoint* getJointById( const tree<BodyJoint>& bodyJoints, int id );
-    static BodyPart* getBodyPartById( const tree<BodyPart>& bodyParts, int id );
+    static BodyJoint* getJointById(const tree<BodyJoint>& bodyJoints, int id);
+    static BodyPart* getBodyPartById(const tree<BodyPart>& bodyParts, int id);
 
-    static BodyJointItem* getJointItemById( const QList<QGraphicsItem*>& items, int id );
+    static BodyJointItem* getJointItemById(const QList<QGraphicsItem*>& items, int id);
 
-    static void resizeImage( cv::Mat& image, int32_t& cols, int32_t& rows );
+    static void resizeImage(cv::Mat& image, int32_t& cols, int32_t& rows);
 
-    static bool isJointItem( const QList<QGraphicsItem*>::iterator& it );
-    static bool isSkeletonItem( const QList<QGraphicsItem*>::iterator& it );
-    static QColor blendColors( const QColor& first, const QColor& second );
+    static bool isJointItem(const QList<QGraphicsItem*>::iterator& it);
+    static bool isSkeletonItem(const QList<QGraphicsItem*>::iterator& it);
+    static QColor blendColors(const QColor& first, const QColor& second);
 
     static void buildBodyPartTree(std::vector<BodyPart> &bodyList,
-                                          tree<BodyPart> &bodyParts);
+      tree<BodyPart> &bodyParts);
 
     static QPixmap loadMask(QImage mask, int opacity);
-};
+  };
 
 }
 

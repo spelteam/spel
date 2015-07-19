@@ -9,13 +9,13 @@ struct ProjectAttrStorage;
 
 namespace posegui {
 
-class ProjectHandler : public ModelHandler<ProjectAttrStorage,QDomElement,QDomDocument>
-{
-public:
+  class ProjectHandler : public ModelHandler < ProjectAttrStorage, QDomElement, QDomDocument >
+  {
+  public:
     ProjectAttrStorage read(const QDomElement &data) override;
     QDomElement write(const ProjectAttrStorage &model, QDomDocument& controller) override;
     virtual ~ProjectHandler() override{}
-};
+  };
 
 }
 
