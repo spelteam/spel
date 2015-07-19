@@ -1,18 +1,26 @@
 #ifndef _MINSPANNINGTREE_HPP_
 #define _MINSPANNINGTREE_HPP_
 
+// STL
 #include <vector>
-#include "frame.hpp"
-#include "imagesimilaritymatrix.hpp"
+
+// OpenCV
 #include <opencv2/opencv.hpp>
+
+// tree.hh
 #include <tree_util.hh>
 
-using namespace std;
-using namespace cv;
-using namespace kptree;
+#include "frame.hpp"
+#include "imagesimilaritymatrix.hpp"
 
-class MinSpanningTree
+namespace SPEL
 {
+  using namespace std;
+  using namespace cv;
+  using namespace kptree;
+
+  class MinSpanningTree
+  {
   public:
     MinSpanningTree(void);
     MinSpanningTree(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
@@ -30,7 +38,8 @@ class MinSpanningTree
 
   private:
     tree<int> mst;
-};
+  };
+
+}
 
 #endif  // _MINSPANNINGTREE_HPP_
-

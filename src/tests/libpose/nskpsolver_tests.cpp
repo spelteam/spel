@@ -11,22 +11,23 @@
 #include <iostream>
 
 using namespace cv;
-
-TEST(nskpsolverTests, findFrameIndexById)
+namespace SPEL
 {
+  TEST(nskpsolverTests, findFrameIndexById)
+  {
     NSKPSolver S;
     vector<Frame*> frames;
     for (int id = 0; id < 10; id++)
     {
-        frames.push_back(new Lockframe());
-        frames[id]->setID(id);
+      frames.push_back(new Lockframe());
+      frames[id]->setID(id);
     }
     uint32_t id = 6;
     EXPECT_EQ(id, S.findFrameIndexById(id, frames));
-}
+  }
 
-TEST(nskpsolverTests, ScoreCostAndJointCost)
-{
+  TEST(nskpsolverTests, ScoreCostAndJointCost)
+  {
     string hogName = "18500";
     string csName = "4409412";
     string surfName = "21316";
@@ -54,7 +55,7 @@ TEST(nskpsolverTests, ScoreCostAndJointCost)
     params.emplace("useHoGdet", 0.0);
     NSKPSolver S;
 
-//Testing function "computeScoreCost"
+    //Testing function "computeScoreCost"
 
     //scores[0] = score1Value, isWeak = true, isOccluded = false, 
     EXPECT_EQ(0, S.computeScoreCost(label1, params));
@@ -67,17 +68,17 @@ TEST(nskpsolverTests, ScoreCostAndJointCost)
     label1.isOccluded = false;
     EXPECT_EQ(0, S.computeScoreCost(label2, params));
 
-//Testing function "computeJointCost"
+    //Testing function "computeJointCost"
     EXPECT_EQ(0, S.computeJointCost(label1, label1, params, false));
     EXPECT_EQ(LimbLength, S.computeJointCost(label1, label1, params, true));
 
-//Testing function "computeNormJointCost"
+    //Testing function "computeNormJointCost"
     float max = 1;
     params.emplace("jointCoeff", 1.0);
     EXPECT_EQ(0, S.computeNormJointCost(label1, label1, params, max, false));
     EXPECT_EQ(LimbLength, S.computeNormJointCost(label1, label1, params, max, true));
 
-//Testing function "computePriorCost"
+    //Testing function "computePriorCost"
     Point2f p0(10, 2), p1(10, 18);
     LimbLength = p1.y - p0.y;
 
@@ -99,22 +100,22 @@ TEST(nskpsolverTests, ScoreCostAndJointCost)
 
     EXPECT_EQ(0, S.computePriorCost(label1, bodyPart, skeleton, params));
 
-//Testing function "computeNormPriorCost"
+    //Testing function "computeNormPriorCost"
     params.emplace("priorCoeff", 1.0);
     EXPECT_EQ(0, S.computeNormPriorCost(label1, bodyPart, skeleton, params, max, max));
-}
+  }
 
-vector<Point2f> shiftPolygon(vector<Point2f> polygon, float dx, float dy)
-{
+  vector<Point2f> shiftPolygon(vector<Point2f> polygon, float dx, float dy)
+  {
     vector<Point2f> X = polygon;
     for (int i = 0; i < polygon.size(); i++)
-        X[i] += Point2f(dx, dy);
+      X[i] += Point2f(dx, dy);
     return X;
-}
+  }
 
 
-TEST(nskpsolverTests, evaluateSolution)
-{   
+  TEST(nskpsolverTests, evaluateSolution)
+  {
     int id = 0;
     Point2f center = Point2f(10, 10);
     float angle = 0;
@@ -134,7 +135,7 @@ TEST(nskpsolverTests, evaluateSolution)
     //Create labels
     int dx = 60;
     LimbLabel label1(id, center, angle, polygon, scores, isOccluded);
-    LimbLabel label2(id+1, center, angle, shiftPolygon(polygon, dx, 0), scores, isOccluded);
+    LimbLabel label2(id + 1, center, angle, shiftPolygon(polygon, dx, 0), scores, isOccluded);
 
     //Create labels vector
     vector<LimbLabel> labels;
@@ -146,9 +147,9 @@ TEST(nskpsolverTests, evaluateSolution)
     Mat mask = Mat(Size(cols, rows), CV_8UC1, Scalar(0));
 
     for (int i = 0; i < rows; i++)
-    for (int k = 0; k < cols; k++)
-    if (label1.containsPoint(Point2f(k, i)) || label2.containsPoint(Point2f(k, i)))
-        mask.at<uchar>(i, k) = 255;
+      for (int k = 0; k < cols; k++)
+        if (label1.containsPoint(Point2f(k, i)) || label2.containsPoint(Point2f(k, i)))
+          mask.at<uchar>(i, k) = 255;
 
     imwrite("mask.jpg", mask);
 
@@ -156,7 +157,7 @@ TEST(nskpsolverTests, evaluateSolution)
     Lockframe* frame = new Lockframe();
     frame->setMask(mask);
 
- //Tesing function "evaluateSolution"
+    //Tesing function "evaluateSolution"
     map<string, float> params;
     double solutionEval = 1;
     NSKPSolver S;
@@ -167,7 +168,7 @@ TEST(nskpsolverTests, evaluateSolution)
 
     //30% of "labels[1]" not in mask
     float e = 0.3; // Relative shift
-    LimbLabel label3(id+1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
+    LimbLabel label3(id + 1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
     labels[1] = label3;
 
     double ActualValue = S.evaluateSolution(frame, labels, params);
@@ -179,13 +180,14 @@ TEST(nskpsolverTests, evaluateSolution)
     //90% of "labels[1]" not in mask
     //"labels[1]" is badly lokalised
     e = 0.9; // Relative shift of "label[1]"
-    LimbLabel label4(id+1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
+    LimbLabel label4(id + 1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
     labels[1] = label4;
 
     ActualValue = S.evaluateSolution(frame, labels, params);
     ExpectedValue = (2 - e) / (2 + e);
-    ExpectedValue = ExpectedValue; 
+    ExpectedValue = ExpectedValue;
     epsilon = 0.04;
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
     cout << ExpectedValue << " ~ " << ActualValue << "\n";
+  }
 }

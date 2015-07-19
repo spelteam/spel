@@ -10,8 +10,10 @@
 #include "skeleton.hpp"
 #include "projectLoader.hpp"
 
-TEST(FramesTests, Constructors)
+namespace SPEL
 {
+  TEST(FramesTests, Constructors)
+  {
     Frame* frame = new Lockframe();
     EXPECT_EQ(LOCKFRAME, frame->getFrametype());
     EXPECT_EQ(-1, frame->getParentFrameID());
@@ -25,15 +27,15 @@ TEST(FramesTests, Constructors)
     EXPECT_EQ(-1, frame->getID());
     EXPECT_EQ(Point2f(0, 0), frame->getGroundPoint());
     delete frame;
-}
+  }
 
-TEST(FramesTests, FramePointerComparer)
-{
+  TEST(FramesTests, FramePointerComparer)
+  {
     vector<Frame*> frames;
     for (int i = 0; i < 9; i++)
     {
-        frames.push_back(new Lockframe());
-        frames[i]->setID(rand());
+      frames.push_back(new Lockframe());
+      frames[i]->setID(rand());
     }
     frames.push_back(new Keyframe());
     sort(frames.begin(), frames.end(), Frame::FramePointerComparer);
@@ -41,23 +43,23 @@ TEST(FramesTests, FramePointerComparer)
     int id = frames[0]->getID();
     for (int i = 0; i < frames.size(); i++)
     {
-        if (id > frames[i]->getID())
-            FramesIsSorted = false;
-        id = frames[i]->getID();
+      if (id > frames[i]->getID())
+        FramesIsSorted = false;
+      id = frames[i]->getID();
     }
     EXPECT_TRUE(FramesIsSorted);
     for (int i = 0; i < frames.size(); i++)
-        delete frames[i];
+      delete frames[i];
     frames.clear();
-}
+  }
 
-TEST(FramesTests, GetAndSet)
-{
-// Prepare input data
+  TEST(FramesTests, GetAndSet)
+  {
+    // Prepare input data
     int rows = 10, cols = 10;
     Mat image, mask;
 
-    Point2f p0(10, 2), p1(10, 18);    
+    Point2f p0(10, 2), p1(10, 18);
     int LimbLength = p1.y - p0.y;
     POSERECT<Point2f> partPolygon(Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2));
 
@@ -80,7 +82,7 @@ TEST(FramesTests, GetAndSet)
     skeleton.setJointTree(jointsTree);
     skeleton.setPartTree(partsTree);
 
-//Testing
+    //Testing
     Frame* frame = new Lockframe();
 
     //Lockframe "get-" and "setID"
@@ -96,7 +98,7 @@ TEST(FramesTests, GetAndSet)
     EXPECT_EQ(Point2f(0, 0.4), frame->getGroundPoint());
 
     //Lockframe "get-" and "setImage"
-    image = Mat(Size(cols, rows), CV_8UC3, Scalar(0,0,0));
+    image = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
     frame->setImage(image);
     EXPECT_EQ(image.size(), frame->getImage().size());
 
@@ -157,26 +159,26 @@ TEST(FramesTests, GetAndSet)
 
     image.release();
     mask.release();
-    delete frame;    
-}
+    delete frame;
+  }
 
-map<int, Point2f> getImageLocations_ft(Skeleton skeleton)
-{
+  map<int, Point2f> getImageLocations_ft(Skeleton skeleton)
+  {
     map<int, Point2f> Locations;
     tree <BodyJoint> jointTree = skeleton.getJointTree();
     for (tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
-        Locations.emplace(pair<int, Point2f>(i->getLimbID(), i->getImageLocation()));
+      Locations.emplace(pair<int, Point2f>(i->getLimbID(), i->getImageLocation()));
     return Locations;
-}
+  }
 
-TEST(FramesTests, shiftSkeleton2D)
-{
+  TEST(FramesTests, shiftSkeleton2D)
+  {
     String FilePath;
     FilePath = "posetests_TestData/CHDTrainTestData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
-        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
 #endif
 
     //Load the input data
@@ -193,7 +195,7 @@ TEST(FramesTests, shiftSkeleton2D)
     Point2f shift(10, 10);
     map<int, Point2f> locations_expected = getImageLocations_ft(skeleton);
     for (int i = 0; i < locations_expected.size(); i++)
-        locations_expected[i] += shift;
+      locations_expected[i] += shift;
 
     //Run "shiftSkeleton2D"
     frame->shiftSkeleton2D(shift);
@@ -201,16 +203,16 @@ TEST(FramesTests, shiftSkeleton2D)
 
     EXPECT_EQ(locations_expected, locations_actual) << " Skeleton shift error?!\n* Impact of 'skeleton.infer3D' not considered in this test!";
     //Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test!;
-}
-/**/
-TEST(FramesTests, Resize)
-{
+  }
+  /**/
+  TEST(FramesTests, Resize)
+  {
     String FilePath;
     FilePath = "posetests_TestData/CHDTrainTestData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
-        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
 #endif
 
     //Load the input data
@@ -233,7 +235,7 @@ TEST(FramesTests, Resize)
     Point2f shift(10, 10);
     map<int, Point2f> locations_expected = getImageLocations_ft(skeleton);
     for (int i = 0; i < locations_expected.size(); i++)
-        locations_expected[i] *= X;
+      locations_expected[i] *= X;
 
     //Run "Resize"
     frame->Resize(newHeight);
@@ -255,24 +257,24 @@ TEST(FramesTests, Resize)
     //Compare parts search radius
     map <int, float> expected_searchRadius;
     for (tree<BodyPart>::iterator p = PartTree.begin(); p != PartTree.end(); ++p)
-        expected_searchRadius.emplace(pair<int, float>(p->getPartID(), p->getSearchRadius()*X));
+      expected_searchRadius.emplace(pair<int, float>(p->getPartID(), p->getSearchRadius()*X));
 
     map <int, float> actual_searchRadius;
     tree<BodyPart> newPartTree = frame->getSkeleton().getPartTree();
     for (tree<BodyPart>::iterator p = newPartTree.begin(); p != newPartTree.end(); ++p)
-        actual_searchRadius.emplace(pair<int, float>(p->getPartID(), p->getSearchRadius()*X));
+      actual_searchRadius.emplace(pair<int, float>(p->getPartID(), p->getSearchRadius()*X));
 
-    EXPECT_EQ(expected_searchRadius, actual_searchRadius);	
-}
+    EXPECT_EQ(expected_searchRadius, actual_searchRadius);
+  }
 
-TEST(FramesTests, Clone)
-{
+  TEST(FramesTests, Clone)
+  {
     String FilePath;
     FilePath = "posetests_TestData/CHDTrainTestData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
-        FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
 #endif
 
     //Load the input data
@@ -288,7 +290,7 @@ TEST(FramesTests, Clone)
     imwrite("mask_temp.bmp", image0);
     image0 = imread("image_temp.bmp");
     mask0 = imread("mask_temp.bmp");
-    
+
     //Clone "frame0"
     Frame* frame1 = frame0->clone(frame0);
 
@@ -302,12 +304,12 @@ TEST(FramesTests, Clone)
     Mat mask1 = frame1->getMask();
     bool ImagesIsEqual = true, MasksIsEqual = true;
     Size size = frame0->getImage().size();
-    for (int y = 0; y < size.height-1; y++)
-      for (int x = 0; x < size.width-1; x++)
-        {
-          ImagesIsEqual = (image0.at<Vec3b>(y, x) == image0.at<Vec3b>(y, x));
-          MasksIsEqual = (mask0.at<Vec3b>(y, x) == mask0.at<Vec3b>(y, x));
-        }
+    for (int y = 0; y < size.height - 1; y++)
+      for (int x = 0; x < size.width - 1; x++)
+      {
+        ImagesIsEqual = (image0.at<Vec3b>(y, x) == image0.at<Vec3b>(y, x));
+        MasksIsEqual = (mask0.at<Vec3b>(y, x) == mask0.at<Vec3b>(y, x));
+      }
     EXPECT_TRUE(ImagesIsEqual);
     EXPECT_TRUE(MasksIsEqual);
 
@@ -316,4 +318,5 @@ TEST(FramesTests, Clone)
     image1.release();
     mask1.release();
 
+  }
 }

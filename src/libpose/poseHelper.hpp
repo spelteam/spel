@@ -1,25 +1,31 @@
 #ifndef _POSEHELPER_HPP_
 #define _POSEHELPER_HPP_
 
+// STL
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES
 #include <math.h>
 #endif  // WINDOWS
 
+// OpenCV
 #include <opencv2/opencv.hpp>
 #if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/core/types_c.h>
 #endif
+
+// tree.hh
 #include <tree.hh>
 
 #include "limbLabel.hpp"
 
-using namespace std;
-using namespace cv;
-
-/// class with common functions
-class PoseHelper
+namespace SPEL
 {
+  using namespace std;
+  using namespace cv;
+
+  /// class with common functions
+  class PoseHelper
+  {
   public:
 
     //vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
@@ -70,11 +76,11 @@ class PoseHelper
     ///Result:
     ///dst is copy of src
     template <class T, class tree_node_allocator>
-    static void copyTree(tree <T, tree_node_allocator> &dst, const tree <T, tree_node_allocator> &src) 
+    static void copyTree(tree <T, tree_node_allocator> &dst, const tree <T, tree_node_allocator> &src)
     {
       dst.clear();
       auto it = src.begin(), to = dst.begin();
-      while(it != src.end())
+      while (it != src.end())
       {
         to = dst.insert(to, (*it));
         it.skip_children();
@@ -82,7 +88,7 @@ class PoseHelper
       }
       to = dst.begin();
       it = src.begin();
-      while(it != src.end())
+      while (it != src.end())
       {
         to = dst.replace(to, it);
         to.skip_children();
@@ -93,97 +99,97 @@ class PoseHelper
     }
 
     static void RecalculateScoreIsWeak(vector <LimbLabel> &labels, string detectorName, float varianceTreshold);
-};
+  };
 
-template <class T>
-struct TPOSERECT
-{
-  T p1;
-  T p2;
-  T p3;
-  T p4;
-};
-///represents rectangle
-template <class T>
-struct POSERECT
-{
-  POSERECT()
+  template <class T>
+  struct TPOSERECT
+  {
+    T p1;
+    T p2;
+    T p3;
+    T p4;
+  };
+  ///represents rectangle
+  template <class T>
+  struct POSERECT
+  {
+    POSERECT()
       : point1(),
-        point2(),
-        point3(),
-        point4() {}
-  POSERECT( const POSERECT<T>& poserect)
+      point2(),
+      point3(),
+      point4() {}
+    POSERECT(const POSERECT<T>& poserect)
       : point1(poserect.point1),
-        point2(poserect.point2),
-        point3(poserect.point3),
-        point4(poserect.point4) {}
-  POSERECT( POSERECT<T>&& poserect )
-      : point1( std::move(poserect.point1) ),
-        point2( std::move(poserect.point2) ),
-        point3( std::move(poserect.point3) ),
-        point4( std::move(poserect.point4) ) {}
-  POSERECT(T _point1, T _point2, T _point3, T _point4)
+      point2(poserect.point2),
+      point3(poserect.point3),
+      point4(poserect.point4) {}
+    POSERECT(POSERECT<T>&& poserect)
+      : point1(std::move(poserect.point1)),
+      point2(std::move(poserect.point2)),
+      point3(std::move(poserect.point3)),
+      point4(std::move(poserect.point4)) {}
+    POSERECT(T _point1, T _point2, T _point3, T _point4)
       : point1(_point1),
-        point2(_point2),
-        point3(_point3),
-        point4(_point4) {}
-  T point1;
-  T point2;
-  T point3;
-  T point4;
-  ///check whether point lies in rectangle
-  ///Arguments:
-  ///point - point which checks
-  ///Result:
-  ///1 - point lies in rectangle
-  ///-1 - point doesn't lies in rectangle
-  ///0 - point lies on the edge(vertex)
-  int8_t containsPoint(T point)
-  {
-    vector <T> contour;
-    contour.push_back(point1);
-    contour.push_back(point2);
-    contour.push_back(point3);
-    contour.push_back(point4);
-
-    return (int8_t)pointPolygonTest(contour, point, false);
-  }
-  ///convert rectangle to vector of points
-  vector <T> asVector()
-  {
-    vector <T> contour;
-    contour.push_back(point1);
-    contour.push_back(point2);
-    contour.push_back(point3);
-    contour.push_back(point4);
-    return contour;
-  }
-
-  template <typename D> void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy)
-  {
-    minx = min(min(point1.x, point2.x), min(point3.x, point4.x));
-    maxx = max(max(point1.x, point2.x), max(point3.x, point4.x));
-    miny = min(min(point1.y, point2.y), min(point3.y, point4.y));
-    maxy = max(max(point1.y, point2.y), max(point3.y, point4.y));
-  }
-
-  template <typename D> D GetCenter()
-  {
-    D center1 = 0.5 * point1 + 0.5 * point3;
-    D center2 = 0.5 * point2 + 0.5 * point4;
-    float dist = (float)sqrt(PoseHelper::distSquared(center1, center2));
-    if (dist > 0.001)
+      point2(_point2),
+      point3(_point3),
+      point4(_point4) {}
+    T point1;
+    T point2;
+    T point3;
+    T point4;
+    ///check whether point lies in rectangle
+    ///Arguments:
+    ///point - point which checks
+    ///Result:
+    ///1 - point lies in rectangle
+    ///-1 - point doesn't lies in rectangle
+    ///0 - point lies on the edge(vertex)
+    int8_t containsPoint(T point)
     {
-      throw logic_error("Rect center couldn't be found");
-    }
-    else
-    {
-      return center1;
-    }
-  }
+      vector <T> contour;
+      contour.push_back(point1);
+      contour.push_back(point2);
+      contour.push_back(point3);
+      contour.push_back(point4);
 
-  POSERECT<T>& operator=( const POSERECT<T>& rect ){
-      if( &rect == this ) return *this;
+      return (int8_t)pointPolygonTest(contour, point, false);
+    }
+    ///convert rectangle to vector of points
+    vector <T> asVector()
+    {
+      vector <T> contour;
+      contour.push_back(point1);
+      contour.push_back(point2);
+      contour.push_back(point3);
+      contour.push_back(point4);
+      return contour;
+    }
+
+    template <typename D> void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy)
+    {
+      minx = min(min(point1.x, point2.x), min(point3.x, point4.x));
+      maxx = max(max(point1.x, point2.x), max(point3.x, point4.x));
+      miny = min(min(point1.y, point2.y), min(point3.y, point4.y));
+      maxy = max(max(point1.y, point2.y), max(point3.y, point4.y));
+    }
+
+    template <typename D> D GetCenter()
+    {
+      D center1 = 0.5 * point1 + 0.5 * point3;
+      D center2 = 0.5 * point2 + 0.5 * point4;
+      float dist = (float)sqrt(PoseHelper::distSquared(center1, center2));
+      if (dist > 0.001)
+      {
+        throw logic_error("Rect center couldn't be found");
+      }
+      else
+      {
+        return center1;
+      }
+    }
+
+    POSERECT<T>& operator=(const POSERECT<T>& rect){
+      if (&rect == this) return *this;
 
       point1 = rect.point1;
       point2 = rect.point2;
@@ -191,70 +197,72 @@ struct POSERECT
       point4 = rect.point4;
 
       return *this;
-  }
+    }
 
-  POSERECT<T>& operator=( POSERECT<T>&& rect ){
-      std::swap(point1,rect.point1);
-      std::swap(point2,rect.point2);
-      std::swap(point3,rect.point3);
-      std::swap(point4,rect.point4);
+    POSERECT<T>& operator=(POSERECT<T>&& rect){
+      std::swap(point1, rect.point1);
+      std::swap(point2, rect.point2);
+      std::swap(point3, rect.point3);
+      std::swap(point4, rect.point4);
 
       return *this;
-  }
+    }
 
-  bool operator==(const POSERECT <T> &rect) const
+    bool operator==(const POSERECT <T> &rect) const
+    {
+      return (this->point1 == rect.point1 && this->point2 == rect.point2 && this->point3 == rect.point3 && this->point4 == rect.point4);
+    }
+
+    bool operator!=(const POSERECT <T> &rect) const
+    {
+      return !(*this == rect);
+    }
+
+    template <typename D> D RectSize(void)
+    {
+      return (D(sqrt(PoseHelper::distSquared(point2, point3)), sqrt(PoseHelper::distSquared(point1, point2))));
+    }
+
+  };
+
+  template <typename T>
+  class PHPoint : public Point_ < T >
   {
-    return (this->point1 == rect.point1 && this->point2 == rect.point2 && this->point3 == rect.point3 && this->point4 == rect.point4);
-  }
+  public:
+    /// various constructors
+    PHPoint() : Point_<T>() {}
+    PHPoint(T _x, T _y) : Point_<T>(_x, _y) {}
+    PHPoint(const Point_<T>& pt) : Point_<T>(pt) {}
+    PHPoint(const CvPoint& pt) : Point_<T>(pt) {}
+    PHPoint(const CvPoint2D32f& pt) : Point_<T>(pt) {}
+    PHPoint(const Size_<T>& sz) : Point_<T>(sz) {}
+    PHPoint(const Vec<T, 2>& v) : Point_<T>(v) {}
 
-  bool operator!=(const POSERECT <T> &rect) const
+    bool operator < (const PHPoint& pt) const
+    {
+      return (this->x < pt.x && this->y < pt.y);
+    }
+  };
+
+  template <typename T>
+  class PHPoint3 : public Point3_ < T >
   {
-    return !(*this == rect);
-  }
+  public:
+    /// various constructors
+    PHPoint3() : Point3_<T>() {}
+    PHPoint3(T _x, T _y, T _z) : Point3_<T>(_x, _y, _z) {}
+    PHPoint3(const Point3_<T>& pt) : Point3_<T>(pt) {}
+    explicit PHPoint3(const Point_<T>& pt) : Point3_<T>(pt) {}
+    PHPoint3(const CvPoint3D32f& pt) : Point3_<T>(pt) {}
+    PHPoint3(const Vec<T, 3>& v) : Point3_<T>(v) {}
 
-  template <typename D> D RectSize(void)
-  {
-    return (D(sqrt(PoseHelper::distSquared(point2, point3)), sqrt(PoseHelper::distSquared(point1, point2))));
-  }
+    bool operator < (const PHPoint3& pt) const
+    {
+      return (this->x < pt.x && this->y < pt.y && this->z < pt.z);
+    }
+  };
 
-};
-
-template <typename T>
-class PHPoint : public Point_<T>
-{
-public:
-  /// various constructors
-  PHPoint() : Point_<T>() {}
-  PHPoint(T _x, T _y) : Point_<T>(_x, _y) {}
-  PHPoint(const Point_<T>& pt) : Point_<T>(pt) {}
-  PHPoint(const CvPoint& pt) : Point_<T>(pt) {}
-  PHPoint(const CvPoint2D32f& pt) : Point_<T>(pt) {}
-  PHPoint(const Size_<T>& sz) : Point_<T>(sz) {}
-  PHPoint(const Vec<T, 2>& v) : Point_<T>(v) {}
-
-  bool operator < (const PHPoint& pt) const
-  {
-    return (this->x < pt.x && this->y < pt.y);
-  }
-};
-
-template <typename T>
-class PHPoint3 : public Point3_ < T >
-{
-public:
-  /// various constructors
-  PHPoint3() : Point3_<T>() {}
-  PHPoint3(T _x, T _y, T _z) : Point3_<T>(_x, _y, _z) {}
-  PHPoint3(const Point3_<T>& pt) : Point3_<T>(pt) {}
-  explicit PHPoint3(const Point_<T>& pt) : Point3_<T>(pt) {}
-  PHPoint3(const CvPoint3D32f& pt) : Point3_<T>(pt) {}
-  PHPoint3(const Vec<T, 3>& v) : Point3_<T>(v) {}
-
-  bool operator < (const PHPoint3& pt) const
-  {
-    return (this->x < pt.x && this->y < pt.y && this->z < pt.z);
-  }
-};
+}
 
 #endif  // _POSEHELPER_HPP_
 

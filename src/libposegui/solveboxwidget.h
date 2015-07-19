@@ -8,27 +8,27 @@
 
 class SolveBoxWidget : public QGroupBox
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit SolveBoxWidget(QWidget *parent = 0);
-    virtual ~SolveBoxWidget();
+  explicit SolveBoxWidget(QWidget *parent = 0);
+  virtual ~SolveBoxWidget();
 signals:
 
-public slots:
+  public slots :
     void loadProjectEvent();
-    void closeProjectEvent();
-    void keyframeUpdatedEvent();
-    void solveFinishedEvent();
-private slots:
-    void interpolatorClicked();
-    void solverClicked();
+  void closeProjectEvent();
+  void keyframeUpdatedEvent();
+  void solveFinishedEvent();
+  private slots:
+  void interpolatorClicked();
+  void solverClicked();
 private:
-    //layouts
-    FlowLayout *MainLayout;
+  //layouts
+  FlowLayout *MainLayout;
 public:
-    //view
-    QPushButton *interpolator;
-    QPushButton *solver;
+  //view
+  QPushButton *interpolator;
+  QPushButton *solver;
 };
 
 #endif // SOLVEBOXWIDGET_H

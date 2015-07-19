@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 #include <interpolation.hpp>
 
-class InterpolationTest : public testing::Test{
-protected:
+namespace SPEL
+{
+  class InterpolationTest : public testing::Test{
+  protected:
     //init
     //nothing to init here
     /*virtual void SetUp(){}*/
@@ -10,12 +12,11 @@ protected:
     //clear
     //nothing to clear here
     /*virtual void TearDown(){}*/
-protected:
+  protected:
     Interpolation interpolation;
-};
+  };
 
-TEST_F( InterpolationTest, GetFrametype ){
-    EXPECT_EQ( FRAMETYPE::INTERPOLATIONFRAME, interpolation.getFrametype() );
+  TEST_F(InterpolationTest, GetFrametype){
+    EXPECT_EQ(FRAMETYPE::INTERPOLATIONFRAME, interpolation.getFrametype());
+  }
 }
-
-

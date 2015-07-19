@@ -1,19 +1,22 @@
 #ifndef _SOLVLET_HPP_
 #define _SOLVLET_HPP_
 
+// STL
 #include <string>
 #include <vector>
+
 #include "limbLabel.hpp"
 #include "skeleton.hpp"
 
-using namespace std;
-
-class Solvlet
+namespace SPEL
 {
+  using namespace std;
+  class Solvlet
+  {
   public:
     Solvlet(void);
     Solvlet(int id, vector<LimbLabel> labels);
-    
+
     Solvlet &operator=(const Solvlet &s);
     // bool operator==(const Solvlet &s) const;
     // bool operator!=(const Solvlet &s) const;
@@ -26,10 +29,12 @@ class Solvlet
     void setLabels(vector<LimbLabel> _labels);
 
     Skeleton toSkeleton(const Skeleton &example);
-  
+
   private:
     int frameId;
     vector<LimbLabel> labels;
-};
+  };
+
+}
 
 #endif  // _SOLVLET_HPP_

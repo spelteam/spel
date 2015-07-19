@@ -3,35 +3,36 @@
 
 #include <QGraphicsItem>
 #include <frame.hpp>
+#include <limbLabel.hpp>
 
-class LimbLabel;
+using namespace SPEL;
 
 class LimbLabelItem : public QGraphicsItem
 {
 private:
-    struct Palette{
-        static QColor interpolation;
-        static QColor lockframe;
-        static QColor keyframe;
-        static QColor selected;
-    };
+  struct Palette{
+    static QColor interpolation;
+    static QColor lockframe;
+    static QColor keyframe;
+    static QColor selected;
+  };
 public:
-    LimbLabelItem( LimbLabel label, QGraphicsItem * parent = 0 );
-    ~LimbLabelItem();
+  LimbLabelItem(LimbLabel label, QGraphicsItem * parent = 0);
+  ~LimbLabelItem();
 public:
-    enum { Type = UserType + 3 };
-    int type() const { return Type; }
+  enum { Type = UserType + 3 };
+  int type() const { return Type; }
 
-    QRectF boundingRect() const override;
+  QRectF boundingRect() const override;
 
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
-                QWidget *widget = 0 ) override;
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+    QWidget *widget = 0) override;
 private:
-    void updateToolTip();
+  void updateToolTip();
 public:
-    static FRAMETYPE Frametype;
+  static FRAMETYPE Frametype;
 private:
-    const LimbLabel label;
+  const LimbLabel label;
 };
 
 #endif // LIMBLABELITEM_H

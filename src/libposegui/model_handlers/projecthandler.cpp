@@ -7,32 +7,32 @@
 
 namespace posegui {
 
-ProjectAttrStorage ProjectHandler::read( const QDomElement &data ){
+  ProjectAttrStorage ProjectHandler::read(const QDomElement &data){
     ProjectAttrStorage project;
     const QDomNamedNodeMap& attrs = data.attributes();
 
     project.name = attrs.namedItem(ProjectAttrs::NAME)
-            .nodeValue();
+      .nodeValue();
     project.imgFolderPath = attrs.namedItem(ProjectAttrs::IMG_FOLDER)
-            .nodeValue();
+      .nodeValue();
     project.maskFolderPath = attrs.namedItem(ProjectAttrs::MASK_FOLDER)
-            .nodeValue();
+      .nodeValue();
     project.camFolderPath = attrs.namedItem(ProjectAttrs::CAM_FOLDER)
-            .nodeValue();
+      .nodeValue();
     QString allowScaling = attrs.namedItem(ProjectAttrs::ALLOW_SCALLING)
-            .nodeValue();
-    project.allowScaling = ( allowScaling=="true" || allowScaling=="1" );
+      .nodeValue();
+    project.allowScaling = (allowScaling == "true" || allowScaling == "1");
     project.simMatPath = attrs.namedItem(ProjectAttrs::SIM_MAT_PATH)
-            .nodeValue();
+      .nodeValue();
     project.exportPath = attrs.namedItem(ProjectAttrs::EXPORT_PATH)
-            .nodeValue();
+      .nodeValue();
 
     return project;
-}
+  }
 
-QDomElement ProjectHandler::write(const ProjectAttrStorage &model , QDomDocument &controller){
+  QDomElement ProjectHandler::write(const ProjectAttrStorage &model, QDomDocument &controller){
     QDomElement elem = controller
-            .createElement(ProjectAttrs::PROJECT_TAG);
+      .createElement(ProjectAttrs::PROJECT_TAG);
     elem.setAttribute(ProjectAttrs::NAME, model.name);
     elem.setAttribute(ProjectAttrs::IMG_FOLDER, model.imgFolderPath);
     elem.setAttribute(ProjectAttrs::MASK_FOLDER, model.maskFolderPath);
@@ -41,7 +41,7 @@ QDomElement ProjectHandler::write(const ProjectAttrStorage &model , QDomDocument
     elem.setAttribute(ProjectAttrs::SIM_MAT_PATH, model.simMatPath);
     elem.setAttribute(ProjectAttrs::EXPORT_PATH, model.exportPath);
     return elem;
-}
+  }
 
 }
 

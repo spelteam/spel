@@ -1,7 +1,5 @@
 #include "projectRunner.hpp"
 
-using namespace std;
-
 ProjectRunner::ProjectRunner(string _testName)
 {
   testName = _testName;

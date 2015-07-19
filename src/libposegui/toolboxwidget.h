@@ -7,21 +7,21 @@
 
 class ToolBoxWidget : public QGroupBox
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit ToolBoxWidget(QWidget *parent = 0);
-    virtual ~ToolBoxWidget();
+  explicit ToolBoxWidget(QWidget *parent = 0);
+  virtual ~ToolBoxWidget();
 signals:
 
-public slots:
+  public slots :
 private:
-    //layouts
-    FlowLayout *MainLayout;
-    //view
-    QPushButton *eraser;
-    QPushButton *picker;
-    QPushButton *jointer;
-    QPushButton *bodyParter;
+  //layouts
+  FlowLayout *MainLayout;
+  //view
+  QPushButton *eraser;
+  QPushButton *picker;
+  QPushButton *jointer;
+  QPushButton *bodyParter;
 
 };
 

@@ -1,28 +1,34 @@
 #ifndef _LIBPOSE_FRAME_HPP_
 #define _LIBPOSE_FRAME_HPP_
 
-#include <opencv2/opencv.hpp>
+// STL
 #include <vector>
+
+// OpenCV
+#include <opencv2/opencv.hpp>
+
 #include "skeleton.hpp"
 
-using namespace std;
-using namespace cv;
-
-enum FRAMETYPE
+namespace SPEL
 {
-  KEYFRAME = 0x00,
-  LOCKFRAME = 0x01,
-  INTERPOLATIONFRAME = 0x02
-};
+  using namespace std;
+  using namespace cv;
 
-class Frame
-{
+  enum FRAMETYPE
+  {
+    KEYFRAME = 0x00,
+    LOCKFRAME = 0x01,
+    INTERPOLATIONFRAME = 0x02
+  };
+
+  class Frame
+  {
   public:
     Frame(void);
     virtual ~Frame(void);
     vector <Point2f> getPartPolygon(int partID) const;
     int getID(void) const;
-    void setID(int _id); 
+    void setID(int _id);
     Mat getImage(void) const;
     void setImage(Mat _image);
     Mat getMask(void) const;
@@ -52,7 +58,7 @@ class Frame
     int parentFrameID; //the ID of the frame this lockframe was derived from
     Size imageSize = Size(-1, -1);
     Size maskSize = Size(-1, -1);
-};
-
+  };
+}
 #endif  // _LIBPOSE_FRAME_HPP_
 

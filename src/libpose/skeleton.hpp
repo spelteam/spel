@@ -1,35 +1,41 @@
 #ifndef _LIBPOSE_SKELETON_HPP_
 #define _LIBPOSE_SKELETON_HPP_
 
+// STL
 #include <string>
+
+// tree.hh
 #include <tree.hh>
+
 #include "bodyPart.hpp"
 
-using namespace std;
-
-///Human body model
-class Skeleton
+namespace SPEL
 {
+  using namespace std;
+
+  ///Human body model
+  class Skeleton
+  {
   public:
     Skeleton(void);
     Skeleton(const Skeleton &s);
-//TODO (Vitaliy Koshura): Need implementation
+    //TODO (Vitaliy Koshura): Need implementation
     string toString(void); // must return Skeleton as string
-//TODO (Vitaliy Koshura): Need implementation
+    //TODO (Vitaliy Koshura): Need implementation
     void learnDepth(Skeleton &skel);
     void infer2D(void);
     void infer3D(void);
-// All these functions just give access to the object fields
+    // All these functions just give access to the object fields
     Skeleton & operator=(const Skeleton &s);
     bool operator==(const Skeleton &s) const;
     bool operator!=(const Skeleton &s) const;
     string getName(void) const;
     void setName(string _name);
-    tree <BodyPart> getPartTree(void) const; 
+    tree <BodyPart> getPartTree(void) const;
     ///direct access
     tree<BodyPart>* getPartTreePtr();
-    void setPartTree(tree <BodyPart> _partTree); 
-    tree <BodyJoint> getJointTree(void) const; 
+    void setPartTree(tree <BodyPart> _partTree);
+    tree <BodyJoint> getJointTree(void) const;
     ///direct access
     tree<BodyJoint>* getJointTreePtr();
     void setJointTree(tree <BodyJoint> _jointTree);
@@ -42,7 +48,7 @@ class Skeleton
     /// search a joint by id and return a pointer to its address
     BodyJoint* getBodyJoint(int jointID) const;
     /// search a body part by id and return a pointer to its address
-    BodyPart* getBodyPart( int partID ) const;
+    BodyPart* getBodyPart(int partID) const;
   private:
     /// name of the specific instance of
     string name;
@@ -52,7 +58,9 @@ class Skeleton
     tree <BodyJoint> jointTree;
     /// scale factor, used for scaling
     float scale;
-};
+  };
+
+}
 
 #endif  // _LIBPOSE_SKELETON_HPP_
 

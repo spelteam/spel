@@ -5,7 +5,16 @@
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG
 
-//OpenGM
+// STL
+#include <vector>
+#include <limits>
+#include <opencv2/opencv.hpp>
+#include <tree.hh>
+#include <algorithm>
+#include <chrono>
+#include <future>
+
+// OpenGM
 #include <opengm/graphicalmodel/graphicalmodel.hxx>
 #include <opengm/graphicalmodel/space/discretespace.hxx>
 #include <opengm/operations/adder.hxx>
@@ -13,23 +22,28 @@
 #include <opengm/inference/messagepassing/messagepassing.hxx>
 #include <opengm/operations/minimizer.hxx>
 
-#include <vector>
+#include "lockframe.hpp"
+#include "colorHistDetector.hpp"
+#include "hogDetector.hpp"
+#include "surfDetector.hpp"
+#include "tlpssolver.hpp"
 #include "solver.hpp"
 #include "solution.hpp"
 #include "frame.hpp"
 #include "imagesimilaritymatrix.hpp"
 #include "minspanningtree.hpp"
-#include <opencv2/opencv.hpp>
 
-
-using namespace std;
-using namespace opengm;
-using namespace cv;
-
-///define the space and the model
-
-class NSKPSolver: public Solver
+namespace SPEL
 {
+  using namespace std;
+  using namespace std::chrono;
+  using namespace opengm;
+  using namespace cv;
+
+  ///define the space and the model
+
+  class NSKPSolver : public Solver
+  {
     typedef struct SolvletScore
     {
       Solvlet solvlet;
@@ -47,7 +61,7 @@ class NSKPSolver: public Solver
     ///define the inference algorithm
     typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
-public:
+  public:
     NSKPSolver();
     ///inherited virtual
     ~NSKPSolver();
@@ -64,15 +78,15 @@ public:
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
     // string getId(); //get the solver Id. Every class inheriting solver has is own ID
-private:
+  private:
 #ifdef DEBUG
     FRIEND_TEST(nskpsolverTests, findFrameIndexById);
-    FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost); 
+    FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost);
     FRIEND_TEST(nskpsolverTests, evaluateSolution);
 #endif  // DEBUG
     vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism, vector<int> &ignore);
     vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
-    
+
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params);
 
     uint32_t findFrameIndexById(int id, vector<Frame*> frames);
@@ -84,15 +98,17 @@ private:
     float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params);
     float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float min, float max);
 
-    vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const vector<Frame *> frames, map<string,float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int> &ignore);
-    int test(int frameId, const vector<Frame*>& frames, map<string,float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore); //test function
+    vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const vector<Frame *> frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int> &ignore);
+    int test(int frameId, const vector<Frame*>& frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore); //test function
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 
     //INHERITED
     //int id;
     //string name;
-};
+  };
+
+}
 
 #endif  // _NSKPSOLVER_HPP_
 

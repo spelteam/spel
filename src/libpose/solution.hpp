@@ -8,12 +8,15 @@
 
 using namespace std;
 
-class Solution
+namespace SPEL
 {
+
+  class Solution
+  {
   public:
     Solution(void);
     Solution(int id, int solverId, int seqId, vector<float> params, vector<Solvlet> solvlets);
-    
+
     Solution &operator=(const Solution &s);
     bool operator==(const Solution &s) const;
     bool operator!=(const Solution &s) const;
@@ -23,7 +26,7 @@ class Solution
 
     vector<Solvlet> getSolvlets(void);
     void setSolvlets(vector<Solvlet> _solvlets);
-  
+
   private:
     int id;
     ///id of the solver solution was obtained from
@@ -33,7 +36,9 @@ class Solution
     string solverName;
     vector <float> solverParams;
     vector <Solvlet> solvlets;
-};
+  };
+
+}
 
 #endif  // _SOLUTION_HPP_
  

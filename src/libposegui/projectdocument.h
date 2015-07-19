@@ -6,27 +6,27 @@
 
 namespace posegui {
 
-class ProjectDocument
-{
-public:
+  class ProjectDocument
+  {
+  public:
     ProjectDocument();
     ~ProjectDocument();
-public:
-    void read( const QString &filename );
-    void write( const QString &filename );
-    void setDocument( const QDomDocument &document );
+  public:
+    void read(const QString &filename);
+    void write(const QString &filename);
+    void setDocument(const QDomDocument &document);
     const QDomDocument& getDocument() const;
-private:
+  private:
     ///
     /// \brief Checking whether xml file is valid
     /// http://www.w3schools.com/schema/
     ///
     void validate();
-private:
+  private:
     QDomDocument document;
-private:
+  private:
     static const QString VALIDATOR_FILEPATH;
-};
+  };
 
 }
 

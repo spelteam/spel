@@ -11,55 +11,55 @@ class BodyPartItem;
 
 class FrameView2D : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 private:
-    class FrameGraphicsView : public QGraphicsView
-    {
-    public:
-        FrameGraphicsView(QWidget* parent = 0):
-            QGraphicsView(parent){
-            setDragMode(DragMode::RubberBandDrag);
-            setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-            setRenderHint(QPainter::Antialiasing);
-            setViewportUpdateMode(BoundingRectViewportUpdate);
-            setCacheMode(CacheBackground);
-        }
-        FrameGraphicsView(QGraphicsScene* scene, QWidget* parent = 0):
-            QGraphicsView(scene,parent){
-            setDragMode(DragMode::RubberBandDrag);
-            setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-            setRenderHint(QPainter::Antialiasing);
-            setViewportUpdateMode(BoundingRectViewportUpdate);
-        }
-    protected:
-        void wheelEvent(QWheelEvent* event) override;
-        void mousePressEvent(QMouseEvent * event) override;
-    };
+  class FrameGraphicsView : public QGraphicsView
+  {
+  public:
+    FrameGraphicsView(QWidget* parent = 0) :
+      QGraphicsView(parent){
+      setDragMode(DragMode::RubberBandDrag);
+      setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+      setRenderHint(QPainter::Antialiasing);
+      setViewportUpdateMode(BoundingRectViewportUpdate);
+      setCacheMode(CacheBackground);
+    }
+    FrameGraphicsView(QGraphicsScene* scene, QWidget* parent = 0) :
+      QGraphicsView(scene, parent){
+      setDragMode(DragMode::RubberBandDrag);
+      setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+      setRenderHint(QPainter::Antialiasing);
+      setViewportUpdateMode(BoundingRectViewportUpdate);
+    }
+  protected:
+    void wheelEvent(QWheelEvent* event) override;
+    void mousePressEvent(QMouseEvent * event) override;
+  };
 public:
-    explicit FrameView2D(QWidget *parent = 0);
-    ~FrameView2D();
+  explicit FrameView2D(QWidget *parent = 0);
+  ~FrameView2D();
 
 signals:
 
-public slots:
+  public slots :
     void loadProjectEvent();
-    void closeProjectEvent();
-    void scaleItemsEvent( int value );
-    void changeMaskOpacityEvent( int value );
-    void pickFrameEvent(int num);
+  void closeProjectEvent();
+  void scaleItemsEvent(int value);
+  void changeMaskOpacityEvent(int value);
+  void pickFrameEvent(int num);
 
 public:
-    FrameGraphicsView *view;
-    QGraphicsScene *scene;
+  FrameGraphicsView *view;
+  QGraphicsScene *scene;
 
 private:
-    void loadFrameImage( int num );
-    void loadFrameSkeleton( int num );
+  void loadFrameImage(int num);
+  void loadFrameSkeleton(int num);
 
 private:
-    QGraphicsPixmapItem* frameImage;
-    QGraphicsPixmapItem* frameMask;
-    QImage frameMaskOrig;
-    int opacityValue;
+  QGraphicsPixmapItem* frameImage;
+  QGraphicsPixmapItem* frameMask;
+  QImage frameMaskOrig;
+  int opacityValue;
 };
 #endif // FRAMEVIEW2D_H

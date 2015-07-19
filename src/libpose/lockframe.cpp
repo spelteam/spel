@@ -1,10 +1,14 @@
 #include "lockframe.hpp"
 
-Lockframe::Lockframe(void) : frameType(LOCKFRAME)
+namespace SPEL
 {
-}
+  Lockframe::Lockframe(void) : frameType(LOCKFRAME)
+  {
+  }
 
-FRAMETYPE Lockframe::getFrametype(void)
-{
-  return frameType;
+  FRAMETYPE Lockframe::getFrametype(void)
+  {
+    return frameType;
+  }
+
 }

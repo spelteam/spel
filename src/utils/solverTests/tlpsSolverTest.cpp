@@ -3,6 +3,7 @@
 #include "projectLoader.hpp"
 
 using namespace std;
+using namespace SPEL;
 
 int main (int argc, char **argv)
 {

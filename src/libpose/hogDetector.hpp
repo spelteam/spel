@@ -5,14 +5,18 @@
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG
 
+// OpenCV
 #include <opencv2/opencv.hpp>
+
 #include "detector.hpp"
 
-using namespace std;
-using namespace cv;
-
-class HogDetector : public Detector
+namespace SPEL
 {
+  using namespace std;
+  using namespace cv;
+
+  class HogDetector : public Detector
+  {
   protected:
     struct PartModel
     {
@@ -81,6 +85,6 @@ class HogDetector : public Detector
     map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
     float compare(BodyPart bodyPart, PartModel partModel, uint8_t nbins);
     float compare(void);
-};
-
+  };
+}
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

@@ -8,538 +8,539 @@
 
 using namespace cv;
 using namespace std;
-
-class TestingDetector : public ColorHistDetector
+namespace SPEL
 {
-public:
-  Mat DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size);
-  float GetBoneLength(Point2f begin, Point2f end);
-  float GetBoneWidth(float length, BodyPart bodyPart);
-};
-
-Mat TestingDetector::DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
-{
-  return  TestingDetector::rotateImageToDefault(imgSource, initialRect, angle, size);
-}
-
-float TestingDetector::GetBoneLength(Point2f begin, Point2f end)
-{
-  return TestingDetector::getBoneLength(begin, end);
-}
-
-float TestingDetector::GetBoneWidth(float length, BodyPart bodyPart)
-{
-  return  TestingDetector::getBoneWidth(length, bodyPart);
-}
-
-POSERECT<Point2f> CreateRect(float x1, float x2, float y1, float y2)
-{
-  Point2f a(x1, y1), b(x2, y1), c(x2, y2), d(x1, y2), E(0, 0);
-  POSERECT <Point2f> rect(a, b, c, d);
-  return rect;
-}
-
-// Rotation of the rectangle around center 
-POSERECT<Point2f> RotateRect(POSERECT<Point2f> &rect, float angle)
-{
-  POSERECT<Point2f> RotatedRect;
-  Point2f center = rect.GetCenter<Point2f>();
-  RotatedRect.point1 = PoseHelper::rotatePoint2D(rect.point1, center, angle);
-  RotatedRect.point2 = PoseHelper::rotatePoint2D(rect.point2, center, angle);
-  RotatedRect.point3 = PoseHelper::rotatePoint2D(rect.point3, center, angle);
-  RotatedRect.point4 = PoseHelper::rotatePoint2D(rect.point4, center, angle);
-  return RotatedRect;
-}
-
-// Filling the rectangle
-void FillRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
-{
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      Img.at<Vec3b>(j, i) = colour;
-}
-
-void FillRotatedRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
-{
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      if (rect.containsPoint(Point2f((float)i, (float)j)) == 1)
-        Img.at<Vec3b>(j, i) = colour;
-}
-
-void FillRectRand(Mat &Img, POSERECT<Point2f> &rect)
-{
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  Vec3b colour;
-  const int c = 250;
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-    {
-      colour = Vec3b(uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX));
-      Img.at<Vec3b>(j, i) = colour;
-    }
-}
-
-// Rotation the rectangle image
-Mat RotateImage(Mat Img, POSERECT<Point2f> &rect, float angle)
-{
-  Size size = Img.size();
-  Mat img2 = Mat(size, CV_8UC3, Scalar(0, 0, 0));
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  Point2f center = rect.GetCenter<Point2f >();
-  Point2f E;
-  for (int i = (int)xmin; i <= (int)xmax; i++)
+  class TestingDetector : public ColorHistDetector
   {
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-    {
-      E = Point2i(i, j);
-      E = PoseHelper::rotatePoint2D(E, center, angle);
-      if ((0 < E.x < size.width) && (0 < E.y < size.height))
-        img2.at<Vec3b>((int32_t)(E.y), (int32_t)(E.x)) = Img.at<Vec3b>(j, i);
-    }
+  public:
+    Mat DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size);
+    float GetBoneLength(Point2f begin, Point2f end);
+    float GetBoneWidth(float length, BodyPart bodyPart);
+  };
+
+  Mat TestingDetector::DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
+  {
+    return  TestingDetector::rotateImageToDefault(imgSource, initialRect, angle, size);
   }
-  return img2;
-}
 
-// Searching the rectangle extreme coordinates at image
-void GetExtremePoints(Mat Img, Vec3b bgColour, Point2f &Min, Point2f &Max)
-{
-  Size size = Img.size();
-  Min = Point2f((float)size.width + 1, (float)size.height + 1);
-  Max = Point2f(-1, -1);
-  for (int i = 0; i < size.width; i++)
-    for (int j = 0; j < size.height; j++)
-      if (Img.at<Vec3b>(j, i) != bgColour)
+  float TestingDetector::GetBoneLength(Point2f begin, Point2f end)
+  {
+    return TestingDetector::getBoneLength(begin, end);
+  }
+
+  float TestingDetector::GetBoneWidth(float length, BodyPart bodyPart)
+  {
+    return  TestingDetector::getBoneWidth(length, bodyPart);
+  }
+
+  POSERECT<Point2f> CreateRect(float x1, float x2, float y1, float y2)
+  {
+    Point2f a(x1, y1), b(x2, y1), c(x2, y2), d(x1, y2), E(0, 0);
+    POSERECT <Point2f> rect(a, b, c, d);
+    return rect;
+  }
+
+  // Rotation of the rectangle around center 
+  POSERECT<Point2f> RotateRect(POSERECT<Point2f> &rect, float angle)
+  {
+    POSERECT<Point2f> RotatedRect;
+    Point2f center = rect.GetCenter<Point2f>();
+    RotatedRect.point1 = PoseHelper::rotatePoint2D(rect.point1, center, angle);
+    RotatedRect.point2 = PoseHelper::rotatePoint2D(rect.point2, center, angle);
+    RotatedRect.point3 = PoseHelper::rotatePoint2D(rect.point3, center, angle);
+    RotatedRect.point4 = PoseHelper::rotatePoint2D(rect.point4, center, angle);
+    return RotatedRect;
+  }
+
+  // Filling the rectangle
+  void FillRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
+  {
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        Img.at<Vec3b>(j, i) = colour;
+  }
+
+  void FillRotatedRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
+  {
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (rect.containsPoint(Point2f((float)i, (float)j)) == 1)
+          Img.at<Vec3b>(j, i) = colour;
+  }
+
+  void FillRectRand(Mat &Img, POSERECT<Point2f> &rect)
+  {
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    Vec3b colour;
+    const int c = 250;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
       {
-        if (i < (int)Min.x) { Min.x = (float)i; }
-        if (i > (int)Max.x) { Max.x = (float)i; }
-        if (j < (int)Min.y) { Min.y = (float)j; }
-        if (j > (int)Max.y) { Max.y = (float)j; }
+        colour = Vec3b(uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX), uchar(rand() * c / RAND_MAX));
+        Img.at<Vec3b>(j, i) = colour;
       }
-}
+  }
 
-TEST(DetectorTests, rotateImageToDefault_OneColor)
-{
-  // Prepare input data
-  int rows = 200, cols = 200; // image size
-  float angle = 45; // the rotation angle
-  float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
-  POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
-  POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
-  Point2f center = rect.GetCenter<Point2f >();
-  Point2f center2 = RotatedRect.GetCenter<Point2f >();
+  // Rotation the rectangle image
+  Mat RotateImage(Mat Img, POSERECT<Point2f> &rect, float angle)
+  {
+    Size size = Img.size();
+    Mat img2 = Mat(size, CV_8UC3, Scalar(0, 0, 0));
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    Point2f center = rect.GetCenter<Point2f >();
+    Point2f E;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+    {
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+      {
+        E = Point2i(i, j);
+        E = PoseHelper::rotatePoint2D(E, center, angle);
+        if ((0 < E.x < size.width) && (0 < E.y < size.height))
+          img2.at<Vec3b>((int32_t)(E.y), (int32_t)(E.x)) = Img.at<Vec3b>(j, i);
+      }
+    }
+    return img2;
+  }
 
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  Point2f MinR(xmin, ymin);
-  Point2f MaxR(xmax, ymax);
+  // Searching the rectangle extreme coordinates at image
+  void GetExtremePoints(Mat Img, Vec3b bgColour, Point2f &Min, Point2f &Max)
+  {
+    Size size = Img.size();
+    Min = Point2f((float)size.width + 1, (float)size.height + 1);
+    Max = Point2f(-1, -1);
+    for (int i = 0; i < size.width; i++)
+      for (int j = 0; j < size.height; j++)
+        if (Img.at<Vec3b>(j, i) != bgColour)
+        {
+          if (i < (int)Min.x) { Min.x = (float)i; }
+          if (i > (int)Max.x) { Max.x = (float)i; }
+          if (j < (int)Min.y) { Min.y = (float)j; }
+          if (j > (int)Max.y) { Max.y = (float)j; }
+        }
+  }
 
-  Mat img1 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
-  Mat img2 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
+  TEST(DetectorTests, rotateImageToDefault_OneColor)
+  {
+    // Prepare input data
+    int rows = 200, cols = 200; // image size
+    float angle = 45; // the rotation angle
+    float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
+    POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
+    POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
+    Point2f center = rect.GetCenter<Point2f >();
+    Point2f center2 = RotatedRect.GetCenter<Point2f >();
 
-  Vec3b colour(0, 0, 255); // color fill 
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    Point2f MinR(xmin, ymin);
+    Point2f MaxR(xmax, ymax);
 
-  FillRect(img1, rect, colour);
-  FillRotatedRect(img2, RotatedRect, colour);
+    Mat img1 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
+    Mat img2 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
 
-  TestingDetector chd;
-  Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
+    Vec3b colour(0, 0, 255); // color fill 
 
-  // Testing
-  Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
+    FillRect(img1, rect, colour);
+    FillRotatedRect(img2, RotatedRect, colour);
 
-  imwrite("image.jpg", img1);
-  imwrite("rotated_image.jpg", img2);
-  imwrite("derotated_image.jpg", X);
+    TestingDetector chd;
+    Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
 
-  Point2f Min, Max;
+    // Testing
+    Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
 
-  // Check X image
-  GetExtremePoints(X, Vec3b(255, 255, 255), Min, Max);
+    imwrite("image.jpg", img1);
+    imwrite("rotated_image.jpg", img2);
+    imwrite("derotated_image.jpg", X);
 
-  // Checking extreme points
-  float delta = 1; // tolerable linear error
-  EXPECT_LE(Min.x, delta);
-  EXPECT_LE(abs(Max.x + xmin - MaxR.x), delta);
-  EXPECT_LE(Min.y, delta);
-  EXPECT_LE(abs(Max.y + ymin - MaxR.y), delta);
+    Point2f Min, Max;
 
-  // Checking matching of the images points with one fill color 
-  uint32_t S = 0;
-  uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      if (img1.at<Vec3b>(j, i) == X.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
-        S++;
+    // Check X image
+    GetExtremePoints(X, Vec3b(255, 255, 255), Min, Max);
+
+    // Checking extreme points
+    float delta = 1; // tolerable linear error
+    EXPECT_LE(Min.x, delta);
+    EXPECT_LE(abs(Max.x + xmin - MaxR.x), delta);
+    EXPECT_LE(Min.y, delta);
+    EXPECT_LE(abs(Max.y + ymin - MaxR.y), delta);
+
+    // Checking matching of the images points with one fill color 
+    uint32_t S = 0;
+    uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img1.at<Vec3b>(j, i) == X.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
 
 
-  float epsilon = 20; // tolerable error of the matching points number, %
-  float FalsePixels = (float)(100 * (S0 - S) / S0);
-  cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
-  EXPECT_LE(FalsePixels, epsilon);
+    float epsilon = 20; // tolerable error of the matching points number, %
+    float FalsePixels = (float)(100 * (S0 - S) / S0);
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
+    EXPECT_LE(FalsePixels, epsilon);
 
-  img1.release();
-  img2.release();
-  X.release();
-}
+    img1.release();
+    img2.release();
+    X.release();
+  }
 
-TEST(DetectorTests, rotateImageToDefault_RandColor)
-{
-  int rows = 200, cols = 200; // image size
-  float angle = 45; // the rotetion angle
-  float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
-  POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
-  POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
-  Point2f center = rect.GetCenter<Point2f >();
-  Point2f center2 = RotatedRect.GetCenter<Point2f >();
+  TEST(DetectorTests, rotateImageToDefault_RandColor)
+  {
+    int rows = 200, cols = 200; // image size
+    float angle = 45; // the rotetion angle
+    float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
+    POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
+    POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
+    Point2f center = rect.GetCenter<Point2f >();
+    Point2f center2 = RotatedRect.GetCenter<Point2f >();
 
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  Point2f MinR(xmin, ymin);
-  Point2f MaxR(xmax, ymax);
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    Point2f MinR(xmin, ymin);
+    Point2f MaxR(xmax, ymax);
 
-  Mat img1 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
-  Mat img2 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
+    Mat img1 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
+    Mat img2 = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
 
-  FillRectRand(img1, rect);
-  img2 = RotateImage(img1, rect, angle);
+    FillRectRand(img1, rect);
+    img2 = RotateImage(img1, rect, angle);
 
-  TestingDetector chd;
-  Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
+    TestingDetector chd;
+    Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
 
-  POSERECT <Point2f> RotatedRectCopy = RotatedRect;
+    POSERECT <Point2f> RotatedRectCopy = RotatedRect;
 
-  Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
+    Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
 
-  imwrite("image_RandColor.jpg", img1);
-  imwrite("rotated_image_RandColor.jpg", img2);
-  imwrite("derotated_image_RandColor.jpg", X);
+    imwrite("image_RandColor.jpg", img1);
+    imwrite("rotated_image_RandColor.jpg", img2);
+    imwrite("derotated_image_RandColor.jpg", X);
 
-  Point2f Min, Max;
+    Point2f Min, Max;
 
-  // Check X image
-  GetExtremePoints(X, Vec3b(255, 255, 255), Min, Max);
+    // Check X image
+    GetExtremePoints(X, Vec3b(255, 255, 255), Min, Max);
 
-  // Checking extreme points
-  float delta = 1; // tolerable linear error
-  EXPECT_LE(Min.x, delta);
-  EXPECT_LE(abs(Max.x + xmin - MaxR.x), delta);
-  EXPECT_LE(Min.y, delta);
-  EXPECT_LE(abs(Max.y + ymin - MaxR.y), delta);
+    // Checking extreme points
+    float delta = 1; // tolerable linear error
+    EXPECT_LE(Min.x, delta);
+    EXPECT_LE(abs(Max.x + xmin - MaxR.x), delta);
+    EXPECT_LE(Min.y, delta);
+    EXPECT_LE(abs(Max.y + ymin - MaxR.y), delta);
 
-  // Checking matching of the images points with one fill color 
-  uint32_t S = 0;
-  uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      if (img1.at<Vec3b>(j, i) == X.at<Vec3b>(((int)(j - ymin), (int)(i - xmin))))
-        S++;
+    // Checking matching of the images points with one fill color 
+    uint32_t S = 0;
+    uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img1.at<Vec3b>(j, i) == X.at<Vec3b>(((int)(j - ymin), (int)(i - xmin))))
+          S++;
 
-  float epsilon = 100; // tolerable error of the matching points number, %
-  float FalsePixels = (float)(100 * (S0 - S) / S0);
-  cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
-  EXPECT_LE(FalsePixels, epsilon);
+    float epsilon = 100; // tolerable error of the matching points number, %
+    float FalsePixels = (float)(100 * (S0 - S) / S0);
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
+    EXPECT_LE(FalsePixels, epsilon);
 
-  img1.release();
-  img2.release();
-  X.release();
-}
+    img1.release();
+    img2.release();
+    X.release();
+  }
 
-TEST(DetectorTests, rotateImageToDefault_FileImage)
-{
+  TEST(DetectorTests, rotateImageToDefault_FileImage)
+  {
 #ifdef WINDOWS
 #ifdef DEBUG
-  Mat img1, img2, img3, img4, Q1, Q2, Q3, Q4;
-  if (IsDebuggerPresent())
-  {
-    img1 = imread("Debug/posetests_TestData/ImageRotationTestData/image1.jpg");
-    img2 = imread("Debug/posetests_TestData/ImageRotationTestData/image2.jpg");
-    img3 = imread("Debug/posetests_TestData/ImageRotationTestData/image3.jpg");
-    img4 = imread("Debug/posetests_TestData/ImageRotationTestData/image4.jpg");
-    Q1 = imread("Debug/posetests_TestData/ImageRotationTestData/Q1.jpg");
-    Q2 = imread("Debug/posetests_TestData/ImageRotationTestData/Q2.jpg");
-    Q3 = imread("Debug/posetests_TestData/ImageRotationTestData/Q3.jpg");
-    Q4 = imread("Debug/posetests_TestData/ImageRotationTestData/Q4.jpg");
-  }
-  else
-  {
-    img1 = imread("posetests_TestData/ImageRotationTestData/image1.jpg");
-    img2 = imread("posetests_TestData/ImageRotationTestData/image2.jpg");
-    img3 = imread("posetests_TestData/ImageRotationTestData/image3.jpg");
-    img4 = imread("posetests_TestData/ImageRotationTestData/image4.jpg");
-    Q1 = imread("posetests_TestData/ImageRotationTestData/Q1.jpg");
-    Q2 = imread("posetests_TestData/ImageRotationTestData/Q2.jpg");
-    Q3 = imread("posetests_TestData/ImageRotationTestData/Q3.jpg");
-    Q4 = imread("posetests_TestData/ImageRotationTestData/Q4.jpg");
-  }
+    Mat img1, img2, img3, img4, Q1, Q2, Q3, Q4;
+    if (IsDebuggerPresent())
+    {
+      img1 = imread("Debug/posetests_TestData/ImageRotationTestData/image1.jpg");
+      img2 = imread("Debug/posetests_TestData/ImageRotationTestData/image2.jpg");
+      img3 = imread("Debug/posetests_TestData/ImageRotationTestData/image3.jpg");
+      img4 = imread("Debug/posetests_TestData/ImageRotationTestData/image4.jpg");
+      Q1 = imread("Debug/posetests_TestData/ImageRotationTestData/Q1.jpg");
+      Q2 = imread("Debug/posetests_TestData/ImageRotationTestData/Q2.jpg");
+      Q3 = imread("Debug/posetests_TestData/ImageRotationTestData/Q3.jpg");
+      Q4 = imread("Debug/posetests_TestData/ImageRotationTestData/Q4.jpg");
+    }
+    else
+    {
+      img1 = imread("posetests_TestData/ImageRotationTestData/image1.jpg");
+      img2 = imread("posetests_TestData/ImageRotationTestData/image2.jpg");
+      img3 = imread("posetests_TestData/ImageRotationTestData/image3.jpg");
+      img4 = imread("posetests_TestData/ImageRotationTestData/image4.jpg");
+      Q1 = imread("posetests_TestData/ImageRotationTestData/Q1.jpg");
+      Q2 = imread("posetests_TestData/ImageRotationTestData/Q2.jpg");
+      Q3 = imread("posetests_TestData/ImageRotationTestData/Q3.jpg");
+      Q4 = imread("posetests_TestData/ImageRotationTestData/Q4.jpg");
+    }
 #else
-  Mat img1 = imread("Release/posetests_TestData/ImageRotationTestData/image1.jpg");
-  Mat img2 = imread("Release/posetests_TestData/ImageRotationTestData/image2.jpg");
-  Mat img3 = imread("Release/posetests_TestData/ImageRotationTestData/image3.jpg");
-  Mat img4 = imread("Release/posetests_TestData/ImageRotationTestData/image4.jpg");
-  Mat Q1 = imread("Release/posetests_TestData/ImageRotationTestData/Q1.jpg");
-  Mat Q2 = imread("Release/posetests_TestData/ImageRotationTestData/Q2.jpg");
-  Mat Q3 = imread("Release/posetests_TestData/ImageRotationTestData/Q3.jpg");
-  Mat Q4 = imread("Release/posetests_TestData/ImageRotationTestData/Q4.jpg");
+    Mat img1 = imread("Release/posetests_TestData/ImageRotationTestData/image1.jpg");
+    Mat img2 = imread("Release/posetests_TestData/ImageRotationTestData/image2.jpg");
+    Mat img3 = imread("Release/posetests_TestData/ImageRotationTestData/image3.jpg");
+    Mat img4 = imread("Release/posetests_TestData/ImageRotationTestData/image4.jpg");
+    Mat Q1 = imread("Release/posetests_TestData/ImageRotationTestData/Q1.jpg");
+    Mat Q2 = imread("Release/posetests_TestData/ImageRotationTestData/Q2.jpg");
+    Mat Q3 = imread("Release/posetests_TestData/ImageRotationTestData/Q3.jpg");
+    Mat Q4 = imread("Release/posetests_TestData/ImageRotationTestData/Q4.jpg");
 #endif  // DEBUG
 #else
-  Mat img1 = imread("posetests_TestData/ImageRotationTestData/image1.jpg");
-  Mat img2 = imread("posetests_TestData/ImageRotationTestData/image2.jpg");
-  Mat img3 = imread("posetests_TestData/ImageRotationTestData/image3.jpg");
-  Mat img4 = imread("posetests_TestData/ImageRotationTestData/image4.jpg");
-  Mat Q1 = imread("posetests_TestData/ImageRotationTestData/Q1.jpg");
-  Mat Q2 = imread("posetests_TestData/ImageRotationTestData/Q2.jpg");
-  Mat Q3 = imread("posetests_TestData/ImageRotationTestData/Q3.jpg");
-  Mat Q4 = imread("posetests_TestData/ImageRotationTestData/Q4.jpg");
+    Mat img1 = imread("posetests_TestData/ImageRotationTestData/image1.jpg");
+    Mat img2 = imread("posetests_TestData/ImageRotationTestData/image2.jpg");
+    Mat img3 = imread("posetests_TestData/ImageRotationTestData/image3.jpg");
+    Mat img4 = imread("posetests_TestData/ImageRotationTestData/image4.jpg");
+    Mat Q1 = imread("posetests_TestData/ImageRotationTestData/Q1.jpg");
+    Mat Q2 = imread("posetests_TestData/ImageRotationTestData/Q2.jpg");
+    Mat Q3 = imread("posetests_TestData/ImageRotationTestData/Q3.jpg");
+    Mat Q4 = imread("posetests_TestData/ImageRotationTestData/Q4.jpg");
 #endif  // WINDOWS
-  imwrite("Q01.jpg", Q1);
-  imwrite("Q02.jpg", Q2);
-  imwrite("Q03.jpg", Q3);
-  imwrite("Q04.jpg", Q4);
+    imwrite("Q01.jpg", Q1);
+    imwrite("Q02.jpg", Q2);
+    imwrite("Q03.jpg", Q3);
+    imwrite("Q04.jpg", Q4);
 
-  // Prepare input data
-  Size img_size = img1.size();
+    // Prepare input data
+    Size img_size = img1.size();
 
-  float angle = 45; // the rotetion angle
-  float x1 = 10.0, x2 = 39.0, y1 = 20.0, y2 = 59.0; // the rectangle vertices
-  POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
-  POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
-  Point2f center = rect.GetCenter<Point2f >();
+    float angle = 45; // the rotetion angle
+    float x1 = 10.0, x2 = 39.0, y1 = 20.0, y2 = 59.0; // the rectangle vertices
+    POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
+    POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
+    Point2f center = rect.GetCenter<Point2f >();
 
-  float xmax, ymax, xmin, ymin;
-  rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-  Point2f MinR(xmin, ymin);
-  Point2f MaxR(xmax, ymax);
+    float xmax, ymax, xmin, ymin;
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    Point2f MinR(xmin, ymin);
+    Point2f MaxR(xmax, ymax);
 
-  TestingDetector chd;
-  Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
+    TestingDetector chd;
+    Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
 
-  // Testing
+    // Testing
 
-  Mat  X1 = chd.DeRotate(Q1, RotatedRect, angle, size);
-  Mat  X2 = chd.DeRotate(Q2, RotatedRect, angle, size);
-  Mat  X3 = chd.DeRotate(Q3, RotatedRect, angle, size);
-  Mat  X4 = chd.DeRotate(Q4, RotatedRect, angle, size);
+    Mat  X1 = chd.DeRotate(Q1, RotatedRect, angle, size);
+    Mat  X2 = chd.DeRotate(Q2, RotatedRect, angle, size);
+    Mat  X3 = chd.DeRotate(Q3, RotatedRect, angle, size);
+    Mat  X4 = chd.DeRotate(Q4, RotatedRect, angle, size);
 
-  imwrite("derotated_image1.jpg", X1);
-  imwrite("derotated_image2.jpg", X2);
-  imwrite("derotated_image3.jpg", X3);
-  imwrite("derotated_image4.jpg", X4);
+    imwrite("derotated_image1.jpg", X1);
+    imwrite("derotated_image2.jpg", X2);
+    imwrite("derotated_image3.jpg", X3);
+    imwrite("derotated_image4.jpg", X4);
 
-  Point2f Min1, Max1;
-  Point2f Min2, Max2;
-  Point2f Min3, Max3;
-  Point2f Min4, Max4;
+    Point2f Min1, Max1;
+    Point2f Min2, Max2;
+    Point2f Min3, Max3;
+    Point2f Min4, Max4;
 
-  // Check X image
-  GetExtremePoints(X1, Vec3b(255, 255, 255), Min1, Max1);
-  GetExtremePoints(X2, Vec3b(255, 255, 255), Min2, Max2);
-  GetExtremePoints(X3, Vec3b(255, 255, 255), Min3, Max3);
-  GetExtremePoints(X4, Vec3b(255, 255, 255), Min4, Max4);
+    // Check X image
+    GetExtremePoints(X1, Vec3b(255, 255, 255), Min1, Max1);
+    GetExtremePoints(X2, Vec3b(255, 255, 255), Min2, Max2);
+    GetExtremePoints(X3, Vec3b(255, 255, 255), Min3, Max3);
+    GetExtremePoints(X4, Vec3b(255, 255, 255), Min4, Max4);
 
-  // Checking extreme points
-  float delta = 1; // tolerable linear error
-  EXPECT_LE(Min1.x, delta);
-  EXPECT_LE(abs(Max1.x + xmin - MaxR.x), delta);
-  EXPECT_LE(Min1.y, delta);
-  EXPECT_LE(abs(Max1.y + ymin - MaxR.y), delta);
+    // Checking extreme points
+    float delta = 1; // tolerable linear error
+    EXPECT_LE(Min1.x, delta);
+    EXPECT_LE(abs(Max1.x + xmin - MaxR.x), delta);
+    EXPECT_LE(Min1.y, delta);
+    EXPECT_LE(abs(Max1.y + ymin - MaxR.y), delta);
 
-  EXPECT_LE(Min2.x, delta);
-  EXPECT_LE(abs(Max2.x + xmin - MaxR.x), delta);
-  EXPECT_LE(Min2.y, delta);
-  EXPECT_LE(abs(Max2.y + ymin - MaxR.y), delta);
+    EXPECT_LE(Min2.x, delta);
+    EXPECT_LE(abs(Max2.x + xmin - MaxR.x), delta);
+    EXPECT_LE(Min2.y, delta);
+    EXPECT_LE(abs(Max2.y + ymin - MaxR.y), delta);
 
-  // Checking matching of the images points with one fill color 
-  float epsilon = 75; // tolerable error of the matching points number, %
+    // Checking matching of the images points with one fill color 
+    float epsilon = 75; // tolerable error of the matching points number, %
 
-  uint32_t S = 0;
-  uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
+    uint32_t S = 0;
+    uint32_t S0 = (uint32_t)((xmax - xmin + 1)*(ymax - ymin + 1));
 
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      if (img1.at<Vec3b>(j, i) == X1.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
-        S++;
-  float FalsePixels = (float)(100 * (S0 - S) / S0);
-  cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
-  EXPECT_LE(FalsePixels, epsilon);
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img1.at<Vec3b>(j, i) == X1.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    float FalsePixels = (float)(100 * (S0 - S) / S0);
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
+    EXPECT_LE(FalsePixels, epsilon);
 
-  S = 0;
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      if (img2.at<Vec3b>(j, i) == X2.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
-        S++;
-  FalsePixels = (float)(100 * (S0 - S) / S0);
-  cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
-  EXPECT_LE(FalsePixels, epsilon);
+    S = 0;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img2.at<Vec3b>(j, i) == X2.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    FalsePixels = (float)(100 * (S0 - S) / S0);
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
+    EXPECT_LE(FalsePixels, epsilon);
 
-  S = 0;
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      if (img3.at<Vec3b>(j, i) == X3.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
-        S++;
-  FalsePixels = (float)(100 * (S0 - S) / S0);
-  cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
-  EXPECT_LE(FalsePixels, epsilon);
+    S = 0;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img3.at<Vec3b>(j, i) == X3.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    FalsePixels = (float)(100 * (S0 - S) / S0);
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
+    EXPECT_LE(FalsePixels, epsilon);
 
-  S = 0;
-  for (int i = (int)xmin; i <= (int)xmax; i++)
-    for (int j = (int)ymin; j <= (int)ymax; j++)
-      if (img4.at<Vec3b>(j, i) == X4.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
-        S++;
-  FalsePixels = (float)(100 * (S0 - S) / S0);
-  cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
-  EXPECT_LE(FalsePixels, epsilon);
+    S = 0;
+    for (int i = (int)xmin; i <= (int)xmax; i++)
+      for (int j = (int)ymin; j <= (int)ymax; j++)
+        if (img4.at<Vec3b>(j, i) == X4.at<Vec3b>((int)(j - ymin), (int)(i - xmin)))
+          S++;
+    FalsePixels = (float)(100 * (S0 - S) / S0);
+    cout << "FalsePixels:\t" << FalsePixels << "\tepsilon:\t" << epsilon << endl;
+    EXPECT_LE(FalsePixels, epsilon);
 
-  img1.release();
-  img2.release();
-  img3.release();
-  img4.release();
+    img1.release();
+    img2.release();
+    img3.release();
+    img4.release();
 
-  Q1.release();
-  Q2.release();
-  Q3.release();
-  Q4.release();
+    Q1.release();
+    Q2.release();
+    Q3.release();
+    Q4.release();
 
-  X1.release();
-  X2.release();
-  X3.release();
-  X4.release();
-}
-
-TEST(DetectorTests, getBoneLength)
-{
-  const int nBins = 8;
-  TestingDetector detector;
-  Point2f begin(0, 0), end(1, 0);
-
-  float length = detector.GetBoneLength(begin, end);
-  cout << length;
-  EXPECT_EQ(end.x - begin.x, length);
-}
-
-TEST(DetectorTests, getBoneWidth)
-{
-  const int nBins = 8;
-  TestingDetector detector;
-  BodyPart part;
-  float lwRatio = 2.0;
-  part.setLWRatio(lwRatio);
-  float length = 1;
-
-  float width = detector.GetBoneWidth(length, part);
-  cout << length;
-  EXPECT_EQ(length / lwRatio, width);
-}
-
-//Output limbLabels set into text file
-void PutLimbLabels(ofstream &fout, vector <vector <LimbLabel>> X)
-{
-    for (int p = 0; p < X.size(); p++)
-    {
-        for (int i = 0; i < X[p].size(); i++)
-        {
-            fout << endl << "  limbID " << X[p][i].getLimbID() << ", angle " << X[p][i].getAngle() << ", poligon" << X[p][i].getPolygon() << ", scores ";
-            vector<Score> S = X[p][i].getScores();
-            for (int k = 0; k < S.size(); k++)
-                fout << S[k].getScore() << ", ";
-        }
-        fout << endl;
-    }
-  fout << endl << "===========================================" << endl;
-}
-
-//Temporary test. Data loss is not checked - only repeating
-TEST(DetectorTests, merge)
-{ 
-  vector <vector <LimbLabel>> A;
-  vector <vector <LimbLabel>> B;
-
-  //Create polygons
-  int polygonsCount = 10;
-  vector<vector<Point2f>> Polygons;
-  for (int i = 0; i < polygonsCount; i++)
-    Polygons.push_back(vector<Point2f> { Point2f(i, i) });
-
-  //Craeate set of limbLabels "A"
-  int partsCount = 2;
-  int A_size = 9;
-  for (int p = 0; p < partsCount; p++)
-  {
-    vector<LimbLabel> temp_partLabels;
-    for (int i = 0; i < A_size; i++)
-    {
-      int N = (Polygons.size() - 1)*rand() / RAND_MAX;
-      LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(float((rand())*100 / RAND_MAX)/100, "", 1)});
-      temp_partLabels.push_back(temp_label);
-    }
-    A.push_back(temp_partLabels);
+    X1.release();
+    X2.release();
+    X3.release();
+    X4.release();
   }
 
-  //Craeate set of limbLabels "B"
-  int B_size = 9;
-  for (int p = 0; p < partsCount; p++)
+  TEST(DetectorTests, getBoneLength)
   {
+    const int nBins = 8;
+    TestingDetector detector;
+    Point2f begin(0, 0), end(1, 0);
+
+    float length = detector.GetBoneLength(begin, end);
+    cout << length;
+    EXPECT_EQ(end.x - begin.x, length);
+  }
+
+  TEST(DetectorTests, getBoneWidth)
+  {
+    const int nBins = 8;
+    TestingDetector detector;
+    BodyPart part;
+    float lwRatio = 2.0;
+    part.setLWRatio(lwRatio);
+    float length = 1;
+
+    float width = detector.GetBoneWidth(length, part);
+    cout << length;
+    EXPECT_EQ(length / lwRatio, width);
+  }
+
+  //Output limbLabels set into text file
+  void PutLimbLabels(ofstream &fout, vector <vector <LimbLabel>> X)
+  {
+    for (int p = 0; p < X.size(); p++)
+    {
+      for (int i = 0; i < X[p].size(); i++)
+      {
+        fout << endl << "  limbID " << X[p][i].getLimbID() << ", angle " << X[p][i].getAngle() << ", poligon" << X[p][i].getPolygon() << ", scores ";
+        vector<Score> S = X[p][i].getScores();
+        for (int k = 0; k < S.size(); k++)
+          fout << S[k].getScore() << ", ";
+      }
+      fout << endl;
+    }
+    fout << endl << "===========================================" << endl;
+  }
+
+  //Temporary test. Data loss is not checked - only repeating
+  TEST(DetectorTests, merge)
+  {
+    vector <vector <LimbLabel>> A;
+    vector <vector <LimbLabel>> B;
+
+    //Create polygons
+    int polygonsCount = 10;
+    vector<vector<Point2f>> Polygons;
+    for (int i = 0; i < polygonsCount; i++)
+      Polygons.push_back(vector < Point2f > { Point2f(i, i) });
+
+    //Craeate set of limbLabels "A"
+    int partsCount = 2;
+    int A_size = 9;
+    for (int p = 0; p < partsCount; p++)
+    {
+      vector<LimbLabel> temp_partLabels;
+      for (int i = 0; i < A_size; i++)
+      {
+        int N = (Polygons.size() - 1)*rand() / RAND_MAX;
+        LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(float((rand()) * 100 / RAND_MAX) / 100, "", 1)});
+        temp_partLabels.push_back(temp_label);
+      }
+      A.push_back(temp_partLabels);
+    }
+
+    //Craeate set of limbLabels "B"
+    int B_size = 9;
+    for (int p = 0; p < partsCount; p++)
+    {
       vector<LimbLabel> temp_partLabels;
       for (int i = 0; i < B_size; i++)
       {
-          int N = (Polygons.size() - 1)*rand() / RAND_MAX;
-          LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(float((rand()) * 100 / RAND_MAX) / 100, "", 1)});
-          temp_partLabels.push_back(temp_label);
+        int N = (Polygons.size() - 1)*rand() / RAND_MAX;
+        LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(float((rand()) * 100 / RAND_MAX) / 100, "", 1)});
+        temp_partLabels.push_back(temp_label);
       }
       B.push_back(temp_partLabels);
-  }
-
-  //Run "merge"
-  ColorHistDetector D;
-  vector <vector <LimbLabel>> H = D.merge(A, B);
-  vector <vector <LimbLabel>> A1 = D.merge(A, A);
-  vector <vector <LimbLabel>> B1 = D.merge(B, B);
-  vector <vector <LimbLabel>> C = D.merge(A1, B1);
-
-  //Put all input and output labels sets into text file
-  ofstream fout("Detector_merge.txt");
-
-  fout << "LimbLabels set A:" << endl;
-  PutLimbLabels(fout, A);
-
-  fout << "LimbLabels set B:" << endl;
-  PutLimbLabels(fout, B);
-
-  fout << "merge(A, B):" << endl;
-  PutLimbLabels(fout, H);
-
-  fout << "merge(A, A):" << endl;
-  PutLimbLabels(fout, A1);
-
-  fout << "merge(B, B):" << endl;
-  PutLimbLabels(fout, B1);
-
-  fout << "merge(merge(A, A), merge(B,B)):" << endl;
-  PutLimbLabels(fout, C);
-
-  fout.close();
-
-  cout << "See input abd output limbLabels values in the file  'Detector_merge.txt'\n";
-
-
-  //Compare
-  for (int p = 0; p < C.size(); p++)
-    for (int i = 0; i < C[p].size(); i++)
-    {
-      //Search equal polygon values in curent part labels
-      for (int k = 0; k < C[p].size(); k++)
-        if (i != k) EXPECT_FALSE(C[p][i].getPolygon() == C[p][k].getPolygon()) << "partID = "<< p << ": polygons of label_Num "<< i << " and " << k << "is equal" << endl ;
-      vector<Score> LimbScores = C[p][i].getScores();
-      //Search equal scores in curent label
-      for (int k = 0; k < LimbScores.size(); k++)
-        for (int t = 0; t < LimbScores.size(); t++)
-            if (t != k) EXPECT_FALSE(LimbScores[k] == LimbScores[t]) << ", PartID = " << p << ": Equal scores in label with Num = " << i << endl;
     }
-}
 
+    //Run "merge"
+    ColorHistDetector D;
+    vector <vector <LimbLabel>> H = D.merge(A, B);
+    vector <vector <LimbLabel>> A1 = D.merge(A, A);
+    vector <vector <LimbLabel>> B1 = D.merge(B, B);
+    vector <vector <LimbLabel>> C = D.merge(A1, B1);
+
+    //Put all input and output labels sets into text file
+    ofstream fout("Detector_merge.txt");
+
+    fout << "LimbLabels set A:" << endl;
+    PutLimbLabels(fout, A);
+
+    fout << "LimbLabels set B:" << endl;
+    PutLimbLabels(fout, B);
+
+    fout << "merge(A, B):" << endl;
+    PutLimbLabels(fout, H);
+
+    fout << "merge(A, A):" << endl;
+    PutLimbLabels(fout, A1);
+
+    fout << "merge(B, B):" << endl;
+    PutLimbLabels(fout, B1);
+
+    fout << "merge(merge(A, A), merge(B,B)):" << endl;
+    PutLimbLabels(fout, C);
+
+    fout.close();
+
+    cout << "See input abd output limbLabels values in the file  'Detector_merge.txt'\n";
+
+
+    //Compare
+    for (int p = 0; p < C.size(); p++)
+      for (int i = 0; i < C[p].size(); i++)
+      {
+        //Search equal polygon values in curent part labels
+        for (int k = 0; k < C[p].size(); k++)
+          if (i != k) EXPECT_FALSE(C[p][i].getPolygon() == C[p][k].getPolygon()) << "partID = " << p << ": polygons of label_Num " << i << " and " << k << "is equal" << endl;
+        vector<Score> LimbScores = C[p][i].getScores();
+        //Search equal scores in curent label
+        for (int k = 0; k < LimbScores.size(); k++)
+          for (int t = 0; t < LimbScores.size(); t++)
+            if (t != k) EXPECT_FALSE(LimbScores[k] == LimbScores[t]) << ", PartID = " << p << ": Equal scores in label with Num = " << i << endl;
+      }
+  }
+}

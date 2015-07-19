@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 #include <limbLabel.hpp>
 
-TEST(limbLabel, ConstructorTest)
+namespace SPEL
 {
+  TEST(limbLabel, ConstructorTest)
+  {
     int id = 1;
     Point2f center = Point2f(10, 10);
     float angle = 0.866302;
@@ -47,7 +49,7 @@ TEST(limbLabel, ConstructorTest)
     EXPECT_EQ(label1.getIsOccluded(), label3.getIsOccluded());
 
     //Testing function getAvgScore()
-    float avgScore = (score1Value + score2Value)*scoreCoeff/2;
+    float avgScore = (score1Value + score2Value)*scoreCoeff / 2;
     EXPECT_EQ(avgScore, label1.getAvgScore());
 
     //Testing function AddScore()
@@ -58,14 +60,14 @@ TEST(limbLabel, ConstructorTest)
     EXPECT_EQ(scores, label3.getScores());
 
     //Testing operator "<"
-    EXPECT_TRUE(label3<label1) << " Operator '<', expected: " << label3.getAvgScore() << " < " << label1.getAvgScore() << " = true" << endl;
-    EXPECT_FALSE(label1<label3) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label3.getAvgScore() << " = false" << endl;
-    EXPECT_FALSE(label1<label1) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label1.getAvgScore() << " = false" << endl;
+    EXPECT_TRUE(label3 < label1) << " Operator '<', expected: " << label3.getAvgScore() << " < " << label1.getAvgScore() << " = true" << endl;
+    EXPECT_FALSE(label1 < label3) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label3.getAvgScore() << " = false" << endl;
+    EXPECT_FALSE(label1 < label1) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label1.getAvgScore() << " = false" << endl;
 
     //Testing operator ">"
-    EXPECT_TRUE(label1>label3) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label3.getAvgScore() << " = true" << endl;
-    EXPECT_FALSE(label3>label1) << " Operator '>', expected: " << label3.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
-    EXPECT_FALSE(label1>label1) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
+    EXPECT_TRUE(label1 > label3) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label3.getAvgScore() << " = true" << endl;
+    EXPECT_FALSE(label3 > label1) << " Operator '>', expected: " << label3.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
+    EXPECT_FALSE(label1 > label1) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
 
     //Testing function getEndPoints()
     Point2f p1, p2;
@@ -81,4 +83,5 @@ TEST(limbLabel, ConstructorTest)
     EXPECT_TRUE(label1.containsPoint(center));
     EXPECT_FALSE(label1.containsPoint(Point2f(-1.0, -1.0)));
 
+  }
 }

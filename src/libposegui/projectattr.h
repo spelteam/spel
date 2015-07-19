@@ -5,15 +5,15 @@
 
 namespace posegui {
 
-struct BodyJointHeaderAttrs{
+  struct BodyJointHeaderAttrs{
     static const QString JOINTS_TAG;
     static const QString JOINT_TAG;
     static const QString ID;
     static const QString NAME;
-};
+  };
 
 
-struct BodyPartHeaderAttrs{
+  struct BodyPartHeaderAttrs{
     static const QString PARTS_TAG;
     static const QString PART_TAG;
     static const QString ID;
@@ -24,25 +24,25 @@ struct BodyPartHeaderAttrs{
     static const QString EXPECT_DIST;
     static const QString REL_LENGTH;
     static const int ROOT_ID;
-};
+  };
 
-struct BodyJointAttrs{
+  struct BodyJointAttrs{
     static const QString JOINTS_TAG;
     static const QString JOINT_TAG;
     static const QString ID;
     static const QString X;
     static const QString Y;
     static const QString DEPTH;
-};
+  };
 
-struct BodyPartAttrs{
+  struct BodyPartAttrs{
     static const QString PARTS_TAG;
     static const QString PART_TAG;
     static const QString ID;
     static const QString IS_OCCLUDE;
-};
+  };
 
-struct FrameAttrs{
+  struct FrameAttrs{
     static const QString FRAMES_TAG;
     static const QString FRAME_TAG;
     static const QString ID;
@@ -52,9 +52,9 @@ struct FrameAttrs{
     static const QString GPX;
     static const QString GPY;
     static const QString IS_KEY;
-};
+  };
 
-struct ProjectAttrs{
+  struct ProjectAttrs{
     static const QString PROJECT_TAG;
     static const QString NAME;
     static const QString IMG_FOLDER;
@@ -63,7 +63,7 @@ struct ProjectAttrs{
     static const QString ALLOW_SCALLING;
     static const QString SIM_MAT_PATH;
     static const QString EXPORT_PATH;
-};
+  };
 
 }
 

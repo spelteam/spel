@@ -6,16 +6,16 @@
 class XmlMessageHandler : public QAbstractMessageHandler
 {
 public:
-    XmlMessageHandler( QObject * parent = 0 );
+  XmlMessageHandler(QObject * parent = 0);
 public:
-    QString errorMessage() const;
+  QString errorMessage() const;
 protected:
-    void handleMessage(QtMsgType type, const QString &description,
-                       const QUrl &identifier, const QSourceLocation &sourceLocation) override;
+  void handleMessage(QtMsgType type, const QString &description,
+    const QUrl &identifier, const QSourceLocation &sourceLocation) override;
 private:
-    QtMsgType messageType;
-    QString messageDescr;
-    QSourceLocation errorLocation;
+  QtMsgType messageType;
+  QString messageDescr;
+  QSourceLocation errorLocation;
 };
 
 #endif // XMLMESSAGEHANDLER_H
