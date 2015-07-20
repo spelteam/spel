@@ -14,6 +14,4 @@ public:
   void DrawSpecific(string outFolder);
   bool drawSURFKeyPoints(map <uint32_t, map <uint32_t, PartModel>> partModels, map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels, string outFolder, Scalar color);
   Mat drawSURFKeyPoints(Frame *frame, PartModel model, Scalar color);
-private:
-  SurfDetector detector;
 };

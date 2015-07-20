@@ -317,23 +317,29 @@ build(ism: const ImageSimilarityMatrix&amp;, rootNode: int, treeSize:int, thresh
     <panel_attributes>ImageSimilarityMatrix
 --
 imageSimilarityMatrix: Mat
+imageShiftMatrix: Mat
 --
 ImageSimilarityMatrix()
 ImageSimilarityMatrix(m: const ImageSimilarityMatrix&amp;)
 ImageSimilarityMatrix(frames: const vector&lt;Frame*&gt;&amp;)
-
 buildImageSimilarityMatrix(frames: const vector&lt;Frame*&gt;&amp;)
 buildMaskSimilarityMatrix(frames: const vector&lt;Frame*&gt;&amp;)
-
+read(filename: string): bool
+write(filename string): bool
 size(): int
 min(): float
 max(): float
 mean(): float
+stdev(): float
 at(row: int, col: int): float
+getShift(row: int, col: int): Point2f
 getPathCost(path: vector&lt;int&gt;): float
+clos(): Mat
 operator==(s: const ImageSimilarityMatrix&amp;): bool
 operator!=(s: const ImageSimilarityMatrix&amp;): bool
-operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;</panel_attributes>
+operator=(s: const ImageSimilarityMatrix&amp;): ImageSimilarityMatrix&amp;
+computeMSMcell(left: Frame*, right: Frame*, maxFrameHeight: int)
+computeISMcell(left: Frame*, right: Frame*, maxFrameHeight: int)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>

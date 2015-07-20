@@ -2,11 +2,11 @@
 
 void SURFDetectorTest::train(vector <Frame*> _frames, map <string, float> params)
 {
-  detector.train(_frames, params);
+  SurfDetector::train(_frames, params);
 }
 vector <vector <LimbLabel> > SURFDetectorTest::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
-  return detector.detect(frame, params, limbLabels);
+  return SurfDetector::detect(frame, params, limbLabels);
 }
 
 void SURFDetectorTest::DrawSpecific(string outFolder)

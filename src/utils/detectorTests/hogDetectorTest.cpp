@@ -2,11 +2,11 @@
 
 void HoGDetectorTest::train(vector <Frame*> _frames, map <string, float> params)
 {
-  train(_frames, params);
+  HogDetector::train(_frames, params);
 }
 vector <vector <LimbLabel> > HoGDetectorTest::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
 {
-  return detect(frame, params, limbLabels);
+  return HogDetector::detect(frame, params, limbLabels);
 }
 void HoGDetectorTest::DrawSpecific(string outFolder)
 {
