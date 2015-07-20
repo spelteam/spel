@@ -5,7 +5,7 @@ ProjectRunner::ProjectRunner(string _testName)
   testName = _testName;
 }
 
-int ProjectRunner::Run(int argc, char **argv)
+int ProjectRunner::Run(int argc, char **argv, map <uint32_t, vector <vector <LimbLabel>>> *limbLabels)
 {
   if (argc < 3)
   {
@@ -152,10 +152,27 @@ int ProjectRunner::Run(int argc, char **argv)
 #endif  // DEBUG
       {
         vector <vector <LimbLabel> > labels;
+        if (limbLabels != 0)
+        {
+          try
+          {
+            labels = limbLabels->at(f->getID());
+          }
+          catch (...) {}
+        }
+          
         try
         {
           cout << "Detecting frame " << f->getID() << "..." << endl;
           labels = detect(f, detectParams, labels);
+          if (limbLabels != 0)
+          {
+            try
+            {
+              limbLabels->at(f->getID()) = labels;
+            }
+            catch (...) {}
+          }
           projectLoader.Save(labels, argv[2], f->getID());
           if (bDraw)
           {
