@@ -171,7 +171,10 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, vector <vector <Lim
             {
               limbLabels->at(f->getID()) = labels;
             }
-            catch (...) {}
+            catch (...)
+            {
+              limbLabels->insert(pair<uint32_t, vector <vector <LimbLabel>>>(f->getID(), labels));
+            }
           }
           projectLoader.Save(labels, argv[2], f->getID());
           if (bDraw)
