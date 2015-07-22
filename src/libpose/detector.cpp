@@ -533,12 +533,15 @@ namespace SPEL
         }
 
         vector <LimbLabel> orphanedLabels;
-        for (vector <vector <LimbLabel>>::iterator i = limbLabels.begin(); i != limbLabels.end(); ++i)
+        if (limbLabels.size() > 0)
         {
-          if (i->size() > 0 && iteratorBodyPart->getPartID() == i->at(0).getLimbID())
+          for (vector <vector <LimbLabel>>::iterator i = limbLabels.begin(); i != limbLabels.end(); ++i)
           {
-            orphanedLabels = *i;
-            break;
+            if (i->size() > 0 && iteratorBodyPart->getPartID() == i->at(0).getLimbID())
+            {
+              orphanedLabels = *i;
+              break;
+            }
           }
         }
 
@@ -550,16 +553,29 @@ namespace SPEL
           try
           {
             bool bFound = false;
-
-            for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++i)
+            if (orphanedLabels.size() > 0)
             {
-              vector <Point2f> first = l->getPolygon();
-              vector <Point2f> second = sortedLabels.at(i).getPolygon();
-              if (equal(first.begin(), first.end(), second.begin()))
+              for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++i)
               {
-                orphanedLabels.erase(l);
-                bFound = true;
-                break;
+                vector <Point2f> first = l->getPolygon();
+                vector <Point2f> second = sortedLabels.at(i).getPolygon();
+                try
+                {
+                  if (equal(first.begin(), first.end(), second.begin()))
+                  {
+                    orphanedLabels.erase(l);
+                    bFound = true;
+                    break;
+                  }
+                }
+                catch (...)
+                {
+                  stringstream ss;
+                  ss << "Can't compare polygons";
+                  if (debugLevelParam >= 1)
+                    cerr << ERROR_HEADER << ss.str() << endl;
+                  throw logic_error(ss.str());
+                }
               }
             }
 
@@ -593,9 +609,20 @@ namespace SPEL
         locations.release();
 
         // Generate LimbLabels for left orphaned labels
-        for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++l)
+        try
         {
-          labels.push_back(generateLabel(boneLength, l->getAngle(), l->getCenter().x, l->getCenter().y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
+          for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++l)
+          {
+            labels.push_back(generateLabel(boneLength, l->getAngle(), l->getCenter().x, l->getCenter().y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
+          }
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Can't generate limgLabel for input orphaned label";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
         }
         // Sort labels again
         sort(labels.begin(), labels.end());
