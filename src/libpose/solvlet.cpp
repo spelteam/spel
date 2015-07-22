@@ -70,7 +70,7 @@ namespace SPEL
 
     for (tree<BodyPart>::iterator partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
     {
-      for (int i = 0; i < labels.size(); ++i)
+      for (auto i = 0; i < labels.size(); ++i)
       {
         if (partIter->getPartID() == labels[i].getLimbID()) //if you find the right label
         {
@@ -113,6 +113,155 @@ namespace SPEL
     return retSkel;
   }
 
+  float Solvlet::evaluateSolution(Frame* frame, map<string, float> params)
+  {
+      vector<LimbLabel> labels = this->getLabels();
+      // /*
+      //   There should clearly be several factors that affect the outcome of an evaluation:
+      //   1) Mask coverage
+      //   2) Parts falling outside mask range
+      //   3) ?
+
+      //   */
+
+      //engaged pixles - the total number of pixels that are either within a limb label of within the mask
+      //correct pixels - those pixles that are black and outside a label, and white and inside a label
+      //incorrect pixels - those pixels that are black and inside a label, and white and outside a label
+      //score = correct/(correct+incorrect)
+
+      //emplace defaults
+      params.emplace("badLabelThresh", 0.52); //if less than 52% of the pixels are in the mask, label this label bad
+      params.emplace("debugLevel", 1);
+      params.emplace("maxFrameHeight", 288);  //emplace if not defined
+
+      int maxFrameHeight = params.at("maxFrameHeight");
+      int debugLevel = params.at("debugLevel");
+
+      Mat mask = frame->getMask().clone();
+
+      float factor = 1;
+      //compute the scaling factor
+      if (maxFrameHeight != 0)
+      {
+          factor = (float)maxFrameHeight / (float)mask.rows;
+
+          resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
+      }
+      for (vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+      {
+          label->Resize(factor);
+      }
+
+      int correctPixels = 0, incorrectPixels = 0;
+      int pixelsInMask = 0;
+      int coveredPixelsInMask = 0;
+      int incorrectlyCoveredPixels = 0;
+      int missedPixels = 0;
+
+      for (int i = 0; i < mask.cols; ++i) //at every col - x
+      {
+          for (int j = 0; j < mask.rows; ++j) //and every row - y
+          {
+              //int test = labels[0].containsPoint(Point2f(480,100));
+              //check whether pixel hit a label from solution
+              bool labelHit = false;
+              for (vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+              {
+                  if (label->containsPoint(Point2f(i, j))) //this is done in x,y coords
+                  {
+                      labelHit = true;
+                      //break;
+                  }
+              }
+
+              //check pixel colour
+              int intensity = mask.at<uchar>(j, i); //this is done with reve
+              bool blackPixel = (intensity < 10);
+
+              if (!blackPixel)
+                  pixelsInMask++;
+
+              if (blackPixel && labelHit) //if black in label, incorrect
+              {
+                  incorrectPixels++;
+                  incorrectlyCoveredPixels++;
+              }
+              else if (!blackPixel && !labelHit) //if white not in label, incorret
+              {
+                  incorrectPixels++;
+                  missedPixels++;
+              }
+              else if (!blackPixel && labelHit)//otherwise correct
+              {
+                  correctPixels++;
+                  coveredPixelsInMask++;
+              }
+              //            else //black pixel and not label hit
+              //                correctPixels++; //don't count these at all?
+          }
+      }
+
+
+      double solutionEval = (float)correctPixels / ((float)correctPixels + (float)incorrectPixels);
+
+      //now check for critical part failures - label mostly outside of mask
+
+      vector<Point2f> badLabelScores;
+      float badLabelThresh = params.at("badLabelThresh");
+
+      for (vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+      {
+          vector<Point2f> poly = label->getPolygon(); //get the label polygon
+          //compute min and max x and y
+          //float xMin, xMax, yMin, yMax;
+          vector<float> xS = { poly[0].x, poly[1].x, poly[2].x, poly[3].x };
+          vector<float> yS = { poly[0].y, poly[1].y, poly[2].y, poly[3].y };
+          auto xMin = min_element(xS.begin(), xS.end());
+          auto xMax = max_element(xS.begin(), xS.end());
+
+          auto yMin = min_element(yS.begin(), yS.end());
+          auto yMax = max_element(yS.begin(), yS.end());
+
+          int labelPixels = 0;
+          int badLabelPixels = 0;
+
+          for (int x = *xMin; x < *xMax; ++x)
+          {
+              for (int y = *yMin; y < *yMax; ++y)
+              {
+                  if (label->containsPoint(Point2f(x, y)))
+                  {
+                      int intensity = mask.at<uchar>(y, x); //this is done with reverse y,x
+                      bool blackPixel = (intensity < 10);
+                      labelPixels++;
+                      if (blackPixel)
+                          ++badLabelPixels;
+                  }
+              }
+          }
+
+          float labelRatio = 1.0 - (float)badLabelPixels / (float)labelPixels; //high is good
+
+          if (labelRatio < badLabelThresh /*&& !label->getIsWeak()*/ && !label->getIsOccluded()) //not weak, not occluded, badly localised
+              badLabelScores.push_back(Point2f(label->getLimbID(), labelRatio));
+      }
+
+      if (debugLevel >= 1)
+      {
+          for (vector<Point2f>::iterator badL = badLabelScores.begin(); badL != badLabelScores.end(); ++badL)
+          {
+              cerr << "Part " << badL->x << " is badly localised, with score " << badL->y << endl;
+          }
+      }
+
+      if (badLabelScores.size() != 0) //make the solution eval fail if a part is badly localised
+          solutionEval = solutionEval - 1.0;
+
+      if (debugLevel >= 1)
+          cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << endl;
+
+      return solutionEval;
+  }
 
   //Skeleton MainWindow::skeletonFromLabels(vector<LimbLabel> labels)
   //{

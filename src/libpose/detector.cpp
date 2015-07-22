@@ -352,8 +352,8 @@ namespace SPEL
     float rotationThreshold = 0.025f;
     const string sRotationThreshold = "rotationThreshold";
 
-    float isWeakTreshhold = 0.1f;
-    const string sIsWeakTreshhold = "isWeakTreshhold";
+    float isWeakThreshold = 0.1f;
+    const string sisWeakThreshold = "isWeakThreshold";
 
     float searchStepCoeff = 0.2f;
     const string sSearchStepCoeff = "searchStepCoeff";
@@ -369,7 +369,7 @@ namespace SPEL
 
     params.emplace(sDebugLevel, debugLevel);
     params.emplace(sRotationThreshold, rotationThreshold);
-    params.emplace(sIsWeakTreshhold, isWeakTreshhold);
+    params.emplace(sisWeakThreshold, isWeakThreshold);
     params.emplace(sSearchStepCoeff, searchStepCoeff);
 
     //now set actual param values
@@ -382,7 +382,7 @@ namespace SPEL
     searchDistCoeffMult = params.at(sSearchDistCoeffMult);
     debugLevel = params.at(sDebugLevel);
     rotationThreshold = params.at(sRotationThreshold);
-    isWeakTreshhold = params.at(sIsWeakTreshhold);
+    isWeakThreshold = params.at(sisWeakThreshold);
     searchStepCoeff = params.at(sSearchStepCoeff);
     debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
@@ -604,7 +604,7 @@ namespace SPEL
           }
         }
       }
-      PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakTreshhold);
+      PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
         t.push_back(labels); // add current point labels
 

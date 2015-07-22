@@ -61,7 +61,7 @@ namespace SPEL
     float knnMatchCoeff = 0.8f;
     vector <KeyPoint> keyPoints;
     // Variables for score comparer
-    BodyPart *comparer_bodyPart = 0;;
+    BodyPart *comparer_bodyPart = 0;
     PartModel *comparer_model = 0;
     Point2f *comparer_j0 = 0;
     Point2f *comparer_j1 = 0;

@@ -7,6 +7,7 @@
 
 #include "limbLabel.hpp"
 #include "skeleton.hpp"
+#include "frame.hpp"
 
 namespace SPEL
 {
@@ -29,6 +30,7 @@ namespace SPEL
     void setLabels(vector<LimbLabel> _labels);
 
     Skeleton toSkeleton(const Skeleton &example);
+    float evaluateSolution(Frame* frame, map<string, float> params);
 
   private:
     int frameId;
