@@ -41,6 +41,7 @@ namespace SPEL
     virtual Mat rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size);
     virtual LimbLabel generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, string detectorName, float _usedet);
     virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *workFrame, Point2f p0, Point2f p1) = 0;
+    virtual LimbLabel generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame);
     virtual float compare(void) = 0;
   };
 }

@@ -76,9 +76,9 @@ bg=blue</panel_attributes>
     <type>com.umlet.element.Class</type>
     <coordinates>
       <x>1288</x>
-      <y>1024</y>
+      <y>992</y>
       <w>920</w>
-      <h>208</h>
+      <h>240</h>
     </coordinates>
     <panel_attributes>/Detector/
 --
@@ -97,6 +97,7 @@ bg=blue</panel_attributes>
 +rotateImageToDefault(imgSource: Mat, initialRectL POSERECT &lt;Point2f&gt;&amp;, angle: float, size: Size): Mat;
 +generateLabel(bodyPart: BodyPart, j0: Point2f, j1: Point2f, detectorName: string, _usedet: float): LimbLabel
 /+generateLabel(bodyPart: BodyPart, workFrame: Frame*, p0: Point2f, p1: Point2f): LimbLabel/
+generateLabel(boneLength: float, rotationAngle: float, x: float, y: float, bodyPart: BodyPart, workFrame:Frame*): LimbLabel
 /+compare(): float/</panel_attributes>
     <additional_attributes/>
   </element>

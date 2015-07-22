@@ -481,23 +481,8 @@ namespace SPEL
               float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
               for (float rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
               {
-                // Create a new label vector and build it label
-                Point2f p0 = Point2f(0, 0); // the point of unit vector
-                Point2f p1 = Point2f(1.0, 0); // the point of unit vector
-                p1 *= boneLength; // change the vector length 
-                p1 = PoseHelper::rotatePoint2D(p1, p0, rot); // rotate the vector
-                Point2f mid = 0.5 * p1; // center of the vector
-                p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
-                p0 = Point2f(x, y) - mid; // shift the vector to current point
-
-                LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, workFrame, p0, p1); // build  the vector label
-
-                if (generatedLabel.getPolygon().size() != 4 || generatedLabel.getScores().size() < 1 || generatedLabel.getScores().size() > 3)
-                {
-                  cerr << "here it is..." << endl;
-                }
-
-                sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
+                // build  the vector label
+                sortedLabels.push_back(generateLabel(boneLength, rot, x, y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
               }
             }
           }
@@ -507,15 +492,8 @@ namespace SPEL
       {
         for (float rot = theta - minTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
         {
-          Point2f p0 = Point2f(0, 0); // the point of unit vector
-          Point2f p1 = Point2f(1.0, 0); // the point of unit vector
-          p1 *= boneLength; // change the vector length 
-          p1 = PoseHelper::rotatePoint2D(p1, p0, rot); // rotate the vector
-          Point2f mid = 0.5 * p1; // center of the vector
-          p1 = p1 + Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
-          p0 = Point2f(suggestStart.x, suggestStart.y) - mid; // shift the vector to reference point
-          LimbLabel generatedLabel = generateLabel(*iteratorBodyPart, workFrame, p0, p1);
-          sortedLabels.push_back(generatedLabel); // add label to current bodypart labels
+          // build  the vector label
+          sortedLabels.push_back(generateLabel(boneLength, rot, suggestStart.x, suggestStart.y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
         }
       }
       float uniqueLocationCandidates = 0;
@@ -553,19 +531,39 @@ namespace SPEL
             }
           }
         }
+
+        vector <LimbLabel> orphanedLabels;
+        for (vector <vector <LimbLabel>>::iterator i = limbLabels.begin(); i != limbLabels.end(); ++i)
+        {
+          if (i->size() > 0 && iteratorBodyPart->getPartID() == i->at(0).getLimbID())
+          {
+            copy(i->begin(), i->end(), orphanedLabels.begin());
+            break;
+          }
+        }
+
         // For all "sortedLabels"
         for (uint32_t i = 0; i < sortedLabels.size(); i++)
         {
-          if (sortedLabels[i].getPolygon().size() != 4 || sortedLabels[i].getScores().size() < 1 || sortedLabels[i].getScores().size() > 3)
-          {
-            cerr << "here it is..." << endl;
-          }
-
           uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x; // copy center coordinates of current label
           uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y; // copy center coordinates of current label
           try
           {
-            if (locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
+            bool bFound = false;
+
+            for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++i)
+            {
+              vector <Point2f> first = l->getPolygon();
+              vector <Point2f> second = sortedLabels.at(i).getPolygon();
+              if (equal(first.begin(), first.end(), second.begin()))
+              {
+                orphanedLabels.erase(l);
+                bFound = true;
+                break;
+              }
+            }
+
+            if (bFound || locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
             {
               try
               {
@@ -579,7 +577,8 @@ namespace SPEL
                   cerr << ERROR_HEADER << ss.str() << endl;
                 throw logic_error(ss.str());
               }
-              locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
+              if (!bFound)
+                locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
             }
           }
           catch (...)
@@ -590,31 +589,21 @@ namespace SPEL
               cerr << ERROR_HEADER << ss.str() << endl;
             throw logic_error(ss.str());
           }
-          if (sortedLabels[i].getPolygon().size() != 4 || sortedLabels[i].getScores().size() < 1 || sortedLabels[i].getScores().size() > 3)
-          {
-            cerr << "here it is..." << endl;
-          }
         }
         locations.release();
-        for (uint32_t i = 0; i < labels.size(); i++)
+
+        // Generate LimbLabels for left orphaned labels
+        for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++l)
         {
-          if (labels[i].getPolygon().size() != 4 || labels[i].getScores().size() < 1 || labels[i].getScores().size() > 3)
-          {
-            cerr << "here it is..." << endl;
-          }
+          labels.push_back(generateLabel(boneLength, l->getAngle(), l->getCenter().x, l->getCenter().y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
         }
+        // Sort labels again
+        sort(labels.begin(), labels.end());
+
       }
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
         t.push_back(labels); // add current point labels
-
-      for (uint32_t i = 0; i < sortedLabels.size(); i++)
-      {
-        if (sortedLabels[i].getPolygon().size() != 4 || sortedLabels[i].getScores().size() < 1 || sortedLabels[i].getScores().size() > 3)
-        {
-          cerr << "here it is..." << endl;
-        }
-      }
     }
     maskMat.release();
 
@@ -631,6 +620,20 @@ namespace SPEL
     }
 
     return merge(limbLabels, t);
+  }
+
+  LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame)
+  {
+    // Create a new label vector and build it label
+    Point2f p0 = Point2f(0, 0); // the point of unit vector
+    Point2f p1 = Point2f(1.0, 0); // the point of unit vector
+    p1 *= boneLength; // change the vector length 
+    p1 = PoseHelper::rotatePoint2D(p1, p0, rotationAngle); // rotate the vector
+    Point2f mid = 0.5 * p1; // center of the vector
+    p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
+    p0 = Point2f(x, y) - mid; // shift the vector to current point
+
+    return generateLabel(bodyPart, workFrame, p0, p1); // build  the vector label
   }
 
 }
