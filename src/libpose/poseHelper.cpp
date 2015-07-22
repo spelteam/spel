@@ -55,17 +55,21 @@ namespace SPEL
         }
       }
     }
-    float mean = (float)sum / (float)scoreValues.size();
-    float sqrSum = 0;
-    for (vector <float>::iterator i = scoreValues.begin(); i != scoreValues.end(); ++i)
+    bool isWeak = true;
+    if (scoreValues.size() > 0)
     {
-      sqrSum += pow((*i) - mean, 2);
+      float mean = (float)sum / (float)scoreValues.size();
+      float sqrSum = 0;
+      for (vector <float>::iterator i = scoreValues.begin(); i != scoreValues.end(); ++i)
+      {
+        sqrSum += pow((*i) - mean, 2);
+      }
+      float standardDeviation = sqrt((float)sqrSum / (float)(scoreValues.size()));
+      float coeff = standardDeviation / (mean - min);
+      if (scoreValues.size() < minCount)
+        coeff = coeff * (1.0 + 1 / (4 * scoreValues.size()));
+      isWeak = coeff < standardDiviationTreshold;
     }
-    float standardDeviation = sqrt((float)sqrSum/(float)(scoreValues.size()));
-    float coeff = standardDeviation / (mean-min);
-    if (scoreValues.size() < minCount)
-      coeff = coeff * (1.0 + 1 / (4 * scoreValues.size()));
-    bool isWeak = coeff < standardDiviationTreshold;
     for (vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
     {
       vector <Score> scores = i->getScores();
