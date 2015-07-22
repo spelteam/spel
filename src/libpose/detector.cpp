@@ -557,10 +557,14 @@ namespace SPEL
             {
               if (orphanedLabels.size() > 0)
               {
+                cerr << ERROR_HEADER << "orphanedLabels.size() > 0" << endl;
                 for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++i)
                 {
+                  cerr << ERROR_HEADER << "for loop" << endl;
                   vector <Point2f> first = l->getPolygon();
+                  cerr << ERROR_HEADER << "vector <Point2f> first = l->getPolygon();" << endl;
                   vector <Point2f> second = sortedLabels.at(i).getPolygon();
+                  cerr << ERROR_HEADER << "vector <Point2f> second = sortedLabels.at(i).getPolygon();" << endl;
                   try
                   {
                     if (equal(first.begin(), first.end(), second.begin()))
