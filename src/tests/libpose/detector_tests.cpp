@@ -543,4 +543,198 @@ namespace SPEL
             if (t != k) EXPECT_FALSE(LimbScores[k] == LimbScores[t]) << ", PartID = " << p << ": Equal scores in label with Num = " << i << endl;
       }
   }
+
+  // Unit test for 'merge' function with statically generated data.
+  // This unit test checks only scores
+  TEST(DetectorTests, merge_StaticData)
+  {
+    vector <vector <LimbLabel>> a;
+
+    //Create polygons
+    const int polygonsCount = 10;
+    vector<vector<Point2f>> Polygons;
+    for (int i = 0; i < polygonsCount; i++)
+      Polygons.push_back(vector < Point2f > { Point2f(i, i) });
+
+    const int partCount = 2;
+    const int a_size = 10;
+
+    for (int p = 0; p < partCount; p++)
+    {
+      vector<LimbLabel> temp_partLabels;
+      for (int i = 0; i < a_size; i++)
+      {
+        LimbLabel temp_label(p, Point2f(i, i), i, Polygons[i], vector < Score > { Score(i / (float)10, "a", 1)});
+        temp_partLabels.push_back(temp_label);
+      }
+      a.push_back(temp_partLabels);
+    }
+    ColorHistDetector d;
+    vector <vector <LimbLabel>> b = d.merge(a, a);
+
+    EXPECT_EQ(a.size(), b.size());
+
+    for (int p = 0; p < a.size(); p++)
+    {
+      vector <LimbLabel> temp = b[p];
+      EXPECT_EQ(temp.size(), a_size);
+      for (int i = 0; i < temp.size(); i++)
+      {
+        LimbLabel l = temp[i];
+        vector <Score> scores = l.getScores();
+        EXPECT_EQ(scores.size(), 1);
+        EXPECT_EQ(scores[0].getScore(), a[p][i].getScores().at(0).getScore());    
+        EXPECT_EQ(scores[0].getDetName(), a[p][i].getScores().at(0).getDetName());
+      }
+    }
+
+    vector <vector <LimbLabel>> c = d.merge(b, c);
+
+    for (int p = 0; p < a.size(); p++)
+    {
+      vector <LimbLabel> temp = c[p];
+      EXPECT_EQ(temp.size(), a_size);
+      for (int i = 0; i < temp.size(); i++)
+      {
+        LimbLabel l = temp[i];
+        vector <Score> scores = l.getScores();
+        EXPECT_EQ(scores.size(), 1);
+        EXPECT_EQ(scores[0].getScore(), a[p][i].getScores().at(0).getScore());
+        EXPECT_EQ(scores[0].getDetName(), a[p][i].getScores().at(0).getDetName());
+      }
+    }
+
+    vector <vector <LimbLabel>> g = d.merge(g, c);
+
+    for (int p = 0; p < a.size(); p++)
+    {
+      vector <LimbLabel> temp = g[p];
+      EXPECT_EQ(temp.size(), a_size);
+      for (int i = 0; i < temp.size(); i++)
+      {
+        LimbLabel l = temp[i];
+        vector <Score> scores = l.getScores();
+        EXPECT_EQ(scores.size(), 1);
+        EXPECT_EQ(scores[0].getScore(), a[p][i].getScores().at(0).getScore());
+        EXPECT_EQ(scores[0].getDetName(), a[p][i].getScores().at(0).getDetName());
+      }
+    }
+
+    vector <vector <LimbLabel>> e;
+
+    for (int p = 0; p < partCount; p++)
+    {
+      vector<LimbLabel> temp_partLabels;
+      for (int i = 0; i < a_size; i++)
+      {
+        LimbLabel temp_label(p, Point2f(i, i), i, Polygons[i], vector < Score > { Score(i / (float)10, "e", 1)});
+        temp_partLabels.push_back(temp_label);
+      }
+      e.push_back(temp_partLabels);
+    }
+
+    vector <vector <LimbLabel>> f = d.merge(c, e);
+
+    for (int p = 0; p < a.size(); p++)
+    {
+      vector <LimbLabel> temp = f[p];
+      EXPECT_EQ(temp.size(), a_size);
+      for (int i = 0; i < temp.size(); i++)
+      {
+        LimbLabel l = temp[i];
+        vector <Score> scores = l.getScores();
+        EXPECT_EQ(scores.size(), 2);
+        EXPECT_EQ(scores[0].getScore(), c[p][i].getScores().at(0).getScore());
+        EXPECT_EQ(scores[0].getDetName(), c[p][i].getScores().at(0).getDetName());
+        EXPECT_EQ(scores[1].getScore(), e[p][i].getScores().at(0).getScore());
+        EXPECT_EQ(scores[1].getDetName(), e[p][i].getScores().at(0).getDetName());
+      }
+    }
+
+    vector <vector <LimbLabel>> h;
+    vector <vector <LimbLabel>> m;
+
+    for (int p = 0; p < partCount; p++)
+    {
+      vector<LimbLabel> temp_partLabels;
+      for (int i = 0; i < a_size / 2; i++)
+      {
+        LimbLabel temp_label(p, Point2f(i, i), i, Polygons[i], vector < Score > { Score(i / (float)10, "h", 1)});
+        temp_partLabels.push_back(temp_label);
+      }
+      h.push_back(temp_partLabels);
+    }
+
+    for (int p = 0; p < partCount; p++)
+    {
+      vector<LimbLabel> temp_partLabels;
+      for (int i = a_size / 2; i < a_size; i++)
+      {
+        LimbLabel temp_label(p, Point2f(i, i), i, Polygons[i], vector < Score > { Score(i / (float)10, "m", 1)});
+        temp_partLabels.push_back(temp_label);
+      }
+      m.push_back(temp_partLabels);
+    }
+
+    vector <vector <LimbLabel>> n = d.merge(h, m);
+
+    for (int p = 0; p < a.size(); p++)
+    {
+      vector <LimbLabel> temp = n[p];
+      EXPECT_EQ(temp.size(), a_size);
+      for (int i = 0; i < temp.size() / 2; i++)
+      {
+        LimbLabel l = temp[i];
+        vector <Score> scores = l.getScores();
+        EXPECT_EQ(scores.size(), 2);
+        bool bFound = false;
+        LimbLabel o;
+        for (int k = 0; k < h[p].size(); k++)
+        {
+          if (l.getPolygon() == h[p][k].getPolygon())
+          {
+            bFound = true;
+            o = h[p][k];
+            break;
+          }
+        }        
+        EXPECT_TRUE(bFound);
+        if (bFound)
+        {
+          EXPECT_EQ(scores[0].getScore(), o.getScores().at(0).getScore());
+          EXPECT_EQ(scores[0].getDetName(), o.getScores().at(0).getDetName());
+          EXPECT_EQ(scores[1].getScore(), 1.0);
+          EXPECT_EQ(scores[1].getDetName(), m[p][0].getScores().at(0).getDetName());
+        }
+      }
+
+      for (int i = temp.size() / 2; i < temp.size(); i++)
+      {
+        LimbLabel l = temp[i];
+        vector <Score> scores = l.getScores();
+        EXPECT_EQ(scores.size(), 2);        
+        bool bFound = false;
+        LimbLabel q;
+        for (int k = 0; k < m[p].size(); k++)
+        {
+          if (l.getPolygon() == m[p][k].getPolygon())
+          {
+            bFound = true;
+            q = m[p][k];
+            break;
+          }
+        }
+        EXPECT_TRUE(bFound);
+        if (bFound)
+        {          
+          EXPECT_EQ(scores[0].getScore(), q.getScores().at(0).getScore());
+          EXPECT_EQ(scores[0].getDetName(), q.getScores().at(0).getDetName());
+          EXPECT_EQ(scores[1].getScore(), 1.0);
+          EXPECT_EQ(scores[1].getDetName(), h[p][0].getScores().at(0).getDetName());
+        }
+      }
+    }
+
+  }
+
 }

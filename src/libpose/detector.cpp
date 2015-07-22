@@ -275,19 +275,18 @@ namespace SPEL
                   detFound = true;
                   break;
                 }
-              }
-              l->setScores(scores);
+              }              
               if (!detFound) //this detector score is missing
               {
                 Score newScore(1.0, m->first, m->second);
-                l->addScore(newScore);
+                scores.push_back(newScore);
               }
             }
+            l->setScores(scores);
           }
         }
       }
-    }
-
+    }    
     //finally, sort the labels
     for (vector <vector <LimbLabel>>::iterator l = result.begin(); l != result.end(); ++l)
     {
