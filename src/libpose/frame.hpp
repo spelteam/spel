@@ -16,15 +16,17 @@ namespace SPEL
 
   enum FRAMETYPE
   {
-    KEYFRAME = 0x00,
-    LOCKFRAME = 0x01,
-    INTERPOLATIONFRAME = 0x02
+    UNDEFINED = -1,
+    KEYFRAME = 0,
+    LOCKFRAME = 1,
+    INTERPOLATIONFRAME = 2
   };
 
   class Frame
   {
   public:
     Frame(void);
+    Frame(FRAMETYPE _frametype);
     virtual ~Frame(void);
     vector <Point2f> getPartPolygon(int partID) const;
     int getID(void) const;
@@ -40,7 +42,7 @@ namespace SPEL
     void setSkeleton(Skeleton _skeleton);
     Point2f getGroundPoint(void) const;
     void setGroundPoint(Point2f _groundPoint);
-    virtual FRAMETYPE getFrametype(void) = 0;
+    FRAMETYPE getFrametype(void) const;
     int getParentFrameID(void) const;
     void setParentFrameID(int _parentFrameID);
     float Resize(uint32_t maxHeight);
@@ -50,14 +52,15 @@ namespace SPEL
     Size getMaskSize(void) const;
     static bool FramePointerComparer(Frame *frame1, Frame *frame2);
   private:
-    int id;
+    int id = -1;
     Mat image;
     Mat mask;
     Skeleton skeleton;
-    Point2f groundPoint;
-    int parentFrameID; //the ID of the frame this lockframe was derived from
+    Point2f groundPoint = Point2f(0.0, 0.0);
+    int parentFrameID = -1; //the ID of the frame this lockframe was derived from
     Size imageSize = Size(-1, -1);
     Size maskSize = Size(-1, -1);
+    FRAMETYPE frametype = UNDEFINED;
   };
 }
 #endif  // _LIBPOSE_FRAME_HPP_

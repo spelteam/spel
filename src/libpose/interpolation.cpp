@@ -2,13 +2,8 @@
 
 namespace SPEL
 {
-  Interpolation::Interpolation(void) : frameType(INTERPOLATIONFRAME)
+  Interpolation::Interpolation(void) : Frame(INTERPOLATIONFRAME)
   {
-  }
-
-  FRAMETYPE Interpolation::getFrametype(void)
-  {
-    return frameType;
   }
 
 }

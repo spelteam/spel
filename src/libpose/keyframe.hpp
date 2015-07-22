@@ -12,9 +12,6 @@ namespace SPEL
   {
   public:
     Keyframe(void);
-    FRAMETYPE getFrametype(void);
-  private:
-    const FRAMETYPE frameType;
   };
 
 }

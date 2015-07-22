@@ -10,9 +10,6 @@ namespace SPEL
   {
   public:
     Interpolation(void);
-    FRAMETYPE getFrametype(void);
-  private:
-    const FRAMETYPE frameType;
   };
 }
 #endif  // _INTERPOLATION_HPP_

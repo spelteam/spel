@@ -5,9 +5,12 @@ namespace SPEL
 
   Frame::Frame(void)
   {
-    setParentFrameID(-1);
-    setID(-1);
-    setGroundPoint(Point2f(0, 0));
+    
+  }
+
+  Frame::Frame(FRAMETYPE _frametype) : Frame()
+  {
+    frametype = _frametype;
   }
 
   Frame::~Frame(void)
@@ -201,6 +204,11 @@ namespace SPEL
   bool Frame::FramePointerComparer(Frame *frame1, Frame *frame2)
   {
     return frame1->getID() < frame2->getID();
+  }
+
+  FRAMETYPE Frame::getFrametype(void) const
+  {
+    return frametype;
   }
 
 }

@@ -2,13 +2,8 @@
 
 namespace SPEL
 {
-  Lockframe::Lockframe(void) : frameType(LOCKFRAME)
+  Lockframe::Lockframe(void) : Frame(LOCKFRAME)
   {
-  }
-
-  FRAMETYPE Lockframe::getFrametype(void)
-  {
-    return frameType;
   }
 
 }

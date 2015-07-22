@@ -11,10 +11,6 @@ namespace SPEL
   {
   public:
     Lockframe(void);
-    FRAMETYPE getFrametype(void);
-
-  private:
-    const FRAMETYPE frameType;
   };
 }
 

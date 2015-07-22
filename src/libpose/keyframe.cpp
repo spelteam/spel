@@ -3,13 +3,8 @@
 namespace SPEL
 {
 
-  Keyframe::Keyframe(void) : frameType(KEYFRAME)
+  Keyframe::Keyframe(void) : Frame(KEYFRAME)
   {
   }
-
-  FRAMETYPE Keyframe::getFrametype(void)
-  {
-    return frameType;
-  }
-
+  
 }
