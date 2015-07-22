@@ -41,6 +41,8 @@ namespace SPEL
     vector <float> scoreValues;
     float avg = 0;
     float min = 1.0f;
+    const uint32_t minCount = 600;
+    float sum = 0;
     for (vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
     {
       vector <Score> scores = i->getScores();
@@ -50,18 +52,22 @@ namespace SPEL
         {
           min = min > j->getScore() ? j->getScore() : min;
           scoreValues.push_back(j->getScore());
-          avg += j->getScore();
+          sum += j->getScore();
         }
       }
     }
-    avg = (avg - min) / (float)scoreValues.size();
-    float sum = 0;
+    float mean = sum / (float)scoreValues.size() - min;
+    float avg = (sum - min) / (float)scoreValues.size();
+    float sqrSum = 0;
     for (vector <float>::iterator i = scoreValues.begin(); i != scoreValues.end(); ++i)
     {
-      sum += pow((*i) - avg, 2);
+      sqrSum += pow((*i) - avg, 2);
     }
-    float standardDiviation = sqrt(sum / (float)(scoreValues.size() - 1)) / avg;
-    bool isWeak = standardDiviation < standardDiviationTreshold;
+    float standardDeviation = sqrt(sqrSum / (float)(scoreValues.size()) / avg;
+    float coeff = standardDeviation / mean;
+    if (scoreValues.size() < minCount)
+      coeff = coeff * (1.0 + 1 / (4 * scoreValues.size()));
+    bool isWeak = coeff < standardDiviationTreshold;
     for (vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
     {
       vector <Score> scores = i->getScores();
