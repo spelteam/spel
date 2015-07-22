@@ -588,7 +588,8 @@ namespace SPEL
       }
     }
 
-    vector <vector <LimbLabel>> c = d.merge(b, c);
+    vector <vector <LimbLabel>> c;
+    c = d.merge(b, c);
 
     for (int p = 0; p < a.size(); p++)
     {
@@ -604,7 +605,8 @@ namespace SPEL
       }
     }
 
-    vector <vector <LimbLabel>> g = d.merge(g, c);
+    vector <vector <LimbLabel>> g;
+    g = d.merge(g, c);
 
     for (int p = 0; p < a.size(); p++)
     {
