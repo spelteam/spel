@@ -553,30 +553,41 @@ namespace SPEL
           try
           {
             bool bFound = false;
-            if (orphanedLabels.size() > 0)
+            try
             {
-              for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++i)
+              if (orphanedLabels.size() > 0)
               {
-                vector <Point2f> first = l->getPolygon();
-                vector <Point2f> second = sortedLabels.at(i).getPolygon();
-                try
+                for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++i)
                 {
-                  if (equal(first.begin(), first.end(), second.begin()))
+                  vector <Point2f> first = l->getPolygon();
+                  vector <Point2f> second = sortedLabels.at(i).getPolygon();
+                  try
                   {
-                    orphanedLabels.erase(l);
-                    bFound = true;
-                    break;
+                    if (equal(first.begin(), first.end(), second.begin()))
+                    {
+                      orphanedLabels.erase(l);
+                      bFound = true;
+                      break;
+                    }
+                  }
+                  catch (...)
+                  {
+                    stringstream ss;
+                    ss << "Can't compare polygons";
+                    if (debugLevelParam >= 1)
+                      cerr << ERROR_HEADER << ss.str() << endl;
+                    throw logic_error(ss.str());
                   }
                 }
-                catch (...)
-                {
-                  stringstream ss;
-                  ss << "Can't compare polygons";
-                  if (debugLevelParam >= 1)
-                    cerr << ERROR_HEADER << ss.str() << endl;
-                  throw logic_error(ss.str());
-                }
               }
+            }
+            catch (exception ex)
+            {
+              stringstream ss;
+              ss << "Unknown error with orphanedLabels: " << ex.what();
+              if (debugLevelParam >= 1)
+                cerr << ERROR_HEADER << ss.str() << endl;
+              throw logic_error(ss.str());
             }
 
             if (bFound || locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
