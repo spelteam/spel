@@ -537,7 +537,7 @@ namespace SPEL
         {
           if (i->size() > 0 && iteratorBodyPart->getPartID() == i->at(0).getLimbID())
           {
-            copy(i->begin(), i->end(), orphanedLabels.begin());
+            orphanedLabels = *i;
             break;
           }
         }
