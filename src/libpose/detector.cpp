@@ -576,24 +576,31 @@ namespace SPEL
           {
             if (partLabel->size() > 0)
             {
-              for (vector <LimbLabel>::iterator potentiallyOrphanedLabels = partLabel->begin(); potentiallyOrphanedLabels != partLabel->end(); ++potentiallyOrphanedLabels)
+              if (labels.size() == 0 || partLabel->front().getLimbID() == labels.front().getLimbID())
               {
-                bool bFound = false;
-                for (vector <LimbLabel>::iterator generatedLabels = labels.begin(); generatedLabels != labels.end(); ++generatedLabels)
+                for (vector <LimbLabel>::iterator potentiallyOrphanedLabels = partLabel->begin(); potentiallyOrphanedLabels != partLabel->end(); ++potentiallyOrphanedLabels)
                 {
-                  vector <Point2f> potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels->getPolygon();
-                  vector <Point2f> generatedLabelsPolygon = generatedLabels->getPolygon();
-                  if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
+                  bool bFound = false;
+                  if (labels.size() > 0)
                   {
-                    for (uint32_t polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
+                    for (vector <LimbLabel>::iterator generatedLabels = labels.begin(); generatedLabels != labels.end(); ++generatedLabels)
                     {
-                      bFound = bFound && potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize);
+                      vector <Point2f> potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels->getPolygon();
+                      vector <Point2f> generatedLabelsPolygon = generatedLabels->getPolygon();
+                      if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
+                      {
+                        for (uint32_t polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
+                        {
+                          bFound = bFound && potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize);
+                        }
+                      }
                     }
                   }
+                  if (!bFound)
+                    labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels->getAngle(), potentiallyOrphanedLabels->getCenter().x, potentiallyOrphanedLabels->getCenter().y, *iteratorBodyPart, workFrame));
                 }
-                if (!bFound)
-                  labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels->getAngle(), potentiallyOrphanedLabels->getCenter().x, potentiallyOrphanedLabels->getCenter().y, *iteratorBodyPart, workFrame));
               }
+              break;
             }
           }
         }
