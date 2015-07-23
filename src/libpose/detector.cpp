@@ -568,6 +568,36 @@ namespace SPEL
         locations.release();
 
         // Generate LimbLabels for left orphaned labels
+
+        if (limbLabels.size() > 0)
+        {
+          vector <LimbLabel> partLabels;
+          for (vector <vector <LimbLabel>>::iterator partLabel = limbLabels.begin(); partLabel != limbLabels.end(); ++partLabel)
+          {
+            if (partLabel->size() > 0)
+            {
+              for (vector <LimbLabel>::iterator potentiallyOrphanedLabels = partLabel->begin(); potentiallyOrphanedLabels != partLabel->end(); ++potentiallyOrphanedLabels)
+              {
+                bool bFound = false;
+                for (vector <LimbLabel>::iterator generatedLabels = labels.begin(); generatedLabels != labels.end(); ++generatedLabels)
+                {
+                  vector <Point2f> potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels->getPolygon();
+                  vector <Point2f> generatedLabelsPolygon = generatedLabels->getPolygon();
+                  if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
+                  {
+                    for (uint32_t polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
+                    {
+                      bFound = bFound && potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize);
+                    }
+                  }
+                }
+                if (!bFound)
+                  labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels->getAngle(), potentiallyOrphanedLabels->getCenter().x, potentiallyOrphanedLabels->getCenter().y, *iteratorBodyPart, workFrame));
+              }
+            }
+          }
+        }
+
         //try
         //{
         //  for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++l)
@@ -584,7 +614,7 @@ namespace SPEL
         //  throw logic_error(ss.str());
         //}
         //// Sort labels again
-        //sort(labels.begin(), labels.end());
+        sort(labels.begin(), labels.end());
 
       }
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
