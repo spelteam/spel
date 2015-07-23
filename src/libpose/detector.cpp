@@ -532,14 +532,73 @@ namespace SPEL
           }
         }
 
+        vector <LimbLabel> generatedPartLabels;
+
+        if (limbLabels.size() > 0)
+        {
+          vector <LimbLabel> partLabels;
+          for (vector <vector <LimbLabel>>::iterator partLabel = limbLabels.begin(); partLabel != limbLabels.end(); ++partLabel)
+          {
+            try
+            {
+              if (partLabel->size() > 0)
+              {
+                if (sortedLabels.size() > 0 && partLabel->front().getLimbID() == sortedLabels.front().getLimbID())
+                {
+                  for (vector <LimbLabel>::iterator generated = partLabel->begin(); generated != partLabel->end(); ++generated)
+                  {
+                    generatedPartLabels.push_back(*generated);
+                  }
+                  break;
+                }
+              }
+            }
+            catch (...)
+            {
+              stringstream ss;
+              ss << "Can't find generated limb label";
+              if (debugLevelParam >= 1)
+                cerr << ERROR_HEADER << ss.str() << endl;
+            }
+          }
+        }
+
         // For all "sortedLabels"
         for (uint32_t i = 0; i < sortedLabels.size(); i++)
         {
+          bool bFound = false;
+          try
+          {
+            if (generatedPartLabels.size() > 0)
+            {
+              for (vector <LimbLabel>::iterator generatedLabels = generatedPartLabels.begin(); generatedLabels != generatedPartLabels.end(); ++generatedLabels)
+              {
+                vector <Point2f> first = sortedLabels.at(i).getPolygon();
+                vector <Point2f> second = generatedLabels->getPolygon();
+                if (first.size() == second.size())
+                {
+                  for (uint32_t polygonSize = 0; polygonSize < first.size(); polygonSize++)
+                  {
+                    bFound = bFound && first.at(polygonSize) == second.at(polygonSize);
+                  }
+                }
+              }
+            }
+          }
+          catch (...)
+          {
+            stringstream ss;
+            ss << "Can't find generated limb label";
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
+          }
+
+
           uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x; // copy center coordinates of current label
           uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y; // copy center coordinates of current label
           try
           {
-            if (locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
+            if (bFound || locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
             {
               try
               {
@@ -553,7 +612,8 @@ namespace SPEL
                   cerr << ERROR_HEADER << ss.str() << endl;
                 throw logic_error(ss.str());
               }
-              locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
+              if (!bFound)
+                locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
             }
           }
           catch (...)
