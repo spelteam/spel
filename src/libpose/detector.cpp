@@ -567,12 +567,15 @@ namespace SPEL
                   cerr << ERROR_HEADER << "vector <Point2f> second = sortedLabels.at(i).getPolygon();" << endl;
                   try
                   {
-                    if (equal(first.begin(), first.end(), second.begin()))
+                    if (first.size() == second.size())
                     {
-                      orphanedLabels.erase(l);
-                      bFound = true;
-                      break;
+                      for (uint32_t ll = 0; ll < first.size(); l++)
+                      {
+                        bFound = bFound && first[ll].x == second[ll].x && first[ll].y == second[ll].y;
+                      }
                     }
+                    if (bFound)
+                      break;
                   }
                   catch (...)
                   {
