@@ -569,7 +569,7 @@ namespace SPEL
                   {
                     if (first.size() == second.size())
                     {
-                      for (uint32_t ll = 0; ll < first.size(); l++)
+                      for (uint32_t ll = 0; ll < first.size(); ll++)
                       {
                         bFound = bFound && first[ll].x == second[ll].x && first[ll].y == second[ll].y;
                       }
