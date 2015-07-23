@@ -275,7 +275,7 @@ namespace SPEL
                   detFound = true;
                   break;
                 }
-              }              
+              }
               if (!detFound) //this detector score is missing
               {
                 Score newScore(1.0, m->first, m->second);
@@ -286,7 +286,7 @@ namespace SPEL
           }
         }
       }
-    }    
+    }
     //finally, sort the labels
     for (vector <vector <LimbLabel>>::iterator l = result.begin(); l != result.end(); ++l)
     {
@@ -532,22 +532,6 @@ namespace SPEL
           }
         }
 
-        vector <LimbLabel> orphanedLabels;
-        if (limbLabels.size() > 0)
-        {
-          for (vector <vector <LimbLabel>>::iterator i = limbLabels.begin(); i != limbLabels.end(); ++i)
-          {
-            if (i->size() > 0 && iteratorBodyPart->getPartID() == i->at(0).getLimbID())
-            {
-              for (vector <LimbLabel>::iterator ii = i->begin(); ii != i->end(); ++ii)
-              {
-                orphanedLabels.push_back(*ii);
-              }
-              break;
-            }
-          }
-        }
-
         // For all "sortedLabels"
         for (uint32_t i = 0; i < sortedLabels.size(); i++)
         {
@@ -555,53 +539,7 @@ namespace SPEL
           uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y; // copy center coordinates of current label
           try
           {
-            bool bFound = false;
-            try
-            {
-              if (orphanedLabels.size() > 0)
-              {
-                cerr << ERROR_HEADER << "orphanedLabels.size() > 0" << endl;
-                for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++i)
-                {
-                  cerr << ERROR_HEADER << "for loop" << endl;
-                  vector <Point2f> first = l->getPolygon();
-                  cerr << ERROR_HEADER << "vector <Point2f> first = l->getPolygon();" << endl;
-                  vector <Point2f> second = sortedLabels.at(i).getPolygon();
-                  cerr << ERROR_HEADER << "vector <Point2f> second = sortedLabels.at(i).getPolygon();" << endl;
-                  try
-                  {
-                    if (first.size() == second.size())
-                    {
-                      for (uint32_t ll = 0; ll < first.size(); ll++)
-                      {
-                        bFound = bFound && first[ll].x == second[ll].x && first[ll].y == second[ll].y;
-                      }
-                    }
-                    if (bFound)
-                      break;
-                  }
-                  catch (...)
-                  {
-                    stringstream ss;
-                    ss << "Can't compare polygons";
-                    if (debugLevelParam >= 1)
-                      cerr << ERROR_HEADER << ss.str() << endl;
-                    throw logic_error(ss.str());
-                  }
-                  cerr << ERROR_HEADER << "bFound=" << (bFound ? "true" : "false") << endl;
-                }
-              }
-            }
-            catch (exception ex)
-            {
-              stringstream ss;
-              ss << "Unknown error with orphanedLabels: " << ex.what();
-              if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
-            }
-
-            if (bFound || locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
+            if (locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
             {
               try
               {
@@ -615,8 +553,7 @@ namespace SPEL
                   cerr << ERROR_HEADER << ss.str() << endl;
                 throw logic_error(ss.str());
               }
-              if (!bFound)
-                locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
+              locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
             }
           }
           catch (...)
@@ -631,23 +568,23 @@ namespace SPEL
         locations.release();
 
         // Generate LimbLabels for left orphaned labels
-        try
-        {
-          for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++l)
-          {
-            labels.push_back(generateLabel(boneLength, l->getAngle(), l->getCenter().x, l->getCenter().y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
-          }
-        }
-        catch (...)
-        {
-          stringstream ss;
-          ss << "Can't generate limgLabel for input orphaned label";
-          if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << ss.str() << endl;
-          throw logic_error(ss.str());
-        }
-        // Sort labels again
-        sort(labels.begin(), labels.end());
+        //try
+        //{
+        //  for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++l)
+        //  {
+        //    labels.push_back(generateLabel(boneLength, l->getAngle(), l->getCenter().x, l->getCenter().y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
+        //  }
+        //}
+        //catch (...)
+        //{
+        //  stringstream ss;
+        //  ss << "Can't generate limgLabel for input orphaned label";
+        //  if (debugLevelParam >= 1)
+        //    cerr << ERROR_HEADER << ss.str() << endl;
+        //  throw logic_error(ss.str());
+        //}
+        //// Sort labels again
+        //sort(labels.begin(), labels.end());
 
       }
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
