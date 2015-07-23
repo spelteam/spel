@@ -539,7 +539,10 @@ namespace SPEL
           {
             if (i->size() > 0 && iteratorBodyPart->getPartID() == i->at(0).getLimbID())
             {
-              orphanedLabels = *i;
+              for (vector <LimbLabel>::iterator ii = i->begin(); ii != i->end(); ++ii)
+              {
+                orphanedLabels.push_back(*ii);
+              }
               break;
             }
           }
@@ -585,6 +588,7 @@ namespace SPEL
                       cerr << ERROR_HEADER << ss.str() << endl;
                     throw logic_error(ss.str());
                   }
+                  cerr << ERROR_HEADER << "bFound=" << (bFound ? "true" : "false") << endl;
                 }
               }
             }
