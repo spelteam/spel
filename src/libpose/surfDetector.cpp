@@ -28,6 +28,9 @@ namespace SPEL
   {
     frames = _frames;
 
+    partModels.clear();
+    labelModels.clear();
+
 #ifdef DEBUG
     const uint8_t debugLevel = 5;
 #else

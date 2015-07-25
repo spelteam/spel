@@ -53,8 +53,6 @@ namespace SPEL
     FRIEND_TEST(HOGDetectorTests, getNBins);
 #endif  // DEBUG
     int id;
-    Size savedCellSize;
-    uint8_t savednbins;
     map <uint32_t, Size> partSize;
     map <uint32_t, map <uint32_t, PartModel>> partModels;
     map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;

@@ -308,6 +308,10 @@ namespace SPEL
   {
     frames = _frames;
 
+    partSize.clear();
+    partModels.clear();
+    labelModels.clear();
+
 #ifdef DEBUG
     const uint8_t debugLevel = 5;
 #else
@@ -328,9 +332,6 @@ namespace SPEL
     params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
 
     maxFrameHeight = params.at(sMaxFrameHeight);
-
-    savedCellSize = cellSize;
-    savednbins = nbins;
 
     bool bFirstConversion = true;
     for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
@@ -513,12 +514,12 @@ namespace SPEL
 
   Size HogDetector::getCellSize(void)
   {
-    return savedCellSize;
+    return cellSize;
   }
 
   uint8_t HogDetector::getnbins(void)
   {
-    return savednbins;
+    return nbins;
   }
 
 }
