@@ -835,7 +835,7 @@ namespace SPEL
   {
     HogDetector detector;
     Size size = Size(8, 8);
-    detector.savedCellSize = size;
+    detector.cellSize = size;
 
     EXPECT_EQ(size, detector.getCellSize());
   }
@@ -844,7 +844,6 @@ namespace SPEL
   {
     HogDetector detector;
     uint8_t nBins = 8;
-    detector.savednbins = nBins;
 
     EXPECT_EQ(nBins, detector.getnbins());
   }
