@@ -1,5 +1,5 @@
 #! /usr/bin/env python2.7
-from spacepy import pycdf
+
 import glob
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -10,6 +10,8 @@ from matplotlib.lines import Line2D
 from pylab import figure, show
 import math
 import os
+#os.putenv("CDF_LIB", '/usr/local/cdf')
+from spacepy import pycdf
 import re
 from itertools import tee, izip
 from scipy.misc import imread	
@@ -57,7 +59,7 @@ partRelativeLength = [1.48, 0.0647, 0.2694, 0.2694, 0.0647, 0.2694, 0.2694, 1.48
 
 #First write the XML header with limb structure
 fo.write('<?xml version="1.0"?>\n')
-fo.write('<Project name="'+projectName+'" imgFolderPath="../img/'+projectName+'/" maskFolderPath="../mask/'+projectName+'/" camFolderPath="" allowScaling="true"  simMatPath="" exportPath="">\n')
+fo.write('<Project name="'+projectName+'" imgFolderPath="../seq/" maskFolderPath="../mask/" camFolderPath="" allowScaling="true"  simMatPath="" exportPath="">\n')
 fo.write(' <BodyJoints>\n')
 
 for i in range(17):

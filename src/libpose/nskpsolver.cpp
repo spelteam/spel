@@ -305,6 +305,30 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             labels = tempLabels;
             tempLabels.clear();
 
+            float maxPartCandidates=params.at("maxPartCandidates");
+
+            for (uint32_t i = 0; i < labels.size(); ++i) //for each part
+            {
+                vector<Score> scores = labels[i].at(0).getScores();
+
+                uint32_t isWeak=0;
+                for(uint32_t j=0; j<scores.size(); ++j)
+                {
+                    if(scores[j].getIsWeak())
+                        isWeak++;
+                }
+                //if both scores are weak
+                if(isWeak!=scores.size()) //if not all scores are weak, filter
+                {
+                    vector<LimbLabel> tmp;
+                    for(uint32_t j=0; j<labels[i].size()*maxPartCandidates;++j) //for each label that is within the threshold
+                    {
+                        tmp.push_back(labels[i].at(j)); //push back the label
+                    }
+                    labels[i] = tmp; //set this part's candidates to the new trimmed vector
+                } //otherwise keep all samples, but ignore later
+            }
+
             //            t2 = high_resolution_clock::now();
 
             //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
@@ -312,36 +336,6 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             //            cerr << "Detection time "  << duration << endl;
 
             //t1 = high_resolution_clock::now();
-
-            // //temp coment this out
-            for(labelPartsIter=labels.begin();labelPartsIter!=labels.end();++labelPartsIter) //now take the top labels
-            {
-
-                vector<LimbLabel> temp;
-
-                uint32_t maxPartCandidates=params.at("maxPartCandidates");
-
-                if((labelPartsIter->at(0)).getIsOccluded())
-                    maxPartCandidates = labelPartsIter->size();
-
-                for(uint32_t currentSize=0; currentSize<maxPartCandidates && currentSize<labelPartsIter->size(); ++currentSize)
-                {
-                    LimbLabel label=labelPartsIter->at(currentSize);
-                    vector<Score> scores=label.getScores();
-
-                    for(uint32_t s=0; s<scores.size(); ++s)
-                    {
-                        if(scores[s].getIsWeak())
-                            maxPartCandidates = labelPartsIter->size();
-                    }
-
-                    temp.push_back(label);
-
-                }
-                tempLabels.push_back(temp);
-            }
-
-            labels = tempLabels;
 
             vector<size_t> numbersOfLabels; //numbers of labels per part
 
@@ -357,20 +351,31 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             //label score cost
             for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter) //for each of the detected parts
             {
+                vector<Score> scores = labels[partIter->getPartID()].at(0).getScores();
+                uint32_t isWeakCount=0;
+                for(uint32_t j=0; j<scores.size(); ++j)
+                {
+                    if(scores[j].getIsWeak())
+                        isWeakCount++;
+                }
+
                 vector<int> varIndices; //create vector of indices of variables
                 varIndices.push_back(partIter->getPartID()); //push first value in
 
-                size_t scoreCostShape[]={numbersOfLabels[partIter->getPartID()]}; //number of labels
-                ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
-
-                for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+                if(isWeakCount!=scores.size()) //if the support score for this part is not weak
                 {
-                    scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
-                }
+                    size_t scoreCostShape[]={numbersOfLabels[partIter->getPartID()]}; //number of labels
+                    ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
-                Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
-                gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                suppFactors++;
+                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
+                    {
+                        scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
+                    }
+
+                    Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
+                    gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
+                    suppFactors++;
+                }
 
                 //Comment out prior cost factors for the moment
                 //                    ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
@@ -455,11 +460,11 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             {
                 float k;
                 k=skeleton.getPartTree().size(); //number of bones
-                float expectedSuppFactors=k; //n*k
+                //float expectedSuppFactors=k; //n*k
                 //float expectedPriorFactors=k; //n*k
                 float expectedJointFactors=(k-1); //n*(k-1)
 
-                assert(expectedSuppFactors==suppFactors);
+                //assert(expectedSuppFactors==suppFactors);
                 assert(expectedJointFactors==jointFactors);
                 //assert(priorFactors==expectedPriorFactors);
             }

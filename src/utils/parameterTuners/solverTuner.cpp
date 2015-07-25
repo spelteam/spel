@@ -433,7 +433,7 @@ int main (int argc, char **argv)
         params.emplace("tempCoeff", 0.1); //set the temporal connection sensitivity for TLPS
 
         //detector settings
-        params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+        params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
         params.emplace("useHoGdet", 9.0); //determine if HoG descriptor is used and with what coefficient
         params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
@@ -463,6 +463,8 @@ int main (int argc, char **argv)
         params.emplace("stepTheta", params.at("baseRotationStep"));
 
         params.emplace("maxPartCandidates", 0.1); //value between 0 and 1
+        params.emplace("isWeakThreshold", 0.3); //if SD is less than 0.3 of mean-min
+        params.emplace("uniqueLocationCandidates", 360);
 
         //params.emplace("mstThresh", 3.5); //set the max number of part candidates to allow into the solver
 
@@ -538,21 +540,28 @@ int main (int argc, char **argv)
 
             //this is a row in the output file
             //frameID evalScore limb1RMS limb2RMS limb3RMS limb4RMS ... limbKRMS
-            out << fSolve[row].getFrameID() << " " << fSolve[row].evaluateSolution(frame, params) << " ";
+            out << fSolve[row].getFrameID() << " " << fSolve[row].evaluateSolution(frame, params) << " "; //output frameID and the solution evaluation score
+            vector<LimbLabel> solLabels = fSolve[row].getLabels();
             for(auto col=0; col<errors.cols; ++col)
             {
                 //this is an item of the row
                 out << errors.at<float>(row,col) << " ";
+
+                //output polygon locations after the error, so each part has a 9-tuple - (error, x0, y0, x1, y1, x2, y2, x3, y3)
+                vector<Point2f> poly = solLabels[col].getPolygon();
+                for(auto point=poly.begin(); point!=poly.end(); ++point)
+                    out << point->x << " " << point->y << " ";
             }
             out << endl; //newline at the end of the block
 
-            if(frame->getParentFrameID()!=-1)
-            {
-                Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-                gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
-            }
-            else
-                gtLoader.drawFrameSolvlets(fSolve[row], frame, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
+            //don't draw solutions
+//            if(frame->getParentFrameID()!=-1)
+//            {
+//                Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+//                gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
+//            }
+//            else
+//                gtLoader.drawFrameSolvlets(fSolve[row], frame, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
         }
 
         out << "}" << endl;

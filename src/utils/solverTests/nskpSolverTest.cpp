@@ -88,6 +88,7 @@ int main (int argc, char **argv)
     {
         ism.buildImageSimilarityMatrix(vFrames, 288);
         ism.write(ismFile);
+        exit(0);
     }
 
     float mean = ism.mean();
