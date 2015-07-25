@@ -843,7 +843,7 @@ namespace SPEL
   TEST(HOGDetectorTests, getNBins)
   {
     HogDetector detector;
-    uint8_t nBins = 8;
+    uint8_t nBins = 9;
 
     EXPECT_EQ(nBins, detector.getnbins());
   }
