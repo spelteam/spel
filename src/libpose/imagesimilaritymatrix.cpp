@@ -187,11 +187,11 @@ namespace SPEL
       return;
     }
     //load images, compute similarity, store to matrix
-    Mat imgMatOne = left->getImage().clone();
-    Mat imgMatTwo = right->getImage().clone();
+    Mat imgMatOne = left->getImage();
+    Mat imgMatTwo = right->getImage();
 
-    Mat maskMatOne = left->getMask().clone();
-    Mat maskMatTwo = right->getMask().clone();
+    Mat maskMatOne = left->getMask();
+    Mat maskMatTwo = right->getMask();
 
     float factor = 1;
     //compute the scaling factor
@@ -337,8 +337,8 @@ namespace SPEL
       return;
     }
 
-    Mat maskMatOne = left->getMask().clone();
-    Mat maskMatTwo = right->getMask().clone();
+    Mat maskMatOne = left->getMask();
+    Mat maskMatTwo = right->getMask();
 
     float factor = 1;
     //compute the scaling factor
