@@ -591,12 +591,28 @@ float TLPSSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
     //score = correct/(correct+incorrect)
 
     //emplace defaults
-    params.emplace("badLabelThresh", 0.4); //if less than 40% of the pixels are in the mask, label this label bad
+    params.emplace("badLabelThresh", 0.52); //if less than 52% of the pixels are in the mask, label this label bad
     params.emplace("debugLevel", 1);
+    params.emplace("maxFrameHeight", 288);  //emplace if not defined
 
+    int maxFrameHeight = params.at("maxFrameHeight");
     int debugLevel = params.at("debugLevel");
 
-    Mat mask = frame->getMask();
+    Mat mask = frame->getMask().clone();
+
+    float factor = 1;
+    //compute the scaling factor
+    if (maxFrameHeight != 0)
+    {
+        factor = (float)maxFrameHeight / (float)mask.rows;
+
+        resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
+    }
+    for (vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+    {
+        label->Resize(factor);
+    }
+
     int correctPixels = 0, incorrectPixels = 0;
     int pixelsInMask = 0;
     int coveredPixelsInMask = 0;
@@ -649,9 +665,6 @@ float TLPSSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
 
     double solutionEval = (float)correctPixels / ((float)correctPixels + (float)incorrectPixels);
 
-    if (debugLevel >= 1)
-        cerr << "Solution evaluation score - " << solutionEval << endl;
-
     //now check for critical part failures - label mostly outside of mask
 
     vector<Point2f> badLabelScores;
@@ -702,8 +715,11 @@ float TLPSSolver::evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<s
         }
     }
 
-    //    if(badLabelScores.size()!=0) //make the solution eval fail if a part is badly localised
-    //        solutionEval=solutionEval-1.0;
+    if (badLabelScores.size() != 0) //make the solution eval fail if a part is badly localised
+        solutionEval = solutionEval - 1.0;
+
+    if (debugLevel >= 1)
+        cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << endl;
 
     return solutionEval;
 }

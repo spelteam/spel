@@ -193,18 +193,18 @@ namespace SPEL
     Mat maskMatOne = left->getMask();
     Mat maskMatTwo = right->getMask();
 
-    float factor = 1;
-    //compute the scaling factor
-    if (maxFrameHeight != 0)
-    {
-      factor = (float)maxFrameHeight / (float)imgMatOne.rows;
+//    float factor = 1;
+//    //compute the scaling factor
+//    if (maxFrameHeight != 0)
+//    {
+//      factor = (float)maxFrameHeight / (float)imgMatOne.rows;
 
-      resize(imgMatOne, imgMatOne, cvSize(imgMatOne.cols * factor, imgMatOne.rows * factor));
-      resize(imgMatTwo, imgMatTwo, cvSize(imgMatTwo.cols * factor, imgMatTwo.rows * factor));
+//      resize(imgMatOne, imgMatOne, cvSize(imgMatOne.cols * factor, imgMatOne.rows * factor));
+//      resize(imgMatTwo, imgMatTwo, cvSize(imgMatTwo.cols * factor, imgMatTwo.rows * factor));
 
-      resize(maskMatOne, maskMatOne, cvSize(maskMatOne.cols * factor, maskMatOne.rows * factor));
-      resize(maskMatTwo, maskMatTwo, cvSize(maskMatTwo.cols * factor, maskMatTwo.rows * factor));
-    }
+//      resize(maskMatOne, maskMatOne, cvSize(maskMatOne.cols * factor, maskMatOne.rows * factor));
+//      resize(maskMatTwo, maskMatTwo, cvSize(maskMatTwo.cols * factor, maskMatTwo.rows * factor));
+//    }
 
     Point2f cOne, cTwo;
     float mSizeOne = 0, mSizeTwo = 0;
@@ -340,15 +340,15 @@ namespace SPEL
     Mat maskMatOne = left->getMask();
     Mat maskMatTwo = right->getMask();
 
-    float factor = 1;
-    //compute the scaling factor
-    if (maxFrameHeight != 0)
-    {
-      factor = (float)maxFrameHeight / (float)maskMatOne.rows;
+//    float factor = 1;
+//    //compute the scaling factor
+//    if (maxFrameHeight != 0)
+//    {
+//      factor = (float)maxFrameHeight / (float)maskMatOne.rows;
 
-      resize(maskMatOne, maskMatOne, cvSize(maskMatOne.cols * factor, maskMatOne.rows * factor));
-      resize(maskMatTwo, maskMatTwo, cvSize(maskMatTwo.cols * factor, maskMatTwo.rows * factor));
-    }
+//      resize(maskMatOne, maskMatOne, cvSize(maskMatOne.cols * factor, maskMatOne.rows * factor));
+//      resize(maskMatTwo, maskMatTwo, cvSize(maskMatTwo.cols * factor, maskMatTwo.rows * factor));
+//    }
 
 
     Point2f cOne, cTwo;
