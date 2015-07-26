@@ -243,7 +243,7 @@ namespace SPEL
 
     //cOne and cTwo now have the centres
     dX = cTwo - cOne;
-    dX = dX*pow(factor, -1.0);
+    //dX = dX*pow(factor, -1.0);
 
     //so, dX+cOne = cTwo
     //and cOne = cTwo-dX
@@ -391,7 +391,7 @@ namespace SPEL
 
     //cOne and cTwo now have the centres
     dX = cTwo - cOne;
-    dX = dX*pow(factor, -1.0);
+    //dX = dX*pow(factor, -1.0);
 
     imageShiftMatrix.at<Point2f>(i, j) = Point2f(dX.y, dX.x);
     imageShiftMatrix.at<Point2f>(j, i) = Point2f(-dX.y, -dX.x);
