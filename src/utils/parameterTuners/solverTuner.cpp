@@ -454,7 +454,7 @@ int main (int argc, char **argv)
 
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 3.5); //use a larger default search radius of 3.5 widths
+        params.emplace("searchDistCoeff", 1.5); //use a larger default search radius of 3.5 widths
         params.emplace("searchStepCoeff", 0.2); //use a smaller search step
         params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
         params.emplace("baseRotationRange", 40); //use base 80 degrees rotation range
