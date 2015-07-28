@@ -81,6 +81,10 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
     float partShiftCoeff = params.at("partShiftCoeff");
     float partRotationCoeff = params.at("partRotationCoeff");
 
+    float depthRotationCoeff = params.at("partDepthRotationCoeff");
+    float baseRotationRange = params.at("baseRotationRange");
+    float baseSearchRadius = params.at("baseSearchRadius");
+
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
     float useSURF = params.at("useSURFdet");
@@ -142,6 +146,38 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
             cerr << "Detecting on frame " << seqSlice[currentFrame]->getID() << endl;
 
             vector<vector<LimbLabel> > labels, tempLabels;
+
+            Skeleton skeleton = seqSlice[currentFrame]->getSkeleton();
+
+            //now set up skeleton params, such as search radius and angle search radius for every part
+            //this should very depending on relative distance between frames
+            //for each body part
+            tree<BodyPart> partTree = skeleton.getPartTree();
+            tree<BodyPart>::iterator partIter;
+
+            for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
+            {
+                //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
+                //and based on node depth (deeper nodes have a higher distance)
+                //this should rely on parameters e.g.
+
+
+                //else
+                int depth = partTree.depth(partIter);
+
+                float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
+                float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
+
+                //                if(isBound) //if we're close to the anchor, restrict the rotation range
+                //                    rotationRange = rotationRange*anchorBindCoeff;
+
+                partIter->setRotationSearchRange(rotationRange);
+                partIter->setSearchRadius(searchRange);
+
+            }
+
+            skeleton.setPartTree(partTree);
+            seqSlice[currentFrame]->setSkeleton(skeleton);
 
             for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
             {
