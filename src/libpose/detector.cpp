@@ -458,7 +458,7 @@ namespace SPEL
       {
         for (float y = suggestStart.y - searchDistance * 0.5f; y < suggestStart.y + searchDistance * 0.5f; y += minDist)
         {
-          if (x < maskMat.cols && y < maskMat.rows)
+          if (x < maskMat.cols && y < maskMat.rows && x>=0 && y >=0)
           {
             uint8_t mintensity = 0;
             try
