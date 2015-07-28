@@ -640,6 +640,7 @@ int main (int argc, char **argv)
         params.at("useHoGdet") = params.at("useHoGdet")*params.at("useHoGdetMult");
 
         params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+        params.emplace("uniqueLocationCandidates", 360); //no max on location candidates
 
         //params.emplace("searchDistCoeff", 3); //set search region to huge
 

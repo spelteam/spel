@@ -454,16 +454,16 @@ int main (int argc, char **argv)
 
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 1.5); //use a larger default search radius
-        params.emplace("searchStepCoeff", 0.5); //use a smaller search step
+        params.emplace("searchDistCoeff", 3.5); //use a larger default search radius of 3.5 widths
+        params.emplace("searchStepCoeff", 0.2); //use a smaller search step
         params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
         params.emplace("baseRotationRange", 40); //use base 80 degrees rotation range
 
         params.emplace("minTheta", params.at("baseRotationRange"));
         params.emplace("stepTheta", params.at("baseRotationStep"));
 
-        params.emplace("maxPartCandidates", 0.1); //value between 0 and 1
-        params.emplace("isWeakThreshold", 0.3); //if SD is less than 0.3 of mean-min
+        params.emplace("maxPartCandidates", 0.1); //Take the top 10% of candidates
+        params.emplace("isWeakThreshold", 0.0); //if SD is less than 0.3 of mean-min
         params.emplace("uniqueLocationCandidates", 360);
 
         //params.emplace("mstThresh", 3.5); //set the max number of part candidates to allow into the solver
@@ -554,7 +554,7 @@ int main (int argc, char **argv)
             }
             out << endl; //newline at the end of the block
 
-            //don't draw solutions
+//            //don't draw solutions
 //            if(frame->getParentFrameID()!=-1)
 //            {
 //                Frame* parent = seq.getFrames()[frame->getParentFrameID()];

@@ -38,6 +38,8 @@ namespace SPEL
 
   void PoseHelper::RecalculateScoreIsWeak(vector <LimbLabel> &labels, string detectorName, float standardDiviationTreshold)
   {
+
+      //@TODO: Ignore this function for now, will be modified before release
     vector <float> scoreValues;
     float min = 1.0f;
     const uint32_t minCount = 600;
@@ -64,11 +66,13 @@ namespace SPEL
       {
         sqrSum += pow((*i) - mean, 2);
       }
-      float standardDeviation = sqrt((float)sqrSum / (float)(scoreValues.size()));
-      float coeff = standardDeviation / (mean - min);
+      float variance = (float)sqrSum / (float)(scoreValues.size());
+      float standardDeviation = sqrt(variance);
+      float variationCoeff = standardDeviation / (mean - min);
+      float dispersionIndex = variance/(mean - min);
       if (scoreValues.size() < minCount)
-        coeff = coeff * (1.0 + 1 / (4 * scoreValues.size()));
-      isWeak = coeff < standardDiviationTreshold;
+        variationCoeff = variationCoeff * (1.0 + 1 / (4 * scoreValues.size()));
+      isWeak = dispersionIndex < standardDiviationTreshold;
     }
     for (vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
     {

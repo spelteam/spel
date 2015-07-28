@@ -318,7 +318,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
                         isWeak++;
                 }
                 //if both scores are weak
-                if(isWeak!=scores.size()) //if not all scores are weak, filter
+                if(isWeak!=scores.size() && !labels[i].at(0).getIsOccluded()) //if not all scores are weak and not occluded, filter
                 {
                     vector<LimbLabel> tmp;
                     for(uint32_t j=0; j<labels[i].size()*maxPartCandidates;++j) //for each label that is within the threshold
@@ -476,9 +476,9 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             // set up the optimizer (loopy belief propagation)
 
             //t1 = high_resolution_clock::now();
-            const size_t maxNumberOfIterations = 40;
+            const size_t maxNumberOfIterations = 100;
             const double convergenceBound = 1e-7;
-            const double damping = 0.1;
+            const double damping = 0.5;
             BeliefPropagation::Parameter parameter(maxNumberOfIterations, convergenceBound, damping);
             BeliefPropagation bp(gm, parameter);
 

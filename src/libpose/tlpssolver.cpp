@@ -55,11 +55,11 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
     //solver sensitivity parameters
     params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
-    params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+    params.emplace("jointCoeff", 0.5); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
-    params.emplace("tempCoeff", 0.0); //set the temporal link coefficient
-    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
-    params.emplace("anchorCoeff", 1.0); //set the anchor coefficient cost
+    params.emplace("tempCoeff", 0.1); //set the temporal link coefficient
+    //params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity NOT CURRENTLY USED
+    //params.emplace("anchorCoeff", 0.0); //set the anchor coefficient cost NOT CURRENTLY USED
 
     //solver eval parameters
     params.emplace("tlpsLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
@@ -172,7 +172,7 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
                         isWeak++;
                 }
                 //if both scores are weak
-                if(isWeak!=scores.size()) //if not all scores are weak, filter
+                if(isWeak!=scores.size() && !labels[i].at(0).getIsOccluded()) //if not all scores are weak, and the part is NOT occluded filter
                 {
                     vector<LimbLabel> tmp;
                     for(uint32_t j=0; j<labels[i].size()*maxPartCandidates;++j) //for each label that is within the threshold

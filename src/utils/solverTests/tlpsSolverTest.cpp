@@ -35,7 +35,7 @@ int main (int argc, char **argv)
   
   map <string, float> params; //use the default params
   params.emplace("debugLevel", 3); //set the debug setting to highest (0,1,2,3)
-  params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+  params.emplace("tlpsLockframeThreshold", 0.0); // 0.0 avoiding the rejection of some TLPS solutions
 
   vector<Solvlet> solve;
   
