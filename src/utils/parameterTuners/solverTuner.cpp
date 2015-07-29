@@ -465,6 +465,7 @@ int main (int argc, char **argv)
         params.emplace("maxPartCandidates", 0.05); //Take the top 5% of candidates
         params.emplace("isWeakThreshold", 0.0); //if SD is less than 0.3 of mean-min
         params.emplace("uniqueLocationCandidates", 360);
+        params.emplace("debugLevel", 0);
 
         //params.emplace("mstThresh", 3.5); //set the max number of part candidates to allow into the solver
 
