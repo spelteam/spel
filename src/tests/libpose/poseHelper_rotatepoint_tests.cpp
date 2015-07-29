@@ -3,7 +3,7 @@
 
 namespace SPEL
 {
-  TEST(PoseHelperTest, rotatepointTest)
+  TEST(PoseHelperTest_, rotatepointTest)
   {
     Point2f p1 = Point2f(-1.0, 1.0);
     Point2f p2 = Point2f(1.0, 1.0);

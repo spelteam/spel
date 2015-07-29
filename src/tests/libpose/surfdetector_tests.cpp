@@ -371,7 +371,9 @@ namespace SPEL
 
     //Compare scores
     EXPECT_NE(score0, score1) << "Must be different values" << endl; // ???
-    EXPECT_NEAR(1, abs(score0 - score2), 0.3) << "Must be near to 1" << endl; // ???
+    EXPECT_LT(score0, score1) << "Score0 is score for ideal part model" << endl;
+    EXPECT_LT(score1, abs(score2)) << "Score2 is score for bad part model" << endl;
+    //EXPECT_NEAR(1, abs(score0 - score2), 0.3) << "Must be near to 1" << endl; // ???
     cout << "See part rects locations in the file: SurfDetector_CompareTest.jpg" << endl << endl;
   }
 }

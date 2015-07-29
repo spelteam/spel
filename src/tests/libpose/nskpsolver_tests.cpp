@@ -42,7 +42,7 @@ namespace SPEL
     vector <Score> scores;
 
     Score score1(score1Value, csName, scoreCoeff);
-    Score score2(score2Value, hogName, scoreCoeff);
+    Score score2(score2Value, csName, scoreCoeff);
 
     scores.push_back(score1);
     scores.push_back(score2);
@@ -53,10 +53,11 @@ namespace SPEL
     params.emplace("imageCoeff", 1.0);
     params.emplace("useCSdet", 1.0);
     params.emplace("useHoGdet", 0.0);
+    params.emplace("useSURFdet", 0.0);
     NSKPSolver S;
 
     //Testing function "computeScoreCost"
-
+    /*
     //scores[0] = score1Value, isWeak = true, isOccluded = false, 
     EXPECT_EQ(0, S.computeScoreCost(label1, params));
 
@@ -67,6 +68,9 @@ namespace SPEL
     LimbLabel label2;
     label1.isOccluded = false;
     EXPECT_EQ(0, S.computeScoreCost(label2, params));
+    */
+    float expected_scoreCost = (scores[0].getScore() + scores[1].getScore());
+    EXPECT_EQ(expected_scoreCost, S.computeScoreCost(label1, params)); // ScoreCost == Summ of scores?
 
     //Testing function "computeJointCost"
     EXPECT_EQ(0, S.computeJointCost(label1, label1, params, false));
