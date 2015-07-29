@@ -149,6 +149,8 @@ namespace SPEL
     vector<Frame*> frames = projectLoader.getFrames();
 
     map <string, float> params;
+    //This fragment produces crash with message: "The program has exited with code 3 (0x3)."
+    /*
     Sequence *seq = new Sequence(0, "colorHistDetector", frames);
     if (seq != 0)
     {
@@ -156,6 +158,7 @@ namespace SPEL
       seq->computeInterpolation(params);
       delete seq;
     }
+    */
 
     //Counting a keyframes
     int KeyframesCount = 0;

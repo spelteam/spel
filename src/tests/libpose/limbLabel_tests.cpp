@@ -49,8 +49,21 @@ namespace SPEL
     EXPECT_EQ(label1.getIsOccluded(), label3.getIsOccluded());
 
     //Testing function getAvgScore()
+    bool bNegativeToPositive = true;
     float avgScore = (score1Value + score2Value)*scoreCoeff / 2;
-    EXPECT_EQ(avgScore, label1.getAvgScore());
+    // Temporary debug messages
+    if (avgScore != label1.getAvgScore(bNegativeToPositive))
+      cout << "-----------\n   LimbLabel::GetAvgScore():\n" << endl;
+    //
+    EXPECT_EQ(avgScore, label1.getAvgScore(bNegativeToPositive));
+    // Temporary debug messages
+    if (avgScore != label1.getAvgScore(bNegativeToPositive))
+    {
+      cout << endl;
+      cout << "----------\n" << endl;
+      //cin.get();
+    }
+    //
 
     //Testing function AddScore()
     float score3Value = 0.1;
@@ -58,16 +71,6 @@ namespace SPEL
     scores.push_back(score3);
     label3.addScore(score3);
     EXPECT_EQ(scores, label3.getScores());
-
-    //Testing operator "<"
-    EXPECT_TRUE(label3 < label1) << " Operator '<', expected: " << label3.getAvgScore() << " < " << label1.getAvgScore() << " = true" << endl;
-    EXPECT_FALSE(label1 < label3) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label3.getAvgScore() << " = false" << endl;
-    EXPECT_FALSE(label1 < label1) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label1.getAvgScore() << " = false" << endl;
-
-    //Testing operator ">"
-    EXPECT_TRUE(label1 > label3) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label3.getAvgScore() << " = true" << endl;
-    EXPECT_FALSE(label3 > label1) << " Operator '>', expected: " << label3.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
-    EXPECT_FALSE(label1 > label1) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
 
     //Testing function getEndPoints()
     Point2f p1, p2;
@@ -83,5 +86,46 @@ namespace SPEL
     EXPECT_TRUE(label1.containsPoint(center));
     EXPECT_FALSE(label1.containsPoint(Point2f(-1.0, -1.0)));
 
+  }
+
+  TEST(limbLabel, Operators)
+  {
+    int id = 1;
+    Point2f center = Point2f(10, 10);
+    float angle = 0.866302;
+    bool isOccluded = false;
+    float score1Value = 0.1, score2Value = 0.3;
+    float scoreCoeff = 1.0;
+    Score score1(score1Value, "", scoreCoeff);
+    Score score2(score2Value, "", scoreCoeff);
+    vector <Score> scores;
+    scores.push_back(score1);
+    scores.push_back(score1);
+    vector<Point2f> polygon = { Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2) };
+    LimbLabel label1(id, center, angle, polygon, scores, isOccluded);
+    scores.clear();
+    scores.push_back(score2);
+    scores.push_back(score2);
+    LimbLabel label2(id, center, angle, polygon, scores, isOccluded);
+
+    //Testing operator "="
+    LimbLabel label3;
+    label3 = label1;
+    EXPECT_EQ(label1.getLimbID(), label3.getLimbID());
+    EXPECT_EQ(label1.getCenter(), label3.getCenter());
+    EXPECT_EQ(label1.getAngle(), label3.getAngle());
+    EXPECT_EQ(label1.getPolygon(), label3.getPolygon());
+    EXPECT_EQ(label1.getScores(), label3.getScores());
+    EXPECT_EQ(label1.getIsOccluded(), label3.getIsOccluded());
+
+    //Testing operator "<"
+    EXPECT_TRUE(label1 < label2) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label2.getAvgScore() << " = true" << endl;
+    EXPECT_FALSE(label2 < label1) << " Operator '<', expected: " << label2.getAvgScore() << " < " << label1.getAvgScore() << " = false" << endl;
+    EXPECT_FALSE(label1 < label1) << " Operator '<', expected: " << label1.getAvgScore() << " < " << label1.getAvgScore() << " = false" << endl;
+
+    //Testing operator ">"
+    EXPECT_TRUE(label2 > label1) << " Operator '>', expected: " << label2.getAvgScore() << " > " << label1.getAvgScore() << " = true" << endl;
+    EXPECT_FALSE(label1 > label2) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label2.getAvgScore() << " = false" << endl;
+    EXPECT_FALSE(label1 > label1) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
   }
 }

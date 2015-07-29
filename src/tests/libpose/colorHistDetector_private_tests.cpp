@@ -165,6 +165,8 @@ namespace SPEL
     vector<Frame*> frames = projectLoader.getFrames();
 
     map <string, float> params;
+    //This fragment produces crash with message: "The program has exited with code 3 (0x3)."
+    /*
     Sequence *seq = new Sequence(0, "colorHistDetector", frames);
     if (seq != 0)
     {
@@ -172,6 +174,7 @@ namespace SPEL
       seq->computeInterpolation(params);
       delete seq;
     }
+    */
 
     //Run "Train()"
     ColorHistDetector detector;
@@ -198,7 +201,7 @@ namespace SPEL
     const uint8_t factor = static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
 
     //Select body part for testing
-    const int  partID = 1;
+    const int  partID = 12;
     //Copy body part
     BodyPart bodyPart = *skeleton.getBodyPart(partID);
     //Copy part joints 
@@ -421,9 +424,33 @@ namespace SPEL
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
     EXPECT_EQ(limbLabel_e.getAngle(), limbLabel_a.getAngle());
+    // Temporary debug messages
+    if (limbLabel_e.getScores() != limbLabel_a.getScores())
+      cout << "----------\n";
+    //
     EXPECT_EQ(limbLabel_e.getScores(), limbLabel_a.getScores());
-    EXPECT_EQ(limbLabel_e.getPolygon(), limbLabel_a.getPolygon());
+    // Temporary debug messages
+    if (limbLabel_e.getScores() != limbLabel_a.getScores())
+    {
+      vector<Score> actual_scores = limbLabel_a.getScores();
+      cout << endl << "Funcion 'colorHistDetector::generateLabel()'  score values:" << endl;
+      for (int i = 0; i < s.size(); i++)
+        cout << "PartID = " << partID << " ~ expected_score[" << i << "] = " << s[i].getScore() << ",   actual_score[" << i << "] = " << actual_scores[i].getScore() << endl;
+      cout << "----------\n";
+      //cin.get();
+    }
+    //
     EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
+    // Temporary debug messages
+    if (limbLabel_e.getIsOccluded() != limbLabel_a.getIsOccluded())
+    {
+      cout << endl << "Funcion 'colorHistDetector::generateLabel()' IsOccluded() value:" << endl;
+      cout << "PartID = " << partID << " ~ BodyPart.IsOccluded = " << limbLabel_e.getIsOccluded() << ",   LimbLabel.IsOccluded = " << limbLabel_a.getIsOccluded() << endl;
+      cout << "----------\n";
+      //cin.get();
+    }
+    //
+    EXPECT_EQ(limbLabel_e.getPolygon(), limbLabel_a.getPolygon());
     EXPECT_EQ(model.bgHistogram, detector.partModels[partID].bgHistogram);
 
     // Testing function "detect"
