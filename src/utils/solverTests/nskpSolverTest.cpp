@@ -61,7 +61,7 @@ int main (int argc, char **argv)
 
     //detector settings
     params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
-    params.emplace("useHoGdet", 1.0); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useHoGdet", 9.0); //determine if HoG descriptor is used and with what coefficient
     params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
     params.emplace("grayImages", 1); // use grayscale images for HoG?
@@ -77,7 +77,7 @@ int main (int argc, char **argv)
     params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
 
     params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
-    params.emplace("maxPartCandidates", 40); //set the max number of part candidates to allow into the solver
+    params.emplace("maxPartCandidates", 0.1); //set the max number of part candidates to allow into the solver
 
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params

@@ -454,7 +454,7 @@ int main (int argc, char **argv)
 
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 3.5); //use a larger default search radius of 3.5 widths
+        params.emplace("searchDistCoeff", 3.0); //use a larger default search radius of 3.5 widths
         params.emplace("searchStepCoeff", 0.2); //use a smaller search step
         params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
         params.emplace("baseRotationRange", 40); //use base 80 degrees rotation range
@@ -462,7 +462,7 @@ int main (int argc, char **argv)
         params.emplace("minTheta", params.at("baseRotationRange"));
         params.emplace("stepTheta", params.at("baseRotationStep"));
 
-        params.emplace("maxPartCandidates", 0.05); //Take the top 5% of candidates
+        params.emplace("maxPartCandidates", 0.1); //Take the top 5% of candidates
         params.emplace("isWeakThreshold", 0.0); //if SD is less than 0.3 of mean-min
         params.emplace("uniqueLocationCandidates", 360);
         params.emplace("debugLevel", 0);
