@@ -204,23 +204,23 @@ int main (int argc, char **argv)
         exit(0); //terminate
     }
 
-    float ismMean = ism.mean();
-    float ismSd = ism.stddev();
-    float ismMin = ism.min();
+//    float ismMean = ism.mean();
+//    float ismSd = ism.stddev();
+//    float ismMin = ism.min();
 
-    cout << "ISM Mean " << ismMean << " sd " << ismSd << " min " << ismMin << endl;
+//    cout << "ISM Mean " << ismMean << " sd " << ismSd << " min " << ismMin << endl;
 
-    cout << "The min is " << (ismMean-ismMin)/ismSd << " deviations away from mean. " << endl;
-    cout << "One sd is " << ismSd/ismMin << " of min." << endl;
+//    cout << "The min is " << (ismMean-ismMin)/ismSd << " deviations away from mean. " << endl;
+//    cout << "One sd is " << ismSd/ismMin << " of min." << endl;
 
-    float numSdMinToMean=(ismMean-ismMin)/ismSd;
-    float sdPartMin = ismSd/ismMin;
-    float sdFactor=0.47;//go up half-way to mean from min
-    float simThreshD = 1.0+sdFactor*numSdMinToMean*sdPartMin;
+//    float numSdMinToMean=(ismMean-ismMin)/ismSd;
+//    float sdPartMin = ismSd/ismMin;
+//    float sdFactor=0.47;//go up half-way to mean from min
+//    float simThreshD = 1.0+sdFactor*numSdMinToMean*sdPartMin;
 
-    cout << "Setting simThresh to " << simThreshD << endl;
+//    cout << "Setting simThresh to " << simThreshD << endl;
 
-    defaultParams.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
+//    defaultParams.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
 
     string baseOutFolder(outFold);
     gtLoader.CreateDirectorySystemIndependent(baseOutFolder);
@@ -274,7 +274,7 @@ int main (int argc, char **argv)
 
     //get the keyframe suggestions from NSKPSolver
     //NSKPSolver s;
-    vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
+
 
     float mean=param_min, max=param_max, sd=param_step;
 
@@ -305,6 +305,58 @@ int main (int argc, char **argv)
             maxKeyframes = param;
         }
 
+        map <string, float> params=defaultParams; //transfer the default params
+
+        //emplace general defaults
+        params.emplace(paramName, param); //emplace the param we're testing
+        if(balanceParamName!="none") //if there is a balance param, emplace it too
+            params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
+
+        //global settings
+        params.emplace("imageCoeff", 0.1); //set solver detector infromation sensitivity
+        params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+        params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+        params.emplace("tempCoeff", 0.1); //set the temporal connection sensitivity for TLPS
+
+        //detector settings
+        params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
+        params.emplace("useHoGdet", 9.0); //determine if HoG descriptor is used and with what coefficient
+        params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
+        params.emplace("grayImages", 1); // use grayscale images for HoG?
+
+        //solver settings
+        params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
+        params.emplace("nskpLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+        params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+
+        params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+        params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+
+        params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+        params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+        params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
+        params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+
+
+        params.emplace("grayImages", 1); // use grayscale images for HoG?
+        params.emplace("searchDistCoeff", 3.0); //use a larger default search radius of 3.5 widths
+        params.emplace("searchStepCoeff", 0.2); //use a smaller search step
+        params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
+        params.emplace("baseRotationRange", 40); //use base 80 degrees rotation range
+
+        params.emplace("minTheta", params.at("baseRotationRange"));
+        params.emplace("stepTheta", params.at("baseRotationStep"));
+
+        params.emplace("maxPartCandidates", 0.1); //Take the top 5% of candidates
+        params.emplace("isWeakThreshold", 0.0); //if SD is less than 0.3 of mean-min
+        params.emplace("uniqueLocationCandidates", 360);
+        params.emplace("debugLevel", 0);
+
+        params.emplace("mstThresh", 3.2); //use outliners that are at least 3 stddev from the mean
+
+        //generate keyframe suggestions
+        vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, params);
         auto start = chrono::steady_clock::now();
 
         vector<int> actualKeyframes;
@@ -418,56 +470,6 @@ int main (int argc, char **argv)
         {
             addKeyframeNoise(vFrames, mean, sd, max); //mean = min, sd = step, max = max
         }
-
-        map <string, float> params=defaultParams; //transfer the default params
-
-        //emplace general defaults
-        params.emplace(paramName, param); //emplace the param we're testing
-        if(balanceParamName!="none") //if there is a balance param, emplace it too
-            params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
-
-        //global settings
-        params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
-        params.emplace("jointCoeff", 0.1); //set solver body part connectivity sensitivity
-        params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
-        params.emplace("tempCoeff", 0.1); //set the temporal connection sensitivity for TLPS
-
-        //detector settings
-        params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
-        params.emplace("useHoGdet", 9.0); //determine if HoG descriptor is used and with what coefficient
-        params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
-
-        params.emplace("grayImages", 1); // use grayscale images for HoG?
-
-        //solver settings
-        params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
-        params.emplace("nskpLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
-        params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
-
-        params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
-        params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
-
-        params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
-        params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
-        params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
-        params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
-
-
-        params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 3.0); //use a larger default search radius of 3.5 widths
-        params.emplace("searchStepCoeff", 0.2); //use a smaller search step
-        params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
-        params.emplace("baseRotationRange", 40); //use base 80 degrees rotation range
-
-        params.emplace("minTheta", params.at("baseRotationRange"));
-        params.emplace("stepTheta", params.at("baseRotationStep"));
-
-        params.emplace("maxPartCandidates", 0.1); //Take the top 5% of candidates
-        params.emplace("isWeakThreshold", 0.0); //if SD is less than 0.3 of mean-min
-        params.emplace("uniqueLocationCandidates", 360);
-        params.emplace("debugLevel", 0);
-
-        //params.emplace("mstThresh", 3.5); //set the max number of part candidates to allow into the solver
 
         Sequence seq(0, "test", vFrames);
 

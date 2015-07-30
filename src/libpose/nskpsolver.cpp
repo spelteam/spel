@@ -362,8 +362,8 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
                 vector<int> varIndices; //create vector of indices of variables
                 varIndices.push_back(partIter->getPartID()); //push first value in
 
-                if(isWeakCount!=scores.size() && !labels[partIter->getPartID()].at(0).getIsOccluded()) //if the support score for this part is not weak
-                {
+//                if(isWeakCount!=scores.size() && !labels[partIter->getPartID()].at(0).getIsOccluded()) //if the support score for this part is not weak
+//                {
                     size_t scoreCostShape[]={numbersOfLabels[partIter->getPartID()]}; //number of labels
                     ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
 
@@ -375,7 +375,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
                     Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
                     gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
                     suppFactors++;
-                }
+//                }
 
                 //Comment out prior cost factors for the moment
                 //                    ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare

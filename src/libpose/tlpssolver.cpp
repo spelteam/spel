@@ -307,8 +307,8 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
                 varIndices.push_back(varID); //push first value in
                 size_t scoreCostShape[] = { labels[partIter->getPartID()].size() }; //number of labels
 
-                if(isWeakCount!=scores.size() && !labels[partIter->getPartID()].at(0).getIsOccluded()) //if the support score for this part is not weak
-                {
+//                if(isWeakCount!=scores.size() && !labels[partIter->getPartID()].at(0).getIsOccluded()) //if the support score for this part is not weak
+//                {
                     ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape + 1); //explicit function declare
                     for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
                     {
@@ -318,7 +318,7 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
                     Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
                     gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
                     suppFactors++;
-                }
+//                }
 
                 if (currentFrame == 1) //anchor to first skeleton in sequence
                 {

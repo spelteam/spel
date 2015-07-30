@@ -46,6 +46,9 @@ namespace SPEL
     graphNodes.push_back(rootNode);
     mst.insert(imgLoc, rootNode); //insert root node
     float absoluteMin = ism.min();
+    float ismMean = ism.mean();
+    float ismSD = ism.stddev();
+    float thresh = ismMean-ismSD*threshold;
     while (mst.size() <= static_cast<size_t>(treeSize) && mst.size() < static_cast<size_t>(ism.size())) //do this until the tree is complete
     {
       //cout << "in..." << endl;
@@ -92,7 +95,7 @@ namespace SPEL
         float nodeCost = ism.at(*imgLoc, minLoc.y);
         //            if( pathCost > absoluteMin*threshold) //stop building tree if we reach threshold
         //                break;
-        float thresh = absoluteMin*threshold;
+
         bool pass = nodeCost < thresh;
         float diff = nodeCost - thresh;
         if (pass) //either the minimum cost node satisfies this condition and is pushed
