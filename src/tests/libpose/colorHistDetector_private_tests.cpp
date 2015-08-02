@@ -166,7 +166,7 @@ namespace SPEL
 
     map <string, float> params;
     //This fragment produces crash with message: "The program has exited with code 3 (0x3)."
-    /*
+    
     Sequence *seq = new Sequence(0, "colorHistDetector", frames);
     if (seq != 0)
     {
@@ -174,7 +174,7 @@ namespace SPEL
       seq->computeInterpolation(params);
       delete seq;
     }
-    */
+    
 
     //Run "Train()"
     ColorHistDetector detector;
@@ -336,6 +336,9 @@ namespace SPEL
       for (int y = 0; y < t.rows; y++)
         EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
 
+    // we need to save pixelDistibutions in private class member
+    detector.pixelDistributions = pixelDistributions;
+
     // Testing function BuildPixelLabels
     Mat p(image.rows, image.cols, DataType <float>::type);
     for (int x = 0; x < image.cols; x++)
@@ -365,6 +368,9 @@ namespace SPEL
     for (int x = 0; x < p.cols; x++)
       for (int y = 0; y < p.rows; y++)
         EXPECT_EQ(p.at<float>(y, x), pixelLabels[partID].at<float>(y, x)) << q++ << ": " << x << ", " << y;
+
+    // we ned to save pixelLabels in private class member
+    detector.pixelLabels = pixelLabels;
 
     // Testing function generateLabel
     vector <Score> s;
