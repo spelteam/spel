@@ -80,15 +80,19 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     }
     //progressFunc(1.0);
 
-    //create tlps solver
-    //TLPSSolver tlps;
+
     sequence.setFrames(propagatedFrames);
 
+    if(params.at("withTLPS"))
+    {
+        //create tlps solver
+        TLPSSolver tlps;
+        //return the TLPS solve
+        return tlps.solve(sequence, params);
+    }
     //the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
-    //return the TLPS solve
     return solvlets;
-    //return tlps.solve(sequence, params);
 }
 
 vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const vector<Frame*> frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore)

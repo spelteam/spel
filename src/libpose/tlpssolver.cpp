@@ -168,6 +168,13 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
                 float rotationRange = baseRotationRange;//*pow(depthRotationCoeff, depth);
                 float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
 
+                if(partTree.number_of_children(partIter)==0)
+                {
+                    searchRange=searchRange*2;
+                    rotationRange=rotationRange*depthRotationCoeff;
+                }
+
+
                 //                if(isBound) //if we're close to the anchor, restrict the rotation range
                 //                    rotationRange = rotationRange*anchorBindCoeff;
 

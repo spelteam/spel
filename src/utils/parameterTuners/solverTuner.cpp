@@ -354,6 +354,8 @@ int main (int argc, char **argv)
         params.emplace("debugLevel", 0);
 
         params.emplace("mstThresh", 3.2); //use outliners that are at least 3 stddev from the mean
+        params.emplace("withTLPS", 0); //don't use TLPS after NSKP by default
+        params.emplace("hybridIters", 1);
 
         //generate keyframe suggestions
         vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, params);
@@ -498,6 +500,8 @@ int main (int argc, char **argv)
         {
             vector<Solvlet> finalSolve;
             uint32_t prevSolveSize=0;
+
+            int numIters=0;
             do
             {
                 prevSolveSize=finalSolve.size(); //set size of the final solve
@@ -506,8 +510,11 @@ int main (int argc, char **argv)
                 //do an iterative NSKP solve
                 nskpSolve = nSolver.solve(seq, params, ism);
 
-                for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
-                    finalSolve.push_back(*s);
+                if(params.at("withNSKP"))
+                {
+                    for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
+                        finalSolve.push_back(*s);
+                }
 
                 //then, do a temporal solve
                 seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
@@ -516,9 +523,18 @@ int main (int argc, char **argv)
 
                 for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
                     finalSolve.push_back(*s);
+                numIters++;
 
-            } while(finalSolve.size()>prevSolveSize);
+            } while(finalSolve.size()>prevSolveSize && numIters<params.at("hybridIters")); //don't do more iters than necessary
             fSolve = finalSolve;
+        }
+        else if(solverName=="interpolation2D")
+        {
+            //generate labels for each frame for each part where there is an interpolation
+        }
+        else if(solverName=="interpolation3D")
+        {
+            //generate labels for each frame for each part where there is an interpolation
         }
 
         auto endSolve = chrono::steady_clock::now();
