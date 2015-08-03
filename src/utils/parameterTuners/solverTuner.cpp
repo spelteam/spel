@@ -296,9 +296,10 @@ int main (int argc, char **argv)
 
     cout << " Set-up finished in " << chrono::duration <double, milli> (diffSetup).count()  << " ms" << endl;
 
+
+
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
-
         uint32_t maxKeyframes=UINT_MAX;
         if(paramName=="numKeyframes")
         {
@@ -371,14 +372,92 @@ int main (int argc, char **argv)
             vFrames.push_back(fp);
         }
 
-        //insert any specified keyframes
-        for(uint32_t i=0; i<requestedKeyframes.size();++i)
+        if(paramName=="percentKeyframes")
         {
-            if(requestedKeyframes[i]!=-1) //if it's not an automatic one
+            float percentKeyframes=params.at("percentKeyframes");
+            uint32_t maxNumKeyframes=(float)gtFrames.size()/100.0*percentKeyframes;
+
+            if(params.at("useOptimalKeyframes")) //use the predictive keyframes
             {
-                int frameID=requestedKeyframes[i];
-                //delete vFrames[requestedKeyframes[i]]; //free memory
-                if(frameID<gtFrames.size())
+                //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
+                for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+                {
+                    int frameID=fi->x;
+
+                    //delete vFrames[requestedKeyframes[i]]; //free memory
+                    vFrames[frameID] = new Keyframe(); //assign new keyframe
+                    //copy all the data
+                    vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+                    vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                    vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
+                    vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+
+                    actualKeyframes.push_back(frameID);
+                }
+                //always add one in the end and the start
+                if(vFrames[0]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
+                {
+                    vFrames[0] = new Keyframe(); //assign new keyframe
+                    //copy all the data
+
+                    vFrames[0]->setSkeleton(gtFrames[0]->getSkeleton());
+                    vFrames[0]->setID(gtFrames[0]->getID());
+                    vFrames[0]->setImage(gtFrames[0]->getImage());
+                    vFrames[0]->setMask(gtFrames[0]->getMask());
+
+                    actualKeyframes.push_back(0);
+                }
+                //always add one at the end (extra)
+                if(vFrames[vFrames.size()-1]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
+                {
+                    vFrames[vFrames.size()-1] = new Keyframe(); //assign new keyframe
+                    //copy all the data
+
+                    vFrames[vFrames.size()-1]->setSkeleton(gtFrames[vFrames.size()-1]->getSkeleton());
+                    vFrames[vFrames.size()-1]->setID(gtFrames[vFrames.size()-1]->getID());
+                    vFrames[vFrames.size()-1]->setImage(gtFrames[vFrames.size()-1]->getImage());
+                    vFrames[vFrames.size()-1]->setMask(gtFrames[vFrames.size()-1]->getMask());
+
+                    actualKeyframes.push_back(vFrames.size()-1);
+                }
+                //what if we didn't get enough keyframes to cover that percentage?
+
+                while(actualKeyframes.size()<maxNumKeyframes) //now fill in the rest by subdivision
+                {
+                    sort(actualKeyframes.begin(), actualKeyframes.end()); //sort the keyframes
+
+                    //now select spot for new keyframe
+                    uint32_t maxGapSize=0;
+                    uint32_t maxGapIndex=-1;
+                    for(auto f=1; f<actualKeyframes.size();++f)
+                    {
+                        uint32_t gapSize=abs(actualKeyframes[f]-actualKeyframes[f-1]);
+
+                        if(gapSize>maxGapSize)
+                        {
+                            maxGapSize=gapSize;
+                            maxGapIndex=actualKeyframes[f-1]+gapSize/2; //previous keyframe plus hafl the gap size
+                        }
+                    }
+                    if(maxGapIndex!=-1)
+                    {
+                        vFrames[maxGapIndex] = new Keyframe(); //assign new keyframe
+                        //copy all the data
+
+                        vFrames[maxGapIndex]->setSkeleton(gtFrames[maxGapIndex]->getSkeleton());
+                        vFrames[maxGapIndex]->setID(gtFrames[maxGapIndex]->getID());
+                        vFrames[maxGapIndex]->setImage(gtFrames[maxGapIndex]->getImage());
+                        vFrames[maxGapIndex]->setMask(gtFrames[maxGapIndex]->getMask());
+
+                        actualKeyframes.push_back(maxGapIndex);
+                    }
+                }
+            }
+            else //otherwise, systematically assign keyframes to sequence, such that they are evenly distributed
+            {
+                int keyframeStep=gtFrames.size()/maxNumKeyframes; //frames/numKeyframes = step size?so if it's 2, then every 2nd frame is a keyframe
+
+                for(auto frameID=0; frameID<vFrames.size();frameID+=keyframeStep)
                 {
                     vFrames[frameID] = new Keyframe(); //assign new keyframe
                     //copy all the data
@@ -390,54 +469,92 @@ int main (int argc, char **argv)
 
                     actualKeyframes.push_back(frameID);
                 }
-            }
-            if(actualKeyframes.size()>=maxKeyframes)
-                break; //sot adding keyuframes if we're at max, during the keyframe numbers test
-        }
-
-        //insert the automatically suggested keyframes, if any
-//        int numKeyframesToTake = requestedKeyframes.size();
-//        if(solverName=="TLPSSolver")
-//            numKeyframesToTake = 4; //take the int that is 1/4th of the num of keyframes
-        for(uint32_t i=0; i<requestedKeyframes.size();++i)
-        {
-            if(requestedKeyframes[i]==-1) //if it's not an automatic one
-            {
-                //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
-                for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+                //also, the last frame is always a keyframe (it's an extra keyframe)
+                if(vFrames[vFrames.size()-1]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
                 {
-                    int frameID=fi->x;
-                    bool alreadyPresent=false;
-                    for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
-                    {
-                        if(*ak==fi->x)
-                        {
-                            alreadyPresent=true;
-                            break;
-                        }
-                    }
-                    if(alreadyPresent==false) //not present yet
-                    {
-                        //add it
+                    vFrames[vFrames.size()-1] = new Keyframe(); //assign new keyframe
+                    //copy all the data
 
-                        //delete vFrames[requestedKeyframes[i]]; //free memory
+                    vFrames[vFrames.size()-1]->setSkeleton(gtFrames[vFrames.size()-1]->getSkeleton());
+                    vFrames[vFrames.size()-1]->setID(gtFrames[vFrames.size()-1]->getID());
+                    vFrames[vFrames.size()-1]->setImage(gtFrames[vFrames.size()-1]->getImage());
+                    vFrames[vFrames.size()-1]->setMask(gtFrames[vFrames.size()-1]->getMask());
+
+                    actualKeyframes.push_back(vFrames.size()-1);
+                }
+            }
+            //create keyframes as a percentage of the sequence total number of frames, based on param
+        }
+        else
+        {
+            //insert any specified keyframes
+            for(uint32_t i=0; i<requestedKeyframes.size();++i)
+            {
+                if(requestedKeyframes[i]!=-1) //if it's not an automatic one
+                {
+                    int frameID=requestedKeyframes[i];
+                    //delete vFrames[requestedKeyframes[i]]; //free memory
+                    if(frameID<gtFrames.size())
+                    {
                         vFrames[frameID] = new Keyframe(); //assign new keyframe
                         //copy all the data
-        \
+
                         vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
                         vFrames[frameID]->setID(gtFrames[frameID]->getID());
                         vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
                         vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
 
                         actualKeyframes.push_back(frameID);
-
-                        //break
-                        break;
                     }
                 }
+                if(actualKeyframes.size()>=maxKeyframes)
+                    break; //sot adding keyuframes if we're at max, during the keyframe numbers test
             }
-            if(actualKeyframes.size()>=maxKeyframes)
-                break; //sot adding keyuframes if we're at max, during the keyframe numbers test
+
+            //insert the automatically suggested keyframes, if any
+    //        int numKeyframesToTake = requestedKeyframes.size();
+    //        if(solverName=="TLPSSolver")
+    //            numKeyframesToTake = 4; //take the int that is 1/4th of the num of keyframes
+            for(uint32_t i=0; i<requestedKeyframes.size();++i)
+            {
+                if(requestedKeyframes[i]==-1) //if it's not an automatic one
+                {
+                    //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
+                    for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+                    {
+                        int frameID=fi->x;
+                        bool alreadyPresent=false;
+                        for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
+                        {
+                            if(*ak==fi->x)
+                            {
+                                alreadyPresent=true;
+                                break;
+                            }
+                        }
+                        if(alreadyPresent==false) //not present yet
+                        {
+                            //add it
+
+                            //delete vFrames[requestedKeyframes[i]]; //free memory
+                            vFrames[frameID] = new Keyframe(); //assign new keyframe
+                            //copy all the data
+            \
+                            vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+                            vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                            vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
+                            vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+
+                            actualKeyframes.push_back(frameID);
+
+                            //break
+                            break;
+                        }
+                    }
+                }
+                if(actualKeyframes.size()>=maxKeyframes)
+                    break; //sot adding keyuframes if we're at max, during the keyframe numbers test
+            }
         }
 
         //fill in the rest with interpolation frames
