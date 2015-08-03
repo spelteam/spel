@@ -379,92 +379,92 @@ namespace SPEL
 
   TEST(surfDetectorTests, generateLabel)
   {
-	  String FilePath;
-	  FilePath = "posetests_TestData/SurfDetectorTestsData/";
+     String FilePath;
+     FilePath = "posetests_TestData/SurfDetectorTestsData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
-	  if (IsDebuggerPresent())
-		  FilePath = "Debug/posetests_TestData/SurfDetectorTestsData/";
+     if (IsDebuggerPresent())
+          FilePath = "Debug/posetests_TestData/SurfDetectorTestsData/";
 #endif
 
-	  //Load the input data
-	  ProjectLoader projectLoader(FilePath);
-	  projectLoader.Load(FilePath + "trijumpSD_shortcut.xml");
-	  vector<Frame*> frames = projectLoader.getFrames();
+     //Load the input data
+     ProjectLoader projectLoader(FilePath);
+     projectLoader.Load(FilePath + "trijumpSD_shortcut.xml");
+     vector<Frame*> frames = projectLoader.getFrames();
 
-	  //Copy image and skeleton from first keyframe
-	  int FirstKeyframe = 0;
-	  Mat image = frames[FirstKeyframe]->getImage();
-	  Mat mask = frames[FirstKeyframe]->getMask();
-	  Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
-	  tree <BodyPart> partTree = skeleton.getPartTree();
-	  tree <BodyJoint> jointsTree = skeleton.getJointTree();
+     //Copy image and skeleton from first keyframe
+     int FirstKeyframe = 0;
+     Mat image = frames[FirstKeyframe]->getImage();
+     Mat mask = frames[FirstKeyframe]->getMask();
+     Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+     tree <BodyPart> partTree = skeleton.getPartTree();
+     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
-	  //Select body part for testing
-	  int  partID = 6;
-	  //Copy body part
-	  BodyPart bodyPart = *skeleton.getBodyPart(partID);
-	  //Copy part joints 
-	  BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());
-	  BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
-	  //Copy joints location
-	  Point2f p0 = j0->getImageLocation();
-	  Point2f p1 = j1->getImageLocation();
+     //Select body part for testing
+     int  partID = 6;
+     //Copy body part
+     BodyPart bodyPart = *skeleton.getBodyPart(partID);
+     //Copy part joints 
+     BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());
+     BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
+     //Copy joints location
+     Point2f p0 = j0->getImageLocation();
+     Point2f p1 = j1->getImageLocation();
 
-	  //Calculate part models descriptors 
-	  uint32_t minHessian = 500;
-	  SurfDetector D;
-	  map <uint32_t, SurfDetector::PartModel> PartModels = D.computeDescriptors(frames[FirstKeyframe], minHessian);
+     //Calculate part models descriptors 
+     uint32_t minHessian = 500;
+     SurfDetector D;
+     map <uint32_t, SurfDetector::PartModel> PartModels = D.computeDescriptors(frames[FirstKeyframe], minHessian);
 
-	  //Create part model for selected LimbLabel {p0, p1}
-	  vector <KeyPoint> _keyPoints;
+     //Create part model for selected LimbLabel {p0, p1}
+     vector <KeyPoint> _keyPoints;
 #if OpenCV_VERSION_MAJOR == 3
-	  Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
-	  D1->detect(image, _keyPoints);
+     Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
+     D1->detect(image, _keyPoints);
 #else
-	  SurfFeatureDetector D1(minHessian);
-	  D1.detect(image, _keyPoints);
+     SurfFeatureDetector D1(minHessian);
+     D1.detect(image, _keyPoints);
 #endif
-	  float boneLength = D.getBoneLength(p0, p1);
-	  float boneWidth = D.getBoneWidth(boneLength, bodyPart);
-	  SurfDetector::PartModel partModel1;
-	  partModel1.partModelRect = D.getBodyPartRect(bodyPart, p0, p1, Size(boneLength, boneWidth));
-	  for (int i = 0; i < _keyPoints.size(); i++)
-	  {
-		  if (partModel1.partModelRect.containsPoint(_keyPoints[i].pt) > 0)
-			  partModel1.keyPoints.push_back(_keyPoints[i]);
-	  }
+     float boneLength = D.getBoneLength(p0, p1);
+     float boneWidth = D.getBoneWidth(boneLength, bodyPart);
+     SurfDetector::PartModel partModel1;
+     partModel1.partModelRect = D.getBodyPartRect(bodyPart, p0, p1, Size(boneLength, boneWidth));
+     for (int i = 0; i < _keyPoints.size(); i++)
+     {
+       if (partModel1.partModelRect.containsPoint(_keyPoints[i].pt) > 0)
+         partModel1.keyPoints.push_back(_keyPoints[i]);
+     }
 #if OpenCV_VERSION_MAJOR == 3
-	  Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
-	  extractor->compute(image, partModel1.keyPoints, partModel1.descriptors);
+     Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+     extractor->compute(image, partModel1.keyPoints, partModel1.descriptors);
 #else
-	  SurfDescriptorExtractor extractor;
-	  extractor.compute(image, partModel1.keyPoints, partModel1.descriptors);
+     SurfDescriptorExtractor extractor;
+     extractor.compute(image, partModel1.keyPoints, partModel1.descriptors);
 #endif
 
-	  vector<Score> scores;
-	  Score score(D.compare(bodyPart, partModel1, p0, p1), std::to_string(D.getID()));
-	  scores.push_back(score);
-	  float rot = float(PoseHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
-	  LimbLabel expected_Label(partID, 0.5*(p0 + p1), rot, bodyPart.getPartPolygon().asVector(), scores, false);
-	  scores.clear();
+     vector<Score> scores;
+     Score score(D.compare(bodyPart, partModel1, p0, p1), std::to_string(D.getID()));
+     scores.push_back(score);
+     float rot = float(PoseHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+     LimbLabel expected_Label(partID, 0.5*(p0 + p1), rot, bodyPart.getPartPolygon().asVector(), scores, false);
+     scores.clear();
 
-	  //Run "GenerateLabel"
-	  LimbLabel actual_Label = D.generateLabel(bodyPart, frames[FirstKeyframe], p0, p1);
+     //Run "GenerateLabel"
+     LimbLabel actual_Label = D.generateLabel(bodyPart, frames[FirstKeyframe], p0, p1);
 
-	  //Compare
-	  EXPECT_EQ(expected_Label.getAngle(), actual_Label.getAngle());
-	  EXPECT_EQ(expected_Label.getCenter(), actual_Label.getCenter());
-	  EXPECT_EQ(expected_Label.getLimbID(), actual_Label.getLimbID());
-	  EXPECT_EQ(expected_Label.getPolygon(), actual_Label.getPolygon());
-	  EXPECT_EQ(expected_Label.getScores(), actual_Label.getScores());
+     //Compare
+     EXPECT_EQ(expected_Label.getAngle(), actual_Label.getAngle());
+     EXPECT_EQ(expected_Label.getCenter(), actual_Label.getCenter());
+     EXPECT_EQ(expected_Label.getLimbID(), actual_Label.getLimbID());
+     EXPECT_EQ(expected_Label.getPolygon(), actual_Label.getPolygon());
+     EXPECT_EQ(expected_Label.getScores(), actual_Label.getScores());
 
-	  //Checking SurfDetector.LabelModels
-	/*int n = D.labelModels[frames[FirstKeyframe]->getID()][bodyPart.getPartID()].size()-1;
-	  //D.labelModels[CurrentFrameID][CurrentPartID][CurrentLimbLabel][CurrentLimbLabel] is empty?
-	  SurfDetector::PartModel labelModels_partID = D.labelModels[frames[FirstKeyframe]->getID()][bodyPart.getPartID()][n];
-	  EXPECT_EQ(partModel1.partModelRect.asVector(), labelModels_partID.partModelRect.asVector());
-	  EXPECT_EQ(partModel1.keyPoints.size(), labelModels_partID.keyPoints.size());
-	  EXPECT_EQ(partModel1.descriptors.size(), labelModels_partID.descriptors.size());*/
+     //Checking SurfDetector.LabelModels
+   /*int n = D.labelModels[frames[FirstKeyframe]->getID()][bodyPart.getPartID()].size()-1;
+     //D.labelModels[CurrentFrameID][CurrentPartID][CurrentLimbLabel][CurrentLimbLabel] is empty?
+     SurfDetector::PartModel labelModels_partID = D.labelModels[frames[FirstKeyframe]->getID()][bodyPart.getPartID()][n];
+     EXPECT_EQ(partModel1.partModelRect.asVector(), labelModels_partID.partModelRect.asVector());
+     EXPECT_EQ(partModel1.keyPoints.size(), labelModels_partID.keyPoints.size());
+     EXPECT_EQ(partModel1.descriptors.size(), labelModels_partID.descriptors.size());*/
   }
 }
