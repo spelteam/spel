@@ -1,0 +1,65 @@
+Project: ../data/BBC/gymnasticsHD/projects/gymnasticsHDGT_c.xml
+
+OutDir: ../out/
+
+SolverName: NSKPSolver
+
+NumKeyframes: 3
+KeyframeNumbers: -1 -1 -1
+
+TestParameter: jointCoeff 
+ParameterMin: 0.0 
+ParameterMax: 1.0 
+ParameterStep: 0.1
+
+BalanceParameter: imageCoeff
+
+NumOtherParams: 2
+useCSdet 0.1
+useHoGdet 1.0
+
+
+
+---------------------------------------------------------------------------------------------
+This file defines test rules for the solverTuner module, and is required as input. 
+
+File format rules (order matters!!):
+
+Line 1 - input file (relative path) - must be a ground truth project file, where every frame is a keyframe
+Line 2 - output folder (relative path) - root directory for output writing. Parameter name and project name will be appended at the end e.g. outFolder/paramName/projectName and a results summary file with errors will be generated, containing some of the initialisation data. Sub-directories with individual parameter value results are also created.
+Line 3 - solver name - this is the name of the solver to be used. Currently only NSKPSolver, TLPSSolver and Hybrid are supported parameters.
+Line 4 - number of keyframes - the number of keyframes to run the tests for 
+Line 5 - frame numbers for keyframes - there must be as many as indicated on line 4. Use -1 to indicate that a keyframe should be chosen automatically.
+Line 6 - test param name - the string defining the parameter we are testing
+Line 7 - test param min - starting value of the test parameter, must be a positive number between 0 and 1.0
+Line 8 - test param max - end value of the test parameter, must be a positive number between 0 and 1.0
+Line 9 - test param step - step - step size for parameter change, must be a positive number between -1.0 and 1.0, and cannot be 0
+Line 10 - balance parameter - the parameter string to counterbalance with test param, none if not applicable. This will interpolate parameter values such that their sum will always be 1.0 e.g. testParamCoeff=0.3, balanceParamcoeff = 0.7.
+Line 11 - number of other params to statically set for this experiment - these will not change in any way and will replace any default parameters (some of the defaults listed below)
+Line 12 to N: Tuples of paramName paramVal. There must be at least as many as indicated on line 11. Any extra params not counted in line 11 will be ignored.
+
+
+
+Here are the base tuner settings, though any valid parameter can be passed in for tuning
+//global settings
+params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+params.emplace("jointCoeff", 0.0); //set solver body part connectivity sensitivity
+params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+
+//detector settings
+params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+
+params.emplace("grayImages", 1); // use grayscale images for HoG?
+
+//solver settings
+params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
+params.emplace("acceptLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+
+params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
+//params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
