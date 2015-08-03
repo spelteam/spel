@@ -430,22 +430,16 @@ namespace SPEL
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
     EXPECT_EQ(limbLabel_e.getAngle(), limbLabel_a.getAngle());
-    // Temporary debug messages
-    if (limbLabel_e.getScores() != limbLabel_a.getScores())
-      cout << "----------\n";
-    //
-    EXPECT_EQ(limbLabel_e.getScores(), limbLabel_a.getScores());
-    // Temporary debug messages
-    if (limbLabel_e.getScores() != limbLabel_a.getScores())
+
+    EXPECT_EQ(limbLabel_e.getScores().size(), limbLabel_a.getScores().size());
+    if (limbLabel_e.getScores().size() == limbLabel_a.getScores().size())
     {
-      vector<Score> actual_scores = limbLabel_a.getScores();
-      cout << endl << "Funcion 'colorHistDetector::generateLabel()'  score values:" << endl;
-      for (int i = 0; i < s.size(); i++)
-        cout << "PartID = " << partID << " ~ expected_score[" << i << "] = " << s[i].getScore() << ",   actual_score[" << i << "] = " << actual_scores[i].getScore() << endl;
-      cout << "----------\n";
-      //cin.get();
+      for (int i = 0; i < limbLabel_e.getScores().size(); i++)
+      {
+        EXPECT_TRUE(fabs(limbLabel_e.getScores().at(i).getScore() - limbLabel_a.getScores().at(i).getScore()) <= 0.005);        
+      }
     }
-    //
+    
     EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
     // Temporary debug messages
     if (limbLabel_e.getIsOccluded() != limbLabel_a.getIsOccluded())
@@ -456,7 +450,16 @@ namespace SPEL
       //cin.get();
     }
     //
-    EXPECT_EQ(limbLabel_e.getPolygon(), limbLabel_a.getPolygon());
+    EXPECT_EQ(limbLabel_e.getPolygon().size(), limbLabel_a.getPolygon().size());
+    if (limbLabel_e.getPolygon().size() == limbLabel_a.getPolygon().size())
+    {
+      for (int i = 0; i < limbLabel_e.getPolygon().size(); i++)
+      {
+        EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).x, limbLabel_a.getPolygon().at(i).x);
+        EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).y, limbLabel_a.getPolygon().at(i).y);
+      }
+    }
+
     EXPECT_EQ(model.bgHistogram, detector.partModels[partID].bgHistogram);
 
     // Testing function "detect"
