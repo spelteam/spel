@@ -462,7 +462,7 @@ namespace SPEL
       {
         for (float y = searchYMin; y < searchYMax; y += minDist)
         {
-          if (x < maskMat.cols && y < maskMat.rows && x>=0 && y >=0)
+          if (x < maskMat.cols && y < maskMat.rows && x >= 0 && y >= 0)
           {
             uint8_t mintensity = 0;
             try
