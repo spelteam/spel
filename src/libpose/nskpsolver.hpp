@@ -72,7 +72,7 @@ namespace SPEL
     ///inherited virtual
     vector<Solvlet> solve(Sequence& frames, map<string, float>  params, const ImageSimilarityMatrix& ISM);
 
-    vector<Point2i> suggestKeyframes(ImageSimilarityMatrix ism, map<string, float> params);
+    vector<Point2i> suggestKeyframes(const ImageSimilarityMatrix& ism, map<string, float> params);
 
     //INHERITED
     //public:
@@ -85,7 +85,7 @@ namespace SPEL
     FRIEND_TEST(nskpsolverTests, evaluateSolution);
 #endif  // DEBUG
     vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism, vector<int> &ignore);
-    vector<MinSpanningTree > buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params); //int treeSize, float threshold)
+    vector<MinSpanningTree > buildFrameMSTs(const ImageSimilarityMatrix &ism, map<string, float> params); //int treeSize, float threshold)
 
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params);
 
@@ -98,8 +98,8 @@ namespace SPEL
     float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params);
     float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, map<string, float> params, float min, float max);
 
-    vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const vector<Frame *> frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int> &ignore);
-    int test(int frameId, const vector<Frame*>& frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore); //test function
+    vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const vector<Frame *> frames, map<string, float> params, const ImageSimilarityMatrix& ism, const vector<MinSpanningTree> &trees, vector<int> &ignore);
+    int test(int frameId, const vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix &ism, const vector<MinSpanningTree> &trees, vector<int>& ignore); //test function
 
     vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 

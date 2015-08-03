@@ -95,7 +95,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     return solvlets;
 }
 
-vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const vector<Frame*> frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int>& ignore)
+vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const vector<Frame*> frames, map<string, float> params, const ImageSimilarityMatrix& ism, const vector<MinSpanningTree>& trees, vector<int>& ignore)
 {
     vector<NSKPSolver::SolvletScore> allSolves;
     Mat image = frames[0]->getImage();
@@ -538,7 +538,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
     return allSolves;
 }
 
-int NSKPSolver::test(int frameId, const vector<Frame *> &frames, map<string, float> params, ImageSimilarityMatrix ism, vector<MinSpanningTree> trees, vector<int> &ignore)
+int NSKPSolver::test(int frameId, const vector<Frame *> &frames, map<string, float> params, const ImageSimilarityMatrix& ism, const vector<MinSpanningTree>& trees, vector<int> &ignore)
 {
     return 0;
 }
@@ -836,7 +836,7 @@ float NSKPSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& p
 }
 
 //build an MST for every frame and return the vector
-vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, map<string, float> params) //int treeSize, float threshold)
+vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(const ImageSimilarityMatrix &ism, map<string, float> params) //int treeSize, float threshold)
 {
     //emplace defaults
     params.emplace("treeSize", ism.size()); //no size limit
@@ -880,7 +880,7 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(ImageSimilarityMatrix ism, m
 
 //suggest maximum number of keyframes
 //function should return vector with suggested keyframe numbers
-vector<Point2i> NSKPSolver::suggestKeyframes(ImageSimilarityMatrix ism, map<string, float> params)
+vector<Point2i> NSKPSolver::suggestKeyframes(const ImageSimilarityMatrix& ism, map<string, float> params)
 {
     vector<MinSpanningTree> mstVec = buildFrameMSTs(ism, params);
     params.emplace("minKeyframeDist", 1); //don't suggest keyframes that are too close together

@@ -8,7 +8,8 @@ namespace SPEL
   }
   ImageSimilarityMatrix::~ImageSimilarityMatrix(void)
   {
-
+    imageSimilarityMatrix.release();
+    imageShiftMatrix.release();
   }
 
   ImageSimilarityMatrix::ImageSimilarityMatrix(const vector<Frame*>& frames)
@@ -108,6 +109,9 @@ namespace SPEL
     {
       int size;
       in >> size;
+
+      imageSimilarityMatrix.release();
+      imageShiftMatrix.release();
 
       imageSimilarityMatrix.create(size, size, DataType<float>::type);
       imageShiftMatrix.create(size, size, DataType<Point2f>::type);
@@ -445,6 +449,9 @@ namespace SPEL
   {
     //create matrices and fill with zeros
     // imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
+    imageSimilarityMatrix.release();
+    imageShiftMatrix.release();
+
     imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
     imageShiftMatrix.create(frames.size(), frames.size(), DataType<Point2f>::type);
 
