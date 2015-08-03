@@ -49,6 +49,16 @@ namespace SPEL
     return *this;
   }
 
+  bool LimbLabel::operator==(const LimbLabel &ll) const
+  {
+    return (this->limbID == ll.getLimbID() && this->center == ll.getCenter() && this->angle == ll.getAngle());
+  }
+
+  bool LimbLabel::operator!=(const LimbLabel &ll) const
+  {
+    return !(*this == ll);
+  }
+
   Point2f LimbLabel::getCenter(void) const
   {
     return center;

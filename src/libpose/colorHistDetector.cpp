@@ -1147,21 +1147,27 @@ namespace SPEL
       throw logic_error(ss.str());
     }
     // Scan the area near the bodypart center
-    for (int32_t i = int32_t(boxCenter.x - boneLength * 0.5); i < int32_t(boxCenter.x + boneLength * 0.5); i++)
+
+    float searchXMin = boxCenter.x - boneLength * 0.5;
+    float searchXMax = boxCenter.x + boneLength * 0.5;
+    float searchYMin = boxCenter.y - boneLength * 0.5;
+    float searchYMax = boxCenter.y + boneLength * 0.5;
+
+    for (float i = searchXMin; i < searchXMax; i++)
     {
-      for (int32_t j = int32_t(boxCenter.y - boneLength * 0.5); j < int32_t(boxCenter.y + boneLength * 0.5); j++)
+      for (float j = searchYMin; j < searchYMax; j++)
       {
         if (i < maskMat.cols && j < maskMat.rows) // if the point is within the image
         {
           if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
           {
-            if (rect.containsPoint(Point2f((float)i, (float)j)) > 0) // if the point belongs to the rectangle
+            if (rect.containsPoint(Point2f(i, j)) > 0) // if the point belongs to the rectangle
             {
               totalPixels++; // counting of the contained pixels
               uint8_t mintensity = 0;
               try
               {
-                mintensity = maskMat.at<uint8_t>(j, i); // copy current point mask value 
+                mintensity = maskMat.at<uint8_t>((int32_t)j, (int32_t)i); // copy current point mask value 
               }
               catch (...)
               {
@@ -1170,7 +1176,7 @@ namespace SPEL
                 bodyPartPixelDistribution.release();
                 bodyPartLixelLabels.release();
                 stringstream ss;
-                ss << "Can't get maskMat [" << j << "][" << i << "]";
+                ss << "Can't get maskMat [" << (int32_t)j << "][" << (int32_t)i << "]";
                 if (debugLevelParam >= 2)
                   cerr << ERROR_HEADER << ss.str() << endl;
                 throw logic_error(ss.str());
@@ -1189,7 +1195,7 @@ namespace SPEL
                   bodyPartPixelDistribution.release();
                   bodyPartLixelLabels.release();
                   stringstream ss;
-                  ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << j << "][" << i << "]";
+                  ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << (int32_t)j << "][" << (int32_t)i << "]";
                   if (debugLevelParam >= 2)
                     cerr << ERROR_HEADER << ss.str() << endl;
                   throw logic_error(ss.str());
@@ -1209,7 +1215,7 @@ namespace SPEL
                   bodyPartPixelDistribution.release();
                   bodyPartLixelLabels.release();
                   stringstream ss;
-                  ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << j << "][" << i << "]";
+                  ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << (int32_t)j << "][" << (int32_t)i << "]";
                   if (debugLevelParam >= 2)
                     cerr << ERROR_HEADER << ss.str() << endl;
                   throw logic_error(ss.str());

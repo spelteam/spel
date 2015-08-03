@@ -34,8 +34,8 @@ namespace SPEL
     /// output labels as printable string
     string toString();
     LimbLabel & operator = (const LimbLabel &ll);
-    bool operator == (const LimbLabel &ll) const;
-    bool operator != (const LimbLabel &ll) const;
+    bool operator == (const LimbLabel &ll) const; // Need implementation
+    bool operator != (const LimbLabel &ll) const; // Need implementation
     bool operator < (const LimbLabel &ll) const;
     bool operator > (const LimbLabel &ll) const;
     // compute the endpoints of the limb that this label would produce

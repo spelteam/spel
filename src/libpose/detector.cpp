@@ -453,10 +453,14 @@ namespace SPEL
       if (searchDistance <= 0)
         searchDistance = minDist + 1;
       Point2f suggestStart = 0.5 * j1 + 0.5 * j0; // reference point - the bodypart center
+      float searchXMin = suggestStart.x - searchDistance * 0.5f;
+      float searchXMax = suggestStart.x + searchDistance * 0.5f;
+      float searchYMin = suggestStart.y - searchDistance * 0.5f;
+      float searchYMax = suggestStart.y + searchDistance * 0.5f;
       // Scan the area around the reference point
-      for (float x = suggestStart.x - searchDistance * 0.5f; x < suggestStart.x + searchDistance * 0.5f; x += minDist)
+      for (float x = searchXMin; x < searchXMax; x += minDist)
       {
-        for (float y = suggestStart.y - searchDistance * 0.5f; y < suggestStart.y + searchDistance * 0.5f; y += minDist)
+        for (float y = searchYMin; y < searchYMax; y += minDist)
         {
           if (x < maskMat.cols && y < maskMat.rows && x>=0 && y >=0)
           {
@@ -685,21 +689,6 @@ namespace SPEL
           }
         }
 
-        //try
-        //{
-        //  for (vector <LimbLabel>::iterator l = orphanedLabels.begin(); l != orphanedLabels.end(); ++l)
-        //  {
-        //    labels.push_back(generateLabel(boneLength, l->getAngle(), l->getCenter().x, l->getCenter().y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
-        //  }
-        //}
-        //catch (...)
-        //{
-        //  stringstream ss;
-        //  ss << "Can't generate limgLabel for input orphaned label";
-        //  if (debugLevelParam >= 1)
-        //    cerr << ERROR_HEADER << ss.str() << endl;
-        //  throw logic_error(ss.str());
-        //}
         //// Sort labels again
         sort(labels.begin(), labels.end());
 
