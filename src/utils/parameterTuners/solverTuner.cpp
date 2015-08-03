@@ -358,6 +358,8 @@ int main (int argc, char **argv)
         params.emplace("withTLPS", 0); //don't use TLPS after NSKP by default
         params.emplace("hybridIters", 1);
 
+        params.emplace("useOptimalKeyframes", 1); //use optimal keyframes by default
+
         //generate keyframe suggestions
         vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, params);
         auto start = chrono::steady_clock::now();
