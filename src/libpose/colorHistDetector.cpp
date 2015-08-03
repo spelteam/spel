@@ -1157,7 +1157,7 @@ namespace SPEL
     {
       for (float j = searchYMin; j < searchYMax; j++)
       {
-        if (i < maskMat.cols && j < maskMat.rows) // if the point is within the image
+        if (i < maskMat.cols && j < maskMat.rows && i >= 0 && j >= 0) // if the point is within the image
         {
           if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
           {
