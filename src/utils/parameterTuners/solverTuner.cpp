@@ -626,11 +626,11 @@ int main (int argc, char **argv)
                 prevSolveSize=finalSolve.size(); //set size of the final solve
 
                 vector<Solvlet> nskpSolve, tlpsSolve;
-                //do an iterative NSKP solve
-                nskpSolve = nSolver.solve(seq, params, ism);
-
                 if(params.at("withNSKP"))
                 {
+                    //do an iterative NSKP solve
+                    nskpSolve = nSolver.solve(seq, params, ism);
+
                     for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
                         finalSolve.push_back(*s);
                 }
