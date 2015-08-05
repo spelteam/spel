@@ -44,7 +44,7 @@ namespace SPEL
     int getID(void) const;
     void setID(int _id);
     void train(vector <Frame*> _frames, map <string, float>);
-    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
+    map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
     map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
     map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
 

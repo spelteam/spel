@@ -92,7 +92,7 @@ namespace SPEL
   }
 
   //TODO (Vitaliy Koshura): Write real implementation here
-  vector <vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
+  map <uint32_t, vector <LimbLabel> > SurfDetector::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
   {
     const string sMinHessian = "minHessian";
     const string sUseSURFdet = "useSURFdet";
@@ -108,7 +108,7 @@ namespace SPEL
     useSURFdet = params.at(sUseSURFdet);
     knnMatchCoeff = params.at(sKnnMatchCoeff);
 
-    Mat imgMat = frame->getImage();
+    auto imgMat = frame->getImage();
 
 #if OpenCV_VERSION_MAJOR == 3
     Ptr <SurfFeatureDetector> detector = SurfFeatureDetector::create(minHessian);

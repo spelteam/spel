@@ -37,7 +37,7 @@ namespace SPEL
     int getID(void) const;
     void setID(int _id);
     void train(vector <Frame*> _frames, map <string, float> params);
-    vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
+    map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
     uint8_t getNBins(void) const;
     vector <Frame*> getFrames(void) const;
     ColorHistDetector &operator=(const ColorHistDetector &c);

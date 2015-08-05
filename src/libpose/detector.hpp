@@ -28,8 +28,8 @@ namespace SPEL
     virtual int getID(void) const = 0;
     virtual void setID(int _id) = 0;
     virtual void train(vector <Frame*> frames, map <string, float> params) = 0;
-    virtual vector <vector <LimbLabel> > detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels);
-    virtual vector <vector <LimbLabel>> merge(vector <vector <LimbLabel>> first, vector <vector <LimbLabel>> second);
+    virtual map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
+    virtual map <uint32_t, vector <LimbLabel>> merge(map <uint32_t, vector <LimbLabel>> first, map <uint32_t, vector <LimbLabel>> second);
   protected:
     vector <Frame*> frames;
     uint32_t maxFrameHeight;

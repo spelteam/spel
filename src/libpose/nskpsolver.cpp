@@ -203,8 +203,8 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             if(frames[*mstIter]->getFrametype()==KEYFRAME || frames[*mstIter]->getFrametype()==LOCKFRAME || *mstIter==frameId) //don't push to existing keyframes and lockframes
                 continue; //also ignore mst frame if it's this frame
             //map<int, vector<LimbLabel> > labels;
-            vector<vector<LimbLabel> > labels, tempLabels;
-            vector<vector<LimbLabel> >::iterator labelPartsIter;
+            map<uint32_t, vector<LimbLabel> > labels;
+            map<uint32_t, vector<LimbLabel> >::iterator labelPartsIter;
 
             //check whether parent is a lockframe
             bool parentIsLockframe=false;
@@ -295,19 +295,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
             {
                 labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
-            }
-
-            //sort labels
-            for(uint32_t i=0; i<labels.size(); ++i)
-            {
-                for(uint32_t j=0; j<labels.size();++j)
-                {
-                    if(labels[j].at(0).getLimbID()==i)
-                        tempLabels.push_back(labels[j]);
-                }
-            }
-            labels = tempLabels;
-            tempLabels.clear();
+            }            
 
             float maxPartCandidates=params.at("maxPartCandidates");
 

@@ -377,7 +377,7 @@ namespace SPEL
     }
   }
 
-  vector <vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
+  map <uint32_t, vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
   {
     const string sUseHoGdet = "useHoGdet";
 
