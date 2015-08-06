@@ -359,6 +359,7 @@ int main (int argc, char **argv)
         params.emplace("hybridIters", 1);
 
         params.emplace("useOptimalKeyframes", 1); //use optimal keyframes by default
+        params.emplace("nskpSpreadSize", 0); //define NSKP prior scatter radius: 0 means solve just the frame we propagated to, 1 means try to solve a frame on either side too
 
         //generate keyframe suggestions
         vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, params);
