@@ -179,7 +179,7 @@ namespace SPEL
 
   std::ostream& operator<<(std::ostream& os, const BodyPart &bp)
   {
-    std::string s = std::to_string(bp.getPartID());
+    auto s = std::to_string(bp.getPartID());
     return os << s;
   }
 

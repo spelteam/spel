@@ -54,7 +54,7 @@ namespace SPEL
   public:
     NSKPSolver();
     ///inherited virtual
-    ~NSKPSolver();
+    virtual ~NSKPSolver();
     ///inherited virtual
     vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual

@@ -30,7 +30,7 @@ namespace SPEL
     ImageSimilarityMatrix(const vector<Frame*>& frames);
 
     ///destructor
-    ~ImageSimilarityMatrix(void);
+    virtual ~ImageSimilarityMatrix(void);
 
     void buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
     void buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
