@@ -4,7 +4,7 @@ void HoGDetectorTest::train(vector <Frame*> _frames, map <string, float> params)
 {
   HogDetector::train(_frames, params);
 }
-vector <vector <LimbLabel> > HoGDetectorTest::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
+map <uint32_t, vector <LimbLabel> > HoGDetectorTest::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
 {
   return HogDetector::detect(frame, params, limbLabels);
 }

@@ -5,7 +5,7 @@ ProjectRunner::ProjectRunner(string _testName)
   testName = _testName;
 }
 
-int ProjectRunner::Run(int argc, char **argv, map <uint32_t, vector <vector <LimbLabel>>> *limbLabels)
+int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vector <LimbLabel>>> *limbLabels)
 {
   if (argc < 3)
   {
@@ -47,7 +47,7 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, vector <vector <Lim
   params.emplace("debugLevel", 3);
 
   vector <Frame*> allFrames = projectLoader.getFrames();
-  vector<Frame*> trainFrames;
+  vector <Frame*> trainFrames;
   int8_t kfCount = 0;
 
   try
@@ -151,7 +151,7 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, vector <vector <Lim
       if (f->getFrametype() == INTERPOLATIONFRAME)
 #endif  // DEBUG
       {
-        vector <vector <LimbLabel> > labels;
+        map <uint32_t, vector <LimbLabel> > labels;
         if (limbLabels != 0)
         {
           try
@@ -173,7 +173,7 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, vector <vector <Lim
             }
             catch (...)
             {
-              limbLabels->insert(pair<uint32_t, vector <vector <LimbLabel>>>(f->getID(), labels));
+              limbLabels->insert(pair<uint32_t, map <uint32_t, vector <LimbLabel>>>(f->getID(), labels));
             }
           }
           projectLoader.Save(labels, argv[2], f->getID());

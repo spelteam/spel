@@ -16,7 +16,7 @@
 using namespace std;
 using namespace SPEL;
 
-vector<vector<float> > computeLabelErrorStatToGT(vector<vector<LimbLabel> > labels, Frame* keyframe) //return squared error from solve to GT for one frame
+vector<vector<float> > computeLabelErrorStatToGT(map<uint32_t, vector<LimbLabel> > labels, Frame* keyframe) //return squared error from solve to GT for one frame
 {
     vector<vector<float> > errors;
 
@@ -55,9 +55,9 @@ vector<vector<float> > computeLabelErrorStatToGT(vector<vector<LimbLabel> > labe
     return errors;
 }
 
-vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> detectors, vector<Frame*> vFrames, map<string,float> params)
+vector<map<uint32_t, vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> detectors, vector<Frame*> vFrames, map<string,float> params)
 {
-    vector<vector<vector<LimbLabel> > > allLabels;
+    vector<map<uint32_t, vector<LimbLabel> > > allLabels;
     //vector<Solvlet> solvlets;
     Sequence seq(0, "test", vFrames);
     seq.estimateUniformScale(params);
@@ -66,23 +66,15 @@ vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> dete
     vector<Frame*> frames = seq.getFrames();
     for(uint32_t frame=0; frame<frames.size(); ++frame)
     {
-        vector<vector<LimbLabel> > labels, tempLabels;
+        map<uint32_t, vector<LimbLabel> > labels;
         for(uint32_t i=0; i<detectors.size();++i)
             labels = detectors[i]->detect(frames[frame], params, labels); //detect labels based on keyframe training
-
-        //sort the label
-        for(uint32_t i=0; i<labels.size(); ++i)
-        {
-            for(uint32_t j=0; j<labels.size();++j)
-            {
-                if(labels[j].size()>0)
-                    if(labels[j].at(0).getLimbID()==i)
-                        tempLabels.push_back(labels[j]);
-            }        //detector settings
-            params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
-            params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
-            params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
-        }
+        
+        //detector settings
+        params.emplace("useCSdet", 0.0); //determine if ColHist detector is used and with what coefficient
+        params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+        params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+        
 
         //make sure all labels contain the same number of detection scores, pad with 1's if they don't
 
@@ -94,11 +86,11 @@ vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> dete
         float useCS = params.at("useCSdet");
         float useSURF = params.at("useSURFdet");
 
-        for(uint32_t i=0; i<tempLabels.size();++i)
+        for(uint32_t i=0; i<labels.size();++i)
         {
-            for(uint32_t j=0; j<tempLabels[i].size(); ++j)
+            for(uint32_t j=0; j<labels[i].size(); ++j)
             {
-                vector<Score> scores=tempLabels[i][j].getScores();
+                vector<Score> scores=labels[i][j].getScores();
 
                 bool hogFound=false;
                 bool csFound=false;
@@ -117,33 +109,32 @@ vector<vector<vector<LimbLabel> > > doInterpolationDetect(vector<Detector*> dete
                 if(!surfFound && useSURF)
                 {
                     Score sc(1.0, surfName, useSURF);
-                    tempLabels[i][j].addScore(sc);
+                    labels[i][j].addScore(sc);
                 }
                 if(!csFound && useCS)
                 {
                     Score sc(1.0, csName, useCS);
-                    tempLabels[i][j].addScore(sc);
+                    labels[i][j].addScore(sc);
                 }
 
                 if(!hogFound && useHoG)
                 {
                     Score sc(1.0, hogName, useHoG);
-                    tempLabels[i][j].addScore(sc);
+                    labels[i][j].addScore(sc);
                 }
 
             }
-            sort(tempLabels[i].begin(), tempLabels[i].end());
+            sort(labels[i].begin(), labels[i].end());
         }
 
-        labels = tempLabels;
         allLabels.push_back(labels);
     }
     return allLabels;
 }
 
-vector<vector<vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detectors, vector<Frame*> vFrames, ImageSimilarityMatrix ism, map<string,float> params)
+vector<map<uint32_t, vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detectors, vector<Frame*> vFrames, ImageSimilarityMatrix ism, map<string,float> params)
 {
-    vector<vector<vector<LimbLabel> > > allLabels;
+    vector<map<uint32_t, vector<LimbLabel> > > allLabels;
     //vector<Solvlet> solvlets;
     Sequence seq(0, "test", vFrames);
     seq.estimateUniformScale(params);
@@ -181,24 +172,9 @@ vector<vector<vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detect
         Point2f shift = ism.getShift(frames[kfr]->getID(),frames[frame]->getID());
         lockframe->shiftSkeleton2D(shift);
 
-        vector<vector<LimbLabel> > labels, tempLabels;
+        map<uint32_t, vector<LimbLabel> > labels;
         for(uint32_t i=0; i<detectors.size();++i)
             labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
-
-        //sort the label
-        for(uint32_t i=0; i<labels.size(); ++i)
-        {
-            for(uint32_t j=0; j<labels.size();++j)
-            {
-                if(labels[j].size()>0)
-                {
-                    if(labels[j].at(0).getLimbID()==i)
-                        tempLabels.push_back(labels[j]);
-                }
-                else
-                    tempLabels.push_back(vector<LimbLabel>());
-            }
-        }
 
         //make sure all labels contain the same number of detection scores, pad with 1's if they don't
 
@@ -210,11 +186,11 @@ vector<vector<vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detect
         float useCS = params.at("useCSdet");
         float useSURF = params.at("useSURFdet");
 
-        for(uint32_t i=0; i<tempLabels.size();++i)
+        for(uint32_t i=0; i<labels.size();++i)
         {
-            for(uint32_t j=0; j<tempLabels[i].size(); ++j)
+            for(uint32_t j=0; j<labels[i].size(); ++j)
             {
-                vector<Score> scores=tempLabels[i][j].getScores();
+                vector<Score> scores=labels[i][j].getScores();
 
                 bool hogFound=false;
                 bool csFound=false;
@@ -233,25 +209,23 @@ vector<vector<vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detect
                 if(!surfFound && useSURF)
                 {
                     Score sc(1.0, surfName, useSURF);
-                    tempLabels[i][j].addScore(sc);
+                    labels[i][j].addScore(sc);
                 }
                 if(!csFound && useCS)
                 {
                     Score sc(1.0, csName, useCS);
-                    tempLabels[i][j].addScore(sc);
+                    labels[i][j].addScore(sc);
                 }
 
                 if(!hogFound && useHoG)
                 {
                     Score sc(1.0, hogName, useHoG);
-                    tempLabels[i][j].addScore(sc);
+                    labels[i][j].addScore(sc);
                 }
 
             }
-            sort(tempLabels[i].begin(), tempLabels[i].end());
+            sort(labels[i].begin(), labels[i].end());
         }
-
-        labels = tempLabels;
 
         allLabels.push_back(labels);
     }
@@ -659,7 +633,7 @@ int main (int argc, char **argv)
 //                gtLoader.drawSkeleton(vFrames[i], baseOutFolder+"/", Scalar(0,0,255), lineWidth);
 //        }
 
-        vector<vector<vector<LimbLabel> > > labels; //used for detetor tuning
+        vector<map<uint32_t, vector<LimbLabel> > > labels; //used for detetor tuning
         vector<Frame*> trimmed; //trim the sequence by removing starting and trailing non-keyframes
 
 
@@ -777,7 +751,7 @@ int main (int argc, char **argv)
             out << "\t" << trimmed[l]->getID() << endl;
             out << "\t[" << endl;
             //for every frame
-            vector<vector<LimbLabel> > frameLabels = labels[l]; //frame labels
+            auto frameLabels = labels[l]; //frame labels
             vector<vector<float> > frameErrors; //frame errors
             frameErrors = computeLabelErrorStatToGT(frameLabels, gtFrames[l]);
 

@@ -4,7 +4,7 @@ void ColorHistDetectorTest::train(vector <Frame*> _frames, map <string, float> p
 {
   ColorHistDetector::train(_frames, params);
 }
-vector <vector <LimbLabel> > ColorHistDetectorTest::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
+map <uint32_t, vector <LimbLabel> > ColorHistDetectorTest::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
 {
   return ColorHistDetector::detect(frame, params, limbLabels);
 }

@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-  map <uint32_t, vector <vector <LimbLabel>>> limbLabels;
+  map <uint32_t, map <uint32_t, vector <LimbLabel>>> limbLabels;
 
   bool chdRun = true;
   bool hdRun = true;

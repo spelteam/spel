@@ -4,7 +4,7 @@ void SURFDetectorTest::train(vector <Frame*> _frames, map <string, float> params
 {
   SurfDetector::train(_frames, params);
 }
-vector <vector <LimbLabel> > SURFDetectorTest::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
+map <uint32_t, vector <LimbLabel> > SURFDetectorTest::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
 {
   return SurfDetector::detect(frame, params, limbLabels);
 }
