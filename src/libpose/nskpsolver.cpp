@@ -197,6 +197,15 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
         //but only if the solve was successful, otherwise propagate from the root frame
         for(mstIter=mst.begin(); mstIter!=mst.end(); ++mstIter) //for each frame in the MST
         {
+            ///define the space
+            typedef opengm::DiscreteSpace<> Space;
+            ///define the model
+            typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
+
+            ///define the update rules
+            typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
+            ///define the inference algorithm
+            typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
             //t1 = high_resolution_clock::now();
 
@@ -476,7 +485,8 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
 
             // optimize (approximately)
             BeliefPropagation::VerboseVisitorType visitor;
-            bp.infer(visitor);
+            //bp.infer(visitor);
+            bp.infer();
 
             // obtain the (approximate) argmin
             vector<size_t> labeling(labels.size());

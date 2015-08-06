@@ -76,6 +76,7 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
 vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> params) //inherited virtual
 {
+
     float baseRotationStep = params.at("baseRotationStep");
 
     float partShiftCoeff = params.at("partShiftCoeff");
@@ -105,7 +106,18 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
 
 
     for (uint32_t sliceNumber = 0; sliceNumber < slices.size(); ++sliceNumber)
-    {		//for every slice, build a factor grph
+    {
+        ///define the space
+        typedef opengm::DiscreteSpace<> Space;
+        ///define the model
+        typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
+
+        ///define the update rules
+        typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
+        ///define the inference algorithm
+        typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
+
+        //for every slice, build a factor grph
         if (debugLevel >= 1)
             cout << "Interpolating slice " << sliceNumber << endl;
         vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
@@ -492,7 +504,8 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
 
         // optimize (approximately)
         BeliefPropagation::VerboseVisitorType visitor;
-        bp.infer(visitor);
+        //bp.infer(visitor);
+        bp.infer();
         //pass to solve function
 
         // obtain the (approximate) argmin
@@ -592,6 +605,15 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
 
 vector<Solvlet> TLPSSolver::solveWindowed(Sequence &sequence, map<string, float> params) //inherited virtual
 {
+    ///define the space
+    typedef opengm::DiscreteSpace<> Space;
+    ///define the model
+    typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
+
+    ///define the update rules
+    typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
+    ///define the inference algorithm
+    typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
     int tempWindowSize = params.at("temporalWindowSize");
     float baseRotationStep = params.at("baseRotationStep");

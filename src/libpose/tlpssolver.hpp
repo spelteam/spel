@@ -39,15 +39,7 @@ namespace SPEL
   class TLPSSolver : public Solver
   {
 
-    ///define the space
-    typedef opengm::DiscreteSpace<> Space;
-    ///define the model
-    typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
 
-    ///define the update rules
-    typedef BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
-    ///define the inference algorithm
-    typedef MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
   public:
     TLPSSolver(void);
