@@ -363,13 +363,11 @@ bool ProjectLoader::Load(string fileName)
   return true;
 }
 
-bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, int frameID)
+bool ProjectLoader::Save(map <uint32_t, vector <LimbLabel>> labels, string outFolder, int frameID)
 {
-  vector <vector <LimbLabel> >::iterator lls;
-  vector <LimbLabel>::iterator ls;
-  for (lls = labels.begin(); lls != labels.end(); ++lls)
+  for (auto lls = labels.begin(); lls != labels.end(); ++lls)
   {
-    if (lls->size() == 0)
+    if (lls->second.size() == 0)
     {
       continue;
     }
@@ -383,7 +381,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
     ss << "-";
     try
     {
-      ss << lls->begin()->getLimbID();
+      ss << lls->second.begin()->getLimbID();
     }
     catch (...)
     {
@@ -393,7 +391,7 @@ bool ProjectLoader::Save(vector <vector <LimbLabel>> labels, string outFolder, i
     outFileName += ss.str();
     outFile.open(outFileName);
     cerr << "Writing file: " << ss.str() << endl;
-    for (ls = lls->begin(); ls != lls->end(); ++ls)
+    for (auto ls = lls->second.begin(); ls != lls->second.end(); ++ls)
     {
       try
       {
@@ -777,7 +775,7 @@ bool ProjectLoader::drawSkeleton(Frame *frame, string outFolder, Scalar color, i
 
 
 
-bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
+bool ProjectLoader::Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth)
 {
   CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
@@ -885,14 +883,14 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
 
   temp.release();
 
-  for (vector <vector <LimbLabel> >::iterator lls = labels.begin(); lls != labels.end(); ++lls)
+  for (auto lls = labels.begin(); lls != labels.end(); ++lls)
   {
-    if (lls->size() == 0)
+    if (lls->second.size() == 0)
     {
       continue;
     }
     int j = 0;
-    for (vector <LimbLabel>::iterator ls = lls->begin(); ls != lls->end(); ++ls)
+    for (auto ls = lls->second.begin(); ls != lls->second.end(); ++ls)
     {
       Point2f p1, p2, p3, p4;
       vector <Point2f> polygon;
@@ -979,13 +977,13 @@ bool ProjectLoader::Draw(vector <vector <LimbLabel>> labels, Frame *frame, strin
       j++;
     }
   }
-  for (vector <vector <LimbLabel> >::iterator lls = labels.begin(); lls != labels.end(); ++lls)
+  for (auto lls = labels.begin(); lls != labels.end(); ++lls)
   {
-    if (lls->size() == 0)
+    if (lls->second.size() == 0)
     {
       continue;
     }
-    for (vector <LimbLabel>::iterator ls = lls->begin(); ls != lls->end(); ++ls)
+    for (auto ls = lls->second.begin(); ls != lls->second.end(); ++ls)
     {
       Point2f p1, p2, p3, p4;
       vector <Point2f> polygon;

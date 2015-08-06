@@ -38,8 +38,8 @@ public:
   ProjectLoader(string _curFolder);
   void SetCurFolder(string _curFolder);
   bool Load(string fileName);
-  bool Save(vector <vector <LimbLabel>> labels, string outFolder, int frameID);
-  bool Draw(vector <vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth);
+  bool Save(map <uint32_t, vector <LimbLabel>> labels, string outFolder, int frameID);
+  bool Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth);
   bool drawSkeleton(Frame *frame, string outFolder, Scalar color, int lineWidth);
   bool drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth);
   bool drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentframe, string outFolder, Scalar color, int lineWidth);  

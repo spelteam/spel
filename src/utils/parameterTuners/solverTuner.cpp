@@ -626,7 +626,7 @@ int main (int argc, char **argv)
                 prevSolveSize=finalSolve.size(); //set size of the final solve
 
                 vector<Solvlet> nskpSolve, tlpsSolve;
-                if(params.at("withNSKP"))
+                if(params.at("withNSKP")) //if it's with NSKP, first the NSKP stuff starts, then TLPS gets called inside it
                 {
                     //do an iterative NSKP solve
                     nskpSolve = nSolver.solve(seq, params, ism);
@@ -634,14 +634,16 @@ int main (int argc, char **argv)
                     for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
                         finalSolve.push_back(*s);
                 }
+                else //otherwise, only call TLPS
+                {
+                    //then, do a temporal solve
+                    seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
 
-                //then, do a temporal solve
-                seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
+                    tlpsSolve = tSolver.solve(seq, params);
 
-                tlpsSolve = tSolver.solve(seq, params);
-
-                for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
-                    finalSolve.push_back(*s);
+                    for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
+                        finalSolve.push_back(*s);
+                }
                 numIters++;
 
             } while(finalSolve.size()>prevSolveSize && numIters<params.at("hybridIters")); //don't do more iters than necessary

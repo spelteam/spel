@@ -491,7 +491,7 @@ namespace SPEL
   }
 
   // Returns a labels vector of possible body parts position
-  vector <vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
+  map <uint32_t, vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
   {
     const string sUseCSdet = "useCSdet";
 

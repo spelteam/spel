@@ -517,12 +517,12 @@ namespace SPEL
     D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
     map<string, float> params;
     D.train(frames, params);
-    vector<vector<LimbLabel>> limbLabels;
+    map<uint32_t, vector<LimbLabel>> limbLabels;
     map <string, float> detectParams;
     limbLabels = D.detect(frames[1], detectParams, limbLabels);
 
     // sort "limbLabels" by limb id
-    sort(limbLabels.begin(), limbLabels.end(), _LimbIDCompare());
+    //sort(limbLabels.begin(), limbLabels.end(), _LimbIDCompare());
 
     // Output top of "limbLabels" into text file
     fout << "\nTop Labels, sorted by part id:\n\n";

@@ -140,13 +140,13 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
             detectors[i]->train(trainingFrames, params);
         }
 
-        vector<vector<vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
+        vector<map<uint32_t, vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
 
         //initialise first level
         for (uint32_t i = 0; i < seqSlice.size(); ++i) // access by reference, the type of i is int&
         {
             //init detections to contain all detects for the sequence slice
-            detections.push_back(vector<vector<LimbLabel> >());
+            detections.push_back(map<uint32_t, vector<LimbLabel> >());
         }
 
         //first do the detections, and store them
@@ -157,7 +157,7 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
 
             cerr << "Detecting on frame " << seqSlice[currentFrame]->getID() << endl;
 
-            vector<vector<LimbLabel> > labels, tempLabels;
+            map<uint32_t, vector<LimbLabel> > labels;
 
             Skeleton skeleton = seqSlice[currentFrame]->getSkeleton();
 
@@ -201,18 +201,7 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
             for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
             {
                 labels = detectors[i]->detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
-            }
-
-            //now sort them in the correct oder
-            for (uint32_t i = 0; i < labels.size(); ++i)
-            {
-                for (uint32_t j = 0; j < labels.size(); ++j)
-                {
-                    if (labels[j].at(0).getLimbID() == i)
-                        tempLabels.push_back(labels[j]);
-                }
-            }
-            labels = tempLabels;
+            }            
 
             float maxPartCandidates=params.at("maxPartCandidates");
             //now take the top percentage of all labels
@@ -310,7 +299,7 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
             //construct the image score cost factors
             //label score cost
             cerr << "Computing Factors at Frame " << seqSlice[currentFrame]->getID() << endl;
-            vector<vector<LimbLabel> > labels = detections[currentFrame];
+            auto labels = detections[currentFrame];
             for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter) //for each of the detected parts
             {
                 vector<Score> scores = labels[partIter->getPartID()].at(0).getScores();

@@ -10,7 +10,7 @@ namespace SPEL
 
   float Detector::getBoneWidth(float length, BodyPart bodyPart)
   {
-    float ratio = bodyPart.getLWRatio();
+    auto ratio = bodyPart.getLWRatio();
     if (ratio == 0)
     {
       stringstream ss;
@@ -26,9 +26,7 @@ namespace SPEL
   POSERECT <Point2f> Detector::getBodyPartRect(BodyPart bodyPart, Point2f j0, Point2f j1, Size blockSize)
   {
     Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-    //float x = boxCenter.x;
-    //float y = boxCenter.y;
-    float boneLength = getBoneLength(j0, j1);
+    auto boneLength = getBoneLength(j0, j1);
     if (blockSize.width > 0)
     {
       if (boneLength < blockSize.width)
@@ -40,7 +38,7 @@ namespace SPEL
         boneLength = boneLength + blockSize.width - ((int)boneLength % blockSize.width) - 1;
       }
     }
-    float boxWidth = getBoneWidth(boneLength, bodyPart);
+    auto boxWidth = getBoneWidth(boneLength, bodyPart);
     if (blockSize.height > 0)
     {
       if (boxWidth < blockSize.height)
@@ -52,19 +50,12 @@ namespace SPEL
         boxWidth = boxWidth + blockSize.width - ((int)boxWidth % blockSize.height) - 1;
       }
     }
-    float angle = float(PoseHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    auto angle = static_cast <float> (PoseHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     Point2f c1, c2, c3, c4, polyCenter;
     c1 = Point2f(0.f, 0.5f * boxWidth);
     c2 = Point2f(boneLength, 0.5f * boxWidth);
     c3 = Point2f(boneLength, -0.5f * boxWidth);
     c4 = Point2f(0.f, -0.5f * boxWidth);
-
-    //  polyCenter = Point2f(boneLength * 0.5f, 0.f);
-    //  c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
-    //  c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
-    //  c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
-    //  c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
-
 
     c1 = PoseHelper::rotatePoint2D(c1, Point2f(0, 0), angle);
     c2 = PoseHelper::rotatePoint2D(c2, Point2f(0, 0), angle);
@@ -83,23 +74,23 @@ namespace SPEL
 
   Mat Detector::rotateImageToDefault(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
   {
-    Mat partImage = Mat(size, CV_8UC3, Scalar(0, 0, 0));
-    Point2f center = initialRect.GetCenter<Point2f>();
-    Point2f newCenter = Point2f(0.5f * size.width, 0.5f * size.height);
-    int width = imgSource.size().width; // !!! For testing
-    int height = imgSource.size().height; // !!! For testing
-    for (int32_t x = 0; x < size.width; x++)
+    auto partImage = Mat(size, CV_8UC3, Scalar(0, 0, 0));
+    auto center = initialRect.GetCenter<Point2f>();
+    auto newCenter = Point2f(0.5f * size.width, 0.5f * size.height);
+    auto width = imgSource.size().width; // !!! For testing
+    auto height = imgSource.size().height; // !!! For testing
+    for (auto x = 0; x < size.width; x++)
     {
-      for (int32_t y = 0; y < size.height; y++)
+      for (auto y = 0; y < size.height; y++)
       {
-        Point2f p = Point2f((float)x, (float)y);
+        auto p = Point2f((float)x, (float)y);
         try
         {
           p = PoseHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
           if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
             if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
             {
-              Vec3b color = imgSource.at<Vec3b>((int)round(p.y), (int)round(p.x));
+              auto color = imgSource.at<Vec3b>((int)round(p.y), (int)round(p.x));
               partImage.at<Vec3b>(y, x) = color;
             }
         }
@@ -117,7 +108,7 @@ namespace SPEL
     return partImage;
   }
 
-  vector <vector <LimbLabel>> Detector::merge(vector <vector <LimbLabel>> first, vector <vector <LimbLabel>> second)
+  map <uint32_t, vector <LimbLabel>> Detector::merge(map <uint32_t, vector <LimbLabel>> first, map <uint32_t, vector <LimbLabel>> second)
   {
     if (first.size() != second.size() && first.size() > 0 && second.size() > 0)
     {
@@ -136,54 +127,54 @@ namespace SPEL
     {
       return first;
     }
-    //  if(first==second) //if two identical vectors are thrown in
-    //      return first;
 
-    map<string, float> detectorNames;
+    map <string, float> detectorNames;
 
-    vector<vector<LimbLabel>> result;
+    map <uint32_t, vector <LimbLabel>> result;
 
-    for (vector <vector <LimbLabel>>::iterator part = first.begin(); part != first.end(); ++part) //for each part
+    for (auto part : first) //for each part
     {
       vector<LimbLabel> partResult;
 
       //iterate through first list, compare to second list, any labels that are matched are combined and pushed
       //any labels that are not found, are added
-      for (vector<LimbLabel>::iterator firstIter = part->begin(); firstIter != part->end(); ++firstIter) //for each label in first
+      for (auto firstIter : part.second) //for each label in first
       {
-        bool isFound = false;
+        auto isFound = false;
 
         LimbLabel foundLabel;
-        for (vector <vector <LimbLabel>>::iterator s = second.begin(); s != second.end(); ++s)
+        try
         {
-          if (firstIter->getLimbID() == s->front().getLimbID())
+          auto s = second.at(part.first);
+          for (auto secondIter : s)
           {
-            for (vector<LimbLabel>::iterator secondIter = s->begin(); secondIter != s->end(); ++secondIter) //for each label second
+            if (firstIter.getLimbID() == secondIter.getLimbID() && firstIter.getPolygon() == secondIter.getPolygon())
             {
-              if (firstIter->getPolygon() == secondIter->getPolygon()) //if they have the same polygon
-              {
-                isFound = true;
-                foundLabel = *secondIter;
-                break;
-              }
+              isFound = true;
+              foundLabel = secondIter;
+              break;
             }
           }
+        }
+        catch (...)
+        {
+          isFound = false;
         }
 
         if (isFound) //if label was found, create a copy, and add a score from other label to it
         {
-          LimbLabel newLabel(*firstIter);
-          LimbLabel sl(foundLabel);
+          auto newLabel(firstIter);
+          auto sl(foundLabel);
           //check any score differences, and push them
-          vector<Score> secondScores = sl.getScores();
-          vector<Score> firstScores = newLabel.getScores();
-          for (vector<Score>::iterator i = secondScores.begin(); i != secondScores.end(); ++i)
-          {
-            bool scoreFound = false;
+          auto secondScores = sl.getScores();
+          auto firstScores = newLabel.getScores();
 
-            for (vector<Score>::iterator j = firstScores.begin(); j != firstScores.end(); ++j)
+          for (auto i : secondScores)
+          {
+            auto scoreFound = false;
+            for (auto j : firstScores)
             {
-              if ((*i) == (*j))
+              if (i == j)
               {
                 scoreFound = true;
                 break;
@@ -191,106 +182,98 @@ namespace SPEL
             }
 
             if (!scoreFound) //add if not found
-              newLabel.addScore(*i);
+              newLabel.addScore(i);
           }
           //emplace scores
-          vector <Score> newLabelScores = newLabel.getScores();
-          for (vector <Score>::iterator i = newLabelScores.begin(); i != newLabelScores.end(); ++i)
-            detectorNames.emplace(i->getDetName(), i->getCoeff());
+          auto newLabelScores = newLabel.getScores();
+          for (auto i : newLabelScores)
+            detectorNames.emplace(i.getDetName(), i.getCoeff());
           newLabel.setScores(newLabelScores);
           partResult.push_back(newLabel);
 
         }
         else //if label wasn't found, create and push to vector
         {
-          LimbLabel newLabel(*firstIter);
-
+          auto newLabel(firstIter);
           //emplace scores
-          vector <Score> newLabelScores = newLabel.getScores();
-          for (vector <Score>::iterator i = newLabelScores.begin(); i != newLabelScores.end(); ++i)
-            detectorNames.emplace(i->getDetName(), i->getCoeff());
+          auto newLabelScores = newLabel.getScores();
+          for (auto i : newLabelScores)
+            detectorNames.emplace(i.getDetName(), i.getCoeff());
           newLabel.setScores(newLabelScores);
           partResult.push_back(newLabel);
         }
       }
 
       //now iterate through the second list, and push back any labels that are not found in result vector
-      for (vector <vector <LimbLabel>>::iterator s = second.begin(); s != second.end(); ++s)
+      try
       {
-        if ((part->front().getLimbID() == s->front().getLimbID()))
+        auto s = second.at(part.first);
+
+        for (auto secondIter : s)
         {
-          for (vector<LimbLabel>::iterator secondIter = s->begin(); secondIter != s->end(); ++secondIter) //for each label in second
+          auto isFound = false;
+          for (auto resIter : partResult)
           {
-            bool isFound = false;
-
-            for (vector<LimbLabel>::iterator resIter = partResult.begin(); resIter != partResult.end(); ++resIter)
+            if (secondIter.getLimbID() == resIter.getLimbID() && secondIter.getPolygon() == resIter.getPolygon())
             {
-              if (resIter->getPolygon() == secondIter->getPolygon())
-              {
-                isFound = true;
-                break;
-              }
+              isFound = true;
+              break;
             }
-
-            if (!isFound) //if label not found, push it to result vector
-            {
-              LimbLabel newLabel(*secondIter);
-              vector <Score> newLabelScores = newLabel.getScores();
-              //emplace scores
-              for (vector <Score>::iterator i = newLabelScores.begin(); i != newLabelScores.end(); ++i)
-                detectorNames.emplace(i->getDetName(), i->getCoeff());
-              newLabel.setScores(newLabelScores);
-              partResult.push_back(newLabel);
-            }
+          }
+          if (!isFound) //if label not found, push it to result vector
+          {
+            auto newLabel(secondIter);
+            auto newLabelScores = newLabel.getScores();
+            //emplace scores
+            for (auto i : newLabelScores)
+              detectorNames.emplace(i.getDetName(), i.getCoeff());
+            newLabel.setScores(newLabelScores);
+            partResult.push_back(newLabel);
           }
         }
       }
-      result.push_back(partResult);
+      catch (...)
+      {
+      }
+
+      result.insert(pair < uint32_t, vector <LimbLabel>>(part.first, partResult));
     }
 
     //now the vectors are merged, but there may be score mismatches
     //unique names of detectors along with their params that are present are stored in detectorNames (duplicates for same detector are ignored)
 
     //look at each label, and add a score of 1.0 for each missing
-    for (vector <vector <LimbLabel>>::iterator part = first.begin(); part != first.end(); ++part) //for each part
+
+    for (auto r = result.begin(); r != result.end(); ++r)
     {
-      for (vector <vector <LimbLabel>>::iterator r = result.begin(); r != result.end(); ++r)
+      for (auto l = r->second.begin(); l != r->second.end(); ++l) //for each label
       {
-        if (part->front().getLimbID() == r->front().getLimbID())
+        auto scores = l->getScores();
+
+        for (auto m : detectorNames) //for each detector, check whether label has a score for it
         {
-          for (vector<LimbLabel>::iterator l = r->begin(); l != r->end(); ++l) //for each label
+          auto detFound = false;
+
+          for (auto i = scores.begin(); i != scores.end(); ++i)
           {
-            vector<Score> scores = l->getScores();
-
-            for (map<string, float>::iterator m = detectorNames.begin(); m != detectorNames.end(); ++m) //for each detector, check whether label has a score for it
+            if (m.first == i->getDetName()) //name
             {
-              bool detFound = false;
-
-              for (vector <Score>::iterator i = scores.begin(); i != scores.end(); ++i)
-              {
-                if (m->first == i->getDetName()) //name
-                {
-                  if (i->getScore() == -1) //change all -1 to 1
-                    i->setScore(1.0);
-                  detFound = true;
-                  break;
-                }
-              }
-              if (!detFound) //this detector score is missing
-              {
-                Score newScore(1.0, m->first, m->second);
-                scores.push_back(newScore);
-              }
+              if (i->getScore() == -1) //change all -1 to 1
+                i->setScore(1.0f);
+              detFound = true;
+              break;
             }
-            l->setScores(scores);
           }
+          if (!detFound) //this detector score is missing
+            scores.push_back(Score(1.0f, m.first, m.second));
         }
+        l->setScores(scores);
       }
     }
     //finally, sort the labels
-    for (vector <vector <LimbLabel>>::iterator l = result.begin(); l != result.end(); ++l)
+    for (auto l = result.begin(); l != result.end(); ++l)
     {
-      sort(l->begin(), l->end());
+      sort(l->second.begin(), l->second.end());
     }
 
     return result;
@@ -298,14 +281,13 @@ namespace SPEL
 
   LimbLabel Detector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, string detectorName, float _usedet)
   {
-    vector <Score> s;
-    Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
-    float rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
-    POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1);
+    auto boxCenter = j0 * 0.5 + j1 * 0.5;
+    auto rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    auto rect = getBodyPartRect(bodyPart, j0, j1);
 
-    float score = compare();
-    Score sc(score, detectorName, _usedet);
-    s.push_back(sc);
+    auto score = compare();
+    vector <Score> s;
+    s.push_back(Score(score, detectorName, _usedet));
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
   }
 
@@ -319,27 +301,27 @@ namespace SPEL
     return 0;
   }
 
-  vector <vector <LimbLabel> > Detector::detect(Frame *frame, map <string, float> params, vector <vector <LimbLabel>> limbLabels)
+  map <uint32_t, vector <LimbLabel>> Detector::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
   {
-    float searchDistCoeff = 0.5;
+    auto searchDistCoeff = 0.5f;
     const string sSearchDistCoeff = "searchDistCoeff";
 
-    float minTheta = 90; // border for search
+    auto minTheta = 90.0f; // border for search
     const string sMinTheta = "minTheta";
 
-    float maxTheta = 100; // border for search
+    auto maxTheta = 100.0f; // border for search
     const string sMaxTheta = "maxTheta";
 
-    float stepTheta = 10; // angular step of search
+    auto stepTheta = 10.0f; // angular step of search
     const string sStepTheta = "stepTheta";
 
-    uint32_t uniqueLocationCandidates = 4; // limiting the choice of the solutions number for each bodypart
+    auto uniqueLocationCandidates = 4.0f; // limiting the choice of the solutions number for each bodypart
     const string sUniqueLocationCandidates = "uniqueLocationCandidates";
 
-    float scaleParam = 1; // scaling coefficient
+    auto scaleParam = 1.0f; // scaling coefficient
     const string sScaleParam = "scaleParam";
 
-    float searchDistCoeffMult = 1.25;
+    auto searchDistCoeffMult = 1.25f;
     const string sSearchDistCoeffMult = "searchDistCoeffMult";
 
 #ifdef DEBUG
@@ -347,15 +329,15 @@ namespace SPEL
 #else
     uint8_t debugLevel = 1;
 #endif // DEBUG
-    string sDebugLevel = "debugLevel";
+    const string sDebugLevel = "debugLevel";
 
-    float rotationThreshold = 0.025f;
+    auto rotationThreshold = 0.025f;
     const string sRotationThreshold = "rotationThreshold";
 
-    float isWeakThreshold = 0.1f;
+    auto isWeakThreshold = 0.1f;
     const string sisWeakThreshold = "isWeakThreshold";
 
-    float searchStepCoeff = 0.2f;
+    auto searchStepCoeff = 0.2f;
     const string sSearchStepCoeff = "searchStepCoeff";
 
     // first we need to check all used params
@@ -386,7 +368,7 @@ namespace SPEL
     searchStepCoeff = params.at(sSearchStepCoeff);
     debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
-    int originalSize = frame->getFrameSize().height;
+    auto originalSize = frame->getFrameSize().height;
 
     Frame *workFrame = 0;
     if (frame->getFrametype() == KEYFRAME)
@@ -398,19 +380,19 @@ namespace SPEL
 
     workFrame = frame->clone(workFrame);
 
-    float resizeFactor = workFrame->Resize(maxFrameHeight);
+    auto resizeFactor = workFrame->Resize(maxFrameHeight);
 
-    vector <vector <LimbLabel> > t;
-    Skeleton skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
-    tree <BodyPart> partTree = skeleton.getPartTree(); // copy tree of bodypart from the skeleton
+    map <uint32_t, vector <LimbLabel> > t;
+    auto skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
+    auto partTree = skeleton.getPartTree(); // copy tree of bodypart from the skeleton
 
-    Mat maskMat = workFrame->getMask(); // copy mask from the frame
+    auto maskMat = workFrame->getMask(); // copy mask from the frame
 
     stringstream detectorName;
     detectorName << getID();
 
     // For all body parts
-    for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
+    for (auto iteratorBodyPart : partTree)
     { //Temporary variables
       vector <LimbLabel> labels;
       vector <LimbLabel> sortedLabels;
@@ -418,8 +400,8 @@ namespace SPEL
 
       try
       {
-        j0 = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getImageLocation(); // copy current bodypart parent joint
-        j1 = skeleton.getBodyJoint(iteratorBodyPart->getChildJoint())->getImageLocation(); // copy current bodypart child joint
+        j0 = skeleton.getBodyJoint(iteratorBodyPart.getParentJoint())->getImageLocation(); // copy current bodypart parent joint
+        j1 = skeleton.getBodyJoint(iteratorBodyPart.getChildJoint())->getImageLocation(); // copy current bodypart child joint
       }
       catch (...)
       {
@@ -430,13 +412,13 @@ namespace SPEL
         throw logic_error(ss.str());
       }
 
-      float boneLength = getBoneLength(j0, j1); // distance between nodes
-      float boxWidth = getBoneWidth(boneLength, *iteratorBodyPart); // current body part polygon width
-      Point2f direction = j1 - j0; // direction of bodypart vector
-      float theta = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
-      float minDist = boxWidth * params.at(sSearchStepCoeff); // linear step of searching
+      auto boneLength = getBoneLength(j0, j1); // distance between nodes
+      auto boxWidth = getBoneWidth(boneLength, iteratorBodyPart); // current body part polygon width
+      auto direction = j1 - j0; // direction of bodypart vector
+      auto theta = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
+      auto minDist = boxWidth * params.at(sSearchStepCoeff); // linear step of searching
       if (minDist < 2) minDist = 2; // the minimal linear step
-      float searchDistance = iteratorBodyPart->getSearchRadius();
+      auto searchDistance = iteratorBodyPart.getSearchRadius();
       try
       {
         if (searchDistance <= 0)
@@ -452,15 +434,15 @@ namespace SPEL
       }
       if (searchDistance <= 0)
         searchDistance = minDist + 1;
-      Point2f suggestStart = 0.5 * j1 + 0.5 * j0; // reference point - the bodypart center
-      float searchXMin = suggestStart.x - searchDistance * 0.5f;
-      float searchXMax = suggestStart.x + searchDistance * 0.5f;
-      float searchYMin = suggestStart.y - searchDistance * 0.5f;
-      float searchYMax = suggestStart.y + searchDistance * 0.5f;
+      auto suggestStart = 0.5 * j1 + 0.5 * j0; // reference point - the bodypart center
+      auto searchXMin = suggestStart.x - searchDistance * 0.5f;
+      auto searchXMax = suggestStart.x + searchDistance * 0.5f;
+      auto searchYMin = suggestStart.y - searchDistance * 0.5f;
+      auto searchYMax = suggestStart.y + searchDistance * 0.5f;
       // Scan the area around the reference point
-      for (float x = searchXMin; x < searchXMax; x += minDist)
+      for (auto x = searchXMin; x < searchXMax; x += minDist)
       {
-        for (float y = searchYMin; y < searchYMax; y += minDist)
+        for (auto y = searchYMin; y < searchYMax; y += minDist)
         {
           if (x < maskMat.cols && y < maskMat.rows && x >= 0 && y >= 0)
           {
@@ -477,16 +459,16 @@ namespace SPEL
                 cerr << ERROR_HEADER << ss.str() << endl;
               throw logic_error(ss.str());
             }
-            bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
+            auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
             { // Scan the possible rotation zone
-              float deltaTheta = abs(iteratorBodyPart->getRotationSearchRange());// + abs(rotationThreshold);
-              float maxLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
-              float minLocalTheta = iteratorBodyPart->getRotationSearchRange() == 0 ? minTheta : deltaTheta;
-              for (float rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
+              auto deltaTheta = abs(iteratorBodyPart.getRotationSearchRange());// + abs(rotationThreshold);
+              auto maxLocalTheta = iteratorBodyPart.getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
+              auto minLocalTheta = iteratorBodyPart.getRotationSearchRange() == 0 ? minTheta : deltaTheta;
+              for (auto rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
               {
                 // build  the vector label
-                sortedLabels.push_back(generateLabel(boneLength, rot, x, y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
+                sortedLabels.push_back(generateLabel(boneLength, rot, x, y, iteratorBodyPart, workFrame)); // add label to current bodypart labels
               }
             }
           }
@@ -494,13 +476,13 @@ namespace SPEL
       }
       if (sortedLabels.size() == 0) // if labels for current body part is not builded
       {
-        for (float rot = theta - minTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
+        for (auto rot = theta - minTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
         {
           // build  the vector label
-          sortedLabels.push_back(generateLabel(boneLength, rot, suggestStart.x, suggestStart.y, *iteratorBodyPart, workFrame)); // add label to current bodypart labels
+          sortedLabels.push_back(generateLabel(boneLength, rot, suggestStart.x, suggestStart.y, iteratorBodyPart, workFrame)); // add label to current bodypart labels
         }
       }
-      float uniqueLocationCandidates = 0;
+      auto uniqueLocationCandidates = .0f;
       try
       {
         uniqueLocationCandidates = params.at(sUniqueLocationCandidates); // copy the value from input parameters
@@ -517,9 +499,9 @@ namespace SPEL
       {
         sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
         Mat locations(workFrame->getFrameSize().height, workFrame->getFrameSize().width, DataType<uint32_t>::type); // create the temporary matrix
-        for (int32_t i = 0; i < workFrame->getFrameSize().width; i++)
+        for (auto i = 0; i < workFrame->getFrameSize().width; i++)
         {
-          for (int32_t j = 0; j < workFrame->getFrameSize().height; j++)
+          for (auto j = 0; j < workFrame->getFrameSize().height; j++)
           {
             try
             {
@@ -540,27 +522,18 @@ namespace SPEL
 
         if (limbLabels.size() > 0)
         {
-          vector <LimbLabel> partLabels;
-          for (vector <vector <LimbLabel>>::iterator partLabel = limbLabels.begin(); partLabel != limbLabels.end(); ++partLabel)
+          if (sortedLabels.size() > 0)
           {
             try
             {
-              if (partLabel->size() > 0)
-              {
-                if (sortedLabels.size() > 0 && partLabel->front().getLimbID() == sortedLabels.front().getLimbID())
-                {
-                  for (vector <LimbLabel>::iterator generated = partLabel->begin(); generated != partLabel->end(); ++generated)
-                  {
-                    generatedPartLabels.push_back(*generated);
-                  }
-                  break;
-                }
-              }
+              auto partLabel = limbLabels.at(sortedLabels.front().getLimbID());
+              for (auto generated : partLabel)
+                generatedPartLabels.push_back(generated);
             }
             catch (...)
             {
               stringstream ss;
-              ss << "Can't find generated limb label";
+              ss << "Can't find generated limb label " << sortedLabels.front().getLimbID();
               if (debugLevelParam >= 1)
                 cerr << ERROR_HEADER << ss.str() << endl;
             }
@@ -568,25 +541,18 @@ namespace SPEL
         }
 
         // For all "sortedLabels"
-        for (uint32_t i = 0; i < sortedLabels.size(); i++)
+        for (auto i : sortedLabels)
         {
-          bool bFound = false;
+          auto bFound = false;
           try
           {
-            if (generatedPartLabels.size() > 0)
+            for (auto generatedLabels : generatedPartLabels)
             {
-              for (vector <LimbLabel>::iterator generatedLabels = generatedPartLabels.begin(); generatedLabels != generatedPartLabels.end(); ++generatedLabels)
-              {
-                vector <Point2f> first = sortedLabels.at(i).getPolygon();
-                vector <Point2f> second = generatedLabels->getPolygon();
-                if (first.size() == second.size())
-                {
-                  for (uint32_t polygonSize = 0; polygonSize < first.size(); polygonSize++)
-                  {
-                    bFound = bFound && first.at(polygonSize) == second.at(polygonSize);
-                  }
-                }
-              }
+              auto first = i.getPolygon();
+              auto second = generatedLabels.getPolygon();
+              if (first.size() == second.size())
+                for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
+                  bFound = bFound && first.at(polygonSize) == second.at(polygonSize);
             }
           }
           catch (...)
@@ -598,20 +564,20 @@ namespace SPEL
           }
 
 
-          uint32_t x = (uint32_t)sortedLabels.at(i).getCenter().x; // copy center coordinates of current label
-          uint32_t y = (uint32_t)sortedLabels.at(i).getCenter().y; // copy center coordinates of current label
+          auto x = (uint32_t)i.getCenter().x; // copy center coordinates of current label
+          auto y = (uint32_t)i.getCenter().y; // copy center coordinates of current label
           try
           {
             if (bFound || locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
             {
               try
               {
-                labels.push_back(sortedLabels.at(i)); // add the current label in the resulting set of labels
+                labels.push_back(i); // add the current label in the resulting set of labels
               }
               catch (...)
               {
                 stringstream ss;
-                ss << "Maybe there is no value of sortedLabels at " << "[" << i << "]";
+                ss << "Maybe there is no value of sortedLabels";
                 if (debugLevelParam >= 1)
                   cerr << ERROR_HEADER << ss.str() << endl;
                 throw logic_error(ss.str());
@@ -633,59 +599,49 @@ namespace SPEL
 
         // Generate LimbLabels for left orphaned labels
 
-        if (limbLabels.size() > 0)
+        for (auto partLabel : limbLabels)
         {
-          vector <LimbLabel> partLabels;
-          for (vector <vector <LimbLabel>>::iterator partLabel = limbLabels.begin(); partLabel != limbLabels.end(); ++partLabel)
+          try
           {
-            try
+            if (labels.size() == 0 || partLabel.first == labels.front().getLimbID())
             {
-              if (partLabel->size() > 0)
+              for (auto potentiallyOrphanedLabels : partLabel.second)
               {
-                if (labels.size() == 0 || partLabel->front().getLimbID() == labels.front().getLimbID())
+                auto bFound = false;
+                try
                 {
-                  for (vector <LimbLabel>::iterator potentiallyOrphanedLabels = partLabel->begin(); potentiallyOrphanedLabels != partLabel->end(); ++potentiallyOrphanedLabels)
+                  for (auto generatedLabels : labels)
                   {
-                    bool bFound = false;
-                    try
+                    auto potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels.getPolygon();
+                    auto generatedLabelsPolygon = generatedLabels.getPolygon();
+                    if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
                     {
-                      if (labels.size() > 0)
+                      for (auto polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
                       {
-                        for (vector <LimbLabel>::iterator generatedLabels = labels.begin(); generatedLabels != labels.end(); ++generatedLabels)
-                        {
-                          vector <Point2f> potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels->getPolygon();
-                          vector <Point2f> generatedLabelsPolygon = generatedLabels->getPolygon();
-                          if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
-                          {
-                            for (uint32_t polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
-                            {
-                              bFound = bFound && potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize);
-                            }
-                          }
-                        }
+                        bFound = bFound && potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize);
                       }
                     }
-                    catch (...)
-                    {
-                      stringstream ss;
-                      ss << "Can't find generated limb label";
-                      if (debugLevelParam >= 1)
-                        cerr << ERROR_HEADER << ss.str() << endl;
-                    }
-                    if (!bFound)
-                      labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels->getAngle(), potentiallyOrphanedLabels->getCenter().x, potentiallyOrphanedLabels->getCenter().y, *iteratorBodyPart, workFrame));
                   }
-                  break;
                 }
+                catch (...)
+                {
+                  stringstream ss;
+                  ss << "Can't find generated limb label";
+                  if (debugLevelParam >= 1)
+                    cerr << ERROR_HEADER << ss.str() << endl;
+                }
+                if (!bFound)
+                  labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels.getAngle(), potentiallyOrphanedLabels.getCenter().x, potentiallyOrphanedLabels.getCenter().y, iteratorBodyPart, workFrame));
               }
+              break;
             }
-            catch (...)
-            {
-              stringstream ss;
-              ss << "Something went wrong. Just keep going";
-              if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;              
-            }
+          }
+          catch (...)
+          {
+            stringstream ss;
+            ss << "Something went wrong. Just keep going";
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
           }
         }
 
@@ -695,7 +651,7 @@ namespace SPEL
       }
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
-        t.push_back(labels); // add current point labels
+        t.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
     }
     maskMat.release();
 
@@ -717,11 +673,11 @@ namespace SPEL
   LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame)
   {
     // Create a new label vector and build it label
-    Point2f p0 = Point2f(0, 0); // the point of unit vector
-    Point2f p1 = Point2f(1.0, 0); // the point of unit vector
+    auto p0 = Point2f(0, 0); // the point of unit vector
+    auto p1 = Point2f(1.0, 0); // the point of unit vector
     p1 *= boneLength; // change the vector length 
     p1 = PoseHelper::rotatePoint2D(p1, p0, rotationAngle); // rotate the vector
-    Point2f mid = 0.5 * p1; // center of the vector
+    auto mid = 0.5 * p1; // center of the vector
     p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
     p0 = Point2f(x, y) - mid; // shift the vector to current point
 

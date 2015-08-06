@@ -44,7 +44,7 @@ namespace SPEL
   public:
     TLPSSolver(void);
     ///inherited virtual
-    ~TLPSSolver(void);
+    virtual ~TLPSSolver(void);
     ///inherited virtual
     vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual
