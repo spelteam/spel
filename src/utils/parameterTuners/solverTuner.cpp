@@ -386,21 +386,26 @@ int main (int argc, char **argv)
                 {
                     int frameID=fi->x;
 
-                    //delete vFrames[requestedKeyframes[i]]; //free memory
-                    vFrames[frameID] = new Keyframe(); //assign new keyframe
-                    //copy all the data
-                    vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
-                    vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                    vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                    vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+                    if(frameID<vFrames.size())
+                    {
+                        delete vFrames[frameID]; //free memory
+                        vFrames[frameID] = new Keyframe(); //assign new keyframe
+                        //copy all the data
+                        vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+                        vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                        vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
+                        vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
 
-                    actualKeyframes.push_back(frameID);
+                        actualKeyframes.push_back(frameID);
+                    }
                 }
                 //always add one in the end and the start
                 if(vFrames[0]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
                 {
                     vFrames[0] = new Keyframe(); //assign new keyframe
                     //copy all the data
+
+                    delete vFrames[0];
 
                     vFrames[0]->setSkeleton(gtFrames[0]->getSkeleton());
                     vFrames[0]->setID(gtFrames[0]->getID());
@@ -412,6 +417,7 @@ int main (int argc, char **argv)
                 //always add one at the end (extra)
                 if(vFrames[vFrames.size()-1]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
                 {
+                    delete vFrames[vFrames.size()-1];
                     vFrames[vFrames.size()-1] = new Keyframe(); //assign new keyframe
                     //copy all the data
 
@@ -709,10 +715,6 @@ int main (int argc, char **argv)
         errors.release();
 
         //delete sequence
-        for(uint32_t i=0; i<vFrames.size(); ++i)
-        {
-            delete vFrames[i];
-        }
         vFrames.clear();
 
         auto end = chrono::steady_clock::now();

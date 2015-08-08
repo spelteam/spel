@@ -592,6 +592,7 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
                 lockframe->setSkeleton(skel);
                 lockframe->setParentFrameID(parentFrameID);
 
+                delete frames[thisFrameID]; //remove the existing frame
                 frames[thisFrameID] = lockframe;
             }
         }

@@ -661,6 +661,10 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
             delete frames[lockframes[i]->getID()]; //delete the frame currently there, and replace with lockframe
             frames[lockframes[i]->getID()] = lockframes.at(i); //make pointers point to the correct objects
             solvlets.push_back(bestSolves[i].solvlet);
+        } //unless this lockframe replaced something in the original vector, delte it
+        else
+        {
+            delete lockframes[i];
         }
     }
 
