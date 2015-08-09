@@ -648,8 +648,8 @@ int main (int argc, char **argv)
         params.emplace("grayImages", 1); // use grayscale images for HoG?
 
         //solver settings
-        params.emplace("nskpIters", 1); //do as many NSKP iterations as is useful at each run
-        params.emplace("nskpLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+        params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
+        params.emplace("nskpLockframeThreshold", 0.49); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
         params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
 
         params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
@@ -674,7 +674,7 @@ int main (int argc, char **argv)
         params.emplace("uniqueLocationCandidates", 360);
         params.emplace("debugLevel", 0);
 
-        params.emplace("mstThresh", 3.2); //use outliners that are at least 3 stddev from the mean
+        params.emplace("mstThresh", 2.5); //use outliners that are at least 2.5 stddev from the mean
         params.emplace("withTLPS", 0); //don't use TLPS after NSKP by default
         params.emplace("hybridIters", 1);
 
