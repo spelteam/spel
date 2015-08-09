@@ -91,7 +91,7 @@ namespace SPEL
     vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const vector<Frame *> frames, map<string, float> params, const ImageSimilarityMatrix& ism, const vector<MinSpanningTree> &trees, vector<int> &ignore);
     int test(int frameId, const vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix &ism, const vector<MinSpanningTree> &trees, vector<int>& ignore); //test function
 
-    vector<vector<Frame*> > slice(const vector<Frame*>& frames);
+//    vector<vector<Frame*> > slice(const vector<Frame*>& frames);
 
     //INHERITED
     //int id;
