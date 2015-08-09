@@ -34,7 +34,7 @@ namespace SPEL
     virtual Mat getImage(void) const;
     virtual void setImage(Mat _image);
     virtual Mat getMask(void) const;
-    virtual virtual void setMask(Mat _mask);
+    virtual void setMask(Mat _mask);
     virtual Skeleton getSkeleton(void) const;
     //TODO: [!]Refactor getters for direct access
     virtual Skeleton* getSkeletonPtr();
@@ -46,7 +46,7 @@ namespace SPEL
     virtual int getParentFrameID(void) const;
     virtual void setParentFrameID(int _parentFrameID);
     virtual float Resize(uint32_t maxHeight);
-    virtual virtual Frame *clone(Frame *dest);
+    virtual Frame *clone(Frame *dest);
     virtual Size getFrameSize(void) const;
     virtual Size getImageSize(void) const;
     virtual Size getMaskSize(void) const;
