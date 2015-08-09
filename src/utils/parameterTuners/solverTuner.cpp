@@ -161,7 +161,7 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
                 {
                     //add it
 
-                    delete vFrames[requestedKeyframes[i]]; //free memory
+                    delete vFrames[frameID]; //free memory
                     vFrames[frameID] = new Keyframe(); //assign new keyframe
                     //copy all the data
     \
@@ -187,7 +187,7 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
         if(vFrames[i]->getFrametype()!=KEYFRAME) //if not keyframes
         {
             int frameID=i;
-            delete vFrames[requestedKeyframes[i]]; //free memory
+            delete vFrames[frameID]; //free memory
             vFrames[frameID] = new Interpolation(); //assign new interpolation frame, without a skeleton
             //copy all the data
 \
@@ -693,7 +693,7 @@ int main (int argc, char **argv)
         //build the sequence based on
         vector <Frame*> vFrames;
 
-        if(paramName=="percentKeyframes" || paramName=="Solvers")
+        if(paramName=="percentKeyframes" || paramName=="Solver")
         {
             vFrames = generateTestFramesPercent(gtFrames, params, suggestedKeyframes);
         }
