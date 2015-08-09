@@ -611,9 +611,10 @@ int main (int argc, char **argv)
 
     //'2Dint', '3Dint', 'tlpsOnly', 'tlpsNSKP', 'fullHybrid'
     vector<string> solverNames;
-    solverNames.push_back("tlpsOnly");
-    solverNames.push_back("tlpsNSKP");
-    solverNames.push_back("fullHybrid");
+
+    solverNames.push_back("NSKPSolver");
+    solverNames.push_back("TLPSSolver");
+    solverNames.push_back("hybridSolver");
     solverNames.push_back("3Dint");
     solverNames.push_back("2Dint");
 
@@ -626,7 +627,7 @@ int main (int argc, char **argv)
         }
         if(paramName=="Solver")
         {
-            solverName==solverNames.at(param);
+            solverName=solverNames.at(param);
             if(param>=solverNames.size())
                 break;//end the loop if we're over the total number of solvers
         }
@@ -657,7 +658,7 @@ int main (int argc, char **argv)
         params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
 
         params.emplace("badLabelThresh", 0.40); //set bad label threshold, which will force solution discard at 0.45
-        params.emplace("partDepthRotationCoeff", 2.05); //search radius increase for each depth level in the part tree
+        params.emplace("partDepthRotationCoeff", 1.3); //search radius increase for each depth level in the part tree
 
         params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
         params.emplace("anchorBindCoeff", 0.0); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)

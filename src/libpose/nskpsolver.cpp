@@ -144,13 +144,13 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
 
     float depthRotationCoeff = params.at("partDepthRotationCoeff");
 
-    float baseRotationStep = params.at("baseRotationStep");
-    float baseSearchStep = params.at("baseSearchStep");
+//    float baseRotationStep = params.at("baseRotationStep");
+//    float baseSearchStep = params.at("baseSearchStep");
 
-    //paramaters for soft binding to existing keyframes/lockframes
-    int anchorBindDistance = params.at("anchorBindDistance");
-    float anchorBindCoeff = params.at("anchorBindCoeff");
-    bool bindToLockframes = params.at("bindToLockframes");
+//    //paramaters for soft binding to existing keyframes/lockframes
+//    int anchorBindDistance = params.at("anchorBindDistance");
+//    float anchorBindCoeff = params.at("anchorBindCoeff");
+//    bool bindToLockframes = params.at("bindToLockframes");
 
     float useHoG = params.at("useHoGdet");
     float useCS = params.at("useCSdet");
@@ -168,12 +168,13 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
         }
     }
 
+    tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
     if(frames[frameId]->getFrametype()!=INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
-            && (frames[frameId]->getFrametype()!=LOCKFRAME || propagateFromLockframes)) //and, if it's a lockframe, and solving from lockframes is allowed
+            && (frames[frameId]->getFrametype()!=LOCKFRAME || propagateFromLockframes) && mst.size()>1) //and, if it's a lockframe, and solving from lockframes is allowed
     {
         ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
 
-        tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
+
         tree<int>::iterator mstIter;
         //do OpenGM solve for single factor graph
 
@@ -188,10 +189,12 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
         vector<Frame*> trainingFrames;
         trainingFrames.push_back(frames[frameId]); //set training frame by index
 
+
         for(uint32_t i=0; i<detectors.size(); ++i)
         {
             detectors[i]->train(trainingFrames, params);
         }
+
 
         //@TODO: This may need to be modified to propagate not from root frame, but from parent frame
         //but only if the solve was successful, otherwise propagate from the root frame
@@ -304,7 +307,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
             for(uint32_t i=0; i<detectors.size(); ++i) //for every detector
             {
                 labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
-            }            
+            }
 
             float maxPartCandidates=params.at("maxPartCandidates");
 
@@ -568,42 +571,50 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     //    vector<future<vector<NSKPSolver::SolvletScore> > > futures;
 
-    vector<future<vector<SolvletScore> > > futures;
-
     cerr << "Set-up time " << duration << endl;
+
+    // //THIS IS THE ASYNC VERSION, THAT NEEDS DEBUGGING  -------------------------------------------------------------
+//    vector<future<vector<SolvletScore> > > futures;
+//    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
+//    {
+//        int captureIndex = frameId;
+//        //[&] { a.foo(100); }
+//        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
+//        futures.push_back(async(std::launch::async | std::launch::deferred,[=, &ignore]()->vector < NSKPSolver::SolvletScore >
+//        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore); }));
+//    }
+
+//    cerr << "Launched " << futures.size() << " threads." << endl;
+
+//    vector<vector<SolvletScore> > temp;
+//    for (auto &e : futures) {
+//        ;
+//        try {
+//            //e.wait();
+//            temp.push_back(e.get());
+//            //std::cout << "You entered: " << x << '\n';
+//        }
+//        catch (std::exception&) {
+//            std::cout << "[exception caught]";
+//        }
+//        //         if(solves.size()>0)
+//        //             allSolves[solves[0].solvlet.getFrameID()]=solves;
+//    }
+    // //END -----------------------------------------------------------------------------
+
+    //THE SINGLE-THREAD VERSION ----------------------------------------------------------
+    vector<vector<SolvletScore> > temp;
     for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
     {
-        int captureIndex = frameId;
-        //[&] { a.foo(100); }
-        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
-        futures.push_back(std::async([=, &ignore]()->vector < NSKPSolver::SolvletScore >
-        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore); }));
+        temp.push_back(propagateFrame(frameId, frames, params, ism, trees, ignore));
     }
-
-    cerr << "Launched " << futures.size() << " threads." << endl;
-
-    vector<vector<SolvletScore> > temp;
-    for (auto &e : futures) {
-        ;
-        try {
-            e.wait();
-            temp.push_back(e.get());
-            //std::cout << "You entered: " << x << '\n';
-        }
-        catch (std::exception&) {
-            std::cout << "[exception caught]";
-        }
-        //         if(solves.size()>0)
-        //             allSolves[solves[0].solvlet.getFrameID()]=solves;
-    }
-
-    //now paralellize this
 
     for (uint32_t i = 0; i < temp.size(); ++i)
     {
         if (temp[i].size()>0)
             allSolves[temp[i].at(0).solvlet.getFrameID()] = temp[i];
     }
+    //END --------------------------------------------------------------------------------
 
     //now extract the best solves
     vector<SolvletScore> bestSolves;
