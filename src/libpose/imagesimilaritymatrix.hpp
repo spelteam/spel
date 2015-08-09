@@ -32,42 +32,34 @@ namespace SPEL
     ///destructor
     virtual ~ImageSimilarityMatrix(void);
 
-    void buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
-    void buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
+    virtual void buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
+    virtual void buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight = 0);
 
-    bool read(string filename);
-    bool write(string filename) const;
+    virtual bool read(string filename);
+    virtual bool write(string filename) const;
 
-    float min() const;
-    float mean() const;
-    float max() const;
-    float stddev() const;
+    virtual float min() const;
+    virtual float mean() const;
+    virtual float max() const;
+    virtual float stddev() const;
 
-    float at(int row, int col) const;
-    Point2f getShift(int row, int col) const;
+    virtual float at(int row, int col) const;
+    virtual Point2f getShift(int row, int col) const;
     ///get cost for path through ISM
-    float getPathCost(vector<int> path) const;
+    virtual float getPathCost(vector<int> path) const;
 
-    uint32_t size() const;
+    virtual uint32_t size() const;
 
-    bool operator==(const ImageSimilarityMatrix &s) const;
-    bool operator!=(const ImageSimilarityMatrix &s) const;
-    ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s);
+    virtual bool operator==(const ImageSimilarityMatrix &s) const;
+    virtual bool operator!=(const ImageSimilarityMatrix &s) const;
+    virtual ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s);
 
-    Mat clone(); //return a Mat clone of ISM
+    virtual Mat clone(); //return a Mat clone of ISM
 
-    // template <class T> inline std::string to_string (const T& t) 
-    // {
-    //     std::stringstream ss;
-    //     ss << t;
-    //     return ss.str();
-    // }
+  protected:
 
-
-  private:
-
-    void computeMSMcell(Frame* left, Frame* right, int maxFrameHeight);
-    void computeISMcell(Frame* left, Frame* right, int maxFrameHeight);
+    virtual void computeMSMcell(Frame* left, Frame* right, int maxFrameHeight);
+    virtual void computeISMcell(Frame* left, Frame* right, int maxFrameHeight);
     ///the image similarity matrix
     Mat imageSimilarityMatrix;
     Mat imageShiftMatrix;

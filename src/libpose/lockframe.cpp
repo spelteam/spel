@@ -6,4 +6,7 @@ namespace SPEL
   {
   }
 
+  Lockframe::~Lockframe(void)
+  {
+  }
 }

@@ -25,6 +25,8 @@ namespace SPEL
   class Detector
   {
   public:
+    Detector(void);
+    virtual ~Detector(void);
     virtual int getID(void) const = 0;
     virtual void setID(int _id) = 0;
     virtual void train(vector <Frame*> frames, map <string, float> params) = 0;
@@ -34,7 +36,7 @@ namespace SPEL
     vector <Frame*> frames;
     uint32_t maxFrameHeight;
     uint8_t debugLevelParam = 0;
-    Frame *getFrame(uint32_t frameId);
+    virtual Frame *getFrame(uint32_t frameId);
     virtual float getBoneLength(Point2f begin, Point2f end);
     virtual float getBoneWidth(float length, BodyPart bodyPart);
     virtual POSERECT <Point2f> getBodyPartRect(BodyPart bodyPart, Point2f j0, Point2f j1, Size blockSize = Size(0, 0));

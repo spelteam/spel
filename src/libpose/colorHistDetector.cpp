@@ -103,6 +103,14 @@ namespace SPEL
     id = 0x434844;
   }
 
+  ColorHistDetector::~ColorHistDetector(void)
+  {
+    for (auto &&p : pixelDistributions)
+      p.second.release();
+    for (auto &&p : pixelLabels)
+      p.second.release();
+  }
+
   // Returns unique ID of "ColorHistDetector" object
   int ColorHistDetector::getID(void) const
   {
@@ -485,8 +493,6 @@ namespace SPEL
 
       }
       delete workFrame;
-      maskMat.release();
-      imgMat.release();
     }
   }
 
@@ -505,13 +511,13 @@ namespace SPEL
 
     auto result = Detector::detect(frame, params, limbLabels);
 
-    for (auto var : pixelDistributions)
+    for (auto &&var : pixelDistributions)
     {
       var.second.release();
     }
     pixelDistributions.clear();
 
-    for (auto var : pixelLabels)
+    for (auto &&var : pixelLabels)
     {
       var.second.release();
     }
@@ -936,10 +942,7 @@ namespace SPEL
         throw logic_error(ss.str());
       }
       pixelDistributions.insert(pair <int32_t, Mat>(partID, t)); // add the current bodypart matrix to the set 
-      t.release();
     }
-    imgMat.release();
-    maskMat.release();
     return pixelDistributions;
   }
 
@@ -1001,7 +1004,6 @@ namespace SPEL
                 if (temp.at<float>(y, x) > top) // search max value of the current bodypart pixel color frequency
                   top = temp.at<float>(y, x);
                 sum += temp.at<float>(y, x);
-                temp.release();
               }
               catch (...)
               {
@@ -1043,13 +1045,6 @@ namespace SPEL
         }
       }
       pixelLabels.insert(pair<int32_t, Mat>(iteratorBodyPart->getPartID(), t)); // insert the resulting matrix into the set "pixelLabels" 
-      t.release();
-    }
-    maskMat.release();
-    map <int32_t, Mat>::iterator i;
-    for (i = pixelDistributions.begin(); i != pixelDistributions.end(); ++i)
-    {
-      i->second.release(); // delete pixelDistributions 
     }
     return pixelLabels;
   }
@@ -1095,8 +1090,6 @@ namespace SPEL
     }
     catch (...)
     {
-      maskMat.release();
-      imgMat.release();
       stringstream ss;
       ss << "Couldn't get partModel of bodyPart " << bodyPart.getPartID();
       if (debugLevelParam >= 1)
@@ -1105,8 +1098,6 @@ namespace SPEL
     }
     if (getAvgSampleSizeFg(model) == 0) // error if samples count is zero
     {
-      maskMat.release();
-      imgMat.release();
       stringstream ss;
       ss << "Couldn't get avgSampleSizeFg";
       if (debugLevelParam >= 2)
@@ -1122,8 +1113,6 @@ namespace SPEL
     }
     catch (...)
     {
-      maskMat.release();
-      imgMat.release();
       stringstream ss;
       ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "]";
       if (debugLevelParam >= 2)
@@ -1137,9 +1126,6 @@ namespace SPEL
     }
     catch (...)
     {
-      maskMat.release();
-      imgMat.release();
-      bodyPartPixelDistribution.release();
       stringstream ss;
       ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "]";
       if (debugLevelParam >= 2)
@@ -1171,10 +1157,6 @@ namespace SPEL
               }
               catch (...)
               {
-                maskMat.release();
-                imgMat.release();
-                bodyPartPixelDistribution.release();
-                bodyPartLixelLabels.release();
                 stringstream ss;
                 ss << "Can't get maskMat [" << (int32_t)j << "][" << (int32_t)i << "]";
                 if (debugLevelParam >= 2)
@@ -1190,10 +1172,6 @@ namespace SPEL
                 }
                 catch (...)
                 {
-                  maskMat.release();
-                  imgMat.release();
-                  bodyPartPixelDistribution.release();
-                  bodyPartLixelLabels.release();
                   stringstream ss;
                   ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << (int32_t)j << "][" << (int32_t)i << "]";
                   if (debugLevelParam >= 2)
@@ -1210,10 +1188,6 @@ namespace SPEL
                 }
                 catch (...)
                 {
-                  maskMat.release();
-                  imgMat.release();
-                  bodyPartPixelDistribution.release();
-                  bodyPartLixelLabels.release();
                   stringstream ss;
                   ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << (int32_t)j << "][" << (int32_t)i << "]";
                   if (debugLevelParam >= 2)
@@ -1227,10 +1201,6 @@ namespace SPEL
         }
       }
     }
-    maskMat.release();
-    imgMat.release();
-    bodyPartPixelDistribution.release();
-    bodyPartLixelLabels.release();
     float supportScore = 0;
     float inMaskSupportScore = 0;
     pixDistAvg /= (float)pixDistNum;  // average "distributions"

@@ -9,6 +9,18 @@ namespace SPEL
     id = 0x4844;
   }
 
+  HogDetector::~HogDetector(void)
+  {
+    for (auto &&p : partModels)
+      for (auto &&pp : p.second)
+        pp.second.partImage.release();
+
+    for (auto &&p : labelModels)
+      for (auto &&pp : p.second)
+        for (auto &&ppp : pp.second)
+          ppp.partImage.release();
+  }
+
   int HogDetector::getID(void) const
   {
     return id;

@@ -20,39 +20,37 @@ namespace SPEL
     BodyPart(const BodyPart& bodyPart);
     BodyPart(BodyPart&& bodyPart);
     BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
-    BodyPart& operator=(const BodyPart& bodyPart);
-    BodyPart& operator=(BodyPart&& bodyPart);
+    virtual ~BodyPart(void);
+    virtual BodyPart& operator=(const BodyPart& bodyPart);
+    virtual BodyPart& operator=(BodyPart&& bodyPart);
     /// comparsion by unique index
-    bool operator==(const BodyPart &bp) const;
+    virtual bool operator==(const BodyPart &bp) const;
     /// comparsion by address
-    bool operator!=(const BodyPart &bp) const;
+    virtual bool operator!=(const BodyPart &bp) const;
     // get and set: All these functions just give access to the object fields
-    int getPartID(void) const;
-    void setPartID(int _partID);
-    string getPartName(void) const;
-    void setPartName(string _partName);
-    int getParentJoint(void) const;
-    void setParentJoint(int _parentJoint);
-    int getChildJoint(void) const;
-    void setChildJoint(int _childJoint);
-    bool getIsOccluded(void) const;
-    void setIsOccluded(bool _isOccluded);
-    float getExpectedDistance(void) const;
-    void setExpectedDistance(float _expectedDistance);
-
-    POSERECT <Point2f> getPartPolygon(void) const;
-    void setPartPolygon(POSERECT <Point2f> _partPolygon);
-    float getLWRatio(void) const;
-    void setLWRatio(float _lwRatio);
-    float getRelativeLength(void) const;
-    void setRelativeLength(float _relativeLength);
-
+    virtual int getPartID(void) const;
+    virtual void setPartID(int _partID);
+    virtual string getPartName(void) const;
+    virtual void setPartName(string _partName);
+    virtual int getParentJoint(void) const;
+    virtual void setParentJoint(int _parentJoint);
+    virtual int getChildJoint(void) const;
+    virtual void setChildJoint(int _childJoint);
+    virtual bool getIsOccluded(void) const;
+    virtual void setIsOccluded(bool _isOccluded);
+    virtual float getExpectedDistance(void) const;
+    virtual void setExpectedDistance(float _expectedDistance);
+    virtual POSERECT <Point2f> getPartPolygon(void) const;
+    virtual void setPartPolygon(POSERECT <Point2f> _partPolygon);
+    virtual float getLWRatio(void) const;
+    virtual void setLWRatio(float _lwRatio);
+    virtual float getRelativeLength(void) const;
+    virtual void setRelativeLength(float _relativeLength);
     //search parameters
-    float getSearchRadius(void) const;
-    void setSearchRadius(float _searchRadius);
-
-    float getRotationSearchRange(void) const;
-    void setRotationSearchRange(float _rotationAngle);
+    virtual float getSearchRadius(void) const;
+    virtual void setSearchRadius(float _searchRadius);
+    virtual float getRotationSearchRange(void) const;
+    virtual void setRotationSearchRange(float _rotationAngle);
   private:
     /// identifier, must be unique within the limits of class
     int partID;

@@ -5,16 +5,17 @@ namespace SPEL
   // default constructor
   BodyPart::BodyPart(void)
   {
-    setPartID(0);
-    setPartName("");
-    setParentJoint(0);
-    setChildJoint(0);
-    setIsOccluded(false);
-    setExpectedDistance(0);
-    setLWRatio(0);
-    setRelativeLength(0);
-    setSearchRadius(0);
-    setRotationSearchRange(0);
+    partID = 0;
+    partName = "";
+    parentJoint = 0;
+    childJoint = 0;  
+    isOccluded = false;
+    expectedDistance = 0;
+    partPolygon = POSERECT<Point2f>();
+    lwRatio = 0;
+    relativeLength = 0;
+    searchRadius = 0;
+    rotationSearchRange = 0;
   }
 
   //copy constructor
@@ -54,14 +55,22 @@ namespace SPEL
   // constructor with params
   BodyPart::BodyPart(int id, string name, int pJoint, int cJoint, bool isOcc, float spaceLen)
   {
-    setPartID(id);
-    setPartName(name);
-    setParentJoint(pJoint);
-    setChildJoint(cJoint);
-    setIsOccluded(isOcc);
-    setExpectedDistance(spaceLen);
-    setSearchRadius(0);
-    setRotationSearchRange(0);
+    partID = id;
+    partName = name;
+    parentJoint = pJoint;
+    childJoint =cJoint;
+    isOccluded = isOcc;
+    expectedDistance = spaceLen;
+    partPolygon = POSERECT<Point2f>();
+    lwRatio = 0;
+    relativeLength = 0;
+    searchRadius = 0;
+    rotationSearchRange = 0;
+  }
+
+  BodyPart::~BodyPart(void)
+  {
+    return;
   }
 
   int BodyPart::getPartID(void) const

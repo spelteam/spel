@@ -29,15 +29,16 @@ namespace SPEL
     };
   public:
     HogDetector(void);
-    int getID(void) const;
-    void setID(int _id);
-    void train(vector <Frame*> _frames, map <string, float> params);
-    map <uint32_t, vector <LimbLabel>> detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
-    map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
-    map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
+    virtual ~HogDetector(void);
+    virtual int getID(void) const;
+    virtual void setID(int _id);
+    virtual void train(vector <Frame*> _frames, map <string, float> params);
+    virtual map <uint32_t, vector <LimbLabel>> detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
+    virtual map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
+    virtual map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
 
-    Size getCellSize(void);
-    uint8_t getnbins(void);
+    virtual Size getCellSize(void);
+    virtual uint8_t getnbins(void);
   private:
 #ifdef DEBUG
     FRIEND_TEST(HOGDetectorTests, computeDescriptor);
@@ -53,9 +54,11 @@ namespace SPEL
     FRIEND_TEST(HOGDetectorTests, getNBins);
 #endif  // DEBUG
     int id;
+    const uint8_t nbins = 9;
     map <uint32_t, Size> partSize;
     map <uint32_t, map <uint32_t, PartModel>> partModels;
     map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;
+  protected:
     bool bGrayImages = false;
     float useHoGdet = 1.0f;
     //TODO(Vitaliy Koshura): Make some of them as detector params
@@ -63,7 +66,6 @@ namespace SPEL
     Size blockStride = Size(8, 8);
     Size cellSize = Size(8, 8);
     Size wndSize = Size(64, 128);
-    const uint8_t nbins = 9;
     double wndSigma = -1;
     double thresholdL2hys = 0.2;
     bool gammaCorrection = true;
@@ -76,13 +78,13 @@ namespace SPEL
     BodyPart *comparer_bodyPart = 0;
     PartModel *comparer_model = 0;
 
-    LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
+    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
 
-    map <uint32_t, Size> getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize, float resizeFactor);
-    PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
-    map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
-    float compare(BodyPart bodyPart, PartModel partModel, uint8_t nbins);
-    float compare(void);
+    virtual map <uint32_t, Size> getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize, float resizeFactor);
+    virtual PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
+    virtual map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
+    virtual float compare(BodyPart bodyPart, PartModel partModel, uint8_t nbins);
+    virtual float compare(void);
   };
 }
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

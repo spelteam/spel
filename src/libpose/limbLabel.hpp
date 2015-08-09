@@ -34,8 +34,8 @@ namespace SPEL
     /// output labels as printable string
     string toString();
     LimbLabel & operator = (const LimbLabel &ll);
-    bool operator == (const LimbLabel &ll) const; // Need implementation
-    bool operator != (const LimbLabel &ll) const; // Need implementation
+    bool operator == (const LimbLabel &ll) const;
+    bool operator != (const LimbLabel &ll) const;
     bool operator < (const LimbLabel &ll) const;
     bool operator > (const LimbLabel &ll) const;
     // compute the endpoints of the limb that this label would produce
@@ -57,8 +57,6 @@ namespace SPEL
     FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost); // Used for set isWeak to "false" in nskpsolver_tests.computeScoreCost
     FRIEND_TEST(nskpsolverTests, evaluateSolution);// Used for set isWeak to "false" in nskpsolver_tests.evaluateSolution
 #endif  // DEBUG
-    ////rotate a point around a pivot by degrees
-    //    Point2f rotatePoint2D(const Point2f point, const Point2f pivot, const float degrees);
     /// Label center 
     Point2f center;
     /// identifier representing what bone this label belongs to

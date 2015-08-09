@@ -21,23 +21,24 @@ namespace SPEL
     BodyJoint(const BodyJoint& bodyJoint);
     BodyJoint(BodyJoint&& bodyJoint);
     BodyJoint(int id, string name, Point2f imgLoc, Point3f spaceLoc = { 0.0, 0.0, 0.0 }, bool depth = false);
-    BodyJoint& operator=(const BodyJoint& bodyJoint);
-    BodyJoint& operator=(BodyJoint&& bodyJoint);
+    virtual ~BodyJoint(void);
+    virtual BodyJoint& operator=(const BodyJoint& bodyJoint);
+    virtual BodyJoint& operator=(BodyJoint&& bodyJoint);
     /// comparsion by unique index
-    bool operator==(const BodyJoint &bj) const;
+    virtual bool operator==(const BodyJoint &bj) const;
     /// comparsion by address
-    bool operator!=(const BodyJoint &bj) const;
+    virtual bool operator!=(const BodyJoint &bj) const;
     // All these functions just give access to this object fields
-    int getLimbID(void) const;
-    void setLimbID(int _limbID);
-    string getJointName(void) const;
-    void setJointName(string _jointName);
-    Point2f getImageLocation(void) const;
-    void setImageLocation(Point2f _imageLocation);
-    Point3f getSpaceLocation(void) const;
-    void setSpaceLocation(Point3f _spaceLocation);
-    bool getDepthSign(void) const;
-    void setDepthSign(bool _depthSign);
+    virtual int getLimbID(void) const;
+    virtual void setLimbID(int _limbID);
+    virtual string getJointName(void) const;
+    virtual void setJointName(string _jointName);
+    virtual Point2f getImageLocation(void) const;
+    virtual void setImageLocation(Point2f _imageLocation);
+    virtual Point3f getSpaceLocation(void) const;
+    virtual void setSpaceLocation(Point3f _spaceLocation);
+    virtual bool getDepthSign(void) const;
+    virtual void setDepthSign(bool _depthSign);
   private:
     /// identifier, must be unique within the limits of class
     int limbID;

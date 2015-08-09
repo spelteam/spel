@@ -124,8 +124,7 @@ namespace SPEL
     //0-1 R, 1-2 G, 2-3 B, 3-0 P
     p0 = 0.5*polygon[3] + 0.5*polygon[0]; //pink = parent
     p1 = 0.5*polygon[1] + 0.5*polygon[2]; //green = child
-
-
+    
     return; // this function needs to update the two endpoints passed into it
   }
 

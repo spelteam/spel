@@ -7,4 +7,7 @@ namespace SPEL
   {
   }
   
+  Keyframe::~Keyframe(void)
+  {
+  }
 }

@@ -30,17 +30,18 @@ namespace SPEL
       vector <uint32_t> fgSampleSizes;
       vector <uint32_t> bgSampleSizes;
       vector <uint32_t> fgBlankSizes;
-      PartModel &operator=(const PartModel &model);
+      virtual PartModel &operator=(const PartModel &model);
     };
   public:
     ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
-    int getID(void) const;
-    void setID(int _id);
-    void train(vector <Frame*> _frames, map <string, float> params);
-    map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
-    uint8_t getNBins(void) const;
-    vector <Frame*> getFrames(void) const;
-    ColorHistDetector &operator=(const ColorHistDetector &c);
+    virtual ~ColorHistDetector(void);
+    virtual int getID(void) const;
+    virtual void setID(int _id);
+    virtual void train(vector <Frame*> _frames, map <string, float> params);
+    virtual map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
+    virtual uint8_t getNBins(void) const;
+    virtual vector <Frame*> getFrames(void) const;
+    virtual ColorHistDetector &operator=(const ColorHistDetector &c);
   private:
 #ifdef DEBUG
     FRIEND_TEST(colorHistDetectorTest, Constructors);
@@ -50,22 +51,23 @@ namespace SPEL
     FRIEND_TEST(colorHistDetectorTest, Train);
 #endif  // DEBUG
     int id;
+  protected:
     const uint8_t nBins;
     map <int32_t, PartModel> partModels;
     float useCSdet = 1.0f;
     map <int32_t, Mat> pixelDistributions;
     map <int32_t, Mat> pixelLabels;
 
-    float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
-    void setPartHistogram(PartModel &partModel, const vector <Point3i> &partColors);
-    void addPartHistogram(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);
-    void addBackgroundHistogram(PartModel &partModel, const vector <Point3i> &bgColors);
-    float getAvgSampleSizeFg(const PartModel &partModel);
-    float getAvgSampleSizeFgBetween(const PartModel &partModel, uint32_t s1, uint32_t s2);
-    float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel);
-    map <int32_t, Mat> buildPixelDistributions(Frame *frame);
-    map <int32_t, Mat> buildPixelLabels(Frame *frame, map <int32_t, Mat> pixelDistributions);
-    LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
+    virtual float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
+    virtual void setPartHistogram(PartModel &partModel, const vector <Point3i> &partColors);
+    virtual void addPartHistogram(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels);
+    virtual void addBackgroundHistogram(PartModel &partModel, const vector <Point3i> &bgColors);
+    virtual float getAvgSampleSizeFg(const PartModel &partModel);
+    virtual float getAvgSampleSizeFgBetween(const PartModel &partModel, uint32_t s1, uint32_t s2);
+    virtual float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel);
+    virtual map <int32_t, Mat> buildPixelDistributions(Frame *frame);
+    virtual map <int32_t, Mat> buildPixelLabels(Frame *frame, map <int32_t, Mat> pixelDistributions);
+    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
 
     // Variables for score comparer
     BodyPart *comparer_bodyPart = 0;
@@ -73,8 +75,8 @@ namespace SPEL
     Point2f *comparer_j0 = 0;
     Point2f *comparer_j1 = 0;
 
-    float compare(void);
-    float compare(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1);
+    virtual float compare(void);
+    virtual float compare(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1);
   };
 }
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

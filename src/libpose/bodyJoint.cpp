@@ -42,6 +42,11 @@ namespace SPEL
   {
   }
 
+  BodyJoint::~BodyJoint(void)
+  {
+    return;
+  }
+
   int BodyJoint::getLimbID(void) const
   {
     return limbID;

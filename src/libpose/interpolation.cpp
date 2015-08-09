@@ -6,4 +6,8 @@ namespace SPEL
   {
   }
 
+  Interpolation::~Interpolation(void)
+  {
+  }
+
 }

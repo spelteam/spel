@@ -3,6 +3,14 @@
 #define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 namespace SPEL
 {
+  Detector::Detector(void)
+  {
+  }
+
+  Detector::~Detector(void)
+  {
+  }
+
   float Detector::getBoneLength(Point2f begin, Point2f end)
   {
     return (begin == end) ? 1.0f : (float)sqrt(PoseHelper::distSquared(begin, end));
@@ -244,22 +252,22 @@ namespace SPEL
 
     //look at each label, and add a score of 1.0 for each missing
 
-    for (auto r = result.begin(); r != result.end(); ++r)
+    for (auto &&r : result)
     {
-      for (auto l = r->second.begin(); l != r->second.end(); ++l) //for each label
+      for (auto &&l : r.second) //for each label
       {
-        auto scores = l->getScores();
+        auto scores = l.getScores();
 
         for (auto m : detectorNames) //for each detector, check whether label has a score for it
         {
           auto detFound = false;
 
-          for (auto i = scores.begin(); i != scores.end(); ++i)
+          for (auto &&i : scores)
           {
-            if (m.first == i->getDetName()) //name
+            if (m.first == i.getDetName()) //name
             {
-              if (i->getScore() == -1) //change all -1 to 1
-                i->setScore(1.0f);
+              if (i.getScore() == -1) //change all -1 to 1
+                i.setScore(1.0f);
               detFound = true;
               break;
             }
@@ -267,13 +275,13 @@ namespace SPEL
           if (!detFound) //this detector score is missing
             scores.push_back(Score(1.0f, m.first, m.second));
         }
-        l->setScores(scores);
+        l.setScores(scores);
       }
     }
     //finally, sort the labels
-    for (auto l = result.begin(); l != result.end(); ++l)
+    for (auto &&l : result)
     {
-      sort(l->second.begin(), l->second.end());
+      sort(l.second.begin(), l.second.end());
     }
 
     return result;
@@ -509,6 +517,7 @@ namespace SPEL
             }
             catch (...)
             {
+              locations.release();
               stringstream ss;
               ss << "There is no value of locations at " << "[" << j << "][" << i << "]";
               if (debugLevelParam >= 1)
@@ -562,8 +571,7 @@ namespace SPEL
             if (debugLevelParam >= 1)
               cerr << ERROR_HEADER << ss.str() << endl;
           }
-
-
+          
           auto x = (uint32_t)i.getCenter().x; // copy center coordinates of current label
           auto y = (uint32_t)i.getCenter().y; // copy center coordinates of current label
           try
@@ -576,6 +584,7 @@ namespace SPEL
               }
               catch (...)
               {
+                locations.release();
                 stringstream ss;
                 ss << "Maybe there is no value of sortedLabels";
                 if (debugLevelParam >= 1)
@@ -588,6 +597,7 @@ namespace SPEL
           }
           catch (...)
           {
+            locations.release();
             stringstream ss;
             ss << "Maybe there is no value of locations at " << "[" << y << "][" << x << "]";
             if (debugLevelParam >= 1)
@@ -653,7 +663,6 @@ namespace SPEL
       if (labels.size() > 0)
         t.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
     }
-    maskMat.release();
 
     delete workFrame;
 

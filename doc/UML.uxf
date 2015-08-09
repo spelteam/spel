@@ -89,8 +89,8 @@ bg=blue</panel_attributes>
 /+getId(): int/
 /+setId(int _id)/
 /+train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)/
-+detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vectot&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
-+merge(first: vector&lt;vectot&lt;LimbLabel&gt;&gt;, second: vector&lt;vectot&lt;LimbLabel&gt;&gt;): vector&lt;vectot&lt;LimbLabel&gt;&gt;
++detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;): map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;
++merge(first: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;, second: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;): map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;
 +getBoneLength(begin: Point2f, end: Point2f): float;
 +getBoneWidth(length: float, bpdyPart: BpodyPart): float;
 +getBodyPartRect(bodyPart: BodyPart, j0: Point2f, j1: Point2f, blockSize: Size): POSERECT &lt;Point2f&gt;
@@ -501,111 +501,6 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>32</x>
-        <y>1176</y>
-        <w>544</w>
-        <h>560</h>
-      </coordinates>
-      <panel_attributes>BodyPart
---
-+partId: int
-+partName: string
-+parentJoint: int
-+childJoint: int
-+isOccluded: bool
-+spaceLength: float 
-+partPolygon: POSERECT &lt;Point2f&gt;
-+lwRatio: float
-+relativeLength: float
-+searchRadius: float
-+rotationSearchRange: float
---
-+BodyPart()
-+BodyPart(bodyPart: BodyPart&amp;)
-+BodyPart(bodyPart: BodyPart&amp;&amp;)
-+BodyPart(id: int, name: string, pJoint: int, cJoint: int, isOcc: bool, spaceLeng: float)
-+operator=(bodyPart: BodyPart&amp;):BodyPart&amp;
-+operator=(bodyPart: BodyPart&amp;&amp;):BodyPart&amp;
-+getPartID(): int
-+setPartID(_partID: int)
-+getPartName(): string;
-+setPartName(_partName: string)
-+getParentJoint(): int
-+setParentJoint(_parentJoint: int)
-+getChildJoint(): int
-+setChildJoint(_childJoint: int)
-+getIsOccluded(): bool
-+setIsOccluded(_isOccluded: bool)
-+getSpaceLength(): float
-+setSpaceLength(_spaceLength: float)
-+getPartPolygon(): POSERECT &lt;Point2f&gt;
-+setPartPolygon(_partPolygon: POSERECT &lt;Point2f&gt;)
-+getLWRatio(): float;
-+setLWRatio(_lwRatio: float);
-+getRelativeLength(): float;
-+setRelativeLength(_relativeLength: float)
-+getSearchRadius(): float
-+setSearchRadius(_radius: float)
-+getRotationSearchRange(): float
-+setRotationSearchRange(_rotationAngle: float)
-+operator==(bp: BodyPart&amp;): bool
-+operator!=(bp: BodyPart&amp;): bool
-</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>32</x>
-        <y>1744</y>
-        <w>544</w>
-        <h>328</h>
-      </coordinates>
-      <panel_attributes>BodyJoint
---
-+limbId: int
-+jointName: string
-+imageLocation: cv:Point2f
-+spaceLocation: cv:Point3f
-+depthSign: bool
---
-+BodyJoint()
-+BodyJoint(bodyJoint: BodyJoint&amp;);
-+BodyJoint(bodyJoint: BodyJoint&amp;&amp;);
-+BodyJoint(id: int, name: string, imgLoc: Point2f, spaceLoc: Point, depth: bool)
-+operator=(bodyJoint: BodyJoint&amp;): BodyJoint&amp;;
-+operator=(bodyJoint: BodyJoint&amp;&amp;): BodyJoint&amp;;
-+getLimbID(): int
-+setLimbID(_limbID: int)
-+getJointName(): string
-+setJointName(_jointName: string)
-+getImageLocation(): Point2f
-+setImageLocation(_imageLocation: Point2f)
-+getSpaceLocation(): Point3f
-+setSpaceLocation(_spaceLocation: Point3f)
-+getDepthSign(): bool
-+setDepthSign(_depthSign: bool)
-+operator==(bj: BodyJoint&amp;): bool
-+operator!=(bj: BodyJoint&amp;): bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>16</x>
-        <y>1160</y>
-        <w>568</w>
-        <h>928</h>
-      </coordinates>
-      <panel_attributes>*Skeletal Structure*
-bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
         <x>608</x>
         <y>1248</y>
         <w>192</w>
@@ -690,46 +585,110 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>608</x>
-        <y>1488</y>
-        <w>848</w>
-        <h>440</h>
+        <x>32</x>
+        <y>1760</y>
+        <w>544</w>
+        <h>336</h>
       </coordinates>
-      <panel_attributes>ColorHistDetector
+      <panel_attributes>BodyJoint
 --
-+id: int;
-+nBins: uint8_t
-+partModels: map &lt;int, PartModel&gt;
-+useCSdet: float
-+pixelDistributions: map &lt;int32_t, Mat&gt;
-+pixelLabels: map &lt;int32_t, Mat&gt;
-+comparer_bodyPart: BodyPart*
-+comparer_frame: Frame**
-+comparer_j0: Point2f*
-+comparer_j1: Point2f*
++limbId: int
++jointName: string
++imageLocation: cv:Point2f
++spaceLocation: cv:Point3f
++depthSign: bool
 --
-+ColorHistDetector(_nBins: int8_t)
-+getId(): int
-+setId(int _id) 
-+train(_frames: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;)
-+detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt; &gt;
-+getNBins(): byte
-+getFrames: vector &lt;Frame*&gt;
-operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
-+computePixelBelongingLikelihood(partModel: PartModel&amp;, r: byte, g: byte, b: byte): float
-+setPartHistogram(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;)
-+addPartHistogram(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;, nBlankPixels: int)
-+addBackgroundHistogram(partModel: PartModel&amp;, bgColors: vector &lt;Point3i&gt;)
-+getAvgSampleSizeFg(partModel: PartModel&amp;): float
-+getAvgSampleSizeFgBetween(partModel: PartModel&amp;, s1: int, s2: int): float
-+matchPartHistogramsED(partModelPrev: PartModel&amp;, partModel: PartModel&amp;): float
-+buildPixelDistributions(frame: Frame*): map &lt;int, Mat&gt;
-+buildPixelLabels(frame: Frame*, pixelDistributions: map&lt;int, Mat&gt;): map &lt;int, Mat&gt;
-+generateLabel(bodyPart: BodyPart, frame: Frame, j0: Point2f, j1 : Point2f): LimbLabel
-+compare(): float
-+compare(bodyPart: BodyPart, frame: Frame*, pixelDistributions: map &lt;int32_t, Mat&gt;, pixelLabels: map &lt;int32_t, Mat&gt;, j0: Point2f, j1: Point2f): float</panel_attributes>
++BodyJoint()
++BodyJoint(bodyJoint: BodyJoint&amp;);
++BodyJoint(bodyJoint: BodyJoint&amp;&amp;);
++BodyJoint(id: int, name: string, imgLoc: Point2f, spaceLoc: Point, depth: bool)
++~BodyJoint()
++operator=(bodyJoint: BodyJoint&amp;): BodyJoint&amp;;
++operator=(bodyJoint: BodyJoint&amp;&amp;): BodyJoint&amp;;
++getLimbID(): int
++setLimbID(_limbID: int)
++getJointName(): string
++setJointName(_jointName: string)
++getImageLocation(): Point2f
++setImageLocation(_imageLocation: Point2f)
++getSpaceLocation(): Point3f
++setSpaceLocation(_spaceLocation: Point3f)
++getDepthSign(): bool
++setDepthSign(_depthSign: bool)
++operator==(bj: BodyJoint&amp;): bool
++operator!=(bj: BodyJoint&amp;): bool</panel_attributes>
       <additional_attributes/>
     </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>32</x>
+        <y>1176</y>
+        <w>544</w>
+        <h>576</h>
+      </coordinates>
+      <panel_attributes>BodyPart
+--
++partId: int
++partName: string
++parentJoint: int
++childJoint: int
++isOccluded: bool
++spaceLength: float 
++partPolygon: POSERECT &lt;Point2f&gt;
++lwRatio: float
++relativeLength: float
++searchRadius: float
++rotationSearchRange: float
+--
++BodyPart()
++BodyPart(bodyPart: BodyPart&amp;)
++BodyPart(bodyPart: BodyPart&amp;&amp;)
++BodyPart(id: int, name: string, pJoint: int, cJoint: int, isOcc: bool, spaceLeng: float)
++~BodyPart()
++operator=(bodyPart: BodyPart&amp;):BodyPart&amp;
++operator=(bodyPart: BodyPart&amp;&amp;):BodyPart&amp;
++getPartID(): int
++setPartID(_partID: int)
++getPartName(): string;
++setPartName(_partName: string)
++getParentJoint(): int
++setParentJoint(_parentJoint: int)
++getChildJoint(): int
++setChildJoint(_childJoint: int)
++getIsOccluded(): bool
++setIsOccluded(_isOccluded: bool)
++getSpaceLength(): float
++setSpaceLength(_spaceLength: float)
++getPartPolygon(): POSERECT &lt;Point2f&gt;
++setPartPolygon(_partPolygon: POSERECT &lt;Point2f&gt;)
++getLWRatio(): float;
++setLWRatio(_lwRatio: float);
++getRelativeLength(): float;
++setRelativeLength(_relativeLength: float)
++getSearchRadius(): float
++setSearchRadius(_radius: float)
++getRotationSearchRange(): float
++setRotationSearchRange(_rotationAngle: float)
++operator==(bp: BodyPart&amp;): bool
++operator!=(bp: BodyPart&amp;): bool
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>16</x>
+        <y>1160</y>
+        <w>568</w>
+        <h>944</h>
+      </coordinates>
+      <panel_attributes>*Skeletal Structure*
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
@@ -756,12 +715,56 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>608</x>
+        <y>1488</y>
+        <w>848</w>
+        <h>440</h>
+      </coordinates>
+      <panel_attributes>ColorHistDetector
+--
++id: int;
++nBins: uint8_t
++partModels: map &lt;int, PartModel&gt;
++useCSdet: float
++pixelDistributions: map &lt;int32_t, Mat&gt;
++pixelLabels: map &lt;int32_t, Mat&gt;
++comparer_bodyPart: BodyPart*
++comparer_frame: Frame**
++comparer_j0: Point2f*
++comparer_j1: Point2f*
+--
++ColorHistDetector(_nBins: int8_t)
++~ColorHistDetector()
++getId(): int
++setId(int _id) 
++train(_frames: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;)
++detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;): map &lt;uint32_t, vector&lt;LimbLabel&gt; &gt;
++getNBins(): byte
++getFrames: vector &lt;Frame*&gt;
+operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
++computePixelBelongingLikelihood(partModel: PartModel&amp;, r: byte, g: byte, b: byte): float
++setPartHistogram(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;)
++addPartHistogram(partModel: PartModel&amp;, partColors: vector &lt;Point3i&gt;&amp;, nBlankPixels: int)
++addBackgroundHistogram(partModel: PartModel&amp;, bgColors: vector &lt;Point3i&gt;)
++getAvgSampleSizeFg(partModel: PartModel&amp;): float
++getAvgSampleSizeFgBetween(partModel: PartModel&amp;, s1: int, s2: int): float
++matchPartHistogramsED(partModelPrev: PartModel&amp;, partModel: PartModel&amp;): float
++buildPixelDistributions(frame: Frame*): map &lt;int, Mat&gt;
++buildPixelLabels(frame: Frame*, pixelDistributions: map&lt;int, Mat&gt;): map &lt;int, Mat&gt;
++generateLabel(bodyPart: BodyPart, frame: Frame, j0: Point2f, j1 : Point2f): LimbLabel
++compare(): float
++compare(bodyPart: BodyPart, frame: Frame*, pixelDistributions: map &lt;int32_t, Mat&gt;, pixelLabels: map &lt;int32_t, Mat&gt;, j0: Point2f, j1: Point2f): float</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
         <x>600</x>
         <y>1464</y>
         <w>864</w>
-        <h>656</h>
+        <h>680</h>
       </coordinates>
       <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
@@ -772,26 +775,9 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>2152</x>
-        <y>2088</y>
-        <w>1232</w>
-        <h>88</h>
-      </coordinates>
-      <panel_attributes>PartModel
---
-+partModelRect: POSERECT&lt;Point2f&gt;
-+gradientStrengths: vector &lt;vector &lt;vector &lt;float&gt;&gt;&gt;;
-+partImage: Mat;
-+descriptos: vector&lt;float&gt;
---</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>2152</x>
         <y>1584</y>
         <w>1232</w>
-        <h>496</h>
+        <h>512</h>
       </coordinates>
       <panel_attributes>HogDetector
 --
@@ -820,10 +806,11 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
 +comparer_model: PartModel*;
 --
 +HogDetector()
++~HogDetector()
 +getId(): int
 +setId(int _id) 
 +train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)
-+detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: vector&lt;vector&lt;LimbLabel&gt;&gt;): vector&lt;vector&lt;LimbLabel&gt;&gt;
++detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;): map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;
 +getLabelModels(void): map &lt;uint32_t, map &lt;uint32_t, vector &lt;PartModel&gt;&gt;&gt;
 +getPartModels(void): map &lt;uint32_t, map &lt;uint32_t, PartModel&gt;&gt;
 +generateLabel(bodyPart: BodyPart, frame: Frame*, j0: Point2f, j1: Point2f): LimbLabel
@@ -835,12 +822,29 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>2152</x>
+        <y>2104</y>
+        <w>1232</w>
+        <h>88</h>
+      </coordinates>
+      <panel_attributes>PartModel
+--
++partModelRect: POSERECT&lt;Point2f&gt;
++gradientStrengths: vector &lt;vector &lt;vector &lt;float&gt;&gt;&gt;;
++partImage: Mat;
++descriptos: vector&lt;float&gt;
+--</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
         <x>2144</x>
         <y>1560</y>
         <w>1248</w>
-        <h>624</h>
+        <h>640</h>
       </coordinates>
       <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
@@ -851,49 +855,85 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>560</x>
-        <y>2664</y>
+        <y>2704</y>
         <w>224</w>
         <h>64</h>
       </coordinates>
       <panel_attributes>Lockframe
 --
 --
-+Lockframe()</panel_attributes>
++Lockframe()
++~Lockframe()</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>280</x>
-        <y>2664</y>
+        <y>2704</y>
         <w>224</w>
         <h>64</h>
       </coordinates>
       <panel_attributes>Interpolation
 --
 --
-+Interpolation()</panel_attributes>
++Interpolation()
++~Interpolation()</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>32</x>
-        <y>2664</y>
+        <y>2704</y>
         <w>224</w>
         <h>64</h>
       </coordinates>
       <panel_attributes>Keyframe
 --
 --
-+Keyframe()</panel_attributes>
++Keyframe()
++~Keyframe()</panel_attributes>
       <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>104</x>
+        <y>2624</y>
+        <w>296</w>
+        <h>96</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>280;24;24;80</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>368</x>
+        <y>2624</y>
+        <w>40</w>
+        <h>96</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>24;24;24;80</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>368</x>
+        <y>2624</y>
+        <w>320</w>
+        <h>96</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>24;24;304;80</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
         <x>256</x>
-        <y>2136</y>
+        <y>2176</y>
         <w>328</w>
         <h>472</h>
       </coordinates>
@@ -937,43 +977,10 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>104</x>
-        <y>2584</y>
-        <w>296</w>
-        <h>96</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>280;24;24;80</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>368</x>
-        <y>2584</y>
-        <w>40</w>
-        <h>96</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;24;80</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>368</x>
-        <y>2584</y>
-        <w>320</w>
-        <h>96</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>24;24;304;80</additional_attributes>
-    </element>
-    <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
         <x>64</x>
-        <y>2136</y>
+        <y>2176</y>
         <w>160</w>
         <h>88</h>
       </coordinates>
@@ -991,7 +998,7 @@ fg=red</panel_attributes>
       <type>com.umlet.element.Package</type>
       <coordinates>
         <x>24</x>
-        <y>2112</y>
+        <y>2152</y>
         <w>848</w>
         <h>632</h>
       </coordinates>

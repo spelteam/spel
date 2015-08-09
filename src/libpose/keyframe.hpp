@@ -12,6 +12,7 @@ namespace SPEL
   {
   public:
     Keyframe(void);
+    virtual ~Keyframe(void);
   };
 
 }

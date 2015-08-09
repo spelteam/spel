@@ -10,6 +10,7 @@ namespace SPEL
   {
   public:
     Interpolation(void);
+    virtual ~Interpolation(void);
   };
 }
 #endif  // _INTERPOLATION_HPP_

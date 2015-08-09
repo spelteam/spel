@@ -11,6 +11,7 @@ namespace SPEL
   {
   public:
     Lockframe(void);
+    virtual ~Lockframe(void);
   };
 }
 
