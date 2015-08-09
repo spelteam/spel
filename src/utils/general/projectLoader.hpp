@@ -36,6 +36,7 @@ class ProjectLoader
 {
 public:
   ProjectLoader(string _curFolder);
+  ~ProjectLoader();
   void SetCurFolder(string _curFolder);
   bool Load(string fileName);
   bool Save(map <uint32_t, vector <LimbLabel>> labels, string outFolder, int frameID);

@@ -44,7 +44,7 @@ namespace SPEL
       throw logic_error(ss.str());
     }
     image.release();
-    image = _image;
+    image = _image.clone();
     imageSize = newImageSize;
   }
 
@@ -63,7 +63,7 @@ namespace SPEL
       throw logic_error(ss.str());
     }
     mask.release();
-    mask = _mask;
+    mask = _mask.clone();
     maskSize = newMaskSize;
   }
 

@@ -7,6 +7,12 @@ ProjectLoader::ProjectLoader(string _curFolder)
 {
   curFolder = _curFolder;
 }
+ProjectLoader::~ProjectLoader()
+{
+  for(auto&& frame:vFrames)
+      delete frame;
+  vFrames.clear();
+}
 
 void ProjectLoader::SetCurFolder(string _curFolder)
 {
@@ -355,6 +361,9 @@ bool ProjectLoader::Load(string fileName)
     f->setSkeleton(skeleton);
     vFrames.push_back(f);
     frames = frames->NextSiblingElement();
+
+    image.release();
+    mask.release();
   }
 
   //  kptree::print_tree_bracketed(trBodyParts);

@@ -120,6 +120,7 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
             //delete vFrames[requestedKeyframes[i]]; //free memory
             if(frameID<gtFrames.size())
             {
+                delete vFrames[frameID];
                 vFrames[frameID] = new Keyframe(); //assign new keyframe
                 //copy all the data
 
@@ -160,7 +161,7 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
                 {
                     //add it
 
-                    //delete vFrames[requestedKeyframes[i]]; //free memory
+                    delete vFrames[requestedKeyframes[i]]; //free memory
                     vFrames[frameID] = new Keyframe(); //assign new keyframe
                     //copy all the data
     \
@@ -186,7 +187,7 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
         if(vFrames[i]->getFrametype()!=KEYFRAME) //if not keyframes
         {
             int frameID=i;
-            //delete vFrames[requestedKeyframes[i]]; //free memory
+            delete vFrames[requestedKeyframes[i]]; //free memory
             vFrames[frameID] = new Interpolation(); //assign new interpolation frame, without a skeleton
             //copy all the data
 \
@@ -237,10 +238,9 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
         //always add one in the end and the start
         if(vFrames[0]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
         {
+            delete vFrames[0];
             vFrames[0] = new Keyframe(); //assign new keyframe
             //copy all the data
-
-            //delete vFrames[0];
 
             vFrames[0]->setSkeleton(gtFrames[0]->getSkeleton());
             vFrames[0]->setID(gtFrames[0]->getID());
@@ -252,7 +252,7 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
         //always add one at the end (extra)
         if(vFrames[vFrames.size()-1]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
         {
-            //delete vFrames[vFrames.size()-1];
+            delete vFrames[vFrames.size()-1];
             vFrames[vFrames.size()-1] = new Keyframe(); //assign new keyframe
             //copy all the data
 
@@ -284,6 +284,7 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
             }
             if(maxGapIndex!=-1)
             {
+                delete vFrames[maxGapIndex];
                 vFrames[maxGapIndex] = new Keyframe(); //assign new keyframe
                 //copy all the data
 
@@ -298,10 +299,11 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
     }
     else //otherwise, systematically assign keyframes to sequence, such that they are evenly distributed
     {
-        int keyframeStep=gtFrames.size()/maxNumKeyframes; //frames/numKeyframes = step size?so if it's 2, then every 2nd frame is a keyframe
+        int keyframeStep=float(gtFrames.size())/maxNumKeyframes; //frames/numKeyframes = step size?so if it's 2, then every 2nd frame is a keyframe
 
         for(auto frameID=0; frameID<vFrames.size();frameID+=keyframeStep)
         {
+            delete vFrames[frameID];
             vFrames[frameID] = new Keyframe(); //assign new keyframe
             //copy all the data
 
@@ -315,6 +317,7 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
         //also, the last frame is always a keyframe (it's an extra keyframe)
         if(vFrames[vFrames.size()-1]->getFrametype()!=KEYFRAME) //if not a keyframe yet, make it one
         {
+            delete vFrames[vFrames.size()-1];
             vFrames[vFrames.size()-1] = new Keyframe(); //assign new keyframe
             //copy all the data
 
@@ -335,12 +338,13 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
         {
             int frameID=i;
             //delete vFrames[requestedKeyframes[i]]; //free memory
+            delete vFrames[frameID];
             vFrames[frameID] = new Interpolation(); //assign new interpolation frame, without a skeleton
             //copy all the data
 \
             vFrames[frameID]->setID(gtFrames[frameID]->getID());
-            vFrames[frameID]->setImage(gtFrames[frameID]->getImage().clone()); //deep copy image
-            vFrames[frameID]->setMask(gtFrames[frameID]->getMask().clone()); //deep copy mask
+            vFrames[frameID]->setImage(gtFrames[frameID]->getImage()); //deep copy image
+            vFrames[frameID]->setMask(gtFrames[frameID]->getMask()); //deep copy mask
 
             //actualKeyframes.push_back(frameID);
         }
@@ -635,10 +639,10 @@ int main (int argc, char **argv)
             params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
 
         //global settings
-        params.emplace("imageCoeff", 0.1); //set solver detector infromation sensitivity
-        params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity
+        params.emplace("imageCoeff", 0.2); //set solver detector infromation sensitivity
+        params.emplace("jointCoeff", 0.8); //set solver body part connectivity sensitivity
         params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
-        params.emplace("tempCoeff", 0.1); //set the temporal connection sensitivity for TLPS
+        params.emplace("tempCoeff", 0.05); //set the temporal connection sensitivity for TLPS
 
         //detector settings
         params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
@@ -652,11 +656,11 @@ int main (int argc, char **argv)
         params.emplace("nskpLockframeThreshold", 0.49); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
         params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
 
-        params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
-        params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+        params.emplace("badLabelThresh", 0.40); //set bad label threshold, which will force solution discard at 0.45
+        params.emplace("partDepthRotationCoeff", 2.05); //search radius increase for each depth level in the part tree
 
         params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
-        params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+        params.emplace("anchorBindCoeff", 0.0); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
         params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
         params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
@@ -736,37 +740,37 @@ int main (int argc, char **argv)
             fSolve = nSolver.solve(seq, params, ism);
         else if(solverName=="hybridSolver")
         {
-            vector<Solvlet> finalSolve;
-            uint32_t prevSolveSize=0;
+//            vector<Solvlet> finalSolve;
+//            uint32_t prevSolveSize=0;
 
-            int numIters=0;
-            do
-            {
-                prevSolveSize=finalSolve.size(); //set size of the final solve
+//            int numIters=0;
+//            do
+//            {
+//                prevSolveSize=finalSolve.size(); //set size of the final solve
 
-                vector<Solvlet> nskpSolve, tlpsSolve;
-                if(params.at("withNSKP")) //if it's with NSKP, first the NSKP stuff starts, then TLPS gets called inside it
-                {
-                    //do an iterative NSKP solve
-                    nskpSolve = nSolver.solve(seq, params, ism);
+//                vector<Solvlet> nskpSolve, tlpsSolve;
+//                if(params.at("withNSKP")) //if it's with NSKP, first the NSKP stuff starts, then TLPS gets called inside it
+//                {
+//                    //do an iterative NSKP solve
+//                    nskpSolve = nSolver.solve(seq, params, ism);
 
-                    for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
-                        finalSolve.push_back(*s);
-                }
-                else //otherwise, only call TLPS
-                {
-                    //then, do a temporal solve
-                    seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
+//                    for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
+//                        finalSolve.push_back(*s);
+//                }
+//                else //otherwise, only call TLPS
+//                {
+//                    //then, do a temporal solve
+//                    seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
 
-                    tlpsSolve = tSolver.solve(seq, params);
+//                    tlpsSolve = tSolver.solve(seq, params);
 
-                    for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
-                        finalSolve.push_back(*s);
-                }
-                numIters++;
+//                    for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
+//                        finalSolve.push_back(*s);
+//                }
+//                numIters++;
 
-            } while(finalSolve.size()>prevSolveSize && numIters<params.at("hybridIters")); //don't do more iters than necessary
-            fSolve = finalSolve;
+//            } while(finalSolve.size()>prevSolveSize && numIters<params.at("hybridIters")); //don't do more iters than necessary
+//            fSolve = finalSolve;
         }
         else if(solverName=="3Dint")
         {
@@ -837,6 +841,8 @@ int main (int argc, char **argv)
         errors.release();
 
         //delete sequence
+        for(auto&& f : vFrames)
+            delete f;
         vFrames.clear();
 
         auto end = chrono::steady_clock::now();
