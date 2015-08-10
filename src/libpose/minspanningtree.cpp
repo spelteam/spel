@@ -89,15 +89,15 @@ namespace SPEL
             break;
         }
         //check the path cost condition
-        vector<int> path;
-        path = kptree::find_path_nodes(mst, mst.begin(), imgLoc);
+//        vector<int> path;
+//        path = kptree::find_path_nodes(mst, mst.begin(), imgLoc);
         //float pathCost = ism.getPathCost(path);
         float nodeCost = ism.at(*imgLoc, minLoc.y);
         //            if( pathCost > absoluteMin*threshold) //stop building tree if we reach threshold
         //                break;
 
         bool pass = nodeCost < thresh;
-        float diff = nodeCost - thresh;
+        //float diff = nodeCost - thresh;
         if (pass) //either the minimum cost node satisfies this condition and is pushed
         {
           mst.append_child(imgLoc, minLoc.y);

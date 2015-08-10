@@ -888,6 +888,7 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(const ImageSimilarityMatrix 
         MinSpanningTree frameTree(ism, i, treeSize, simThresh);
         //and add to vector
         frameMST[i] = frameTree;
+        cout << i << " MST built"  << endl;
     }
 
     return frameMST;
@@ -897,7 +898,12 @@ vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(const ImageSimilarityMatrix 
 //function should return vector with suggested keyframe numbers
 vector<Point2i> NSKPSolver::suggestKeyframes(const ImageSimilarityMatrix& ism, map<string, float> params)
 {
+    auto debugLevel = params.at("debugLevel");
+    //if(params.at("debugLevel")>=1)
+        cerr << "Building all MSTs..." << endl;
     vector<MinSpanningTree> mstVec = buildFrameMSTs(ism, params);
+    //if(debugLevel>=1)
+        cerr << "Finished building MSTs" << endl;
     params.emplace("minKeyframeDist", 1); //don't suggest keyframes that are too close together
     int minKeyframeDist = params.at("minKeyframeDist");
     vector<vector<uint32_t> > orderedList;

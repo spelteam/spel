@@ -687,12 +687,21 @@ int main (int argc, char **argv)
         params.emplace("percentKeyframes", 10); //do a 10% keyframe solve by default
 
         //generate keyframe suggestions
+        auto startSuggestions = chrono::steady_clock::now();
+        cout << "Generating keyframe suggestions... "  << endl;
         vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, params);
         auto start = chrono::steady_clock::now();
 
-        vector<int> actualKeyframes;
+        auto diffSuggestions = start-startSuggestions;
+
+        cout << "Suggestions generated in " << chrono::duration <double, milli> (diffSuggestions).count()  << " ms" << endl;
+
         //build the sequence based on
         vector <Frame*> vFrames;
+
+
+        cout << "Solving with " << paramName << " at " << param << endl;
+        cout << "Building test sequence... " << paramName << " at " << param << endl;
 
         if(paramName=="percentKeyframes" || paramName=="Solver")
         {
@@ -705,7 +714,7 @@ int main (int argc, char **argv)
 
         //the new frame set has been generated, and can be used for solving
 
-        cout << "Solving with " << paramName << " at " << param << endl;
+
 //        cout << "Keyframes: " << " ";
 //        for(uint32_t i=0; i<actualKeyframes.size();++i)
 //        {
