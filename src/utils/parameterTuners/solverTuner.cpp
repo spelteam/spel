@@ -679,7 +679,7 @@ int main (int argc, char **argv)
         params.emplace("uniqueLocationCandidates", 360);
         params.emplace("debugLevel", 0);
 
-        params.emplace("mstThresh", 2.5); //use outliners that are at least 2.5 stddev from the mean
+        params.emplace("mstThresh", 3.0; //use outliners that are at least 2.5 stddev from the mean
         params.emplace("withTLPS", 0); //don't use TLPS after NSKP by default
         params.emplace("hybridIters", 1);
 
