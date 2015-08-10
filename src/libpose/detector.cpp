@@ -390,7 +390,7 @@ namespace SPEL
 
     auto resizeFactor = workFrame->Resize(maxFrameHeight);
 
-    map <uint32_t, vector <LimbLabel> > t;
+    map <uint32_t, vector <LimbLabel> > tempLabelVector;
     auto skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
     auto partTree = skeleton.getPartTree(); // copy tree of bodypart from the skeleton
 
@@ -628,7 +628,8 @@ namespace SPEL
                     {
                       for (auto polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
                       {
-                        bFound = bFound && potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize);
+                        if(potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize))
+                            bFound=true;
                       }
                     }
                   }
@@ -661,22 +662,22 @@ namespace SPEL
       }
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
-        t.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
+        tempLabelVector.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
     }
 
     delete workFrame;
 
-    for (auto i = 0; i < t.size(); ++i)
+    for (auto i = 0; i < tempLabelVector.size(); ++i)
     {
-      for (auto j = 0; j < t.at(i).size(); ++j)
+      for (auto j = 0; j < tempLabelVector.at(i).size(); ++j)
       {
-        LimbLabel label = t.at(i).at(j);
+        LimbLabel label = tempLabelVector.at(i).at(j);
         label.Resize(pow(resizeFactor, -1));
-        t[i][j] = label;
+        tempLabelVector[i][j] = label;
       }
     }
 
-    return merge(limbLabels, t);
+    return merge(limbLabels, tempLabelVector);
   }
 
   LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame)

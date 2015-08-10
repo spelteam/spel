@@ -144,8 +144,8 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
 
     float depthRotationCoeff = params.at("partDepthRotationCoeff");
 
-//    float baseRotationStep = params.at("baseRotationStep");
-//    float baseSearchStep = params.at("baseSearchStep");
+    float baseRotationStep = params.at("baseRotationStep");
+    float baseSearchStep = params.at("baseSearchStep");
 
 //    //paramaters for soft binding to existing keyframes/lockframes
 //    int anchorBindDistance = params.at("anchorBindDistance");
@@ -277,15 +277,17 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
 
             for(partIter=partTree.begin(); partIter!=partTree.end(); ++partIter)
             {
-                //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
-                //and based on node depth (deeper nodes have a higher distance)
-                //this should rely on parameters e.g.
-
-                //else
                 int depth = partTree.depth(partIter);
 
-                float rotationRange = baseRotationRange*pow(depthRotationCoeff, depth);
+                float rotationRange = baseRotationRange;//*pow(depthRotationCoeff, depth);
                 float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
+
+                if(partTree.number_of_children(partIter)==0)
+                {
+                    searchRange=searchRange*2;
+                    rotationRange=rotationRange*depthRotationCoeff;
+                }
+
 
                 //                if(isBound) //if we're close to the anchor, restrict the rotation range
                 //                    rotationRange = rotationRange*anchorBindCoeff;
@@ -574,46 +576,46 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     cerr << "Set-up time " << duration << endl;
 
     // //THIS IS THE ASYNC VERSION, THAT NEEDS DEBUGGING  -------------------------------------------------------------
-//    vector<future<vector<SolvletScore> > > futures;
-//    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
-//    {
-//        int captureIndex = frameId;
-//        //[&] { a.foo(100); }
-//        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
-//        futures.push_back(async(std::launch::async | std::launch::deferred,[=, &ignore]()->vector < NSKPSolver::SolvletScore >
-//        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore); }));
-//    }
+    vector<future<vector<SolvletScore> > > futures;
+    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
+    {
+        int captureIndex = frameId;
+        //[&] { a.foo(100); }
+        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
+        futures.push_back(async(std::launch::async | std::launch::deferred,[=, &ignore]()->vector < NSKPSolver::SolvletScore >
+        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore); }));
+    }
 
-//    cerr << "Launched " << futures.size() << " threads." << endl;
+    cerr << "Launched " << futures.size() << " threads." << endl;
 
-//    vector<vector<SolvletScore> > temp;
-//    for (auto &e : futures) {
-//        ;
-//        try {
-//            //e.wait();
-//            temp.push_back(e.get());
-//            //std::cout << "You entered: " << x << '\n';
-//        }
-//        catch (std::exception&) {
-//            std::cout << "[exception caught]";
-//        }
-//        //         if(solves.size()>0)
-//        //             allSolves[solves[0].solvlet.getFrameID()]=solves;
-//    }
+    vector<vector<SolvletScore> > temp;
+    for (auto &e : futures) {
+        ;
+        try {
+            //e.wait();
+            temp.push_back(e.get());
+            //std::cout << "You entered: " << x << '\n';
+        }
+        catch (std::exception&) {
+            std::cout << "[exception caught]";
+        }
+        //         if(solves.size()>0)
+        //             allSolves[solves[0].solvlet.getFrameID()]=solves;
+    }
     // //END -----------------------------------------------------------------------------
 
     //THE SINGLE-THREAD VERSION ----------------------------------------------------------
-    vector<vector<SolvletScore> > temp;
-    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
-    {
-        temp.push_back(propagateFrame(frameId, frames, params, ism, trees, ignore));
-    }
+//    vector<vector<SolvletScore> > temp;
+//    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
+//    {
+//        temp.push_back(propagateFrame(frameId, frames, params, ism, trees, ignore));
+//    }
 
-    for (uint32_t i = 0; i < temp.size(); ++i)
-    {
-        if (temp[i].size()>0)
-            allSolves[temp[i].at(0).solvlet.getFrameID()] = temp[i];
-    }
+//    for (uint32_t i = 0; i < temp.size(); ++i)
+//    {
+//        if (temp[i].size()>0)
+//            allSolves[temp[i].at(0).solvlet.getFrameID()] = temp[i];
+//    }
     //END --------------------------------------------------------------------------------
 
     //now extract the best solves
