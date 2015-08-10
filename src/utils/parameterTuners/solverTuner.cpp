@@ -679,7 +679,7 @@ int main (int argc, char **argv)
         params.emplace("uniqueLocationCandidates", 360);
         params.emplace("debugLevel", 0);
 
-        params.emplace("mstThresh", 3.0; //use outliners that are at least 2.5 stddev from the mean
+        params.emplace("mstThresh", 3.0); //use outliners that are at least 2.5 stddev from the mean
         params.emplace("withTLPS", 0); //don't use TLPS after NSKP by default
         params.emplace("hybridIters", 1);
 
@@ -753,34 +753,34 @@ int main (int argc, char **argv)
             vector<Solvlet> finalSolve;
             uint32_t prevSolveSize=0;
 
-            int numIters=0;
-            do
-            {
-                prevSolveSize=finalSolve.size(); //set size of the final solve
+//            int numIters=0;
+//            do
+//            {
+//                prevSolveSize=finalSolve.size(); //set size of the final solve
 
-                vector<Solvlet> nskpSolve, tlpsSolve;
-                if(params.at("withNSKP")) //if it's with NSKP, first the NSKP stuff starts, then TLPS gets called inside it
-                {
-                    //do an iterative NSKP solve
-                    nskpSolve = nSolver.solve(seq, params, ism);
+//                vector<Solvlet> nskpSolve, tlpsSolve;
+//                if(params.at("withNSKP")) //if it's with NSKP, first the NSKP stuff starts, then TLPS gets called inside it
+//                {
+//                    //do an iterative NSKP solve
+//                    nskpSolve = nSolver.solve(seq, params, ism);
 
-                    for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
-                        finalSolve.push_back(*s);
-                }
-                else //otherwise, only call TLPS
-                {
-                    //then, do a temporal solve
-                    seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
+//                    for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
+//                        finalSolve.push_back(*s);
+//                }
+//                else //otherwise, only call TLPS
+//                {
+//                    //then, do a temporal solve
+//                    seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
 
-                    tlpsSolve = tSolver.solve(seq, params);
+//                    tlpsSolve = tSolver.solve(seq, params);
 
-                    for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
-                        finalSolve.push_back(*s);
-                }
-                numIters++;
+//                    for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
+//                        finalSolve.push_back(*s);
+//                }
+//                numIters++;
 
-            } while(finalSolve.size()>prevSolveSize && numIters<params.at("hybridIters")); //don't do more iters than necessary
-            fSolve = finalSolve;
+//            } while(finalSolve.size()>prevSolveSize && numIters<params.at("hybridIters")); //don't do more iters than necessary
+//            fSolve = finalSolve;
         }
         else if(solverName=="3Dint")
         {
