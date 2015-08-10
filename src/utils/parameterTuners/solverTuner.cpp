@@ -614,9 +614,9 @@ int main (int argc, char **argv)
 
     solverNames.push_back("NSKPSolver");
     solverNames.push_back("TLPSSolver");
-    solverNames.push_back("hybridSolver");
-    solverNames.push_back("3Dint");
-    solverNames.push_back("2Dint");
+    //solverNames.push_back("hybridSolver");
+    //solverNames.push_back("3Dint");
+    //solverNames.push_back("2Dint");
 
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
