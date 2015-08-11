@@ -1,6 +1,6 @@
 #include "poseHelper.hpp"
 #include "projectLoader.hpp"
-#include "ColorHistDetector.hpp"
+#include "colorHistDetector.hpp"
 #include "frame.hpp"
 #include <fstream>
 #include <iostream>

@@ -34,6 +34,11 @@ namespace SPEL
     scores = _scores;
     isOccluded = _isOccluded;
   }
+
+  LimbLabel::~LimbLabel(void)
+  {
+  }
+
   LimbLabel &LimbLabel::operator=(const LimbLabel &ll)
   {
     if (this == &ll)

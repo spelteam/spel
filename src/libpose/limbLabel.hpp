@@ -30,28 +30,28 @@ namespace SPEL
     LimbLabel();
     LimbLabel(const LimbLabel& ll);
     LimbLabel(int _id, Point2f _centre, float _angle, vector<Point2f> _polygon, vector<Score> _scores, bool _isOccluded = false);
-
+    virtual ~LimbLabel(void);
     /// output labels as printable string
-    string toString();
-    LimbLabel & operator = (const LimbLabel &ll);
-    bool operator == (const LimbLabel &ll) const;
-    bool operator != (const LimbLabel &ll) const;
-    bool operator < (const LimbLabel &ll) const;
-    bool operator > (const LimbLabel &ll) const;
+    virtual string toString();
+    virtual LimbLabel & operator = (const LimbLabel &ll);
+    virtual bool operator == (const LimbLabel &ll) const;
+    virtual bool operator != (const LimbLabel &ll) const;
+    virtual bool operator < (const LimbLabel &ll) const;
+    virtual bool operator > (const LimbLabel &ll) const;
     // compute the endpoints of the limb that this label would produce
-    void getEndpoints(Point2f &p0, Point2f &p1) const;
-    void addScore(Score detectionScore);
-    Point2f getCenter(void) const;
+    virtual void getEndpoints(Point2f &p0, Point2f &p1) const;
+    virtual void addScore(Score detectionScore);
+    virtual Point2f getCenter(void) const;
     ///get the label scores
-    vector<Score> getScores(void) const;
-    void setScores(vector <Score> _scores);
-    int getLimbID(void) const;
-    float getAngle(void) const;
-    vector <Point2f> getPolygon(void) const;
-    bool getIsOccluded(void) const;
-    float getAvgScore(bool bNegativeToPositive = false) const;
-    void Resize(float factor);
-    bool containsPoint(Point2f pt);
+    virtual vector<Score> getScores(void) const;
+    virtual void setScores(vector <Score> _scores);
+    virtual int getLimbID(void) const;
+    virtual float getAngle(void) const;
+    virtual vector <Point2f> getPolygon(void) const;
+    virtual bool getIsOccluded(void) const;
+    virtual float getAvgScore(bool bNegativeToPositive = false) const;
+    virtual void Resize(float factor);
+    virtual bool containsPoint(Point2f pt);
   private:
 #ifdef DEBUG
     FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost); // Used for set isWeak to "false" in nskpsolver_tests.computeScoreCost
