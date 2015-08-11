@@ -5,17 +5,13 @@
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 #include <tree.hh>
-#include <fstream>
-#include <iostream>
 #include <string>
-#include "colorHistDetector.hpp"
 #include "bodyPart.hpp"
 #include "skeleton.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
-#include "frame.hpp"
 #include "interpolation.hpp"
-#include "projectLoader.hpp"
+#include "TestsFunctions.hpp"
 
 namespace SPEL
 {
@@ -28,69 +24,48 @@ namespace SPEL
     }
   };
 
-  // Selecting locations of all body part from skeleton
-  map<int, pair<Point2f, Point2f>> getPartLocations(Skeleton skeleton)
+  class TestColorHistDetector : public ColorHistDetector
   {
-    map<int, pair<Point2f, Point2f>> PartLocations;
-    BodyJoint* J0, *J1;
-    Point2f p0, p1;
-    tree <BodyPart> partTree = skeleton.getPartTree();
-    for (tree <BodyPart>::iterator i = partTree.begin(); i != partTree.end(); ++i)
-    {
-      J0 = skeleton.getBodyJoint(i->getChildJoint());
-      J1 = skeleton.getBodyJoint(i->getParentJoint());
-      p0 = J0->getImageLocation();
-      p1 = J1->getImageLocation();
-      PartLocations.emplace(pair<int, pair<Point2f, Point2f>>(i->getPartID(), pair<Point2f, Point2f>(p0, p1)));
-    }
-    return PartLocations;
-  }
-
-  //Built bodypart rectangle on bodypart joints
-  POSERECT<Point2f> BuildPartRectOnJoints(BodyJoint* j0, BodyJoint* j1, float LWRatio)
-  {
-    Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
-    float boneLength = (float)sqrt(PoseHelper::distSquared(p0, p1)); // distance between nodes
-    float boneWidth = boneLength / LWRatio;
-    Point2f boxCenter = p0 * 0.5 + p1 * 0.5; // the bobypart center  coordinates
-    // Coordinates for drawing of the polygon at the coordinate origin
-    Point2f c1 = Point2f(0.f, 0.5f * boneWidth);
-    Point2f c2 = Point2f(boneLength, 0.5f * boneWidth);
-    Point2f c3 = Point2f(boneLength, -0.5f * boneWidth);
-    Point2f c4 = Point2f(0.f, -0.5f * boneWidth);
-    Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f); // polygon center 
-    Point2f direction = p1 - p0; // used as estimation of the vector's direction
-    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
-    // Rotate and shift the polygon to the bodypart center
-    c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    POSERECT <Point2f> poserect(c1, c2, c3, c4);
-    return poserect;
-  }
-
-  //Build set of the rect pixels colors 
-  vector <Point3i> GetPartColors(Mat image, Mat mask, POSERECT < Point2f > rect)
-  {
-    vector <Point3i> PartColors;
-    float xmin, ymin, xmax, ymax;
-    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-    for (int x = xmin; x < xmax; x++)
-    {
-      for (int y = ymin; y < ymax; y++)
-      {
-        if ((rect.containsPoint(Point2f(x, y)) > 0) && (mask.at<uint8_t>(y, x) > 9))
-        {
-          Vec3b color = image.at<Vec3b>(y, x);
-          PartColors.push_back(Point3i(color[0], color[1], color[2]));
-        }
-      }
-    }
-    return PartColors;
-  }
+  public:
+    ColorHistDetector::PartModel;
+  };
 
   //IT'S TEMPORARY TESTS
+
+  //Global variables - each next test uses data from previous
+  const int  partID = 12;
+  int FirstKeyframe;
+  vector<Frame*> frames;
+  Skeleton skeleton;
+  tree <BodyPart> partTree;
+  BodyPart bodyPart;
+  BodyJoint* j0;
+  BodyJoint* j1;
+  POSERECT<Point2f> rect;
+  vector <Point3i> Colors;
+  ColorHistDetector detector;
+  TestColorHistDetector::PartModel model;
+  TestColorHistDetector::PartModel partModel_expected(NBins);
+  TestColorHistDetector::PartModel partModel_actual(NBins);
+  map <int32_t, Mat> pixelDistributions;  
+  
+  //For frames recovery between tests (frame exists only in the current function!)
+  map<int32_t, Mat> pixelLabels;
+  Mat image, mask;
+  int FrameID;
+  Point2f GroundPoint;
+  FRAMETYPE frameType;
+
+  Frame* SetFrame(int ID, Mat Image, Mat Mask, Skeleton skeleton, Point2f GroundPoint, FRAMETYPE frameType)
+  {
+    Frame* frame = new Frame(frameType);
+    frame->setID(ID);
+    frame->setImage(Image);
+    frame->setMask(Mask);
+    frame->setSkeleton(skeleton);
+    frame->setGroundPoint(GroundPoint);
+    return frame;
+  }
 
   TEST(colorHistDetectorTest, Constructors)
   {
@@ -146,88 +121,61 @@ namespace SPEL
     EXPECT_EQ(x.fgBlankSizes, y.fgBlankSizes);
   }
 
-  TEST(colorHistDetectorTest, bulkyFunctions)
+  TEST(colorHistDetectorTest, setPartHistogram)
   {
-    // Prepare input data
-
-    //Path to the input files
-    String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
+    //Load the input data
+    String FilePath = "posetests_TestData/CHDTrainTestData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
       FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
 #endif
-
-    //Load the input data
     ProjectLoader projectLoader(FilePath);
     projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    frames = projectLoader.getFrames();
+    //frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
-    map <string, float> params;
-    //This fragment produces crash with message: "The program has exited with code 3 (0x3)."
-    
-    Sequence *seq = new Sequence(0, "colorHistDetector", frames);
-    if (seq != 0)
-    {
-      seq->estimateUniformScale(params);
-      seq->computeInterpolation(params);
-      delete seq;
-    }
-    
-
-    //Run "Train()"
-    ColorHistDetector detector;
-    detector.train(frames, params);
-
-    //Counting a keyframes
-    int KeyframesCount = 0;
-    int FirstKeyframe = -1;
-    for (int i = 0; i < frames.size(); i++)
-      if (frames[i]->getFrametype() == KEYFRAME)
-      {
-        KeyframesCount++;
-        if (FirstKeyframe < 0) FirstKeyframe = i;
-      }
+    //Setting parameters 
+    map <string, float> params = SetParams(frames);   
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
-    tree <BodyPart> partTree = skeleton.getPartTree();
-    tree <BodyJoint> jointsTree = skeleton.getJointTree();
+    FirstKeyframe = FirstKeyFrameNum(frames);
+    image = frames[FirstKeyframe]->getImage();
+    mask = frames[FirstKeyframe]->getMask();
+    skeleton = frames[FirstKeyframe]->getSkeleton();
+    partTree = skeleton.getPartTree();
 
-    const int nBins = 8;
-    const uint8_t factor = static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
+    //Fields copyes for frames recovery between tests
+    FrameID = frames[FirstKeyframe]->getID();
+    frameType = frames[FirstKeyframe]->getFrametype();
+    GroundPoint = frames[FirstKeyframe]->getGroundPoint();
 
     //Select body part for testing
-    const int  partID = 12;
-    //Copy body part
-    BodyPart bodyPart = *skeleton.getBodyPart(partID);
-    //Copy part joints 
-    BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());
-    BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
-    //Build part rect
-    POSERECT<Point2f> rect = BuildPartRectOnJoints(j0, j1, bodyPart.getLWRatio());
-    //Build part colors
-    vector <Point3i> Colors = GetPartColors(image, mask, rect);
+    bodyPart = *skeleton.getBodyPart(partID);
+    j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());
+    j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
+    rect = BuildPartRect(j0, j1, bodyPart.getLWRatio());
+      
+    //Build part colorset
+    Colors = GetPartColors(image, mask, rect);
 
-    //Copy part model
-    ColorHistDetector::PartModel model = detector.partModels.at(partID);
-
-    //Testing function "setpartHistogram"
-    ColorHistDetector::PartModel partModel_expected(nBins), partModel_actual(nBins);
+    //Create expected value	  
     partModel_expected.sizeFG = Colors.size();
     partModel_expected.fgNumSamples = 1;
     partModel_expected.fgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
     for (uint32_t i = 0; i < Colors.size(); i++)
-      partModel_expected.partHistogram[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+      partModel_expected.partHistogram[Colors[i].x / Factor][Colors[i].y / Factor][Colors[i].z / Factor]++;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
         for (uint8_t b = 0; b < partModel_expected.nBins; b++)
           partModel_expected.partHistogram[r][g][b] /= Colors.size();
 
+    //Create actual value
+    detector.train(frames, params);
+    model = detector.partModels.at(partID);
     detector.setPartHistogram(partModel_actual, Colors);
+
+    //Compare
     EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
     EXPECT_EQ(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
     EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
@@ -236,8 +184,11 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+  }
 
-    // Testing function "addpartHistogram"
+  TEST(colorHistDetectorTest, addpartHistogram)
+  {
+    //Create expected value
     uint32_t nBlankPixels = 10;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
@@ -247,14 +198,17 @@ namespace SPEL
     partModel_expected.fgNumSamples++;
     partModel_expected.fgSampleSizes.push_back(Colors.size());
     for (uint32_t i = 0; i < Colors.size(); i++)
-      partModel_expected.partHistogram[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+      partModel_expected.partHistogram[Colors[i].x / Factor][Colors[i].y / Factor][Colors[i].z / Factor]++;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
         for (uint8_t b = 0; b < partModel_expected.nBins; b++)
           partModel_expected.partHistogram[r][g][b] /= partModel_expected.sizeFG;
     partModel_expected.fgBlankSizes.push_back(nBlankPixels);
 
+    //Create actual value
     detector.addPartHistogram(partModel_actual, Colors, nBlankPixels);
+
+    //Compare
     EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
     EXPECT_EQ(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
     EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
@@ -263,30 +217,43 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+  }
 
-    // Testing function "getAvgSampleSizeFg"
+  // Testing function "getAvgSampleSizeFg"
+  TEST(colorHistDetectorTest, getAvgSampleSizeFg)
+  {
     float Sum = 0;
     for (uint32_t i = 0; i < partModel_expected.fgSampleSizes.size(); i++)
       Sum += partModel_expected.fgSampleSizes[i];
     Sum /= partModel_expected.fgNumSamples;
-    EXPECT_EQ(Sum, detector.getAvgSampleSizeFg(partModel_actual));
 
-    // Testing function "getAvgSampleSizeFgBetween"
+    EXPECT_EQ(Sum, detector.getAvgSampleSizeFg(partModel_actual));
+  }
+
+  // Testing function "getAvgSampleSizeFgBetween"
+  TEST(colorHistDetectorTest, getAvgSampleSizeFgBetween)
+  {
     uint32_t s1 = 0, s2 = 0;
     float f = (partModel_expected.fgSampleSizes[s1] + partModel_expected.fgSampleSizes[s2]) / 2.0f;
     EXPECT_EQ(f, detector.getAvgSampleSizeFgBetween(partModel_actual, s1, s2));
     EXPECT_EQ(0.f, detector.getAvgSampleSizeFgBetween(partModel_actual, static_cast <uint32_t> (partModel_expected.fgSampleSizes.size()), s2));
+  }
 
-    // Testing function "matchPartHistogramsED"
+  // Testing function "matchPartHistogramsED"
+  TEST(colorHistDetectorTest, matchPartHistogramsED)
+  {
     float distance = 0;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
         for (uint8_t b = 0; b < partModel_expected.nBins; b++)
           distance += pow(partModel_expected.partHistogram[r][g][b] - partModel_expected.partHistogram[r][g][b], 2.0f);
-    f = detector.matchPartHistogramsED(partModel_expected, partModel_expected);
+    float f = detector.matchPartHistogramsED(partModel_expected, partModel_expected);
     EXPECT_EQ(sqrt(distance), f);
+  }
 
-    // Testing function "addBackgroundHistogramm"
+  // Testing function "addBackgroundHistogram"
+  TEST(colorHistDetectorTest, addBackgroundHistogram)
+  {
     vector <Point3i> cEmpty;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
@@ -296,7 +263,7 @@ namespace SPEL
     partModel_expected.bgNumSamples++;
     partModel_expected.bgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
     for (uint32_t i = 0; i < Colors.size(); i++)
-      partModel_expected.bgHistogram[Colors[i].x / factor][Colors[i].y / factor][Colors[i].z / factor]++;
+      partModel_expected.bgHistogram[Colors[i].x / Factor][Colors[i].y / Factor][Colors[i].z / Factor]++;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
         for (uint8_t b = 0; b < partModel_expected.nBins; b++)
@@ -313,33 +280,42 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+  }
 
-    // Testing function buildPixelDistributions
+  // Testing function buildPixelDistributions
+  TEST(colorHistDetectorTest, buildPixelDistributions)
+  {
+    //Restore keyframe
+    frames[FirstKeyframe] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
+
     Mat t(image.rows, image.cols, DataType <float>::type);
     ColorHistDetector::PartModel partModel = detector.partModels[partID];
     for (int x = 0; x < image.cols; x++)
       for (int y = 0; y < image.rows; y++)
-      {
-        Vec3b intensity = image.at<Vec3b>(y, x);
-        uint8_t blue = intensity.val[0];
-        uint8_t green = intensity.val[1];
-        uint8_t red = intensity.val[2];
-        uint8_t mintensity = mask.at<uint8_t>(y, x);
-        bool blackPixel = mintensity < 10;
+        {
+           Vec3b intensity = image.at<Vec3b>(y, x);
+           uint8_t blue = intensity.val[0];
+           uint8_t green = intensity.val[1];
+           uint8_t red = intensity.val[2];
+           uint8_t mintensity = mask.at<uint8_t>(y, x);
+           bool blackPixel = mintensity < 10;
 
-        t.at<float>(y, x) = blackPixel ? 0 : partModel.partHistogram.at(red / factor).at(green / factor).at(blue / factor); // (x, y)  or (y, x) !? ?
-        //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
-      }
+           t.at<float>(y, x) = blackPixel ? 0 : partModel.partHistogram.at(red / Factor).at(green / Factor).at(blue / Factor); // (x, y)  or (y, x) !? ?
+           //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
+        }
 
-    map <int32_t, Mat> pixelDistributions = detector.buildPixelDistributions(frames[FirstKeyframe]);
+    pixelDistributions = detector.buildPixelDistributions(frames[FirstKeyframe]);
     for (int x = 0; x < t.cols; x++)
       for (int y = 0; y < t.rows; y++)
         EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
 
     // we need to save pixelDistibutions in private class member
     detector.pixelDistributions = pixelDistributions;
+  }
 
-    // Testing function BuildPixelLabels
+  // Testing function "BuildPixelLabels"
+  TEST(colorHistDetectorTest, BuildPixelLabels)
+  {
     Mat p(image.rows, image.cols, DataType <float>::type);
     for (int x = 0; x < image.cols; x++)
       for (int y = 0; y < image.rows; y++)
@@ -354,25 +330,31 @@ namespace SPEL
             temp = pixelDistributions.at(i->getPartID());
             if (temp.at<float>(y, x) > top) // (x,y)  or (y,x) !?? Matrix "PixelLabels" - transposed relative to the matrix "Image"
               top = temp.at<float>(y, x);
-            temp.release(); // (x,y)  or (y,x) !??
+              temp.release(); // (x,y)  or (y,x) !??
           }
           p.at<float>(y, x) = (top == 0) ? 0 : pixelDistributions[partID].at<float>(y, x) / top;
         }
         else
           p.at<float>(y, x) = 0; // (x,y)  or (y,x) !??
-      }
+       }
 
-    map<int32_t, Mat> pixelLabels = detector.buildPixelLabels(frames[FirstKeyframe], pixelDistributions);
+    pixelLabels = detector.buildPixelLabels(frames[FirstKeyframe], pixelDistributions);
 
     int q = 0;
     for (int x = 0; x < p.cols; x++)
       for (int y = 0; y < p.rows; y++)
         EXPECT_EQ(p.at<float>(y, x), pixelLabels[partID].at<float>(y, x)) << q++ << ": " << x << ", " << y;
 
-    // we ned to save pixelLabels in private class member
+    // we need to save pixelLabels in private class member
     detector.pixelLabels = pixelLabels;
+  }
+  
+  // Testing function generateLabel
+  TEST(colorHistDetectorTest, generateLabel)
+  {
+    //Restore keyframe
+    frames[FirstKeyframe] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
 
-    // Testing function generateLabel
     vector <Score> s;
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
     Point2f boxCenter = p0 * 0.5 + p1 * 0.5;
@@ -436,15 +418,15 @@ namespace SPEL
     {
       for (int i = 0; i < limbLabel_e.getScores().size(); i++)
       {
-        EXPECT_TRUE(fabs(limbLabel_e.getScores().at(i).getScore() - limbLabel_a.getScores().at(i).getScore()) <= 0.005);        
+        EXPECT_TRUE(fabs(limbLabel_e.getScores().at(i).getScore() - limbLabel_a.getScores().at(i).getScore()) <= 0.005);
       }
     }
-    
+
     EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
     // Temporary debug messages
     if (limbLabel_e.getIsOccluded() != limbLabel_a.getIsOccluded())
     {
-      cout << endl << "Funcion 'colorHistDetector::generateLabel()' IsOccluded() value:" << endl;
+      cout << endl << "Function 'colorHistDetector::generateLabel()' IsOccluded() value:" << endl;
       cout << "PartID = " << partID << " ~ BodyPart.IsOccluded = " << limbLabel_e.getIsOccluded() << ",   LimbLabel.IsOccluded = " << limbLabel_a.getIsOccluded() << endl;
       cout << "----------\n";
       //cin.get();
@@ -454,15 +436,22 @@ namespace SPEL
     if (limbLabel_e.getPolygon().size() == limbLabel_a.getPolygon().size())
     {
       for (int i = 0; i < limbLabel_e.getPolygon().size(); i++)
-      {
-        EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).x, limbLabel_a.getPolygon().at(i).x);
-        EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).y, limbLabel_a.getPolygon().at(i).y);
-      }
+        {
+          EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).x, limbLabel_a.getPolygon().at(i).x);
+          EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).y, limbLabel_a.getPolygon().at(i).y);
+        }
     }
 
     EXPECT_EQ(model.bgHistogram, detector.partModels[partID].bgHistogram);
+  }
 
-    // Testing function "detect"
+  // Testing function "detect"
+  TEST(colorHistDetectorTest, detect)
+  {
+    //Restore frames
+    frames[0] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
+    frames[1] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, LOCKFRAME);
+    frames[2] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
 
     ofstream fout("Output_CHDTest_detect.txt");
 
@@ -514,8 +503,8 @@ namespace SPEL
       fout << "\nPartID = " << id << ":\n";
       Point2f l0, l1, p0, p1, delta0, delta1;
       vector<LimbLabel> temp;
-      p0 = PartLocation[id].first; // Ideal boby part point
-      p1 = PartLocation[id].second; // Ideal boby part point
+      p0 = PartLocation[id].first; // Ideal body part point
+      p1 = PartLocation[id].second; // Ideal body part point
       for (int k = 0; k < limbLabels[id].size(); k++)
       {
         limbLabels[id][k].getEndpoints(l0, l1); // Label points
@@ -528,7 +517,7 @@ namespace SPEL
         float error = min(error_A, error_B); // Distance between ideal body part and label
         if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >= 0) // Label is "effective" if it has small error and of not less than zero  Score  value
           temp.push_back(limbLabels[id][k]); // Copy effective labels
-        // Put linear errors for all Lalbels into text file, copy indexes of a "badly processed parts"
+        // Put linear errors for all Labels into text file, copy indexes of a "badly processed parts"
         fout << "    PartID = " << id << ", LabelIndex = " << k << ":    AvgScore = " << limbLabels[id][k].getAvgScore() << ", LinearError = " << error << endl;
         if (k == TopListLabelsCount - 1)
         {
@@ -537,7 +526,7 @@ namespace SPEL
             if (temp.size() < 1)
             {
               EffectiveLabbelsInTop = false; // false == Present not Occluded bodyparts, but no nave "effective labels" in the top of list
-              WithoutGoodLabelInTop.push_back(id); // Copy index of not Occluded parts, wich no have "effective labels" in the top of labels list
+              WithoutGoodLabelInTop.push_back(id); // Copy index of not Occluded parts, which no have "effective labels" in the top of labels list
             }
         }
       }
@@ -584,10 +573,15 @@ namespace SPEL
 
     for (map <int32_t, Mat>::iterator I = pixelDistributions.begin(); I != pixelDistributions.end(); ++I)
       I->second.release();
+    pixelDistributions.clear();
     detector.partModels.clear();
+    pixelLabels.clear();
+    partTree.clear();
     image.release();
     mask.release();
+    Colors.clear();
     for (int i = 0; i < frames.size(); i++)
       delete frames[i];
+    frames.clear();
   }
 }

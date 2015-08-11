@@ -41,6 +41,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/utils/general/pr
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}/tinyxml2.cpp )
 
 # libpose tests
+LIST ( APPEND ${TESTS_MODULE}_SRC libpose/TestsFunctions )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_get_and_set_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_constructor_tests )
 LIST ( APPEND ${TESTS_MODULE}_SRC libpose/bodyJoint_operators_tests )

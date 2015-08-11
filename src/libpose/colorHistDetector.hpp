@@ -47,7 +47,16 @@ namespace SPEL
     FRIEND_TEST(colorHistDetectorTest, Constructors);
     FRIEND_TEST(colorHistDetectorTest, computePixelBelongingLikelihood);
     FRIEND_TEST(colorHistDetectorTest, Operators);
-    FRIEND_TEST(colorHistDetectorTest, bulkyFunctions);
+    FRIEND_TEST(colorHistDetectorTest, setPartHistogram);
+    FRIEND_TEST(colorHistDetectorTest, addpartHistogram);
+    FRIEND_TEST(colorHistDetectorTest, getAvgSampleSizeFg);
+    FRIEND_TEST(colorHistDetectorTest, getAvgSampleSizeFgBetween);
+    FRIEND_TEST(colorHistDetectorTest, matchPartHistogramsED);
+    FRIEND_TEST(colorHistDetectorTest, addBackgroundHistogram);
+    FRIEND_TEST(colorHistDetectorTest, buildPixelDistributions);
+    FRIEND_TEST(colorHistDetectorTest, BuildPixelLabels);
+    FRIEND_TEST(colorHistDetectorTest, generateLabel);
+    FRIEND_TEST(colorHistDetectorTest, detect);
     FRIEND_TEST(colorHistDetectorTest, Train);
 #endif  // DEBUG
     int id;
