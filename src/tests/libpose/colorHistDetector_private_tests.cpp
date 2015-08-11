@@ -47,10 +47,10 @@ namespace SPEL
   TestColorHistDetector::PartModel model;
   TestColorHistDetector::PartModel partModel_expected(NBins);
   TestColorHistDetector::PartModel partModel_actual(NBins);
-  map <int32_t, Mat> pixelDistributions;  
+  map <int32_t, Mat> pixelDistributions;
+  map<int32_t, Mat> pixelLabels;
   
   //For frames recovery between tests (frame exists only in the current function!)
-  map<int32_t, Mat> pixelLabels;
   Mat image, mask;
   int FrameID;
   Point2f GroundPoint;
@@ -136,7 +136,7 @@ namespace SPEL
     //frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
-    map <string, float> params = SetParams(frames);   
+    map <string, float> params = SetParams(frames);
 
     //Copy image and skeleton from first keyframe
     FirstKeyframe = FirstKeyFrameNum(frames);
@@ -292,17 +292,17 @@ namespace SPEL
     ColorHistDetector::PartModel partModel = detector.partModels[partID];
     for (int x = 0; x < image.cols; x++)
       for (int y = 0; y < image.rows; y++)
-        {
-           Vec3b intensity = image.at<Vec3b>(y, x);
-           uint8_t blue = intensity.val[0];
-           uint8_t green = intensity.val[1];
-           uint8_t red = intensity.val[2];
-           uint8_t mintensity = mask.at<uint8_t>(y, x);
-           bool blackPixel = mintensity < 10;
+      {
+        Vec3b intensity = image.at<Vec3b>(y, x);
+        uint8_t blue = intensity.val[0];
+        uint8_t green = intensity.val[1];
+        uint8_t red = intensity.val[2];
+        uint8_t mintensity = mask.at<uint8_t>(y, x);
+        bool blackPixel = mintensity < 10;
 
-           t.at<float>(y, x) = blackPixel ? 0 : partModel.partHistogram.at(red / Factor).at(green / Factor).at(blue / Factor); // (x, y)  or (y, x) !? ?
-           //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
-        }
+        t.at<float>(y, x) = blackPixel ? 0 : partModel.partHistogram.at(red / Factor).at(green / Factor).at(blue / Factor); // (x, y)  or (y, x) !? ?
+        //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
+      }
 
     pixelDistributions = detector.buildPixelDistributions(frames[FirstKeyframe]);
     for (int x = 0; x < t.cols; x++)
@@ -436,10 +436,10 @@ namespace SPEL
     if (limbLabel_e.getPolygon().size() == limbLabel_a.getPolygon().size())
     {
       for (int i = 0; i < limbLabel_e.getPolygon().size(); i++)
-        {
-          EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).x, limbLabel_a.getPolygon().at(i).x);
-          EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).y, limbLabel_a.getPolygon().at(i).y);
-        }
+      {
+        EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).x, limbLabel_a.getPolygon().at(i).x);
+        EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).y, limbLabel_a.getPolygon().at(i).y);
+      }
     }
 
     EXPECT_EQ(model.bgHistogram, detector.partModels[partID].bgHistogram);

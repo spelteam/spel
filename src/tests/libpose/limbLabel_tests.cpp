@@ -50,7 +50,8 @@ namespace SPEL
 
     //Testing function getAvgScore()
     bool bNegativeToPositive = true;
-    float avgScore = (score1Value + score2Value)*scoreCoeff / 2;
+    //float avgScore = (score1Value + score2Value)*scoreCoeff / 2;
+    float avgScore = (score1Value + score2Value)*scoreCoeff; // Use sum instead of average
     // Temporary debug messages
     if (avgScore != label1.getAvgScore(bNegativeToPositive))
       cout << "-----------\n   LimbLabel::GetAvgScore():\n" << endl;

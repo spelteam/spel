@@ -545,7 +545,7 @@ namespace SPEL
 
     // Copy coordinates of BodyParts from skeleton
     map<int, pair<Point2f, Point2f>> PartLocation = _getPartLocations(skeleton);
-
+	
     // Compare labels with ideal bodyparts from keyframe, and output debug information 
     float TolerableCoordinateError = 7; // Linear error in pixels
     float TolerableAngleError = 0.1; // 10% (not used in this test)
@@ -631,9 +631,8 @@ namespace SPEL
 
     image.release();
     mask.release();
-    for (int i = 0; i < frames.size(); i++)
-      delete frames[i];
-
+    /*for (int i = 0; i < frames.size(); i++)
+        delete frames[i];	*/
   }
 
   TEST(HOGDetectorTests, compare)
