@@ -192,14 +192,6 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
     }
     cout << "Detecting complete" << endl;
     trainFrames.clear();
-  }
-  vector <Frame*> vFrames = projectLoader.getFrames();
-  vector <Frame*>::iterator i;
-  for (i = vFrames.begin(); i != vFrames.end(); ++i)
-  {
-    Frame *f = *i;
-    if (f != 0)
-      delete f;
-  }
+  }  
   return 0;
 }
