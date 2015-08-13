@@ -77,7 +77,7 @@ bg=blue</panel_attributes>
     <coordinates>
       <x>1127</x>
       <y>868</y>
-      <w>805</w>
+      <w>1001</w>
       <h>210</h>
     </coordinates>
     <panel_attributes>/Detector/
@@ -86,9 +86,9 @@ bg=blue</panel_attributes>
 +maxFrameHeight: uint32_t
 +debugLevelParam: uint8_t
 --
-/+getId(): int/
-/+setId(int _id)/
-/+train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)/
++getId(): int
++setId(int _id)
++train(frames: vector&lt;Frame&gt;, params: map&lt;string, float&gt;)
 +detect(frame: Frame*, params: map&lt;string, float&gt;, limbLabels: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;): map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;
 +merge(first: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;, second: map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;): map &lt;uint32_t, vector &lt;LimbLabel&gt; &gt;
 +getBoneLength(begin: Point2f, end: Point2f): float;
@@ -96,9 +96,10 @@ bg=blue</panel_attributes>
 +getBodyPartRect(bodyPart: BodyPart, j0: Point2f, j1: Point2f, blockSize: Size): POSERECT &lt;Point2f&gt;
 +rotateImageToDefault(imgSource: Mat, initialRectL POSERECT &lt;Point2f&gt;&amp;, angle: float, size: Size): Mat;
 +generateLabel(bodyPart: BodyPart, j0: Point2f, j1: Point2f, detectorName: string, _usedet: float): LimbLabel
-/+generateLabel(bodyPart: BodyPart, workFrame: Frame*, p0: Point2f, p1: Point2f): LimbLabel/
-generateLabel(boneLength: float, rotationAngle: float, x: float, y: float, bodyPart: BodyPart, workFrame:Frame*): LimbLabel
-/+compare(): float/</panel_attributes>
++generateLabel(bodyPart: BodyPart, workFrame: Frame*, p0: Point2f, p1: Point2f): LimbLabel
++generateLabel(boneLength: float, rotationAngle: float, x: float, y: float, bodyPart: BodyPart, workFrame:Frame*): LimbLabel
++compare(): float
++filterLimbLabels(workFrame: Frame*, sortedLabels: vector &lt;LimbLabel&gt;&amp;, limbLabels: map &lt;uint32_t, vector &lt;LimbLabel&gt;&gt;&amp;, bodyPart: BodyPart, boneLength: float, uniqueLocationCandidates: uint32_t): vector &lt;LimbLabel&gt;</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -193,8 +194,8 @@ generateLabel(boneLength: float, rotationAngle: float, x: float, y: float, bodyP
     <coordinates>
       <x>56</x>
       <y>301</y>
-      <w>175</w>
-      <h>70</h>
+      <w>181</w>
+      <h>76</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>168;21;21;63</additional_attributes>
@@ -204,8 +205,8 @@ generateLabel(boneLength: float, rotationAngle: float, x: float, y: float, bodyP
     <coordinates>
       <x>210</x>
       <y>301</y>
-      <w>28</w>
-      <h>70</h>
+      <w>34</w>
+      <h>76</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>21;21;21;63</additional_attributes>
@@ -215,8 +216,8 @@ generateLabel(boneLength: float, rotationAngle: float, x: float, y: float, bodyP
     <coordinates>
       <x>224</x>
       <y>301</y>
-      <w>161</w>
-      <h>70</h>
+      <w>167</w>
+      <h>76</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>21;21;154;63</additional_attributes>
@@ -303,8 +304,8 @@ bg=orange</panel_attributes>
     <coordinates>
       <x>1463</x>
       <y>1057</y>
-      <w>98</w>
-      <h>336</h>
+      <w>97</w>
+      <h>335</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>84;21;21;322</additional_attributes>
@@ -314,8 +315,8 @@ bg=orange</panel_attributes>
     <coordinates>
       <x>1575</x>
       <y>1057</y>
-      <w>448</w>
-      <h>322</h>
+      <w>447</w>
+      <h>321</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
     <additional_attributes>21;21;434;308</additional_attributes>

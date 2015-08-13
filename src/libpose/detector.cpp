@@ -504,162 +504,8 @@ namespace SPEL
         throw logic_error(ss.str());
       }
       if (sortedLabels.size() > 0) // if labels vector is not empty
-      {
-        sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
-        Mat locations(workFrame->getFrameSize().height, workFrame->getFrameSize().width, DataType<uint32_t>::type); // create the temporary matrix
-        for (auto i = 0; i < workFrame->getFrameSize().width; i++)
-        {
-          for (auto j = 0; j < workFrame->getFrameSize().height; j++)
-          {
-            try
-            {
-              locations.at<uint32_t>(j, i) = 0; // init elements of the "location" matrix
-            }
-            catch (...)
-            {
-              locations.release();
-              stringstream ss;
-              ss << "There is no value of locations at " << "[" << j << "][" << i << "]";
-              if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
-            }
-          }
-        }
+        labels = filterLimbLabels(workFrame, sortedLabels, limbLabels, iteratorBodyPart, boneLength, uniqueLocationCandidates);
 
-        vector <LimbLabel> generatedPartLabels;
-
-        if (limbLabels.size() > 0)
-        {
-          if (sortedLabels.size() > 0)
-          {
-            try
-            {
-              auto partLabel = limbLabels.at(sortedLabels.front().getLimbID());
-              for (auto generated : partLabel)
-                generatedPartLabels.push_back(generated);
-            }
-            catch (...)
-            {
-              stringstream ss;
-              ss << "Can't find generated limb label " << sortedLabels.front().getLimbID();
-              if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-            }
-          }
-        }
-
-        // For all "sortedLabels"
-        for (auto i : sortedLabels)
-        {
-          auto bFound = false;
-          try
-          {
-            for (auto generatedLabels : generatedPartLabels)
-            {
-              auto first = i.getPolygon();
-              auto second = generatedLabels.getPolygon();
-              if (first.size() == second.size())
-                for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
-                  bFound = bFound && first.at(polygonSize) == second.at(polygonSize);
-            }
-          }
-          catch (...)
-          {
-            stringstream ss;
-            ss << "Can't find generated limb label";
-            if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-          }
-          
-          auto x = (uint32_t)i.getCenter().x; // copy center coordinates of current label
-          auto y = (uint32_t)i.getCenter().y; // copy center coordinates of current label
-          try
-          {
-            if (bFound || locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
-            {
-              try
-              {
-                labels.push_back(i); // add the current label in the resulting set of labels
-              }
-              catch (...)
-              {
-                locations.release();
-                stringstream ss;
-                ss << "Maybe there is no value of sortedLabels";
-                if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                throw logic_error(ss.str());
-              }
-              if (!bFound)
-                locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
-            }
-          }
-          catch (...)
-          {
-            locations.release();
-            stringstream ss;
-            ss << "Maybe there is no value of locations at " << "[" << y << "][" << x << "]";
-            if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
-          }
-        }
-        locations.release();
-
-        // Generate LimbLabels for left orphaned labels
-
-        for (auto partLabel : limbLabels)
-        {
-          try
-          {
-            if (labels.size() == 0 || partLabel.first == labels.front().getLimbID())
-            {
-              for (auto potentiallyOrphanedLabels : partLabel.second)
-              {
-                auto bFound = false;
-                try
-                {
-                  for (auto generatedLabels : labels)
-                  {
-                    auto potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels.getPolygon();
-                    auto generatedLabelsPolygon = generatedLabels.getPolygon();
-                    if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
-                    {
-                      for (auto polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
-                      {
-                        if(potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize))
-                            bFound=true;
-                      }
-                    }
-                  }
-                }
-                catch (...)
-                {
-                  stringstream ss;
-                  ss << "Can't find generated limb label";
-                  if (debugLevelParam >= 1)
-                    cerr << ERROR_HEADER << ss.str() << endl;
-                }
-                if (!bFound)
-                  labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels.getAngle(), potentiallyOrphanedLabels.getCenter().x, potentiallyOrphanedLabels.getCenter().y, iteratorBodyPart, workFrame));
-              }
-              break;
-            }
-          }
-          catch (...)
-          {
-            stringstream ss;
-            ss << "Something went wrong. Just keep going";
-            if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-          }
-        }
-
-        //// Sort labels again
-        sort(labels.begin(), labels.end());
-
-      }
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
         tempLabelVector.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
@@ -692,6 +538,216 @@ namespace SPEL
     p0 = Point2f(x, y) - mid; // shift the vector to current point
 
     return generateLabel(bodyPart, workFrame, p0, p1); // build  the vector label
+  }
+
+  vector<LimbLabel> Detector::filterLimbLabels(Frame *workFrame, vector <LimbLabel> &sortedLabels, map <uint32_t, vector <LimbLabel>> &limbLabels, BodyPart bodyPart, float boneLength, uint32_t uniqueLocationCandidates)
+  {
+    vector <LimbLabel> labels, locationLabels, angleLabels;
+    map <float, uint32_t> angles;
+
+    sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
+
+    Mat locations(workFrame->getFrameSize().height, workFrame->getFrameSize().width, DataType<uint32_t>::type); // create the temporary matrix
+    for (auto i = 0; i < workFrame->getFrameSize().width; i++)
+    {
+      for (auto j = 0; j < workFrame->getFrameSize().height; j++)
+      {
+        try
+        {
+          locations.at<uint32_t>(j, i) = 0; // init elements of the "location" matrix
+        }
+        catch (...)
+        {
+          locations.release();
+          stringstream ss;
+          ss << "There is no value of locations at " << "[" << j << "][" << i << "]";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
+      }
+    }
+
+    vector <LimbLabel> generatedPartLabels;
+
+    if (limbLabels.size() > 0)
+    {
+      if (sortedLabels.size() > 0)
+      {
+        try
+        {
+          auto partLabel = limbLabels.at(sortedLabels.front().getLimbID());
+          for (auto generated : partLabel)
+            generatedPartLabels.push_back(generated);
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Can't find generated limb label " << sortedLabels.front().getLimbID();
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+        }
+      }
+    }
+
+    // For all "sortedLabels"
+    for (auto i : sortedLabels)
+    {
+      auto x = (uint32_t)i.getCenter().x; // copy center coordinates of current label
+      auto y = (uint32_t)i.getCenter().y; // copy center coordinates of current label
+      try
+      {
+        if (locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
+        {
+          try
+          {
+            locationLabels.push_back(i); // add the current label in the resulting set of labels
+          }
+          catch (...)
+          {
+            locations.release();
+            stringstream ss;
+            ss << "Maybe there is no value of sortedLabels";
+            if (debugLevelParam >= 1)
+              cerr << ERROR_HEADER << ss.str() << endl;
+            throw logic_error(ss.str());
+          }
+          locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
+        }
+      }
+      catch (...)
+      {
+        locations.release();
+        stringstream ss;
+        ss << "Maybe there is no value of locations at " << "[" << y << "][" << x << "]";
+        if (debugLevelParam >= 1)
+          cerr << ERROR_HEADER << ss.str() << endl;
+        throw logic_error(ss.str());
+      }
+
+      auto count = 0;
+      try
+      {
+        count = angles.at(i.getAngle());
+      }
+      catch (...)
+      {
+        count = 0;
+      }
+      if (count < uniqueLocationCandidates)
+      {
+        angleLabels.push_back(i);
+        angles[i.getAngle()] = count + 1;
+      }
+    }
+
+    for (auto i : sortedLabels)
+    {
+      auto bFound = false;
+      try
+      {
+        for (auto generatedLabels : generatedPartLabels)
+        {
+          auto first = i.getPolygon();
+          auto second = generatedLabels.getPolygon();
+          if (first.size() == second.size())
+            for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
+              bFound = bFound && first.at(polygonSize) == second.at(polygonSize);
+          if (bFound)
+            break;
+        }
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Can't find generated limb label";
+        if (debugLevelParam >= 1)
+          cerr << ERROR_HEADER << ss.str() << endl;
+      }
+
+      auto bLocationFound = false;
+      for (auto locationLabel : locationLabels)
+      {
+        auto first = i.getPolygon();
+        auto second = locationLabel.getPolygon();
+        if (first.size() == second.size())
+          for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
+            bLocationFound = bLocationFound && first.at(polygonSize) == second.at(polygonSize);
+        if (bLocationFound)
+          break;
+      }
+
+      auto bAngleFound = false;
+      for (auto angleLabel : angleLabels)
+      {
+        auto first = i.getPolygon();
+        auto second = angleLabel.getPolygon();
+        if (first.size() == second.size())
+          for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
+            bAngleFound = bAngleFound && first.at(polygonSize) == second.at(polygonSize);
+        if (bAngleFound)
+          break;
+      }
+
+      if (bFound || (bLocationFound && bAngleFound))
+        labels.push_back(i);
+    }
+
+    locations.release();
+
+    // Generate LimbLabels for left orphaned labels
+
+    for (auto partLabel : limbLabels)
+    {
+      try
+      {
+        if (labels.size() == 0 || partLabel.first == labels.front().getLimbID())
+        {
+          for (auto potentiallyOrphanedLabels : partLabel.second)
+          {
+            auto bFound = false;
+            try
+            {
+              for (auto generatedLabels : labels)
+              {
+                auto potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels.getPolygon();
+                auto generatedLabelsPolygon = generatedLabels.getPolygon();
+                if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
+                {
+                  for (auto polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
+                  {
+                    if (potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize))
+                      bFound = true;
+                  }
+                }
+              }
+            }
+            catch (...)
+            {
+              stringstream ss;
+              ss << "Can't find generated limb label";
+              if (debugLevelParam >= 1)
+                cerr << ERROR_HEADER << ss.str() << endl;
+            }
+            if (!bFound)
+              labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels.getAngle(), potentiallyOrphanedLabels.getCenter().x, potentiallyOrphanedLabels.getCenter().y, bodyPart, workFrame));
+          }
+          break;
+        }
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Something went wrong. Just keep going";
+        if (debugLevelParam >= 1)
+          cerr << ERROR_HEADER << ss.str() << endl;
+      }
+    }
+
+    //// Sort labels again
+    sort(labels.begin(), labels.end());
+
+    return labels;
   }
 
 }
