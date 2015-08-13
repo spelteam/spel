@@ -77,7 +77,7 @@ bg=blue</panel_attributes>
     <coordinates>
       <x>1127</x>
       <y>868</y>
-      <w>1001</w>
+      <w>1099</w>
       <h>210</h>
     </coordinates>
     <panel_attributes>/Detector/
@@ -99,7 +99,7 @@ bg=blue</panel_attributes>
 +generateLabel(bodyPart: BodyPart, workFrame: Frame*, p0: Point2f, p1: Point2f): LimbLabel
 +generateLabel(boneLength: float, rotationAngle: float, x: float, y: float, bodyPart: BodyPart, workFrame:Frame*): LimbLabel
 +compare(): float
-+filterLimbLabels(workFrame: Frame*, sortedLabels: vector &lt;LimbLabel&gt;&amp;, limbLabels: map &lt;uint32_t, vector &lt;LimbLabel&gt;&gt;&amp;, bodyPart: BodyPart, boneLength: float, uniqueLocationCandidates: uint32_t): vector &lt;LimbLabel&gt;</panel_attributes>
++filterLimbLabels(workFrame: Frame*, sortedLabels: vector &lt;LimbLabel&gt;&amp;, limbLabels: map &lt;uint32_t, vector &lt;LimbLabel&gt;&gt;&amp;, bodyPart: BodyPart, boneLength: float, uniqueLocationCandidates: float, uniqueAngleCandidates: float): vector &lt;LimbLabel&gt;</panel_attributes>
     <additional_attributes/>
   </element>
   <element>

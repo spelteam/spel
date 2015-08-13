@@ -45,7 +45,7 @@ namespace SPEL
     virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *workFrame, Point2f p0, Point2f p1) = 0;
     virtual LimbLabel generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame);
     virtual float compare(void) = 0;
-    virtual vector <LimbLabel> filterLimbLabels(Frame *workFrame, vector <LimbLabel> &sortedLabels, map <uint32_t, vector <LimbLabel>> &limbLabels, BodyPart bodyPart, float boneLength, uint32_t uniqueLocationCandidates);
+    virtual vector <LimbLabel> filterLimbLabels(Frame *workFrame, vector <LimbLabel> &sortedLabels, map <uint32_t, vector <LimbLabel>> &limbLabels, BodyPart bodyPart, float boneLength, float uniqueLocationCandidates, float uniqueAngleCandidates);
   };
 }
 #endif  // _LIBPOSE_DETECTOR_HPP_

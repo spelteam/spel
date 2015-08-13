@@ -323,8 +323,11 @@ namespace SPEL
     auto stepTheta = 10.0f; // angular step of search
     const string sStepTheta = "stepTheta";
 
-    auto uniqueLocationCandidates = 4.0f; // limiting the choice of the solutions number for each bodypart
+    auto uniqueLocationCandidates = 0.1f; // limiting the choice of the solutions number for each bodypart
     const string sUniqueLocationCandidates = "uniqueLocationCandidates";
+
+    auto uniqueAngleCandidates = 0.1f;
+    const string sUniqueAngleCandidates = "uniqueAngleCandidates";
 
     auto scaleParam = 1.0f; // scaling coefficient
     const string sScaleParam = "scaleParam";
@@ -354,6 +357,7 @@ namespace SPEL
     params.emplace(sMaxTheta, maxTheta);
     params.emplace(sStepTheta, stepTheta);
     params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
+    params.emplace(sUniqueAngleCandidates, uniqueAngleCandidates);
     params.emplace(sScaleParam, scaleParam);
     params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
 
@@ -368,6 +372,7 @@ namespace SPEL
     maxTheta = params.at(sMaxTheta);
     stepTheta = params.at(sStepTheta);
     uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
+    uniqueAngleCandidates = params.at(sUniqueAngleCandidates);
     scaleParam = params.at(sScaleParam);
     searchDistCoeffMult = params.at(sSearchDistCoeffMult);
     debugLevel = params.at(sDebugLevel);
@@ -490,21 +495,8 @@ namespace SPEL
           sortedLabels.push_back(generateLabel(boneLength, rot, suggestStart.x, suggestStart.y, iteratorBodyPart, workFrame)); // add label to current bodypart labels
         }
       }
-      auto uniqueLocationCandidates = .0f;
-      try
-      {
-        uniqueLocationCandidates = params.at(sUniqueLocationCandidates); // copy the value from input parameters
-      }
-      catch (...)
-      {
-        stringstream ss;
-        ss << "Maybe there is no '" << sUniqueLocationCandidates << "' param";
-        if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
-      }
       if (sortedLabels.size() > 0) // if labels vector is not empty
-        labels = filterLimbLabels(workFrame, sortedLabels, limbLabels, iteratorBodyPart, boneLength, uniqueLocationCandidates);
+        labels = filterLimbLabels(workFrame, sortedLabels, limbLabels, iteratorBodyPart, boneLength, uniqueLocationCandidates, uniqueAngleCandidates);
 
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
@@ -540,7 +532,7 @@ namespace SPEL
     return generateLabel(bodyPart, workFrame, p0, p1); // build  the vector label
   }
 
-  vector<LimbLabel> Detector::filterLimbLabels(Frame *workFrame, vector <LimbLabel> &sortedLabels, map <uint32_t, vector <LimbLabel>> &limbLabels, BodyPart bodyPart, float boneLength, uint32_t uniqueLocationCandidates)
+  vector<LimbLabel> Detector::filterLimbLabels(Frame *workFrame, vector <LimbLabel> &sortedLabels, map <uint32_t, vector <LimbLabel>> &limbLabels, BodyPart bodyPart, float boneLength, float uniqueLocationCandidates, float uniqueAngleCandidates)
   {
     vector <LimbLabel> labels, locationLabels, angleLabels;
     map <float, uint32_t> angles;
@@ -597,7 +589,7 @@ namespace SPEL
       auto y = (uint32_t)i.getCenter().y; // copy center coordinates of current label
       try
       {
-        if (locations.at<uint32_t>(y, x) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
+        if (((float)locations.at<uint32_t>(y, x) / (float)sortedLabels.size()) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
         {
           try
           {
@@ -634,10 +626,24 @@ namespace SPEL
       {
         count = 0;
       }
-      if (count < uniqueLocationCandidates)
+      try
       {
-        angleLabels.push_back(i);
-        angles[i.getAngle()] = count + 1;
+        if (((float)count / (float)sortedLabels.size()) < uniqueAngleCandidates)
+        {
+          angleLabels.push_back(i);
+          if (count == 0)
+            angles.insert(pair<float, uint32_t>(i.getAngle(), 1));
+          else
+            angles.at(i.getAngle()) = count + 1;
+        }
+      }
+      catch (...)
+      {
+        stringstream ss;
+        ss << "Can't insert angle: angle " << i.getAngle() << " count " << count;
+        if (debugLevelParam >=1 )
+          cerr << ERROR_HEADER << ss.str() << endl;
+        throw logic_error(ss.str());
       }
     }
 
@@ -668,25 +674,47 @@ namespace SPEL
       auto bLocationFound = false;
       for (auto locationLabel : locationLabels)
       {
-        auto first = i.getPolygon();
-        auto second = locationLabel.getPolygon();
-        if (first.size() == second.size())
-          for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
-            bLocationFound = bLocationFound && first.at(polygonSize) == second.at(polygonSize);
-        if (bLocationFound)
-          break;
+        try
+        {
+          auto first = i.getPolygon();
+          auto second = locationLabel.getPolygon();
+          if (first.size() == second.size())
+            for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
+              bLocationFound = bLocationFound && first.at(polygonSize) == second.at(polygonSize);
+          if (bLocationFound)
+            break;
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Can't get locationLabel";
+          if (debugLevelParam >= 2)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
       }
 
       auto bAngleFound = false;
       for (auto angleLabel : angleLabels)
       {
-        auto first = i.getPolygon();
-        auto second = angleLabel.getPolygon();
-        if (first.size() == second.size())
-          for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
-            bAngleFound = bAngleFound && first.at(polygonSize) == second.at(polygonSize);
-        if (bAngleFound)
-          break;
+        try
+        {
+          auto first = i.getPolygon();
+          auto second = angleLabel.getPolygon();
+          if (first.size() == second.size())
+            for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
+              bAngleFound = bAngleFound && first.at(polygonSize) == second.at(polygonSize);
+          if (bAngleFound)
+            break;
+        }
+        catch (...)
+        {
+          stringstream ss;
+          ss << "Can't get angleLabel";
+          if (debugLevelParam >= 1)
+            cerr << ERROR_HEADER << ss.str() << endl;
+          throw logic_error(ss.str());
+        }
       }
 
       if (bFound || (bLocationFound && bAngleFound))
