@@ -1066,7 +1066,16 @@ namespace SPEL
     catch (logic_error ex)
     {
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << "Dirty Label: " << ex.what() << endl;
+      {
+          string frameType;
+          if((*comparer_frame)->getFrametype()==KEYFRAME)
+              frameType="Keyframe";
+          else if((*comparer_frame)->getFrametype()==LOCKFRAME)
+              frameType="Lockframe";
+          else
+              frameType="Interpolation";
+        cerr << ERROR_HEADER << "Dirty Label: " << " Frame("<<frameType<< "): " << (*comparer_frame)->getID() << " Part: " << comparer_bodyPart->getPartID() << " " << ex.what() << endl;
+      }
       return -1.0f;
     }
   }

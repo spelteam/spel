@@ -654,7 +654,7 @@ int main (int argc, char **argv)
 
         //solver settings
         params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
-        params.emplace("nskpLockframeThreshold", 0.49); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+        params.emplace("nskpLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
         params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
 
         params.emplace("badLabelThresh", 0.40); //set bad label threshold, which will force solution discard at 0.45
@@ -676,7 +676,8 @@ int main (int argc, char **argv)
 
         params.emplace("maxPartCandidates", 0.1); //Take the top 5% of candidates
         params.emplace("isWeakThreshold", 0.0); //if SD is less than 0.3 of mean-min
-        params.emplace("uniqueLocationCandidates", 360);
+        params.emplace("uniqueLocationCandidates", 0.1);
+        params.emplace("uniqueAngleCandidates", 0.1);
         params.emplace("debugLevel", 0);
 
         params.emplace("mstThresh", 3.0); //use outliners that are at least 2.5 stddev from the mean
@@ -767,7 +768,7 @@ int main (int argc, char **argv)
                     for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
                         finalSolve.push_back(*s);
                 }
-                else //otherwise, only call TLPS
+                else if(params.at("withTLPS")) //otherwise, only call TLPS
                 {
                     //then, do a temporal solve
                     seq.computeInterpolation(params); //recompute interpolation (does this improve results?)

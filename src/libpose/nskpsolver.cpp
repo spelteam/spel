@@ -172,8 +172,6 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
     if(frames[frameId]->getFrametype()!=INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
             && (frames[frameId]->getFrametype()!=LOCKFRAME || propagateFromLockframes) && mst.size()>1) //and, if it's a lockframe, and solving from lockframes is allowed
     {
-        ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
-
 
         tree<int>::iterator mstIter;
         //do OpenGM solve for single factor graph
@@ -536,6 +534,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
         for(auto i=0; i<detectors.size(); ++i)
             delete detectors[i];
         detectors.clear();
+        ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
     }
 
     return allSolves;
@@ -576,46 +575,46 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     cerr << "Set-up time " << duration << endl;
 
     // //THIS IS THE ASYNC VERSION, THAT NEEDS DEBUGGING  -------------------------------------------------------------
-    vector<future<vector<SolvletScore> > > futures;
-    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
-    {
-        int captureIndex = frameId;
-        //[&] { a.foo(100); }
-        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
-        futures.push_back(async(std::launch::async | std::launch::deferred,[=, &ignore]()->vector < NSKPSolver::SolvletScore >
-        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore); }));
-    }
+//    vector<future<vector<SolvletScore> > > futures;
+//    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
+//    {
+//        int captureIndex = frameId;
+//        //[&] { a.foo(100); }
+//        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
+//        futures.push_back(async(std::launch::async | std::launch::deferred,[=, &ignore]()->vector < NSKPSolver::SolvletScore >
+//        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore); }));
+//    }
 
-    cerr << "Launched " << futures.size() << " threads." << endl;
+//    cerr << "Launched " << futures.size() << " threads." << endl;
 
-    vector<vector<SolvletScore> > temp;
-    for (auto &e : futures) {
-        ;
-        try {
-            //e.wait();
-            temp.push_back(e.get());
-            //std::cout << "You entered: " << x << '\n';
-        }
-        catch (std::exception&) {
-            std::cout << "[exception caught]";
-        }
-        //         if(solves.size()>0)
-        //             allSolves[solves[0].solvlet.getFrameID()]=solves;
-    }
+//    vector<vector<SolvletScore> > temp;
+//    for (auto &e : futures) {
+//        ;
+//        try {
+//            //e.wait();
+//            temp.push_back(e.get());
+//            //std::cout << "You entered: " << x << '\n';
+//        }
+//        catch (std::exception&) {
+//            std::cout << "[exception caught]";
+//        }
+//        //         if(solves.size()>0)
+//        //             allSolves[solves[0].solvlet.getFrameID()]=solves;
+//    }
     // //END -----------------------------------------------------------------------------
 
     //THE SINGLE-THREAD VERSION ----------------------------------------------------------
-//    vector<vector<SolvletScore> > temp;
-//    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
-//    {
-//        temp.push_back(propagateFrame(frameId, frames, params, ism, trees, ignore));
-//    }
+    vector<vector<SolvletScore> > temp;
+    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
+    {
+        temp.push_back(propagateFrame(frameId, frames, params, ism, trees, ignore));
+    }
 
-//    for (uint32_t i = 0; i < temp.size(); ++i)
-//    {
-//        if (temp[i].size()>0)
-//            allSolves[temp[i].at(0).solvlet.getFrameID()] = temp[i];
-//    }
+    for (uint32_t i = 0; i < temp.size(); ++i)
+    {
+        if (temp[i].size()>0)
+            allSolves[temp[i].at(0).solvlet.getFrameID()] = temp[i];
+    }
     //END --------------------------------------------------------------------------------
 
     //now extract the best solves
