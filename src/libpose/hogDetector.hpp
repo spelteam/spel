@@ -54,11 +54,11 @@ namespace SPEL
     FRIEND_TEST(HOGDetectorTests, getNBins);
 #endif  // DEBUG
     int id;
+  protected:
     const uint8_t nbins = 9;
     map <uint32_t, Size> partSize;
     map <uint32_t, map <uint32_t, PartModel>> partModels;
     map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;
-  protected:
     bool bGrayImages = false;
     float useHoGdet = 1.0f;
     //TODO(Vitaliy Koshura): Make some of them as detector params

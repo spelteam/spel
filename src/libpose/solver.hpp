@@ -20,9 +20,9 @@ namespace SPEL
     virtual vector<Solvlet> solve(const Sequence& v);
     virtual vector<Solvlet> solve(const Sequence& v, map<string, float> params);
     ///get the solver name. Every class inheriting solver has its own Name
-    string getName(void);
+    virtual string getName(void);
     ///get the solver Id. Every class inheriting solver has its own ID
-    int getId(void);
+    virtual int getId(void);
   protected:
     int id;
     string name;

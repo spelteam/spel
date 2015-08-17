@@ -116,7 +116,7 @@ namespace SPEL
     return partImage;
   }
 
-  map <uint32_t, vector <LimbLabel>> Detector::merge(map <uint32_t, vector <LimbLabel>> first, map <uint32_t, vector <LimbLabel>> second)
+  map <uint32_t, vector <LimbLabel>> Detector::merge(map <uint32_t, vector <LimbLabel>> first, map <uint32_t, vector <LimbLabel>> second, map <uint32_t, vector <LimbLabel>> secondUnfiltered)
   {
     if (first.size() != second.size() && first.size() > 0 && second.size() > 0)
     {
@@ -207,6 +207,30 @@ namespace SPEL
           auto newLabelScores = newLabel.getScores();
           for (auto i : newLabelScores)
             detectorNames.emplace(i.getDetName(), i.getCoeff());
+                    
+          auto foundUnfiltered = secondUnfiltered.find(firstIter.getLimbID());
+          if (foundUnfiltered != secondUnfiltered.end())
+          {
+            auto bFound = false;
+            LimbLabel foundLabel;
+            for (auto l : foundUnfiltered->second)
+            {
+              if (l.getLimbID() == firstIter.getLimbID() && l.getPolygon() == firstIter.getPolygon())
+              {
+                bFound = true;
+                foundLabel = l;
+                break;
+              }
+            }
+            if (bFound)
+            {
+              for (auto i : foundLabel.getScores())
+              {
+                newLabelScores.push_back(i);
+                detectorNames.emplace(i.getDetName(), i.getCoeff());
+              }
+            }
+          }
           newLabel.setScores(newLabelScores);
           partResult.push_back(newLabel);
         }
@@ -404,6 +428,8 @@ namespace SPEL
     stringstream detectorName;
     detectorName << getID();
 
+    map <uint32_t, vector <LimbLabel>> sortedLabelsMap;
+
     // For all body parts
     for (auto iteratorBodyPart : partTree)
     { //Temporary variables
@@ -496,11 +522,12 @@ namespace SPEL
         }
       }
       if (sortedLabels.size() > 0) // if labels vector is not empty
-        labels = filterLimbLabels(workFrame, sortedLabels, limbLabels, iteratorBodyPart, boneLength, uniqueLocationCandidates, uniqueAngleCandidates);
+        labels = filterLimbLabels(sortedLabels, uniqueLocationCandidates, uniqueAngleCandidates);
 
       PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
         tempLabelVector.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
+      sortedLabelsMap.insert(pair <uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), sortedLabels));
     }
 
     delete workFrame;
@@ -515,7 +542,7 @@ namespace SPEL
       }
     }
 
-    return merge(limbLabels, tempLabelVector);
+    return merge(limbLabels, tempLabelVector, sortedLabelsMap);
   }
 
   LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame)
@@ -532,340 +559,97 @@ namespace SPEL
     return generateLabel(bodyPart, workFrame, p0, p1); // build  the vector label
   }
 
-  vector<LimbLabel> Detector::filterLimbLabels(Frame *workFrame, vector <LimbLabel> &sortedLabels, map <uint32_t, vector <LimbLabel>> &limbLabels, BodyPart bodyPart, float boneLength, float uniqueLocationCandidates, float uniqueAngleCandidates)
+  vector<LimbLabel> Detector::filterLimbLabels(vector <LimbLabel> &sortedLabels, float uniqueLocationCandidates, float uniqueAngleCandidates)
   {
-      if(uniqueLocationCandidates<0 || uniqueLocationCandidates>1.0 || uniqueAngleCandidates< 0 || uniqueAngleCandidates>1.0)
-          return sortedLabels;
+    if (uniqueLocationCandidates<0 || uniqueLocationCandidates>1.0 || uniqueAngleCandidates< 0 || uniqueAngleCandidates>1.0)
+      return sortedLabels;
 
-      map<float, map<float, vector<uint32_t> > > locationMap;
-      map<float, vector<uint32_t> > angleMap;
+    map<float, map<float, vector<uint32_t> > > locationMap;
+    map<float, vector<uint32_t> > angleMap;
 
-      sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
+    sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
 
-      for(auto index=0; index<sortedLabels.size(); ++index)
+    for (auto index = 0; index < sortedLabels.size(); ++index)
+    {
+      Point2f location = sortedLabels[index].getCenter();
+      float angle = sortedLabels[index].getAngle();
+      if (locationMap.find(location.x) == locationMap.end()) //not found
       {
-          Point2f location=sortedLabels[index].getCenter();
-          float angle=sortedLabels[index].getAngle();
-        if ( locationMap.find(location.x) == locationMap.end() ) //not found
-        {
-            map<float, vector<uint32_t> > yMap; //create the new map
-            vector<uint32_t> indices; //create the index vector
-            indices.push_back(index); //push the index
-            yMap.emplace(location.y, indices); //put in yMap
-            locationMap.emplace(location.x, yMap); //push the  yMap
-        }
-        else //found x coordinate
-        {
-            map<float, vector<uint32_t> > yMap = locationMap.at(location.x);
-            if ( yMap.find(location.y) == yMap.end() ) //not found
-            {
-                vector<uint32_t> indices; //read the existing vector
-                indices.push_back(index); //push back another index
-                yMap.emplace(location.y, indices); //set in map
-            }
-            else
-            {
-                vector<uint32_t> indices;
-                indices.push_back(index);
-                yMap.at(location.y) = indices;
-            }
-            //update the location map
-            locationMap.at(location.x) = yMap;
-        }
-        if(angleMap.find(angle) == angleMap.end()) //not found
-        {
-            vector<uint32_t> indices;
-            indices.push_back(index);
-            angleMap.emplace(angle, indices);
-        }
-        else //found
-        {
-            vector<uint32_t> indices = angleMap.at(angle); //read the existing vector
-            indices.push_back(index); //push back another index
-            angleMap.at(angle) = indices; //set in map
-        }
+        map<float, vector<uint32_t> > yMap; //create the new map
+        vector<uint32_t> indices; //create the index vector
+        indices.push_back(index); //push the index
+        yMap.emplace(location.y, indices); //put in yMap
+        locationMap.emplace(location.x, yMap); //push the  yMap
       }
-
-      vector<uint32_t> bestByLocation;
-      vector<uint32_t> bestByAngle;
-
-      for(auto iter=locationMap.begin(); iter!=locationMap.end(); ++iter) //take the top from every location
+      else //found x coordinate
       {
-         map<float, vector<uint32_t> > yMap = iter->second;
-
-         for(auto yiter=yMap.begin(); yiter!=yMap.end(); ++yiter) //take the top from every location
-         {
-             vector<uint32_t> indices = yiter->second;
-             uint32_t numToPush = indices.size()*uniqueLocationCandidates;
-             if(numToPush<1) numToPush=1;
-             for(auto i=0; i<numToPush; ++i)
-                 bestByLocation.push_back(indices[i]);
-         }
+        map<float, vector<uint32_t> > yMap = locationMap.at(location.x);
+        if (yMap.find(location.y) == yMap.end()) //not found
+        {
+          vector<uint32_t> indices; //read the existing vector
+          indices.push_back(index); //push back another index
+          yMap.emplace(location.y, indices); //set in map
+        }
+        else
+        {
+          vector<uint32_t> indices;
+          indices.push_back(index);
+          yMap.at(location.y) = indices;
+        }
+        //update the location map
+        locationMap.at(location.x) = yMap;
       }
-      for(auto iter=angleMap.begin(); iter!=angleMap.end(); ++iter) //take the top from every angle
+      if (angleMap.find(angle) == angleMap.end()) //not found
       {
-         vector<uint32_t> indices = iter->second;
-         uint32_t numToPush = indices.size()*uniqueAngleCandidates;
-         if(numToPush<1) numToPush=1;
-         for(auto i=0; i<numToPush; ++i)
-             bestByAngle.push_back(indices[i]);
+        vector<uint32_t> indices;
+        indices.push_back(index);
+        angleMap.emplace(angle, indices);
       }
-      //now intersect
-      sort(bestByLocation.begin(), bestByLocation.end());
-      sort(bestByAngle.begin(), bestByAngle.end());
+      else //found
+      {
+        vector<uint32_t> indices = angleMap.at(angle); //read the existing vector
+        indices.push_back(index); //push back another index
+        angleMap.at(angle) = indices; //set in map
+      }
+    }
 
-      vector<uint32_t> bestIntersect;
-      set_union(bestByLocation.begin(), bestByLocation.end(), bestByAngle.begin(), bestByAngle.end(),back_inserter(bestIntersect));
+    vector<uint32_t> bestByLocation;
+    vector<uint32_t> bestByAngle;
 
-      vector<LimbLabel> labels;
-      for(auto index : bestIntersect)
-          labels.push_back(sortedLabels.at(index));
+    for (auto iter = locationMap.begin(); iter != locationMap.end(); ++iter) //take the top from every location
+    {
+      map<float, vector<uint32_t> > yMap = iter->second;
 
-      return labels;
+      for (auto yiter = yMap.begin(); yiter != yMap.end(); ++yiter) //take the top from every location
+      {
+        vector<uint32_t> indices = yiter->second;
+        uint32_t numToPush = indices.size()*uniqueLocationCandidates;
+        if (numToPush < 1) numToPush = 1;
+        for (auto i = 0; i < numToPush; ++i)
+          bestByLocation.push_back(indices[i]);
+      }
+    }
+    for (auto iter = angleMap.begin(); iter != angleMap.end(); ++iter) //take the top from every angle
+    {
+      vector<uint32_t> indices = iter->second;
+      uint32_t numToPush = indices.size()*uniqueAngleCandidates;
+      if (numToPush < 1) numToPush = 1;
+      for (auto i = 0; i < numToPush; ++i)
+        bestByAngle.push_back(indices[i]);
+    }
+    //now intersect
+    sort(bestByLocation.begin(), bestByLocation.end());
+    sort(bestByAngle.begin(), bestByAngle.end());
 
+    vector<uint32_t> bestIntersect;
+    set_union(bestByLocation.begin(), bestByLocation.end(), bestByAngle.begin(), bestByAngle.end(), back_inserter(bestIntersect));
 
-//    vector <LimbLabel> labels, locationLabels, angleLabels;
-//    map <float, uint32_t> angles;
+    vector<LimbLabel> labels;
+    for (auto index : bestIntersect)
+      labels.push_back(sortedLabels.at(index));
 
-//    sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
+    return labels;
 
-//    Mat locations(workFrame->getFrameSize().height, workFrame->getFrameSize().width, DataType<uint32_t>::type); // create the temporary matrix
-//    for (auto i = 0; i < workFrame->getFrameSize().width; i++)
-//    {
-//      for (auto j = 0; j < workFrame->getFrameSize().height; j++)
-//      {
-//        try
-//        {
-//          locations.at<uint32_t>(j, i) = 0; // init elements of the "location" matrix
-//        }
-//        catch (...)
-//        {
-//          locations.release();
-//          stringstream ss;
-//          ss << "There is no value of locations at " << "[" << j << "][" << i << "]";
-//          if (debugLevelParam >= 1)
-//            cerr << ERROR_HEADER << ss.str() << endl;
-//          throw logic_error(ss.str());
-//        }
-//      }
-//    }
-
-//    vector <LimbLabel> generatedPartLabels;
-
-//    if (limbLabels.size() > 0)
-//    {
-//      if (sortedLabels.size() > 0)
-//      {
-//        try
-//        {
-//          auto partLabel = limbLabels.at(sortedLabels.front().getLimbID());
-//          for (auto generated : partLabel)
-//            generatedPartLabels.push_back(generated);
-//        }
-//        catch (...)
-//        {
-//          stringstream ss;
-//          ss << "Can't find generated limb label " << sortedLabels.front().getLimbID();
-//          if (debugLevelParam >= 1)
-//            cerr << ERROR_HEADER << ss.str() << endl;
-//        }
-//      }
-//    }
-
-//    // For all "sortedLabels"
-//    for (auto i : sortedLabels)
-//    {
-//      auto x = (uint32_t)i.getCenter().x; // copy center coordinates of current label
-//      auto y = (uint32_t)i.getCenter().y; // copy center coordinates of current label
-//      try
-//      {
-//        if (((float)locations.at<uint32_t>(y, x) / (float)sortedLabels.size()) < uniqueLocationCandidates) // current point is occupied by less then "uniqueLocationCandidates" of labels with a greater score
-//        {
-//          try
-//          {
-//            locationLabels.push_back(i); // add the current label in the resulting set of labels
-//          }
-//          catch (...)
-//          {
-//            locations.release();
-//            stringstream ss;
-//            ss << "Maybe there is no value of sortedLabels";
-//            if (debugLevelParam >= 1)
-//              cerr << ERROR_HEADER << ss.str() << endl;
-//            throw logic_error(ss.str());
-//          }
-//          locations.at<uint32_t>(y, x) += 1; // increase the counter of labels number at given point
-//        }
-//      }
-//      catch (...)
-//      {
-//        locations.release();
-//        stringstream ss;
-//        ss << "Maybe there is no value of locations at " << "[" << y << "][" << x << "]";
-//        if (debugLevelParam >= 1)
-//          cerr << ERROR_HEADER << ss.str() << endl;
-//        throw logic_error(ss.str());
-//      }
-
-//      auto count = 0;
-//      try
-//      {
-//        count = angles.at(i.getAngle());
-//      }
-//      catch (...)
-//      {
-//        count = 0;
-//      }
-//      try
-//      {
-//        if (((float)count / (float)sortedLabels.size()) < uniqueAngleCandidates)
-//        {
-//          angleLabels.push_back(i);
-//          if (count == 0)
-//            angles.insert(pair<float, uint32_t>(i.getAngle(), 1));
-//          else
-//            angles.at(i.getAngle()) = count + 1;
-//        }
-//      }
-//      catch (...)
-//      {
-//        stringstream ss;
-//        ss << "Can't insert angle: angle " << i.getAngle() << " count " << count;
-//        if (debugLevelParam >=1 )
-//          cerr << ERROR_HEADER << ss.str() << endl;
-//        throw logic_error(ss.str());
-//      }
-//    }
-
-//    for (auto i : sortedLabels)
-//    {
-//      auto bFound = false;
-//      try
-//      {
-//        for (auto generatedLabels : generatedPartLabels)
-//        {
-//          auto first = i.getPolygon();
-//          auto second = generatedLabels.getPolygon();
-//          if (first.size() == second.size())
-//            for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
-//              bFound = bFound && first.at(polygonSize) == second.at(polygonSize);
-//          if (bFound)
-//            break;
-//        }
-//      }
-//      catch (...)
-//      {
-//        stringstream ss;
-//        ss << "Can't find generated limb label";
-//        if (debugLevelParam >= 1)
-//          cerr << ERROR_HEADER << ss.str() << endl;
-//      }
-
-//      auto bLocationFound = false;
-//      for (auto locationLabel : locationLabels)
-//      {
-//        try
-//        {
-//          auto first = i.getPolygon();
-//          auto second = locationLabel.getPolygon();
-//          if (first.size() == second.size())
-//            for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
-//              bLocationFound = bLocationFound && first.at(polygonSize) == second.at(polygonSize);
-//          if (bLocationFound)
-//            break;
-//        }
-//        catch (...)
-//        {
-//          stringstream ss;
-//          ss << "Can't get locationLabel";
-//          if (debugLevelParam >= 2)
-//            cerr << ERROR_HEADER << ss.str() << endl;
-//          throw logic_error(ss.str());
-//        }
-//      }
-
-//      auto bAngleFound = false;
-//      for (auto angleLabel : angleLabels)
-//      {
-//        try
-//        {
-//          auto first = i.getPolygon();
-//          auto second = angleLabel.getPolygon();
-//          if (first.size() == second.size())
-//            for (auto polygonSize = 0; polygonSize < first.size(); polygonSize++)
-//              bAngleFound = bAngleFound && first.at(polygonSize) == second.at(polygonSize);
-//          if (bAngleFound)
-//            break;
-//        }
-//        catch (...)
-//        {
-//          stringstream ss;
-//          ss << "Can't get angleLabel";
-//          if (debugLevelParam >= 1)
-//            cerr << ERROR_HEADER << ss.str() << endl;
-//          throw logic_error(ss.str());
-//        }
-//      }
-
-//      if (bFound || (bLocationFound && bAngleFound))
-//        labels.push_back(i);
-//    }
-
-//    locations.release();
-
-//    // Generate LimbLabels for left orphaned labels
-
-//    for (auto partLabel : limbLabels)
-//    {
-//      try
-//      {
-//        if (labels.size() == 0 || partLabel.first == labels.front().getLimbID())
-//        {
-//          for (auto potentiallyOrphanedLabels : partLabel.second)
-//          {
-//            auto bFound = false;
-//            try
-//            {
-//              for (auto generatedLabels : labels)
-//              {
-//                auto potentiallyOrphanedLabelsPolygon = potentiallyOrphanedLabels.getPolygon();
-//                auto generatedLabelsPolygon = generatedLabels.getPolygon();
-//                if (potentiallyOrphanedLabelsPolygon.size() == generatedLabelsPolygon.size())
-//                {
-//                  for (auto polygonSize = 0; polygonSize < potentiallyOrphanedLabelsPolygon.size(); polygonSize++)
-//                  {
-//                    if (potentiallyOrphanedLabelsPolygon.at(polygonSize) == generatedLabelsPolygon.at(polygonSize))
-//                      bFound = true;
-//                  }
-//                }
-//              }
-//            }
-//            catch (...)
-//            {
-//              stringstream ss;
-//              ss << "Can't find generated limb label";
-//              if (debugLevelParam >= 1)
-//                cerr << ERROR_HEADER << ss.str() << endl;
-//            }
-//            if (!bFound)
-//              labels.push_back(generateLabel(boneLength, potentiallyOrphanedLabels.getAngle(), potentiallyOrphanedLabels.getCenter().x, potentiallyOrphanedLabels.getCenter().y, bodyPart, workFrame));
-//          }
-//          break;
-//        }
-//      }
-//      catch (...)
-//      {
-//        stringstream ss;
-//        ss << "Something went wrong. Just keep going";
-//        if (debugLevelParam >= 1)
-//          cerr << ERROR_HEADER << ss.str() << endl;
-//      }
-//    }
-
-//    //// Sort labels again
-//    sort(labels.begin(), labels.end());
-
-//    return labels;
   }
 
 }

@@ -41,12 +41,13 @@ namespace SPEL
     };
   public:
     SurfDetector(void);
-    int getID(void) const;
-    void setID(int _id);
-    void train(vector <Frame*> _frames, map <string, float>);
-    map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
-    map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
-    map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
+    virtual ~SurfDetector(void);
+    virtual int getID(void) const;
+    virtual void setID(int _id);
+    virtual void train(vector <Frame*> _frames, map <string, float>);
+    virtual map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
+    virtual map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
+    virtual map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
 
   private:
 #ifdef DEBUG
@@ -56,6 +57,7 @@ namespace SPEL
     FRIEND_TEST(surfDetectorTests, generateLabel);
 #endif  // DEBUG
     int id;
+  protected:
     uint32_t minHessian = 500;
     float useSURFdet = 1.0f;
     float knnMatchCoeff = 0.8f;
@@ -69,11 +71,11 @@ namespace SPEL
     map <uint32_t, map <uint32_t, PartModel>> partModels;
     map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;
 
-    map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
-    PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian, vector <KeyPoint> keyPoints);
-    LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
-    float compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1);
-    float compare(void);
+    virtual map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
+    virtual PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian, vector <KeyPoint> keyPoints);
+    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
+    virtual float compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1);
+    virtual float compare(void);
   };
 
 }

@@ -31,7 +31,7 @@ namespace SPEL
     virtual void setID(int _id) = 0;
     virtual void train(vector <Frame*> frames, map <string, float> params) = 0;
     virtual map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
-    virtual map <uint32_t, vector <LimbLabel>> merge(map <uint32_t, vector <LimbLabel>> first, map <uint32_t, vector <LimbLabel>> second);
+    virtual map <uint32_t, vector <LimbLabel>> merge(map <uint32_t, vector <LimbLabel>> first, map <uint32_t, vector <LimbLabel>> second, map <uint32_t, vector <LimbLabel>> secondUnfiltered);
   protected:
     vector <Frame*> frames;
     uint32_t maxFrameHeight;
@@ -45,7 +45,7 @@ namespace SPEL
     virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *workFrame, Point2f p0, Point2f p1) = 0;
     virtual LimbLabel generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame);
     virtual float compare(void) = 0;
-    virtual vector <LimbLabel> filterLimbLabels(Frame *workFrame, vector <LimbLabel> &sortedLabels, map <uint32_t, vector <LimbLabel>> &limbLabels, BodyPart bodyPart, float boneLength, float uniqueLocationCandidates, float uniqueAngleCandidates);
+    virtual vector <LimbLabel> filterLimbLabels(vector <LimbLabel> &sortedLabels, float uniqueLocationCandidates, float uniqueAngleCandidates);
   };
 }
 #endif  // _LIBPOSE_DETECTOR_HPP_

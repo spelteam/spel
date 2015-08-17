@@ -13,6 +13,18 @@ namespace SPEL
 #endif
   }
 
+  SurfDetector::~SurfDetector(void)
+  {
+    for (auto i : partModels)
+      for (auto j : i.second)
+        j.second.descriptors.release();
+
+    for (auto i : labelModels)
+      for (auto j : i.second)
+        for (auto k : j.second)
+          k.descriptors.release();
+  }
+
   int SurfDetector::getID(void) const
   {
     return id;
@@ -289,6 +301,7 @@ namespace SPEL
     labelModels[frame->getID()][bodyPart.getPartID()].push_back(generatedPartModel);
 
     comparer_bodyPart = 0;
+    comparer_model->descriptors.release();
     comparer_model = 0;
     comparer_j0 = 0;
     comparer_j1 = 0;
