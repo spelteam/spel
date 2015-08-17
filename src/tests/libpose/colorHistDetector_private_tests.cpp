@@ -35,7 +35,7 @@ namespace SPEL
   //Global variables - each next test uses data from previous
   const int  partID = 12;
   int FirstKeyframe;
-  vector<Frame*> ÑFrames;
+  vector<Frame*> vFrames;
   Skeleton skeleton;
   tree <BodyPart> partTree;
   BodyPart bodyPart;
@@ -108,16 +108,16 @@ namespace SPEL
   TEST(colorHistDetectorTest, setPartHistogram)
   {
     //Load the input data
-    ÑFrames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vFrames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
-    map <string, float> params = SetParams(ÑFrames);
+    map <string, float> params = SetParams(vFrames);
 
     //Copy image and skeleton from first keyframe
-    FirstKeyframe = FirstKeyFrameNum(ÑFrames);
-    image = ÑFrames[FirstKeyframe]->getImage();
-    mask = ÑFrames[FirstKeyframe]->getMask();
-    skeleton = ÑFrames[FirstKeyframe]->getSkeleton();
+    FirstKeyframe = FirstKeyFrameNum(vFrames);
+    image = vFrames[FirstKeyframe]->getImage();
+    mask = vFrames[FirstKeyframe]->getMask();
+    skeleton = vFrames[FirstKeyframe]->getSkeleton();
     partTree = skeleton.getPartTree();
 
     //Select body part for testing
@@ -141,7 +141,7 @@ namespace SPEL
           partModel_expected.partHistogram[r][g][b] /= Colors.size();
 
     //Create actual value
-    detector.train(ÑFrames, params);
+    detector.train(vFrames, params);
     model = detector.partModels.at(partID);
     detector.setPartHistogram(partModel_actual, Colors);
 
@@ -271,7 +271,7 @@ namespace SPEL
         //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
       }
 
-    pixelDistributions = detector.buildPixelDistributions(ÑFrames[FirstKeyframe]);
+    pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
     for (int x = 0; x < t.cols; x++)
       for (int y = 0; y < t.rows; y++)
         EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
@@ -305,7 +305,7 @@ namespace SPEL
           p.at<float>(y, x) = 0; // (x,y)  or (y,x) !??
        }
 
-    pixelLabels = detector.buildPixelLabels(ÑFrames[FirstKeyframe], pixelDistributions);
+    pixelLabels = detector.buildPixelLabels(vFrames[FirstKeyframe], pixelDistributions);
 
     int q = 0;
     for (int x = 0; x < p.cols; x++)
@@ -370,7 +370,7 @@ namespace SPEL
       limbLabel_e = LimbLabel(partID, boxCenter, rot, rect.asVector(), s);
     }
 
-    LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), ÑFrames[0], p0, p1);
+    LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), vFrames[0], p0, p1);
 
     EXPECT_EQ(limbLabel_e.getLimbID(), limbLabel_a.getLimbID());
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
@@ -415,13 +415,13 @@ namespace SPEL
     ofstream fout("Output_CHDTest_detect.txt");
 
     // Copy skeleton from keyframe to frames[1] 
-    ÑFrames[1]->setSkeleton(ÑFrames[0]->getSkeleton());
+    vFrames[1]->setSkeleton(vFrames[0]->getSkeleton());
 
     // Run "detect"
     map<uint32_t, vector<LimbLabel>> limbLabels;
     map <string, float> detectParams;
     ASSERT_GT(detector.partModels.size(), 0);
-    limbLabels = detector.detect(ÑFrames[1], detectParams, limbLabels);
+    limbLabels = detector.detect(vFrames[1], detectParams, limbLabels);
     ASSERT_GT(limbLabels.size(), 0);
 
     // sort "limbLabels" by limb id
@@ -541,8 +541,8 @@ namespace SPEL
     image.release();
     mask.release();
     Colors.clear();
-    for (int i = 0; i < ÑFrames.size(); i++)
-      delete ÑFrames[i];
-    ÑFrames.clear();
+    for (int i = 0; i < vFrames.size(); i++)
+      delete vFrames[i];
+    vFrames.clear();
   }
 }

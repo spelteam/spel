@@ -852,8 +852,8 @@ int main (int argc, char **argv)
         errors.release();
 
         //delete sequence
-        for(auto&& f : vFrames)
-            delete f;
+        for(auto f=0; f<vFrames.size(); ++f)
+            delete vFrames[f];
         vFrames.clear();
 
         auto end = chrono::steady_clock::now();
