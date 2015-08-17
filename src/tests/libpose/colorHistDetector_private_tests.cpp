@@ -461,7 +461,9 @@ namespace SPEL
     // Run "detect"
     map<uint32_t, vector<LimbLabel>> limbLabels;
     map <string, float> detectParams;
+    ASSERT_GT(detector.partModels.size()), 0);
     limbLabels = detector.detect(frames[1], detectParams, limbLabels);
+    ASSERT_GT(limbLabels.size(), 0);
 
     // sort "limbLabels" by limb id
     //sort(limbLabels.begin(), limbLabels.end(), LimbIDCompare());

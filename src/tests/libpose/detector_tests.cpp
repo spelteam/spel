@@ -101,7 +101,7 @@ namespace SPEL
       {
         E = Point2i(i, j);
         E = PoseHelper::rotatePoint2D(E, center, angle);
-        if ((0 < E.x < size.width) && (0 < E.y < size.height))
+        if ((0 < E.x) && (E.x < size.width) && (0 < E.y) && (E.y < size.height))
           img2.at<Vec3b>((int32_t)(E.y), (int32_t)(E.x)) = Img.at<Vec3b>(j, i);
       }
     }
