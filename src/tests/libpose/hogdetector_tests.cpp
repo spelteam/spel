@@ -12,9 +12,12 @@
 #include "projectLoader.hpp"
 #include "limbLabel.hpp"
 #include "poseHelper.hpp"
+#include "TestsFunctions.hpp"
 
 namespace SPEL
 {
+  vector<Frame*> HFrames;
+
   vector <vector <vector <float>>> decodeDescriptor(vector<float> descriptors, Size wndSize, Size blockSize, Size blockStride, Size cellSize, int nbins)
   {
     vector <vector <vector <float>>> gradientStrengths;
@@ -94,27 +97,17 @@ namespace SPEL
 
   TEST(HOGDetectorTests, computeDescriptor)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-
     //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    HFrames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = HFrames[FirstKeyframe]->getImage();
+    Mat mask = HFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -167,27 +160,14 @@ namespace SPEL
 
   TEST(HOGDetectorTests, computeDescriptors)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-
-    //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
-
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = HFrames[FirstKeyframe]->getImage();
+    Mat mask = HFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -208,9 +188,9 @@ namespace SPEL
 
     //Calculate actual value
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     map <uint32_t, HogDetector::PartModel> partModels;
-    partModels = D.computeDescriptors(frames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+    partModels = D.computeDescriptors(HFrames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
 
     //Calculate expected value
     vector<vector<float>> allDescriptors;
@@ -226,7 +206,7 @@ namespace SPEL
     }
 
     //Compare		
-    Skeleton S = frames[FirstKeyframe]->getSkeleton();
+    Skeleton S = HFrames[FirstKeyframe]->getSkeleton();
     for (int partID = 0; partID < partTree.size(); partID++)
     {
       EXPECT_EQ(allDescriptors[partID].size(), partModels[partID].descriptors.size());
@@ -247,27 +227,14 @@ namespace SPEL
 
   TEST(HOGDetectorTests, getMaxBodyPartHeightWidth)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-
-    //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
-
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = HFrames[FirstKeyframe]->getImage();
+    Mat mask = HFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -293,33 +260,20 @@ namespace SPEL
 
     //Calculate actual parts size
     HogDetector D;
-    map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
+    map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     EXPECT_EQ(partsSize, partsSize_actual);
   }
 
   TEST(HOGDetectorTests, train)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-
-    //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
-
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = HFrames[FirstKeyframe]->getImage();
+    Mat mask = HFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -339,9 +293,9 @@ namespace SPEL
 
     //Calculate actual value
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     map<string, float> params;
-    D.train(frames, params);
+    D.train(HFrames, params);
 
     //Calculate expected value
     vector<vector<float>> allDescriptors;
@@ -374,27 +328,14 @@ namespace SPEL
 
   TEST(HOGDetectorTests, generateLabel)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-
-    //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
-
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = HFrames[FirstKeyframe]->getImage();
+    Mat mask = HFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -426,12 +367,12 @@ namespace SPEL
 
     //Calculate actual value
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     map<string, float> params;
-    D.train(frames, params);
+    D.train(HFrames, params);
     bool useHOGDet = true;
     HogDetector::PartModel partModel = D.getPartModels()[0][partID];
-    LimbLabel label_actual = D.generateLabel(bodyPart, frames[FirstKeyframe], p0, p1);
+    LimbLabel label_actual = D.generateLabel(bodyPart, HFrames[FirstKeyframe], p0, p1);
 
 
     //Create expected LimbLabel value
@@ -467,35 +408,21 @@ namespace SPEL
 
   TEST(HOGDetectorTests, detect)
   {
-
-    String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-
-    //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
-
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = HFrames[FirstKeyframe]->getImage();
+    Mat mask = HFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
     ofstream fout("Output_HOGTest_detect.txt");
 
     // Copy skeleton from keyframe to frames[1] 
-    frames[1]->setSkeleton(frames[0]->getSkeleton());
+    HFrames[1]->setSkeleton(HFrames[0]->getSkeleton());
 
     // Set descriptor parameters
     Size blockSize = Size(16, 16);
@@ -514,12 +441,12 @@ namespace SPEL
 
     // Run "detect"
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(frames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     map<string, float> params;
-    D.train(frames, params);
+    D.train(HFrames, params);
     map<uint32_t, vector<LimbLabel>> limbLabels;
     map <string, float> detectParams;
-    limbLabels = D.detect(frames[1], detectParams, limbLabels);
+    limbLabels = D.detect(HFrames[1], detectParams, limbLabels);
 
     // sort "limbLabels" by limb id
     //sort(limbLabels.begin(), limbLabels.end(), _LimbIDCompare());
@@ -545,7 +472,7 @@ namespace SPEL
 
     // Copy coordinates of BodyParts from skeleton
     map<int, pair<Point2f, Point2f>> PartLocation = _getPartLocations(skeleton);
-	
+    
     // Compare labels with ideal bodyparts from keyframe, and output debug information 
     float TolerableCoordinateError = 7; // Linear error in pixels
     float TolerableAngleError = 0.1; // 10% (not used in this test)

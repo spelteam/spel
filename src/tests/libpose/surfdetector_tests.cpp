@@ -9,11 +9,13 @@
 #include <gtest/gtest.h>
 #include <detector.hpp>
 #include <surfDetector.hpp>
-#include "projectLoader.hpp"
 #include "limbLabel.hpp"
+#include "TestsFunctions.hpp"
 
 namespace SPEL
 {
+  vector<Frame*> SFrames;
+
   void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color)
   {
     polygon.push_back(polygon[0]);
@@ -33,33 +35,17 @@ namespace SPEL
   //Testing "computeDescriptors" functions
   TEST(surfDetectorTests, computeDescriptors)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/SurfDetectorTestsData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/SurfDetectorTestsData/";
-#endif
-
     //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_shortcut.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
-    int FirstKeyframe = -1;
-    for (int i = 0; i < frames.size(); i++)
-      if (frames[i]->getFrametype() == KEYFRAME)
-      {
-        KeyframesCount++;
-        if (FirstKeyframe < 0) FirstKeyframe = i;
-      }
+    int FirstKeyframe = FirstKeyFrameNum(SFrames);
+    int KeyframesCount = keyFramesCount(SFrames);
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = SFrames[FirstKeyframe]->getImage();
+    Mat mask = SFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = SFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -77,7 +63,7 @@ namespace SPEL
     //Calculate actual value
     uint32_t minHessian = 500;
     SurfDetector D;
-    map <uint32_t, SurfDetector::PartModel> actual_PartModels = D.computeDescriptors(frames[FirstKeyframe], minHessian);
+    map <uint32_t, SurfDetector::PartModel> actual_PartModels = D.computeDescriptors(SFrames[FirstKeyframe], minHessian);
     SurfDetector::PartModel actual_PartModel = D.computeDescriptors(bodyPart, p0, p1, image, minHessian, actual_PartModels[partID].keyPoints);
 
     //Calculate expected values
@@ -152,33 +138,17 @@ namespace SPEL
 
   TEST(surfDetectorTests, train)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/SurfDetectorTestsData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/SurfDetectorTestsData/";
-#endif
-
     //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_shortcut.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    //vector<Frame*> SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
-    int FirstKeyframe = -1;
-    for (int i = 0; i < frames.size(); i++)
-      if (frames[i]->getFrametype() == KEYFRAME)
-      {
-        KeyframesCount++;
-        if (FirstKeyframe < 0) FirstKeyframe = i;
-      }
+    int FirstKeyframe = FirstKeyFrameNum(SFrames);
+    int KeyframesCount = keyFramesCount(SFrames);
 
     //Copy image and skeleton from first keyframe
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = SFrames[FirstKeyframe]->getImage();
+    Mat mask = SFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = SFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
     Size ImageSize = image.size();
@@ -188,7 +158,7 @@ namespace SPEL
     SurfDetector D;
     map <string, float> params;
     params.emplace(pair<string, float>("maxFrameHeight", ImageSize.height));
-    D.train(frames, params);
+    D.train(SFrames, params);
 
     //Calculate expected value
     vector <KeyPoint> keyPoints;
@@ -236,11 +206,11 @@ namespace SPEL
 
     //Compare
     vector<Point2f> empty_rect = { Point2f(0, 0), Point2f(0, 0), Point2f(0, 0), Point2f(0, 0) };
-    for (int f = 0; f < frames.size(); f++)
+    for (int f = 0; f < SFrames.size(); f++)
       for (tree<BodyPart>::iterator p = partTree.begin(); p != partTree.end(); p++)
       {
         int partID = p->getPartID();
-        if (frames[f]->getFrametype() != INTERPOLATIONFRAME)
+        if (SFrames[f]->getFrametype() != INTERPOLATIONFRAME)
         {
           EXPECT_EQ(expected_rects[partID], D.partModels[f][partID].partModelRect.asVector());
           for (int i = 0; i < expected_Keypoints[partID].size(); i++)
@@ -252,7 +222,7 @@ namespace SPEL
               All_values_equal = expected_descriptors[partID].at<float>(i, k) == D.partModels[f][partID].descriptors.at<float>(i, k);
           EXPECT_TRUE(All_values_equal);
         }
-        if (frames[f]->getFrametype() == INTERPOLATIONFRAME)
+        if (SFrames[f]->getFrametype() == INTERPOLATIONFRAME)
         {
           EXPECT_EQ(empty_rect, D.partModels[f][partID].partModelRect.asVector()); //?
           EXPECT_TRUE(D.partModels[f][partID].keyPoints.empty());
@@ -268,24 +238,14 @@ namespace SPEL
   //Temporary test
   TEST(surfDetectorTests, compare)
   {
-    String FilePath;
-    FilePath = "posetests_TestData/SurfDetectorTestsData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/SurfDetectorTestsData/";
-#endif
-
     //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_shortcut.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    //vector<Frame*> SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
     //Copy image and skeleton from first keyframe
     int FirstKeyframe = 0;
-    Mat image = frames[FirstKeyframe]->getImage();
-    Mat mask = frames[FirstKeyframe]->getMask();
-    Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+    Mat image = SFrames[FirstKeyframe]->getImage();
+    Mat mask = SFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = SFrames[FirstKeyframe]->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -303,7 +263,7 @@ namespace SPEL
     //Calculate part models descriptors 
     uint32_t minHessian = 500;
     SurfDetector D;
-    map <uint32_t, SurfDetector::PartModel> PartModels = D.computeDescriptors(frames[FirstKeyframe], minHessian);
+    map <uint32_t, SurfDetector::PartModel> PartModels = D.computeDescriptors(SFrames[FirstKeyframe], minHessian);
 
     //Copy ideal part model for selected body part
     SurfDetector::PartModel partModel0 = PartModels[partID];
@@ -353,7 +313,7 @@ namespace SPEL
 
     //Run "Train"
     map <string, float> params;
-    D.train(frames, params);
+    D.train(SFrames, params);
 
     //Run "compare" function
     float score0 = D.compare(bodyPart, partModel0, p0, p1);
@@ -379,24 +339,14 @@ namespace SPEL
 
   TEST(surfDetectorTests, generateLabel)
   {
-     String FilePath;
-     FilePath = "posetests_TestData/SurfDetectorTestsData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-     if (IsDebuggerPresent())
-          FilePath = "Debug/posetests_TestData/SurfDetectorTestsData/";
-#endif
-
      //Load the input data
-     ProjectLoader projectLoader(FilePath);
-     projectLoader.Load(FilePath + "trijumpSD_shortcut.xml");
-     vector<Frame*> frames = projectLoader.getFrames();
+     //vector<Frame*> SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
      //Copy image and skeleton from first keyframe
      int FirstKeyframe = 0;
-     Mat image = frames[FirstKeyframe]->getImage();
-     Mat mask = frames[FirstKeyframe]->getMask();
-     Skeleton skeleton = frames[FirstKeyframe]->getSkeleton();
+     Mat image = SFrames[FirstKeyframe]->getImage();
+     Mat mask = SFrames[FirstKeyframe]->getMask();
+     Skeleton skeleton = SFrames[FirstKeyframe]->getSkeleton();
      tree <BodyPart> partTree = skeleton.getPartTree();
      tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
@@ -414,7 +364,7 @@ namespace SPEL
      //Calculate part models descriptors 
      uint32_t minHessian = 500;
      SurfDetector D;
-     map <uint32_t, SurfDetector::PartModel> PartModels = D.computeDescriptors(frames[FirstKeyframe], minHessian);
+     map <uint32_t, SurfDetector::PartModel> PartModels = D.computeDescriptors(SFrames[FirstKeyframe], minHessian);
 
      //Create part model for selected LimbLabel {p0, p1}
      vector <KeyPoint> _keyPoints;
@@ -450,7 +400,7 @@ namespace SPEL
      scores.clear();
 
      //Run "GenerateLabel"
-     LimbLabel actual_Label = D.generateLabel(bodyPart, frames[FirstKeyframe], p0, p1);
+     LimbLabel actual_Label = D.generateLabel(bodyPart, SFrames[FirstKeyframe], p0, p1);
 
      //Compare
      EXPECT_EQ(expected_Label.getAngle(), actual_Label.getAngle());
@@ -460,11 +410,144 @@ namespace SPEL
      EXPECT_EQ(expected_Label.getScores(), actual_Label.getScores());
 
      //Checking SurfDetector.LabelModels
-   /*int n = D.labelModels[frames[FirstKeyframe]->getID()][bodyPart.getPartID()].size()-1;
+   /*int n = D.labelModels[SFrames[FirstKeyframe]->getID()][bodyPart.getPartID()].size()-1;
      //D.labelModels[CurrentFrameID][CurrentPartID][CurrentLimbLabel][CurrentLimbLabel] is empty?
-     SurfDetector::PartModel labelModels_partID = D.labelModels[frames[FirstKeyframe]->getID()][bodyPart.getPartID()][n];
+     SurfDetector::PartModel labelModels_partID = D.labelModels[SFrames[FirstKeyframe]->getID()][bodyPart.getPartID()][n];
      EXPECT_EQ(partModel1.partModelRect.asVector(), labelModels_partID.partModelRect.asVector());
      EXPECT_EQ(partModel1.keyPoints.size(), labelModels_partID.keyPoints.size());
      EXPECT_EQ(partModel1.descriptors.size(), labelModels_partID.descriptors.size());*/
   }
+
+  TEST(surfDetectorTests, detect)
+  {
+      //Copy image and skeleton from first keyframe
+      int FirstKeyframe = 0;
+      Mat image = SFrames[FirstKeyframe]->getImage();
+      Mat mask = SFrames[FirstKeyframe]->getMask();
+      Skeleton skeleton = SFrames[FirstKeyframe]->getSkeleton();
+      tree <BodyPart> partTree = skeleton.getPartTree();
+      tree <BodyJoint> jointsTree = skeleton.getJointTree();
+
+      // Copy skeleton from keyframe to frames[1] 
+      SFrames[1]->setSkeleton(SFrames[0]->getSkeleton());
+
+      // Run "detect"
+      uint32_t minHessian = 500;
+      SurfDetector D;
+      map <string, float> params;
+      D.train(SFrames, params);
+      ASSERT_GT(D.getPartModels().size(), 0);
+      map<uint32_t, vector<LimbLabel>> limbLabels = D.detect(SFrames[1], params, limbLabels);
+      ASSERT_GT(limbLabels.size(), 0);
+
+      // Create output file
+      ofstream fout("Output_SurfTest_detect.txt");
+
+      // Output top of "limbLabels" into text file
+      fout << "\nTop Labels, sorted by part id:\n\n";
+      for (int i = 0; i < limbLabels.size(); i++) // For all body parts
+      {
+        for (int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
+        {
+          Point2f p0, p1;
+          limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
+          fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
+          vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
+          for (int t = 0; t < scores.size(); t++)
+            fout << scores[t].getScore() << ", "; // Put all scores of the Label
+          fout << "}\n";
+        }
+        fout << endl;
+      }
+
+      // Copy coordinates of BodyParts from skeleton
+      map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(skeleton);
+
+      // Compare labels with ideal bodyparts from keyframe, and output debug information 
+      float TolerableCoordinateError = 7; // Linear error in pixels
+      float TolerableAngleError = 0.1; // 10% (not used in this test)
+      int TopListLabelsCount = 4; // Size of "labels top list"
+      map<int, vector<LimbLabel>> effectiveLabels;
+      vector<int> WithoutGoodLabelInTop;
+      bool EffectiveLabbelsInTop = true;
+
+      fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
+
+      for (int id = 0; id < limbLabels.size(); id++)
+      {
+        fout << "\nPartID = " << id << ":\n";
+        Point2f l0, l1, p0, p1, delta0, delta1;
+        vector<LimbLabel> temp;
+        p0 = PartLocation[id].first; // Ideal boby part point
+        p1 = PartLocation[id].second; // Ideal boby part point
+        for (int k = 0; k < limbLabels[id].size(); k++)
+        {
+          limbLabels[id][k].getEndpoints(l0, l1); // Label points
+          delta0 = l0 - p0;
+          delta1 = l1 - p1;
+          float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+          delta0 = l0 - p1;
+          delta1 = l1 - p0;
+          float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+          float error = min(error_A, error_B); // Distance between ideal body part and label
+          if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >= 0) // Label is "effective" if it has small error and of not less than zero  Score  value
+            temp.push_back(limbLabels[id][k]); // Copy effective labels
+           // Put linear errors for all Lalbels into text file, copy indexes of a "badly processed parts"
+           fout << "    PartID = " << id << ", LabelIndex = " << k << ":    AvgScore = " << limbLabels[id][k].getAvgScore() << ", LinearError = " << error << endl;
+           if (k == TopListLabelsCount - 1)
+           {
+             fout << "    //End of part[" << id << "] top labels list\n";
+             if (!(skeleton.getBodyPart(id)->getIsOccluded()))
+               if (temp.size() < 1)
+               {
+                 EffectiveLabbelsInTop = false; // false == Present not Occluded bodyparts, but no nave "effective labels" in the top of list
+                 WithoutGoodLabelInTop.push_back(id); // Copy index of not Occluded parts, wich no have "effective labels" in the top of labels list
+               }
+           }
+        }
+        effectiveLabels.emplace(pair<int, vector<LimbLabel>>(id, temp));
+      }
+
+      //Output top of "effectiveLabels" into text file
+      fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
+      for (int i = 0; i < effectiveLabels.size(); i++)
+      {
+        for (int k = 0; k < effectiveLabels[i].size(); k++)
+        {
+          Point2f p0, p1;
+          limbLabels[i][k].getEndpoints(p0, p1);
+          fout << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
+          vector<Score> scores = effectiveLabels[i][k].getScores();
+          for (int t = 0; t < scores.size(); t++)
+            fout << scores[t].getScore() << ", ";
+          fout << "}\n";
+        }
+        fout << endl;
+      }
+
+      fout.close();
+      cout << "\nLimbLabels saved in file: Output_SurfTest_detect.txt\n";
+
+      // Output messages 
+      if (!EffectiveLabbelsInTop) cout << endl << " SurfDetector_Tests.detect:" << endl;
+      EXPECT_TRUE(EffectiveLabbelsInTop);
+      if (!EffectiveLabbelsInTop)
+      {
+        cout << "Body parts with id: ";
+        for (int i = 0; i < WithoutGoodLabelInTop.size(); i++)
+        {
+            cout << WithoutGoodLabelInTop[i];
+            if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";
+        }
+        cout << " - does not have effective labels in the top of labels list." << endl;
+      }
+      if (!EffectiveLabbelsInTop) cout << endl;
+
+      image.release();
+      mask.release();
+      for (int i = 0; i < SFrames.size(); i++)
+        if (SFrames[i] != 0) delete SFrames[i];
+      SFrames.clear();
+  }
 }
+

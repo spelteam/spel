@@ -35,7 +35,7 @@ namespace SPEL
   //Global variables - each next test uses data from previous
   const int  partID = 12;
   int FirstKeyframe;
-  vector<Frame*> frames;
+  vector<Frame*> ÑFrames;
   Skeleton skeleton;
   tree <BodyPart> partTree;
   BodyPart bodyPart;
@@ -49,23 +49,7 @@ namespace SPEL
   TestColorHistDetector::PartModel partModel_actual(NBins);
   map <int32_t, Mat> pixelDistributions;
   map<int32_t, Mat> pixelLabels;
-  
-  //For frames recovery between tests (frame exists only in the current function!)
   Mat image, mask;
-  int FrameID;
-  Point2f GroundPoint;
-  FRAMETYPE frameType;
-
-  Frame* SetFrame(int ID, Mat Image, Mat Mask, Skeleton skeleton, Point2f GroundPoint, FRAMETYPE frameType)
-  {
-    Frame* frame = new Frame(frameType);
-    frame->setID(ID);
-    frame->setImage(Image);
-    frame->setMask(Mask);
-    frame->setSkeleton(skeleton);
-    frame->setGroundPoint(GroundPoint);
-    return frame;
-  }
 
   TEST(colorHistDetectorTest, Constructors)
   {
@@ -124,31 +108,17 @@ namespace SPEL
   TEST(colorHistDetectorTest, setPartHistogram)
   {
     //Load the input data
-    String FilePath = "posetests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    frames = projectLoader.getFrames();
-    //frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    ÑFrames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
-    map <string, float> params = SetParams(frames);
+    map <string, float> params = SetParams(ÑFrames);
 
     //Copy image and skeleton from first keyframe
-    FirstKeyframe = FirstKeyFrameNum(frames);
-    image = frames[FirstKeyframe]->getImage();
-    mask = frames[FirstKeyframe]->getMask();
-    skeleton = frames[FirstKeyframe]->getSkeleton();
+    FirstKeyframe = FirstKeyFrameNum(ÑFrames);
+    image = ÑFrames[FirstKeyframe]->getImage();
+    mask = ÑFrames[FirstKeyframe]->getMask();
+    skeleton = ÑFrames[FirstKeyframe]->getSkeleton();
     partTree = skeleton.getPartTree();
-
-    //Fields copyes for frames recovery between tests
-    FrameID = frames[FirstKeyframe]->getID();
-    frameType = frames[FirstKeyframe]->getFrametype();
-    GroundPoint = frames[FirstKeyframe]->getGroundPoint();
 
     //Select body part for testing
     bodyPart = *skeleton.getBodyPart(partID);
@@ -171,7 +141,7 @@ namespace SPEL
           partModel_expected.partHistogram[r][g][b] /= Colors.size();
 
     //Create actual value
-    detector.train(frames, params);
+    detector.train(ÑFrames, params);
     model = detector.partModels.at(partID);
     detector.setPartHistogram(partModel_actual, Colors);
 
@@ -285,9 +255,6 @@ namespace SPEL
   // Testing function buildPixelDistributions
   TEST(colorHistDetectorTest, buildPixelDistributions)
   {
-    //Restore keyframe
-    frames[FirstKeyframe] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
-
     Mat t(image.rows, image.cols, DataType <float>::type);
     ColorHistDetector::PartModel partModel = detector.partModels[partID];
     for (int x = 0; x < image.cols; x++)
@@ -304,7 +271,7 @@ namespace SPEL
         //Matrix "PixelDistributions" - transposed relative to the matrix "Image"
       }
 
-    pixelDistributions = detector.buildPixelDistributions(frames[FirstKeyframe]);
+    pixelDistributions = detector.buildPixelDistributions(ÑFrames[FirstKeyframe]);
     for (int x = 0; x < t.cols; x++)
       for (int y = 0; y < t.rows; y++)
         EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
@@ -338,7 +305,7 @@ namespace SPEL
           p.at<float>(y, x) = 0; // (x,y)  or (y,x) !??
        }
 
-    pixelLabels = detector.buildPixelLabels(frames[FirstKeyframe], pixelDistributions);
+    pixelLabels = detector.buildPixelLabels(ÑFrames[FirstKeyframe], pixelDistributions);
 
     int q = 0;
     for (int x = 0; x < p.cols; x++)
@@ -352,9 +319,6 @@ namespace SPEL
   // Testing function generateLabel
   TEST(colorHistDetectorTest, generateLabel)
   {
-    //Restore keyframe
-    frames[FirstKeyframe] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
-
     vector <Score> s;
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
     Point2f boxCenter = p0 * 0.5 + p1 * 0.5;
@@ -406,7 +370,7 @@ namespace SPEL
       limbLabel_e = LimbLabel(partID, boxCenter, rot, rect.asVector(), s);
     }
 
-    LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), frames[0], p0, p1);
+    LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), ÑFrames[0], p0, p1);
 
     EXPECT_EQ(limbLabel_e.getLimbID(), limbLabel_a.getLimbID());
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());
@@ -448,21 +412,16 @@ namespace SPEL
   // Testing function "detect"
   TEST(colorHistDetectorTest, detect)
   {
-    //Restore frames
-    frames[0] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
-    frames[1] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, LOCKFRAME);
-    frames[2] = SetFrame(FrameID, image, mask, skeleton, GroundPoint, frameType);
-
     ofstream fout("Output_CHDTest_detect.txt");
 
     // Copy skeleton from keyframe to frames[1] 
-    frames[1]->setSkeleton(frames[0]->getSkeleton());
+    ÑFrames[1]->setSkeleton(ÑFrames[0]->getSkeleton());
 
     // Run "detect"
     map<uint32_t, vector<LimbLabel>> limbLabels;
     map <string, float> detectParams;
-    ASSERT_GT(detector.partModels.size()), 0);
-    limbLabels = detector.detect(frames[1], detectParams, limbLabels);
+    ASSERT_GT(detector.partModels.size(), 0);
+    limbLabels = detector.detect(ÑFrames[1], detectParams, limbLabels);
     ASSERT_GT(limbLabels.size(), 0);
 
     // sort "limbLabels" by limb id
@@ -582,8 +541,8 @@ namespace SPEL
     image.release();
     mask.release();
     Colors.clear();
-    for (int i = 0; i < frames.size(); i++)
-      delete frames[i];
-    frames.clear();
+    for (int i = 0; i < ÑFrames.size(); i++)
+      delete ÑFrames[i];
+    ÑFrames.clear();
   }
 }

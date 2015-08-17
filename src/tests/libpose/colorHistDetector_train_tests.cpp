@@ -11,7 +11,6 @@
 #include "lockframe.hpp"
 #include "interpolation.hpp"
 #include "TestsFunctions.hpp"
-#include "projectLoader.hpp"
 
 namespace SPEL
 {  
@@ -19,16 +18,7 @@ namespace SPEL
   TEST(colorHistDetectorTest, Train)
   {
     //Load the input data
-    String FilePath = "posetests_TestData/CHDTrainTestData/";
-    
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
-#endif
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
-    //frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
     map <string, float> params = SetParams(frames);

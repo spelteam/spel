@@ -1,3 +1,7 @@
+#if defined(WINDOWS) && defined(_MSC_VER)
+#include <Windows.h>
+#endif
+
 #include "TestsFunctions.hpp"
   
 namespace SPEL
@@ -165,17 +169,22 @@ namespace SPEL
   }
 
   //Loading frames from project
-  vector<Frame*> LoadTestProject(String FilePath, String FileName)
-  {
-    FilePath = "posetests_TestData/CHDTrainTestData/";
 
+  vector<Frame*> LoadTestProject(string FilePath, string FileName)
+  {
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
       FilePath = "Debug/" + FilePath;
 #endif
     ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    return projectLoader.getFrames();
+    projectLoader.Load(FilePath + FileName);
+    vector<Frame*> frames, temp = projectLoader.getFrames();
+    for (int i = 0; i < temp.size(); i++)
+    {
+      frames.push_back(new Frame(temp[i]->getFrametype()));
+      temp[i]->clone(frames[i]);
+    }
+    return frames;
   }
 
   //Set parameters from the frames sequence
