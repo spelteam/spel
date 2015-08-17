@@ -441,19 +441,19 @@ namespace SPEL
   //Output limbLabels set into text file
   void PutLimbLabels(ofstream &fout, string S, map <uint32_t, vector <LimbLabel>> X)
   {
-      fout << S << endl;
-      for (int p = 0; p < X.size(); p++)
+    fout << S << endl;
+    for (int p = 0; p < X.size(); p++)
+    {
+      for (int i = 0; i < X[p].size(); i++)
       {
-        for (int i = 0; i < X[p].size(); i++)
-        {
-          fout << endl << "  limbID " << X[p][i].getLimbID() << ", angle " << X[p][i].getAngle() << ", poligon" << X[p][i].getPolygon() << ", scores ";
-          vector<Score> S = X[p][i].getScores();
-          for (int k = 0; k < S.size(); k++)
+        fout << endl << "  limbID " << X[p][i].getLimbID() << ", angle " << X[p][i].getAngle() << ", poligon" << X[p][i].getPolygon() << ", scores ";
+        vector<Score> S = X[p][i].getScores();
+        for (int k = 0; k < S.size(); k++)
           fout << S[k].getScore() << ", ";
-        }
-        fout << endl;
       }
-      fout << endl << "===========================================" << endl;
+      fout << endl;
+    }
+    fout << endl << "===========================================" << endl;
   }
 
   /*
@@ -536,68 +536,68 @@ namespace SPEL
 
   TEST(DetectorTests, merge)
   {
-      map <uint32_t, vector <LimbLabel>> A;
-      map <uint32_t, vector <LimbLabel>> B;
+    map <uint32_t, vector <LimbLabel>> A;
+    map <uint32_t, vector <LimbLabel>> B;
 
-      //Create polygons
-      int polygonsCount = 10;
-      vector<vector<Point2f>> Polygons;
-      for (int i = 0; i < polygonsCount; i++)
-        Polygons.push_back(vector < Point2f > { Point2f(i, i) });
+    //Create polygons
+    int polygonsCount = 10;
+    vector<vector<Point2f>> Polygons;
+    for (int i = 0; i < polygonsCount; i++)
+      Polygons.push_back(vector < Point2f > { Point2f(i, i) });
 
-      //Craeate sets of limbLabels "A" and ""B
-      int partsCount = 2;
-      int A_size = 9;
-      for (int p = 0; p < partsCount; p++)
+    //Craeate sets of limbLabels "A" and ""B
+    int partsCount = 2;
+    int A_size = 9;
+    for (int p = 0; p < partsCount; p++)
+    {
+      vector<LimbLabel> tempA_partLabels;
+      vector<LimbLabel> tempB_partLabels;
+      for (int N = 0; N < polygonsCount; N++)
       {
-        vector<LimbLabel> tempA_partLabels;
-        vector<LimbLabel> tempB_partLabels;
-        for (int N = 0; N < polygonsCount; N++)
-        {
-          LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(N / (float)polygonsCount, "", 1)});
-          if (rand() > 0.3*RAND_MAX)
-            tempA_partLabels.push_back(temp_label);
-          if (rand() > 0.3*RAND_MAX)
-            tempB_partLabels.push_back(temp_label);
-        }
-        A.insert(pair<uint32_t, vector <LimbLabel>>(p, tempA_partLabels));
-        B.insert(pair<uint32_t, vector <LimbLabel>>(p, tempB_partLabels));
-        tempA_partLabels.clear();
-        tempB_partLabels.clear();
+        LimbLabel temp_label(p, Point2f(N, N), N, Polygons[N], vector < Score > { Score(N / (float)polygonsCount, "", 1)});
+        if (rand() > 0.3*RAND_MAX)
+          tempA_partLabels.push_back(temp_label);
+        if (rand() > 0.3*RAND_MAX)
+          tempB_partLabels.push_back(temp_label);
       }
+      A.insert(pair<uint32_t, vector <LimbLabel>>(p, tempA_partLabels));
+      B.insert(pair<uint32_t, vector <LimbLabel>>(p, tempB_partLabels));
+      tempA_partLabels.clear();
+      tempB_partLabels.clear();
+    }
 
-      //Run "merge"
-      ColorHistDetector D;
-      auto H = D.merge(A, B);
-      auto A1 = D.merge(A, A);
-      auto B1 = D.merge(B, B);
-      auto C = D.merge(A1, B1);
+    //Run "merge"
+    ColorHistDetector D;
+    auto H = D.merge(A, B, map<uint32_t, vector<LimbLabel>>());
+    auto A1 = D.merge(A, A, map<uint32_t, vector<LimbLabel>>());
+    auto B1 = D.merge(B, B, map<uint32_t, vector<LimbLabel>>());
+    auto C = D.merge(A1, B1, map<uint32_t, vector<LimbLabel>>());
 
-      //Put all input and output labels sets into text file
-      ofstream fout("Detector_merge.txt");
-      PutLimbLabels(fout, "LimbLabels set A:", A);
-      PutLimbLabels(fout, "LimbLabels set B:", B);
-      PutLimbLabels(fout, "merge(A, B):", H);
-      PutLimbLabels(fout, "merge(A, A):", A1);
-      PutLimbLabels(fout, "merge(B, B):", B1);
-      PutLimbLabels(fout, "merge(merge(A, A), merge(B, B)) :", C);
-      fout.close();
+    //Put all input and output labels sets into text file
+    ofstream fout("Detector_merge.txt");
+    PutLimbLabels(fout, "LimbLabels set A:", A);
+    PutLimbLabels(fout, "LimbLabels set B:", B);
+    PutLimbLabels(fout, "merge(A, B):", H);
+    PutLimbLabels(fout, "merge(A, A):", A1);
+    PutLimbLabels(fout, "merge(B, B):", B1);
+    PutLimbLabels(fout, "merge(merge(A, A), merge(B, B)) :", C);
+    fout.close();
 
-      cout << "See input abd output limbLabels values in the file  'Detector_merge.txt'\n";
+    cout << "See input abd output limbLabels values in the file  'Detector_merge.txt'\n";
 
-      //Compare
-      for (int p = 0; p < C.size(); p++)
-        for (int i = 0; i < C[p].size(); i++)
-        {
-          //Search equal polygon values in curent part labels
-          for (int k = 0; k < C[p].size(); k++)
+    //Compare
+    for (int p = 0; p < C.size(); p++)
+      for (int i = 0; i < C[p].size(); i++)
+      {
+        //Search equal polygon values in curent part labels
+        for (int k = 0; k < C[p].size(); k++)
           if (i != k) EXPECT_FALSE(C[p][i].getPolygon() == C[p][k].getPolygon()) << "partID = " << p << ": polygons of label_Num " << i << " and " << k << "is equal" << endl;
-            vector<Score> LimbScores = C[p][i].getScores();
-          //Search equal scores in curent label
-          for (int k = 0; k < LimbScores.size(); k++)
-            for (int t = 0; t < LimbScores.size(); t++)
-              if (t != k) EXPECT_FALSE(LimbScores[k] == LimbScores[t]) << ", PartID = " << p << ": Equal scores in label with Num = " << i << endl;
-        }
+        vector<Score> LimbScores = C[p][i].getScores();
+        //Search equal scores in curent label
+        for (int k = 0; k < LimbScores.size(); k++)
+          for (int t = 0; t < LimbScores.size(); t++)
+            if (t != k) EXPECT_FALSE(LimbScores[k] == LimbScores[t]) << ", PartID = " << p << ": Equal scores in label with Num = " << i << endl;
+      }
   }
 
   // Unit test for 'merge' function with statically generated data.
@@ -626,7 +626,7 @@ namespace SPEL
       a.insert(pair<uint32_t, vector <LimbLabel>>(p, temp_partLabels));
     }
     ColorHistDetector d;
-    auto b = d.merge(a, a);
+    auto b = d.merge(a, a, map<uint32_t, vector<LimbLabel>>());
 
     EXPECT_EQ(a.size(), b.size());
 
@@ -639,13 +639,13 @@ namespace SPEL
         LimbLabel l = temp[i];
         vector <Score> scores = l.getScores();
         EXPECT_EQ(scores.size(), 1);
-        EXPECT_EQ(scores[0].getScore(), a[p][i].getScores().at(0).getScore());    
+        EXPECT_EQ(scores[0].getScore(), a[p][i].getScores().at(0).getScore());
         EXPECT_EQ(scores[0].getDetName(), a[p][i].getScores().at(0).getDetName());
       }
     }
 
     map <uint32_t, vector <LimbLabel>> c;
-    c = d.merge(b, c);
+    c = d.merge(b, c, map<uint32_t, vector<LimbLabel>>());
 
     for (int p = 0; p < a.size(); p++)
     {
@@ -661,7 +661,7 @@ namespace SPEL
       }
     }
     map <uint32_t, vector <LimbLabel>> g;
-    g = d.merge(g, c);
+    g = d.merge(g, c, map<uint32_t, vector<LimbLabel>>());
 
     for (int p = 0; p < a.size(); p++)
     {
@@ -690,7 +690,7 @@ namespace SPEL
       e.insert(pair<uint32_t, vector <LimbLabel>>(p, temp_partLabels));
     }
 
-    auto f = d.merge(c, e);
+    auto f = d.merge(c, e, map<uint32_t, vector<LimbLabel>>());
 
     for (int p = 0; p < a.size(); p++)
     {
@@ -719,7 +719,7 @@ namespace SPEL
         LimbLabel temp_label(p, Point2f(i, i), i, Polygons[i], vector < Score > { Score(i / (float)10, "h", 1)});
         temp_partLabels.push_back(temp_label);
       }
-      h.insert(pair <uint32_t, vector <LimbLabel>> (p, temp_partLabels));
+      h.insert(pair <uint32_t, vector <LimbLabel>>(p, temp_partLabels));
     }
 
     for (int p = 0; p < partCount; p++)
@@ -730,10 +730,10 @@ namespace SPEL
         LimbLabel temp_label(p, Point2f(i, i), i, Polygons[i], vector < Score > { Score(i / (float)10, "m", 1)});
         temp_partLabels.push_back(temp_label);
       }
-      m.insert(pair <uint32_t, vector <LimbLabel>> (p, temp_partLabels));
+      m.insert(pair <uint32_t, vector <LimbLabel>>(p, temp_partLabels));
     }
 
-    auto n = d.merge(h, m);
+    auto n = d.merge(h, m, map<uint32_t, vector<LimbLabel>>());
 
     for (int p = 0; p < a.size(); p++)
     {
@@ -754,7 +754,7 @@ namespace SPEL
             o = h[p][k];
             break;
           }
-        }        
+        }
         EXPECT_TRUE(bFound);
         if (bFound)
         {
@@ -769,7 +769,7 @@ namespace SPEL
       {
         LimbLabel l = temp[i];
         vector <Score> scores = l.getScores();
-        EXPECT_EQ(scores.size(), 2);        
+        EXPECT_EQ(scores.size(), 2);
         bool bFound = false;
         LimbLabel q;
         for (int k = 0; k < m[p].size(); k++)
@@ -783,7 +783,7 @@ namespace SPEL
         }
         EXPECT_TRUE(bFound);
         if (bFound)
-        {          
+        {
           EXPECT_EQ(scores[0].getScore(), q.getScores().at(0).getScore());
           EXPECT_EQ(scores[0].getDetName(), q.getScores().at(0).getDetName());
           EXPECT_EQ(scores[1].getScore(), 1.0);
