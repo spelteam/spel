@@ -730,6 +730,11 @@ int main (int argc, char **argv)
 
         Sequence seq(0, "test", vFrames);
 
+        //delete vFrames - we only need the sequence now
+//        for(auto f=0; f<vFrames.size(); ++f)
+//            delete vFrames[f];
+//        vFrames.clear();
+
         seq.estimateUniformScale(params);
         seq.computeInterpolation(params);
 
@@ -851,17 +856,17 @@ int main (int argc, char **argv)
         //release errors
         errors.release();
 
-        //delete sequence
-        for(auto f=0; f<vFrames.size(); ++f)
-            delete vFrames[f];
-        vFrames.clear();
-
         auto end = chrono::steady_clock::now();
 
         // Store the time difference between start and end
         auto diff = end - start;
 
         cout << paramName << " at " << param << " finished in " << chrono::duration <double, milli> (diff).count()  << " ms" << endl;
+        //now release sequence
+        vFrames = seq.getFrames();
+        for(auto&& f:vFrames)
+            delete f;
+
     }
 
     out.close();

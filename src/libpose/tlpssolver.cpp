@@ -25,6 +25,17 @@ vector<Solvlet> TLPSSolver::solve(Sequence &frames) //inherited virtual
     return this->solve(frames, params);
 }
 
+vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params, vector<Solvlet> solvlets) //inherited virtual
+{
+    vector<Solvlet> tlpsSolvlets = solve(sequence, params); //inherited virtual
+
+    for(auto&& s:solvlets)
+        tlpsSolvlets.push_back(s);
+
+    return tlpsSolvlets;
+
+}
+
 vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params) //inherited virtual
 {
     if (sequence.getFrames().size() == 0)

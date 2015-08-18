@@ -88,7 +88,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
         //create tlps solver
         TLPSSolver tlps;
         //return the TLPS solve
-        return tlps.solve(sequence, params);
+        return tlps.solve(sequence, params, solvlets);
     }
     //the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
@@ -560,7 +560,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
         allSolves.push_back(vector<SolvletScore>()); //empty vector to every frame slot
     }
 
-    vector<Frame*> lockframes;
+    vector<Lockframe*> lockframes;
 
     //build frame MSTs by ID's as in ISM
     vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);

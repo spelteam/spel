@@ -49,6 +49,7 @@ namespace SPEL
     vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual
     vector<Solvlet> solve(Sequence& frames, map<string, float> params);
+    vector<Solvlet> solve(Sequence& frames, map<string, float> params, vector<Solvlet> solvlets);
     //INHERITED
     //public:
     // string getName(); //get the solver name. Every class inheriting solver has its own Name
