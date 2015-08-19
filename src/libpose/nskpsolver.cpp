@@ -49,13 +49,15 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     uint32_t lockframesLastIter = 0;
     vector<int> ignore; //frames to ignore during propagation
 
+    vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);
+
     //progressFunc(0.0);
     for (uint32_t iteration = 0; iteration < nskpIters; ++iteration)
     {
         if (iteration >= nskpIters)
             break;
 
-        vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism, ignore);
+        vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism, trees, ignore);
 
         //add the new solves to the return vector
         for (vector<Solvlet>::iterator s = sol.begin(); s != sol.end(); ++s)
@@ -545,7 +547,7 @@ int NSKPSolver::test(int frameId, const vector<Frame *> &frames, map<string, flo
     return 0;
 }
 
-vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix& ism, vector<int>& ignore)
+vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<string, float> params, const ImageSimilarityMatrix& ism, const vector<MinSpanningTree>& trees, vector<int>& ignore)
 {
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -563,7 +565,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     vector<Lockframe*> lockframes;
 
     //build frame MSTs by ID's as in ISM
-    vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);
+    //vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);
     //now add variables to the space, with number of detections
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();

@@ -74,7 +74,7 @@ namespace SPEL
     FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost);
     FRIEND_TEST(nskpsolverTests, evaluateSolution);
 #endif  // DEBUG
-    vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism, vector<int> &ignore);
+    vector<Solvlet> propagateKeyframes(vector<Frame*>& frames, map<string, float>  params, const ImageSimilarityMatrix& ism, const vector<MinSpanningTree> &trees, vector<int> &ignore);
     vector<MinSpanningTree > buildFrameMSTs(const ImageSimilarityMatrix &ism, map<string, float> params); //int treeSize, float threshold)
 
     float evaluateSolution(Frame* frame, vector<LimbLabel> labels, map<string, float> params);
