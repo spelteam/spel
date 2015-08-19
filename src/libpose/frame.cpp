@@ -136,7 +136,6 @@ namespace SPEL
     if (image.rows != maxHeight)
     {
       Mat newImage;
-      cerr << "Trying to resize" << endl;
       resize(image, newImage, cvSize(image.cols * factor, image.rows * factor));
       image.release();
       image = newImage.clone();

@@ -803,6 +803,9 @@ int main (int argc, char **argv)
             fSolve=solvletsFromSkeleton(vFrames);
         }
 
+        //now sort fSolve solvlets
+        sort(fSolve.begin(), fSolve.end());
+
         auto endSolve = chrono::steady_clock::now();
 
         // Store the time difference between start and end

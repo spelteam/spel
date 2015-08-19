@@ -24,10 +24,15 @@ namespace SPEL
     return *this;
   }
 
-  // bool operator==(const Solvlet &s) const
-  // {
-  // 	if(s.getFrameId==frameId && s.)
-  // }
+  bool Solvlet::operator<(const Solvlet &s) const
+  {
+      return this->getFrameID()<s.getFrameID();
+  }
+
+  bool Solvlet::operator>(const Solvlet &s) const
+  {
+      return this->getFrameID()>s.getFrameID();
+  }
 
   // bool operator!=(const Solvlet &s) const
   // {

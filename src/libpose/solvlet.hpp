@@ -19,6 +19,8 @@ namespace SPEL
     Solvlet(int id, vector<LimbLabel> labels);
 
     Solvlet &operator=(const Solvlet &s);
+    bool operator<(const Solvlet &s) const;
+    bool operator>(const Solvlet &s) const;
     // bool operator==(const Solvlet &s) const;
     // bool operator!=(const Solvlet &s) const;
 
