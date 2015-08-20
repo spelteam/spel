@@ -75,6 +75,9 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
     //solver eval parameters
     params.emplace("tlpsLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
+    sequence.estimateUniformScale(params);
+    sequence.computeInterpolation(params);
+
     vector<Solvlet> solution;
     //call the new function
     if (params.at("temporalWindowSize") == 0)

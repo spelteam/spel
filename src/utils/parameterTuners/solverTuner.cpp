@@ -614,7 +614,7 @@ int main (int argc, char **argv)
 
     solverNames.push_back("NSKPSolver");
     solverNames.push_back("TLPSSolver");
-    //solverNames.push_back("hybridSolver");
+    solverNames.push_back("hybridSolver");
     //solverNames.push_back("3Dint");
     //solverNames.push_back("2Dint");
 
@@ -655,7 +655,11 @@ int main (int argc, char **argv)
         //solver settings
         params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
         params.emplace("nskpLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
-        params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+
+        if(solverName=="hybridSolver")
+            params.emplace("tlpsLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+        else
+            params.emplace("tlpsLockframeThreshold", 0.0); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
 
         params.emplace("badLabelThresh", 0.40); //set bad label threshold, which will force solution discard at 0.45
         params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
