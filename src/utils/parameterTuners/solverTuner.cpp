@@ -776,10 +776,12 @@ int main (int argc, char **argv)
 
                     for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
                         finalSolve.push_back(*s);
+
                 }
                 else if(params.at("withTLPS")) //otherwise, only call TLPS
                 {
                     //then, do a temporal solve
+                    seq.estimateUniformScale(params);
                     seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
 
                     tlpsSolve = tSolver.solve(seq, params);
