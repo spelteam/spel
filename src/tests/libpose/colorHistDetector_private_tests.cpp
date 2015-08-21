@@ -111,7 +111,6 @@ namespace SPEL
     vFrames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
-    auto seq = new Sequence();
     map <string, float> params = SetParams(vFrames, &seq);
     for (auto f : vFrames)
       delete f;
@@ -159,8 +158,6 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
-
-    delete seq;
   }
 
   TEST(colorHistDetectorTest, addpartHistogram)
