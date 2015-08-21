@@ -188,15 +188,15 @@ namespace SPEL
   }
 
   //Set parameters from the frames sequence
-  map <string, float> SetParams(vector<Frame*> frames, Sequence *seq)
+  map <string, float> SetParams(vector<Frame*> frames, Sequence **seq)
   {
     //This fragment produces crash with message: "The program has exited with code 3 (0x3)."
     map <string, float> params;
-    seq = new Sequence(0, "colorHistDetector", frames);
-    if (seq != 0)
+    *seq = new Sequence(0, "colorHistDetector", frames);
+    if (*seq != 0)
     {
-      seq->estimateUniformScale(params);
-      seq->computeInterpolation(params);
+      (*seq)->estimateUniformScale(params);
+      (*seq)->computeInterpolation(params);
     }
     return params;
   }
