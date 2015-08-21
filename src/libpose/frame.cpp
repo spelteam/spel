@@ -171,12 +171,13 @@ namespace SPEL
 
   Frame *Frame::clone(Frame *dest)
   {
-    dest->setGroundPoint(this->groundPoint);
-    dest->setID(this->id);
-    dest->setImage(this->image.clone());
-    dest->setMask(this->mask.clone());
-    dest->setParentFrameID(this->parentFrameID);
-    dest->setSkeleton(this->skeleton);
+    dest->setGroundPoint(groundPoint);
+    dest->setID(id);
+    dest->setImage(image.clone());
+    dest->setMask(mask.clone());
+    dest->setParentFrameID(parentFrameID);
+    dest->setSkeleton(skeleton);
+    dest->frametype = frametype;
     return dest;
   }
 
