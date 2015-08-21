@@ -142,6 +142,13 @@ namespace posegui {
     return frames.at(num).get();
   }
 
+  void Project::setFrames(std::vector<Frame*> _frames)
+  {
+    frames.clear();
+    for (auto f : _frames)
+      frames.push_back(FramePtr(f->clone(new Frame())));
+  }
+
   const std::vector<LimbLabel> *Project::getLabels(int num) const{
     const std::vector<LimbLabel>* result = nullptr;
     int frameId = getFrame(num)->getID();
@@ -192,6 +199,7 @@ namespace posegui {
     map<string, float> params;
     seq.estimateUniformScale(params);
     seq.computeInterpolation(params);
+    Project::getInstance().setFrames(seq.getFrames());
   }
 
   void Project::solveFrames(){
@@ -208,6 +216,9 @@ namespace posegui {
     Sequence seq(0, "test", getFrames());
     seq.estimateUniformScale(params);
     seq.computeInterpolation(params);
+
+    setFrames(seq.getFrames());
+
     //global settings
     params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
     params.emplace("jointCoeff", 1.0); //set solver body part connectivity sensitivity

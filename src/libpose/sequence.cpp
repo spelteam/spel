@@ -9,56 +9,60 @@ namespace SPEL
 
   Sequence::Sequence(const Sequence& seq)
   {
-    this->name = seq.name;
-    this->frames.clear();
-    this->frames = seq.frames;
+    id = seq.getID();
+    name = seq.getName();
+    for (auto f : seq.getFrames())
+      frames.push_back(f->clone(new Frame()));
   }
 
   Sequence::Sequence(int idx, string seqName, vector<Frame*> seq)
   {
-    this->id = idx;
-    name = this->name;
+    id = idx;
+    name = seqName;
+    for (auto f : seq)
+      frames.push_back(f->clone(new Frame()));
+  }
+
+  Sequence::~Sequence(void)
+  {
+    for (auto f : frames)
+      delete f;
     frames.clear();
-    for (uint32_t i = 0; i < seq.size(); ++i)
-    {
-      seq[i]->setID(i);
-      frames.push_back(seq[i]);
-    }
   }
 
   string Sequence::getName() const
   {
-    return this->name;
+    return name;
   }
 
   void Sequence::setName(const string& _name)
   {
-    this->name = _name;
+    name = _name;
   }
 
   int Sequence::getID() const
   {
-    return this->id;
+    return id;
   }
 
   void Sequence::setID(const int& _id)
   {
-    this->id = _id;
+    id = _id;
   }
 
   vector<Frame*> Sequence::getFrames() const
   {
-    return this->frames;
+    return frames;
   }
 
   void Sequence::setFrames(const vector<Frame *> _frames)
   {
-    //    for(int i=0; i<this->frames.size();++i)
-    //    {
-    //        delete frames[i];
-    //    }
-    this->frames.clear();
-    this->frames = _frames;
+    for (auto f : frames)
+      delete f;
+    frames.clear();
+
+    for (auto f : _frames)
+      frames.push_back(f->clone(new Frame()));
   }
 
   void Sequence::computeInterpolation(map<string, float> &params)

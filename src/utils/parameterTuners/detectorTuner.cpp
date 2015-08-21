@@ -625,6 +625,11 @@ int main (int argc, char **argv)
         seq.estimateUniformScale(params);
         seq.computeInterpolation(params);
 
+        for (auto f : vFrames)
+          delete f;
+        vFrames.clear();
+        vFrames = seq.getFrames();
+
 //        float lineWidth = (float)vFrames[0]->getImage().rows/210.0;
 
 //        if(param==param_min || paramName=="numKeyframes") //only draw once, unless we're testing number of keyframes
@@ -853,14 +858,6 @@ int main (int argc, char **argv)
         out << "}" << endl;
 
         //draw interpolation
-
-
-        //delete sequence
-        for(uint32_t i=0; i<vFrames.size(); ++i)
-        {
-            delete vFrames[i];
-        }
-        vFrames.clear();
 
         auto end = chrono::steady_clock::now();
 

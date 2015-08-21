@@ -21,7 +21,13 @@ namespace SPEL
     vector<Frame*> frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
-    map <string, float> params = SetParams(frames);
+    Sequence seq;
+    map <string, float> params = SetParams(frames, &seq);
+
+    for (auto f : frames)
+      delete f;
+    frames.clear();
+    frames = seq.getFrames();
 
     //Counting a keyframes
     int FirstKeyframe = FirstKeyFrameNum(frames);
