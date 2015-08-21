@@ -50,6 +50,7 @@ namespace SPEL
   map <int32_t, Mat> pixelDistributions;
   map<int32_t, Mat> pixelLabels;
   Mat image, mask;
+  auto seq = new Sequence();
 
   TEST(colorHistDetectorTest, Constructors)
   {
