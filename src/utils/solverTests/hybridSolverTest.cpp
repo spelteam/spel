@@ -44,6 +44,9 @@ int main (int argc, char **argv)
     seq.estimateUniformScale(params);
     seq.computeInterpolation(params);
 
+    vFrames.clear();
+    vFrames = seq.getFrames();
+
     NSKPSolver nSolver;
     TLPSSolver tSolver;
     cout << "Solving using NSKPSolver..." << endl;

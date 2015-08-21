@@ -73,6 +73,7 @@ namespace posegui {
 
     std::vector<Frame*> getFrames() const;
     Frame* getFrame(int num) const;
+    void setFrames(std::vector<Frame*> _frames);
 
     const std::vector<LimbLabel>* getLabels(int num) const;
 

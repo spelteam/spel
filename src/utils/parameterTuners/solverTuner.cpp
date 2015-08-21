@@ -742,6 +742,11 @@ int main (int argc, char **argv)
         seq.estimateUniformScale(params);
         seq.computeInterpolation(params);
 
+        for (auto f : vFrames)
+          delete f;
+        vFrames.clear();
+        vFrames = seq.getFrames();
+
         NSKPSolver nSolver;
         TLPSSolver tSolver;
 
@@ -799,6 +804,10 @@ int main (int argc, char **argv)
             //generate labels for each frame for each part where there is an interpolation
             params.emplace("interpolate2d", 0); //do 3D interpolation
             seq.computeInterpolation(params);
+            
+            vFrames.clear();
+            vFrames = seq.getFrames();
+
             fSolve=solvletsFromSkeleton(vFrames);
         }
         else if(solverName=="2Dint")
@@ -806,6 +815,10 @@ int main (int argc, char **argv)
             //generate labels for each frame for each part where there is an interpolation
             params.emplace("interpolate2d", 1); //force 2D interpolation
             seq.computeInterpolation(params);
+
+            vFrames.clear();
+            vFrames = seq.getFrames();
+
             fSolve=solvletsFromSkeleton(vFrames);
         }
 
@@ -871,11 +884,6 @@ int main (int argc, char **argv)
         auto diff = end - start;
 
         cout << paramName << " at " << param << " finished in " << chrono::duration <double, milli> (diff).count()  << " ms" << endl;
-        //now release sequence
-        vFrames = seq.getFrames();
-        for(auto&& f:vFrames)
-            delete f;
-
     }
 
     out.close();

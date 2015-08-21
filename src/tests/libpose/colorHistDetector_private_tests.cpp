@@ -111,7 +111,12 @@ namespace SPEL
     vFrames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
-    map <string, float> params = SetParams(vFrames);
+    Sequence seq;
+    map <string, float> params = SetParams(vFrames, &seq);
+    for (auto f : vFrames)
+      delete f;
+    vFrames.clear();
+    vFrames = seq.getFrames();
 
     //Copy image and skeleton from first keyframe
     FirstKeyframe = FirstKeyFrameNum(vFrames);

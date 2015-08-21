@@ -50,31 +50,41 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
   vector <Frame*> trainFrames;
   int8_t kfCount = 0;
 
+  Sequence *seq = 0;
   try
   {
-    Sequence *seq = new Sequence(0, testName, allFrames);
+    seq = new Sequence(0, testName, allFrames);
     if (seq != 0)
     {
       seq->estimateUniformScale(params);
       seq->computeInterpolation(params);
-      delete seq;
+    }
+    else
+    {
+      for (auto f : allFrames)
+        delete f;
+      allFrames.clear();
+      return -1;
     }
   }
   catch (exception &e)
   {
     cerr << e.what() << endl;
+    for (auto f : allFrames)
+      delete f;
+    allFrames.clear();
     return -1;
   }
 
-  for (vector <Frame*>::iterator frame = allFrames.begin(); frame != allFrames.end(); ++frame)
+  for (auto frame : seq->getFrames())
   {
-    if ((*frame)->getFrametype() != KEYFRAME && (*frame)->getFrametype() != LOCKFRAME && kfCount == 1)
+    if (frame->getFrametype() != KEYFRAME && frame->getFrametype() != LOCKFRAME && kfCount == 1)
     {
-      trainFrames.push_back(*frame);
+      trainFrames.push_back(frame);
     }
-    else if ((*frame)->getFrametype() == KEYFRAME || (*frame)->getFrametype() == LOCKFRAME)
+    else if (frame->getFrametype() == KEYFRAME || frame->getFrametype() == LOCKFRAME)
     {
-      trainFrames.push_back(*frame);
+      trainFrames.push_back(frame);
       kfCount++;
     }
 
@@ -193,5 +203,9 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
     cout << "Detecting complete" << endl;
     trainFrames.clear();
   }  
+
+  if (seq != 0)
+    delete seq;
+
   return 0;
 }

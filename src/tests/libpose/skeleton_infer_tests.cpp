@@ -83,6 +83,9 @@ namespace SPEL
 
     sequence.estimateUniformScale(params);
 
+    frames.clear();
+    frames = sequence.getFrames();
+
     for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
     {
       if ((*frame)->getFrametype() != KEYFRAME)
@@ -111,6 +114,9 @@ namespace SPEL
     }
 
     sequence.computeInterpolation(params);
+
+    frames.clear();
+    frames = sequence.getFrames();
 
     for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
     {
@@ -160,6 +166,9 @@ namespace SPEL
     }
 
     sequence.estimateUniformScale(params);
+
+    frames.clear();
+    frames = sequence.getFrames();
 
     for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
     {

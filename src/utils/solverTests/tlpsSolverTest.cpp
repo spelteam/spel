@@ -70,6 +70,8 @@ int main (int argc, char **argv)
   seq.estimateUniformScale(params);
   seq.computeInterpolation(params);
 
+  vFrames.clear();
+
   //first, test the 3D locations
   for(uint32_t i=0; i<vFrames.size(); ++i)
   {
