@@ -101,14 +101,6 @@ namespace SPEL
     static void RecalculateScoreIsWeak(vector <LimbLabel> &labels, string detectorName, float standardDiviationTreshold);
   };
 
-  template <class T>
-  struct TPOSERECT
-  {
-    T p1;
-    T p2;
-    T p3;
-    T p4;
-  };
   ///represents rectangle
   template <class T>
   struct POSERECT
