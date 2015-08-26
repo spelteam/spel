@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="12.2">
-  <zoom_level>3</zoom_level>
+  <zoom_level>4</zoom_level>
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>555</x>
-      <y>225</y>
-      <w>87</w>
-      <h>57</h>
+      <x>740</x>
+      <y>408</y>
+      <w>116</w>
+      <h>76</h>
     </coordinates>
     <panel_attributes>Notes:
  
@@ -20,10 +20,10 @@ bg=blue</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>546</x>
-        <y>12</y>
-        <w>213</w>
-        <h>126</h>
+        <x>728</x>
+        <y>124</y>
+        <w>284</w>
+        <h>168</h>
       </coordinates>
       <panel_attributes>ImageSimilarityMatrix
 --
@@ -56,10 +56,10 @@ computeISMcell(left: Frame*, right: Frame*, maxFrameHeight: int)</panel_attribut
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>546</x>
-        <y>147</y>
-        <w>210</w>
-        <h>51</h>
+        <x>728</x>
+        <y>304</y>
+        <w>280</w>
+        <h>68</h>
       </coordinates>
       <panel_attributes>MinSpanningTree
 --
@@ -77,10 +77,10 @@ mst: tree&lt;int&gt;
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>543</x>
-        <y>0</y>
-        <w>219</w>
-        <h>207</h>
+        <x>724</x>
+        <y>108</y>
+        <w>292</w>
+        <h>276</h>
       </coordinates>
       <panel_attributes>bg=orange</panel_attributes>
       <additional_attributes/>
@@ -90,10 +90,10 @@ mst: tree&lt;int&gt;
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>261</x>
-        <y>345</y>
-        <w>471</w>
-        <h>90</h>
+        <x>348</x>
+        <y>568</y>
+        <w>628</w>
+        <h>120</h>
       </coordinates>
       <panel_attributes>/Detector/
 --
@@ -120,44 +120,44 @@ mst: tree&lt;int&gt;
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>114</x>
-        <y>426</y>
-        <w>318</w>
-        <h>147</h>
+        <x>152</x>
+        <y>676</y>
+        <w>424</w>
+        <h>196</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>315;9;9;144</additional_attributes>
+      <additional_attributes>420;12;12;192</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>426</x>
-        <y>426</y>
-        <w>18</w>
-        <h>147</h>
+        <x>568</x>
+        <y>676</y>
+        <w>24</w>
+        <h>196</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>15;9;9;144</additional_attributes>
+      <additional_attributes>20;12;12;192</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>453</x>
-        <y>426</y>
-        <w>267</w>
-        <h>150</h>
+        <x>604</x>
+        <y>676</y>
+        <w>352</w>
+        <h>196</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>9;9;261;144</additional_attributes>
+      <additional_attributes>12;12;348;192</additional_attributes>
     </element>
     <group>
       <element>
         <type>com.umlet.element.Class</type>
         <coordinates>
-          <x>18</x>
-          <y>747</y>
-          <w>318</w>
-          <h>69</h>
+          <x>24</x>
+          <y>1104</y>
+          <w>424</w>
+          <h>92</h>
         </coordinates>
         <panel_attributes>PartModel
 --
@@ -179,10 +179,10 @@ operator=(model: PartModel&amp;): PartModel&amp;</panel_attributes>
       <element>
         <type>com.umlet.element.Class</type>
         <coordinates>
-          <x>18</x>
-          <y>579</y>
-          <w>318</w>
-          <h>165</h>
+          <x>24</x>
+          <y>880</y>
+          <w>424</w>
+          <h>220</h>
         </coordinates>
         <panel_attributes>ColorHistDetector
 --
@@ -223,10 +223,10 @@ operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
       <element>
         <type>com.umlet.element.Package</type>
         <coordinates>
-          <x>15</x>
-          <y>570</y>
-          <w>324</w>
-          <h>255</h>
+          <x>20</x>
+          <y>868</y>
+          <w>432</w>
+          <h>340</h>
         </coordinates>
         <panel_attributes>bg=orange</panel_attributes>
         <additional_attributes/>
@@ -236,10 +236,10 @@ operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
       <element>
         <type>com.umlet.element.Package</type>
         <coordinates>
-          <x>348</x>
-          <y>570</y>
-          <w>240</w>
-          <h>255</h>
+          <x>464</x>
+          <y>868</y>
+          <w>320</w>
+          <h>340</h>
         </coordinates>
         <panel_attributes>bg=orange</panel_attributes>
         <additional_attributes/>
@@ -247,10 +247,10 @@ operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
       <element>
         <type>com.umlet.element.Class</type>
         <coordinates>
-          <x>351</x>
-          <y>708</y>
-          <w>231</w>
-          <h>30</h>
+          <x>468</x>
+          <y>1052</y>
+          <w>308</w>
+          <h>40</h>
         </coordinates>
         <panel_attributes>PartModel
 --
@@ -263,10 +263,10 @@ operator=(c: ColorHistDetector&amp;): ColorHistDetector&amp;
       <element>
         <type>com.umlet.element.Class</type>
         <coordinates>
-          <x>351</x>
-          <y>579</y>
-          <w>231</w>
-          <h>123</h>
+          <x>468</x>
+          <y>880</y>
+          <w>308</w>
+          <h>164</h>
         </coordinates>
         <panel_attributes>SurfDetector
 --
@@ -302,10 +302,10 @@ labelModels: map &lt;uint32_t, map &lt;uint32_t, vector &lt;PartModel&gt;&gt;&gt
       <element>
         <type>com.umlet.element.Class</type>
         <coordinates>
-          <x>600</x>
-          <y>579</y>
-          <w>462</w>
-          <h>192</h>
+          <x>800</x>
+          <y>880</y>
+          <w>616</w>
+          <h>256</h>
         </coordinates>
         <panel_attributes>HogDetector
 --
@@ -352,10 +352,10 @@ labelModels: map &lt;uint32_t, map &lt;uint32_t, vector &lt;PartModel&gt;&gt;&gt
       <element>
         <type>com.umlet.element.Class</type>
         <coordinates>
-          <x>600</x>
-          <y>774</y>
-          <w>462</w>
-          <h>33</h>
+          <x>800</x>
+          <y>1140</y>
+          <w>616</w>
+          <h>44</h>
         </coordinates>
         <panel_attributes>PartModel
 --
@@ -369,10 +369,10 @@ labelModels: map &lt;uint32_t, map &lt;uint32_t, vector &lt;PartModel&gt;&gt;&gt
       <element>
         <type>com.umlet.element.Package</type>
         <coordinates>
-          <x>597</x>
-          <y>570</y>
-          <w>468</w>
-          <h>255</h>
+          <x>796</x>
+          <y>868</y>
+          <w>624</w>
+          <h>340</h>
         </coordinates>
         <panel_attributes>bg=orange</panel_attributes>
         <additional_attributes/>
@@ -382,9 +382,9 @@ labelModels: map &lt;uint32_t, map &lt;uint32_t, vector &lt;PartModel&gt;&gt;&gt
       <type>com.umlet.element.Package</type>
       <coordinates>
         <x>0</x>
-        <y>336</y>
-        <w>1083</w>
-        <h>519</h>
+        <y>556</y>
+        <w>1444</w>
+        <h>692</h>
       </coordinates>
       <panel_attributes>Detecting
 bg=orange</panel_attributes>
@@ -395,10 +395,10 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>87</x>
-        <y>9</y>
-        <w>123</w>
-        <h>180</h>
+        <x>116</x>
+        <y>120</y>
+        <w>164</w>
+        <h>240</h>
       </coordinates>
       <panel_attributes>/Frame/
 --
@@ -442,10 +442,10 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>3</x>
-        <y>207</y>
-        <w>84</w>
-        <h>24</h>
+        <x>4</x>
+        <y>384</y>
+        <w>112</w>
+        <h>32</h>
       </coordinates>
       <panel_attributes>Keyframe
 --
@@ -457,32 +457,32 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>30</x>
-        <y>180</y>
-        <w>108</w>
-        <h>30</h>
+        <x>40</x>
+        <y>348</y>
+        <w>144</w>
+        <h>40</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>105;9;9;27</additional_attributes>
+      <additional_attributes>140;12;12;36</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>129</x>
-        <y>180</y>
-        <w>12</w>
-        <h>30</h>
+        <x>172</x>
+        <y>348</y>
+        <w>16</w>
+        <h>40</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>9;9;9;27</additional_attributes>
+      <additional_attributes>12;12;12;36</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>96</x>
-        <y>207</y>
-        <w>84</w>
-        <h>24</h>
+        <x>128</x>
+        <y>384</y>
+        <w>112</w>
+        <h>32</h>
       </coordinates>
       <panel_attributes>Interpolation
 --
@@ -494,21 +494,21 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Relation</type>
       <coordinates>
-        <x>129</x>
-        <y>180</y>
-        <w>117</w>
-        <h>30</h>
+        <x>172</x>
+        <y>348</y>
+        <w>156</w>
+        <h>40</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>9;9;114;27</additional_attributes>
+      <additional_attributes>12;12;152;36</additional_attributes>
     </element>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>201</x>
-        <y>207</y>
-        <w>84</w>
-        <h>24</h>
+        <x>268</x>
+        <y>384</y>
+        <w>112</w>
+        <h>32</h>
       </coordinates>
       <panel_attributes>Lockframe
 --
@@ -520,10 +520,10 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>15</x>
-        <y>9</y>
-        <w>60</w>
-        <h>33</h>
+        <x>20</x>
+        <y>120</y>
+        <w>80</w>
+        <h>44</h>
       </coordinates>
       <panel_attributes>Frame Type
 --
@@ -539,9 +539,9 @@ fg=red</panel_attributes>
       <type>com.umlet.element.Package</type>
       <coordinates>
         <x>0</x>
-        <y>0</y>
-        <w>318</w>
-        <h>237</h>
+        <y>108</y>
+        <w>424</w>
+        <h>316</h>
       </coordinates>
       <panel_attributes>Frame
 bg=orange</panel_attributes>
@@ -552,10 +552,476 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>1011</x>
-        <y>207</y>
-        <w>204</w>
-        <h>117</h>
+        <x>436</x>
+        <y>388</y>
+        <w>280</w>
+        <h>64</h>
+      </coordinates>
+      <panel_attributes>PHPoint3
+--
+--
++PHPoint3();
++PHPoint3(_x: T, _y: T);
++PHPoint3(pt: Point3_&lt;T&gt;&amp;);
++PHPoint3(pt: Point_&lt;T&gt;&amp;);
++PHPoint(pt: CvPoint3D32f&amp;);
++PHPoint(v: Vec&lt;T, 3&gt;&amp;);
++operator&lt;(pt: PHPoint3&amp;): bool;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>436</x>
+        <y>316</y>
+        <w>280</w>
+        <h>68</h>
+      </coordinates>
+      <panel_attributes>PHPoint
+--
+--
++PHPoint()
++PHPoint(_x: T, _y: T)
++PHPoint(pt: const Point_&lt;T&gt;&amp;)
++PHPoint(pt: const CvPoint&amp;)
++PHPoint(pt: const CvPoint2D32f&amp;)
++PHPoint(sz: const Size_&lt;T&gt;&amp;)
++PHPoint(v: const Vec&lt;T, 2&gt;&amp;)
++operator&lt;(pt: const PHPoint&amp;): const bool</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>436</x>
+        <y>184</y>
+        <w>280</w>
+        <h>128</h>
+      </coordinates>
+      <panel_attributes>POSERECT &lt;T&gt;
+--
++p1: T
++p2: T
++p3: T
++p4: T
+--
++POSERECT()
++POSERECT(poserect: POSERECT&lt;T&gt;&amp;)
++POSERECT(poserect: POSERECT&lt;T&gt;&amp;&amp;)
++POSERECT(_point1: T, _point2: T, _point3: T, _point4: T)
++containsPoint(point: T): int8_t
++asVector(): vector &lt;T&gt;
++GetMinMaxXY(minx: D&amp;, miny: D&amp;, maxx: D&amp;, maxy: D&amp;)
++GetCenter(): D
++operator=(rect &lt;POSERECT&lt;T&gt;&amp;) POSERECT&lt;T&gt;&amp;
++operator=(rect &lt;POSERECT&lt;T&gt;&amp;&amp;) POSERECT&lt;T&gt;&amp;
++operator==(rect &lt;POSERECT&lt;T&gt;&amp;): bool
++operator!=(rect &lt;POSERECT&lt;T&gt;&amp;): bool
++RectSize(): D</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>436</x>
+        <y>120</y>
+        <w>280</w>
+        <h>60</h>
+      </coordinates>
+      <panel_attributes>PoseHelper
+--
+--
++distSquared(one: T, two: T): double
++distSquared3d(one: T, two: T): double
++angle2D(x1: double, y1: double, x2: double, y2: double): double
++interpolateFloat(prevAngle: double, nextAngle: double, step: int, nextStep: int): double
++rotatePoint2D(point: const T, pivot: const T, degrees: const float): T
++copyTree(dst: tree &lt;T, tree_node_allocator&gt;&amp;, src: tree &lt;T, tree_node_allocator&gt;&amp;)
++RecalculateScoreIsWeak(labels: vector &lt;LimbLabel&gt;&amp;, detectorName: string, standardDiviationTreshold: float)</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>428</x>
+        <y>108</y>
+        <w>292</w>
+        <h>352</h>
+      </coordinates>
+      <panel_attributes>PoseHelper
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1024</x>
+        <y>324</y>
+        <w>308</w>
+        <h>136</h>
+      </coordinates>
+      <panel_attributes>Score
+--
++score: float
++detName: string
++coeff: float
++isWeak: bool
+--
++Score()
++Score(sc: float, name: string, _coeff: name)
++operator=(s: const Score&amp;): Score&amp;
++operator==(s: const Score&amp;): const bool
++operator!=(s: const Score&amp;): const bool
++operator&lt;(s: const Score&amp;): const bool
++operator&gt;(s: const Score&amp;): const bool
++getScore(): const float
++setScore(_score: float)
++getDetName(): const string
++setDetName(_detName: string)
++getCoeff(): const float
++setCoeff(_coeff: float)
++getIsWeak(): const bool
++setIsWeak(_isWeak: bool)</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1024</x>
+        <y>124</y>
+        <w>308</w>
+        <h>196</h>
+      </coordinates>
+      <panel_attributes>LimbLabel
+--
++limbId: int
++center: Point2f
++angle: float
++polygon: vector&lt;Point2f&gt;
++scores: vector&lt;Score&gt;
++isOccluded: bool
+--
++LimbLabel()
++LimbLabel(ll: LimbLabel&amp;)
++LimbLabel(_id:int, _centre: Point2f, _angle: float, _polygon: vector&lt;Point2f&gt;, _scores: vector&lt;Score&gt;, _isOccluded: bool)
++~LimbLabel()
++toString: string;
++addScore(detectionScore: Score)
++getScores(): vector&lt;Score&gt;
++setScores(vector&lt;Score&gt; _score)
++getEndPoints(p0: Point2f&amp;, p1: Point2f&amp;)
++getCenter(): Point2f
++getLimbID(): int
++getAngle(): float
++getPolygon(): vector &lt;Point2f&gt;
++getIsOccluded(bNegativeToPositive: bool): bool
++getAvgScore(): float;
++operator=(ll: LimbLabel&amp;): Score&amp;
++operator==(ll: LimbLabel&amp;): bool
++operator!=(ll: LimbLabel&amp;): bool
++operator&lt;(ll: LimbLabel&amp;):bool
++operator&gt;(ll: LimbLabel&amp;):bool
++containsPoint(pt: Point2f): bool</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>1020</x>
+        <y>108</y>
+        <w>316</w>
+        <h>356</h>
+      </coordinates>
+      <panel_attributes>*Part Labelling*
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>2084</x>
+        <y>764</y>
+        <w>368</w>
+        <h>184</h>
+      </coordinates>
+      <panel_attributes>TLPSSolver
+--
+--
++TLPSSolver()
++~TLPSSolver()
++solve(frames: Sequence&amp;): vector&lt;Solvlet&gt;
++solve(frames: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
++solve(frames: Sequence&amp;, params: map&lt;string, float&gt;, solvlets: vector&lt;Solvlet&gt;): vector&lt;Solvlet&gt;
++solveWindowed(sequence: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
++solveGlobal(sequence: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
++evaluateSolution(frame: Frame*, labels: vector&lt;LimbLabel&gt;, params: map&lt;string, float&gt;): float
++findFrameIndexById(id: int, frames: vector&lt;Frame*&gt;): int
++computeScoreCost(label: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
++computeJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, toChild: bool): float
++computeNormJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, jointMax: float, toChild: bool): float
++computePriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;): float
++computeNormPriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;, max: float): float
++computePastTempCost(thisLabel: const LimbLabel&amp;, pastLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
++computeNormPastTempCost(thisLabel: const LimbLabel&amp;, pastLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;, jointMax: float): float
++computeFutureTempCost(thisLabel: const LimbLabel&amp;, futureLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
++computeNormFutureTempCost(thisLabel: const LimbLabel&amp;, futureLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;, max: float): float
++computeAnchorCost(thisLabel: const LimbLabel&amp;, anchor: Frame*, params: map&lt;string, float&gt;): float
++computeNormAnchorCost(thisLabel: const LimbLabel&amp;, anchor: Frame*, params: map&lt;string, float&gt;, jointMax: float): float
++slice(frames: const vector&lt;Frame*&gt;&amp;): vector&lt;vector&lt;Frame*&gt;&gt; </panel_attributes>
+      <additional_attributes/>
+    </element>
+    <group>
+      <element>
+        <type>com.umlet.element.Package</type>
+        <coordinates>
+          <x>1500</x>
+          <y>756</y>
+          <w>576</w>
+          <h>192</h>
+        </coordinates>
+        <panel_attributes>EmptyPackage
+bg=orange</panel_attributes>
+        <additional_attributes/>
+      </element>
+      <element>
+        <type>com.umlet.element.Class</type>
+        <coordinates>
+          <x>1504</x>
+          <y>768</y>
+          <w>568</w>
+          <h>128</h>
+        </coordinates>
+        <panel_attributes>NSKPSolver
+--
+--
++NSKPSolver()
++~NSKPSolver()
++solve(frames: Sequence&amp;): vector&lt;Solvlet&gt;
++solve(frames: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
++solve(frames: Sequence&amp;, params: map&lt;string, float&gt;, ISM: const ImageSimilarityMatrix&amp;): vector&lt;Solvlet&gt; 
++suggestKeyframes(ism: const ImageSimilarityMatrix&amp;, params: map&lt;string, float&gt;): vector&lt;Point2i&gt;
++propagateKeyframes(frames: vector&lt;Frame*&gt;&amp;, params: map&lt;string, float&gt;, ism: const ImageSimilarityMatrix&amp;, trees: const vector&lt;MinSpanningTree&gt;&amp;, ignore: vector&lt;int&gt;&amp;): vector&lt;Solvlet&gt;
++buildFrameMSTs(ism: const ImageSimilarityMatrix&amp;, params: map&lt;string, float&gt;): vector&lt;MinSpanningTree&gt;
++evaluateSolution(frame: Frame*, labels: vector&lt;LimbLabel&gt;, params: map&lt;string, float&gt;): float
++findFrameIndexById(id: int, frames: vector&lt;Frame*&gt;): uint32_t
++computeScoreCost(label: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
++computeJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, toChild: bool): float
++computeNormJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, max: float, toChild: bool): float
++computePriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;): float
++computeNormPriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;, min: float, max: float): float
++propagateFrame(frameId: int, frames: const vector&lt;Frame*&gt;, params: map&lt;string, float&gt;, ism: const ImageSimilarityMatrix&amp;, trees: const vector&lt;MinSpanningTree&gt;&amp;, ignore: vector&lt;int&gt; &amp;): vector&lt;NSKPSolver::SolvletScore&gt;
++test(frameId: int, frames: const vector&lt;Frame*&gt;&amp;, params: map&lt;string, float&gt;, ism: const ImageSimilarityMatrix&amp;, trees: const vector&lt;MinSpanningTree&gt;&amp;, ignore: vector&lt;int&gt;&amp;): int
+</panel_attributes>
+        <additional_attributes/>
+      </element>
+      <element>
+        <type>com.umlet.element.Class</type>
+        <coordinates>
+          <x>1504</x>
+          <y>900</y>
+          <w>568</w>
+          <h>40</h>
+        </coordinates>
+        <panel_attributes>SolvletScore
+--
+solvlet: Solvlet
+score: float
+parentFrame: int
+--</panel_attributes>
+        <additional_attributes/>
+      </element>
+    </group>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>1712</x>
+        <y>624</y>
+        <w>336</w>
+        <h>148</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>328;12;12;140</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>2032</x>
+        <y>624</y>
+        <w>248</w>
+        <h>148</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+      <additional_attributes>12;12;240;140</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>2196</x>
+        <y>572</y>
+        <w>172</w>
+        <h>120</h>
+      </coordinates>
+      <panel_attributes>Sequence
+--
++id: int
++name: string
++frames: vector&lt;Frame*&gt;
+--
++Sequence()
++Sequence(seq: const Sequence&amp;)
++Sequence(id: int, name: string, frames: vector&lt;Frame*&gt;)
++~Sequence()
++getID(): const int
++setID(_id: const int&amp;)
++getName(): const string
++setName(_name: const string&amp;)
++getFrames(): const vector&lt;Frame*&gt;
++setFrames(frames: const vector&lt;Frame*&gt;&amp;)
++computeInterpolation(params)
++estimateUniformScale(params: map&lt;string, float&gt;&amp;)
++interpolateSlice(slice: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;&amp;): vector&lt;Frame*&gt;
++interpolateSlice2D(slice: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;&amp;): vector&lt;Frame*&gt;</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1952</x>
+        <y>576</y>
+        <w>196</w>
+        <h>64</h>
+      </coordinates>
+      <panel_attributes>/Solver/
+--
+-id: int
+-name: string
+--
++Solver()
++~Solver()
++solve(v: Sequence): vector&lt;Solvlet&gt;
++solve(v: Sequence, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
++getName(): string
++getId(): int</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1756</x>
+        <y>576</y>
+        <w>132</w>
+        <h>92</h>
+      </coordinates>
+      <panel_attributes>Solvlet
+--
+-frameId: int
+-labels: vector&lt;LimbLabel&gt;
+--
++Solvlet()
++Solvlet(id: int, labels: vector&lt;LimbLabel&gt;)
++getFrameId(): int
++setFrameId(id: int)
++setLables(labels: vector&lt;LimbLabel&gt;)
++getLabels(): vector&lt;LimbLabel&gt;
++toSkeleton(scale: float): Skeleton
++operator=: Solvlet&amp;
++operator==: bool
++operator!=: bool</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1484</x>
+        <y>580</y>
+        <w>248</w>
+        <h>104</h>
+      </coordinates>
+      <panel_attributes>Solution
+--
+-id: int
+-sequenceId: int
+-solverId: int
+-solverParams: vector&lt;float&gt;
+-solvlets: vector&lt;Solvlet&gt;
+--
++Solution()
++Solution(id: int, solverId: int, seqId: int, params: vector&lt;float&gt;, sol: vector&lt;Solvlet&gt;)
++getId(): int
++setId(id: int)
++getSolvlets(): vector&lt;Solvletl&gt;
++setSolvlets(labels: vector&lt;Solvlet&gt;)
+
++operator=: Solution&amp;
++operator==: bool
++operator!=: bool
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>1480</x>
+        <y>556</y>
+        <w>972</w>
+        <h>404</h>
+      </coordinates>
+      <panel_attributes>Solving
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1896</x>
+        <y>120</y>
+        <w>140</w>
+        <h>188</h>
+      </coordinates>
+      <panel_attributes>Skeleton
+--
++name: string
++partTree: tree&lt;BodyPart&gt;
++jointTree: tree&lt;BodyJoint&gt;
++scale: float
+--
++Skeleton()
++Skeleton(s: const Skeleton&amp;);
++~Skeleton()
++getName(): const string
++setName(_name: string)
++getPartTreePtr(): tree&lt;BodyPart&gt;*
++getPartTree(): const tree&lt;BodyPart&gt;
++setPartTree(_partTree: tree&lt;BodyPart&gt;)
++getJointTreePtr(): tree&lt;BodyJoint&gt;*
++getJointTree(): const tree&lt;JointTree&gt;
++setJointTree(_jointTree: tree&lt;BodyJoint&gt;)
++getBodyJoint(jointID: int): BodyJoint*
++getScale(): const float
++setScale(_scale: float)
++infer2D()
++infer3D()
++operator=(s: const Skeleton&amp;): Skeleton&amp;
++operator==(s: const Skeleton&amp;): const bool
++operator!=(s: const Skeleton&amp;): const bool
++getPartTreeCount(): uint32_t
++getBodyJoint(jointID: int): BodyJoint*
++getBodyPart(partID: int): BodyPart*</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>1620</x>
+        <y>120</y>
+        <w>272</w>
+        <h>176</h>
       </coordinates>
       <panel_attributes>BodyJoint
 --
@@ -589,10 +1055,10 @@ bg=orange</panel_attributes>
     <element>
       <type>com.umlet.element.Class</type>
       <coordinates>
-        <x>1011</x>
-        <y>6</y>
-        <w>204</w>
-        <h>198</h>
+        <x>1344</x>
+        <y>120</y>
+        <w>272</w>
+        <h>296</h>
       </coordinates>
       <panel_attributes>BodyPart
 --
@@ -643,476 +1109,14 @@ bg=orange</panel_attributes>
       <additional_attributes/>
     </element>
     <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>1230</x>
-        <y>9</y>
-        <w>105</w>
-        <h>126</h>
-      </coordinates>
-      <panel_attributes>Skeleton
---
-+name: string
-+partTree: tree&lt;BodyPart&gt;
-+jointTree: tree&lt;BodyJoint&gt;
-+scale: float
---
-+Skeleton()
-+getName(): string
-+setName(_name: string)
-+getPartTree(): tree&lt;BodyPart&gt;
-+setPartTree(_partTree: tree&lt;BodyPart&gt;)
-+getJointTree(): tree&lt;JointTree&gt;
-+setJointTree(_jointTree: tree&lt;BodyJoint&gt;)
-+getBodyJoint(jointID: int): BodyJoint*
-+getScale(): float
-+setScale(_scale: float)
-+toString(): string
-+learnDepth(skel: Skeleton&amp;)
-+infer2D()
-+operator=(s: Skeleton&amp;): Skeleton&amp;
-+operator==(s: Skeleton&amp;): bool
-+operator!=(s: Skeleton&amp;): bool
-+getPartTreeCount(): int
-+getBodyJoint(jointID: int): BodyJoint*
-+getBodyPart(partID: int): BodyPart*</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
       <type>com.umlet.element.Package</type>
       <coordinates>
-        <x>1005</x>
-        <y>0</y>
-        <w>348</w>
-        <h>330</h>
+        <x>1340</x>
+        <y>108</y>
+        <w>708</w>
+        <h>440</h>
       </coordinates>
       <panel_attributes>*Skeletal Structure*
-bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>327</x>
-        <y>210</y>
-        <w>210</w>
-        <h>48</h>
-      </coordinates>
-      <panel_attributes>PHPoint3
---
---
-+PHPoint3();
-+PHPoint3(_x: T, _y: T);
-+PHPoint3(pt: Point3_&lt;T&gt;&amp;);
-+PHPoint3(pt: Point_&lt;T&gt;&amp;);
-+PHPoint(pt: CvPoint3D32f&amp;);
-+PHPoint(v: Vec&lt;T, 3&gt;&amp;);
-+operator&lt;(pt: PHPoint3&amp;): bool;</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>327</x>
-        <y>156</y>
-        <w>210</w>
-        <h>51</h>
-      </coordinates>
-      <panel_attributes>PHPoint
---
---
-+PHPoint()
-+PHPoint(_x: T, _y: T)
-+PHPoint(pt: const Point_&lt;T&gt;&amp;)
-+PHPoint(pt: const CvPoint&amp;)
-+PHPoint(pt: const CvPoint2D32f&amp;)
-+PHPoint(sz: const Size_&lt;T&gt;&amp;)
-+PHPoint(v: const Vec&lt;T, 2&gt;&amp;)
-+operator&lt;(pt: const PHPoint&amp;): const bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>327</x>
-        <y>57</y>
-        <w>210</w>
-        <h>96</h>
-      </coordinates>
-      <panel_attributes>POSERECT &lt;T&gt;
---
-+p1: T
-+p2: T
-+p3: T
-+p4: T
---
-+POSERECT()
-+POSERECT(poserect: POSERECT&lt;T&gt;&amp;)
-+POSERECT(poserect: POSERECT&lt;T&gt;&amp;&amp;)
-+POSERECT(_point1: T, _point2: T, _point3: T, _point4: T)
-+containsPoint(point: T): int8_t
-+asVector(): vector &lt;T&gt;
-+GetMinMaxXY(minx: D&amp;, miny: D&amp;, maxx: D&amp;, maxy: D&amp;)
-+GetCenter(): D
-+operator=(rect &lt;POSERECT&lt;T&gt;&amp;) POSERECT&lt;T&gt;&amp;
-+operator=(rect &lt;POSERECT&lt;T&gt;&amp;&amp;) POSERECT&lt;T&gt;&amp;
-+operator==(rect &lt;POSERECT&lt;T&gt;&amp;): bool
-+operator!=(rect &lt;POSERECT&lt;T&gt;&amp;): bool
-+RectSize(): D</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>327</x>
-        <y>9</y>
-        <w>210</w>
-        <h>45</h>
-      </coordinates>
-      <panel_attributes>PoseHelper
---
---
-+distSquared(one: T, two: T): double
-+distSquared3d(one: T, two: T): double
-+angle2D(x1: double, y1: double, x2: double, y2: double): double
-+interpolateFloat(prevAngle: double, nextAngle: double, step: int, nextStep: int): double
-+rotatePoint2D(point: const T, pivot: const T, degrees: const float): T
-+copyTree(dst: tree &lt;T, tree_node_allocator&gt;&amp;, src: tree &lt;T, tree_node_allocator&gt;&amp;)
-+RecalculateScoreIsWeak(labels: vector &lt;LimbLabel&gt;&amp;, detectorName: string, standardDiviationTreshold: float)</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>321</x>
-        <y>0</y>
-        <w>219</w>
-        <h>264</h>
-      </coordinates>
-      <panel_attributes>PoseHelper
-bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>768</x>
-        <y>162</y>
-        <w>231</w>
-        <h>102</h>
-      </coordinates>
-      <panel_attributes>Score
---
-+score: float
-+detName: string
-+coeff: float
-+isWeak: bool
---
-+Score()
-+Score(sc: float, name: string, _coeff: name)
-+operator=(s: const Score&amp;): Score&amp;
-+operator==(s: const Score&amp;): const bool
-+operator!=(s: const Score&amp;): const bool
-+operator&lt;(s: const Score&amp;): const bool
-+operator&gt;(s: const Score&amp;): const bool
-+getScore(): const float
-+setScore(_score: float)
-+getDetName(): const string
-+setDetName(_detName: string)
-+getCoeff(): const float
-+setCoeff(_coeff: float)
-+getIsWeak(): const bool
-+setIsWeak(_isWeak: bool)</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>768</x>
-        <y>12</y>
-        <w>231</w>
-        <h>147</h>
-      </coordinates>
-      <panel_attributes>LimbLabel
---
-+limbId: int
-+center: Point2f
-+angle: float
-+polygon: vector&lt;Point2f&gt;
-+scores: vector&lt;Score&gt;
-+isOccluded: bool
---
-+LimbLabel()
-+LimbLabel(ll: LimbLabel&amp;)
-+LimbLabel(_id:int, _centre: Point2f, _angle: float, _polygon: vector&lt;Point2f&gt;, _scores: vector&lt;Score&gt;, _isOccluded: bool)
-+~LimbLabel()
-+toString: string;
-+addScore(detectionScore: Score)
-+getScores(): vector&lt;Score&gt;
-+setScores(vector&lt;Score&gt; _score)
-+getEndPoints(p0: Point2f&amp;, p1: Point2f&amp;)
-+getCenter(): Point2f
-+getLimbID(): int
-+getAngle(): float
-+getPolygon(): vector &lt;Point2f&gt;
-+getIsOccluded(bNegativeToPositive: bool): bool
-+getAvgScore(): float;
-+operator=(ll: LimbLabel&amp;): Score&amp;
-+operator==(ll: LimbLabel&amp;): bool
-+operator!=(ll: LimbLabel&amp;): bool
-+operator&lt;(ll: LimbLabel&amp;):bool
-+operator&gt;(ll: LimbLabel&amp;):bool
-+containsPoint(pt: Point2f): bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>765</x>
-        <y>0</y>
-        <w>237</w>
-        <h>267</h>
-      </coordinates>
-      <panel_attributes>*Part Labelling*
-bg=orange</panel_attributes>
-      <additional_attributes/>
-    </element>
-  </group>
-  <group>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>1557</x>
-        <y>492</y>
-        <w>276</w>
-        <h>138</h>
-      </coordinates>
-      <panel_attributes>TLPSSolver
---
---
-+TLPSSolver()
-+~TLPSSolver()
-+solve(frames: Sequence&amp;): vector&lt;Solvlet&gt;
-+solve(frames: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
-+solve(frames: Sequence&amp;, params: map&lt;string, float&gt;, solvlets: vector&lt;Solvlet&gt;): vector&lt;Solvlet&gt;
-+solveWindowed(sequence: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
-+solveGlobal(sequence: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
-+evaluateSolution(frame: Frame*, labels: vector&lt;LimbLabel&gt;, params: map&lt;string, float&gt;): float
-+findFrameIndexById(id: int, frames: vector&lt;Frame*&gt;): int
-+computeScoreCost(label: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
-+computeJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, toChild: bool): float
-+computeNormJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, jointMax: float, toChild: bool): float
-+computePriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;): float
-+computeNormPriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;, max: float): float
-+computePastTempCost(thisLabel: const LimbLabel&amp;, pastLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
-+computeNormPastTempCost(thisLabel: const LimbLabel&amp;, pastLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;, jointMax: float): float
-+computeFutureTempCost(thisLabel: const LimbLabel&amp;, futureLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
-+computeNormFutureTempCost(thisLabel: const LimbLabel&amp;, futureLabel: const LimbLabel&amp;, params: map&lt;string, float&gt;, max: float): float
-+computeAnchorCost(thisLabel: const LimbLabel&amp;, anchor: Frame*, params: map&lt;string, float&gt;): float
-+computeNormAnchorCost(thisLabel: const LimbLabel&amp;, anchor: Frame*, params: map&lt;string, float&gt;, jointMax: float): float
-+slice(frames: const vector&lt;Frame*&gt;&amp;): vector&lt;vector&lt;Frame*&gt;&gt; </panel_attributes>
-      <additional_attributes/>
-    </element>
-    <group>
-      <element>
-        <type>com.umlet.element.Package</type>
-        <coordinates>
-          <x>1119</x>
-          <y>486</y>
-          <w>432</w>
-          <h>144</h>
-        </coordinates>
-        <panel_attributes>EmptyPackage
-bg=orange</panel_attributes>
-        <additional_attributes/>
-      </element>
-      <element>
-        <type>com.umlet.element.Class</type>
-        <coordinates>
-          <x>1122</x>
-          <y>495</y>
-          <w>426</w>
-          <h>96</h>
-        </coordinates>
-        <panel_attributes>NSKPSolver
---
---
-+NSKPSolver()
-+~NSKPSolver()
-+solve(frames: Sequence&amp;): vector&lt;Solvlet&gt;
-+solve(frames: Sequence&amp;, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
-+solve(frames: Sequence&amp;, params: map&lt;string, float&gt;, ISM: const ImageSimilarityMatrix&amp;): vector&lt;Solvlet&gt; 
-+suggestKeyframes(ism: const ImageSimilarityMatrix&amp;, params: map&lt;string, float&gt;): vector&lt;Point2i&gt;
-+propagateKeyframes(frames: vector&lt;Frame*&gt;&amp;, params: map&lt;string, float&gt;, ism: const ImageSimilarityMatrix&amp;, trees: const vector&lt;MinSpanningTree&gt;&amp;, ignore: vector&lt;int&gt;&amp;): vector&lt;Solvlet&gt;
-+buildFrameMSTs(ism: const ImageSimilarityMatrix&amp;, params: map&lt;string, float&gt;): vector&lt;MinSpanningTree&gt;
-+evaluateSolution(frame: Frame*, labels: vector&lt;LimbLabel&gt;, params: map&lt;string, float&gt;): float
-+findFrameIndexById(id: int, frames: vector&lt;Frame*&gt;): uint32_t
-+computeScoreCost(label: const LimbLabel&amp;, params: map&lt;string, float&gt;): float
-+computeJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, toChild: bool): float
-+computeNormJointCost(child: const LimbLabel&amp;, parent: const LimbLabel&amp;, params: map&lt;string, float&gt;, max: float, toChild: bool): float
-+computePriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;): float
-+computeNormPriorCost(label: const LimbLabel&amp;, prior: const BodyPart&amp;, skeleton: const Skeleton&amp;, params: map&lt;string, float&gt;, min: float, max: float): float
-+propagateFrame(frameId: int, frames: const vector&lt;Frame*&gt;, params: map&lt;string, float&gt;, ism: const ImageSimilarityMatrix&amp;, trees: const vector&lt;MinSpanningTree&gt;&amp;, ignore: vector&lt;int&gt; &amp;): vector&lt;NSKPSolver::SolvletScore&gt;
-+test(frameId: int, frames: const vector&lt;Frame*&gt;&amp;, params: map&lt;string, float&gt;, ism: const ImageSimilarityMatrix&amp;, trees: const vector&lt;MinSpanningTree&gt;&amp;, ignore: vector&lt;int&gt;&amp;): int
-</panel_attributes>
-        <additional_attributes/>
-      </element>
-      <element>
-        <type>com.umlet.element.Class</type>
-        <coordinates>
-          <x>1122</x>
-          <y>594</y>
-          <w>426</w>
-          <h>30</h>
-        </coordinates>
-        <panel_attributes>SolvletScore
---
-solvlet: Solvlet
-score: float
-parentFrame: int
---</panel_attributes>
-        <additional_attributes/>
-      </element>
-    </group>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>1281</x>
-        <y>387</y>
-        <w>251</w>
-        <h>110</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>246;9;9;105</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Relation</type>
-      <coordinates>
-        <x>1521</x>
-        <y>387</y>
-        <w>182</w>
-        <h>110</h>
-      </coordinates>
-      <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-      <additional_attributes>9;9;177;105</additional_attributes>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>1644</x>
-        <y>348</y>
-        <w>129</w>
-        <h>90</h>
-      </coordinates>
-      <panel_attributes>Sequence
---
-+id: int
-+name: string
-+frames: vector&lt;Frame*&gt;
---
-+Sequence()
-+Sequence(seq: const Sequence&amp;)
-+Sequence(id: int, name: string, frames: vector&lt;Frame*&gt;)
-+getID(): const int
-+setID(_id: const int&amp;)
-+getName(): const string
-+setName(_name: const string&amp;)
-+getFrames(): const vector&lt;Frame*&gt;
-+setFrames(frames: const vector&lt;Frame*&gt;&amp;)
-+computeInterpolation(params)
-+estimateUniformScale(params: map&lt;string, float&gt;&amp;)
-+interpolateSlice(slice: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;&amp;): vector&lt;Frame*&gt;
-+interpolateSlice2D(slice: vector&lt;Frame*&gt;, params: map&lt;string, float&gt;&amp;): vector&lt;Frame*&gt;</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>1461</x>
-        <y>351</y>
-        <w>147</w>
-        <h>48</h>
-      </coordinates>
-      <panel_attributes>/Solver/
---
--id: int
--name: string
---
-+Solver()
-+~Solver()
-+solve(v: Sequence): vector&lt;Solvlet&gt;
-+solve(v: Sequence, params: map&lt;string, float&gt;): vector&lt;Solvlet&gt;
-+getName(): string
-+getId(): int</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>1314</x>
-        <y>351</y>
-        <w>99</w>
-        <h>69</h>
-      </coordinates>
-      <panel_attributes>Solvlet
---
--frameId: int
--labels: vector&lt;LimbLabel&gt;
---
-+Solvlet()
-+Solvlet(id: int, labels: vector&lt;LimbLabel&gt;)
-+getFrameId(): int
-+setFrameId(id: int)
-+setLables(labels: vector&lt;LimbLabel&gt;)
-+getLabels(): vector&lt;LimbLabel&gt;
-+toSkeleton(scale: float): Skeleton
-+operator=: Solvlet&amp;
-+operator==: bool
-+operator!=: bool</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Class</type>
-      <coordinates>
-        <x>1110</x>
-        <y>354</y>
-        <w>186</w>
-        <h>78</h>
-      </coordinates>
-      <panel_attributes>Solution
---
--id: int
--sequenceId: int
--solverId: int
--solverParams: vector&lt;float&gt;
--solvlets: vector&lt;Solvlet&gt;
---
-+Solution()
-+Solution(id: int, solverId: int, seqId: int, params: vector&lt;float&gt;, sol: vector&lt;Solvlet&gt;)
-+getId(): int
-+setId(id: int)
-+getSolvlets(): vector&lt;Solvletl&gt;
-+setSolvlets(labels: vector&lt;Solvlet&gt;)
-
-+operator=: Solution&amp;
-+operator==: bool
-+operator!=: bool
-</panel_attributes>
-      <additional_attributes/>
-    </element>
-    <element>
-      <type>com.umlet.element.Package</type>
-      <coordinates>
-        <x>1107</x>
-        <y>336</y>
-        <w>729</w>
-        <h>303</h>
-      </coordinates>
-      <panel_attributes>Solving
 bg=orange</panel_attributes>
       <additional_attributes/>
     </element>

@@ -20,6 +20,10 @@ namespace SPEL
     this->setScale(s.getScale());
   }
 
+  Skeleton::~Skeleton(void)
+  {
+  }
+
   // constructor with params
   Skeleton &Skeleton::operator=(const Skeleton &s)
   {

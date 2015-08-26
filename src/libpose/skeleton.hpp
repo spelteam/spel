@@ -19,10 +19,11 @@ namespace SPEL
   public:
     Skeleton(void);
     Skeleton(const Skeleton &s);
+    virtual ~Skeleton(void);
     //TODO (Vitaliy Koshura): Need implementation
-    string toString(void); // must return Skeleton as string
+    //string toString(void); // must return Skeleton as string
     //TODO (Vitaliy Koshura): Need implementation
-    void learnDepth(Skeleton &skel);
+    //void learnDepth(Skeleton &skel);
     void infer2D(void);
     void infer3D(void);
     // All these functions just give access to the object fields
@@ -33,11 +34,11 @@ namespace SPEL
     void setName(string _name);
     tree <BodyPart> getPartTree(void) const;
     ///direct access
-    tree<BodyPart>* getPartTreePtr();
+    tree<BodyPart>* getPartTreePtr(void);
     void setPartTree(tree <BodyPart> _partTree);
     tree <BodyJoint> getJointTree(void) const;
     ///direct access
-    tree<BodyJoint>* getJointTreePtr();
+    tree<BodyJoint>* getJointTreePtr(void);
     void setJointTree(tree <BodyJoint> _jointTree);
     float getScale(void) const;
     void setScale(float _scale);
