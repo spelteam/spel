@@ -27,19 +27,20 @@ namespace SPEL
     ///constructor
     Sequence(int idx, string seqName, vector<Frame*> seq);
     virtual ~Sequence(void);
-    string getName() const;
-    void setName(const string& _name);
-    int getID() const;
-    void setID(const int& _id);
-    vector<Frame*> getFrames() const;
-    void setFrames(const vector<Frame*> _frames);
+    virtual string getName(void) const;
+    virtual void setName(const string& _name);
+    virtual int getID(void) const;
+    virtual void setID(const int& _id);
+    virtual vector<Frame*> getFrames(void) const;
+    virtual void setFrames(const vector<Frame*> _frames);
     ///compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
-    void computeInterpolation(map<string, float> &params);
-    void estimateUniformScale(map<string, float> &params);
+    virtual void computeInterpolation(map<string, float> &params);
+    virtual void estimateUniformScale(map<string, float> &params);
 
+  protected:
+    virtual vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
+    virtual vector<Frame*> interpolateSlice2D(vector<Frame*> slice, map<string, float> params);
   private:
-    vector<Frame*> interpolateSlice(vector<Frame*> slice, map<string, float> params);
-    vector<Frame*> interpolateSlice2D(vector<Frame*> slice, map<string, float> params);
     /// detection score
     vector<Frame*> frames;
     ///sequence name
