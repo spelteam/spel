@@ -35,12 +35,14 @@ namespace SPEL
     ///two - second point
     ///Result:
     ///squared distance between one and two
-    template <typename T> static double distSquared(T one, T two)
+    template <typename T> 
+    static double distSquared(T one, T two)
     {
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
     }
 
-    template <typename T> static double distSquared3d(T one, T two)
+    template <typename T> 
+    static double distSquared3d(T one, T two)
     {
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0) + pow(one.z - two.z, 2.0);
     }
@@ -56,7 +58,8 @@ namespace SPEL
     static double angle2D(double x1, double y1, double x2, double y2);
     static double interpolateFloat(double prevAngle, double nextAngle, int step, int numSteps);
     //
-    template <typename T> static T rotatePoint2D(const T point, const T pivot, const float degrees)
+    template <typename T> 
+    static T rotatePoint2D(const T point, const T pivot, const float degrees)
     {
       float radians = degrees * M_PI / 180.0;
       T pt, cnt;
@@ -103,9 +106,10 @@ namespace SPEL
 
   ///represents rectangle
   template <class T>
-  struct POSERECT
+  class POSERECT
   {
-    POSERECT()
+  public:
+    POSERECT(void)
       : point1(),
       point2(),
       point3(),
@@ -157,7 +161,8 @@ namespace SPEL
       return contour;
     }
 
-    template <typename D> void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy)
+    template <typename D> 
+    void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy)
     {
       minx = min(min(point1.x, point2.x), min(point3.x, point4.x));
       maxx = max(max(point1.x, point2.x), max(point3.x, point4.x));
@@ -165,7 +170,8 @@ namespace SPEL
       maxy = max(max(point1.y, point2.y), max(point3.y, point4.y));
     }
 
-    template <typename D> D GetCenter()
+    template <typename D> 
+    D GetCenter()
     {
       D center1 = 0.5 * point1 + 0.5 * point3;
       D center2 = 0.5 * point2 + 0.5 * point4;
@@ -210,7 +216,8 @@ namespace SPEL
       return !(*this == rect);
     }
 
-    template <typename D> D RectSize(void)
+    template <typename D> 
+    D RectSize(void)
     {
       return (D(sqrt(PoseHelper::distSquared(point2, point3)), sqrt(PoseHelper::distSquared(point1, point2))));
     }
