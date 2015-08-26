@@ -17,22 +17,23 @@ namespace SPEL
   public:
     Solvlet(void);
     Solvlet(int id, vector<LimbLabel> labels);
+    virtual ~Solvlet(void);
 
-    Solvlet &operator=(const Solvlet &s);
-    bool operator<(const Solvlet &s) const;
-    bool operator>(const Solvlet &s) const;
+    virtual Solvlet &operator=(const Solvlet &s);
+    virtual bool operator<(const Solvlet &s) const;
+    virtual bool operator>(const Solvlet &s) const;
     // bool operator==(const Solvlet &s) const;
     // bool operator!=(const Solvlet &s) const;
 
-    int getFrameID(void) const;
-    void setFrameID(int _id);
+    virtual int getFrameID(void) const;
+    virtual void setFrameID(int _id);
 
-    vector<LimbLabel> getLabels(void) const;
-    const vector<LimbLabel>* getLabelsPtr() const;
-    void setLabels(vector<LimbLabel> _labels);
+    virtual vector<LimbLabel> getLabels(void) const;
+    virtual const vector<LimbLabel>* getLabelsPtr(void) const;
+    virtual void setLabels(vector<LimbLabel> _labels);
 
-    Skeleton toSkeleton(const Skeleton &example);
-    float evaluateSolution(Frame* frame, map<string, float> params);
+    virtual Skeleton toSkeleton(const Skeleton &example);
+    virtual float evaluateSolution(Frame* frame, map<string, float> params);
 
   private:
     int frameId;

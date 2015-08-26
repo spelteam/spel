@@ -24,32 +24,32 @@ namespace SPEL
     //string toString(void); // must return Skeleton as string
     //TODO (Vitaliy Koshura): Need implementation
     //void learnDepth(Skeleton &skel);
-    void infer2D(void);
-    void infer3D(void);
+    virtual void infer2D(void);
+    virtual void infer3D(void);
     // All these functions just give access to the object fields
-    Skeleton & operator=(const Skeleton &s);
-    bool operator==(const Skeleton &s) const;
-    bool operator!=(const Skeleton &s) const;
-    string getName(void) const;
-    void setName(string _name);
-    tree <BodyPart> getPartTree(void) const;
+    virtual Skeleton & operator=(const Skeleton &s);
+    virtual bool operator==(const Skeleton &s) const;
+    virtual bool operator!=(const Skeleton &s) const;
+    virtual string getName(void) const;
+    virtual void setName(string _name);
+    virtual tree <BodyPart> getPartTree(void) const;
     ///direct access
-    tree<BodyPart>* getPartTreePtr(void);
-    void setPartTree(tree <BodyPart> _partTree);
-    tree <BodyJoint> getJointTree(void) const;
+    virtual tree<BodyPart>* getPartTreePtr(void);
+    virtual void setPartTree(tree <BodyPart> _partTree);
+    virtual tree <BodyJoint> getJointTree(void) const;
     ///direct access
-    tree<BodyJoint>* getJointTreePtr(void);
-    void setJointTree(tree <BodyJoint> _jointTree);
-    float getScale(void) const;
-    void setScale(float _scale);
+    virtual tree<BodyJoint>* getJointTreePtr(void);
+    virtual void setJointTree(tree <BodyJoint> _jointTree);
+    virtual float getScale(void) const;
+    virtual void setScale(float _scale);
     //void shift(Point2f point);
 
     /// count of bodypart elements, included in the tree
-    uint32_t getPartTreeCount(void) const;
+    virtual uint32_t getPartTreeCount(void) const;
     /// search a joint by id and return a pointer to its address
-    BodyJoint* getBodyJoint(int jointID) const;
+    virtual BodyJoint* getBodyJoint(int jointID) const;
     /// search a body part by id and return a pointer to its address
-    BodyPart* getBodyPart(int partID) const;
+    virtual BodyPart* getBodyPart(int partID) const;
   private:
     /// name of the specific instance of
     string name;

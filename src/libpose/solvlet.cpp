@@ -13,6 +13,10 @@ namespace SPEL
     labels = _labels;
   }
 
+  Solvlet::~Solvlet(void)
+  {
+  }
+
   Solvlet &Solvlet::operator=(const Solvlet &s)
   {
     if (this == &s)
