@@ -13,23 +13,24 @@ namespace SPEL
   public:
     Score(void);
     Score(float sc, string name, float _coeff = 1.0f);
+    virtual ~Score(void);
     /// copying all fields
-    Score & operator=(const Score &s);
+    virtual Score & operator=(const Score &s);
     /// All this operators perform comparison by score values
-    bool operator<(const Score &s) const;
-    bool operator>(const Score &s) const;
-    bool operator==(const Score &s) const;
+    virtual bool operator<(const Score &s) const;
+    virtual bool operator>(const Score &s) const;
+    virtual bool operator==(const Score &s) const;
     /// This operator perform comparison by address
-    bool operator!=(const Score &s) const;
+    virtual bool operator!=(const Score &s) const;
     /// All this functions just give access to the object fields
-    float getScore(void) const;
-    void setScore(float _score);
-    string getDetName(void) const;
-    void setDetName(string _detName);
-    float getCoeff(void) const;
-    void setCoeff(float _coeff);
-    bool getIsWeak(void) const;
-    void setIsWeak(bool _isWeak);
+    virtual float getScore(void) const;
+    virtual void setScore(float _score);
+    virtual string getDetName(void) const;
+    virtual void setDetName(string _detName);
+    virtual float getCoeff(void) const;
+    virtual void setCoeff(float _coeff);
+    virtual bool getIsWeak(void) const;
+    virtual void setIsWeak(bool _isWeak);
 
   private:
     /// detection score

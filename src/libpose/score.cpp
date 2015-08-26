@@ -20,6 +20,10 @@ namespace SPEL
     isWeak = false;
   }
 
+  Score::~Score(void)
+  {
+  }
+
   Score &Score::operator=(const Score &s)
   {
     if (this == &s)
