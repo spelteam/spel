@@ -151,7 +151,7 @@ namespace SPEL
       return (int8_t)pointPolygonTest(contour, point, false);
     }
     ///convert rectangle to vector of points
-    vector <T> asVector()
+    vector <T> asVector(void)
     {
       vector <T> contour;
       contour.push_back(point1);
@@ -171,7 +171,7 @@ namespace SPEL
     }
 
     template <typename D> 
-    D GetCenter()
+    D GetCenter(void)
     {
       D center1 = 0.5 * point1 + 0.5 * point3;
       D center2 = 0.5 * point2 + 0.5 * point4;
