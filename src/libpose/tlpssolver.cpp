@@ -32,6 +32,8 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params,
     for(auto&& s:solvlets)
         tlpsSolvlets.push_back(s);
 
+    sort(tlpsSolvlets.begin(), tlpsSolvlets.end());
+
     return tlpsSolvlets;
 
 }
