@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 #include <poseHelper.hpp>
+#include <BodyPart.hpp>
+#include <Frame.hpp>
+#include "TestsFunctions.hpp"
 
 namespace SPEL
 {
@@ -101,4 +104,65 @@ namespace SPEL
     EXPECT_EQ(p[9], rect5.point3);
     EXPECT_EQ(p[8], rect5.point4);
   }
+
+  TEST_F(PoseRectTest, GetMinMaxXY)
+  {
+    float Xmin, Xmax, Ymin, Ymax;
+    rect5.GetMinMaxXY(Xmin, Ymin, Xmax, Ymax);
+    EXPECT_EQ(p[6].x, Xmin);
+    EXPECT_EQ(p[7].x, Xmax);
+    EXPECT_EQ(p[9].y, Ymin);
+    EXPECT_EQ(p[6].y, Ymax);
+  }
+
+  TEST_F(PoseRectTest, GetCenter)
+  {
+    Point2f center = rect1.GetCenter<Point2f>();
+    EXPECT_EQ(center, 0.25*(p[0] + p[1] + p[2] + p[3]));
+  }
+
+  TEST_F(PoseRectTest, AssignmentOperator)
+  {
+    POSERECT<Point2f> rect = rect1;
+    EXPECT_EQ(rect1, rect);
+  }
+
+  TEST_F(PoseRectTest, RectSize)
+  {
+    Point2f rectSize = rect1.RectSize<Point2f>();
+    EXPECT_EQ(Point2f(1.0, 1.0), rectSize);
+  }
+
+  TEST(PoseHelperTests_, CopyTree)
+  {
+    //Loading part tree from existing project
+    tree<BodyPart> partTree, copy;
+    vector<Frame*> frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    partTree = frames[0]->getSkeleton().getPartTree();
+
+    PoseHelper::copyTree(copy, partTree);
+
+    ASSERT_EQ(partTree.size(), copy.size());
+    
+    tree<BodyPart>::pre_order_iterator a, b;
+    a = partTree.begin();
+    b = copy.begin();
+    while (a != partTree.end())
+    {
+      EXPECT_EQ(*a, *b);
+      a++;
+      b++;
+    }
+
+    /* tree<BodyPart>::breadth_first_iterator c, d;
+    c = partTree.begin();
+    d = copy.begin();
+    while (c != partTree.end())
+    {
+      EXPECT_EQ(*c, *d);
+      c++;
+      d++;
+    }*/
+  }
+
 }

@@ -25,6 +25,7 @@ namespace SPEL
     //virtual void TearDown(){}
   protected:
     Point2f p[10];
+
   };
 
   TEST_F(PoseHelperTest, DistSquared){
@@ -43,7 +44,6 @@ namespace SPEL
 
   }
 
-
   TEST_F(PoseHelperTest, Angle2D){
     EXPECT_DOUBLE_EQ(-M_PI / 4, PoseHelper::angle2D(p[1].x, p[1].y, p[2].x, p[2].y));
     EXPECT_DOUBLE_EQ(-M_PI / 2, PoseHelper::angle2D(p[3].x, p[3].y, p[2].x, p[2].y));
@@ -61,5 +61,18 @@ namespace SPEL
     //testing with itsefl
     EXPECT_DOUBLE_EQ(0.0, PoseHelper::angle2D(p[5].x, p[5].y, p[5].x, p[5].y));
     EXPECT_DOUBLE_EQ(0.0, PoseHelper::angle2D(p[8].x, p[8].y, p[8].x, p[8].y));
+  }
+
+  TEST_F(PoseHelperTest, distSquared3D)
+  {
+    double b = sqrt(1.0 / 3.0);
+
+    Point3d A = Point3d(0.0, 0.0, 0.0);
+    Point3d B = Point3d(b, b, b);
+    Point3f C = Point3f(-b, -b, -b);
+
+    EXPECT_DOUBLE_EQ(0.0, PoseHelper::distSquared3d(A, A));
+    EXPECT_DOUBLE_EQ(1.0, PoseHelper::distSquared3d(A, B));
+    EXPECT_FLOAT_EQ(1.0, (float)PoseHelper::distSquared3d(Point3f(0.0, 0.0, 0.0), C));
   }
 }
