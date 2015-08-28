@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <poseHelper.hpp>
-#include <BodyPart.hpp>
-#include <Frame.hpp>
+#include <bodyPart.hpp>
+#include <frame.hpp>
 #include "TestsFunctions.hpp"
 
 namespace SPEL
