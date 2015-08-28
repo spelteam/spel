@@ -1,13 +1,13 @@
 # Module names
 
-# libpose module name
-SET ( LIBPOSE_MODULE "libpose" )
+# spel module name
+SET ( SPEL_MODULE "spel" )
 
 #libposegui module name
-SET ( LIBPOSEGUI_MODULE "libposegui" )
+SET ( SPELGUI_MODULE "spelgui" )
 
 # tests modules
-SET ( TESTS_MODULE "posetests" )
+SET ( TESTS_MODULE "speltests" )
 SET ( COLORHISTDETECTORTEST_MODULE "ColorHistDetectorTest" )
 SET ( HOGDETECTORTEST_MODULE "HogDetectorTest" )
 SET ( SURFDETECTORTEST_MODULE "SurfDetectorTest" )
