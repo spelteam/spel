@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 2.8.11)
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/cmake" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 # Add spel library
-INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/spel" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${SPEL_MODULE}" )
 
 IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH )
   INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
@@ -82,10 +82,7 @@ LIST(APPEND ${SPELGUI_MODULE}_SRC xmlmessagehandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC projectattr.cpp)
 #Documents
 LIST(APPEND ${SPELGUI_MODULE}_SRC projectdocument.cpp)
-#Exceptions
-LIST(APPEND ${SPELGUI_MODULE}_SRC exceptions.h)
 #Model handlers
-LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/modelhandler.h)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodyjointhandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodyparthandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodyjointheaderhandler.cpp)
@@ -97,10 +94,44 @@ LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodypartsheaderhandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodyjointshandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodypartshandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/frameshandler.cpp)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/modelhandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodyjointhandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodyparthandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodyjointheaderhandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodypartheaderhandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/framehandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/projecthandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodyjointsheaderhandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodypartsheaderhandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodyjointshandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodypartshandler.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/frameshandler.h)
 #Transitional classes
-LIST(APPEND ${SPELGUI_MODULE}_SRC frameattrstorage.h)
-LIST(APPEND ${SPELGUI_MODULE}_SRC projectattrstorage.h)
-LIST(APPEND ${SPELGUI_MODULE}_SRC filepathstorage.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR frameattrstorage.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR projectattrstorage.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR filepathstorage.h)
+#Exceptions
+LIST(APPEND ${SPELGUI_MODULE}_HDR exceptions.h)
+#Other
+LIST(APPEND ${SPELGUI_MODULE}_HDR bodyjointitem.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR bodypartitem.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR flowlayout.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR frameboxwidget.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR frametablewidget.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR frameview2d.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR frameview3d.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR limblabelitem.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR mainwindow.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR speldocument.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR project.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR projectattr.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR projectdocument.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR solveboxwidget.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR solverparametersdialog.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR toolboxwidget.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR utility.h)
+LIST(APPEND ${SPELGUI_MODULE}_HDR xmlmessagehandler.h)
+
 
 #Add forms
 QT5_WRAP_UI(UIS_HDRS
@@ -113,7 +144,7 @@ QT5_ADD_RESOURCES( ${SPELGUI_MODULE}_RRC resources.qrc )
 
 
 # Tell CMake to create the executable
-add_executable(${SPELGUI_MODULE} ${${SPELGUI_MODULE}_SRC} ${UIS_HDRS} ${${SPELGUI_MODULE}_RRC} )
+add_executable(${SPELGUI_MODULE} ${${SPELGUI_MODULE}_SRC} ${${SPELGUI_MODULE}_HDR} ${UIS_HDRS} ${${SPELGUI_MODULE}_RRC} )
 
 if (WIN32)
   set (QtMain Qt5::WinMain)

@@ -6,7 +6,7 @@
 #include "bodyJoint.hpp"
 #include "bodyPart.hpp"
 #include "skeleton.hpp"
-#include "poseHelper.hpp"
+#include "spelHelper.hpp"
 
 #include <iostream>
 

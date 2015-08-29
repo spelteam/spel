@@ -340,9 +340,9 @@ namespace SPEL
           Point3f prevRootLoc = prevRootJoint->getSpaceLocation();
           Point3f futureRootLoc = futureRootJoint->getSpaceLocation();
 
-          float X = PoseHelper::interpolateFloat(prevRootLoc.x, futureRootLoc.x, i, slice.size() - 1);
-          float Y = PoseHelper::interpolateFloat(prevRootLoc.y, futureRootLoc.y, i, slice.size() - 1);
-          float Z = PoseHelper::interpolateFloat(prevRootLoc.z, futureRootLoc.z, i, slice.size() - 1);
+          float X = spelHelper::interpolateFloat(prevRootLoc.x, futureRootLoc.x, i, slice.size() - 1);
+          float Y = spelHelper::interpolateFloat(prevRootLoc.y, futureRootLoc.y, i, slice.size() - 1);
+          float Z = spelHelper::interpolateFloat(prevRootLoc.z, futureRootLoc.z, i, slice.size() - 1);
 
           BodyJoint* currentRootJoint = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint()); //this should be the future root joint
           currentRootJoint->setSpaceLocation(Point3f(X, Y, Z));
@@ -406,7 +406,7 @@ namespace SPEL
         for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
         {
           float len3d = tree->getRelativeLength();
-          float len2d = sqrt(PoseHelper::distSquared(skel.getBodyJoint(tree->getParentJoint())->getImageLocation(), skel.getBodyJoint(tree->getChildJoint())->getImageLocation()));
+          float len2d = sqrt(spelHelper::distSquared(skel.getBodyJoint(tree->getParentJoint())->getImageLocation(), skel.getBodyJoint(tree->getChildJoint())->getImageLocation()));
           scales.push_back(len2d / len3d); //compute the difference, this must be the depth
         }
       }

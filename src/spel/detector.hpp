@@ -14,7 +14,7 @@
 
 #include "frame.hpp"
 #include "limbLabel.hpp"
-#include "poseHelper.hpp"
+#include "spelHelper.hpp"
 #include "sequence.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"

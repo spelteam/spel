@@ -247,7 +247,7 @@ namespace SPEL
           throw logic_error(ss.str());
         }
         Point2f direction = j1 - j0; // used as estimation of the vector's direction
-        float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
+        float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
         iteratorBodyPart->setRotationSearchRange(rotationAngle);
         POSERECT <Point2f> poserect = getBodyPartRect(*iteratorBodyPart, j0, j1);
         polygons.insert(pair <int32_t, POSERECT <Point2f>>(iteratorBodyPart->getPartID(), poserect));

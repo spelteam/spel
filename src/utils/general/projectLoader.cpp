@@ -1,7 +1,7 @@
 #include "projectLoader.hpp"
 #include "imagesimilaritymatrix.hpp"
 #include "lockframe.hpp"
-#include "poseHelper.hpp"
+#include "spelHelper.hpp"
 
 ProjectLoader::ProjectLoader(string _curFolder)
 {
@@ -277,7 +277,7 @@ bool ProjectLoader::Load(string fileName)
     ResizeImage(mask, firstFrameCols, firstFrameRows);
     f->setMask(mask);
     f->setGroundPoint(gp);
-    PoseHelper::copyTree(trBodyJointsCopy, trBodyJoints);
+    spelHelper::copyTree(trBodyJointsCopy, trBodyJoints);
     if (isKeyFrame)
     {
       bodyJoints = frames->FirstChildElement(bodyJointsNode.c_str());
@@ -321,7 +321,7 @@ bool ProjectLoader::Load(string fileName)
         bodyJoints = bodyJoints->NextSiblingElement();
       }
     }
-    PoseHelper::copyTree(trBodyPartsCopy, trBodyParts);
+    spelHelper::copyTree(trBodyPartsCopy, trBodyParts);
     if (isKeyFrame)
     {
       bodyParts = frames->FirstChildElement(bodyPartsNode.c_str());
@@ -414,7 +414,7 @@ bool ProjectLoader::Save(map <uint32_t, vector <LimbLabel>> labels, string outFo
         }
         else
         {
-          outFile << sqrt(PoseHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2])) << " ";
+          outFile << sqrt(spelHelper::distSquared(ls->getPolygon()[0], ls->getPolygon()[2])) << " ";
         }
         outFile << ls->getAvgScore() << " ";
         outFile << "0" << " ";
@@ -682,7 +682,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     float angleRadius = partIter->getRotationSearchRange();
 
     circle(image, 0.5*p0 + 0.5*p1, (int)pixelRadius, Scalar(0, 0, 0, 100), lineWidth, CV_AA);
-    double startAngleUpright = PoseHelper::angle2D(1.0, 0.0, (p1 - p0).x, (p1 - p0).y)*180.0 / M_PI;
+    double startAngleUpright = spelHelper::angle2D(1.0, 0.0, (p1 - p0).x, (p1 - p0).y)*180.0 / M_PI;
 
     ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - angleRadius, startAngleUpright + angleRadius, Scalar(0, 255, 0), lineWidth, CV_AA);
     ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - 2, startAngleUpright + 2, Scalar(0, 0, 255), lineWidth*0.5, CV_AA); //draw a 1 degree tick mark
@@ -770,7 +770,7 @@ bool ProjectLoader::drawSkeleton(Frame *frame, string outFolder, Scalar color, i
     //float angleRadius = partIter->getRotationSearchRange();
 
     //circle(image, 0.5*p0 + 0.5*p1, (int)pixelRadius, Scalar(0, 0, 0, 100), lineWidth, CV_AA);
-    //double startAngleUpright = PoseHelper::angle2D(1.0, 0.0, (p1 - p0).x, (p1 - p0).y)*180.0 / M_PI;
+    //double startAngleUpright = spelHelper::angle2D(1.0, 0.0, (p1 - p0).x, (p1 - p0).y)*180.0 / M_PI;
 
     //ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - angleRadius, startAngleUpright + angleRadius, Scalar(0, 255, 0), lineWidth, CV_AA);
     //ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - 2, startAngleUpright + 2, Scalar(0, 0, 255), lineWidth*0.5, CV_AA); //draw a 1 degree tick mark
@@ -832,7 +832,7 @@ bool ProjectLoader::Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame
       break; // a joint has no marking on the frame
 
     j1 = joint->getImageLocation(); // coordinates of current joint
-    float boneLength = (j0 == j1) ? 1.0f : (float)sqrt(PoseHelper::distSquared(j0, j1)); // distance between nodes
+    float boneLength = (j0 == j1) ? 1.0f : (float)sqrt(spelHelper::distSquared(j0, j1)); // distance between nodes
     //TODO (Vitaliy Koshura): Check this!
     float boneWidth;
     try
@@ -856,22 +856,22 @@ bool ProjectLoader::Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame
       throw logic_error(ss.str());
     }
     Point2f direction = j1 - j0; // used as estimation of the vector's direction
-    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle
+    float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle
     bpi->setRotationSearchRange(rotationAngle);
 
     Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
 
-    float angle = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    float angle = float(spelHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     Point2f c1, c2, c3, c4, polyCenter;
     c1 = Point2f(0.f, 0.5f * boneWidth);
     c2 = Point2f(boneLength, 0.5f * boneWidth);
     c3 = Point2f(boneLength, -0.5f * boneWidth);
     c4 = Point2f(0.f, -0.5f * boneWidth);
     polyCenter = Point2f(boneLength * 0.5f, 0.f);
-    c1 = PoseHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
-    c2 = PoseHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
-    c3 = PoseHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
-    c4 = PoseHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
+    c1 = spelHelper::rotatePoint2D(c1, polyCenter, angle) + boxCenter - polyCenter;
+    c2 = spelHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
+    c3 = spelHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
+    c4 = spelHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
     POSERECT <Point2f> rect = POSERECT <Point2f>(c1, c2, c3, c4);
 
     line(temp, rect.point1, rect.point2, Scalar(255, 0, 0), lineWidth, CV_AA);

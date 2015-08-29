@@ -3,7 +3,7 @@
 
 namespace posegui {
 
-class PoseguiDocument
+class spelDocument
 {
 public:
     virtual void create() = 0;

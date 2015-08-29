@@ -69,9 +69,9 @@ namespace SPEL
         Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
         Point3f point3 = childJoint->getSpaceLocation();
 
-        float length12 = PoseHelper::distSquared3d(point1, point2);
-        float length23 = PoseHelper::distSquared3d(point2, point3);
-        float length13 = PoseHelper::distSquared3d(point1, point3);
+        float length12 = spelHelper::distSquared3d(point1, point2);
+        float length23 = spelHelper::distSquared3d(point2, point3);
+        float length13 = spelHelper::distSquared3d(point1, point3);
 
         EXPECT_NEAR(length13, length12 + length23, 0.999);
       }
@@ -105,9 +105,9 @@ namespace SPEL
         Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
         Point3f point3 = childJoint->getSpaceLocation();
 
-        float length12 = PoseHelper::distSquared3d(point1, point2);
-        float length23 = PoseHelper::distSquared3d(point2, point3);
-        float length13 = PoseHelper::distSquared3d(point1, point3);
+        float length12 = spelHelper::distSquared3d(point1, point2);
+        float length23 = spelHelper::distSquared3d(point2, point3);
+        float length13 = spelHelper::distSquared3d(point1, point3);
 
         EXPECT_NEAR(length13, length12 + length23, 0.999);
       }
@@ -157,9 +157,9 @@ namespace SPEL
         Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
         Point3f point3 = childJoint->getSpaceLocation();
 
-        float length12 = PoseHelper::distSquared3d(point1, point2);
-        float length23 = PoseHelper::distSquared3d(point2, point3);
-        float length13 = PoseHelper::distSquared3d(point1, point3);
+        float length12 = spelHelper::distSquared3d(point1, point2);
+        float length23 = spelHelper::distSquared3d(point2, point3);
+        float length13 = spelHelper::distSquared3d(point1, point3);
 
         EXPECT_NEAR(length13, length12 + length23, 0.999);
       }
@@ -208,9 +208,9 @@ namespace SPEL
         Point3f point2 = Point3f(childJoint->getSpaceLocation().x, childJoint->getSpaceLocation().y, 0.0);
         Point3f point3 = childJoint->getSpaceLocation();
 
-        float length12 = PoseHelper::distSquared3d(point1, point2);
-        float length23 = PoseHelper::distSquared3d(point2, point3);
-        float length13 = PoseHelper::distSquared3d(point1, point3);
+        float length12 = spelHelper::distSquared3d(point1, point2);
+        float length23 = spelHelper::distSquared3d(point2, point3);
+        float length13 = spelHelper::distSquared3d(point1, point3);
 
         EXPECT_NEAR(length13, length12 + length23, 0.999);
       }

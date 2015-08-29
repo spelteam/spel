@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
-#include <poseHelper.hpp>
+#include <spelHelper.hpp>
 
-TEST(poseHelperTest, distsquaredTest)
+using namespace SPEL;
+
+TEST(spelHelperTest, distsquaredTest)
 {
   Point2f p1 = Point2f(0.0, 0.0);
   Point2f p2 = Point2f(1.0, 1.0);
@@ -12,9 +14,9 @@ TEST(poseHelperTest, distsquaredTest)
   double controlDist10 = 1.0;
   double controlDist01 = 1.0;
 
-  double dist11 = PoseHelper::distSquared(p1, p2);
-  double dist10 = PoseHelper::distSquared(p1, p3);
-  double dist01 = PoseHelper::distSquared(p1, p4);
+  double dist11 = spelHelper::distSquared(p1, p2);
+  double dist10 = spelHelper::distSquared(p1, p3);
+  double dist01 = spelHelper::distSquared(p1, p4);
 
   EXPECT_DOUBLE_EQ(controlDist11, dist11);
   EXPECT_DOUBLE_EQ(controlDist10, dist10);

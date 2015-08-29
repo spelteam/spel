@@ -156,7 +156,7 @@ namespace SPEL
     for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
     {
       float len3d = tree->getRelativeLength();
-      float len2d = sqrt(PoseHelper::distSquared(getBodyJoint(tree->getParentJoint())->getImageLocation(), getBodyJoint(tree->getChildJoint())->getImageLocation()));
+      float len2d = sqrt(spelHelper::distSquared(getBodyJoint(tree->getParentJoint())->getImageLocation(), getBodyJoint(tree->getChildJoint())->getImageLocation()));
       float diff = pow(len3d, 2) - pow(len2d / scale, 2); //compute the difference, this must be the depth
       if (diff < 0)
         dz[tree->getPartID()] = 0;

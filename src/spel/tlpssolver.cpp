@@ -296,8 +296,8 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
                 float searchRange = sqrt(partShift.x*partShift.x + partShift.y*partShift.y)*partShiftCoeff;
 
                 //bow compute the rotation angle change
-                float partAngle = float(PoseHelper::angle2D(1.0, 0, c1.x - c0.x, c1.y - c0.y) * (180.0 / M_PI));
-                float prevAngle = float(PoseHelper::angle2D(1.0, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+                float partAngle = float(spelHelper::angle2D(1.0, 0, c1.x - c0.x, c1.y - c0.y) * (180.0 / M_PI));
+                float prevAngle = float(spelHelper::angle2D(1.0, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
 
                 //set search radius based on part rotation between previous frame and this frame
                 float rotationRange = (partAngle - prevAngle)*partRotationCoeff;

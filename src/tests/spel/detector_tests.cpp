@@ -45,10 +45,10 @@ namespace SPEL
   {
     POSERECT<Point2f> RotatedRect;
     Point2f center = rect.GetCenter<Point2f>();
-    RotatedRect.point1 = PoseHelper::rotatePoint2D(rect.point1, center, angle);
-    RotatedRect.point2 = PoseHelper::rotatePoint2D(rect.point2, center, angle);
-    RotatedRect.point3 = PoseHelper::rotatePoint2D(rect.point3, center, angle);
-    RotatedRect.point4 = PoseHelper::rotatePoint2D(rect.point4, center, angle);
+    RotatedRect.point1 = spelHelper::rotatePoint2D(rect.point1, center, angle);
+    RotatedRect.point2 = spelHelper::rotatePoint2D(rect.point2, center, angle);
+    RotatedRect.point3 = spelHelper::rotatePoint2D(rect.point3, center, angle);
+    RotatedRect.point4 = spelHelper::rotatePoint2D(rect.point4, center, angle);
     return RotatedRect;
   }
 
@@ -100,7 +100,7 @@ namespace SPEL
       for (int j = (int)ymin; j <= (int)ymax; j++)
       {
         E = Point2i(i, j);
-        E = PoseHelper::rotatePoint2D(E, center, angle);
+        E = spelHelper::rotatePoint2D(E, center, angle);
         if ((0 < E.x) && (E.x < size.width) && (0 < E.y) && (E.y < size.height))
           img2.at<Vec3b>((int32_t)(E.y), (int32_t)(E.x)) = Img.at<Vec3b>(j, i);
       }

@@ -44,8 +44,8 @@ vector<vector<float> > computeLabelErrorStatToGT(map<uint32_t, vector<LimbLabel>
             Point2f p0,p1;
             label->getEndpoints(p0,p1);
 
-            float d0 = PoseHelper::distSquared(p0,t0); //dist between parent joints
-            float d1 = PoseHelper::distSquared(p1,t1); //dist between child joints
+            float d0 = spelHelper::distSquared(p0,t0); //dist between parent joints
+            float d1 = spelHelper::distSquared(p1,t1); //dist between child joints
 
             partErrors.push_back(sqrt(0.5*d0+0.5*d1)); //average error for the two joints
         }

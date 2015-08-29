@@ -1,9 +1,9 @@
-#include "poseHelper.hpp"
+#include "spelHelper.hpp"
 
 namespace SPEL
 {
 
-  double PoseHelper::angle2D(double x1, double y1, double x2, double y2)
+  double spelHelper::angle2D(double x1, double y1, double x2, double y2)
   {
     //input has a zero vector
     if ((x1 == 0.0 && y1 == 0.0) || (x2 == 0.0 && y2 == 0.0)){
@@ -26,7 +26,7 @@ namespace SPEL
     return(dtheta);
   }
 
-  double PoseHelper::interpolateFloat(double prevAngle, double nextAngle, int step, int numSteps)
+  double spelHelper::interpolateFloat(double prevAngle, double nextAngle, int step, int numSteps)
   {
     double t;
     if (numSteps != 0)
@@ -36,7 +36,7 @@ namespace SPEL
     return prevAngle*(1 - t) + nextAngle*t;
   }
 
-  void PoseHelper::RecalculateScoreIsWeak(vector <LimbLabel> &labels, string detectorName, float standardDiviationTreshold)
+  void spelHelper::RecalculateScoreIsWeak(vector <LimbLabel> &labels, string detectorName, float standardDiviationTreshold)
   {
 
       //@TODO: Ignore this function for now, will be modified before release

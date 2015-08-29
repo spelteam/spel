@@ -57,7 +57,7 @@ namespace SPEL
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
     Point2f direction = j1 - j0;
-    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
+    float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
     PartModel partModel;
     partModel.partModelRect = rect;
     Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
@@ -238,7 +238,7 @@ namespace SPEL
       }
       j1 = joint->getImageLocation();
       Point2f direction = j1 - j0; // used as estimation of the vector's direction
-      float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
+      float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
       part->setRotationSearchRange(rotationAngle);
       try
       {

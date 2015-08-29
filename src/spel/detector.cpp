@@ -13,7 +13,7 @@ namespace SPEL
 
   float Detector::getBoneLength(Point2f begin, Point2f end)
   {
-    return (begin == end) ? 1.0f : (float)sqrt(PoseHelper::distSquared(begin, end));
+    return (begin == end) ? 1.0f : (float)sqrt(spelHelper::distSquared(begin, end));
   }
 
   float Detector::getBoneWidth(float length, BodyPart bodyPart)
@@ -58,17 +58,17 @@ namespace SPEL
         boxWidth = boxWidth + blockSize.width - ((int)boxWidth % blockSize.height) - 1;
       }
     }
-    auto angle = static_cast <float> (PoseHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    auto angle = static_cast <float> (spelHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     Point2f c1, c2, c3, c4, polyCenter;
     c1 = Point2f(0.f, 0.5f * boxWidth);
     c2 = Point2f(boneLength, 0.5f * boxWidth);
     c3 = Point2f(boneLength, -0.5f * boxWidth);
     c4 = Point2f(0.f, -0.5f * boxWidth);
 
-    c1 = PoseHelper::rotatePoint2D(c1, Point2f(0, 0), angle);
-    c2 = PoseHelper::rotatePoint2D(c2, Point2f(0, 0), angle);
-    c3 = PoseHelper::rotatePoint2D(c3, Point2f(0, 0), angle);
-    c4 = PoseHelper::rotatePoint2D(c4, Point2f(0, 0), angle);
+    c1 = spelHelper::rotatePoint2D(c1, Point2f(0, 0), angle);
+    c2 = spelHelper::rotatePoint2D(c2, Point2f(0, 0), angle);
+    c3 = spelHelper::rotatePoint2D(c3, Point2f(0, 0), angle);
+    c4 = spelHelper::rotatePoint2D(c4, Point2f(0, 0), angle);
 
     polyCenter = 0.25*c1 + 0.25*c2 + 0.25*c3 + 0.25*c4;
 
@@ -94,7 +94,7 @@ namespace SPEL
         auto p = Point2f((float)x, (float)y);
         try
         {
-          p = PoseHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
+          p = spelHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
           if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
             if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
             {
@@ -314,7 +314,7 @@ namespace SPEL
   LimbLabel Detector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, string detectorName, float _usedet)
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
-    auto rot = float(PoseHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    auto rot = float(spelHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     auto rect = getBodyPartRect(bodyPart, j0, j1);
 
     auto score = compare();
@@ -454,7 +454,7 @@ namespace SPEL
       auto boneLength = getBoneLength(j0, j1); // distance between nodes
       auto boxWidth = getBoneWidth(boneLength, iteratorBodyPart); // current body part polygon width
       auto direction = j1 - j0; // direction of bodypart vector
-      auto theta = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
+      auto theta = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
       auto minDist = boxWidth * params.at(sSearchStepCoeff); // linear step of searching
       if (minDist < 2) minDist = 2; // the minimal linear step
       auto searchDistance = iteratorBodyPart.getSearchRadius();
@@ -524,7 +524,7 @@ namespace SPEL
       if (sortedLabels.size() > 0) // if labels vector is not empty
         labels = filterLimbLabels(sortedLabels, uniqueLocationCandidates, uniqueAngleCandidates);
 
-      PoseHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
+      spelHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
         tempLabelVector.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
       sortedLabelsMap.insert(pair <uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), sortedLabels));
@@ -551,7 +551,7 @@ namespace SPEL
     auto p0 = Point2f(0, 0); // the point of unit vector
     auto p1 = Point2f(1.0, 0); // the point of unit vector
     p1 *= boneLength; // change the vector length 
-    p1 = PoseHelper::rotatePoint2D(p1, p0, rotationAngle); // rotate the vector
+    p1 = spelHelper::rotatePoint2D(p1, p0, rotationAngle); // rotate the vector
     auto mid = 0.5 * p1; // center of the vector
     p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
     p0 = Point2f(x, y) - mid; // shift the vector to current point

@@ -47,8 +47,8 @@ Mat computeErrorToGT(vector<Solvlet> solves, vector<Frame*> keyframes) //return 
             Point2f t1(kSkel.getBodyJoint(partIter->getChildJoint())->getImageLocation());
 
             //dist(p0gt, p0sim)*0.5+dist(p1gt, p1sim)*0.5;
-            float d0 = PoseHelper::distSquared(p0,t0); //dist between parent joints
-            float d1 = PoseHelper::distSquared(p1,t1); //dist between child joints
+            float d0 = spelHelper::distSquared(p0,t0); //dist between parent joints
+            float d1 = spelHelper::distSquared(p1,t1); //dist between child joints
 
             float error = 0.5*d0+0.5*d1; //average error for the two joints
             errorMatrix.at<float>(i, partIter->getPartID()) = error;
@@ -379,21 +379,21 @@ vector<Solvlet> solvletsFromSkeleton(vector<Frame*> vFrames)
             }
 
             auto ratio = part->getLWRatio();
-            auto boneLength = sqrt(PoseHelper::distSquared(j0, j1)); // distance between nodes
+            auto boneLength = sqrt(spelHelper::distSquared(j0, j1)); // distance between nodes
             float boxWidth= boneLength / ratio;
             auto boxCenter=0.5*j0+0.5*j1; //the midpoint
 
-            auto angle = static_cast <float> (PoseHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+            auto angle = static_cast <float> (spelHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
             Point2f c1, c2, c3, c4, polyCenter;
             c1 = Point2f(0.f, 0.5f * boxWidth);
             c2 = Point2f(boneLength, 0.5f * boxWidth);
             c3 = Point2f(boneLength, -0.5f * boxWidth);
             c4 = Point2f(0.f, -0.5f * boxWidth);
 
-            c1 = PoseHelper::rotatePoint2D(c1, Point2f(0, 0), angle);
-            c2 = PoseHelper::rotatePoint2D(c2, Point2f(0, 0), angle);
-            c3 = PoseHelper::rotatePoint2D(c3, Point2f(0, 0), angle);
-            c4 = PoseHelper::rotatePoint2D(c4, Point2f(0, 0), angle);
+            c1 = spelHelper::rotatePoint2D(c1, Point2f(0, 0), angle);
+            c2 = spelHelper::rotatePoint2D(c2, Point2f(0, 0), angle);
+            c3 = spelHelper::rotatePoint2D(c3, Point2f(0, 0), angle);
+            c4 = spelHelper::rotatePoint2D(c4, Point2f(0, 0), angle);
 
             polyCenter = 0.25*c1 + 0.25*c2 + 0.25*c3 + 0.25*c4;
 

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <poseHelper.hpp>
+#include <spelHelper.hpp>
 #include <bodyPart.hpp>
 #include <frame.hpp>
 #include "TestsFunctions.hpp"
@@ -133,14 +133,14 @@ namespace SPEL
     EXPECT_EQ(Point2f(1.0, 1.0), rectSize);
   }
 
-  TEST(PoseHelperTests_, CopyTree)
+  TEST(spelHelperTests_, CopyTree)
   {
     //Loading part tree from existing project
     tree<BodyPart> partTree, copy;
     vector<Frame*> frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
     partTree = frames[0]->getSkeleton().getPartTree();
 
-    PoseHelper::copyTree(copy, partTree);
+    spelHelper::copyTree(copy, partTree);
 
     ASSERT_EQ(partTree.size(), copy.size());
     

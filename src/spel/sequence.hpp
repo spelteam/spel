@@ -9,7 +9,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
-#include "poseHelper.hpp"
+#include "spelHelper.hpp"
 #include "interpolation.hpp"
 #include "frame.hpp"
 

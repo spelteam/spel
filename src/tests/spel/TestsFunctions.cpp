@@ -10,7 +10,7 @@ namespace SPEL
   POSERECT<Point2f> BuildPartRect(BodyJoint *j0, BodyJoint *j1, float LWRatio)
   {
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
-    float boneLength = (float)sqrt(PoseHelper::distSquared(p0, p1)); // distance between nodes
+    float boneLength = (float)sqrt(spelHelper::distSquared(p0, p1)); // distance between nodes
     float boneWidth = boneLength / LWRatio;
     Point2f boxCenter = p0 * 0.5 + p1 * 0.5; // the bobypart center  coordinates
     // Coordinates for drawing of the polygon at the coordinate origin
@@ -20,12 +20,12 @@ namespace SPEL
     Point2f c4 = Point2f(0.f, -0.5f * boneWidth);
     Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f); // polygon center 
     Point2f direction = p1 - p0; // used as estimation of the vector's direction
-    float rotationAngle = float(PoseHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
+    float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
     // Rotate and shift the polygon to the bodypart center
-    c1 = PoseHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c2 = PoseHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c3 = PoseHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    c4 = PoseHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c1 = spelHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c2 = spelHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c3 = spelHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
+    c4 = spelHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
     POSERECT <Point2f> poserect(c1, c2, c3, c4);
     return poserect;
   }

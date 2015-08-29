@@ -11,7 +11,7 @@
 #include <hogDetector.hpp>
 #include "projectLoader.hpp"
 #include "limbLabel.hpp"
-#include "poseHelper.hpp"
+#include "spelHelper.hpp"
 #include "TestsFunctions.hpp"
 
 namespace SPEL
@@ -395,7 +395,7 @@ namespace SPEL
     //Skeleton S = frames[FirstKeyframe]->getSkeleton();
     //BodyPart *P = S.getBodyPart(partID);
     //EXPECT_EQ(P->getRotationSearchRange(), label_actual.getAngle());
-    float expected_angle = (float)(PoseHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * 180 / M_PI);
+    float expected_angle = (float)(spelHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * 180 / M_PI);
     EXPECT_EQ(expected_angle, label_actual.getAngle());
 
     //Output debug inf

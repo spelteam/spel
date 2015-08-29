@@ -24,7 +24,7 @@ namespace SPEL
   using namespace cv;
 
   /// class with common functions
-  class PoseHelper
+  class spelHelper
   {
   public:
 
@@ -175,7 +175,7 @@ namespace SPEL
     {
       D center1 = 0.5 * point1 + 0.5 * point3;
       D center2 = 0.5 * point2 + 0.5 * point4;
-      float dist = (float)sqrt(PoseHelper::distSquared(center1, center2));
+      float dist = (float)sqrt(spelHelper::distSquared(center1, center2));
       if (dist > 0.001)
       {
         throw logic_error("Rect center couldn't be found");
@@ -219,7 +219,7 @@ namespace SPEL
     template <typename D> 
     D RectSize(void)
     {
-      return (D(sqrt(PoseHelper::distSquared(point2, point3)), sqrt(PoseHelper::distSquared(point1, point2))));
+      return (D(sqrt(spelHelper::distSquared(point2, point3)), sqrt(spelHelper::distSquared(point1, point2))));
     }
 
   };
