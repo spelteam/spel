@@ -1,6 +1,9 @@
 #ifndef _SCORE_HPP_
 #define _SCORE_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <string>
 

@@ -1,6 +1,9 @@
 #ifndef _BODYPART_HPP_
 #define _BODYPART_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <string>
 

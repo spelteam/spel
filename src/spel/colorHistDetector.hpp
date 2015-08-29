@@ -1,6 +1,9 @@
 #ifndef _LIBPOSE_COLORHISTDETECTOR_HPP_
 #define _LIBPOSE_COLORHISTDETECTOR_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 #ifdef DEBUG
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG

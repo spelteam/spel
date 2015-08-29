@@ -1,6 +1,9 @@
 #ifndef _LIBPOSE_FRAME_HPP_
 #define _LIBPOSE_FRAME_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <vector>
 

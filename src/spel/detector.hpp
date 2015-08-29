@@ -1,6 +1,9 @@
 #ifndef _LIBPOSE_DETECTOR_HPP_
 #define _LIBPOSE_DETECTOR_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES

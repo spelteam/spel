@@ -1,6 +1,9 @@
 #ifndef _SEQUENCE_HPP_
 #define _SEQUENCE_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <string>
 #include <math.h>

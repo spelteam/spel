@@ -1,6 +1,9 @@
 #ifndef _LIBPOSE_SURFDETECTOR_HPP_
 #define _LIBPOSE_SURFDETECTOR_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // OpenCV
 #include <opencv2/opencv.hpp>
 #include <opencv2/opencv_modules.hpp>

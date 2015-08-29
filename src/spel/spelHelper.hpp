@@ -1,6 +1,9 @@
 #ifndef _POSEHELPER_HPP_
 #define _POSEHELPER_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES

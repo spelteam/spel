@@ -1,6 +1,9 @@
 #ifndef _BODYJOINT_HPP_
 #define _BODYJOINT_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <string>
 

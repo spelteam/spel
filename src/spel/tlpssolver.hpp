@@ -1,6 +1,9 @@
 #ifndef _TLPSSOLVER_HPP_
 #define _TLPSSOLVER_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <vector>
 #include <opencv2/opencv.hpp>

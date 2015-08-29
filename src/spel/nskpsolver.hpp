@@ -1,6 +1,9 @@
 #ifndef _NSKPSOLVER_HPP_
 #define _NSKPSOLVER_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 #ifdef DEBUG
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG

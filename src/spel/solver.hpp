@@ -1,6 +1,9 @@
 #ifndef _SOLVER_HPP_
 #define _SOLVER_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <string>
 #include <vector>

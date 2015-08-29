@@ -1,6 +1,9 @@
 #ifndef _LIBPOSE_SKELETON_HPP_
 #define _LIBPOSE_SKELETON_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <string>
 

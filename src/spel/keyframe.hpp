@@ -1,6 +1,9 @@
 #ifndef _KEYFRAME_HPP_
 #define _KEYFRAME_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include "frame.hpp"
 
 namespace SPEL

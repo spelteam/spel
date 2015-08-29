@@ -1,6 +1,9 @@
 #ifndef _MINSPANNINGTREE_HPP_
 #define _MINSPANNINGTREE_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <vector>
 

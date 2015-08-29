@@ -1,6 +1,9 @@
 #ifndef _IMAGESIMILARITYMATRIX_HPP_
 #define _IMAGESIMILARITYMATRIX_HPP_
 
+// SPEL definitions
+#include "predef.hpp"
+
 // STL
 #include <vector>
 #include <string>
