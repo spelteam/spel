@@ -75,4 +75,22 @@ namespace SPEL
     EXPECT_DOUBLE_EQ(1.0, spelHelper::distSquared3d(A, B));
     EXPECT_FLOAT_EQ(1.0, (float)spelHelper::distSquared3d(Point3f(0.0, 0.0, 0.0), C));
   }
+
+  TEST_F(spelHelperTest, angleTest)
+  {
+    double controlAngle45 = 45;
+    double controlAngle0 = 0;
+    double controlAngle90 = 90;
+    double controlAngle180 = 180;
+
+    double angle45 = spelHelper::angle2D(p[1].x, p[1].y, p[3].x, p[3].y) * (180.0 / M_PI);
+    double angle0 = spelHelper::angle2D(p[3].x, p[3].y, p[3].x, p[3].y) * (180.0 / M_PI);
+    double angle90 = spelHelper::angle2D(p[2].x, p[2].y, p[3].x, p[3].y) * (180.0 / M_PI);
+    double angle180 = spelHelper::angle2D(p[2].x, p[2].y, p[4].x, p[4].y) * (180.0 / M_PI);
+
+    EXPECT_DOUBLE_EQ(controlAngle45, angle45);
+    EXPECT_DOUBLE_EQ(controlAngle0, angle0);
+    EXPECT_DOUBLE_EQ(controlAngle90, angle90);
+    EXPECT_DOUBLE_EQ(controlAngle180, angle180);
+  }
 }
