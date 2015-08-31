@@ -133,12 +133,10 @@ Section "Uninstall"
 DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${ProgramName}"
 DeleteRegKey HKLM "SOFTWARE\${CompanyName}\${ProgramName}"
 
-Delete "$INSTDIR\*"
-
 Delete "$SMPROGRAMS\${CompanyName}\${ProgramName}\*"
 Delete "$DESKTOP\${ProgramName}.lnk"
 
 RMDir "$SMPROGRAMS\${CompanyName}\${ProgramName}"
-RMDir "$INSTDIR"
+RMDir /r /REBOOTOK "$INSTDIR"
 
 SectionEnd
