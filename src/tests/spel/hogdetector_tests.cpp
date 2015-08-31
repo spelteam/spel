@@ -98,7 +98,7 @@ namespace SPEL
   TEST(HOGDetectorTests, computeDescriptor)
   {
     //Load the input data
-    HFrames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
     int KeyframesCount = 0;

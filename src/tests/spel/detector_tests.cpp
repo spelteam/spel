@@ -259,45 +259,45 @@ namespace SPEL
     Mat img1, img2, img3, img4, Q1, Q2, Q3, Q4;
     if (IsDebuggerPresent())
     {
-      img1 = imread("Debug/posetests_TestData/ImageRotationTestData/image1.jpg");
-      img2 = imread("Debug/posetests_TestData/ImageRotationTestData/image2.jpg");
-      img3 = imread("Debug/posetests_TestData/ImageRotationTestData/image3.jpg");
-      img4 = imread("Debug/posetests_TestData/ImageRotationTestData/image4.jpg");
-      Q1 = imread("Debug/posetests_TestData/ImageRotationTestData/Q1.jpg");
-      Q2 = imread("Debug/posetests_TestData/ImageRotationTestData/Q2.jpg");
-      Q3 = imread("Debug/posetests_TestData/ImageRotationTestData/Q3.jpg");
-      Q4 = imread("Debug/posetests_TestData/ImageRotationTestData/Q4.jpg");
+      img1 = imread("Debug/speltests_TestData/ImageRotationTestData/image1.jpg");
+      img2 = imread("Debug/speltests_TestData/ImageRotationTestData/image2.jpg");
+      img3 = imread("Debug/speltests_TestData/ImageRotationTestData/image3.jpg");
+      img4 = imread("Debug/speltests_TestData/ImageRotationTestData/image4.jpg");
+      Q1 = imread("Debug/speltests_TestData/ImageRotationTestData/Q1.jpg");
+      Q2 = imread("Debug/speltests_TestData/ImageRotationTestData/Q2.jpg");
+      Q3 = imread("Debug/speltests_TestData/ImageRotationTestData/Q3.jpg");
+      Q4 = imread("Debug/speltests_TestData/ImageRotationTestData/Q4.jpg");
     }
     else
     {
-      img1 = imread("posetests_TestData/ImageRotationTestData/image1.jpg");
-      img2 = imread("posetests_TestData/ImageRotationTestData/image2.jpg");
-      img3 = imread("posetests_TestData/ImageRotationTestData/image3.jpg");
-      img4 = imread("posetests_TestData/ImageRotationTestData/image4.jpg");
-      Q1 = imread("posetests_TestData/ImageRotationTestData/Q1.jpg");
-      Q2 = imread("posetests_TestData/ImageRotationTestData/Q2.jpg");
-      Q3 = imread("posetests_TestData/ImageRotationTestData/Q3.jpg");
-      Q4 = imread("posetests_TestData/ImageRotationTestData/Q4.jpg");
+      img1 = imread("speltests_TestData/ImageRotationTestData/image1.jpg");
+      img2 = imread("speltests_TestData/ImageRotationTestData/image2.jpg");
+      img3 = imread("speltests_TestData/ImageRotationTestData/image3.jpg");
+      img4 = imread("speltests_TestData/ImageRotationTestData/image4.jpg");
+      Q1 = imread("speltests_TestData/ImageRotationTestData/Q1.jpg");
+      Q2 = imread("speltests_TestData/ImageRotationTestData/Q2.jpg");
+      Q3 = imread("speltests_TestData/ImageRotationTestData/Q3.jpg");
+      Q4 = imread("speltests_TestData/ImageRotationTestData/Q4.jpg");
     }
 #else
-    Mat img1 = imread("Release/posetests_TestData/ImageRotationTestData/image1.jpg");
-    Mat img2 = imread("Release/posetests_TestData/ImageRotationTestData/image2.jpg");
-    Mat img3 = imread("Release/posetests_TestData/ImageRotationTestData/image3.jpg");
-    Mat img4 = imread("Release/posetests_TestData/ImageRotationTestData/image4.jpg");
-    Mat Q1 = imread("Release/posetests_TestData/ImageRotationTestData/Q1.jpg");
-    Mat Q2 = imread("Release/posetests_TestData/ImageRotationTestData/Q2.jpg");
-    Mat Q3 = imread("Release/posetests_TestData/ImageRotationTestData/Q3.jpg");
-    Mat Q4 = imread("Release/posetests_TestData/ImageRotationTestData/Q4.jpg");
+    Mat img1 = imread("Release/speltests_TestData/ImageRotationTestData/image1.jpg");
+    Mat img2 = imread("Release/speltests_TestData/ImageRotationTestData/image2.jpg");
+    Mat img3 = imread("Release/speltests_TestData/ImageRotationTestData/image3.jpg");
+    Mat img4 = imread("Release/speltests_TestData/ImageRotationTestData/image4.jpg");
+    Mat Q1 = imread("Release/speltests_TestData/ImageRotationTestData/Q1.jpg");
+    Mat Q2 = imread("Release/speltests_TestData/ImageRotationTestData/Q2.jpg");
+    Mat Q3 = imread("Release/speltests_TestData/ImageRotationTestData/Q3.jpg");
+    Mat Q4 = imread("Release/speltests_TestData/ImageRotationTestData/Q4.jpg");
 #endif  // DEBUG
 #else
-    Mat img1 = imread("posetests_TestData/ImageRotationTestData/image1.jpg");
-    Mat img2 = imread("posetests_TestData/ImageRotationTestData/image2.jpg");
-    Mat img3 = imread("posetests_TestData/ImageRotationTestData/image3.jpg");
-    Mat img4 = imread("posetests_TestData/ImageRotationTestData/image4.jpg");
-    Mat Q1 = imread("posetests_TestData/ImageRotationTestData/Q1.jpg");
-    Mat Q2 = imread("posetests_TestData/ImageRotationTestData/Q2.jpg");
-    Mat Q3 = imread("posetests_TestData/ImageRotationTestData/Q3.jpg");
-    Mat Q4 = imread("posetests_TestData/ImageRotationTestData/Q4.jpg");
+    Mat img1 = imread("speltests_TestData/ImageRotationTestData/image1.jpg");
+    Mat img2 = imread("speltests_TestData/ImageRotationTestData/image2.jpg");
+    Mat img3 = imread("speltests_TestData/ImageRotationTestData/image3.jpg");
+    Mat img4 = imread("speltests_TestData/ImageRotationTestData/image4.jpg");
+    Mat Q1 = imread("speltests_TestData/ImageRotationTestData/Q1.jpg");
+    Mat Q2 = imread("speltests_TestData/ImageRotationTestData/Q2.jpg");
+    Mat Q3 = imread("speltests_TestData/ImageRotationTestData/Q3.jpg");
+    Mat Q4 = imread("speltests_TestData/ImageRotationTestData/Q4.jpg");
 #endif  // WINDOWS
     imwrite("Q01.jpg", Q1);
     imwrite("Q02.jpg", Q2);

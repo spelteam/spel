@@ -23,7 +23,7 @@ namespace SPEL
   protected:
     virtual void SetUp()
     {
-      FilePath = "posetests_TestData/SimilarityMatrixTestsData/";
+      FilePath = "speltests_TestData/SimilarityMatrixTestsData/";
 #if defined(WINDOWS) && defined(_MSC_VER)
       if (IsDebuggerPresent())
           FilePath = "Debug/" + FilePath;

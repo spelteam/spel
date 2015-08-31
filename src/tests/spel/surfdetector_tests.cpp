@@ -36,7 +36,7 @@ namespace SPEL
   TEST(surfDetectorTests, computeDescriptors)
   {
     //Load the input data
-    SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
     //Counting a keyframes
     int FirstKeyframe = FirstKeyFrameNum(SFrames);
@@ -139,7 +139,7 @@ namespace SPEL
   TEST(surfDetectorTests, train)
   {
     //Load the input data
-    //vector<Frame*> SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    //vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
     //Counting a keyframes
     int FirstKeyframe = FirstKeyFrameNum(SFrames);
@@ -239,7 +239,7 @@ namespace SPEL
   TEST(surfDetectorTests, compare)
   {
     //Load the input data
-    //vector<Frame*> SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    //vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
     //Copy image and skeleton from first keyframe
     int FirstKeyframe = 0;
@@ -340,7 +340,7 @@ namespace SPEL
   TEST(surfDetectorTests, generateLabel)
   {
      //Load the input data
-     //vector<Frame*> SFrames = LoadTestProject("posetests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+     //vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
      //Copy image and skeleton from first keyframe
      int FirstKeyframe = 0;

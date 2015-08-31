@@ -137,7 +137,7 @@ namespace SPEL
   {
     //Loading part tree from existing project
     tree<BodyPart> partTree, copy;
-    vector<Frame*> frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
     partTree = frames[0]->getSkeleton().getPartTree();
 
     spelHelper::copyTree(copy, partTree);

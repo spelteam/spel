@@ -18,17 +18,17 @@ namespace SPEL
   TEST(colorHistDetectorTest, Train)
   {
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("posetests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Setting parameters 
     auto seq = new Sequence();
     map <string, float> params = SetParams(frames, &seq);
-
+	
     for (auto f : frames)
       delete f;
     frames.clear();
     frames = seq->getFrames();
-
+    
     //Counting a keyframes
     int FirstKeyframe = FirstKeyFrameNum(frames);
     int KeyframesCount = keyFramesCount(frames);

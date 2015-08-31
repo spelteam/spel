@@ -174,11 +174,11 @@ namespace SPEL
   TEST(FramesTests, shiftSkeleton2D)
   {
     String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
+    FilePath = "speltests_TestData/CHDTrainTestData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+      FilePath = "Debug/speltests_TestData/CHDTrainTestData/";
 #endif
 
     //Load the input data
@@ -208,11 +208,11 @@ namespace SPEL
   TEST(FramesTests, Resize)
   {
     String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
+    FilePath = "speltests_TestData/CHDTrainTestData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+      FilePath = "Debug/speltests_TestData/CHDTrainTestData/";
 #endif
 
     //Load the input data
@@ -270,11 +270,11 @@ namespace SPEL
   TEST(FramesTests, Clone)
   {
     String FilePath;
-    FilePath = "posetests_TestData/CHDTrainTestData/";
+    FilePath = "speltests_TestData/CHDTrainTestData/";
 
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
-      FilePath = "Debug/posetests_TestData/CHDTrainTestData/";
+      FilePath = "Debug/speltests_TestData/CHDTrainTestData/";
 #endif
 
     //Load the input data
