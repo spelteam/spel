@@ -1,4 +1,5 @@
-#include <gtest/gtest.h>
+//This test is duplicate of "spelHelper_angle_dist_tests.cpp" TEST_F(spelHelperTest, DistSquared)
+/*#include <gtest/gtest.h>
 #include <spelHelper.hpp>
 
 using namespace SPEL;
@@ -22,3 +23,4 @@ TEST(spelHelperTest, distsquaredTest)
   EXPECT_DOUBLE_EQ(controlDist10, dist10);
   EXPECT_DOUBLE_EQ(controlDist01, dist01);
 }
+*/
