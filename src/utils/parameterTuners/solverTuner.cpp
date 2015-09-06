@@ -779,8 +779,8 @@ int main (int argc, char **argv)
                     //do an iterative NSKP solve
                     nskpSolve = nSolver.solve(seq, params, ism);
 
-                    for(vector<Solvlet>::iterator s=nskpSolve.begin(); s!=nskpSolve.end(); ++s)
-                        finalSolve.push_back(*s);
+                    for(auto s: nskpSolve)
+                        finalSolve.push_back(s);
 
                 }
                 else if(params.at("withTLPS")) //otherwise, only call TLPS
@@ -791,8 +791,8 @@ int main (int argc, char **argv)
 
                     tlpsSolve = tSolver.solve(seq, params);
 
-                    for(vector<Solvlet>::iterator s=tlpsSolve.begin(); s!=tlpsSolve.end(); ++s)
-                        finalSolve.push_back(*s);
+                    for(auto s: tlpsSolve)
+                        finalSolve.push_back(s);
                 }
                 numIters++;
 
