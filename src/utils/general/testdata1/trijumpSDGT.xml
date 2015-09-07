@@ -1,0 +1,3693 @@
+<?xml version="1.0"?>
+<Project allowScaling="true" maskFolderPath="./mask/" imgFolderPath="./seq/" exportPath="" name="trijumpSDGT" simMatPath="" camFolderPath="./cam/">
+ <BodyJoints>
+  <BodyJoint name="Lower Back" id="0"/>
+  <BodyJoint name="Neck Bottom" id="1"/>
+  <BodyJoint name="Left Hip" id="2"/>
+  <BodyJoint name="Right Hip" id="3"/>
+  <BodyJoint name="Head Bottom" id="4"/>
+  <BodyJoint name="Left Shoulder" id="5"/>
+  <BodyJoint name="Right Shoulder" id="6"/>
+  <BodyJoint name="Left Knee" id="7"/>
+  <BodyJoint name="Right Knee" id="8"/>
+  <BodyJoint name="Head Top" id="9"/>
+  <BodyJoint name="Left Elbow" id="10"/>
+  <BodyJoint name="Right Elbow" id="11"/>
+  <BodyJoint name="Left Ankle" id="12"/>
+  <BodyJoint name="Right Ankle" id="13"/>
+  <BodyJoint name="Left Wrist" id="14"/>
+  <BodyJoint name="Right Wrist" id="15"/>
+  <BodyJoint name="Left Toes" id="16"/>
+  <BodyJoint name="Right Toes" id="17"/>
+ </BodyJoints>
+ <BodyParts>
+  <BodyPart lwRatio="1.9" relativeLength="0.2953" expectedDistance="0" name="Root" id="0" parentJointId="0" childJointId="1"/>
+  <BodyPart lwRatio="3.2" relativeLength="0.0647" expectedDistance="0" name="Left Hip" id="1" parentJointId="0" childJointId="2"/>
+  <BodyPart lwRatio="3.2" relativeLength="0.0647" expectedDistance="0" name="Right Hip" id="2" parentJointId="0" childJointId="3"/>
+  <BodyPart lwRatio="1.454" relativeLength="0.04663" expectedDistance="0" name="Neck" id="3" parentJointId="1" childJointId="4"/>
+  <BodyPart lwRatio="3.4" relativeLength="0.0881" expectedDistance="0" name="Left Clavicle" id="4" parentJointId="1" childJointId="5"/>
+  <BodyPart lwRatio="3.4" relativeLength="0.0881" expectedDistance="0" name="Right Clavicle" id="5" parentJointId="1" childJointId="6"/>
+  <BodyPart lwRatio="3.059" relativeLength="0.2694" expectedDistance="0" name="Left Femur" id="6" parentJointId="2" childJointId="7"/>
+  <BodyPart lwRatio="3.059" relativeLength="0.2694" expectedDistance="0" name="Right Femur" id="7" parentJointId="3" childJointId="8"/>
+  <BodyPart lwRatio="1.125" relativeLength="0.1088" expectedDistance="0" name="Head" id="8" parentJointId="4" childJointId="9"/>
+  <BodyPart lwRatio="3.0" relativeLength="0.1554" expectedDistance="0" name="Left Humerus" id="9" parentJointId="5" childJointId="10"/>
+  <BodyPart lwRatio="3.0" relativeLength="0.1554" expectedDistance="0" name="Right Humerus" id="10" parentJointId="6" childJointId="11"/>
+  <BodyPart lwRatio="4.727" relativeLength="0.2694" expectedDistance="0" name="Left Tibia" id="11" parentJointId="7" childJointId="12"/>
+  <BodyPart lwRatio="4.727" relativeLength="0.2694" expectedDistance="0" name="Right Tibia" id="12" parentJointId="8" childJointId="13"/>
+  <BodyPart lwRatio="3.75" relativeLength="0.1554" expectedDistance="0" name="Left Radius" id="13" parentJointId="10" childJointId="14"/>
+  <BodyPart lwRatio="3.75" relativeLength="0.1554" expectedDistance="0" name="Right Radius" id="14" parentJointId="11" childJointId="15"/>
+  <BodyPart lwRatio="3.5" relativeLength="0.1139" expectedDistance="0" name="Left Metatarsal" id="15" parentJointId="12" childJointId="16"/>
+  <BodyPart lwRatio="3.5" relativeLength="0.1139" expectedDistance="0" name="Right Metatarsal" id="16" parentJointId="13" childJointId="17"/>
+ </BodyParts>
+ <Frames>
+  <Frame gpX="" camPath="0000.camu" gpY="" imgPath="0000.png" id="0" maskPath="mask0000.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="474" y="130" depthSign="false" id="0"/>
+    <BodyJoint x="479" y="85" depthSign="false" id="1"/>
+    <BodyJoint x="482" y="130" depthSign="false" id="2"/>
+    <BodyJoint x="470" y="128" depthSign="true" id="3"/>
+    <BodyJoint x="479" y="78" depthSign="false" id="4"/>
+    <BodyJoint x="492" y="90" depthSign="false" id="5"/>
+    <BodyJoint x="475" y="78" depthSign="true" id="6"/>
+    <BodyJoint x="505" y="165" depthSign="false" id="7"/>
+    <BodyJoint x="426" y="141" depthSign="true" id="8"/>
+    <BodyJoint x="479" y="63" depthSign="false" id="9"/>
+    <BodyJoint x="468" y="99" depthSign="false" id="10"/>
+    <BodyJoint x="472" y="88" depthSign="true" id="11"/>
+    <BodyJoint x="551" y="169" depthSign="false" id="12"/>
+    <BodyJoint x="431" y="184" depthSign="true" id="13"/>
+    <BodyJoint x="446" y="86" depthSign="false" id="14"/>
+    <BodyJoint x="463" y="83" depthSign="false" id="15"/>
+    <BodyJoint x="553" y="186" depthSign="false" id="16"/>
+    <BodyJoint x="405" y="188" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0001.camu" gpY="" imgPath="0001.png" id="1" maskPath="mask0001.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="475" y="128" depthSign="false" id="0"/>
+    <BodyJoint x="480" y="79" depthSign="false" id="1"/>
+    <BodyJoint x="480" y="128" depthSign="false" id="2"/>
+    <BodyJoint x="470" y="125" depthSign="true" id="3"/>
+    <BodyJoint x="480" y="71" depthSign="false" id="4"/>
+    <BodyJoint x="493" y="82" depthSign="false" id="5"/>
+    <BodyJoint x="475" y="75" depthSign="true" id="6"/>
+    <BodyJoint x="504" y="163" depthSign="false" id="7"/>
+    <BodyJoint x="426" y="141" depthSign="true" id="8"/>
+    <BodyJoint x="480" y="58" depthSign="false" id="9"/>
+    <BodyJoint x="473" y="92" depthSign="false" id="10"/>
+    <BodyJoint x="469" y="63" depthSign="true" id="11"/>
+    <BodyJoint x="549" y="149" depthSign="false" id="12"/>
+    <BodyJoint x="416" y="186" depthSign="true" id="13"/>
+    <BodyJoint x="446" y="86" depthSign="false" id="14"/>
+    <BodyJoint x="454" y="66" depthSign="false" id="15"/>
+    <BodyJoint x="560" y="163" depthSign="false" id="16"/>
+    <BodyJoint x="394" y="185" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0002.camu" gpY="" imgPath="0002.png" id="2" maskPath="mask0002.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="476" y="120" depthSign="false" id="0"/>
+    <BodyJoint x="482" y="75" depthSign="false" id="1"/>
+    <BodyJoint x="481" y="120" depthSign="false" id="2"/>
+    <BodyJoint x="471" y="118" depthSign="true" id="3"/>
+    <BodyJoint x="482" y="67" depthSign="false" id="4"/>
+    <BodyJoint x="495" y="77" depthSign="false" id="5"/>
+    <BodyJoint x="477" y="67" depthSign="true" id="6"/>
+    <BodyJoint x="500" y="156" depthSign="false" id="7"/>
+    <BodyJoint x="430" y="141" depthSign="true" id="8"/>
+    <BodyJoint x="482" y="51" depthSign="false" id="9"/>
+    <BodyJoint x="472" y="87" depthSign="false" id="10"/>
+    <BodyJoint x="468" y="58" depthSign="true" id="11"/>
+    <BodyJoint x="541" y="133" depthSign="false" id="12"/>
+    <BodyJoint x="413" y="184" depthSign="true" id="13"/>
+    <BodyJoint x="440" y="79" depthSign="false" id="14"/>
+    <BodyJoint x="453" y="58" depthSign="false" id="15"/>
+    <BodyJoint x="559" y="143" depthSign="false" id="16"/>
+    <BodyJoint x="389" y="182" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0003.camu" gpY="" imgPath="0003.png" id="3" maskPath="mask0003.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="477" y="118" depthSign="false" id="0"/>
+    <BodyJoint x="480" y="72" depthSign="false" id="1"/>
+    <BodyJoint x="484" y="118" depthSign="false" id="2"/>
+    <BodyJoint x="472" y="115" depthSign="true" id="3"/>
+    <BodyJoint x="479" y="63" depthSign="false" id="4"/>
+    <BodyJoint x="499" y="74" depthSign="false" id="5"/>
+    <BodyJoint x="483" y="63" depthSign="true" id="6"/>
+    <BodyJoint x="493" y="157" depthSign="false" id="7"/>
+    <BodyJoint x="434" y="141" depthSign="true" id="8"/>
+    <BodyJoint x="480" y="50" depthSign="false" id="9"/>
+    <BodyJoint x="473" y="83" depthSign="false" id="10"/>
+    <BodyJoint x="465" y="52" depthSign="true" id="11"/>
+    <BodyJoint x="532" y="122" depthSign="false" id="12"/>
+    <BodyJoint x="413" y="182" depthSign="true" id="13"/>
+    <BodyJoint x="441" y="76" depthSign="false" id="14"/>
+    <BodyJoint x="446" y="51" depthSign="false" id="15"/>
+    <BodyJoint x="552" y="131" depthSign="false" id="16"/>
+    <BodyJoint x="387" y="180" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0004.camu" gpY="" imgPath="0004.png" id="4" maskPath="mask0004.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="478" y="114" depthSign="false" id="0"/>
+    <BodyJoint x="484" y="66" depthSign="false" id="1"/>
+    <BodyJoint x="485" y="113" depthSign="false" id="2"/>
+    <BodyJoint x="472" y="112" depthSign="true" id="3"/>
+    <BodyJoint x="484" y="58" depthSign="false" id="4"/>
+    <BodyJoint x="498" y="71" depthSign="false" id="5"/>
+    <BodyJoint x="479" y="62" depthSign="true" id="6"/>
+    <BodyJoint x="488" y="152" depthSign="false" id="7"/>
+    <BodyJoint x="438" y="143" depthSign="true" id="8"/>
+    <BodyJoint x="483" y="45" depthSign="false" id="9"/>
+    <BodyJoint x="478" y="78" depthSign="false" id="10"/>
+    <BodyJoint x="470" y="47" depthSign="true" id="11"/>
+    <BodyJoint x="523" y="119" depthSign="false" id="12"/>
+    <BodyJoint x="415" y="184" depthSign="true" id="13"/>
+    <BodyJoint x="442" y="72" depthSign="false" id="14"/>
+    <BodyJoint x="442" y="45" depthSign="false" id="15"/>
+    <BodyJoint x="541" y="118" depthSign="false" id="16"/>
+    <BodyJoint x="388" y="178" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0005.camu" gpY="" imgPath="0005.png" id="5" maskPath="mask0005.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="476" y="114" depthSign="false" id="0"/>
+    <BodyJoint x="483" y="68" depthSign="false" id="1"/>
+    <BodyJoint x="483" y="114" depthSign="false" id="2"/>
+    <BodyJoint x="470" y="112" depthSign="true" id="3"/>
+    <BodyJoint x="483" y="60" depthSign="false" id="4"/>
+    <BodyJoint x="498" y="72" depthSign="false" id="5"/>
+    <BodyJoint x="481" y="60" depthSign="true" id="6"/>
+    <BodyJoint x="489" y="153" depthSign="false" id="7"/>
+    <BodyJoint x="437" y="144" depthSign="true" id="8"/>
+    <BodyJoint x="484" y="47" depthSign="false" id="9"/>
+    <BodyJoint x="479" y="81" depthSign="false" id="10"/>
+    <BodyJoint x="468" y="48" depthSign="true" id="11"/>
+    <BodyJoint x="521" y="123" depthSign="false" id="12"/>
+    <BodyJoint x="414" y="183" depthSign="true" id="13"/>
+    <BodyJoint x="444" y="72" depthSign="false" id="14"/>
+    <BodyJoint x="442" y="44" depthSign="false" id="15"/>
+    <BodyJoint x="542" y="118" depthSign="false" id="16"/>
+    <BodyJoint x="389" y="178" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0006.camu" gpY="" imgPath="0006.png" id="6" maskPath="mask0006.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="476" y="109" depthSign="false" id="0"/>
+    <BodyJoint x="486" y="61" depthSign="false" id="1"/>
+    <BodyJoint x="486" y="110" depthSign="false" id="2"/>
+    <BodyJoint x="472" y="107" depthSign="true" id="3"/>
+    <BodyJoint x="486" y="55" depthSign="false" id="4"/>
+    <BodyJoint x="500" y="67" depthSign="false" id="5"/>
+    <BodyJoint x="480" y="56" depthSign="true" id="6"/>
+    <BodyJoint x="480" y="150" depthSign="false" id="7"/>
+    <BodyJoint x="444" y="142" depthSign="true" id="8"/>
+    <BodyJoint x="487" y="41" depthSign="false" id="9"/>
+    <BodyJoint x="478" y="76" depthSign="false" id="10"/>
+    <BodyJoint x="465" y="44" depthSign="true" id="11"/>
+    <BodyJoint x="514" y="118" depthSign="false" id="12"/>
+    <BodyJoint x="423" y="181" depthSign="true" id="13"/>
+    <BodyJoint x="446" y="68" depthSign="false" id="14"/>
+    <BodyJoint x="438" y="39" depthSign="false" id="15"/>
+    <BodyJoint x="534" y="112" depthSign="false" id="16"/>
+    <BodyJoint x="395" y="178" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0007.camu" gpY="" imgPath="0007.png" id="7" maskPath="mask0007.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="477" y="106" depthSign="false" id="0"/>
+    <BodyJoint x="485" y="60" depthSign="false" id="1"/>
+    <BodyJoint x="486" y="107" depthSign="false" id="2"/>
+    <BodyJoint x="472" y="104" depthSign="true" id="3"/>
+    <BodyJoint x="485" y="52" depthSign="false" id="4"/>
+    <BodyJoint x="504" y="62" depthSign="false" id="5"/>
+    <BodyJoint x="476" y="52" depthSign="true" id="6"/>
+    <BodyJoint x="470" y="145" depthSign="false" id="7"/>
+    <BodyJoint x="449" y="140" depthSign="true" id="8"/>
+    <BodyJoint x="485" y="39" depthSign="false" id="9"/>
+    <BodyJoint x="483" y="74" depthSign="false" id="10"/>
+    <BodyJoint x="462" y="42" depthSign="true" id="11"/>
+    <BodyJoint x="508" y="116" depthSign="false" id="12"/>
+    <BodyJoint x="433" y="181" depthSign="true" id="13"/>
+    <BodyJoint x="450" y="67" depthSign="false" id="14"/>
+    <BodyJoint x="436" y="37" depthSign="false" id="15"/>
+    <BodyJoint x="528" y="110" depthSign="false" id="16"/>
+    <BodyJoint x="407" y="180" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0008.camu" gpY="" imgPath="0008.png" id="8" maskPath="mask0008.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="478" y="101" depthSign="false" id="0"/>
+    <BodyJoint x="487" y="57" depthSign="false" id="1"/>
+    <BodyJoint x="486" y="103" depthSign="false" id="2"/>
+    <BodyJoint x="473" y="100" depthSign="true" id="3"/>
+    <BodyJoint x="487" y="51" depthSign="false" id="4"/>
+    <BodyJoint x="504" y="62" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="48" depthSign="true" id="6"/>
+    <BodyJoint x="462" y="139" depthSign="false" id="7"/>
+    <BodyJoint x="456" y="138" depthSign="true" id="8"/>
+    <BodyJoint x="485" y="36" depthSign="false" id="9"/>
+    <BodyJoint x="486" y="71" depthSign="false" id="10"/>
+    <BodyJoint x="460" y="39" depthSign="true" id="11"/>
+    <BodyJoint x="503" y="116" depthSign="false" id="12"/>
+    <BodyJoint x="445" y="179" depthSign="true" id="13"/>
+    <BodyJoint x="450" y="67" depthSign="false" id="14"/>
+    <BodyJoint x="436" y="37" depthSign="false" id="15"/>
+    <BodyJoint x="521" y="113" depthSign="false" id="16"/>
+    <BodyJoint x="419" y="182" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0009.camu" gpY="" imgPath="0009.png" id="9" maskPath="mask0009.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="477" y="99" depthSign="false" id="0"/>
+    <BodyJoint x="487" y="57" depthSign="false" id="1"/>
+    <BodyJoint x="485" y="99" depthSign="false" id="2"/>
+    <BodyJoint x="473" y="97" depthSign="true" id="3"/>
+    <BodyJoint x="487" y="51" depthSign="false" id="4"/>
+    <BodyJoint x="505" y="59" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="44" depthSign="true" id="6"/>
+    <BodyJoint x="451" y="135" depthSign="false" id="7"/>
+    <BodyJoint x="461" y="135" depthSign="true" id="8"/>
+    <BodyJoint x="485" y="36" depthSign="false" id="9"/>
+    <BodyJoint x="491" y="70" depthSign="false" id="10"/>
+    <BodyJoint x="454" y="36" depthSign="true" id="11"/>
+    <BodyJoint x="500" y="119" depthSign="false" id="12"/>
+    <BodyJoint x="458" y="178" depthSign="true" id="13"/>
+    <BodyJoint x="459" y="67" depthSign="false" id="14"/>
+    <BodyJoint x="427" y="35" depthSign="false" id="15"/>
+    <BodyJoint x="517" y="121" depthSign="false" id="16"/>
+    <BodyJoint x="437" y="184" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0010.camu" gpY="" imgPath="0010.png" id="10" maskPath="mask0010.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="479" y="97" depthSign="false" id="0"/>
+    <BodyJoint x="489" y="51" depthSign="false" id="1"/>
+    <BodyJoint x="487" y="99" depthSign="false" id="2"/>
+    <BodyJoint x="474" y="94" depthSign="true" id="3"/>
+    <BodyJoint x="488" y="44" depthSign="false" id="4"/>
+    <BodyJoint x="508" y="55" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="44" depthSign="true" id="6"/>
+    <BodyJoint x="444" y="126" depthSign="false" id="7"/>
+    <BodyJoint x="467" y="134" depthSign="true" id="8"/>
+    <BodyJoint x="489" y="30" depthSign="false" id="9"/>
+    <BodyJoint x="499" y="67" depthSign="false" id="10"/>
+    <BodyJoint x="454" y="36" depthSign="true" id="11"/>
+    <BodyJoint x="495" y="124" depthSign="false" id="12"/>
+    <BodyJoint x="473" y="177" depthSign="true" id="13"/>
+    <BodyJoint x="470" y="68" depthSign="false" id="14"/>
+    <BodyJoint x="427" y="35" depthSign="false" id="15"/>
+    <BodyJoint x="507" y="134" depthSign="false" id="16"/>
+    <BodyJoint x="449" y="184" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0011.camu" gpY="" imgPath="0011.png" id="11" maskPath="mask0011.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="479" y="95" depthSign="false" id="0"/>
+    <BodyJoint x="489" y="51" depthSign="false" id="1"/>
+    <BodyJoint x="486" y="96" depthSign="false" id="2"/>
+    <BodyJoint x="475" y="92" depthSign="true" id="3"/>
+    <BodyJoint x="488" y="44" depthSign="false" id="4"/>
+    <BodyJoint x="508" y="55" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="42" depthSign="true" id="6"/>
+    <BodyJoint x="441" y="119" depthSign="false" id="7"/>
+    <BodyJoint x="471" y="133" depthSign="true" id="8"/>
+    <BodyJoint x="489" y="30" depthSign="false" id="9"/>
+    <BodyJoint x="500" y="68" depthSign="false" id="10"/>
+    <BodyJoint x="450" y="36" depthSign="true" id="11"/>
+    <BodyJoint x="488" y="133" depthSign="false" id="12"/>
+    <BodyJoint x="487" y="173" depthSign="true" id="13"/>
+    <BodyJoint x="476" y="70" depthSign="false" id="14"/>
+    <BodyJoint x="422" y="36" depthSign="false" id="15"/>
+    <BodyJoint x="485" y="150" depthSign="false" id="16"/>
+    <BodyJoint x="465" y="184" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0012.camu" gpY="" imgPath="0012.png" id="12" maskPath="mask0012.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="481" y="95" depthSign="false" id="0"/>
+    <BodyJoint x="488" y="49" depthSign="false" id="1"/>
+    <BodyJoint x="490" y="96" depthSign="false" id="2"/>
+    <BodyJoint x="474" y="95" depthSign="true" id="3"/>
+    <BodyJoint x="488" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="508" y="55" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="42" depthSign="true" id="6"/>
+    <BodyJoint x="438" y="111" depthSign="false" id="7"/>
+    <BodyJoint x="482" y="136" depthSign="true" id="8"/>
+    <BodyJoint x="487" y="27" depthSign="false" id="9"/>
+    <BodyJoint x="506" y="68" depthSign="false" id="10"/>
+    <BodyJoint x="450" y="38" depthSign="true" id="11"/>
+    <BodyJoint x="474" y="139" depthSign="false" id="12"/>
+    <BodyJoint x="499" y="171" depthSign="true" id="13"/>
+    <BodyJoint x="483" y="73" depthSign="false" id="14"/>
+    <BodyJoint x="420" y="38" depthSign="false" id="15"/>
+    <BodyJoint x="463" y="156" depthSign="false" id="16"/>
+    <BodyJoint x="479" y="184" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0013.camu" gpY="" imgPath="0013.png" id="13" maskPath="mask0013.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="482" y="93" depthSign="false" id="0"/>
+    <BodyJoint x="488" y="49" depthSign="false" id="1"/>
+    <BodyJoint x="489" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="475" y="94" depthSign="true" id="3"/>
+    <BodyJoint x="488" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="509" y="53" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="42" depthSign="true" id="6"/>
+    <BodyJoint x="438" y="109" depthSign="false" id="7"/>
+    <BodyJoint x="486" y="132" depthSign="true" id="8"/>
+    <BodyJoint x="487" y="27" depthSign="false" id="9"/>
+    <BodyJoint x="511" y="68" depthSign="false" id="10"/>
+    <BodyJoint x="445" y="39" depthSign="true" id="11"/>
+    <BodyJoint x="464" y="143" depthSign="false" id="12"/>
+    <BodyJoint x="510" y="167" depthSign="true" id="13"/>
+    <BodyJoint x="496" y="75" depthSign="false" id="14"/>
+    <BodyJoint x="417" y="39" depthSign="false" id="15"/>
+    <BodyJoint x="446" y="154" depthSign="false" id="16"/>
+    <BodyJoint x="492" y="181" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0014.camu" gpY="" imgPath="0014.png" id="14" maskPath="mask0014.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="480" y="92" depthSign="false" id="0"/>
+    <BodyJoint x="488" y="49" depthSign="false" id="1"/>
+    <BodyJoint x="489" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="473" y="92" depthSign="true" id="3"/>
+    <BodyJoint x="488" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="509" y="53" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="42" depthSign="true" id="6"/>
+    <BodyJoint x="434" y="105" depthSign="false" id="7"/>
+    <BodyJoint x="490" y="132" depthSign="true" id="8"/>
+    <BodyJoint x="487" y="27" depthSign="false" id="9"/>
+    <BodyJoint x="516" y="66" depthSign="false" id="10"/>
+    <BodyJoint x="445" y="39" depthSign="true" id="11"/>
+    <BodyJoint x="451" y="141" depthSign="false" id="12"/>
+    <BodyJoint x="521" y="160" depthSign="true" id="13"/>
+    <BodyJoint x="505" y="77" depthSign="false" id="14"/>
+    <BodyJoint x="417" y="39" depthSign="false" id="15"/>
+    <BodyJoint x="430" y="152" depthSign="false" id="16"/>
+    <BodyJoint x="505" y="177" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0015.camu" gpY="" imgPath="0015.png" id="15" maskPath="mask0015.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="480" y="92" depthSign="false" id="0"/>
+    <BodyJoint x="488" y="49" depthSign="false" id="1"/>
+    <BodyJoint x="491" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="475" y="92" depthSign="true" id="3"/>
+    <BodyJoint x="488" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="509" y="53" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="42" depthSign="true" id="6"/>
+    <BodyJoint x="433" y="102" depthSign="false" id="7"/>
+    <BodyJoint x="490" y="130" depthSign="true" id="8"/>
+    <BodyJoint x="487" y="27" depthSign="false" id="9"/>
+    <BodyJoint x="520" y="71" depthSign="false" id="10"/>
+    <BodyJoint x="445" y="41" depthSign="true" id="11"/>
+    <BodyJoint x="442" y="142" depthSign="false" id="12"/>
+    <BodyJoint x="531" y="157" depthSign="true" id="13"/>
+    <BodyJoint x="514" y="81" depthSign="false" id="14"/>
+    <BodyJoint x="417" y="43" depthSign="false" id="15"/>
+    <BodyJoint x="420" y="148" depthSign="false" id="16"/>
+    <BodyJoint x="517" y="173" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0016.camu" gpY="" imgPath="0016.png" id="16" maskPath="mask0016.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="479" y="91" depthSign="false" id="0"/>
+    <BodyJoint x="488" y="49" depthSign="false" id="1"/>
+    <BodyJoint x="488" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="474" y="93" depthSign="true" id="3"/>
+    <BodyJoint x="488" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="509" y="53" depthSign="false" id="5"/>
+    <BodyJoint x="478" y="42" depthSign="true" id="6"/>
+    <BodyJoint x="432" y="101" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="129" depthSign="true" id="8"/>
+    <BodyJoint x="487" y="27" depthSign="false" id="9"/>
+    <BodyJoint x="522" y="68" depthSign="false" id="10"/>
+    <BodyJoint x="445" y="41" depthSign="true" id="11"/>
+    <BodyJoint x="431" y="142" depthSign="false" id="12"/>
+    <BodyJoint x="540" y="151" depthSign="true" id="13"/>
+    <BodyJoint x="526" y="85" depthSign="false" id="14"/>
+    <BodyJoint x="417" y="43" depthSign="false" id="15"/>
+    <BodyJoint x="409" y="147" depthSign="false" id="16"/>
+    <BodyJoint x="527" y="169" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0017.camu" gpY="" imgPath="0017.png" id="17" maskPath="mask0017.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="478" y="91" depthSign="false" id="0"/>
+    <BodyJoint x="486" y="49" depthSign="false" id="1"/>
+    <BodyJoint x="487" y="96" depthSign="false" id="2"/>
+    <BodyJoint x="474" y="93" depthSign="true" id="3"/>
+    <BodyJoint x="485" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="505" y="55" depthSign="false" id="5"/>
+    <BodyJoint x="473" y="42" depthSign="true" id="6"/>
+    <BodyJoint x="429" y="101" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="129" depthSign="true" id="8"/>
+    <BodyJoint x="483" y="28" depthSign="false" id="9"/>
+    <BodyJoint x="525" y="70" depthSign="false" id="10"/>
+    <BodyJoint x="443" y="42" depthSign="true" id="11"/>
+    <BodyJoint x="424" y="143" depthSign="false" id="12"/>
+    <BodyJoint x="545" y="145" depthSign="true" id="13"/>
+    <BodyJoint x="536" y="89" depthSign="false" id="14"/>
+    <BodyJoint x="415" y="47" depthSign="false" id="15"/>
+    <BodyJoint x="402" y="145" depthSign="false" id="16"/>
+    <BodyJoint x="538" y="163" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0018.camu" gpY="" imgPath="0018.png" id="18" maskPath="mask0018.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="478" y="91" depthSign="false" id="0"/>
+    <BodyJoint x="483" y="48" depthSign="false" id="1"/>
+    <BodyJoint x="483" y="96" depthSign="false" id="2"/>
+    <BodyJoint x="474" y="94" depthSign="true" id="3"/>
+    <BodyJoint x="483" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="505" y="55" depthSign="false" id="5"/>
+    <BodyJoint x="471" y="44" depthSign="true" id="6"/>
+    <BodyJoint x="429" y="101" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="129" depthSign="true" id="8"/>
+    <BodyJoint x="482" y="28" depthSign="false" id="9"/>
+    <BodyJoint x="527" y="72" depthSign="false" id="10"/>
+    <BodyJoint x="440" y="43" depthSign="true" id="11"/>
+    <BodyJoint x="414" y="144" depthSign="false" id="12"/>
+    <BodyJoint x="551" y="140" depthSign="true" id="13"/>
+    <BodyJoint x="544" y="90" depthSign="false" id="14"/>
+    <BodyJoint x="416" y="50" depthSign="false" id="15"/>
+    <BodyJoint x="393" y="145" depthSign="false" id="16"/>
+    <BodyJoint x="545" y="159" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0019.camu" gpY="" imgPath="0019.png" id="19" maskPath="mask0019.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="476" y="93" depthSign="false" id="0"/>
+    <BodyJoint x="482" y="52" depthSign="false" id="1"/>
+    <BodyJoint x="484" y="97" depthSign="false" id="2"/>
+    <BodyJoint x="471" y="95" depthSign="true" id="3"/>
+    <BodyJoint x="482" y="45" depthSign="false" id="4"/>
+    <BodyJoint x="505" y="58" depthSign="false" id="5"/>
+    <BodyJoint x="471" y="44" depthSign="true" id="6"/>
+    <BodyJoint x="425" y="106" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="129" depthSign="true" id="8"/>
+    <BodyJoint x="482" y="30" depthSign="false" id="9"/>
+    <BodyJoint x="529" y="74" depthSign="false" id="10"/>
+    <BodyJoint x="439" y="45" depthSign="true" id="11"/>
+    <BodyJoint x="407" y="147" depthSign="false" id="12"/>
+    <BodyJoint x="553" y="136" depthSign="true" id="13"/>
+    <BodyJoint x="548" y="89" depthSign="false" id="14"/>
+    <BodyJoint x="416" y="50" depthSign="false" id="15"/>
+    <BodyJoint x="385" y="145" depthSign="false" id="16"/>
+    <BodyJoint x="552" y="152" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0020.camu" gpY="" imgPath="0020.png" id="20" maskPath="mask0020.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="475" y="96" depthSign="false" id="0"/>
+    <BodyJoint x="481" y="53" depthSign="false" id="1"/>
+    <BodyJoint x="482" y="101" depthSign="false" id="2"/>
+    <BodyJoint x="471" y="97" depthSign="true" id="3"/>
+    <BodyJoint x="481" y="45" depthSign="false" id="4"/>
+    <BodyJoint x="504" y="60" depthSign="false" id="5"/>
+    <BodyJoint x="471" y="44" depthSign="true" id="6"/>
+    <BodyJoint x="423" y="107" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="129" depthSign="true" id="8"/>
+    <BodyJoint x="479" y="32" depthSign="false" id="9"/>
+    <BodyJoint x="533" y="75" depthSign="false" id="10"/>
+    <BodyJoint x="438" y="44" depthSign="true" id="11"/>
+    <BodyJoint x="401" y="147" depthSign="false" id="12"/>
+    <BodyJoint x="556" y="133" depthSign="true" id="13"/>
+    <BodyJoint x="555" y="88" depthSign="false" id="14"/>
+    <BodyJoint x="419" y="51" depthSign="false" id="15"/>
+    <BodyJoint x="377" y="146" depthSign="false" id="16"/>
+    <BodyJoint x="555" y="148" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0021.camu" gpY="" imgPath="0021.png" id="21" maskPath="mask0021.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="476" y="99" depthSign="false" id="0"/>
+    <BodyJoint x="479" y="55" depthSign="false" id="1"/>
+    <BodyJoint x="482" y="102" depthSign="false" id="2"/>
+    <BodyJoint x="473" y="102" depthSign="true" id="3"/>
+    <BodyJoint x="479" y="49" depthSign="false" id="4"/>
+    <BodyJoint x="504" y="60" depthSign="false" id="5"/>
+    <BodyJoint x="470" y="47" depthSign="true" id="6"/>
+    <BodyJoint x="423" y="112" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="129" depthSign="true" id="8"/>
+    <BodyJoint x="477" y="35" depthSign="false" id="9"/>
+    <BodyJoint x="533" y="75" depthSign="false" id="10"/>
+    <BodyJoint x="438" y="44" depthSign="true" id="11"/>
+    <BodyJoint x="392" y="152" depthSign="false" id="12"/>
+    <BodyJoint x="558" y="133" depthSign="true" id="13"/>
+    <BodyJoint x="555" y="88" depthSign="false" id="14"/>
+    <BodyJoint x="424" y="53" depthSign="false" id="15"/>
+    <BodyJoint x="371" y="147" depthSign="false" id="16"/>
+    <BodyJoint x="557" y="145" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0022.camu" gpY="" imgPath="0022.png" id="22" maskPath="mask0022.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="474" y="102" depthSign="false" id="0"/>
+    <BodyJoint x="479" y="58" depthSign="false" id="1"/>
+    <BodyJoint x="477" y="106" depthSign="false" id="2"/>
+    <BodyJoint x="471" y="103" depthSign="true" id="3"/>
+    <BodyJoint x="479" y="51" depthSign="false" id="4"/>
+    <BodyJoint x="502" y="61" depthSign="false" id="5"/>
+    <BodyJoint x="468" y="50" depthSign="true" id="6"/>
+    <BodyJoint x="421" y="121" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="129" depthSign="true" id="8"/>
+    <BodyJoint x="478" y="37" depthSign="false" id="9"/>
+    <BodyJoint x="534" y="74" depthSign="false" id="10"/>
+    <BodyJoint x="440" y="45" depthSign="true" id="11"/>
+    <BodyJoint x="384" y="159" depthSign="false" id="12"/>
+    <BodyJoint x="559" y="131" depthSign="true" id="13"/>
+    <BodyJoint x="561" y="87" depthSign="false" id="14"/>
+    <BodyJoint x="428" y="53" depthSign="false" id="15"/>
+    <BodyJoint x="368" y="149" depthSign="false" id="16"/>
+    <BodyJoint x="558" y="143" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0023.camu" gpY="" imgPath="0023.png" id="23" maskPath="mask0023.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="474" y="106" depthSign="false" id="0"/>
+    <BodyJoint x="477" y="62" depthSign="false" id="1"/>
+    <BodyJoint x="477" y="111" depthSign="false" id="2"/>
+    <BodyJoint x="473" y="107" depthSign="true" id="3"/>
+    <BodyJoint x="477" y="57" depthSign="false" id="4"/>
+    <BodyJoint x="497" y="65" depthSign="false" id="5"/>
+    <BodyJoint x="466" y="54" depthSign="true" id="6"/>
+    <BodyJoint x="421" y="128" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="134" depthSign="true" id="8"/>
+    <BodyJoint x="476" y="41" depthSign="false" id="9"/>
+    <BodyJoint x="530" y="75" depthSign="false" id="10"/>
+    <BodyJoint x="444" y="45" depthSign="true" id="11"/>
+    <BodyJoint x="384" y="162" depthSign="false" id="12"/>
+    <BodyJoint x="559" y="131" depthSign="true" id="13"/>
+    <BodyJoint x="561" y="87" depthSign="false" id="14"/>
+    <BodyJoint x="435" y="55" depthSign="false" id="15"/>
+    <BodyJoint x="366" y="155" depthSign="false" id="16"/>
+    <BodyJoint x="557" y="147" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0024.camu" gpY="" imgPath="0024.png" id="24" maskPath="mask0024.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="472" y="109" depthSign="false" id="0"/>
+    <BodyJoint x="475" y="65" depthSign="false" id="1"/>
+    <BodyJoint x="475" y="113" depthSign="false" id="2"/>
+    <BodyJoint x="471" y="111" depthSign="true" id="3"/>
+    <BodyJoint x="475" y="59" depthSign="false" id="4"/>
+    <BodyJoint x="497" y="65" depthSign="false" id="5"/>
+    <BodyJoint x="465" y="54" depthSign="true" id="6"/>
+    <BodyJoint x="420" y="134" depthSign="false" id="7"/>
+    <BodyJoint x="493" y="134" depthSign="true" id="8"/>
+    <BodyJoint x="473" y="44" depthSign="false" id="9"/>
+    <BodyJoint x="530" y="75" depthSign="false" id="10"/>
+    <BodyJoint x="450" y="45" depthSign="true" id="11"/>
+    <BodyJoint x="382" y="167" depthSign="false" id="12"/>
+    <BodyJoint x="559" y="131" depthSign="true" id="13"/>
+    <BodyJoint x="561" y="87" depthSign="false" id="14"/>
+    <BodyJoint x="444" y="53" depthSign="false" id="15"/>
+    <BodyJoint x="363" y="158" depthSign="false" id="16"/>
+    <BodyJoint x="554" y="148" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0025.camu" gpY="" imgPath="0025.png" id="25" maskPath="mask0025.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="468" y="113" depthSign="false" id="0"/>
+    <BodyJoint x="474" y="69" depthSign="false" id="1"/>
+    <BodyJoint x="470" y="117" depthSign="false" id="2"/>
+    <BodyJoint x="467" y="114" depthSign="true" id="3"/>
+    <BodyJoint x="474" y="63" depthSign="false" id="4"/>
+    <BodyJoint x="495" y="71" depthSign="false" id="5"/>
+    <BodyJoint x="464" y="56" depthSign="true" id="6"/>
+    <BodyJoint x="422" y="139" depthSign="false" id="7"/>
+    <BodyJoint x="492" y="136" depthSign="true" id="8"/>
+    <BodyJoint x="472" y="48" depthSign="false" id="9"/>
+    <BodyJoint x="526" y="77" depthSign="false" id="10"/>
+    <BodyJoint x="453" y="47" depthSign="true" id="11"/>
+    <BodyJoint x="383" y="174" depthSign="false" id="12"/>
+    <BodyJoint x="557" y="140" depthSign="true" id="13"/>
+    <BodyJoint x="551" y="87" depthSign="false" id="14"/>
+    <BodyJoint x="449" y="53" depthSign="false" id="15"/>
+    <BodyJoint x="366" y="168" depthSign="false" id="16"/>
+    <BodyJoint x="551" y="152" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0026.camu" gpY="" imgPath="0026.png" id="26" maskPath="mask0026.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="464" y="114" depthSign="false" id="0"/>
+    <BodyJoint x="472" y="72" depthSign="false" id="1"/>
+    <BodyJoint x="465" y="118" depthSign="false" id="2"/>
+    <BodyJoint x="465" y="118" depthSign="true" id="3"/>
+    <BodyJoint x="472" y="67" depthSign="false" id="4"/>
+    <BodyJoint x="495" y="75" depthSign="false" id="5"/>
+    <BodyJoint x="462" y="60" depthSign="true" id="6"/>
+    <BodyJoint x="420" y="146" depthSign="false" id="7"/>
+    <BodyJoint x="491" y="136" depthSign="true" id="8"/>
+    <BodyJoint x="471" y="52" depthSign="false" id="9"/>
+    <BodyJoint x="525" y="81" depthSign="false" id="10"/>
+    <BodyJoint x="456" y="54" depthSign="true" id="11"/>
+    <BodyJoint x="387" y="180" depthSign="false" id="12"/>
+    <BodyJoint x="556" y="145" depthSign="true" id="13"/>
+    <BodyJoint x="548" y="90" depthSign="false" id="14"/>
+    <BodyJoint x="450" y="56" depthSign="false" id="15"/>
+    <BodyJoint x="366" y="175" depthSign="false" id="16"/>
+    <BodyJoint x="544" y="156" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0027.camu" gpY="" imgPath="0027.png" id="27" maskPath="mask0027.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="459" y="119" depthSign="false" id="0"/>
+    <BodyJoint x="468" y="80" depthSign="false" id="1"/>
+    <BodyJoint x="461" y="121" depthSign="false" id="2"/>
+    <BodyJoint x="460" y="120" depthSign="true" id="3"/>
+    <BodyJoint x="467" y="72" depthSign="false" id="4"/>
+    <BodyJoint x="489" y="81" depthSign="false" id="5"/>
+    <BodyJoint x="462" y="68" depthSign="true" id="6"/>
+    <BodyJoint x="419" y="153" depthSign="false" id="7"/>
+    <BodyJoint x="486" y="145" depthSign="true" id="8"/>
+    <BodyJoint x="468" y="57" depthSign="false" id="9"/>
+    <BodyJoint x="516" y="88" depthSign="false" id="10"/>
+    <BodyJoint x="457" y="57" depthSign="true" id="11"/>
+    <BodyJoint x="395" y="190" depthSign="false" id="12"/>
+    <BodyJoint x="548" y="151" depthSign="true" id="13"/>
+    <BodyJoint x="544" y="97" depthSign="false" id="14"/>
+    <BodyJoint x="448" y="60" depthSign="false" id="15"/>
+    <BodyJoint x="371" y="188" depthSign="false" id="16"/>
+    <BodyJoint x="536" y="162" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0028.camu" gpY="" imgPath="0028.png" id="28" maskPath="mask0028.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="459" y="119" depthSign="false" id="0"/>
+    <BodyJoint x="466" y="81" depthSign="false" id="1"/>
+    <BodyJoint x="461" y="121" depthSign="false" id="2"/>
+    <BodyJoint x="460" y="120" depthSign="true" id="3"/>
+    <BodyJoint x="466" y="75" depthSign="false" id="4"/>
+    <BodyJoint x="489" y="86" depthSign="false" id="5"/>
+    <BodyJoint x="453" y="77" depthSign="true" id="6"/>
+    <BodyJoint x="421" y="156" depthSign="false" id="7"/>
+    <BodyJoint x="480" y="150" depthSign="true" id="8"/>
+    <BodyJoint x="465" y="60" depthSign="false" id="9"/>
+    <BodyJoint x="510" y="94" depthSign="false" id="10"/>
+    <BodyJoint x="443" y="73" depthSign="true" id="11"/>
+    <BodyJoint x="400" y="195" depthSign="false" id="12"/>
+    <BodyJoint x="539" y="157" depthSign="true" id="13"/>
+    <BodyJoint x="537" y="106" depthSign="false" id="14"/>
+    <BodyJoint x="446" y="66" depthSign="false" id="15"/>
+    <BodyJoint x="378" y="197" depthSign="false" id="16"/>
+    <BodyJoint x="527" y="167" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0029.camu" gpY="" imgPath="0029.png" id="29" maskPath="mask0029.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="453" y="124" depthSign="false" id="0"/>
+    <BodyJoint x="463" y="85" depthSign="false" id="1"/>
+    <BodyJoint x="455" y="126" depthSign="false" id="2"/>
+    <BodyJoint x="453" y="127" depthSign="true" id="3"/>
+    <BodyJoint x="463" y="78" depthSign="false" id="4"/>
+    <BodyJoint x="486" y="91" depthSign="false" id="5"/>
+    <BodyJoint x="453" y="83" depthSign="true" id="6"/>
+    <BodyJoint x="426" y="164" depthSign="false" id="7"/>
+    <BodyJoint x="469" y="155" depthSign="true" id="8"/>
+    <BodyJoint x="462" y="64" depthSign="false" id="9"/>
+    <BodyJoint x="511" y="104" depthSign="false" id="10"/>
+    <BodyJoint x="444" y="84" depthSign="true" id="11"/>
+    <BodyJoint x="413" y="202" depthSign="false" id="12"/>
+    <BodyJoint x="529" y="163" depthSign="true" id="13"/>
+    <BodyJoint x="531" y="118" depthSign="false" id="14"/>
+    <BodyJoint x="437" y="79" depthSign="false" id="15"/>
+    <BodyJoint x="395" y="206" depthSign="false" id="16"/>
+    <BodyJoint x="518" y="176" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0030.camu" gpY="" imgPath="0030.png" id="30" maskPath="mask0030.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="453" y="124" depthSign="false" id="0"/>
+    <BodyJoint x="463" y="85" depthSign="false" id="1"/>
+    <BodyJoint x="455" y="126" depthSign="false" id="2"/>
+    <BodyJoint x="453" y="127" depthSign="true" id="3"/>
+    <BodyJoint x="463" y="78" depthSign="false" id="4"/>
+    <BodyJoint x="478" y="98" depthSign="false" id="5"/>
+    <BodyJoint x="451" y="85" depthSign="true" id="6"/>
+    <BodyJoint x="426" y="164" depthSign="false" id="7"/>
+    <BodyJoint x="457" y="160" depthSign="true" id="8"/>
+    <BodyJoint x="462" y="64" depthSign="false" id="9"/>
+    <BodyJoint x="502" y="114" depthSign="false" id="10"/>
+    <BodyJoint x="442" y="99" depthSign="true" id="11"/>
+    <BodyJoint x="428" y="199" depthSign="false" id="12"/>
+    <BodyJoint x="513" y="169" depthSign="true" id="13"/>
+    <BodyJoint x="518" y="134" depthSign="false" id="14"/>
+    <BodyJoint x="429" y="93" depthSign="false" id="15"/>
+    <BodyJoint x="403" y="205" depthSign="false" id="16"/>
+    <BodyJoint x="498" y="183" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0031.camu" gpY="" imgPath="0031.png" id="31" maskPath="mask0031.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="462" y="124" depthSign="false" id="0"/>
+    <BodyJoint x="461" y="88" depthSign="false" id="1"/>
+    <BodyJoint x="466" y="127" depthSign="false" id="2"/>
+    <BodyJoint x="456" y="126" depthSign="true" id="3"/>
+    <BodyJoint x="459" y="79" depthSign="false" id="4"/>
+    <BodyJoint x="476" y="97" depthSign="false" id="5"/>
+    <BodyJoint x="449" y="87" depthSign="true" id="6"/>
+    <BodyJoint x="433" y="160" depthSign="false" id="7"/>
+    <BodyJoint x="436" y="158" depthSign="true" id="8"/>
+    <BodyJoint x="458" y="66" depthSign="false" id="9"/>
+    <BodyJoint x="495" y="118" depthSign="false" id="10"/>
+    <BodyJoint x="447" y="105" depthSign="true" id="11"/>
+    <BodyJoint x="449" y="199" depthSign="false" id="12"/>
+    <BodyJoint x="502" y="172" depthSign="true" id="13"/>
+    <BodyJoint x="503" y="145" depthSign="false" id="14"/>
+    <BodyJoint x="430" y="109" depthSign="false" id="15"/>
+    <BodyJoint x="420" y="204" depthSign="false" id="16"/>
+    <BodyJoint x="483" y="182" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0032.camu" gpY="" imgPath="0032.png" id="32" maskPath="mask0032.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="460" y="122" depthSign="false" id="0"/>
+    <BodyJoint x="461" y="88" depthSign="false" id="1"/>
+    <BodyJoint x="470" y="124" depthSign="false" id="2"/>
+    <BodyJoint x="457" y="124" depthSign="true" id="3"/>
+    <BodyJoint x="459" y="79" depthSign="false" id="4"/>
+    <BodyJoint x="476" y="97" depthSign="false" id="5"/>
+    <BodyJoint x="449" y="87" depthSign="true" id="6"/>
+    <BodyJoint x="442" y="157" depthSign="false" id="7"/>
+    <BodyJoint x="430" y="155" depthSign="true" id="8"/>
+    <BodyJoint x="458" y="66" depthSign="false" id="9"/>
+    <BodyJoint x="481" y="127" depthSign="false" id="10"/>
+    <BodyJoint x="449" y="108" depthSign="true" id="11"/>
+    <BodyJoint x="464" y="196" depthSign="false" id="12"/>
+    <BodyJoint x="480" y="177" depthSign="true" id="13"/>
+    <BodyJoint x="460" y="148" depthSign="false" id="14"/>
+    <BodyJoint x="437" y="117" depthSign="false" id="15"/>
+    <BodyJoint x="438" y="201" depthSign="false" id="16"/>
+    <BodyJoint x="454" y="188" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0033.camu" gpY="" imgPath="0033.png" id="33" maskPath="mask0033.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="465" y="123" depthSign="false" id="0"/>
+    <BodyJoint x="461" y="88" depthSign="false" id="1"/>
+    <BodyJoint x="472" y="124" depthSign="false" id="2"/>
+    <BodyJoint x="459" y="123" depthSign="true" id="3"/>
+    <BodyJoint x="459" y="79" depthSign="false" id="4"/>
+    <BodyJoint x="479" y="93" depthSign="false" id="5"/>
+    <BodyJoint x="449" y="87" depthSign="true" id="6"/>
+    <BodyJoint x="456" y="162" depthSign="false" id="7"/>
+    <BodyJoint x="425" y="151" depthSign="true" id="8"/>
+    <BodyJoint x="458" y="66" depthSign="false" id="9"/>
+    <BodyJoint x="475" y="123" depthSign="false" id="10"/>
+    <BodyJoint x="454" y="107" depthSign="true" id="11"/>
+    <BodyJoint x="489" y="193" depthSign="false" id="12"/>
+    <BodyJoint x="455" y="178" depthSign="true" id="13"/>
+    <BodyJoint x="467" y="144" depthSign="false" id="14"/>
+    <BodyJoint x="448" y="112" depthSign="false" id="15"/>
+    <BodyJoint x="460" y="200" depthSign="false" id="16"/>
+    <BodyJoint x="430" y="186" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0034.camu" gpY="" imgPath="0034.png" id="34" maskPath="mask0034.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="466" y="121" depthSign="false" id="0"/>
+    <BodyJoint x="463" y="85" depthSign="false" id="1"/>
+    <BodyJoint x="473" y="122" depthSign="false" id="2"/>
+    <BodyJoint x="461" y="119" depthSign="true" id="3"/>
+    <BodyJoint x="460" y="77" depthSign="false" id="4"/>
+    <BodyJoint x="479" y="88" depthSign="false" id="5"/>
+    <BodyJoint x="456" y="80" depthSign="true" id="6"/>
+    <BodyJoint x="470" y="164" depthSign="false" id="7"/>
+    <BodyJoint x="423" y="141" depthSign="true" id="8"/>
+    <BodyJoint x="455" y="64" depthSign="false" id="9"/>
+    <BodyJoint x="462" y="114" depthSign="false" id="10"/>
+    <BodyJoint x="453" y="94" depthSign="true" id="11"/>
+    <BodyJoint x="506" y="189" depthSign="false" id="12"/>
+    <BodyJoint x="438" y="175" depthSign="true" id="13"/>
+    <BodyJoint x="434" y="120" depthSign="false" id="14"/>
+    <BodyJoint x="449" y="104" depthSign="false" id="15"/>
+    <BodyJoint x="479" y="197" depthSign="false" id="16"/>
+    <BodyJoint x="412" y="180" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0035.camu" gpY="" imgPath="0035.png" id="35" maskPath="mask0035.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="464" y="120" depthSign="false" id="0"/>
+    <BodyJoint x="464" y="79" depthSign="false" id="1"/>
+    <BodyJoint x="474" y="120" depthSign="false" id="2"/>
+    <BodyJoint x="459" y="117" depthSign="true" id="3"/>
+    <BodyJoint x="460" y="73" depthSign="false" id="4"/>
+    <BodyJoint x="478" y="80" depthSign="false" id="5"/>
+    <BodyJoint x="459" y="73" depthSign="true" id="6"/>
+    <BodyJoint x="485" y="160" depthSign="false" id="7"/>
+    <BodyJoint x="419" y="135" depthSign="true" id="8"/>
+    <BodyJoint x="452" y="60" depthSign="false" id="9"/>
+    <BodyJoint x="454" y="106" depthSign="false" id="10"/>
+    <BodyJoint x="454" y="90" depthSign="true" id="11"/>
+    <BodyJoint x="523" y="185" depthSign="false" id="12"/>
+    <BodyJoint x="424" y="172" depthSign="true" id="13"/>
+    <BodyJoint x="420" y="99" depthSign="false" id="14"/>
+    <BodyJoint x="444" y="93" depthSign="false" id="15"/>
+    <BodyJoint x="499" y="195" depthSign="false" id="16"/>
+    <BodyJoint x="397" y="173" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0036.camu" gpY="" imgPath="0036.png" id="36" maskPath="mask0036.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="464" y="120" depthSign="false" id="0"/>
+    <BodyJoint x="463" y="75" depthSign="false" id="1"/>
+    <BodyJoint x="474" y="120" depthSign="false" id="2"/>
+    <BodyJoint x="459" y="117" depthSign="true" id="3"/>
+    <BodyJoint x="459" y="67" depthSign="false" id="4"/>
+    <BodyJoint x="476" y="78" depthSign="false" id="5"/>
+    <BodyJoint x="463" y="67" depthSign="true" id="6"/>
+    <BodyJoint x="496" y="155" depthSign="false" id="7"/>
+    <BodyJoint x="415" y="128" depthSign="true" id="8"/>
+    <BodyJoint x="451" y="55" depthSign="false" id="9"/>
+    <BodyJoint x="449" y="95" depthSign="false" id="10"/>
+    <BodyJoint x="456" y="78" depthSign="true" id="11"/>
+    <BodyJoint x="536" y="179" depthSign="false" id="12"/>
+    <BodyJoint x="413" y="165" depthSign="true" id="13"/>
+    <BodyJoint x="418" y="83" depthSign="false" id="14"/>
+    <BodyJoint x="445" y="78" depthSign="false" id="15"/>
+    <BodyJoint x="517" y="193" depthSign="false" id="16"/>
+    <BodyJoint x="389" y="163" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0037.camu" gpY="" imgPath="0037.png" id="37" maskPath="mask0037.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="461" y="117" depthSign="false" id="0"/>
+    <BodyJoint x="464" y="73" depthSign="false" id="1"/>
+    <BodyJoint x="471" y="116" depthSign="false" id="2"/>
+    <BodyJoint x="455" y="113" depthSign="true" id="3"/>
+    <BodyJoint x="460" y="66" depthSign="false" id="4"/>
+    <BodyJoint x="475" y="74" depthSign="false" id="5"/>
+    <BodyJoint x="462" y="64" depthSign="true" id="6"/>
+    <BodyJoint x="503" y="147" depthSign="false" id="7"/>
+    <BodyJoint x="412" y="119" depthSign="true" id="8"/>
+    <BodyJoint x="451" y="55" depthSign="false" id="9"/>
+    <BodyJoint x="445" y="87" depthSign="false" id="10"/>
+    <BodyJoint x="455" y="71" depthSign="true" id="11"/>
+    <BodyJoint x="539" y="173" depthSign="false" id="12"/>
+    <BodyJoint x="407" y="158" depthSign="true" id="13"/>
+    <BodyJoint x="419" y="72" depthSign="false" id="14"/>
+    <BodyJoint x="446" y="71" depthSign="false" id="15"/>
+    <BodyJoint x="532" y="190" depthSign="false" id="16"/>
+    <BodyJoint x="383" y="154" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0038.camu" gpY="" imgPath="0038.png" id="38" maskPath="mask0038.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="459" y="113" depthSign="false" id="0"/>
+    <BodyJoint x="463" y="68" depthSign="false" id="1"/>
+    <BodyJoint x="469" y="113" depthSign="false" id="2"/>
+    <BodyJoint x="453" y="109" depthSign="true" id="3"/>
+    <BodyJoint x="460" y="62" depthSign="false" id="4"/>
+    <BodyJoint x="475" y="68" depthSign="false" id="5"/>
+    <BodyJoint x="463" y="61" depthSign="true" id="6"/>
+    <BodyJoint x="503" y="142" depthSign="false" id="7"/>
+    <BodyJoint x="411" y="112" depthSign="true" id="8"/>
+    <BodyJoint x="453" y="51" depthSign="false" id="9"/>
+    <BodyJoint x="444" y="77" depthSign="false" id="10"/>
+    <BodyJoint x="454" y="67" depthSign="true" id="11"/>
+    <BodyJoint x="545" y="158" depthSign="false" id="12"/>
+    <BodyJoint x="402" y="151" depthSign="true" id="13"/>
+    <BodyJoint x="419" y="64" depthSign="false" id="14"/>
+    <BodyJoint x="442" y="64" depthSign="false" id="15"/>
+    <BodyJoint x="545" y="179" depthSign="false" id="16"/>
+    <BodyJoint x="379" y="146" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0039.camu" gpY="" imgPath="0039.png" id="39" maskPath="mask0039.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="459" y="110" depthSign="false" id="0"/>
+    <BodyJoint x="461" y="65" depthSign="false" id="1"/>
+    <BodyJoint x="470" y="111" depthSign="false" id="2"/>
+    <BodyJoint x="452" y="108" depthSign="true" id="3"/>
+    <BodyJoint x="458" y="59" depthSign="false" id="4"/>
+    <BodyJoint x="475" y="68" depthSign="false" id="5"/>
+    <BodyJoint x="463" y="57" depthSign="true" id="6"/>
+    <BodyJoint x="505" y="141" depthSign="false" id="7"/>
+    <BodyJoint x="408" y="107" depthSign="true" id="8"/>
+    <BodyJoint x="451" y="46" depthSign="false" id="9"/>
+    <BodyJoint x="441" y="71" depthSign="false" id="10"/>
+    <BodyJoint x="457" y="63" depthSign="true" id="11"/>
+    <BodyJoint x="550" y="145" depthSign="false" id="12"/>
+    <BodyJoint x="398" y="146" depthSign="true" id="13"/>
+    <BodyJoint x="417" y="60" depthSign="false" id="14"/>
+    <BodyJoint x="443" y="61" depthSign="false" id="15"/>
+    <BodyJoint x="558" y="164" depthSign="false" id="16"/>
+    <BodyJoint x="374" y="139" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0040.camu" gpY="" imgPath="0040.png" id="40" maskPath="mask0040.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="457" y="107" depthSign="false" id="0"/>
+    <BodyJoint x="461" y="63" depthSign="false" id="1"/>
+    <BodyJoint x="468" y="107" depthSign="false" id="2"/>
+    <BodyJoint x="452" y="103" depthSign="true" id="3"/>
+    <BodyJoint x="457" y="55" depthSign="false" id="4"/>
+    <BodyJoint x="474" y="64" depthSign="false" id="5"/>
+    <BodyJoint x="463" y="57" depthSign="true" id="6"/>
+    <BodyJoint x="502" y="138" depthSign="false" id="7"/>
+    <BodyJoint x="406" y="101" depthSign="true" id="8"/>
+    <BodyJoint x="451" y="44" depthSign="false" id="9"/>
+    <BodyJoint x="440" y="67" depthSign="false" id="10"/>
+    <BodyJoint x="457" y="63" depthSign="true" id="11"/>
+    <BodyJoint x="551" y="130" depthSign="false" id="12"/>
+    <BodyJoint x="394" y="141" depthSign="true" id="13"/>
+    <BodyJoint x="413" y="55" depthSign="false" id="14"/>
+    <BodyJoint x="443" y="61" depthSign="false" id="15"/>
+    <BodyJoint x="562" y="147" depthSign="false" id="16"/>
+    <BodyJoint x="371" y="134" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0041.camu" gpY="" imgPath="0041.png" id="41" maskPath="mask0041.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="457" y="107" depthSign="false" id="0"/>
+    <BodyJoint x="461" y="60" depthSign="false" id="1"/>
+    <BodyJoint x="467" y="105" depthSign="false" id="2"/>
+    <BodyJoint x="452" y="103" depthSign="true" id="3"/>
+    <BodyJoint x="456" y="53" depthSign="false" id="4"/>
+    <BodyJoint x="472" y="61" depthSign="false" id="5"/>
+    <BodyJoint x="463" y="57" depthSign="true" id="6"/>
+    <BodyJoint x="498" y="137" depthSign="false" id="7"/>
+    <BodyJoint x="405" y="97" depthSign="true" id="8"/>
+    <BodyJoint x="449" y="39" depthSign="false" id="9"/>
+    <BodyJoint x="438" y="65" depthSign="false" id="10"/>
+    <BodyJoint x="455" y="62" depthSign="true" id="11"/>
+    <BodyJoint x="545" y="120" depthSign="false" id="12"/>
+    <BodyJoint x="389" y="137" depthSign="true" id="13"/>
+    <BodyJoint x="413" y="55" depthSign="false" id="14"/>
+    <BodyJoint x="443" y="60" depthSign="false" id="15"/>
+    <BodyJoint x="564" y="132" depthSign="false" id="16"/>
+    <BodyJoint x="368" y="129" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0042.camu" gpY="" imgPath="0042.png" id="42" maskPath="mask0042.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="457" y="102" depthSign="false" id="0"/>
+    <BodyJoint x="461" y="60" depthSign="false" id="1"/>
+    <BodyJoint x="463" y="102" depthSign="false" id="2"/>
+    <BodyJoint x="451" y="99" depthSign="true" id="3"/>
+    <BodyJoint x="456" y="53" depthSign="false" id="4"/>
+    <BodyJoint x="471" y="58" depthSign="false" id="5"/>
+    <BodyJoint x="463" y="57" depthSign="true" id="6"/>
+    <BodyJoint x="496" y="135" depthSign="false" id="7"/>
+    <BodyJoint x="404" y="94" depthSign="true" id="8"/>
+    <BodyJoint x="449" y="39" depthSign="false" id="9"/>
+    <BodyJoint x="436" y="63" depthSign="false" id="10"/>
+    <BodyJoint x="455" y="62" depthSign="true" id="11"/>
+    <BodyJoint x="542" y="112" depthSign="false" id="12"/>
+    <BodyJoint x="385" y="135" depthSign="true" id="13"/>
+    <BodyJoint x="403" y="54" depthSign="false" id="14"/>
+    <BodyJoint x="443" y="60" depthSign="false" id="15"/>
+    <BodyJoint x="561" y="118" depthSign="false" id="16"/>
+    <BodyJoint x="366" y="126" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0043.camu" gpY="" imgPath="0043.png" id="43" maskPath="mask0043.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="455" y="99" depthSign="false" id="0"/>
+    <BodyJoint x="458" y="54" depthSign="false" id="1"/>
+    <BodyJoint x="463" y="99" depthSign="false" id="2"/>
+    <BodyJoint x="450" y="95" depthSign="true" id="3"/>
+    <BodyJoint x="455" y="48" depthSign="false" id="4"/>
+    <BodyJoint x="470" y="54" depthSign="false" id="5"/>
+    <BodyJoint x="456" y="52" depthSign="true" id="6"/>
+    <BodyJoint x="494" y="133" depthSign="false" id="7"/>
+    <BodyJoint x="403" y="94" depthSign="true" id="8"/>
+    <BodyJoint x="448" y="36" depthSign="false" id="9"/>
+    <BodyJoint x="435" y="61" depthSign="false" id="10"/>
+    <BodyJoint x="450" y="66" depthSign="true" id="11"/>
+    <BodyJoint x="534" y="107" depthSign="false" id="12"/>
+    <BodyJoint x="383" y="132" depthSign="true" id="13"/>
+    <BodyJoint x="402" y="54" depthSign="false" id="14"/>
+    <BodyJoint x="427" y="68" depthSign="false" id="15"/>
+    <BodyJoint x="553" y="109" depthSign="false" id="16"/>
+    <BodyJoint x="364" y="124" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0044.camu" gpY="" imgPath="0044.png" id="44" maskPath="mask0044.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="456" y="96" depthSign="false" id="0"/>
+    <BodyJoint x="455" y="50" depthSign="false" id="1"/>
+    <BodyJoint x="463" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="447" y="92" depthSign="true" id="3"/>
+    <BodyJoint x="453" y="44" depthSign="false" id="4"/>
+    <BodyJoint x="467" y="52" depthSign="false" id="5"/>
+    <BodyJoint x="453" y="50" depthSign="true" id="6"/>
+    <BodyJoint x="490" y="132" depthSign="false" id="7"/>
+    <BodyJoint x="402" y="93" depthSign="true" id="8"/>
+    <BodyJoint x="445" y="33" depthSign="false" id="9"/>
+    <BodyJoint x="433" y="60" depthSign="false" id="10"/>
+    <BodyJoint x="446" y="67" depthSign="true" id="11"/>
+    <BodyJoint x="528" y="102" depthSign="false" id="12"/>
+    <BodyJoint x="379" y="131" depthSign="true" id="13"/>
+    <BodyJoint x="398" y="56" depthSign="false" id="14"/>
+    <BodyJoint x="422" y="71" depthSign="false" id="15"/>
+    <BodyJoint x="546" y="104" depthSign="false" id="16"/>
+    <BodyJoint x="358" y="120" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0045.camu" gpY="" imgPath="0045.png" id="45" maskPath="mask0045.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="453" y="96" depthSign="false" id="0"/>
+    <BodyJoint x="455" y="50" depthSign="false" id="1"/>
+    <BodyJoint x="463" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="447" y="92" depthSign="true" id="3"/>
+    <BodyJoint x="453" y="44" depthSign="false" id="4"/>
+    <BodyJoint x="462" y="50" depthSign="false" id="5"/>
+    <BodyJoint x="448" y="49" depthSign="true" id="6"/>
+    <BodyJoint x="485" y="133" depthSign="false" id="7"/>
+    <BodyJoint x="403" y="94" depthSign="true" id="8"/>
+    <BodyJoint x="445" y="33" depthSign="false" id="9"/>
+    <BodyJoint x="429" y="59" depthSign="false" id="10"/>
+    <BodyJoint x="445" y="67" depthSign="true" id="11"/>
+    <BodyJoint x="522" y="101" depthSign="false" id="12"/>
+    <BodyJoint x="374" y="130" depthSign="true" id="13"/>
+    <BodyJoint x="395" y="59" depthSign="false" id="14"/>
+    <BodyJoint x="419" y="79" depthSign="false" id="15"/>
+    <BodyJoint x="540" y="101" depthSign="false" id="16"/>
+    <BodyJoint x="356" y="119" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0046.camu" gpY="" imgPath="0046.png" id="46" maskPath="mask0046.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="455" y="94" depthSign="false" id="0"/>
+    <BodyJoint x="450" y="48" depthSign="false" id="1"/>
+    <BodyJoint x="463" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="447" y="92" depthSign="true" id="3"/>
+    <BodyJoint x="446" y="43" depthSign="false" id="4"/>
+    <BodyJoint x="461" y="49" depthSign="false" id="5"/>
+    <BodyJoint x="445" y="47" depthSign="true" id="6"/>
+    <BodyJoint x="482" y="132" depthSign="false" id="7"/>
+    <BodyJoint x="400" y="94" depthSign="true" id="8"/>
+    <BodyJoint x="436" y="30" depthSign="false" id="9"/>
+    <BodyJoint x="429" y="59" depthSign="false" id="10"/>
+    <BodyJoint x="444" y="72" depthSign="true" id="11"/>
+    <BodyJoint x="514" y="100" depthSign="false" id="12"/>
+    <BodyJoint x="374" y="130" depthSign="true" id="13"/>
+    <BodyJoint x="395" y="59" depthSign="false" id="14"/>
+    <BodyJoint x="420" y="83" depthSign="false" id="15"/>
+    <BodyJoint x="533" y="100" depthSign="false" id="16"/>
+    <BodyJoint x="356" y="119" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0047.camu" gpY="" imgPath="0047.png" id="47" maskPath="mask0047.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="448" y="94" depthSign="false" id="0"/>
+    <BodyJoint x="444" y="48" depthSign="false" id="1"/>
+    <BodyJoint x="459" y="93" depthSign="false" id="2"/>
+    <BodyJoint x="442" y="91" depthSign="true" id="3"/>
+    <BodyJoint x="443" y="43" depthSign="false" id="4"/>
+    <BodyJoint x="452" y="48" depthSign="false" id="5"/>
+    <BodyJoint x="445" y="47" depthSign="true" id="6"/>
+    <BodyJoint x="479" y="132" depthSign="false" id="7"/>
+    <BodyJoint x="397" y="97" depthSign="true" id="8"/>
+    <BodyJoint x="436" y="30" depthSign="false" id="9"/>
+    <BodyJoint x="429" y="59" depthSign="false" id="10"/>
+    <BodyJoint x="443" y="71" depthSign="true" id="11"/>
+    <BodyJoint x="509" y="102" depthSign="false" id="12"/>
+    <BodyJoint x="370" y="131" depthSign="true" id="13"/>
+    <BodyJoint x="394" y="66" depthSign="false" id="14"/>
+    <BodyJoint x="431" y="87" depthSign="false" id="15"/>
+    <BodyJoint x="528" y="102" depthSign="false" id="16"/>
+    <BodyJoint x="350" y="119" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0048.camu" gpY="" imgPath="0048.png" id="48" maskPath="mask0048.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="448" y="94" depthSign="false" id="0"/>
+    <BodyJoint x="444" y="48" depthSign="false" id="1"/>
+    <BodyJoint x="459" y="93" depthSign="false" id="2"/>
+    <BodyJoint x="442" y="91" depthSign="true" id="3"/>
+    <BodyJoint x="440" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="451" y="47" depthSign="false" id="5"/>
+    <BodyJoint x="445" y="47" depthSign="true" id="6"/>
+    <BodyJoint x="475" y="132" depthSign="false" id="7"/>
+    <BodyJoint x="395" y="98" depthSign="true" id="8"/>
+    <BodyJoint x="431" y="30" depthSign="false" id="9"/>
+    <BodyJoint x="428" y="61" depthSign="false" id="10"/>
+    <BodyJoint x="443" y="71" depthSign="true" id="11"/>
+    <BodyJoint x="507" y="104" depthSign="false" id="12"/>
+    <BodyJoint x="365" y="130" depthSign="true" id="13"/>
+    <BodyJoint x="401" y="70" depthSign="false" id="14"/>
+    <BodyJoint x="431" y="87" depthSign="false" id="15"/>
+    <BodyJoint x="524" y="103" depthSign="false" id="16"/>
+    <BodyJoint x="346" y="120" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0049.camu" gpY="" imgPath="0049.png" id="49" maskPath="mask0049.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="442" y="95" depthSign="false" id="0"/>
+    <BodyJoint x="440" y="48" depthSign="false" id="1"/>
+    <BodyJoint x="453" y="94" depthSign="false" id="2"/>
+    <BodyJoint x="437" y="91" depthSign="true" id="3"/>
+    <BodyJoint x="436" y="42" depthSign="false" id="4"/>
+    <BodyJoint x="438" y="50" depthSign="false" id="5"/>
+    <BodyJoint x="444" y="46" depthSign="true" id="6"/>
+    <BodyJoint x="471" y="134" depthSign="false" id="7"/>
+    <BodyJoint x="393" y="101" depthSign="true" id="8"/>
+    <BodyJoint x="428" y="31" depthSign="false" id="9"/>
+    <BodyJoint x="429" y="63" depthSign="false" id="10"/>
+    <BodyJoint x="444" y="71" depthSign="true" id="11"/>
+    <BodyJoint x="504" y="106" depthSign="false" id="12"/>
+    <BodyJoint x="361" y="134" depthSign="true" id="13"/>
+    <BodyJoint x="404" y="74" depthSign="false" id="14"/>
+    <BodyJoint x="431" y="87" depthSign="false" id="15"/>
+    <BodyJoint x="524" y="107" depthSign="false" id="16"/>
+    <BodyJoint x="343" y="124" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0050.camu" gpY="" imgPath="0050.png" id="50" maskPath="mask0050.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="442" y="96" depthSign="false" id="0"/>
+    <BodyJoint x="438" y="50" depthSign="false" id="1"/>
+    <BodyJoint x="449" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="434" y="94" depthSign="true" id="3"/>
+    <BodyJoint x="433" y="44" depthSign="false" id="4"/>
+    <BodyJoint x="433" y="48" depthSign="false" id="5"/>
+    <BodyJoint x="445" y="49" depthSign="true" id="6"/>
+    <BodyJoint x="469" y="135" depthSign="false" id="7"/>
+    <BodyJoint x="389" y="105" depthSign="true" id="8"/>
+    <BodyJoint x="426" y="31" depthSign="false" id="9"/>
+    <BodyJoint x="428" y="62" depthSign="false" id="10"/>
+    <BodyJoint x="461" y="70" depthSign="true" id="11"/>
+    <BodyJoint x="505" y="107" depthSign="false" id="12"/>
+    <BodyJoint x="354" y="136" depthSign="true" id="13"/>
+    <BodyJoint x="413" y="77" depthSign="false" id="14"/>
+    <BodyJoint x="463" y="88" depthSign="false" id="15"/>
+    <BodyJoint x="524" y="115" depthSign="false" id="16"/>
+    <BodyJoint x="337" y="125" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0051.camu" gpY="" imgPath="0051.png" id="51" maskPath="mask0051.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="437" y="98" depthSign="false" id="0"/>
+    <BodyJoint x="433" y="49" depthSign="false" id="1"/>
+    <BodyJoint x="445" y="97" depthSign="false" id="2"/>
+    <BodyJoint x="428" y="95" depthSign="true" id="3"/>
+    <BodyJoint x="429" y="44" depthSign="false" id="4"/>
+    <BodyJoint x="428" y="53" depthSign="false" id="5"/>
+    <BodyJoint x="441" y="54" depthSign="true" id="6"/>
+    <BodyJoint x="466" y="137" depthSign="false" id="7"/>
+    <BodyJoint x="385" y="111" depthSign="true" id="8"/>
+    <BodyJoint x="421" y="34" depthSign="false" id="9"/>
+    <BodyJoint x="430" y="63" depthSign="false" id="10"/>
+    <BodyJoint x="466" y="71" depthSign="true" id="11"/>
+    <BodyJoint x="505" y="113" depthSign="false" id="12"/>
+    <BodyJoint x="349" y="138" depthSign="true" id="13"/>
+    <BodyJoint x="420" y="79" depthSign="false" id="14"/>
+    <BodyJoint x="474" y="92" depthSign="true" id="15"/>
+    <BodyJoint x="522" y="120" depthSign="false" id="16"/>
+    <BodyJoint x="334" y="128" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0052.camu" gpY="" imgPath="0052.png" id="52" maskPath="mask0052.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="433" y="101" depthSign="false" id="0"/>
+    <BodyJoint x="431" y="53" depthSign="false" id="1"/>
+    <BodyJoint x="442" y="100" depthSign="false" id="2"/>
+    <BodyJoint x="425" y="99" depthSign="true" id="3"/>
+    <BodyJoint x="425" y="47" depthSign="false" id="4"/>
+    <BodyJoint x="421" y="55" depthSign="false" id="5"/>
+    <BodyJoint x="440" y="57" depthSign="true" id="6"/>
+    <BodyJoint x="466" y="137" depthSign="false" id="7"/>
+    <BodyJoint x="384" y="115" depthSign="true" id="8"/>
+    <BodyJoint x="417" y="37" depthSign="false" id="9"/>
+    <BodyJoint x="433" y="63" depthSign="false" id="10"/>
+    <BodyJoint x="469" y="69" depthSign="true" id="11"/>
+    <BodyJoint x="508" y="117" depthSign="false" id="12"/>
+    <BodyJoint x="343" y="143" depthSign="true" id="13"/>
+    <BodyJoint x="426" y="82" depthSign="false" id="14"/>
+    <BodyJoint x="485" y="89" depthSign="true" id="15"/>
+    <BodyJoint x="522" y="127" depthSign="false" id="16"/>
+    <BodyJoint x="329" y="131" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0053.camu" gpY="" imgPath="0053.png" id="53" maskPath="mask0053.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="429" y="104" depthSign="false" id="0"/>
+    <BodyJoint x="427" y="55" depthSign="false" id="1"/>
+    <BodyJoint x="436" y="103" depthSign="false" id="2"/>
+    <BodyJoint x="422" y="101" depthSign="true" id="3"/>
+    <BodyJoint x="423" y="49" depthSign="false" id="4"/>
+    <BodyJoint x="419" y="58" depthSign="false" id="5"/>
+    <BodyJoint x="437" y="62" depthSign="true" id="6"/>
+    <BodyJoint x="464" y="140" depthSign="false" id="7"/>
+    <BodyJoint x="381" y="119" depthSign="true" id="8"/>
+    <BodyJoint x="417" y="40" depthSign="false" id="9"/>
+    <BodyJoint x="433" y="65" depthSign="false" id="10"/>
+    <BodyJoint x="471" y="69" depthSign="true" id="11"/>
+    <BodyJoint x="513" y="123" depthSign="false" id="12"/>
+    <BodyJoint x="338" y="149" depthSign="true" id="13"/>
+    <BodyJoint x="435" y="85" depthSign="false" id="14"/>
+    <BodyJoint x="491" y="84" depthSign="true" id="15"/>
+    <BodyJoint x="523" y="137" depthSign="false" id="16"/>
+    <BodyJoint x="326" y="134" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0054.camu" gpY="" imgPath="0054.png" id="54" maskPath="mask0054.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="425" y="108" depthSign="false" id="0"/>
+    <BodyJoint x="423" y="58" depthSign="false" id="1"/>
+    <BodyJoint x="434" y="107" depthSign="false" id="2"/>
+    <BodyJoint x="418" y="106" depthSign="true" id="3"/>
+    <BodyJoint x="420" y="53" depthSign="false" id="4"/>
+    <BodyJoint x="419" y="58" depthSign="false" id="5"/>
+    <BodyJoint x="438" y="62" depthSign="true" id="6"/>
+    <BodyJoint x="462" y="141" depthSign="false" id="7"/>
+    <BodyJoint x="383" y="123" depthSign="true" id="8"/>
+    <BodyJoint x="414" y="42" depthSign="false" id="9"/>
+    <BodyJoint x="435" y="68" depthSign="false" id="10"/>
+    <BodyJoint x="472" y="69" depthSign="true" id="11"/>
+    <BodyJoint x="513" y="132" depthSign="false" id="12"/>
+    <BodyJoint x="336" y="153" depthSign="true" id="13"/>
+    <BodyJoint x="439" y="86" depthSign="false" id="14"/>
+    <BodyJoint x="494" y="80" depthSign="true" id="15"/>
+    <BodyJoint x="519" y="148" depthSign="false" id="16"/>
+    <BodyJoint x="321" y="137" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0055.camu" gpY="" imgPath="0055.png" id="55" maskPath="mask0055.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="420" y="112" depthSign="false" id="0"/>
+    <BodyJoint x="421" y="64" depthSign="false" id="1"/>
+    <BodyJoint x="428" y="110" depthSign="false" id="2"/>
+    <BodyJoint x="412" y="109" depthSign="true" id="3"/>
+    <BodyJoint x="417" y="57" depthSign="false" id="4"/>
+    <BodyJoint x="412" y="64" depthSign="false" id="5"/>
+    <BodyJoint x="431" y="64" depthSign="true" id="6"/>
+    <BodyJoint x="459" y="143" depthSign="false" id="7"/>
+    <BodyJoint x="376" y="131" depthSign="true" id="8"/>
+    <BodyJoint x="410" y="47" depthSign="false" id="9"/>
+    <BodyJoint x="437" y="69" depthSign="false" id="10"/>
+    <BodyJoint x="466" y="68" depthSign="true" id="11"/>
+    <BodyJoint x="516" y="143" depthSign="false" id="12"/>
+    <BodyJoint x="334" y="161" depthSign="true" id="13"/>
+    <BodyJoint x="442" y="89" depthSign="false" id="14"/>
+    <BodyJoint x="494" y="80" depthSign="true" id="15"/>
+    <BodyJoint x="515" y="160" depthSign="false" id="16"/>
+    <BodyJoint x="319" y="145" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0056.camu" gpY="" imgPath="0056.png" id="56" maskPath="mask0056.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="417" y="116" depthSign="false" id="0"/>
+    <BodyJoint x="419" y="66" depthSign="false" id="1"/>
+    <BodyJoint x="425" y="114" depthSign="false" id="2"/>
+    <BodyJoint x="410" y="113" depthSign="true" id="3"/>
+    <BodyJoint x="416" y="60" depthSign="false" id="4"/>
+    <BodyJoint x="413" y="67" depthSign="false" id="5"/>
+    <BodyJoint x="430" y="68" depthSign="true" id="6"/>
+    <BodyJoint x="457" y="145" depthSign="false" id="7"/>
+    <BodyJoint x="376" y="135" depthSign="true" id="8"/>
+    <BodyJoint x="410" y="49" depthSign="false" id="9"/>
+    <BodyJoint x="439" y="72" depthSign="false" id="10"/>
+    <BodyJoint x="464" y="70" depthSign="true" id="11"/>
+    <BodyJoint x="511" y="150" depthSign="false" id="12"/>
+    <BodyJoint x="336" y="165" depthSign="true" id="13"/>
+    <BodyJoint x="445" y="90" depthSign="false" id="14"/>
+    <BodyJoint x="492" y="80" depthSign="true" id="15"/>
+    <BodyJoint x="506" y="168" depthSign="false" id="16"/>
+    <BodyJoint x="319" y="153" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0057.camu" gpY="" imgPath="0057.png" id="57" maskPath="mask0057.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="414" y="120" depthSign="false" id="0"/>
+    <BodyJoint x="415" y="70" depthSign="false" id="1"/>
+    <BodyJoint x="421" y="118" depthSign="false" id="2"/>
+    <BodyJoint x="407" y="118" depthSign="true" id="3"/>
+    <BodyJoint x="412" y="66" depthSign="false" id="4"/>
+    <BodyJoint x="409" y="73" depthSign="false" id="5"/>
+    <BodyJoint x="426" y="70" depthSign="true" id="6"/>
+    <BodyJoint x="453" y="149" depthSign="false" id="7"/>
+    <BodyJoint x="374" y="142" depthSign="true" id="8"/>
+    <BodyJoint x="405" y="53" depthSign="false" id="9"/>
+    <BodyJoint x="440" y="76" depthSign="false" id="10"/>
+    <BodyJoint x="462" y="75" depthSign="true" id="11"/>
+    <BodyJoint x="506" y="160" depthSign="false" id="12"/>
+    <BodyJoint x="339" y="176" depthSign="true" id="13"/>
+    <BodyJoint x="448" y="100" depthSign="false" id="14"/>
+    <BodyJoint x="490" y="85" depthSign="true" id="15"/>
+    <BodyJoint x="497" y="177" depthSign="false" id="16"/>
+    <BodyJoint x="318" y="164" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0058.camu" gpY="" imgPath="0058.png" id="58" maskPath="mask0058.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="410" y="123" depthSign="false" id="0"/>
+    <BodyJoint x="413" y="73" depthSign="false" id="1"/>
+    <BodyJoint x="418" y="121" depthSign="false" id="2"/>
+    <BodyJoint x="403" y="121" depthSign="true" id="3"/>
+    <BodyJoint x="410" y="67" depthSign="false" id="4"/>
+    <BodyJoint x="408" y="77" depthSign="false" id="5"/>
+    <BodyJoint x="424" y="75" depthSign="true" id="6"/>
+    <BodyJoint x="448" y="153" depthSign="false" id="7"/>
+    <BodyJoint x="374" y="147" depthSign="true" id="8"/>
+    <BodyJoint x="403" y="56" depthSign="false" id="9"/>
+    <BodyJoint x="439" y="82" depthSign="false" id="10"/>
+    <BodyJoint x="458" y="81" depthSign="true" id="11"/>
+    <BodyJoint x="500" y="167" depthSign="false" id="12"/>
+    <BodyJoint x="345" y="182" depthSign="true" id="13"/>
+    <BodyJoint x="446" y="104" depthSign="false" id="14"/>
+    <BodyJoint x="485" y="91" depthSign="true" id="15"/>
+    <BodyJoint x="489" y="182" depthSign="false" id="16"/>
+    <BodyJoint x="324" y="174" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0059.camu" gpY="" imgPath="0059.png" id="59" maskPath="mask0059.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="408" y="127" depthSign="false" id="0"/>
+    <BodyJoint x="411" y="79" depthSign="false" id="1"/>
+    <BodyJoint x="416" y="125" depthSign="false" id="2"/>
+    <BodyJoint x="400" y="125" depthSign="true" id="3"/>
+    <BodyJoint x="407" y="71" depthSign="false" id="4"/>
+    <BodyJoint x="407" y="83" depthSign="false" id="5"/>
+    <BodyJoint x="417" y="77" depthSign="true" id="6"/>
+    <BodyJoint x="442" y="160" depthSign="false" id="7"/>
+    <BodyJoint x="372" y="156" depthSign="true" id="8"/>
+    <BodyJoint x="402" y="59" depthSign="false" id="9"/>
+    <BodyJoint x="438" y="94" depthSign="false" id="10"/>
+    <BodyJoint x="449" y="88" depthSign="true" id="11"/>
+    <BodyJoint x="493" y="173" depthSign="false" id="12"/>
+    <BodyJoint x="354" y="190" depthSign="true" id="13"/>
+    <BodyJoint x="448" y="116" depthSign="false" id="14"/>
+    <BodyJoint x="477" y="99" depthSign="true" id="15"/>
+    <BodyJoint x="481" y="189" depthSign="false" id="16"/>
+    <BodyJoint x="329" y="186" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0060.camu" gpY="" imgPath="0060.png" id="60" maskPath="mask0060.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="408" y="130" depthSign="false" id="0"/>
+    <BodyJoint x="408" y="79" depthSign="false" id="1"/>
+    <BodyJoint x="414" y="127" depthSign="false" id="2"/>
+    <BodyJoint x="400" y="128" depthSign="true" id="3"/>
+    <BodyJoint x="404" y="72" depthSign="false" id="4"/>
+    <BodyJoint x="410" y="88" depthSign="false" id="5"/>
+    <BodyJoint x="413" y="80" depthSign="true" id="6"/>
+    <BodyJoint x="432" y="167" depthSign="false" id="7"/>
+    <BodyJoint x="380" y="160" depthSign="true" id="8"/>
+    <BodyJoint x="398" y="62" depthSign="false" id="9"/>
+    <BodyJoint x="437" y="105" depthSign="false" id="10"/>
+    <BodyJoint x="445" y="95" depthSign="true" id="11"/>
+    <BodyJoint x="484" y="177" depthSign="false" id="12"/>
+    <BodyJoint x="361" y="199" depthSign="true" id="13"/>
+    <BodyJoint x="439" y="133" depthSign="false" id="14"/>
+    <BodyJoint x="467" y="108" depthSign="true" id="15"/>
+    <BodyJoint x="472" y="194" depthSign="false" id="16"/>
+    <BodyJoint x="339" y="202" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0061.camu" gpY="" imgPath="0061.png" id="61" maskPath="mask0061.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="408" y="130" depthSign="false" id="0"/>
+    <BodyJoint x="406" y="86" depthSign="false" id="1"/>
+    <BodyJoint x="414" y="127" depthSign="false" id="2"/>
+    <BodyJoint x="400" y="128" depthSign="true" id="3"/>
+    <BodyJoint x="403" y="78" depthSign="false" id="4"/>
+    <BodyJoint x="410" y="94" depthSign="false" id="5"/>
+    <BodyJoint x="410" y="85" depthSign="true" id="6"/>
+    <BodyJoint x="421" y="173" depthSign="false" id="7"/>
+    <BodyJoint x="381" y="162" depthSign="true" id="8"/>
+    <BodyJoint x="396" y="67" depthSign="false" id="9"/>
+    <BodyJoint x="432" y="113" depthSign="false" id="10"/>
+    <BodyJoint x="444" y="102" depthSign="true" id="11"/>
+    <BodyJoint x="474" y="180" depthSign="false" id="12"/>
+    <BodyJoint x="375" y="201" depthSign="true" id="13"/>
+    <BodyJoint x="428" y="137" depthSign="false" id="14"/>
+    <BodyJoint x="453" y="120" depthSign="true" id="15"/>
+    <BodyJoint x="461" y="197" depthSign="false" id="16"/>
+    <BodyJoint x="347" y="204" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0062.camu" gpY="" imgPath="0062.png" id="62" maskPath="mask0062.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="404" y="133" depthSign="false" id="0"/>
+    <BodyJoint x="406" y="86" depthSign="false" id="1"/>
+    <BodyJoint x="413" y="133" depthSign="false" id="2"/>
+    <BodyJoint x="400" y="130" depthSign="true" id="3"/>
+    <BodyJoint x="402" y="80" depthSign="false" id="4"/>
+    <BodyJoint x="410" y="96" depthSign="false" id="5"/>
+    <BodyJoint x="410" y="85" depthSign="true" id="6"/>
+    <BodyJoint x="401" y="172" depthSign="false" id="7"/>
+    <BodyJoint x="386" y="162" depthSign="true" id="8"/>
+    <BodyJoint x="397" y="69" depthSign="false" id="9"/>
+    <BodyJoint x="420" y="110" depthSign="false" id="10"/>
+    <BodyJoint x="422" y="99" depthSign="true" id="11"/>
+    <BodyJoint x="457" y="184" depthSign="false" id="12"/>
+    <BodyJoint x="387" y="198" depthSign="true" id="13"/>
+    <BodyJoint x="419" y="135" depthSign="false" id="14"/>
+    <BodyJoint x="432" y="113" depthSign="true" id="15"/>
+    <BodyJoint x="439" y="198" depthSign="false" id="16"/>
+    <BodyJoint x="362" y="203" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0063.camu" gpY="" imgPath="0063.png" id="63" maskPath="mask0063.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="412" y="134" depthSign="false" id="0"/>
+    <BodyJoint x="405" y="87" depthSign="false" id="1"/>
+    <BodyJoint x="419" y="133" depthSign="false" id="2"/>
+    <BodyJoint x="407" y="133" depthSign="true" id="3"/>
+    <BodyJoint x="402" y="80" depthSign="false" id="4"/>
+    <BodyJoint x="407" y="99" depthSign="false" id="5"/>
+    <BodyJoint x="411" y="89" depthSign="true" id="6"/>
+    <BodyJoint x="389" y="166" depthSign="false" id="7"/>
+    <BodyJoint x="391" y="161" depthSign="true" id="8"/>
+    <BodyJoint x="397" y="69" depthSign="false" id="9"/>
+    <BodyJoint x="408" y="125" depthSign="false" id="10"/>
+    <BodyJoint x="419" y="106" depthSign="true" id="11"/>
+    <BodyJoint x="442" y="187" depthSign="false" id="12"/>
+    <BodyJoint x="403" y="200" depthSign="true" id="13"/>
+    <BodyJoint x="393" y="137" depthSign="false" id="14"/>
+    <BodyJoint x="418" y="122" depthSign="true" id="15"/>
+    <BodyJoint x="419" y="200" depthSign="false" id="16"/>
+    <BodyJoint x="376" y="204" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0064.camu" gpY="" imgPath="0064.png" id="64" maskPath="mask0064.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="421" y="130" depthSign="false" id="0"/>
+    <BodyJoint x="405" y="87" depthSign="false" id="1"/>
+    <BodyJoint x="418" y="133" depthSign="false" id="2"/>
+    <BodyJoint x="424" y="133" depthSign="true" id="3"/>
+    <BodyJoint x="402" y="80" depthSign="false" id="4"/>
+    <BodyJoint x="411" y="98" depthSign="false" id="5"/>
+    <BodyJoint x="408" y="90" depthSign="true" id="6"/>
+    <BodyJoint x="376" y="158" depthSign="false" id="7"/>
+    <BodyJoint x="402" y="160" depthSign="true" id="8"/>
+    <BodyJoint x="397" y="69" depthSign="false" id="9"/>
+    <BodyJoint x="397" y="121" depthSign="false" id="10"/>
+    <BodyJoint x="402" y="112" depthSign="true" id="11"/>
+    <BodyJoint x="421" y="187" depthSign="false" id="12"/>
+    <BodyJoint x="419" y="199" depthSign="true" id="13"/>
+    <BodyJoint x="367" y="126" depthSign="false" id="14"/>
+    <BodyJoint x="373" y="119" depthSign="true" id="15"/>
+    <BodyJoint x="397" y="196" depthSign="false" id="16"/>
+    <BodyJoint x="396" y="204" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0065.camu" gpY="" imgPath="0065.png" id="65" maskPath="mask0065.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="421" y="130" depthSign="false" id="0"/>
+    <BodyJoint x="405" y="87" depthSign="false" id="1"/>
+    <BodyJoint x="419" y="130" depthSign="false" id="2"/>
+    <BodyJoint x="424" y="130" depthSign="true" id="3"/>
+    <BodyJoint x="402" y="80" depthSign="false" id="4"/>
+    <BodyJoint x="414" y="93" depthSign="false" id="5"/>
+    <BodyJoint x="410" y="88" depthSign="true" id="6"/>
+    <BodyJoint x="373" y="148" depthSign="false" id="7"/>
+    <BodyJoint x="416" y="166" depthSign="true" id="8"/>
+    <BodyJoint x="397" y="69" depthSign="false" id="9"/>
+    <BodyJoint x="392" y="115" depthSign="false" id="10"/>
+    <BodyJoint x="393" y="103" depthSign="true" id="11"/>
+    <BodyJoint x="401" y="186" depthSign="false" id="12"/>
+    <BodyJoint x="436" y="200" depthSign="true" id="13"/>
+    <BodyJoint x="360" y="117" depthSign="false" id="14"/>
+    <BodyJoint x="358" y="104" depthSign="false" id="15"/>
+    <BodyJoint x="375" y="191" depthSign="false" id="16"/>
+    <BodyJoint x="411" y="204" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0066.camu" gpY="" imgPath="0066.png" id="66" maskPath="mask0066.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="423" y="128" depthSign="false" id="0"/>
+    <BodyJoint x="408" y="82" depthSign="false" id="1"/>
+    <BodyJoint x="420" y="128" depthSign="false" id="2"/>
+    <BodyJoint x="426" y="127" depthSign="true" id="3"/>
+    <BodyJoint x="404" y="77" depthSign="false" id="4"/>
+    <BodyJoint x="416" y="88" depthSign="false" id="5"/>
+    <BodyJoint x="407" y="87" depthSign="true" id="6"/>
+    <BodyJoint x="370" y="139" depthSign="false" id="7"/>
+    <BodyJoint x="430" y="160" depthSign="true" id="8"/>
+    <BodyJoint x="396" y="67" depthSign="false" id="9"/>
+    <BodyJoint x="385" y="105" depthSign="false" id="10"/>
+    <BodyJoint x="390" y="90" depthSign="true" id="11"/>
+    <BodyJoint x="387" y="181" depthSign="false" id="12"/>
+    <BodyJoint x="451" y="197" depthSign="true" id="13"/>
+    <BodyJoint x="360" y="99" depthSign="false" id="14"/>
+    <BodyJoint x="355" y="90" depthSign="false" id="15"/>
+    <BodyJoint x="361" y="181" depthSign="false" id="16"/>
+    <BodyJoint x="426" y="203" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0067.camu" gpY="" imgPath="0067.png" id="67" maskPath="mask0067.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="423" y="128" depthSign="false" id="0"/>
+    <BodyJoint x="408" y="82" depthSign="false" id="1"/>
+    <BodyJoint x="420" y="128" depthSign="false" id="2"/>
+    <BodyJoint x="426" y="127" depthSign="true" id="3"/>
+    <BodyJoint x="404" y="77" depthSign="false" id="4"/>
+    <BodyJoint x="415" y="83" depthSign="false" id="5"/>
+    <BodyJoint x="407" y="78" depthSign="true" id="6"/>
+    <BodyJoint x="368" y="134" depthSign="false" id="7"/>
+    <BodyJoint x="442" y="162" depthSign="true" id="8"/>
+    <BodyJoint x="396" y="67" depthSign="false" id="9"/>
+    <BodyJoint x="380" y="96" depthSign="false" id="10"/>
+    <BodyJoint x="395" y="79" depthSign="true" id="11"/>
+    <BodyJoint x="378" y="175" depthSign="false" id="12"/>
+    <BodyJoint x="464" y="195" depthSign="true" id="13"/>
+    <BodyJoint x="359" y="81" depthSign="false" id="14"/>
+    <BodyJoint x="365" y="78" depthSign="false" id="15"/>
+    <BodyJoint x="353" y="173" depthSign="false" id="16"/>
+    <BodyJoint x="441" y="204" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0068.camu" gpY="" imgPath="0068.png" id="68" maskPath="mask0068.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="424" y="126" depthSign="false" id="0"/>
+    <BodyJoint x="408" y="77" depthSign="false" id="1"/>
+    <BodyJoint x="420" y="124" depthSign="false" id="2"/>
+    <BodyJoint x="424" y="122" depthSign="true" id="3"/>
+    <BodyJoint x="405" y="72" depthSign="false" id="4"/>
+    <BodyJoint x="412" y="79" depthSign="false" id="5"/>
+    <BodyJoint x="411" y="78" depthSign="true" id="6"/>
+    <BodyJoint x="367" y="125" depthSign="false" id="7"/>
+    <BodyJoint x="448" y="160" depthSign="true" id="8"/>
+    <BodyJoint x="398" y="62" depthSign="false" id="9"/>
+    <BodyJoint x="375" y="86" depthSign="false" id="10"/>
+    <BodyJoint x="398" y="76" depthSign="true" id="11"/>
+    <BodyJoint x="374" y="164" depthSign="false" id="12"/>
+    <BodyJoint x="470" y="190" depthSign="true" id="13"/>
+    <BodyJoint x="364" y="68" depthSign="false" id="14"/>
+    <BodyJoint x="368" y="66" depthSign="false" id="15"/>
+    <BodyJoint x="353" y="165" depthSign="false" id="16"/>
+    <BodyJoint x="454" y="204" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0069.camu" gpY="" imgPath="0069.png" id="69" maskPath="mask0069.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="422" y="122" depthSign="false" id="0"/>
+    <BodyJoint x="408" y="77" depthSign="false" id="1"/>
+    <BodyJoint x="422" y="122" depthSign="false" id="2"/>
+    <BodyJoint x="424" y="121" depthSign="true" id="3"/>
+    <BodyJoint x="405" y="72" depthSign="false" id="4"/>
+    <BodyJoint x="412" y="79" depthSign="false" id="5"/>
+    <BodyJoint x="412" y="78" depthSign="true" id="6"/>
+    <BodyJoint x="366" y="119" depthSign="false" id="7"/>
+    <BodyJoint x="443" y="154" depthSign="true" id="8"/>
+    <BodyJoint x="398" y="62" depthSign="false" id="9"/>
+    <BodyJoint x="377" y="78" depthSign="false" id="10"/>
+    <BodyJoint x="393" y="68" depthSign="true" id="11"/>
+    <BodyJoint x="375" y="159" depthSign="false" id="12"/>
+    <BodyJoint x="478" y="184" depthSign="true" id="13"/>
+    <BodyJoint x="367" y="59" depthSign="false" id="14"/>
+    <BodyJoint x="370" y="63" depthSign="false" id="15"/>
+    <BodyJoint x="351" y="161" depthSign="false" id="16"/>
+    <BodyJoint x="469" y="202" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0070.camu" gpY="" imgPath="0070.png" id="70" maskPath="mask0070.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="422" y="116" depthSign="false" id="0"/>
+    <BodyJoint x="409" y="73" depthSign="false" id="1"/>
+    <BodyJoint x="419" y="116" depthSign="false" id="2"/>
+    <BodyJoint x="422" y="114" depthSign="true" id="3"/>
+    <BodyJoint x="405" y="72" depthSign="false" id="4"/>
+    <BodyJoint x="413" y="74" depthSign="false" id="5"/>
+    <BodyJoint x="412" y="72" depthSign="true" id="6"/>
+    <BodyJoint x="367" y="115" depthSign="false" id="7"/>
+    <BodyJoint x="441" y="151" depthSign="true" id="8"/>
+    <BodyJoint x="398" y="62" depthSign="false" id="9"/>
+    <BodyJoint x="382" y="67" depthSign="false" id="10"/>
+    <BodyJoint x="389" y="63" depthSign="true" id="11"/>
+    <BodyJoint x="380" y="152" depthSign="false" id="12"/>
+    <BodyJoint x="484" y="178" depthSign="true" id="13"/>
+    <BodyJoint x="374" y="48" depthSign="false" id="14"/>
+    <BodyJoint x="372" y="51" depthSign="false" id="15"/>
+    <BodyJoint x="359" y="155" depthSign="false" id="16"/>
+    <BodyJoint x="483" y="190" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0071.camu" gpY="" imgPath="0071.png" id="71" maskPath="mask0071.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="422" y="116" depthSign="false" id="0"/>
+    <BodyJoint x="409" y="73" depthSign="false" id="1"/>
+    <BodyJoint x="419" y="116" depthSign="false" id="2"/>
+    <BodyJoint x="422" y="114" depthSign="true" id="3"/>
+    <BodyJoint x="404" y="66" depthSign="false" id="4"/>
+    <BodyJoint x="413" y="74" depthSign="false" id="5"/>
+    <BodyJoint x="412" y="72" depthSign="true" id="6"/>
+    <BodyJoint x="365" y="112" depthSign="false" id="7"/>
+    <BodyJoint x="436" y="151" depthSign="true" id="8"/>
+    <BodyJoint x="399" y="55" depthSign="false" id="9"/>
+    <BodyJoint x="387" y="66" depthSign="false" id="10"/>
+    <BodyJoint x="391" y="59" depthSign="true" id="11"/>
+    <BodyJoint x="389" y="147" depthSign="false" id="12"/>
+    <BodyJoint x="488" y="168" depthSign="true" id="13"/>
+    <BodyJoint x="380" y="45" depthSign="false" id="14"/>
+    <BodyJoint x="372" y="44" depthSign="false" id="15"/>
+    <BodyJoint x="367" y="153" depthSign="false" id="16"/>
+    <BodyJoint x="491" y="185" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0072.camu" gpY="" imgPath="0072.png" id="72" maskPath="mask0072.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="424" y="112" depthSign="false" id="0"/>
+    <BodyJoint x="409" y="69" depthSign="false" id="1"/>
+    <BodyJoint x="419" y="112" depthSign="false" id="2"/>
+    <BodyJoint x="421" y="112" depthSign="true" id="3"/>
+    <BodyJoint x="404" y="61" depthSign="false" id="4"/>
+    <BodyJoint x="413" y="74" depthSign="false" id="5"/>
+    <BodyJoint x="412" y="72" depthSign="true" id="6"/>
+    <BodyJoint x="365" y="112" depthSign="false" id="7"/>
+    <BodyJoint x="432" y="148" depthSign="true" id="8"/>
+    <BodyJoint x="399" y="53" depthSign="false" id="9"/>
+    <BodyJoint x="393" y="62" depthSign="false" id="10"/>
+    <BodyJoint x="395" y="52" depthSign="true" id="11"/>
+    <BodyJoint x="398" y="143" depthSign="false" id="12"/>
+    <BodyJoint x="486" y="161" depthSign="true" id="13"/>
+    <BodyJoint x="380" y="39" depthSign="false" id="14"/>
+    <BodyJoint x="381" y="38" depthSign="false" id="15"/>
+    <BodyJoint x="375" y="151" depthSign="false" id="16"/>
+    <BodyJoint x="493" y="178" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0073.camu" gpY="" imgPath="0073.png" id="73" maskPath="mask0073.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="424" y="112" depthSign="false" id="0"/>
+    <BodyJoint x="406" y="64" depthSign="false" id="1"/>
+    <BodyJoint x="419" y="112" depthSign="false" id="2"/>
+    <BodyJoint x="421" y="112" depthSign="true" id="3"/>
+    <BodyJoint x="404" y="61" depthSign="false" id="4"/>
+    <BodyJoint x="414" y="61" depthSign="false" id="5"/>
+    <BodyJoint x="401" y="58" depthSign="true" id="6"/>
+    <BodyJoint x="364" y="111" depthSign="false" id="7"/>
+    <BodyJoint x="429" y="146" depthSign="true" id="8"/>
+    <BodyJoint x="395" y="51" depthSign="false" id="9"/>
+    <BodyJoint x="396" y="52" depthSign="false" id="10"/>
+    <BodyJoint x="399" y="50" depthSign="true" id="11"/>
+    <BodyJoint x="405" y="139" depthSign="false" id="12"/>
+    <BodyJoint x="484" y="158" depthSign="true" id="13"/>
+    <BodyJoint x="384" y="36" depthSign="false" id="14"/>
+    <BodyJoint x="382" y="34" depthSign="false" id="15"/>
+    <BodyJoint x="385" y="152" depthSign="false" id="16"/>
+    <BodyJoint x="491" y="174" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0074.camu" gpY="" imgPath="0074.png" id="74" maskPath="mask0074.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="422" y="106" depthSign="false" id="0"/>
+    <BodyJoint x="405" y="64" depthSign="false" id="1"/>
+    <BodyJoint x="421" y="107" depthSign="false" id="2"/>
+    <BodyJoint x="422" y="106" depthSign="true" id="3"/>
+    <BodyJoint x="401" y="59" depthSign="false" id="4"/>
+    <BodyJoint x="414" y="61" depthSign="false" id="5"/>
+    <BodyJoint x="411" y="55" depthSign="true" id="6"/>
+    <BodyJoint x="360" y="113" depthSign="false" id="7"/>
+    <BodyJoint x="423" y="143" depthSign="true" id="8"/>
+    <BodyJoint x="389" y="50" depthSign="false" id="9"/>
+    <BodyJoint x="400" y="50" depthSign="false" id="10"/>
+    <BodyJoint x="397" y="38" depthSign="true" id="11"/>
+    <BodyJoint x="407" y="136" depthSign="false" id="12"/>
+    <BodyJoint x="478" y="155" depthSign="true" id="13"/>
+    <BodyJoint x="388" y="38" depthSign="false" id="14"/>
+    <BodyJoint x="378" y="27" depthSign="false" id="15"/>
+    <BodyJoint x="394" y="150" depthSign="false" id="16"/>
+    <BodyJoint x="484" y="170" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0075.camu" gpY="" imgPath="0075.png" id="75" maskPath="mask0075.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="422" y="106" depthSign="false" id="0"/>
+    <BodyJoint x="405" y="64" depthSign="false" id="1"/>
+    <BodyJoint x="421" y="107" depthSign="false" id="2"/>
+    <BodyJoint x="422" y="106" depthSign="true" id="3"/>
+    <BodyJoint x="401" y="59" depthSign="false" id="4"/>
+    <BodyJoint x="409" y="60" depthSign="false" id="5"/>
+    <BodyJoint x="411" y="55" depthSign="true" id="6"/>
+    <BodyJoint x="363" y="116" depthSign="false" id="7"/>
+    <BodyJoint x="423" y="143" depthSign="true" id="8"/>
+    <BodyJoint x="389" y="50" depthSign="false" id="9"/>
+    <BodyJoint x="404" y="53" depthSign="false" id="10"/>
+    <BodyJoint x="402" y="35" depthSign="true" id="11"/>
+    <BodyJoint x="410" y="137" depthSign="false" id="12"/>
+    <BodyJoint x="474" y="154" depthSign="true" id="13"/>
+    <BodyJoint x="389" y="42" depthSign="false" id="14"/>
+    <BodyJoint x="379" y="23" depthSign="false" id="15"/>
+    <BodyJoint x="399" y="150" depthSign="false" id="16"/>
+    <BodyJoint x="476" y="169" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0076.camu" gpY="" imgPath="0076.png" id="76" maskPath="mask0076.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="422" y="106" depthSign="false" id="0"/>
+    <BodyJoint x="401" y="58" depthSign="false" id="1"/>
+    <BodyJoint x="421" y="107" depthSign="false" id="2"/>
+    <BodyJoint x="422" y="106" depthSign="true" id="3"/>
+    <BodyJoint x="393" y="54" depthSign="false" id="4"/>
+    <BodyJoint x="405" y="62" depthSign="false" id="5"/>
+    <BodyJoint x="408" y="48" depthSign="true" id="6"/>
+    <BodyJoint x="364" y="116" depthSign="false" id="7"/>
+    <BodyJoint x="412" y="137" depthSign="true" id="8"/>
+    <BodyJoint x="385" y="47" depthSign="false" id="9"/>
+    <BodyJoint x="403" y="55" depthSign="false" id="10"/>
+    <BodyJoint x="406" y="32" depthSign="true" id="11"/>
+    <BodyJoint x="412" y="139" depthSign="false" id="12"/>
+    <BodyJoint x="465" y="153" depthSign="true" id="13"/>
+    <BodyJoint x="392" y="44" depthSign="false" id="14"/>
+    <BodyJoint x="380" y="17" depthSign="false" id="15"/>
+    <BodyJoint x="401" y="150" depthSign="false" id="16"/>
+    <BodyJoint x="463" y="167" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0077.camu" gpY="" imgPath="0077.png" id="77" maskPath="mask0077.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="418" y="101" depthSign="false" id="0"/>
+    <BodyJoint x="399" y="59" depthSign="false" id="1"/>
+    <BodyJoint x="419" y="103" depthSign="false" id="2"/>
+    <BodyJoint x="421" y="102" depthSign="true" id="3"/>
+    <BodyJoint x="393" y="54" depthSign="false" id="4"/>
+    <BodyJoint x="400" y="63" depthSign="false" id="5"/>
+    <BodyJoint x="408" y="48" depthSign="true" id="6"/>
+    <BodyJoint x="363" y="118" depthSign="false" id="7"/>
+    <BodyJoint x="407" y="136" depthSign="true" id="8"/>
+    <BodyJoint x="385" y="47" depthSign="false" id="9"/>
+    <BodyJoint x="394" y="60" depthSign="false" id="10"/>
+    <BodyJoint x="407" y="33" depthSign="true" id="11"/>
+    <BodyJoint x="412" y="140" depthSign="false" id="12"/>
+    <BodyJoint x="457" y="153" depthSign="true" id="13"/>
+    <BodyJoint x="388" y="55" depthSign="false" id="14"/>
+    <BodyJoint x="383" y="17" depthSign="false" id="15"/>
+    <BodyJoint x="399" y="154" depthSign="false" id="16"/>
+    <BodyJoint x="453" y="165" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0078.camu" gpY="" imgPath="0078.png" id="78" maskPath="mask0078.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="418" y="101" depthSign="false" id="0"/>
+    <BodyJoint x="393" y="58" depthSign="false" id="1"/>
+    <BodyJoint x="418" y="102" depthSign="false" id="2"/>
+    <BodyJoint x="420" y="101" depthSign="true" id="3"/>
+    <BodyJoint x="387" y="54" depthSign="false" id="4"/>
+    <BodyJoint x="399" y="59" depthSign="false" id="5"/>
+    <BodyJoint x="400" y="49" depthSign="true" id="6"/>
+    <BodyJoint x="364" y="118" depthSign="false" id="7"/>
+    <BodyJoint x="399" y="133" depthSign="true" id="8"/>
+    <BodyJoint x="376" y="45" depthSign="false" id="9"/>
+    <BodyJoint x="404" y="62" depthSign="false" id="10"/>
+    <BodyJoint x="409" y="33" depthSign="true" id="11"/>
+    <BodyJoint x="409" y="140" depthSign="false" id="12"/>
+    <BodyJoint x="449" y="153" depthSign="true" id="13"/>
+    <BodyJoint x="405" y="68" depthSign="false" id="14"/>
+    <BodyJoint x="395" y="16" depthSign="true" id="15"/>
+    <BodyJoint x="395" y="155" depthSign="false" id="16"/>
+    <BodyJoint x="440" y="166" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0079.camu" gpY="" imgPath="0079.png" id="79" maskPath="mask0079.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="415" y="99" depthSign="false" id="0"/>
+    <BodyJoint x="389" y="59" depthSign="false" id="1"/>
+    <BodyJoint x="414" y="99" depthSign="false" id="2"/>
+    <BodyJoint x="414" y="99" depthSign="true" id="3"/>
+    <BodyJoint x="385" y="56" depthSign="false" id="4"/>
+    <BodyJoint x="392" y="60" depthSign="false" id="5"/>
+    <BodyJoint x="400" y="49" depthSign="true" id="6"/>
+    <BodyJoint x="364" y="118" depthSign="false" id="7"/>
+    <BodyJoint x="393" y="128" depthSign="true" id="8"/>
+    <BodyJoint x="370" y="47" depthSign="false" id="9"/>
+    <BodyJoint x="398" y="66" depthSign="false" id="10"/>
+    <BodyJoint x="409" y="33" depthSign="true" id="11"/>
+    <BodyJoint x="407" y="144" depthSign="false" id="12"/>
+    <BodyJoint x="439" y="153" depthSign="true" id="13"/>
+    <BodyJoint x="402" y="72" depthSign="false" id="14"/>
+    <BodyJoint x="395" y="16" depthSign="true" id="15"/>
+    <BodyJoint x="388" y="158" depthSign="false" id="16"/>
+    <BodyJoint x="426" y="164" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0080.camu" gpY="" imgPath="0080.png" id="80" maskPath="mask0080.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="414" y="96" depthSign="false" id="0"/>
+    <BodyJoint x="385" y="60" depthSign="false" id="1"/>
+    <BodyJoint x="414" y="97" depthSign="false" id="2"/>
+    <BodyJoint x="415" y="96" depthSign="true" id="3"/>
+    <BodyJoint x="381" y="56" depthSign="false" id="4"/>
+    <BodyJoint x="386" y="64" depthSign="false" id="5"/>
+    <BodyJoint x="387" y="50" depthSign="true" id="6"/>
+    <BodyJoint x="367" y="117" depthSign="false" id="7"/>
+    <BodyJoint x="388" y="124" depthSign="true" id="8"/>
+    <BodyJoint x="370" y="47" depthSign="false" id="9"/>
+    <BodyJoint x="394" y="68" depthSign="false" id="10"/>
+    <BodyJoint x="405" y="41" depthSign="true" id="11"/>
+    <BodyJoint x="402" y="146" depthSign="false" id="12"/>
+    <BodyJoint x="428" y="151" depthSign="true" id="13"/>
+    <BodyJoint x="401" y="75" depthSign="false" id="14"/>
+    <BodyJoint x="414" y="27" depthSign="true" id="15"/>
+    <BodyJoint x="384" y="157" depthSign="false" id="16"/>
+    <BodyJoint x="414" y="164" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0081.camu" gpY="" imgPath="0081.png" id="81" maskPath="mask0081.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="414" y="96" depthSign="false" id="0"/>
+    <BodyJoint x="380" y="62" depthSign="false" id="1"/>
+    <BodyJoint x="414" y="97" depthSign="false" id="2"/>
+    <BodyJoint x="415" y="96" depthSign="true" id="3"/>
+    <BodyJoint x="374" y="58" depthSign="false" id="4"/>
+    <BodyJoint x="379" y="66" depthSign="false" id="5"/>
+    <BodyJoint x="388" y="53" depthSign="true" id="6"/>
+    <BodyJoint x="364" y="117" depthSign="false" id="7"/>
+    <BodyJoint x="380" y="121" depthSign="true" id="8"/>
+    <BodyJoint x="361" y="48" depthSign="false" id="9"/>
+    <BodyJoint x="388" y="74" depthSign="false" id="10"/>
+    <BodyJoint x="405" y="44" depthSign="true" id="11"/>
+    <BodyJoint x="397" y="146" depthSign="false" id="12"/>
+    <BodyJoint x="419" y="147" depthSign="true" id="13"/>
+    <BodyJoint x="401" y="82" depthSign="false" id="14"/>
+    <BodyJoint x="421" y="34" depthSign="true" id="15"/>
+    <BodyJoint x="380" y="156" depthSign="false" id="16"/>
+    <BodyJoint x="406" y="159" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0082.camu" gpY="" imgPath="0082.png" id="82" maskPath="mask0082.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="412" y="94" depthSign="false" id="0"/>
+    <BodyJoint x="376" y="63" depthSign="false" id="1"/>
+    <BodyJoint x="412" y="95" depthSign="false" id="2"/>
+    <BodyJoint x="411" y="95" depthSign="true" id="3"/>
+    <BodyJoint x="367" y="58" depthSign="false" id="4"/>
+    <BodyJoint x="376" y="71" depthSign="false" id="5"/>
+    <BodyJoint x="385" y="52" depthSign="true" id="6"/>
+    <BodyJoint x="361" y="114" depthSign="false" id="7"/>
+    <BodyJoint x="374" y="119" depthSign="true" id="8"/>
+    <BodyJoint x="356" y="50" depthSign="false" id="9"/>
+    <BodyJoint x="388" y="77" depthSign="false" id="10"/>
+    <BodyJoint x="402" y="46" depthSign="true" id="11"/>
+    <BodyJoint x="391" y="145" depthSign="false" id="12"/>
+    <BodyJoint x="408" y="143" depthSign="true" id="13"/>
+    <BodyJoint x="399" y="89" depthSign="false" id="14"/>
+    <BodyJoint x="420" y="42" depthSign="true" id="15"/>
+    <BodyJoint x="375" y="156" depthSign="false" id="16"/>
+    <BodyJoint x="397" y="154" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0083.camu" gpY="" imgPath="0083.png" id="83" maskPath="mask0083.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="409" y="96" depthSign="false" id="0"/>
+    <BodyJoint x="370" y="66" depthSign="false" id="1"/>
+    <BodyJoint x="410" y="101" depthSign="false" id="2"/>
+    <BodyJoint x="407" y="99" depthSign="true" id="3"/>
+    <BodyJoint x="363" y="61" depthSign="false" id="4"/>
+    <BodyJoint x="372" y="74" depthSign="false" id="5"/>
+    <BodyJoint x="378" y="56" depthSign="true" id="6"/>
+    <BodyJoint x="356" y="112" depthSign="false" id="7"/>
+    <BodyJoint x="367" y="116" depthSign="true" id="8"/>
+    <BodyJoint x="350" y="52" depthSign="false" id="9"/>
+    <BodyJoint x="382" y="81" depthSign="false" id="10"/>
+    <BodyJoint x="394" y="53" depthSign="true" id="11"/>
+    <BodyJoint x="386" y="145" depthSign="false" id="12"/>
+    <BodyJoint x="401" y="141" depthSign="true" id="13"/>
+    <BodyJoint x="392" y="95" depthSign="false" id="14"/>
+    <BodyJoint x="418" y="49" depthSign="true" id="15"/>
+    <BodyJoint x="369" y="153" depthSign="false" id="16"/>
+    <BodyJoint x="387" y="148" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0084.camu" gpY="" imgPath="0084.png" id="84" maskPath="mask0084.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="408" y="97" depthSign="false" id="0"/>
+    <BodyJoint x="365" y="66" depthSign="false" id="1"/>
+    <BodyJoint x="408" y="99" depthSign="false" id="2"/>
+    <BodyJoint x="407" y="100" depthSign="true" id="3"/>
+    <BodyJoint x="358" y="63" depthSign="false" id="4"/>
+    <BodyJoint x="366" y="72" depthSign="false" id="5"/>
+    <BodyJoint x="376" y="57" depthSign="true" id="6"/>
+    <BodyJoint x="356" y="112" depthSign="false" id="7"/>
+    <BodyJoint x="367" y="116" depthSign="true" id="8"/>
+    <BodyJoint x="344" y="58" depthSign="false" id="9"/>
+    <BodyJoint x="376" y="87" depthSign="false" id="10"/>
+    <BodyJoint x="395" y="54" depthSign="true" id="11"/>
+    <BodyJoint x="380" y="142" depthSign="false" id="12"/>
+    <BodyJoint x="395" y="136" depthSign="true" id="13"/>
+    <BodyJoint x="384" y="100" depthSign="false" id="14"/>
+    <BodyJoint x="413" y="59" depthSign="true" id="15"/>
+    <BodyJoint x="361" y="152" depthSign="false" id="16"/>
+    <BodyJoint x="379" y="140" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0085.camu" gpY="" imgPath="0085.png" id="85" maskPath="mask0085.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="402" y="98" depthSign="false" id="0"/>
+    <BodyJoint x="356" y="69" depthSign="false" id="1"/>
+    <BodyJoint x="403" y="102" depthSign="false" id="2"/>
+    <BodyJoint x="403" y="103" depthSign="true" id="3"/>
+    <BodyJoint x="351" y="65" depthSign="false" id="4"/>
+    <BodyJoint x="362" y="79" depthSign="false" id="5"/>
+    <BodyJoint x="369" y="63" depthSign="true" id="6"/>
+    <BodyJoint x="348" y="110" depthSign="false" id="7"/>
+    <BodyJoint x="346" y="104" depthSign="true" id="8"/>
+    <BodyJoint x="341" y="59" depthSign="false" id="9"/>
+    <BodyJoint x="370" y="87" depthSign="false" id="10"/>
+    <BodyJoint x="388" y="59" depthSign="true" id="11"/>
+    <BodyJoint x="375" y="143" depthSign="false" id="12"/>
+    <BodyJoint x="387" y="134" depthSign="true" id="13"/>
+    <BodyJoint x="376" y="101" depthSign="false" id="14"/>
+    <BodyJoint x="408" y="69" depthSign="true" id="15"/>
+    <BodyJoint x="356" y="148" depthSign="false" id="16"/>
+    <BodyJoint x="370" y="137" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0086.camu" gpY="" imgPath="0086.png" id="86" maskPath="mask0086.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="398" y="99" depthSign="false" id="0"/>
+    <BodyJoint x="352" y="73" depthSign="false" id="1"/>
+    <BodyJoint x="397" y="103" depthSign="false" id="2"/>
+    <BodyJoint x="397" y="105" depthSign="true" id="3"/>
+    <BodyJoint x="345" y="70" depthSign="false" id="4"/>
+    <BodyJoint x="353" y="80" depthSign="false" id="5"/>
+    <BodyJoint x="364" y="67" depthSign="true" id="6"/>
+    <BodyJoint x="340" y="107" depthSign="false" id="7"/>
+    <BodyJoint x="341" y="99" depthSign="true" id="8"/>
+    <BodyJoint x="332" y="65" depthSign="false" id="9"/>
+    <BodyJoint x="363" y="89" depthSign="false" id="10"/>
+    <BodyJoint x="380" y="61" depthSign="true" id="11"/>
+    <BodyJoint x="368" y="141" depthSign="false" id="12"/>
+    <BodyJoint x="376" y="132" depthSign="true" id="13"/>
+    <BodyJoint x="367" y="105" depthSign="false" id="14"/>
+    <BodyJoint x="399" y="74" depthSign="true" id="15"/>
+    <BodyJoint x="348" y="149" depthSign="false" id="16"/>
+    <BodyJoint x="359" y="138" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0087.camu" gpY="" imgPath="0087.png" id="87" maskPath="mask0087.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="395" y="101" depthSign="false" id="0"/>
+    <BodyJoint x="345" y="76" depthSign="false" id="1"/>
+    <BodyJoint x="391" y="107" depthSign="false" id="2"/>
+    <BodyJoint x="398" y="104" depthSign="true" id="3"/>
+    <BodyJoint x="341" y="74" depthSign="false" id="4"/>
+    <BodyJoint x="350" y="82" depthSign="false" id="5"/>
+    <BodyJoint x="362" y="69" depthSign="true" id="6"/>
+    <BodyJoint x="337" y="105" depthSign="false" id="7"/>
+    <BodyJoint x="337" y="97" depthSign="true" id="8"/>
+    <BodyJoint x="326" y="67" depthSign="false" id="9"/>
+    <BodyJoint x="354" y="97" depthSign="false" id="10"/>
+    <BodyJoint x="375" y="68" depthSign="true" id="11"/>
+    <BodyJoint x="359" y="141" depthSign="false" id="12"/>
+    <BodyJoint x="367" y="131" depthSign="true" id="13"/>
+    <BodyJoint x="356" y="122" depthSign="false" id="14"/>
+    <BodyJoint x="393" y="79" depthSign="true" id="15"/>
+    <BodyJoint x="334" y="148" depthSign="false" id="16"/>
+    <BodyJoint x="347" y="136" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+  <Frame gpX="" camPath="0088.camu" gpY="" imgPath="0088.png" id="88" maskPath="mask0088.pgm" isKeyframe="true">
+   <BodyJoints>
+    <BodyJoint x="389" y="103" depthSign="false" id="0"/>
+    <BodyJoint x="344" y="78" depthSign="false" id="1"/>
+    <BodyJoint x="386" y="109" depthSign="false" id="2"/>
+    <BodyJoint x="388" y="107" depthSign="true" id="3"/>
+    <BodyJoint x="335" y="75" depthSign="false" id="4"/>
+    <BodyJoint x="344" y="85" depthSign="false" id="5"/>
+    <BodyJoint x="355" y="72" depthSign="true" id="6"/>
+    <BodyJoint x="331" y="104" depthSign="false" id="7"/>
+    <BodyJoint x="333" y="96" depthSign="true" id="8"/>
+    <BodyJoint x="321" y="71" depthSign="false" id="9"/>
+    <BodyJoint x="348" y="103" depthSign="false" id="10"/>
+    <BodyJoint x="370" y="69" depthSign="true" id="11"/>
+    <BodyJoint x="348" y="141" depthSign="false" id="12"/>
+    <BodyJoint x="348" y="131" depthSign="true" id="13"/>
+    <BodyJoint x="351" y="125" depthSign="false" id="14"/>
+    <BodyJoint x="388" y="85" depthSign="true" id="15"/>
+    <BodyJoint x="323" y="144" depthSign="false" id="16"/>
+    <BodyJoint x="328" y="134" depthSign="true" id="17"/>
+   </BodyJoints>
+   <BodyParts>
+    <BodyPart isOccluded="false" id="0"/>
+    <BodyPart isOccluded="false" id="1"/>
+    <BodyPart isOccluded="false" id="2"/>
+    <BodyPart isOccluded="false" id="3"/>
+    <BodyPart isOccluded="false" id="4"/>
+    <BodyPart isOccluded="false" id="5"/>
+    <BodyPart isOccluded="false" id="6"/>
+    <BodyPart isOccluded="false" id="7"/>
+    <BodyPart isOccluded="false" id="8"/>
+    <BodyPart isOccluded="false" id="9"/>
+    <BodyPart isOccluded="false" id="10"/>
+    <BodyPart isOccluded="false" id="11"/>
+    <BodyPart isOccluded="false" id="12"/>
+    <BodyPart isOccluded="false" id="13"/>
+    <BodyPart isOccluded="false" id="14"/>
+    <BodyPart isOccluded="false" id="15"/>
+    <BodyPart isOccluded="false" id="16"/>
+   </BodyParts>
+  </Frame>
+ </Frames>
+</Project>
