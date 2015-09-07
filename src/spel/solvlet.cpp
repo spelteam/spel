@@ -17,7 +17,7 @@ namespace SPEL
   {
   }
 
-  Solvlet &Solvlet::operator=(const Solvlet &s)
+  Solvlet &Solvlet:: operator=(const Solvlet &s)
   {
     if (this == &s)
     {

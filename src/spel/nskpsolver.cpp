@@ -60,9 +60,9 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
         vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism, trees, ignore);
 
         //add the new solves to the return vector
-        for (vector<Solvlet>::iterator s = sol.begin(); s != sol.end(); ++s)
+        for (auto s: sol)
         {
-            solvlets.push_back(*s);
+            solvlets.push_back(s);
         }
 
         //calculate number of lockframes in the sequence
@@ -97,6 +97,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
     }
     //the params map should countain all necessary parameters for solving, if they don't exist, default values should be used
 
+    sort(solvlets.begin(), solvlets.end());
     return solvlets;
 }
 
@@ -560,7 +561,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
 
     vector<vector<SolvletScore> > allSolves;
 
-    for (int i = 0; i < frames.size(); ++i)
+    for (uint32_t i = 0; i < frames.size(); ++i)
     {
         allSolves.push_back(vector<SolvletScore>()); //empty vector to every frame slot
     }
@@ -672,7 +673,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
         {
             delete frames[lockframes[i]->getID()]; //delete the frame currently there, and replace with lockframe
             frames[lockframes[i]->getID()] = lockframes.at(i); //make pointers point to the correct objects
-            solvlets.push_back(bestSolves[i].solvlet);
+            solvlets.push_back(bestSolves.at(lockframes.at(i)->getID()).solvlet);
         } //unless this lockframe replaced something in the original vector, delte it
         else
         {
