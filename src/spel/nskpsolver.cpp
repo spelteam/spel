@@ -35,7 +35,7 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float> params)
 vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params, const ImageSimilarityMatrix& ism)//, function<float(float)> progressFunc) //inherited virtual
 {
     //parametrise the number of times frames get propagated
-    params.emplace("nskpIters", 2); //set number of iterations, 0 to iterate until no new lockframes are introduced
+    params.emplace("nskpIters", 0); //set number of iterations, 0 to iterate until no new lockframes are introduced
 
     uint32_t nskpIters = params.at("nskpIters");
     if (nskpIters == 0)
@@ -623,36 +623,31 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
     //END --------------------------------------------------------------------------------
 
     //now extract the best solves
-    vector<SolvletScore> bestSolves;
+    map<uint32_t, SolvletScore> bestSolves;
 
     float acceptLockframeThreshold = params.at("nskpLockframeThreshold");
 
-    for (int i = 0; i < allSolves.size(); ++i)
+    for(auto frameSolves: allSolves)
     {
-        Point2f max(0, -1); //score, index
-        for (int j = 0; j<allSolves[i].size(); ++j)
+        for(auto solve:frameSolves)
         {
-            SolvletScore ss = allSolves[i].at(j);
-            if (ss.score>max.x)
+            if(solve.score>=acceptLockframeThreshold)
             {
-                max.x = ss.score;
-                max.y = j;
-            }
-        }
+                bestSolves.emplace(solve.solvlet.getFrameID(), solve); //emplace this solve if one isn't in there yet
 
-        if (max.x != 0 && max.y != -1) //then we found some kind of a solution
-        {
-            if (allSolves[i].at(max.y).score >= acceptLockframeThreshold)
-                bestSolves.push_back(allSolves[i].at(max.y));
+                if(solve.score > bestSolves.at(solve.solvlet.getFrameID()).score) //now compare to solve in the map
+                    bestSolves.at(solve.solvlet.getFrameID()) = solve; //replace with this one if it's better
+            }
         }
     }
 
     //now create skeletons for these solves
 
-    for (int i = 0; i < bestSolves.size(); ++i)
+    for (auto bs: bestSolves)
     {
-        int thisFrameID = bestSolves[i].solvlet.getFrameID();
-        int parentFrameID = bestSolves[i].parentFrame;//the ID of the frame the solve prior came from
+        SolvletScore ss = bs.second;
+        int thisFrameID = ss.solvlet.getFrameID();
+        int parentFrameID = ss.parentFrame;//the ID of the frame the solve prior came from
 
 
         Lockframe * lockframe = new Lockframe();
@@ -660,7 +655,7 @@ vector<Solvlet> NSKPSolver::propagateKeyframes(vector<Frame*>& frames, map<strin
         lockframe->setMask(frames[thisFrameID]->getMask());
         lockframe->setID(thisFrameID);
         Skeleton parentSkel = frames[parentFrameID]->getSkeleton();
-        Skeleton skel = bestSolves[i].solvlet.toSkeleton(parentSkel);
+        Skeleton skel = ss.solvlet.toSkeleton(parentSkel);
         //parent skeleton is the basis, this will copy scale and other params, but have different locations
         lockframe->setSkeleton(skel);
         lockframe->setParentFrameID(parentFrameID);
