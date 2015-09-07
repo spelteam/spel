@@ -797,6 +797,19 @@ int main (int argc, char **argv)
                 numIters++;
 
             } while(finalSolve.size()>prevSolveSize && numIters<params.at("hybridIters")); //don't do more iters than necessary
+
+            //now do the final TLPSSolve
+            //then, do a temporal solve
+            seq.estimateUniformScale(params);
+            seq.computeInterpolation(params); //recompute interpolation (does this improve results?)
+            params.at("tlpsLockframeThreshold") = 0.0; //set the threshold to zero, to get solves for the currently unsolved frames
+
+            vector<Solvlet> tlpsSolve = tSolver.solve(seq, params);
+
+            for(auto s: tlpsSolve)
+                finalSolve.push_back(s);
+
+
             fSolve = finalSolve;
         }
         else if(solverName=="3Dint")
