@@ -67,9 +67,9 @@ vector<Solvlet> NSKPSolver::solve(Sequence& sequence, map<string, float>  params
 
         //calculate number of lockframes in the sequence
         uint32_t numLockframes = 0;
-        for (vector<Frame*>::iterator frameIter = propagatedFrames.begin(); frameIter != propagatedFrames.end(); ++frameIter)
+        for (auto frameIter:propagatedFrames)
         {
-            if ((*frameIter)->getFrametype() == LOCKFRAME)
+            if (frameIter->getFrametype() == LOCKFRAME)
                 numLockframes++;
         }
 
@@ -542,6 +542,7 @@ vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const v
         detectors.clear();
         ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
     }
+
 
     return allSolves;
 }
