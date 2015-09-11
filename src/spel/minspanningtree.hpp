@@ -18,10 +18,6 @@
 
 namespace SPEL
 {
-  using namespace std;
-  using namespace cv;
-  using namespace kptree;
-
   class MinSpanningTree
   {
   public:

@@ -162,10 +162,10 @@ namespace SPEL
     template <typename D> 
     void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy)
     {
-      minx = min(min(point1.x, point2.x), min(point3.x, point4.x));
-      maxx = max(max(point1.x, point2.x), max(point3.x, point4.x));
-      miny = min(min(point1.y, point2.y), min(point3.y, point4.y));
-      maxy = max(max(point1.y, point2.y), max(point3.y, point4.y));
+      minx = std::min(std::min(point1.x, point2.x), std::min(point3.x, point4.x));
+      maxx = std::max(std::max(point1.x, point2.x), std::max(point3.x, point4.x));
+      miny = std::min(std::min(point1.y, point2.y), std::min(point3.y, point4.y));
+      maxy = std::max(std::max(point1.y, point2.y), std::max(point3.y, point4.y));
     }
 
     template <typename D> 
@@ -176,7 +176,7 @@ namespace SPEL
       float dist = (float)sqrt(spelHelper::distSquared(center1, center2));
       if (dist > 0.001)
       {
-        throw logic_error("Rect center couldn't be found");
+        throw std::logic_error("Rect center couldn't be found");
       }
       else
       {

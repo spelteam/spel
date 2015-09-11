@@ -17,9 +17,9 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find partHistogram " << "[" << r << "]";
-        throw logic_error(ss.str());
+        throw std::logic_error(ss.str());
       }
       try
       {
@@ -27,9 +27,9 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find bgHistogram " << "[" << r << "]";
-        throw logic_error(ss.str());
+        throw std::logic_error(ss.str());
       }
       for (uint8_t g = 0; g < nBins; g++)
       {
@@ -39,9 +39,9 @@ namespace SPEL
         }
         catch (...)
         {
-          stringstream ss;
+          std::stringstream ss;
           ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "]";
-          throw logic_error(ss.str());
+          throw std::logic_error(ss.str());
         }
         try
         {
@@ -49,9 +49,9 @@ namespace SPEL
         }
         catch (...)
         {
-          stringstream ss;
+          std::stringstream ss;
           ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "]";
-          throw logic_error(ss.str());
+          throw std::logic_error(ss.str());
         }
         for (int b = 0; b < nBins; b++)
         {
@@ -61,9 +61,9 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            throw logic_error(ss.str());
+            throw std::logic_error(ss.str());
           }
           try
           {
@@ -71,9 +71,9 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            throw logic_error(ss.str());
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -124,7 +124,7 @@ namespace SPEL
   }
 
   // Builds a histograms of all polygons for pre-marked frames
-  void ColorHistDetector::train(vector <Frame*> _frames, map <string, float> params)
+  void ColorHistDetector::train(std::vector <Frame*> _frames, std::map <std::string, float> params)
   {
     frames = _frames; // vector of pointers - presents a sequence of frames
     sort(frames.begin(), frames.end(), Frame::FramePointerComparer); // sorting frames by id
@@ -135,7 +135,7 @@ namespace SPEL
 #else
     const uint8_t debugLevel = 1;
 #endif // DEBUG
-    const string sDebugLevel = "debugLevel";
+    const std::string sDebugLevel = "debugLevel";
     // first we need to check all used params
     //params.emplace(sScaleParam, scaleParam);
     params.emplace(sDebugLevel, debugLevel);
@@ -143,19 +143,19 @@ namespace SPEL
     debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
     if (frames.size() == 0)
-      throw logic_error("No input frames"); // the sequence of frames is empty
+      throw std::logic_error("No input frames"); // the sequence of frames is empty
     partModels.clear();
     // Find skeleton from first keyframe or lockframe
     Skeleton skeleton;
 
-    const string sMaxFrameHeight = "maxFrameHeight";
+    const std::string sMaxFrameHeight = "maxFrameHeight";
 
     params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
 
     maxFrameHeight = params.at(sMaxFrameHeight);
 
     bool bFind = false; // flag, indicate the presence of marked frame in the sequence
-    for (vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
+    for (std::vector <Frame*>::iterator i = frames.begin(); i != frames.end(); ++i)
     {
       Frame *f = *i;
       if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
@@ -168,13 +168,13 @@ namespace SPEL
     if (bFind == false)
     {
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << "No neither keyframes nor lockframes" << endl;
-      throw logic_error("No neither keyframes nor lockframes");
+        std::cerr << ERROR_HEADER << "No neither keyframes nor lockframes" << std::endl;
+      throw std::logic_error("No neither keyframes nor lockframes");
     }
 
     tree <BodyPart> partTree;
     // Handling all frames
-    for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
+    for (std::vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
     {
       if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
       {
@@ -196,29 +196,29 @@ namespace SPEL
       workFrame->Resize(params.at(sMaxFrameHeight));
 
       if (debugLevelParam >= 2)
-        cerr << "Training on frame " << workFrame->getID() << endl;
+        std::cerr << "Training on frame " << workFrame->getID() << std::endl;
       // Create local variables
-      map <int32_t, vector <Point3i>> partPixelColours; // the set of RGB-colours of pixel's for current body part
-      map <int32_t, vector <Point3i>> bgPixelColours; // the set of RGB-colours for a pixels of background
-      map <int32_t, int> blankPixels;  // pixels outside the mask
+      std::map <int32_t, std::vector <cv::Point3i>> partPixelColours; // the set of RGB-colours of pixel's for current body part
+      std::map <int32_t, std::vector <cv::Point3i>> bgPixelColours; // the set of RGB-colours for a pixels of background
+      std::map <int32_t, int> blankPixels;  // pixels outside the mask
       skeleton = workFrame->getSkeleton(); // copy marking from current frame
-      multimap <int32_t, POSERECT <Point2f>> polygons;  // polygons for this frame
-      multimap <int32_t, float> polyDepth; // used for evaluation of overlapped polygons
+      std::multimap <int32_t, POSERECT <cv::Point2f>> polygons;  // polygons for this frame
+      std::multimap <int32_t, float> polyDepth; // used for evaluation of overlapped polygons
       partTree = skeleton.getPartTree(); // the skeleton body parts
       // Handling all bodyparts on the frames
       for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
       {
-        partPixelColours.insert(pair <int32_t, vector <Point3i>>(iteratorBodyPart->getPartID(), vector <Point3i>())); // container initialization for conserve colours set for each of body parts
-        bgPixelColours.insert(pair <int32_t, vector <Point3i>>(iteratorBodyPart->getPartID(), vector <Point3i>())); // container initialization for conserve background colours set for each of body parts
-        blankPixels.insert(pair <int32_t, int>(iteratorBodyPart->getPartID(), 0)); // container initialization for counting blank pixels for each of body parts
-        Point2f j1, j0;  // temporary adjacent joints   
+        partPixelColours.insert(std::pair <int32_t, std::vector <cv::Point3i>>(iteratorBodyPart->getPartID(), std::vector <cv::Point3i>())); // container initialization for conserve colours set for each of body parts
+        bgPixelColours.insert(std::pair <int32_t, std::vector <cv::Point3i>>(iteratorBodyPart->getPartID(), std::vector <cv::Point3i>())); // container initialization for conserve background colours set for each of body parts
+        blankPixels.insert(std::pair <int32_t, int>(iteratorBodyPart->getPartID(), 0)); // container initialization for counting blank pixels for each of body parts
+        cv::Point2f j1, j0;  // temporary adjacent joints   
         BodyJoint *joint = 0; // temporary conserve a joints
         joint = skeleton.getBodyJoint(iteratorBodyPart->getParentJoint()); // the parent node of current body part pointer 
 
         if (joint == 0)
         {
           if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << "Invalid parent joint" << endl;
+            std::cerr << ERROR_HEADER << "Invalid parent joint" << std::endl;
           break; // a joint has no marking on the frame
         }
         j0 = joint->getImageLocation(); // coordinates of current joint
@@ -227,7 +227,7 @@ namespace SPEL
         if (joint == 0)
         {
           if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << "Invalid child joint" << endl;
+            std::cerr << ERROR_HEADER << "Invalid child joint" << std::endl;
           break; // a joint has no marking on the frame
         }
         j1 = joint->getImageLocation(); // coordinates of current joint
@@ -240,40 +240,40 @@ namespace SPEL
         }
         catch (...)
         {
-          stringstream ss;
+          std::stringstream ss;
           ss << "Can't get LWRatio value";
           if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << ss.str() << endl;
-          throw logic_error(ss.str());
+            std::cerr << ERROR_HEADER << ss.str() << std::endl;
+          throw std::logic_error(ss.str());
         }
-        Point2f direction = j1 - j0; // used as estimation of the vector's direction
+        cv::Point2f direction = j1 - j0; // used as estimation of the vector's direction
         float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
         iteratorBodyPart->setRotationSearchRange(rotationAngle);
-        POSERECT <Point2f> poserect = getBodyPartRect(*iteratorBodyPart, j0, j1);
-        polygons.insert(pair <int32_t, POSERECT <Point2f>>(iteratorBodyPart->getPartID(), poserect));
-        polyDepth.insert(pair <int32_t, float>(iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getSpaceLocation().z));
+        POSERECT <cv::Point2f> poserect = getBodyPartRect(*iteratorBodyPart, j0, j1);
+        polygons.insert(std::pair <int32_t, POSERECT <cv::Point2f>>(iteratorBodyPart->getPartID(), poserect));
+        polyDepth.insert(std::pair <int32_t, float>(iteratorBodyPart->getPartID(), skeleton.getBodyJoint(iteratorBodyPart->getParentJoint())->getSpaceLocation().z));
       }
       skeleton.setPartTree(partTree);
       workFrame->setSkeleton(skeleton);
-      Mat maskMat = workFrame->getMask(); // copy mask from the current frame
-      Mat imgMat = workFrame->getImage(); // copy image from the current frame
+      cv::Mat maskMat = workFrame->getMask(); // copy mask from the current frame
+      cv::Mat imgMat = workFrame->getImage(); // copy image from the current frame
       // Range over all pixels of the frame
       for (int32_t i = 0; i < imgMat.cols; i++)
       {
         for (int32_t j = 0; j < imgMat.rows; j++)
         {
-          Vec3b intensity;
+          cv::Vec3b intensity;
           try
           {
-            intensity = imgMat.at<Vec3b>(j, i);  // copy RGB color of current pixel
+            intensity = imgMat.at<cv::Vec3b>(j, i);  // copy RGB color of current pixel
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't get imgMat value of indeces " << "[" << j << "][" << i << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
           // Copy the current pixel colour components
           uint8_t blue = intensity.val[0];
@@ -286,11 +286,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't get maskMat value of indeces " << "[" << j << "][" << i << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
           bool blackPixel = mintensity < 10;
           int partHit = -1; // will be equal to -1 until is not found polygon, which contains the point
@@ -302,14 +302,14 @@ namespace SPEL
             bool bContainsPoint = false;
             try
             {
-              vector <POSERECT <Point2f>> partPolygons;
+              std::vector <POSERECT <cv::Point2f>> partPolygons;
               // Copy poligons to "PartPoligons"
-              multimap <int32_t, POSERECT <Point2f>>::iterator lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
-              transform(lower, upper, back_inserter(partPolygons), [](std::pair <int32_t, POSERECT<Point2f>> const &pair) { return pair.second; });
+              std::multimap <int32_t, POSERECT <cv::Point2f>>::iterator lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
+              transform(lower, upper, back_inserter(partPolygons), [](std::pair <int32_t, POSERECT<cv::Point2f>> const &pair) { return pair.second; });
               // Checking whether a pixel belongs to the current and to another polygons            
-              for (vector <POSERECT <Point2f>>::iterator iteratorPartPolygons = partPolygons.begin(); iteratorPartPolygons != partPolygons.end(); ++iteratorPartPolygons)
+              for (std::vector <POSERECT <cv::Point2f>>::iterator iteratorPartPolygons = partPolygons.begin(); iteratorPartPolygons != partPolygons.end(); ++iteratorPartPolygons)
               {
-                if ((bContainsPoint = iteratorPartPolygons->containsPoint(Point2f((float)i, (float)j)) > 0) == true)
+                if ((bContainsPoint = iteratorPartPolygons->containsPoint(cv::Point2f((float)i, (float)j)) > 0) == true)
                 {
                   break;; // was found polygon, which contain current pixel
                 }
@@ -317,19 +317,19 @@ namespace SPEL
             }
             catch (...)
             {
-              stringstream ss;
+              std::stringstream ss;
               ss << "There is no such polygon for body part " << partNumber;
               if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
+                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              throw std::logic_error(ss.str());
             }
             try
             {
-              vector <float> partDepths;
-              multimap <int32_t, float>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);
+              std::vector <float> partDepths;
+              std::multimap <int32_t, float>::iterator lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);
               transform(lower, upper, back_inserter(partDepths), [](std::pair <int32_t, bool> const &pair) { return pair.second; }); // copy "polyDepth" to "PartDepth"
               // Checkig polygons overlapping
-              for (vector <float>::iterator iteratorPartDepths = partDepths.begin(); iteratorPartDepths != partDepths.end(); ++iteratorPartDepths)
+              for (std::vector <float>::iterator iteratorPartDepths = partDepths.begin(); iteratorPartDepths != partDepths.end(); ++iteratorPartDepths)
               {
                 if (bContainsPoint && partHit == -1)
                 {
@@ -345,11 +345,11 @@ namespace SPEL
             }
             catch (...)
             {
-              stringstream ss;
+              std::stringstream ss;
               ss << "There is no such polyDepth parameter for body part " << partNumber;
               if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
+                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              throw std::logic_error(ss.str());
             }
           }
           if (partHit != -1) // if was found polygon, that contains this pixel
@@ -358,15 +358,15 @@ namespace SPEL
             {
               try
               {
-                partPixelColours.at(partHit).push_back(Point3i(red, green, blue)); // add colour of this pixel to part[partHit] colours
+                partPixelColours.at(partHit).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] colours
               }
               catch (...)
               {
-                stringstream ss;
+                std::stringstream ss;
                 ss << "There is no partPixelColours for body part " << partHit;
                 if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                throw logic_error(ss.str());
+                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                throw std::logic_error(ss.str());
               }
               // For all bodyparts
               for (tree <BodyPart>::iterator p = partTree.begin(); p != partTree.end(); ++p)
@@ -375,15 +375,15 @@ namespace SPEL
                 {
                   try
                   {
-                    bgPixelColours.at(p->getPartID()).push_back(Point3i(red, green, blue)); // add colour of this pixel to part[partHit] background colours
+                    bgPixelColours.at(p->getPartID()).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] background colours
                   }
                   catch (...)
                   {
-                    stringstream ss;
+                    std::stringstream ss;
                     ss << "There is no such bgPixelColours for body part " << p->getPartID();
                     if (debugLevelParam >= 1)
-                      cerr << ERROR_HEADER << ss.str() << endl;
-                    throw logic_error(ss.str());
+                      std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                    throw std::logic_error(ss.str());
                   }
                 }
               }
@@ -396,11 +396,11 @@ namespace SPEL
               }
               catch (...)
               {
-                stringstream ss;
+                std::stringstream ss;
                 ss << "There is no such blankPixels for body part " << partHit;
                 if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                throw logic_error(ss.str());
+                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                throw std::logic_error(ss.str());
               }
             }
           }
@@ -410,15 +410,15 @@ namespace SPEL
             {
               try
               {
-                bgPixelColours.at(p->getPartID()).push_back(Point3i(red, green, blue));
+                bgPixelColours.at(p->getPartID()).push_back(cv::Point3i(red, green, blue));
               }
               catch (...)
               {
-                stringstream ss;
+                std::stringstream ss;
                 ss << "There is no such bgPixelColours for body part " << p->getPartID();
                 if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                throw logic_error(ss.str());
+                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                throw std::logic_error(ss.str());
               }
             }
           }
@@ -432,13 +432,13 @@ namespace SPEL
         if (partModels.find(partNumber) == partModels.end())
         {
           PartModel model(nBins);
-          partModels.insert(pair <int32_t, PartModel>(partNumber, model)); //add a new model to end of models list
+          partModels.insert(std::pair <int32_t, PartModel>(partNumber, model)); //add a new model to end of models list
         }
         try
         {
           PartModel partModel = partModels.at(partNumber);
-          vector <Point3i> partPixelColoursVector; // temporary variable
-          vector <Point3i> bgPixelColoursVector; // temporary variable
+          std::vector <cv::Point3i> partPixelColoursVector; // temporary variable
+          std::vector <cv::Point3i> bgPixelColoursVector; // temporary variable
           int blankPixelsCount;
           try
           {
@@ -446,11 +446,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "There is no such partPixelColours for body part " << partNumber;
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
           try
           {
@@ -458,11 +458,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "There is no such blankPixels for body part " << partNumber;
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
           try
           {
@@ -470,25 +470,25 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "There is no such bgPixelColours for body part " << partNumber;
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
           addPartHistogram(partModel, partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
           addBackgroundHistogram(partModel, bgPixelColoursVector); // building histograms for current bodypart background colours
           partModels.at(partNumber) = partModel; // copy result to part models set
           if (debugLevelParam >= 2)
-            cerr << "Found part model: " << partNumber << endl;
+            std::cerr << "Found part model: " << partNumber << std::endl;
         }
         catch (...)
         {
-          stringstream ss;
+          std::stringstream ss;
           ss << "Could not find part model " << partNumber;
           if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << ss.str() << endl;
-          throw logic_error(ss.str());
+            std::cerr << ERROR_HEADER << ss.str() << std::endl;
+          throw std::logic_error(ss.str());
         }
 
       }
@@ -497,9 +497,9 @@ namespace SPEL
   }
 
   // Returns a labels vector of possible body parts position
-  map <uint32_t, vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels)
   {
-    const string sUseCSdet = "useCSdet";
+    const std::string sUseCSdet = "useCSdet";
 
     params.emplace(sUseCSdet, useCSdet);
 
@@ -542,16 +542,16 @@ namespace SPEL
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Couldn't find partHistogram " << "[" << (int)r / factor << "][" << (int)g / factor << "][" << (int)b / factor << "]";
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
   }
 
   // Build into the "partModel" a histogram of the color set "partColors"
-  void ColorHistDetector::setPartHistogram(PartModel &partModel, const vector <Point3i> &partColors)
+  void ColorHistDetector::setPartHistogram(PartModel &partModel, const std::vector <cv::Point3i> &partColors)
   {
     // do not add sample if the number of pixels is zero
     if (partColors.size() == 0)
@@ -575,11 +575,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -596,11 +596,11 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't get partColors with index " << i;
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
       try
       {
@@ -608,11 +608,11 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
     }
     for (uint8_t r = 0; r < partModel.nBins; r++)
@@ -628,11 +628,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -640,7 +640,7 @@ namespace SPEL
   }
 
   // Take stock of the additional set of colors in the histogram
-  void ColorHistDetector::addPartHistogram(PartModel &partModel, const vector <Point3i> &partColors, uint32_t nBlankPixels)
+  void ColorHistDetector::addPartHistogram(PartModel &partModel, const std::vector <cv::Point3i> &partColors, uint32_t nBlankPixels)
   {
     if (partColors.size() == 0) //do not add sample if the number of pixels is zero
       return;
@@ -657,11 +657,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -676,18 +676,18 @@ namespace SPEL
     // Adjustment of the histogram
     for (uint32_t i = 0; i < partColors.size(); i++)
     {
-      Point3i color;
+      cv::Point3i color;
       try
       {
         color = partColors.at(i);
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find partColor " << "[" << i << "]";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
       uint8_t r = static_cast<uint8_t> (color.x / factor);
       uint8_t g = static_cast<uint8_t> (color.y / factor);
@@ -698,11 +698,11 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
     }
 
@@ -720,11 +720,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -745,11 +745,11 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find fgSampleSizes " << "[" << i << "]";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
     }
     sum /= partModel.fgNumSamples;
@@ -767,11 +767,11 @@ namespace SPEL
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Couldn't find fgSampleSizes " << "[" << s1 << "] or fgSampleSizes [" << s2 << "]";
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
   }
 
@@ -793,11 +793,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -806,7 +806,7 @@ namespace SPEL
   }
 
   // Background histogram
-  void ColorHistDetector::addBackgroundHistogram(PartModel &partModel, const vector <Point3i> &bgColors)
+  void ColorHistDetector::addBackgroundHistogram(PartModel &partModel, const std::vector <cv::Point3i> &bgColors)
   {
     if (bgColors.size() == 0)
       return;
@@ -823,11 +823,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -838,18 +838,18 @@ namespace SPEL
     partModel.bgSampleSizes.push_back(static_cast <uint32_t> (bgColors.size()));
     for (uint32_t i = 0; i < bgColors.size(); i++)
     {
-      Point3i color;
+      cv::Point3i color;
       try
       {
         color = bgColors.at(i);
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find bgColors " << "[" << i << "]";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
       try
       {
@@ -857,11 +857,11 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find bgHistogram " << "[" << color.x / factor << "][" << color.y / factor << "][" << color.z / factor << "]";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
     }
     // renormalise
@@ -877,11 +877,11 @@ namespace SPEL
           }
           catch (...)
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
         }
       }
@@ -889,29 +889,29 @@ namespace SPEL
   }
 
   // Returns a matrix, that contains relative frequency of the pixels colors reiteration 
-  map <int32_t, Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
+  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
   {
     Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
     tree <BodyPart> partTree = skeleton.getPartTree(); // copy part tree from the skeleton
-    Mat imgMat = frame->getImage(); // copy image from the frame
-    Mat maskMat = frame->getMask(); // copy mask from the frame
+    cv::Mat imgMat = frame->getImage(); // copy image from the frame
+    cv::Mat maskMat = frame->getMask(); // copy mask from the frame
     uint32_t width = imgMat.cols;
     uint32_t height = imgMat.rows;
     uint32_t mwidth = maskMat.cols;
     uint32_t mheight = maskMat.rows;
-    map <int32_t, Mat> pixelDistributions;
+    std::map <int32_t, cv::Mat> pixelDistributions;
     if (width != mwidth || height != mheight) // error if mask and image sizes don't match
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Mask size not equal image size";
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
     // For all bodyparts
     for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
     {
-      Mat t = Mat(height, width, DataType <float>::type); // create empty matrix
+      cv::Mat t = cv::Mat(height, width, cv::DataType <float>::type); // create empty matrix
       int partID = iteratorBodyPart->getPartID();
       try
       {
@@ -921,7 +921,7 @@ namespace SPEL
         {
           for (uint32_t y = 0; y < height; y++)
           {
-            Vec3b intensity = imgMat.at<Vec3b>(y, x);
+            cv::Vec3b intensity = imgMat.at<cv::Vec3b>(y, x);
             // Copy components of the current pixel color
             uint8_t blue = intensity.val[0];
             uint8_t green = intensity.val[1];
@@ -935,42 +935,42 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Maybe couldn't find partModel " << partID;
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
-      pixelDistributions.insert(pair <int32_t, Mat>(partID, t)); // add the current bodypart matrix to the set 
+      pixelDistributions.insert(std::pair <int32_t, cv::Mat>(partID, t)); // add the current bodypart matrix to the set 
     }
     return pixelDistributions;
   }
 
 
-  map <int32_t, Mat> ColorHistDetector::buildPixelLabels(Frame *frame, map <int32_t, Mat> pixelDistributions)
+  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelLabels(Frame *frame, std::map <int32_t, cv::Mat> pixelDistributions)
   {
-    Mat maskMat = frame->getMask(); // copy mask from the frame
+    cv::Mat maskMat = frame->getMask(); // copy mask from the frame
     uint32_t width = maskMat.cols;
     uint32_t height = maskMat.rows;
     Skeleton skeleton = frame->getSkeleton(); // copy skeleton from the frame
     tree <BodyPart> partTree = skeleton.getPartTree(); // copy part tree from the skeleton
-    map <int32_t, Mat> pixelLabels;
+    std::map <int32_t, cv::Mat> pixelLabels;
     // For all body parts
     for (tree <BodyPart>::iterator iteratorBodyPart = partTree.begin(); iteratorBodyPart != partTree.end(); ++iteratorBodyPart)
     {
-      Mat t = Mat(height, width, DataType <float>::type); // create empty matrix
-      Mat tt;
+      cv::Mat t = cv::Mat(height, width, cv::DataType <float>::type); // create empty matrix
+      cv::Mat tt;
       try
       { // Matrix, that contains relative frequency of the pixels colors reiteration for current body part
         tt = pixelDistributions.at(iteratorBodyPart->getPartID());
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't find distributions for body part " << iteratorBodyPart->getPartID();
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
       // For all pixels
       for (uint32_t x = 0; x < width; x++)
@@ -986,18 +986,18 @@ namespace SPEL
             // For all body parts
             for (tree <BodyPart>::iterator i = partTree.begin(); i != partTree.end(); ++i)
             {
-              Mat temp;
+              cv::Mat temp;
               try
               {
                 temp = pixelDistributions.at(i->getPartID()); // matrix of the pixels colors frequency for current body part
               }
               catch (...)
               {
-                stringstream ss;
+                std::stringstream ss;
                 ss << "Couldn't find pixel distributions for body part " << i->getPartID();
                 if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                throw logic_error(ss.str());
+                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                throw std::logic_error(ss.str());
               }
               try
               {
@@ -1007,11 +1007,11 @@ namespace SPEL
               }
               catch (...)
               {
-                stringstream ss;
+                std::stringstream ss;
                 ss << "Couldn't find value of temp " << "[" << y << "][" << x << "]";
                 if (debugLevelParam >= 1)
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                throw logic_error(ss.str());
+                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                throw std::logic_error(ss.str());
               }
             }
             try
@@ -1020,11 +1020,11 @@ namespace SPEL
             }
             catch (...)
             {
-              stringstream ss;
+              std::stringstream ss;
               ss << "Couldn't find t " << "[" << y << "][" << x << "] or tt [" << y << "][" << x << "]";
               if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
+                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              throw std::logic_error(ss.str());
             }
           }
           else
@@ -1035,16 +1035,16 @@ namespace SPEL
             }
             catch (...)
             {
-              stringstream ss;
+              std::stringstream ss;
               ss << "Couldn't find value of t " << "[" << y << "][" << x << "]";
               if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
+                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              throw std::logic_error(ss.str());
             }
           }
         }
       }
-      pixelLabels.insert(pair<int32_t, Mat>(iteratorBodyPart->getPartID(), t)); // insert the resulting matrix into the set "pixelLabels" 
+      pixelLabels.insert(std::pair<int32_t, cv::Mat>(iteratorBodyPart->getPartID(), t)); // insert the resulting matrix into the set "pixelLabels" 
     }
     return pixelLabels;
   }
@@ -1053,40 +1053,40 @@ namespace SPEL
   {
     if (comparer_bodyPart == 0 || comparer_frame == 0 || comparer_j0 == 0 || comparer_j1 == 0)
     {
-      stringstream ss;
-      ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_frame == 0 ? "comparer_frame == 0 " : "") << (comparer_j0 == 0 ? "comparer_j0 == 0" : "") << (comparer_j1 == 0 ? "comparer_j1 == 0" : "") << endl;
+      std::stringstream ss;
+      ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_frame == 0 ? "comparer_frame == 0 " : "") << (comparer_j0 == 0 ? "comparer_j0 == 0" : "") << (comparer_j1 == 0 ? "comparer_j1 == 0" : "") << std::endl;
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
     try
     {
       return compare(*comparer_bodyPart, *comparer_frame, pixelDistributions, pixelLabels, *comparer_j0, *comparer_j1);
     }
-    catch (logic_error ex)
+    catch (std::logic_error ex)
     {
       if (debugLevelParam >= 1)
       {
-          string frameType;
+        std::string frameType;
           if((*comparer_frame)->getFrametype()==KEYFRAME)
               frameType="Keyframe";
           else if((*comparer_frame)->getFrametype()==LOCKFRAME)
               frameType="Lockframe";
           else
               frameType="Interpolation";
-        cerr << ERROR_HEADER << "Dirty Label: " << " Frame("<<frameType<< "): " << (*comparer_frame)->getID() << " Part: " << comparer_bodyPart->getPartID() << " " << ex.what() << endl;
+          std::cerr << ERROR_HEADER << "Dirty Label: " << " Frame("<<frameType<< "): " << (*comparer_frame)->getID() << " Part: " << comparer_bodyPart->getPartID() << " " << ex.what() << std::endl;
       }
       return -1.0f;
     }
   }
 
-  float ColorHistDetector::compare(BodyPart bodyPart, Frame *frame, map <int32_t, Mat> pixelDistributions, map <int32_t, Mat> pixelLabels, Point2f j0, Point2f j1)
+  float ColorHistDetector::compare(BodyPart bodyPart, Frame *frame, std::map <int32_t, cv::Mat> pixelDistributions, std::map <int32_t, cv::Mat> pixelLabels, cv::Point2f j0, cv::Point2f j1)
   {
-    Mat maskMat = frame->getMask(); // copy mask from the frame 
-    Mat imgMat = frame->getImage(); // copy image from the frame
-    Point2f boxCenter = j0 * 0.5 + j1 * 0.5; // segment center
+    cv::Mat maskMat = frame->getMask(); // copy mask from the frame 
+    cv::Mat imgMat = frame->getImage(); // copy image from the frame
+    cv::Point2f boxCenter = j0 * 0.5 + j1 * 0.5; // segment center
     float boneLength = getBoneLength(j0, j1); // distance between joints
-    POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1); // expected bodypart location area?
+    POSERECT <cv::Point2f> rect = getBodyPartRect(bodyPart, j0, j1); // expected bodypart location area?
     uint32_t totalPixels = 0;
     uint32_t pixelsInMask = 0;
     float totalPixelLabelScore = 0;
@@ -1099,47 +1099,47 @@ namespace SPEL
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Couldn't get partModel of bodyPart " << bodyPart.getPartID();
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
     if (getAvgSampleSizeFg(model) == 0) // error if samples count is zero
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Couldn't get avgSampleSizeFg";
       if (debugLevelParam >= 2)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
-    Mat bodyPartPixelDistribution;
+    cv::Mat bodyPartPixelDistribution;
     try
     {
       bodyPartPixelDistribution = pixelDistributions.at(bodyPart.getPartID());
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "]";
       if (debugLevelParam >= 2)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
-    Mat bodyPartLixelLabels;
+    cv::Mat bodyPartLixelLabels;
     try
     {
       bodyPartLixelLabels = pixelLabels.at(bodyPart.getPartID());
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "]";
       if (debugLevelParam >= 2)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
     // Scan the area near the bodypart center
 
@@ -1156,7 +1156,7 @@ namespace SPEL
         {
           if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
           {
-            if (rect.containsPoint(Point2f(i, j)) > 0) // if the point belongs to the rectangle
+            if (rect.containsPoint(cv::Point2f(i, j)) > 0) // if the point belongs to the rectangle
             {
               totalPixels++; // counting of the contained pixels
               uint8_t mintensity = 0;
@@ -1166,11 +1166,11 @@ namespace SPEL
               }
               catch (...)
               {
-                stringstream ss;
+                std::stringstream ss;
                 ss << "Can't get maskMat [" << (int32_t)j << "][" << (int32_t)i << "]";
                 if (debugLevelParam >= 2)
-                  cerr << ERROR_HEADER << ss.str() << endl;
-                throw logic_error(ss.str());
+                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                throw std::logic_error(ss.str());
               }
               bool blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
               if (!blackPixel)
@@ -1181,11 +1181,11 @@ namespace SPEL
                 }
                 catch (...)
                 {
-                  stringstream ss;
+                  std::stringstream ss;
                   ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << (int32_t)j << "][" << (int32_t)i << "]";
                   if (debugLevelParam >= 2)
-                    cerr << ERROR_HEADER << ss.str() << endl;
-                  throw logic_error(ss.str());
+                    std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                  throw std::logic_error(ss.str());
                 }
                 pixDistNum++; // counting of the all scanned pixels
                 try
@@ -1197,11 +1197,11 @@ namespace SPEL
                 }
                 catch (...)
                 {
-                  stringstream ss;
+                  std::stringstream ss;
                   ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << (int32_t)j << "][" << (int32_t)i << "]";
                   if (debugLevelParam >= 2)
-                    cerr << ERROR_HEADER << ss.str() << endl;
-                  throw logic_error(ss.str());
+                    std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                  throw std::logic_error(ss.str());
                 }
                 pixelsInMask++; // counting pixels within the mask
               }
@@ -1221,16 +1221,16 @@ namespace SPEL
       float score = 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + inMaskSuppWeight * inMaskSupportScore);
       return score;
     }
-    stringstream ss;
+    std::stringstream ss;
     ss << "Dirty label!";
     if (debugLevelParam >= 2)
-      cerr << ERROR_HEADER << ss.str() << endl;
-    throw logic_error(ss.str());
+      std::cerr << ERROR_HEADER << ss.str() << std::endl;
+    throw std::logic_error(ss.str());
   }
 
-  LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1)
+  LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1)
   {
-    stringstream detectorName;
+    std::stringstream detectorName;
     detectorName << getID();
 
     comparer_bodyPart = &bodyPart;
@@ -1249,7 +1249,7 @@ namespace SPEL
   }
 
   //Used only as prevent a warning for "const uint8_t nBins";
-  vector <Frame*> ColorHistDetector::getFrames() const
+  std::vector <Frame*> ColorHistDetector::getFrames() const
   {
     return frames;
   }

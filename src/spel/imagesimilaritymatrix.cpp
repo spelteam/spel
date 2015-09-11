@@ -12,7 +12,7 @@ namespace SPEL
     imageShiftMatrix.release();
   }
 
-  ImageSimilarityMatrix::ImageSimilarityMatrix(const vector<Frame*>& frames)
+  ImageSimilarityMatrix::ImageSimilarityMatrix(const std::vector<Frame*>& frames)
   {
     //by default use colour
     buildImageSimilarityMatrix(frames);
@@ -31,37 +31,37 @@ namespace SPEL
 
     if (row >= imageSimilarityMatrix.rows)
     {
-      cerr << "ISM contains " << imageSimilarityMatrix.rows << " rows, cannot request row " << endl; //<< to_string(row) << end;
+      std::cerr << "ISM contains " << imageSimilarityMatrix.rows << " rows, cannot request row " << std::endl; //<< to_string(row) << end;
       return -1;
     }
     if (col >= imageSimilarityMatrix.cols)
     {
-      cerr << "ISM contains " << imageSimilarityMatrix.cols << " cols, cannot request col " << endl; // << to_string(col) << end;
+      std::cerr << "ISM contains " << imageSimilarityMatrix.cols << " cols, cannot request col " << std::endl; // << to_string(col) << end;
       return -1;
     }
     return imageSimilarityMatrix.at<float>(row, col);
   }
 
   //get ISM value at (row, col)
-  Point2f ImageSimilarityMatrix::getShift(int row, int col) const
+  cv::Point2f ImageSimilarityMatrix::getShift(int row, int col) const
   {
 
     if (row >= imageShiftMatrix.rows)
     {
-      cerr << "Shift Matrix contains " << imageShiftMatrix.rows << " rows, cannot request row " << endl; //<< to_string(row) << end;
-      return Point2f();
+      std::cerr << "Shift Matrix contains " << imageShiftMatrix.rows << " rows, cannot request row " << std::endl; //<< to_string(row) << end;
+      return cv::Point2f();
     }
     if (col >= imageShiftMatrix.cols)
     {
-      cerr << "Shift Matrix contains " << imageShiftMatrix.cols << " cols, cannot request col " << endl; // << to_string(col) << end;
-      return Point2f();
+      std::cerr << "Shift Matrix contains " << imageShiftMatrix.cols << " cols, cannot request col " << std::endl; // << to_string(col) << end;
+      return cv::Point2f();
     }
-    return imageShiftMatrix.at<Point2f>(row, col);
+    return imageShiftMatrix.at<cv::Point2f>(row, col);
   }
 
   bool ImageSimilarityMatrix::operator==(const ImageSimilarityMatrix &s) const
   {
-    Mat result = (imageSimilarityMatrix == s.imageSimilarityMatrix);
+    cv::Mat result = (imageSimilarityMatrix == s.imageSimilarityMatrix);
 
     bool res = true;
 
@@ -79,7 +79,7 @@ namespace SPEL
 
   bool ImageSimilarityMatrix::operator!=(const ImageSimilarityMatrix &s) const
   {
-    Mat result = (imageSimilarityMatrix == s.imageSimilarityMatrix);
+    cv::Mat result = (imageSimilarityMatrix == s.imageSimilarityMatrix);
 
     bool res = true;
 
@@ -102,9 +102,9 @@ namespace SPEL
     return *this;
   }
 
-  bool ImageSimilarityMatrix::read(string filename)
+  bool ImageSimilarityMatrix::read(std::string filename)
   {
-    ifstream in(filename.c_str());
+    std::ifstream in(filename.c_str());
     if (in.is_open())
     {
       int size;
@@ -113,8 +113,8 @@ namespace SPEL
       imageSimilarityMatrix.release();
       imageShiftMatrix.release();
 
-      imageSimilarityMatrix.create(size, size, DataType<float>::type);
-      imageShiftMatrix.create(size, size, DataType<Point2f>::type);
+      imageSimilarityMatrix.create(size, size, cv::DataType<float>::type);
+      imageShiftMatrix.create(size, size, cv::DataType<cv::Point2f>::type);
 
       for (int i = 0; i < imageSimilarityMatrix.rows; ++i)
       {
@@ -134,46 +134,46 @@ namespace SPEL
         {
           float x, y;
           in >> x >> y;
-          imageShiftMatrix.at<Point2f>(i, j) = Point2f(x, y);
+          imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(x, y);
         }
       }
       return true;
     }
     else
     {
-      cerr << "Could not open " << filename << " for reading. " << endl;
+      std::cerr << "Could not open " << filename << " for reading. " << std::endl;
       return false;
     }
   }
 
-  bool ImageSimilarityMatrix::write(string filename) const
+  bool ImageSimilarityMatrix::write(std::string filename) const
   {
-    ofstream out(filename.c_str());
+    std::ofstream out(filename.c_str());
     if (out.is_open())
     {
-      out << imageSimilarityMatrix.rows << endl; //size
+      out << imageSimilarityMatrix.rows << std::endl; //size
       for (int i = 0; i < imageSimilarityMatrix.rows; ++i)
       {
         for (int j = 0; j < imageSimilarityMatrix.cols; ++j)
         {
           out << imageSimilarityMatrix.at<float>(i, j) << " ";
         }
-        out << endl;
+        out << std::endl;
       }
 
       for (int i = 0; i < imageShiftMatrix.rows; ++i)
       {
         for (int j = 0; j < imageShiftMatrix.cols; ++j)
         {
-          out << imageShiftMatrix.at<Point2f>(i, j).x << " " << imageShiftMatrix.at<Point2f>(i, j).y << " ";
+          out << imageShiftMatrix.at<cv::Point2f>(i, j).x << " " << imageShiftMatrix.at<cv::Point2f>(i, j).y << " ";
         }
-        out << endl;
+        out << std::endl;
       }
       return true;
     }
     else
     {
-      cerr << "Could not open " << filename << " for writing. " << endl;
+      std::cerr << "Could not open " << filename << " for writing. " << std::endl;
       return false;
     }
   }
@@ -186,16 +186,16 @@ namespace SPEL
       return;
     if (i == j)
     {
-      imageShiftMatrix.at<Point2f>(i, j) = Point2f(0, 0);
+      imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(0, 0);
       imageSimilarityMatrix.at<float>(i, j) = 0;
       return;
     }
     //load images, compute similarity, store to matrix
-    Mat imgMatOne = left->getImage();
-    Mat imgMatTwo = right->getImage();
+    cv::Mat imgMatOne = left->getImage();
+    cv::Mat imgMatTwo = right->getImage();
 
-    Mat maskMatOne = left->getMask();
-    Mat maskMatTwo = right->getMask();
+    cv::Mat maskMatOne = left->getMask();
+    cv::Mat maskMatTwo = right->getMask();
 
 //    float factor = 1;
 //    //compute the scaling factor
@@ -210,18 +210,18 @@ namespace SPEL
 //      resize(maskMatTwo, maskMatTwo, cvSize(maskMatTwo.cols * factor, maskMatTwo.rows * factor));
 //    }
 
-    Point2f cOne, cTwo;
+    cv::Point2f cOne, cTwo;
     float mSizeOne = 0, mSizeTwo = 0;
 
     // cout << "at " << i << ", " << j << " ";
 
-    Point2f dX;
+    cv::Point2f dX;
     for (int x = 0; x < maskMatOne.rows; ++x)
     {
       for (int y = 0; y < maskMatOne.cols; ++y)
       {
-        Scalar intensity = maskMatOne.at<uchar>(x, y);
-        Scalar mintensity = maskMatTwo.at<uchar>(x, y);
+        cv::Scalar intensity = maskMatOne.at<uchar>(x, y);
+        cv::Scalar mintensity = maskMatTwo.at<uchar>(x, y);
 
         bool darkPixel = intensity.val[0] < 10;
         bool blackPixel = mintensity.val[0] < 10; //if all intensities are zero
@@ -229,14 +229,14 @@ namespace SPEL
         if (!darkPixel) //if the pixel is non-black for maskOne
         {
           //pixOne = imgOne.pixel(x,y);
-          cOne += Point2f(x, y);
+          cOne += cv::Point2f(x, y);
           mSizeOne++;
         }
 
         if (!blackPixel) //if the pixel is non-black for maskOne
         {
           //pixTwo = imgTwo.pixel(x,y);
-          cTwo += Point2f(x, y);
+          cTwo += cv::Point2f(x, y);
           mSizeTwo++;
         }
 
@@ -253,8 +253,8 @@ namespace SPEL
     //and cOne = cTwo-dX
 
     //for real image coords, these points are actually reversed
-    imageShiftMatrix.at<Point2f>(i, j) = Point2f(dX.y, dX.x);
-    imageShiftMatrix.at<Point2f>(j, i) = Point2f(-dX.y, -dX.x);
+    imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(dX.y, dX.x);
+    imageShiftMatrix.at<cv::Point2f>(j, i) = cv::Point2f(-dX.y, -dX.x);
 
     float similarityScore = 0;
     // float maskSimilarityScore = 0;
@@ -286,20 +286,20 @@ namespace SPEL
         if (!darkPixel)
         {
           mOne = 1;
-          Vec4b intensityOne = imgMatOne.at<Vec4b>(x, y);
+          cv::Vec4b intensityOne = imgMatOne.at<cv::Vec4b>(x, y);
           blueOne = intensityOne.val[0];
           greenOne = intensityOne.val[1];
           redOne = intensityOne.val[2];
         }
         if (xTwo < imgMatTwo.rows && xTwo >= 0 && yTwo < imgMatTwo.cols && yTwo >= 0)
         {
-          Scalar mintensityTwo = maskMatTwo.at<uchar>(xTwo, yTwo);
+          cv::Scalar mintensityTwo = maskMatTwo.at<uchar>(xTwo, yTwo);
           bool blackPixel = mintensityTwo.val[0] < 10; //if all intensities are zero
 
           if (!blackPixel)
           {
             mTwo = 1;
-            Vec4b intensityTwo = imgMatTwo.at<Vec4b>(xTwo, yTwo);
+            cv::Vec4b intensityTwo = imgMatTwo.at<cv::Vec4b>(xTwo, yTwo);
             blueTwo = intensityTwo.val[0];
             greenTwo = intensityTwo.val[1];
             redTwo = intensityTwo.val[2];
@@ -336,13 +336,13 @@ namespace SPEL
       return;
     if (i == j)
     {
-      imageShiftMatrix.at<Point2f>(i, j) = Point2f(0, 0);
+      imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(0, 0);
       imageSimilarityMatrix.at<float>(i, j) = 0;
       return;
     }
 
-    Mat maskMatOne = left->getMask();
-    Mat maskMatTwo = right->getMask();
+    cv::Mat maskMatOne = left->getMask();
+    cv::Mat maskMatTwo = right->getMask();
 
 //    float factor = 1;
 //    //compute the scaling factor
@@ -355,7 +355,7 @@ namespace SPEL
 //    }
 
 
-    Point2f cOne, cTwo;
+    cv::Point2f cOne, cTwo;
     float mSizeOne = 0, mSizeTwo = 0;
 
     // cout << "at " << to_string(i) << ", " << to_string(j) << " ";
@@ -364,7 +364,7 @@ namespace SPEL
     //                cout<<"SPECIAL CASE" << endl;
 
     //compute deltaX from centroid
-    Point2f dX;
+    cv::Point2f dX;
     for (int x = 0; x < maskMatOne.rows; ++x)
     {
       for (int y = 0; y < maskMatOne.cols; ++y)
@@ -378,14 +378,14 @@ namespace SPEL
         if (!darkPixel) //if the pixel is non-black for maskOne
         {
           //pixOne = imgOne.pixel(x,y);
-          cOne += Point2f(x, y);
+          cOne += cv::Point2f(x, y);
           mSizeOne++;
         }
 
         if (!blackPixel) //if the pixel is non-black for maskOne
         {
           //pixTwo = imgTwo.pixel(x,y);
-          cTwo += Point2f(x, y);
+          cTwo += cv::Point2f(x, y);
           mSizeTwo++;
         }
       }
@@ -397,8 +397,8 @@ namespace SPEL
     dX = cTwo - cOne;
     //dX = dX*pow(factor, -1.0);
 
-    imageShiftMatrix.at<Point2f>(i, j) = Point2f(dX.y, dX.x);
-    imageShiftMatrix.at<Point2f>(j, i) = Point2f(-dX.y, -dX.x);
+    imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(dX.y, dX.x);
+    imageShiftMatrix.at<cv::Point2f>(j, i) = cv::Point2f(-dX.y, -dX.x);
 
     //so, dX+cOne = cTwo
     //and cOne = cTwo-dX
@@ -445,15 +445,15 @@ namespace SPEL
     return;
   }
 
-  void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight)
+  void ImageSimilarityMatrix::buildMaskSimilarityMatrix(const std::vector<Frame*>& frames, int maxFrameHeight)
   {
     //create matrices and fill with zeros
     // imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
     imageSimilarityMatrix.release();
     imageShiftMatrix.release();
 
-    imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
-    imageShiftMatrix.create(frames.size(), frames.size(), DataType<Point2f>::type);
+    imageSimilarityMatrix.create(frames.size(), frames.size(), cv::DataType<float>::type);
+    imageShiftMatrix.create(frames.size(), frames.size(), cv::DataType<cv::Point2f>::type);
 
     for (uint32_t i = 0; i < frames.size(); ++i)
     {
@@ -464,7 +464,7 @@ namespace SPEL
       }
     }
     //store the futures
-    vector<future<void> > futures;
+    std::vector<std::future<void> > futures;
 
     //set-up finished
 
@@ -486,12 +486,12 @@ namespace SPEL
     return;
   }
 
-  void ImageSimilarityMatrix::buildImageSimilarityMatrix(const vector<Frame*>& frames, int maxFrameHeight)
+  void ImageSimilarityMatrix::buildImageSimilarityMatrix(const std::vector<Frame*>& frames, int maxFrameHeight)
   {
-    cerr << "building ISM matrix" << endl;
+    std::cerr << "building ISM matrix" << std::endl;
     //create matrices and fill with zeros
-    imageSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
-    imageShiftMatrix.create(frames.size(), frames.size(), DataType<Point2f>::type);
+    imageSimilarityMatrix.create(frames.size(), frames.size(), cv::DataType<float>::type);
+    imageShiftMatrix.create(frames.size(), frames.size(), cv::DataType<cv::Point2f>::type);
     // maskSimilarityMatrix.create(frames.size(), frames.size(), DataType<float>::type);
 
     for (uint32_t i = 0; i < frames.size(); ++i)
@@ -499,14 +499,14 @@ namespace SPEL
       for (uint32_t j = 0; j < frames.size(); ++j)
       {
         imageSimilarityMatrix.at<float>(i, j) = 0;
-        imageShiftMatrix.at<Point2f>(i, j) = Point2f(0, 0);
+        imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(0, 0);
       }
     }
 
     //compute mask centroid offsets
 
     //store the futures
-    vector<future<void> > futures;
+    std::vector<std::future<void> > futures;
 
     for (uint32_t i = 0; i < frames.size(); ++i)
     {
@@ -602,14 +602,14 @@ namespace SPEL
     return sqrt(sd);
   }
 
-  float ImageSimilarityMatrix::getPathCost(vector<int> path) const//get cost for path through ISM
+  float ImageSimilarityMatrix::getPathCost(std::vector<int> path) const//get cost for path through ISM
   {
     //check that the path is valid
     for (uint32_t i = 0; i < path.size(); ++i)
     {
       if (!(path[i] < imageSimilarityMatrix.rows))
       {
-        cerr << "Path contains invalid node " << path[i] << endl;
+        std::cerr << "Path contains invalid node " << path[i] << std::endl;
         return -1;
       }
     }
@@ -627,7 +627,7 @@ namespace SPEL
     return imageSimilarityMatrix.rows;
   }
 
-  Mat ImageSimilarityMatrix::clone()
+  cv::Mat ImageSimilarityMatrix::clone()
   {
     return imageSimilarityMatrix.clone();
   }

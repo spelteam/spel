@@ -4,6 +4,9 @@
 // SPEL definitions
 #include "predef.hpp"
 
+// STL
+#include <utility>
+
 // OpenCV
 #include <opencv2/opencv.hpp>
 #include <opencv2/opencv_modules.hpp>
@@ -15,11 +18,11 @@
 #if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
 #include <opencv2/nonfree/nonfree.hpp>
 #else
-#warning "Unsupported version on OpenCV"
+#warning "Unsupported version of OpenCV"
 #include <opencv2/features2d/features2d.hpp>
 #endif
 #else
-#error "Unsupported version on OpenCV"
+#error "Unsupported version of OpenCV"
 #endif
 
 #include "detector.hpp"
@@ -30,27 +33,24 @@ namespace SPEL
   using namespace xfeatures2d;
 #endif
 
-  using namespace std;
-  using namespace cv;
-
   class SurfDetector : public Detector
   {
   protected:
     struct PartModel
     {
-      POSERECT <Point2f> partModelRect;
-      vector <KeyPoint> keyPoints;
-      Mat descriptors;
+      POSERECT <cv::Point2f> partModelRect;
+      std::vector <cv::KeyPoint> keyPoints;
+      cv::Mat descriptors;
     };
   public:
     SurfDetector(void);
     virtual ~SurfDetector(void);
     virtual int getID(void) const;
     virtual void setID(int _id);
-    virtual void train(vector <Frame*> _frames, map <string, float>);
-    virtual map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
-    virtual map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
-    virtual map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
+    virtual void train(std::vector <Frame*> _frames, std::map <std::string, float>);
+    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels);
+    virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void);
+    virtual std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> getLabelModels(void);
 
   private:
 #ifdef DEBUG
@@ -65,24 +65,23 @@ namespace SPEL
     uint32_t minHessian = 500;
     float useSURFdet = 1.0f;
     float knnMatchCoeff = 0.8f;
-    vector <KeyPoint> keyPoints;
+    std::vector <cv::KeyPoint> keyPoints;
     // Variables for score comparer
     BodyPart *comparer_bodyPart = 0;
     PartModel *comparer_model = 0;
-    Point2f *comparer_j0 = 0;
-    Point2f *comparer_j1 = 0;
+    cv::Point2f *comparer_j0 = 0;
+    cv::Point2f *comparer_j1 = 0;
 
-    map <uint32_t, map <uint32_t, PartModel>> partModels;
-    map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;
+    std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
+    std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> labelModels;
 
-    virtual map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
-    virtual PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, uint32_t minHessian, vector <KeyPoint> keyPoints);
-    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
-    virtual float compare(BodyPart bodyPart, PartModel model, Point2f j0, Point2f j1);
+    virtual std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
+    virtual PartModel computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, uint32_t minHessian, std::vector <cv::KeyPoint> keyPoints);
+    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1);
+    virtual float compare(BodyPart bodyPart, PartModel model, cv::Point2f j0, cv::Point2f j1);
     virtual float compare(void);
   };
 
 }
 
-#endif  // _LIBPOSE_SURFDETECTOR_HPP_
-
+#endif  // _LIBPOSE_SURFDETECTOR_HPP_ctujly

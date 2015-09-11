@@ -31,7 +31,7 @@ namespace SPEL
     id = _id;
   }
 
-  HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
+  HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, int nbins, cv::Size wndSize, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
   {
     float boneLength = getBoneLength(j0, j1);
     if (boneLength < blockSize.width)
@@ -51,17 +51,17 @@ namespace SPEL
     {
       boneWidth = boneWidth + blockSize.width - ((int)boneWidth % blockSize.height);
     }
-    Size originalSize = Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
-    POSERECT <Point2f> rect = getBodyPartRect(bodyPart, j0, j1, blockSize);
+    cv::Size originalSize = cv::Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
+    POSERECT <cv::Point2f> rect = getBodyPartRect(bodyPart, j0, j1, blockSize);
 
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-    Point2f direction = j1 - j0;
+    cv::Point2f direction = j1 - j0;
     float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));
     PartModel partModel;
     partModel.partModelRect = rect;
-    Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
-    Mat partImageResized = Mat(wndSize.height, wndSize.width, CV_8UC3, Scalar(255, 255, 255));
+    cv::Mat partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
+    cv::Mat partImageResized = cv::Mat(wndSize.height, wndSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
     resize(partImage, partImageResized, wndSize);
     if (bGrayImages)
     {
@@ -77,9 +77,9 @@ namespace SPEL
     {
       partModel.partImage = partImageResized.clone();
     }
-    HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
+    cv::HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
 
-    vector <float> descriptors;
+    std::vector <float> descriptors;
 
     detector.compute(partModel.partImage, descriptors);
 
@@ -87,7 +87,7 @@ namespace SPEL
     partModel.descriptors = descriptors;
 #endif  // DEBUG
 
-    vector <vector <uint32_t>> counter;
+    std::vector <std::vector <uint32_t>> counter;
 
     uint32_t i, j, b;
 
@@ -95,11 +95,11 @@ namespace SPEL
     {
       for (i = 0; i < wndSize.height; i += cellSize.height)
       {
-        partModel.gradientStrengths.push_back(vector <vector <float>>());
-        counter.push_back(vector <uint32_t>());
+        partModel.gradientStrengths.push_back(std::vector <std::vector <float>>());
+        counter.push_back(std::vector <uint32_t>());
         for (j = 0; j < wndSize.width; j += cellSize.width)
         {
-          partModel.gradientStrengths.at(i / cellSize.height).push_back(vector <float>());
+          partModel.gradientStrengths.at(i / cellSize.height).push_back(std::vector <float>());
           counter.at(i / cellSize.height).push_back(0);
           for (b = 0; b < nbins; b++)
           {
@@ -110,12 +110,12 @@ namespace SPEL
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Can't get gradientStrengths at [" << i / cellSize.height << "][" << j / cellSize.width << "]";
 #ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
+      std::cerr << ERROR_HEADER << ss.str() << std::endl;
 #endif // DEBUG
-      throw logic_error(ss.str());
+      throw std::logic_error(ss.str());
     }
 
     uint32_t d = 0, n, k, r, c;
@@ -150,15 +150,15 @@ namespace SPEL
     }
     catch (...)
     {
-      stringstream ss;
-      ss << "Descriptor parse error:" << endl << "Window row:\t" << n << "\tWindow col:\t" << k << endl << "Block row:\t" << r << "\tBlock col:\t" << c << endl << "NBins:\t" << b << endl;
-      ss << "Total image rows:\t" << wndSize.height << "\tTotal image cols:\t" << wndSize.width << endl;
-      ss << "Total descriptors:\t" << descriptors.size() << endl;
-      ss << "Trying to get descriptor at:\t" << d << endl;
+      std::stringstream ss;
+      ss << "Descriptor parse error:" << std::endl << "Window row:\t" << n << "\tWindow col:\t" << k << std::endl << "Block row:\t" << r << "\tBlock col:\t" << c << std::endl << "NBins:\t" << b << std::endl;
+      ss << "Total image rows:\t" << wndSize.height << "\tTotal image cols:\t" << wndSize.width << std::endl;
+      ss << "Total descriptors:\t" << descriptors.size() << std::endl;
+      ss << "Trying to get descriptor at:\t" << d << std::endl;
 #ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
+      std::cerr << ERROR_HEADER << ss.str() << std::endl;
 #endif // DEBUG
-      throw logic_error(ss.str());
+      throw std::logic_error(ss.str());
     }
 
     try
@@ -183,24 +183,24 @@ namespace SPEL
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Can't get gradientStrengths at [" << i / cellSize.height << "][" << j / cellSize.width << "]";
 #ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
+      std::cerr << ERROR_HEADER << ss.str() << std::endl;
 #endif // DEBUG
-      throw logic_error(ss.str());
+      throw std::logic_error(ss.str());
     }
 
     return partModel;
   }
 
-  map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
+  std::map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
   {
-    map <uint32_t, PartModel> parts;
-    Size wndSize;
+    std::map <uint32_t, PartModel> parts;
+    cv::Size wndSize;
     Skeleton skeleton = frame->getSkeleton();
     tree <BodyPart> partTree = skeleton.getPartTree();
-    Mat imgMat = frame->getImage();
+    cv::Mat imgMat = frame->getImage();
     for (tree <BodyPart>::iterator part = partTree.begin(); part != partTree.end(); ++part)
     {
       try
@@ -209,49 +209,49 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Couldn't get partSize for part " << part->getPartID();
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
-      Point2f j0, j1;
+      cv::Point2f j0, j1;
       BodyJoint *joint = skeleton.getBodyJoint(part->getParentJoint());
       if (joint == 0)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Invalid parent joint";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
       j0 = joint->getImageLocation();
       joint = 0;
       joint = skeleton.getBodyJoint(part->getChildJoint());
       if (joint == 0)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Invalid child joint";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
       j1 = joint->getImageLocation();
-      Point2f direction = j1 - j0; // used as estimation of the vector's direction
+      cv::Point2f direction = j1 - j0; // used as estimation of the vector's direction
       float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
       part->setRotationSearchRange(rotationAngle);
       try
       {
-        parts.insert(pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
+        parts.insert(std::pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
       }
-      catch (logic_error err)
+      catch (std::logic_error err)
       {
-        stringstream ss;
-        ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part->getPartID() << endl;
+        std::stringstream ss;
+        ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part->getPartID() << std::endl;
         ss << "\t" << err.what();
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
     }
     skeleton.setPartTree(partTree);
@@ -259,10 +259,10 @@ namespace SPEL
     return parts;
   }
 
-  map <uint32_t, Size> HogDetector::getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize, float resizeFactor)
+  std::map <uint32_t, cv::Size> HogDetector::getMaxBodyPartHeightWidth(std::vector <Frame*> frames, cv::Size blockSize, float resizeFactor)
   {
-    map <uint32_t, Size> result;
-    for (vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
+    std::map <uint32_t, cv::Size> result;
+    for (std::vector <Frame*>::iterator frame = frames.begin(); frame != frames.end(); ++frame)
     {
       if ((*frame)->getFrametype() != KEYFRAME && (*frame)->getFrametype() != LOCKFRAME)
       {
@@ -272,12 +272,12 @@ namespace SPEL
       tree <BodyPart> bodyParts = skeleton.getPartTree();
       for (tree <BodyPart>::iterator bodyPart = bodyParts.begin(); bodyPart != bodyParts.end(); ++bodyPart)
       {
-        Point2f j0, j1;
+        cv::Point2f j0, j1;
         BodyJoint *joint = skeleton.getBodyJoint(bodyPart->getParentJoint());
         if (joint == 0)
         {
           if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << "Invalid parent joint" << endl;
+            std::cerr << ERROR_HEADER << "Invalid parent joint" << std::endl;
           break;
         }
         j0 = joint->getImageLocation();
@@ -286,7 +286,7 @@ namespace SPEL
         if (joint == 0)
         {
           if (debugLevelParam >= 1)
-            cerr << ERROR_HEADER << "Invalid child joint" << endl;
+            std::cerr << ERROR_HEADER << "Invalid child joint" << std::endl;
           break;
         }
         j1 = joint->getImageLocation();
@@ -295,7 +295,7 @@ namespace SPEL
         float boneWidth = 0;
         boneWidth = getBoneWidth(boneLength, *bodyPart);
 
-        Size maxSize = Size(static_cast <uint32_t> (boneLength * resizeFactor), static_cast <uint32_t> (boneWidth * resizeFactor));
+        cv::Size maxSize = cv::Size(static_cast <uint32_t> (boneLength * resizeFactor), static_cast <uint32_t> (boneWidth * resizeFactor));
         if (result.size() > 0)
         {
           try
@@ -304,11 +304,11 @@ namespace SPEL
           }
           catch (...){}
         }
-        result[bodyPart->getPartID()] = Size(max(maxSize.width, static_cast <int> (boneLength * resizeFactor)), max(maxSize.height, static_cast <int> (boneWidth * resizeFactor)));
+        result[bodyPart->getPartID()] = cv::Size(std::max(maxSize.width, static_cast <int> (boneLength * resizeFactor)), std::max(maxSize.height, static_cast <int> (boneWidth * resizeFactor)));
       }
     }
     // normalize
-    for (map <uint32_t, Size>::iterator part = result.begin(); part != result.end(); ++part)
+    for (std::map <uint32_t, cv::Size>::iterator part = result.begin(); part != result.end(); ++part)
     {
       part->second.width += (blockSize.width - part->second.width % blockSize.width);
       part->second.height += (blockSize.height - part->second.height % blockSize.height);
@@ -316,7 +316,7 @@ namespace SPEL
     return result;
   }
 
-  void HogDetector::train(vector <Frame*> _frames, map <string, float> params)
+  void HogDetector::train(std::vector <Frame*> _frames, std::map <std::string, float> params)
   {
     frames = _frames;
 
@@ -329,24 +329,24 @@ namespace SPEL
 #else
     const uint8_t debugLevel = 1;
 #endif // DEBUG
-    const string sDebugLevel = "debugLevel";
+    const std::string sDebugLevel = "debugLevel";
 
     params.emplace(sDebugLevel, debugLevel);
 
     debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
 
-    const string sGrayImages = "grayImages";
+    const std::string sGrayImages = "grayImages";
 
     params.emplace(sGrayImages, bGrayImages == true ? 1.0f : 0.0f);
 
-    const string sMaxFrameHeight = "maxFrameHeight";
+    const std::string sMaxFrameHeight = "maxFrameHeight";
 
     params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
 
     maxFrameHeight = params.at(sMaxFrameHeight);
 
     bool bFirstConversion = true;
-    for (vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
+    for (std::vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
     {
       if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
       {
@@ -374,11 +374,11 @@ namespace SPEL
       }
 
       if (debugLevelParam >= 2)
-        cerr << "Training on frame " << workFrame->getID() << endl;
+        std::cerr << "Training on frame " << workFrame->getID() << std::endl;
 
       try
       {
-        partModels.insert(pair <uint32_t, map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
+        partModels.insert(std::pair <uint32_t, std::map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
       }
       catch (...)
       {
@@ -389,11 +389,11 @@ namespace SPEL
     }
   }
 
-  map <uint32_t, vector <LimbLabel> > HogDetector::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel> > HogDetector::detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels)
   {
-    const string sUseHoGdet = "useHoGdet";
+    const std::string sUseHoGdet = "useHoGdet";
 
-    const string sGrayImages = "grayImages";
+    const std::string sGrayImages = "grayImages";
 
     params.emplace(sUseHoGdet, useHoGdet);
     params.emplace(sGrayImages, bGrayImages == true ? 1.0f : 0.0f);
@@ -403,26 +403,26 @@ namespace SPEL
     return Detector::detect(frame, params, limbLabels);
   }
 
-  LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1)
+  LimbLabel HogDetector::generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1)
   {
-    stringstream detectorName;
+    std::stringstream detectorName;
     detectorName << getID();
 
     comparer_bodyPart = &bodyPart;
 
-    Size size;
+    cv::Size size;
     try
     {
       size = partSize.at(bodyPart.getPartID());
     }
     catch (...)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Can't get partSize for body part " << bodyPart.getPartID();
       if (debugLevelParam >= 1)
       {
-        cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
     }
     PartModel generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
@@ -443,11 +443,11 @@ namespace SPEL
   {
     if (comparer_bodyPart == 0 || comparer_model == 0)
     {
-      stringstream ss;
-      ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_model == 0 ? "comparer_model == 0" : "") << endl;
+      std::stringstream ss;
+      ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_model == 0 ? "comparer_model == 0" : "") << std::endl;
       if (debugLevelParam >= 1)
-        cerr << ERROR_HEADER << ss.str() << endl;
-      throw logic_error(ss.str());
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
     }
     return compare(*comparer_bodyPart, *comparer_model, nbins);
   }
@@ -456,9 +456,9 @@ namespace SPEL
   {
     float score = 0;
     uint32_t totalcount = 0;
-    for (map <uint32_t, map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
+    for (std::map <uint32_t, std::map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
     {
-      for (map <uint32_t, PartModel>::iterator partModel = framePartModels->second.begin(); partModel != framePartModels->second.end(); ++partModel)
+      for (std::map <uint32_t, PartModel>::iterator partModel = framePartModels->second.begin(); partModel != framePartModels->second.end(); ++partModel)
       {
         if (partModel->first != static_cast <uint32_t> (bodyPart.getPartID()))
         {
@@ -468,22 +468,22 @@ namespace SPEL
         {
           if (model.gradientStrengths.size() != partModel->second.gradientStrengths.size())
           {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Invalid descriptor count. Need: " << model.gradientStrengths.size() << ". Have: " << partModel->second.gradientStrengths.size();
             if (debugLevelParam >= 1)
-              cerr << ERROR_HEADER << ss.str() << endl;
-            throw logic_error(ss.str());
+              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            throw std::logic_error(ss.str());
           }
           uint32_t count = 0;
           for (uint32_t i = 0; i < model.gradientStrengths.size(); i++)
           {
             if (model.gradientStrengths.at(i).size() != partModel->second.gradientStrengths.at(i).size())
             {
-              stringstream ss;
+              std::stringstream ss;
               ss << "Invalid descriptor count. Need: " << model.gradientStrengths.at(i).size() << ". Have: " << partModel->second.gradientStrengths.at(i).size();
               if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
+                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              throw std::logic_error(ss.str());
             }
             for (uint32_t j = 0; j < model.gradientStrengths.at(i).size(); j++)
             {
@@ -493,15 +493,14 @@ namespace SPEL
                 {
                   count++;
                   score += abs(model.gradientStrengths.at(i).at(j).at(b) - partModel->second.gradientStrengths.at(i).at(j).at(b));
-                  //score += sqrt(pow(model.gradientStrengths.at(i).at(j).at(b), 2) - pow(partModel->second.gradientStrengths.at(i).at(j).at(b), 2));
                 }
                 catch (...)
                 {
-                  stringstream ss;
+                  std::stringstream ss;
                   ss << "Can't get some descriptor at [" << i << "][" << j << "][" << b << "]";
                   if (debugLevelParam >= 1)
-                    cerr << ERROR_HEADER << ss.str() << endl;
-                  throw logic_error(ss.str());
+                    std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                  throw std::logic_error(ss.str());
                 }
               }
             }
@@ -514,17 +513,17 @@ namespace SPEL
     return (score / (float)totalcount);
   }
 
-  map <uint32_t, map <uint32_t, vector <HogDetector::PartModel>>> HogDetector::getLabelModels(void)
+  std::map <uint32_t, std::map <uint32_t, std::vector <HogDetector::PartModel>>> HogDetector::getLabelModels(void)
   {
     return labelModels;
   }
 
-  map <uint32_t, map <uint32_t, HogDetector::PartModel>> HogDetector::getPartModels(void)
+  std::map <uint32_t, std::map <uint32_t, HogDetector::PartModel>> HogDetector::getPartModels(void)
   {
     return partModels;
   }
 
-  Size HogDetector::getCellSize(void)
+  cv::Size HogDetector::getCellSize(void)
   {
     return cellSize;
   }

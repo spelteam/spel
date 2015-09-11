@@ -15,19 +15,16 @@
 
 namespace SPEL
 {
-  using namespace std;
-  using namespace cv;
-
   class HogDetector : public Detector
   {
   protected:
     struct PartModel
     {
-      POSERECT <Point2f> partModelRect;
-      vector <vector <vector <float>>> gradientStrengths;
-      Mat partImage;
+      POSERECT <cv::Point2f> partModelRect;
+      std::vector <std::vector <std::vector <float>>> gradientStrengths;
+      cv::Mat partImage;
 #ifdef DEBUG
-      vector<float> descriptors;
+      std::vector<float> descriptors;
 #endif  // DEBUG
     };
   public:
@@ -35,12 +32,12 @@ namespace SPEL
     virtual ~HogDetector(void);
     virtual int getID(void) const;
     virtual void setID(int _id);
-    virtual void train(vector <Frame*> _frames, map <string, float> params);
-    virtual map <uint32_t, vector <LimbLabel>> detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
-    virtual map <uint32_t, map <uint32_t, vector <PartModel>>> getLabelModels(void);
-    virtual map <uint32_t, map <uint32_t, PartModel>> getPartModels(void);
+    virtual void train(std::vector <Frame*> _frames, std::map <std::string, float> params);
+    virtual std::map <uint32_t, std::vector <LimbLabel>> detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels);
+    virtual std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> getLabelModels(void);
+    virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void);
 
-    virtual Size getCellSize(void);
+    virtual cv::Size getCellSize(void);
     virtual uint8_t getnbins(void);
   private:
 #ifdef DEBUG
@@ -59,33 +56,33 @@ namespace SPEL
     int id;
   protected:
     const uint8_t nbins = 9;
-    map <uint32_t, Size> partSize;
-    map <uint32_t, map <uint32_t, PartModel>> partModels;
-    map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels;
+    std::map <uint32_t, cv::Size> partSize;
+    std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
+    std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> labelModels;
     bool bGrayImages = false;
     float useHoGdet = 1.0f;
     //TODO(Vitaliy Koshura): Make some of them as detector params
-    Size blockSize = Size(16, 16);
-    Size blockStride = Size(8, 8);
-    Size cellSize = Size(8, 8);
-    Size wndSize = Size(64, 128);
+    cv::Size blockSize = cv::Size(16, 16);
+    cv::Size blockStride = cv::Size(8, 8);
+    cv::Size cellSize = cv::Size(8, 8);
+    cv::Size wndSize = cv::Size(64, 128);
     double wndSigma = -1;
     double thresholdL2hys = 0.2;
     bool gammaCorrection = true;
     int nlevels = 64;
-    Size wndStride = Size(8, 8);
-    Size padding = Size(32, 32);
+    cv::Size wndStride = cv::Size(8, 8);
+    cv::Size padding = cv::Size(32, 32);
     int derivAperture = 1;
-    int histogramNormType = HOGDescriptor::L2Hys;
+    int histogramNormType = cv::HOGDescriptor::L2Hys;
     // Variables for score comparer
     BodyPart *comparer_bodyPart = 0;
     PartModel *comparer_model = 0;
 
-    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, Point2f j0, Point2f j1);
+    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1);
 
-    virtual map <uint32_t, Size> getMaxBodyPartHeightWidth(vector <Frame*> frames, Size blockSize, float resizeFactor);
-    virtual PartModel computeDescriptors(BodyPart bodyPart, Point2f j0, Point2f j1, Mat imgMat, int nbins, Size wndSize, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
-    virtual map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, Size blockSize, Size blockStride, Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
+    virtual std::map <uint32_t, cv::Size> getMaxBodyPartHeightWidth(std::vector <Frame*> frames, cv::Size blockSize, float resizeFactor);
+    virtual PartModel computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, int nbins, cv::Size wndSize, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
+    virtual std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
     virtual float compare(BodyPart bodyPart, PartModel partModel, uint8_t nbins);
     virtual float compare(void);
   };

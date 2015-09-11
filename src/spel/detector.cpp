@@ -120,12 +120,12 @@ namespace SPEL
   {
     if (first.size() != second.size() && first.size() > 0 && second.size() > 0)
     {
-      stringstream ss;
+      std::stringstream ss;
       ss << "Can't merge vectors with different sizes (different count of BodyPart): First: " << first.size() << " Second: " << second.size();
 #ifdef DEBUG
-      cerr << ERROR_HEADER << ss.str() << endl;
+      std::cerr << ERROR_HEADER << ss.str() << std::endl;
 #endif  // DEBUG
-      throw logic_error(ss.str());
+      throw std::logic_error(ss.str());
     }
     if (first.size() == 0)
     {
@@ -136,13 +136,13 @@ namespace SPEL
       return first;
     }
 
-    map <string, float> detectorNames;
+    std::map <std::string, float> detectorNames;
 
-    map <uint32_t, vector <LimbLabel>> result;
+    std::map <uint32_t, std::vector <LimbLabel>> result;
 
     for (auto part : first) //for each part
     {
-      vector<LimbLabel> partResult;
+      std::vector<LimbLabel> partResult;
 
       //iterate through first list, compare to second list, any labels that are matched are combined and pushed
       //any labels that are not found, are added
@@ -268,7 +268,7 @@ namespace SPEL
       {
       }
 
-      result.insert(pair < uint32_t, vector <LimbLabel>>(part.first, partResult));
+      result.insert(std::pair <uint32_t, std::vector <LimbLabel>>(part.first, partResult));
     }
 
     //now the vectors are merged, but there may be score mismatches
@@ -311,14 +311,14 @@ namespace SPEL
     return result;
   }
 
-  LimbLabel Detector::generateLabel(BodyPart bodyPart, Point2f j0, Point2f j1, string detectorName, float _usedet)
+  LimbLabel Detector::generateLabel(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, std::string detectorName, float _usedet)
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
     auto rot = float(spelHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     auto rect = getBodyPartRect(bodyPart, j0, j1);
 
     auto score = compare();
-    vector <Score> s;
+    std::vector <Score> s;
     s.push_back(Score(score, detectorName, _usedet));
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
   }
@@ -333,47 +333,47 @@ namespace SPEL
     return 0;
   }
 
-  map <uint32_t, vector <LimbLabel>> Detector::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel>> Detector::detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels)
   {
     auto searchDistCoeff = 0.5f;
-    const string sSearchDistCoeff = "searchDistCoeff";
+    const std::string sSearchDistCoeff = "searchDistCoeff";
 
     auto minTheta = 90.0f; // border for search
-    const string sMinTheta = "minTheta";
+    const std::string sMinTheta = "minTheta";
 
     auto maxTheta = 100.0f; // border for search
-    const string sMaxTheta = "maxTheta";
+    const std::string sMaxTheta = "maxTheta";
 
     auto stepTheta = 10.0f; // angular step of search
-    const string sStepTheta = "stepTheta";
+    const std::string sStepTheta = "stepTheta";
 
     auto uniqueLocationCandidates = 0.1f; // limiting the choice of the solutions number for each bodypart
-    const string sUniqueLocationCandidates = "uniqueLocationCandidates";
+    const std::string sUniqueLocationCandidates = "uniqueLocationCandidates";
 
     auto uniqueAngleCandidates = 0.1f;
-    const string sUniqueAngleCandidates = "uniqueAngleCandidates";
+    const std::string sUniqueAngleCandidates = "uniqueAngleCandidates";
 
     auto scaleParam = 1.0f; // scaling coefficient
-    const string sScaleParam = "scaleParam";
+    const std::string sScaleParam = "scaleParam";
 
     auto searchDistCoeffMult = 1.25f;
-    const string sSearchDistCoeffMult = "searchDistCoeffMult";
+    const std::string sSearchDistCoeffMult = "searchDistCoeffMult";
 
 #ifdef DEBUG
     uint8_t debugLevel = 5;
 #else
     uint8_t debugLevel = 1;
 #endif // DEBUG
-    const string sDebugLevel = "debugLevel";
+    const std::string sDebugLevel = "debugLevel";
 
     auto rotationThreshold = 0.025f;
-    const string sRotationThreshold = "rotationThreshold";
+    const std::string sRotationThreshold = "rotationThreshold";
 
     auto isWeakThreshold = 0.1f;
-    const string sisWeakThreshold = "isWeakThreshold";
+    const std::string sisWeakThreshold = "isWeakThreshold";
 
     auto searchStepCoeff = 0.2f;
-    const string sSearchStepCoeff = "searchStepCoeff";
+    const std::string sSearchStepCoeff = "searchStepCoeff";
 
     // first we need to check all used params
     params.emplace(sSearchDistCoeff, searchDistCoeff);
@@ -419,23 +419,23 @@ namespace SPEL
 
     auto resizeFactor = workFrame->Resize(maxFrameHeight);
 
-    map <uint32_t, vector <LimbLabel> > tempLabelVector;
+    std::map <uint32_t, std::vector <LimbLabel> > tempLabelVector;
     auto skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
     auto partTree = skeleton.getPartTree(); // copy tree of bodypart from the skeleton
 
     auto maskMat = workFrame->getMask(); // copy mask from the frame
 
-    stringstream detectorName;
+    std::stringstream detectorName;
     detectorName << getID();
 
-    map <uint32_t, vector <LimbLabel>> sortedLabelsMap;
+    std::map <uint32_t, std::vector <LimbLabel>> sortedLabelsMap;
 
     // For all body parts
     for (auto iteratorBodyPart : partTree)
     { //Temporary variables
-      vector <LimbLabel> labels;
-      vector <LimbLabel> sortedLabels;
-      Point2f j0, j1;
+      std::vector <LimbLabel> labels;
+      std::vector <LimbLabel> sortedLabels;
+      cv::Point2f j0, j1;
 
       try
       {
@@ -444,11 +444,11 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Can't get joints";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
 
       auto boneLength = getBoneLength(j0, j1); // distance between nodes
@@ -465,11 +465,11 @@ namespace SPEL
       }
       catch (...)
       {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Maybe there is no '" << sSearchDistCoeff << "' param";
         if (debugLevelParam >= 1)
-          cerr << ERROR_HEADER << ss.str() << endl;
-        throw logic_error(ss.str());
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
       }
       if (searchDistance <= 0)
         searchDistance = minDist + 1;
@@ -492,11 +492,11 @@ namespace SPEL
             }
             catch (...)
             {
-              stringstream ss;
+              std::stringstream ss;
               ss << "Can't get value in maskMat at " << "[" << (int)y << "][" << (int)x << "]";
               if (debugLevelParam >= 1)
-                cerr << ERROR_HEADER << ss.str() << endl;
-              throw logic_error(ss.str());
+                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              throw std::logic_error(ss.str());
             }
             auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
@@ -526,8 +526,8 @@ namespace SPEL
 
       spelHelper::RecalculateScoreIsWeak(labels, detectorName.str(), isWeakThreshold);
       if (labels.size() > 0)
-        tempLabelVector.insert(pair<uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
-      sortedLabelsMap.insert(pair <uint32_t, vector <LimbLabel>>(iteratorBodyPart.getPartID(), sortedLabels));
+        tempLabelVector.insert(std::pair<uint32_t, std::vector <LimbLabel>>(iteratorBodyPart.getPartID(), labels)); // add current point labels
+      sortedLabelsMap.insert(std::pair <uint32_t, std::vector <LimbLabel>>(iteratorBodyPart.getPartID(), sortedLabels));
     }
 
     delete workFrame;
@@ -548,51 +548,51 @@ namespace SPEL
   LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame)
   {
     // Create a new label vector and build it label
-    auto p0 = Point2f(0, 0); // the point of unit vector
-    auto p1 = Point2f(1.0, 0); // the point of unit vector
+    auto p0 = cv::Point2f(0, 0); // the point of unit vector
+    auto p1 = cv::Point2f(1.0, 0); // the point of unit vector
     p1 *= boneLength; // change the vector length 
     p1 = spelHelper::rotatePoint2D(p1, p0, rotationAngle); // rotate the vector
     auto mid = 0.5 * p1; // center of the vector
-    p1 = p1 + Point2f(x, y) - mid; // shift the vector to current point
-    p0 = Point2f(x, y) - mid; // shift the vector to current point
+    p1 = p1 + cv::Point2f(x, y) - mid; // shift the vector to current point
+    p0 = cv::Point2f(x, y) - mid; // shift the vector to current point
 
     return generateLabel(bodyPart, workFrame, p0, p1); // build  the vector label
   }
 
-  vector<LimbLabel> Detector::filterLimbLabels(vector <LimbLabel> &sortedLabels, float uniqueLocationCandidates, float uniqueAngleCandidates)
+  std::vector<LimbLabel> Detector::filterLimbLabels(std::vector <LimbLabel> &sortedLabels, float uniqueLocationCandidates, float uniqueAngleCandidates)
   {
     if (uniqueLocationCandidates<0 || uniqueLocationCandidates>1.0 || uniqueAngleCandidates< 0 || uniqueAngleCandidates>1.0)
       return sortedLabels;
 
-    map<float, map<float, vector<uint32_t> > > locationMap;
-    map<float, vector<uint32_t> > angleMap;
+    std::map<float, std::map<float, std::vector<uint32_t> > > locationMap;
+    std::map<float, std::vector<uint32_t> > angleMap;
 
     sort(sortedLabels.begin(), sortedLabels.end()); // sort labels by "SumScore" ?
 
     for (auto index = 0; index < sortedLabels.size(); ++index)
     {
-      Point2f location = sortedLabels[index].getCenter();
+      cv::Point2f location = sortedLabels[index].getCenter();
       float angle = sortedLabels[index].getAngle();
       if (locationMap.find(location.x) == locationMap.end()) //not found
       {
-        map<float, vector<uint32_t> > yMap; //create the new map
-        vector<uint32_t> indices; //create the index vector
+        std::map<float, std::vector<uint32_t> > yMap; //create the new map
+        std::vector<uint32_t> indices; //create the index vector
         indices.push_back(index); //push the index
         yMap.emplace(location.y, indices); //put in yMap
         locationMap.emplace(location.x, yMap); //push the  yMap
       }
       else //found x coordinate
       {
-        map<float, vector<uint32_t> > yMap = locationMap.at(location.x);
+        std::map<float, std::vector<uint32_t> > yMap = locationMap.at(location.x);
         if (yMap.find(location.y) == yMap.end()) //not found
         {
-          vector<uint32_t> indices; //read the existing vector
+          std::vector<uint32_t> indices; //read the existing vector
           indices.push_back(index); //push back another index
           yMap.emplace(location.y, indices); //set in map
         }
         else
         {
-          vector<uint32_t> indices;
+          std::vector<uint32_t> indices;
           indices.push_back(index);
           yMap.at(location.y) = indices;
         }
@@ -601,28 +601,28 @@ namespace SPEL
       }
       if (angleMap.find(angle) == angleMap.end()) //not found
       {
-        vector<uint32_t> indices;
+        std::vector<uint32_t> indices;
         indices.push_back(index);
         angleMap.emplace(angle, indices);
       }
       else //found
       {
-        vector<uint32_t> indices = angleMap.at(angle); //read the existing vector
+        std::vector<uint32_t> indices = angleMap.at(angle); //read the existing vector
         indices.push_back(index); //push back another index
         angleMap.at(angle) = indices; //set in map
       }
     }
 
-    vector<uint32_t> bestByLocation;
-    vector<uint32_t> bestByAngle;
+    std::vector<uint32_t> bestByLocation;
+    std::vector<uint32_t> bestByAngle;
 
     for (auto iter = locationMap.begin(); iter != locationMap.end(); ++iter) //take the top from every location
     {
-      map<float, vector<uint32_t> > yMap = iter->second;
+      std::map<float, std::vector<uint32_t> > yMap = iter->second;
 
       for (auto yiter = yMap.begin(); yiter != yMap.end(); ++yiter) //take the top from every location
       {
-        vector<uint32_t> indices = yiter->second;
+        std::vector<uint32_t> indices = yiter->second;
         uint32_t numToPush = indices.size()*uniqueLocationCandidates;
         if (numToPush < 1) numToPush = 1;
         for (auto i = 0; i < numToPush; ++i)
@@ -631,7 +631,7 @@ namespace SPEL
     }
     for (auto iter = angleMap.begin(); iter != angleMap.end(); ++iter) //take the top from every angle
     {
-      vector<uint32_t> indices = iter->second;
+      std::vector<uint32_t> indices = iter->second;
       uint32_t numToPush = indices.size()*uniqueAngleCandidates;
       if (numToPush < 1) numToPush = 1;
       for (auto i = 0; i < numToPush; ++i)
@@ -641,15 +641,14 @@ namespace SPEL
     sort(bestByLocation.begin(), bestByLocation.end());
     sort(bestByAngle.begin(), bestByAngle.end());
 
-    vector<uint32_t> bestIntersect;
+    std::vector<uint32_t> bestIntersect;
     set_union(bestByLocation.begin(), bestByLocation.end(), bestByAngle.begin(), bestByAngle.end(), back_inserter(bestIntersect));
 
-    vector<LimbLabel> labels;
+    std::vector<LimbLabel> labels;
     for (auto index : bestIntersect)
       labels.push_back(sortedLabels.at(index));
 
     return labels;
-
   }
 
 }

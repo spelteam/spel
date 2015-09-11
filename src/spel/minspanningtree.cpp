@@ -42,7 +42,7 @@ namespace SPEL
     tree<int>::iterator imgLoc; //bone number, length, angle, root angle is with x axis
     imgLoc = mst.begin();
 
-    vector<int> graphNodes; //nodes already in the graph
+    std::vector<int> graphNodes; //nodes already in the graph
     graphNodes.push_back(rootNode);
     mst.insert(imgLoc, rootNode); //insert root node
     float absoluteMin = ism.min();
@@ -52,7 +52,7 @@ namespace SPEL
     while (mst.size() <= static_cast<size_t>(treeSize) && mst.size() < static_cast<size_t>(ism.size())) //do this until the tree is complete
     {
       //cout << "in..." << endl;
-      Point2i minLoc(-1, -1);
+      cv::Point2i minLoc(-1, -1);
       float min = FLT_MAX;
       //for each node currently in the graph
       for (uint32_t i = 0; i < graphNodes.size(); ++i)
@@ -69,7 +69,7 @@ namespace SPEL
             if (locScore < min)
             {
               min = locScore;
-              minLoc = Point2i(x, y);
+              minLoc = cv::Point2i(x, y);
             }
           }
         }
