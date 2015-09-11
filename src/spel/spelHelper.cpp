@@ -33,7 +33,7 @@ namespace SPEL
       t = (double)step / (double)numSteps;
     else
       t = 0;
-    return prevAngle*(1 - t) + nextAngle*t;
+    return prevAngle*(1.0 - t) + nextAngle*t;
   }
 
   void spelHelper::RecalculateScoreIsWeak(std::vector <LimbLabel> &labels, std::string detectorName, float standardDiviationTreshold)
