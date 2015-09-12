@@ -565,11 +565,11 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
             delete detectors[i];
         detectors.clear();
         //slice clean-up
-        for(auto f:slices[sliceNumber])
-            delete f;
-        slices[sliceNumber].clear();
+//        for(auto f:slices[sliceNumber])
+//            delete f;
+//        slices[sliceNumber].clear();
     }
-    slices.clear();
+//    slices.clear();
 
 
     if (debugLevel >= 1)
@@ -627,6 +627,12 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
     sequence.setFrames(frames);
     for(auto f:frames) //clean up frames
         delete f;
+    for(auto s:slices)
+    {
+        for(auto sf: s)
+            delete sf;
+    }
+    slices.clear();
     return retSolve;
 }
 
