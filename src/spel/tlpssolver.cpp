@@ -40,10 +40,11 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params,
 
 vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params) //inherited virtual
 {
-    if (sequence.getFrames().size() == 0)
+    vector<Frame*> frames = sequence.getFrames();
+    if (frames.size() == 0)
         return vector<Solvlet>();
 
-    Mat image(sequence.getFrames()[0]->getImage());
+    Mat image(frames[0]->getImage());
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
     params.emplace("temporalWindowSize", 0); //0 for unlimited window size
@@ -79,6 +80,9 @@ vector<Solvlet> TLPSSolver::solve(Sequence &sequence, map<string, float> params)
 
     sequence.estimateUniformScale(params);
     sequence.computeInterpolation(params);
+
+    for(auto f:frames)
+        delete f;
 
     vector<Solvlet> solution;
     //call the new function
@@ -560,7 +564,12 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
         for(auto i=0; i<detectors.size(); ++i)
             delete detectors[i];
         detectors.clear();
+        //slice clean-up
+        for(auto f:slices[sliceNumber])
+            delete f;
+        slices[sliceNumber].clear();
     }
+    slices.clear();
 
 
     if (debugLevel >= 1)
@@ -616,6 +625,8 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
     }
 
     sequence.setFrames(frames);
+    for(auto f:frames) //clean up frames
+        delete f;
     return retSolve;
 }
 
