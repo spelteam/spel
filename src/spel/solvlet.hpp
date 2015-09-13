@@ -14,33 +14,30 @@
 
 namespace SPEL
 {
-  using namespace std;
   class Solvlet
   {
   public:
     Solvlet(void);
-    Solvlet(int id, vector<LimbLabel> labels);
+    Solvlet(int id, std::vector<LimbLabel> labels);
     virtual ~Solvlet(void);
 
     virtual Solvlet &operator=(const Solvlet &s);
     virtual bool operator<(const Solvlet &s) const;
     virtual bool operator>(const Solvlet &s) const;
-    // bool operator==(const Solvlet &s) const;
-    // bool operator!=(const Solvlet &s) const;
 
     virtual int getFrameID(void) const;
     virtual void setFrameID(int _id);
 
-    virtual vector<LimbLabel> getLabels(void) const;
-    virtual const vector<LimbLabel>* getLabelsPtr(void) const;
-    virtual void setLabels(vector<LimbLabel> _labels);
+    virtual std::vector<LimbLabel> getLabels(void) const;
+    virtual const std::vector<LimbLabel>* getLabelsPtr(void) const;
+    virtual void setLabels(std::vector<LimbLabel> _labels);
 
     virtual Skeleton toSkeleton(const Skeleton &example);
-    virtual float evaluateSolution(Frame* frame, map<string, float> params);
+    virtual float evaluateSolution(Frame* frame, std::map<std::string, float> params);
 
   private:
     int frameId;
-    vector<LimbLabel> labels;
+    std::vector<LimbLabel> labels;
   };
 
 }

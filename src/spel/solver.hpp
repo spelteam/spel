@@ -13,25 +13,22 @@
 
 namespace SPEL
 {
-  using namespace std;
-
   class Solver
   {
   public:
     Solver(void);
     virtual ~Solver(void);
-    virtual vector<Solvlet> solve(const Sequence& v);
-    virtual vector<Solvlet> solve(const Sequence& v, map<string, float> params);
+    virtual std::vector<Solvlet> solve(const Sequence& v);
+    virtual std::vector<Solvlet> solve(const Sequence& v, std::map<std::string, float> params);
     ///get the solver name. Every class inheriting solver has its own Name
-    virtual string getName(void);
+    virtual std::string getName(void);
     ///get the solver Id. Every class inheriting solver has its own ID
     virtual int getId(void);
   protected:
     int id;
-    string name;
+    std::string name;
   };
 
 }
 
 #endif  // _SOLVER_HPP_
-

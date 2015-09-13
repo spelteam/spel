@@ -14,7 +14,7 @@ namespace SPEL
 
   }
 
-  string Solver::getName() //get the solver name. Every class inheriting solver has its own Name
+  std::string Solver::getName() //get the solver name. Every class inheriting solver has its own Name
   {
     return name;
   }
@@ -24,16 +24,15 @@ namespace SPEL
     return id;
   }
 
-  vector<Solvlet> Solver::solve(const Sequence& v)
+  std::vector<Solvlet> Solver::solve(const Sequence& v)
   {
-    map<string, float> params;
+    std::map<std::string, float> params;
     return solve(v, params);
   }
 
-  vector<Solvlet> Solver::solve(const Sequence& v, map<string, float> params)
+  std::vector<Solvlet> Solver::solve(const Sequence& v, std::map<std::string, float> params)
   {
-    vector<Solvlet> empty;
-
+    std::vector<Solvlet> empty;
     return empty;
   }
 
