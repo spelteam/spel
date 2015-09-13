@@ -114,7 +114,8 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
     if (debugLevel >= 1)
         cout << "TLPSSolver started, slicing sequence..." << endl;
 
-    vector<vector<Frame*> > slices = slice(sequence.getFrames());
+    vector<Frame*> origFrames = sequence.getFrames();
+    vector<vector<Frame*> > slices = slice(origFrames);
 
     if (debugLevel >= 1)
         cout << slices.size() << " sequence slices created." << endl;
@@ -624,14 +625,14 @@ vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, map<string, float> p
         retSolve = passedSolves; //return these solves
     }
 
+    //cout << "ALL GOOD" << endl;
     sequence.setFrames(frames);
     for(auto f:frames) //clean up frames
         delete f;
-    for(auto s:slices)
-    {
-        for(auto sf: s)
-            delete sf;
-    }
+    //cout << "ALL GOOD 2" << endl;
+    for(auto f:origFrames)
+        delete f;
+    //cout << "ALL GOOD 3" << endl;
     slices.clear();
     return retSolve;
 }
