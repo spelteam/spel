@@ -12,6 +12,11 @@
 #include "limbLabel.hpp"
 #include "TestsFunctions.hpp"
 
+using namespace std;
+#if OpenCV_VERSION_MAJOR == 3 && defined (HAVE_OPENCV_XFEATURES2D)
+using namespace xfeatures2d;
+#endif
+
 namespace SPEL
 {
   vector<Frame*> SFrames;

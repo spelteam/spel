@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include "imagesimilaritymatrix.hpp"
 
+using namespace std;
 using namespace cv;
 
 namespace SPEL

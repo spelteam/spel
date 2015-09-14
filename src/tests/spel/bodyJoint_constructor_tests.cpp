@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <bodyJoint.hpp>
 
+using namespace std;
 using namespace cv;
 
 namespace SPEL
