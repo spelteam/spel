@@ -122,9 +122,9 @@ namespace SPEL
 
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-    Ptr <cv::xfeatures2d::SurfFeatureDetector> detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
+    cv::Ptr <cv::xfeatures2d::SurfFeatureDetector> detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
 #else
-    Ptr <cv::SurfFeatureDetector> detector = cv::SurfFeatureDetector::create(minHessian);
+    cv::Ptr <cv::SurfFeatureDetector> detector = cv::SurfFeatureDetector::create(minHessian);
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
     detector->detect(imgMat, keyPoints);
 #else
@@ -157,9 +157,9 @@ namespace SPEL
 
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-    Ptr <cv::xfeatures2d::SurfFeatureDetector> detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
+    cv::Ptr <cv::xfeatures2d::SurfFeatureDetector> detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
 #else
-    Ptr <cv::SurfFeatureDetector> detector = cv::SurfFeatureDetector::create(minHessian);
+    cv::Ptr <cv::SurfFeatureDetector> detector = cv::SurfFeatureDetector::create(minHessian);
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
     detector->detect(imgMat, keyPoints);
 #else
@@ -248,9 +248,9 @@ namespace SPEL
     {
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-      Ptr <cv::xfeatures2d::SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+      cv::Ptr <cv::xfeatures2d::SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
 #else
-      Ptr <cv::SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+      cv::Ptr <cv::SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
       extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
 #else
