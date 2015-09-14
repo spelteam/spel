@@ -68,7 +68,7 @@ namespace SPEL
 #if OpenCV_VERSION_MAJOR == 2
       cvtColor(partImageResized, partModel.partImage, CV_BGR2GRAY);
 #elif OpenCV_VERSION_MAJOR >= 3
-      cvtColor(partImageResized, partModel.partImage, COLOR_BGR2GRAY);
+      cvtColor(partImageResized, partModel.partImage, cv::COLOR_BGR2GRAY);
 #else
 #error "Unsupported version of OpenCV"
 #endif
