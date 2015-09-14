@@ -39,10 +39,10 @@ namespace SPEL
 
   std::vector<Solvlet> TLPSSolver::solve(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
-    if (sequence.getFrames().size() == 0)
-      return std::vector<Solvlet>();
+    vector<Frame*> frames = sequence.getFrames();
+    if (frames.size() == 0)
 
-    cv::Mat image(sequence.getFrames()[0]->getImage());
+    Mat image(frames[0]->getImage());
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
     params.emplace("temporalWindowSize", 0); //0 for unlimited window size
@@ -79,7 +79,9 @@ namespace SPEL
     sequence.estimateUniformScale(params);
     sequence.computeInterpolation(params);
 
-    std::vector<Solvlet> solution;
+    for(auto f:frames)
+        delete f;
+
     //call the new function
     if (params.at("temporalWindowSize") == 0)
       solution = solveGlobal(sequence, params);
@@ -108,7 +110,8 @@ namespace SPEL
     if (debugLevel >= 1)
       std::cout << "TLPSSolver started, slicing sequence..." << std::endl;
 
-    std::vector<std::vector<Frame*> > slices = slice(sequence.getFrames());
+    vector<Frame*> origFrames = sequence.getFrames();
+    vector<vector<Frame*> > slices = slice(origFrames);
 
     if (debugLevel >= 1)
       std::cout << slices.size() << " sequence slices created." << std::endl;
@@ -523,7 +526,12 @@ namespace SPEL
       for (auto i = 0; i < detectors.size(); ++i)
         delete detectors[i];
       detectors.clear();
+        //slice clean-up
+//        for(auto f:slices[sliceNumber])
+//            delete f;
+//        slices[sliceNumber].clear();
     }
+//    slices.clear();
 
     if (debugLevel >= 1)
       std::cout << sequenceSolvlets.size() << " slices solved." << std::endl;
@@ -573,7 +581,15 @@ namespace SPEL
       retSolve = passedSolves; //return these solves
     }
 
+    //cout << "ALL GOOD" << endl;
     sequence.setFrames(frames);
+    for(auto f:frames) //clean up frames
+        delete f;
+    //cout << "ALL GOOD 2" << endl;
+    for(auto f:origFrames)
+        delete f;
+    //cout << "ALL GOOD 3" << endl;
+    slices.clear();
     return retSolve;
   }
   
