@@ -248,9 +248,9 @@ namespace SPEL
     {
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-      cv::Ptr <cv::xfeatures2d::SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+      cv::Ptr <cv::xfeatures2d::SurfDescriptorExtractor> extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
 #else
-      cv::Ptr <cv::SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
+      cv::Ptr <cv::SurfDescriptorExtractor> extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
       extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
 #else
