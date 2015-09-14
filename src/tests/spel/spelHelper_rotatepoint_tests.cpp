@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <spelHelper.hpp>
 
+using namespace cv;
+
 namespace SPEL
 {
   TEST(spelHelperTest_, rotatepointTest)

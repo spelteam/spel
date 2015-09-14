@@ -5,6 +5,7 @@
 #include "projectLoader.hpp"
 
 using namespace std;
+using namespace cv;
 using namespace SPEL;
 
 class ProjectRunner

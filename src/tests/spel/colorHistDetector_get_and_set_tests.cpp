@@ -5,6 +5,9 @@
 #include "bodyJoint.hpp"
 #include "skeleton.cpp"
 
+using namespace std;
+using namespace cv;
+
 namespace SPEL
 {
   TEST(colorHistDetectorTest, GetAndSetTest)

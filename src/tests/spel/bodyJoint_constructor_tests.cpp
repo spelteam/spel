@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <bodyJoint.hpp>
 
+using namespace cv;
+
 namespace SPEL
 {
   TEST(bodyJointTest, ConstructorTest)

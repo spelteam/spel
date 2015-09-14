@@ -18,6 +18,7 @@
 #include "projectattrstorage.h"
 
 using namespace SPEL;
+using namespace std;
 
 namespace posegui {
 

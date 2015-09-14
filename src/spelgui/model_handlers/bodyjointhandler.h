@@ -9,6 +9,7 @@ class QDomDocument;
 
 namespace posegui {
   using namespace SPEL;
+  using namespace cv;
   class BodyJointHandler : public ModelHandler < SPEL::BodyJoint, QDomElement, QDomDocument >
   {
   public:

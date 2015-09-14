@@ -8,6 +8,7 @@
 
 using namespace cv;
 using namespace std;
+
 namespace SPEL
 {
   class TestingDetector : public ColorHistDetector

@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <score.hpp>
 
+using namespace std;
+
 namespace SPEL
 {
   TEST(scoreTest, GetAndSetTest)

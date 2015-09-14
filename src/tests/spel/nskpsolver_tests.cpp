@@ -10,7 +10,9 @@
 
 #include <iostream>
 
+using namespace std;
 using namespace cv;
+
 namespace SPEL
 {
   TEST(nskpsolverTests, findFrameIndexById)

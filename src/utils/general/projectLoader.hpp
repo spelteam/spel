@@ -30,6 +30,7 @@
 
 using namespace std;
 using namespace tinyxml2;
+using namespace cv;
 using namespace SPEL;
 
 class ProjectLoader
@@ -68,4 +69,3 @@ private:
 };
 
 #endif  // _PROJECT_LOADER_HPP_
-

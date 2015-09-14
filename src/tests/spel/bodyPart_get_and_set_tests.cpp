@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include <bodyPart.hpp>
 
+using namespace std;
+using namespace cv;
+
 namespace SPEL
 {
   TEST(bodyPartTest, GetAndSetTest)

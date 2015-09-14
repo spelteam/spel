@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <skeleton.hpp>
 
+using namespace std;
+
 namespace SPEL
 {
   TEST(skeletonTest, GetAndSetTest)

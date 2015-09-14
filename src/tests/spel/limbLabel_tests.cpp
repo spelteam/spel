@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include <limbLabel.hpp>
 
+using namespace std;
+using namespace cv;
+
 namespace SPEL
 {
   TEST(limbLabel, ConstructorTest)

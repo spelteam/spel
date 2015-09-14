@@ -6,6 +6,7 @@
 #include <limbLabel.hpp>
 
 using namespace SPEL;
+using namespace cv;
 
 class LimbLabelItem : public QGraphicsItem
 {

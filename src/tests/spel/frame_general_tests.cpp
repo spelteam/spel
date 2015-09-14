@@ -6,6 +6,8 @@
 #include "lockframe.hpp"
 #include "interpolation.hpp"
 
+using namespace cv;
+
 namespace SPEL
 {
   //factory functions for creating implementation
