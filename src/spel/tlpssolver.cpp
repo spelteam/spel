@@ -39,10 +39,11 @@ namespace SPEL
 
   std::vector<Solvlet> TLPSSolver::solve(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
-    vector<Frame*> frames = sequence.getFrames();
+    std::vector<Frame*> frames = sequence.getFrames();
     if (frames.size() == 0)
+      return std::vector<Solvlet>();
 
-    Mat image(frames[0]->getImage());
+    cv::Mat image(frames[0]->getImage());
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
     params.emplace("temporalWindowSize", 0); //0 for unlimited window size
@@ -79,9 +80,10 @@ namespace SPEL
     sequence.estimateUniformScale(params);
     sequence.computeInterpolation(params);
 
-    for(auto f:frames)
-        delete f;
+    for (auto f : frames)
+      delete f;
 
+    std::vector<Solvlet> solution;
     //call the new function
     if (params.at("temporalWindowSize") == 0)
       solution = solveGlobal(sequence, params);
@@ -110,8 +112,8 @@ namespace SPEL
     if (debugLevel >= 1)
       std::cout << "TLPSSolver started, slicing sequence..." << std::endl;
 
-    vector<Frame*> origFrames = sequence.getFrames();
-    vector<vector<Frame*> > slices = slice(origFrames);
+    std::vector<Frame*> origFrames = sequence.getFrames();
+    std::vector<std::vector<Frame*> > slices = slice(origFrames);
 
     if (debugLevel >= 1)
       std::cout << slices.size() << " sequence slices created." << std::endl;
@@ -526,12 +528,12 @@ namespace SPEL
       for (auto i = 0; i < detectors.size(); ++i)
         delete detectors[i];
       detectors.clear();
-        //slice clean-up
+      //slice clean-up
 //        for(auto f:slices[sliceNumber])
 //            delete f;
 //        slices[sliceNumber].clear();
     }
-//    slices.clear();
+    //    slices.clear();
 
     if (debugLevel >= 1)
       std::cout << sequenceSolvlets.size() << " slices solved." << std::endl;
@@ -583,16 +585,16 @@ namespace SPEL
 
     //cout << "ALL GOOD" << endl;
     sequence.setFrames(frames);
-    for(auto f:frames) //clean up frames
-        delete f;
+    for (auto f : frames) //clean up frames
+      delete f;
     //cout << "ALL GOOD 2" << endl;
-    for(auto f:origFrames)
-        delete f;
+    for (auto f : origFrames)
+      delete f;
     //cout << "ALL GOOD 3" << endl;
     slices.clear();
     return retSolve;
   }
-  
+
   std::vector<Solvlet> TLPSSolver::solveWindowed(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
     ///define the space
@@ -708,7 +710,7 @@ namespace SPEL
         //                correctPixels++; //don't count these at all?
       }
     }
-    
+
     double solutionEval = (float)correctPixels / ((float)correctPixels + (float)incorrectPixels);
 
     //now check for critical part failures - label mostly outside of mask
