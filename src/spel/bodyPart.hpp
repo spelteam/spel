@@ -18,41 +18,41 @@ namespace SPEL
   class BodyPart
   {
   public:
-    BodyPart(void);
-    BodyPart(const BodyPart& bodyPart);
-    BodyPart(BodyPart&& bodyPart);
-    BodyPart(int id, std::string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0);
-    virtual ~BodyPart(void);
-    virtual BodyPart& operator=(const BodyPart& bodyPart);
-    virtual BodyPart& operator=(BodyPart&& bodyPart);
+    BodyPart(void) noexcept;
+    BodyPart(const BodyPart& bodyPart) noexcept;
+    BodyPart(BodyPart&& bodyPart) noexcept;
+    BodyPart(int id, std::string name, int pJoint, int cJoint, bool isOcc = false, float spaceLen = 0) noexcept;
+    virtual ~BodyPart(void) noexcept;
+    virtual BodyPart& operator=(const BodyPart& bodyPart) noexcept;
+    virtual BodyPart& operator=(BodyPart&& bodyPart) noexcept;
     /// comparsion by unique index
-    virtual bool operator==(const BodyPart &bp) const;
+    virtual bool operator==(const BodyPart &bp) const noexcept;
     /// comparsion by address
-    virtual bool operator!=(const BodyPart &bp) const;
+    virtual bool operator!=(const BodyPart &bp) const noexcept;
     // get and set: All these functions just give access to the object fields
-    virtual int getPartID(void) const;
-    virtual void setPartID(int _partID);
-    virtual std::string getPartName(void) const;
-    virtual void setPartName(std::string _partName);
-    virtual int getParentJoint(void) const;
-    virtual void setParentJoint(int _parentJoint);
-    virtual int getChildJoint(void) const;
-    virtual void setChildJoint(int _childJoint);
-    virtual bool getIsOccluded(void) const;
-    virtual void setIsOccluded(bool _isOccluded);
-    virtual float getExpectedDistance(void) const;
-    virtual void setExpectedDistance(float _expectedDistance);
-    virtual POSERECT <cv::Point2f> getPartPolygon(void) const;
-    virtual void setPartPolygon(POSERECT <cv::Point2f> _partPolygon);
-    virtual float getLWRatio(void) const;
-    virtual void setLWRatio(float _lwRatio);
-    virtual float getRelativeLength(void) const;
-    virtual void setRelativeLength(float _relativeLength);
+    virtual int getPartID(void) const noexcept;
+    virtual void setPartID(int _partID) noexcept;
+    virtual std::string getPartName(void) const noexcept;
+    virtual void setPartName(std::string _partName) noexcept;
+    virtual int getParentJoint(void) const noexcept;
+    virtual void setParentJoint(int _parentJoint) noexcept;
+    virtual int getChildJoint(void) const noexcept;
+    virtual void setChildJoint(int _childJoint) noexcept;
+    virtual bool getIsOccluded(void) const noexcept;
+    virtual void setIsOccluded(bool _isOccluded) noexcept;
+    virtual float getExpectedDistance(void) const noexcept;
+    virtual void setExpectedDistance(float _expectedDistance) noexcept;
+    virtual POSERECT <cv::Point2f> getPartPolygon(void) const noexcept;
+    virtual void setPartPolygon(POSERECT <cv::Point2f> _partPolygon) noexcept;
+    virtual float getLWRatio(void) const noexcept;
+    virtual void setLWRatio(float _lwRatio) noexcept;
+    virtual float getRelativeLength(void) const noexcept;
+    virtual void setRelativeLength(float _relativeLength) noexcept;
     //search parameters
-    virtual float getSearchRadius(void) const;
-    virtual void setSearchRadius(float _searchRadius);
-    virtual float getRotationSearchRange(void) const;
-    virtual void setRotationSearchRange(float _rotationAngle);
+    virtual float getSearchRadius(void) const noexcept;
+    virtual void setSearchRadius(float _searchRadius) noexcept;
+    virtual float getRotationSearchRange(void) const noexcept;
+    virtual void setRotationSearchRange(float _rotationAngle) noexcept;
   private:
     /// identifier, must be unique within the limits of class
     int partID;
@@ -78,7 +78,7 @@ namespace SPEL
     float rotationSearchRange;
   };
 
-  std::ostream& operator<<(std::ostream& os, const BodyPart &bp);
+  std::ostream& operator<<(std::ostream& os, const BodyPart &bp) noexcept;
 
 }
 #endif  // _BODYPART_HPP_

@@ -58,6 +58,7 @@ LIST ( APPEND ${SPEL_MODULE}_HDR skeleton.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR solver.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR solvlet.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR spel.hpp )
+LIST ( APPEND ${SPEL_MODULE}_HDR spelParameters.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR surfDetector.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR tlpssolver.hpp )
 

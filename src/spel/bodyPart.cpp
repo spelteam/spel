@@ -3,7 +3,7 @@
 namespace SPEL
 {
   // default constructor
-  BodyPart::BodyPart(void)
+  BodyPart::BodyPart(void) noexcept
   {
     partID = 0;
     partName = "";
@@ -19,7 +19,7 @@ namespace SPEL
   }
 
   //copy constructor
-  BodyPart::BodyPart(const BodyPart &bodyPart)
+  BodyPart::BodyPart(const BodyPart &bodyPart) noexcept
     : partID(bodyPart.partID),
     partName(bodyPart.partName),
     parentJoint(bodyPart.parentJoint),
@@ -35,7 +35,7 @@ namespace SPEL
   }
 
   //move constructor
-  BodyPart::BodyPart(BodyPart &&bodyPart)
+  BodyPart::BodyPart(BodyPart &&bodyPart) noexcept
     : partID(std::move(bodyPart.partID)),
     partName(std::move(bodyPart.partName)),
     parentJoint(std::move(bodyPart.parentJoint)),
@@ -53,7 +53,7 @@ namespace SPEL
 
 
   // constructor with params
-  BodyPart::BodyPart(int id, std::string name, int pJoint, int cJoint, bool isOcc, float spaceLen)
+  BodyPart::BodyPart(int id, std::string name, int pJoint, int cJoint, bool isOcc, float spaceLen) noexcept
   {
     partID = id;
     partName = name;
@@ -68,84 +68,85 @@ namespace SPEL
     rotationSearchRange = 0;
   }
 
-  BodyPart::~BodyPart(void)
+  BodyPart::~BodyPart(void) noexcept
   {
     return;
   }
 
-  int BodyPart::getPartID(void) const
+  int BodyPart::getPartID(void) const noexcept
   {
     return partID;
   }
 
-  void BodyPart::setPartID(int _partID)
+  void BodyPart::setPartID(int _partID) noexcept
   {
     partID = _partID;
   }
 
-  std::string BodyPart::getPartName(void) const
+  std::string BodyPart::getPartName(void) const noexcept
   {
     return partName;
   }
 
-  void BodyPart::setPartName(std::string _partName)
+  void BodyPart::setPartName(std::string _partName) noexcept
   {
     partName = _partName;
   }
 
-  int BodyPart::getParentJoint(void) const
+  int BodyPart::getParentJoint(void) const noexcept
   {
     return parentJoint;
   }
 
-  void BodyPart::setParentJoint(int _parentJoint)
+  void BodyPart::setParentJoint(int _parentJoint) noexcept
   {
     parentJoint = _parentJoint;
   }
 
-  int BodyPart::getChildJoint(void) const
+  int BodyPart::getChildJoint(void) const noexcept
   {
     return childJoint;
   }
 
-  void BodyPart::setChildJoint(int _childJoint)
+  void BodyPart::setChildJoint(int _childJoint) noexcept
   {
     childJoint = _childJoint;
   }
 
-  bool BodyPart::getIsOccluded(void) const
+  bool BodyPart::getIsOccluded(void) const noexcept
   {
     return isOccluded;
   }
 
-  void BodyPart::setIsOccluded(bool _isOccluded)
+  void BodyPart::setIsOccluded(bool _isOccluded) noexcept
   {
     isOccluded = _isOccluded;
   }
 
-  float BodyPart::getSearchRadius(void) const
+  float BodyPart::getSearchRadius(void) const noexcept
   {
     return searchRadius;
   }
 
-  void BodyPart::setSearchRadius(float _searchRadius)
+  void BodyPart::setSearchRadius(float _searchRadius) noexcept
   {
     searchRadius = _searchRadius;
   }
 
-
-  float BodyPart::getExpectedDistance(void) const
+  float BodyPart::getExpectedDistance(void) const noexcept
   {
     return expectedDistance;
   }
 
-  void BodyPart::setExpectedDistance(float _expectedDistance)
+  void BodyPart::setExpectedDistance(float _expectedDistance) noexcept
   {
     expectedDistance = _expectedDistance;
   }
 
-  BodyPart& BodyPart::operator=(const BodyPart& bodyPart){
-    if (&bodyPart == this) return *this;
+  BodyPart& BodyPart::operator=(const BodyPart& bodyPart) noexcept
+  {
+    if (&bodyPart == this) 
+      return *this;
 
     partID = bodyPart.partID;
     partName = bodyPart.partName;
@@ -161,7 +162,8 @@ namespace SPEL
     return *this;
   }
 
-  BodyPart& BodyPart::operator=(BodyPart&& bodyPart){
+  BodyPart& BodyPart::operator=(BodyPart&& bodyPart) noexcept
+  {
     partID = std::move(bodyPart.partID);
     std::swap(partName, bodyPart.partName);
     parentJoint = std::move(bodyPart.parentJoint);
@@ -176,58 +178,57 @@ namespace SPEL
     return *this;
   }
 
-  bool BodyPart::operator==(const BodyPart &bp) const
+  bool BodyPart::operator==(const BodyPart &bp) const noexcept
   {
     return this->getPartID() == bp.getPartID();
   }
 
-  bool BodyPart::operator!=(const BodyPart &bp) const
+  bool BodyPart::operator!=(const BodyPart &bp) const noexcept
   {
     return !(*this == bp);
   }
 
-  std::ostream& operator<<(std::ostream& os, const BodyPart &bp)
+  std::ostream& operator<<(std::ostream& os, const BodyPart &bp) noexcept
   {
-    auto s = std::to_string(bp.getPartID());
-    return os << s;
+    return os << std::to_string(bp.getPartID());
   }
 
-  POSERECT <cv::Point2f> BodyPart::getPartPolygon(void) const
+  POSERECT <cv::Point2f> BodyPart::getPartPolygon(void) const noexcept
   {
     return partPolygon;
   }
 
-  void BodyPart::setPartPolygon(POSERECT <cv::Point2f> _partPolygon)
+  void BodyPart::setPartPolygon(POSERECT <cv::Point2f> _partPolygon) noexcept
   {
     partPolygon = _partPolygon;
   }
 
-  float BodyPart::getLWRatio(void) const
+  float BodyPart::getLWRatio(void) const noexcept
   {
     return lwRatio;
   }
 
-  void BodyPart::setLWRatio(float _lwRatio)
+  void BodyPart::setLWRatio(float _lwRatio) noexcept
   {
     lwRatio = _lwRatio;
   }
 
-  float BodyPart::getRelativeLength(void) const
+  float BodyPart::getRelativeLength(void) const noexcept
   {
     return relativeLength;
   }
 
-  void BodyPart::setRelativeLength(float _relativeLength)
+  void BodyPart::setRelativeLength(float _relativeLength) noexcept
   {
     relativeLength = _relativeLength;
   }
 
-  float BodyPart::getRotationSearchRange(void) const
+  float BodyPart::getRotationSearchRange(void) const noexcept
   {
     return rotationSearchRange;
   }
 
-  void BodyPart::setRotationSearchRange(float _rotationAngle)
+  void BodyPart::setRotationSearchRange(float _rotationAngle) noexcept
   {
     rotationSearchRange = _rotationAngle;
   }
