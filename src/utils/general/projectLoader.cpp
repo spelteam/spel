@@ -682,7 +682,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
     float angleRadius = partIter->getRotationSearchRange();
 
     circle(image, 0.5*p0 + 0.5*p1, (int)pixelRadius, Scalar(0, 0, 0, 100), lineWidth, CV_AA);
-    double startAngleUpright = spelHelper::angle2D(1.0, 0.0, (p1 - p0).x, (p1 - p0).y)*180.0 / M_PI;
+    double startAngleUpright = spelHelper::angle2D(1.0f, 0.0f, (p1 - p0).x, (p1 - p0).y)*180.0 / M_PI;
 
     ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - angleRadius, startAngleUpright + angleRadius, Scalar(0, 255, 0), lineWidth, CV_AA);
     ellipse(image, 0.5*p0 + 0.5*p1, cv::Size((int)pixelRadius, (int)pixelRadius), 0, startAngleUpright - 2, startAngleUpright + 2, Scalar(0, 0, 255), lineWidth*0.5, CV_AA); //draw a 1 degree tick mark
@@ -856,12 +856,12 @@ bool ProjectLoader::Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame
       throw logic_error(ss.str());
     }
     Point2f direction = j1 - j0; // used as estimation of the vector's direction
-    float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle
+    float rotationAngle = float(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle
     bpi->setRotationSearchRange(rotationAngle);
 
     Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
 
-    float angle = float(spelHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    float angle = float(spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     Point2f c1, c2, c3, c4, polyCenter;
     c1 = Point2f(0.f, 0.5f * boneWidth);
     c2 = Point2f(boneLength, 0.5f * boneWidth);

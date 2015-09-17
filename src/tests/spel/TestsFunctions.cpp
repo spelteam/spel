@@ -20,7 +20,7 @@ namespace SPEL
     Point2f c4 = Point2f(0.f, -0.5f * boneWidth);
     Point2f polyCenter = Point2f(boneLength * 0.5f, 0.f); // polygon center 
     Point2f direction = p1 - p0; // used as estimation of the vector's direction
-    float rotationAngle = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
+    float rotationAngle = float(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
     // Rotate and shift the polygon to the bodypart center
     c1 = spelHelper::rotatePoint2D(c1, polyCenter, rotationAngle) + boxCenter - polyCenter;
     c2 = spelHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;

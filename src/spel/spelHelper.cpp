@@ -2,43 +2,9 @@
 
 namespace SPEL
 {
-
-  double spelHelper::angle2D(double x1, double y1, double x2, double y2)
-  {
-    //input has a zero vector
-    if ((x1 == 0.0 && y1 == 0.0) || (x2 == 0.0 && y2 == 0.0)){
-      //zero vector is both parallel and perpendicular to every vector
-      return 0.0;
-    }
-
-    double dtheta, theta1, theta2;
-    //angle between Ox and first vector
-    theta1 = atan2(y1, x1);
-    //angle between Ox and second vector
-    theta2 = atan2(y2, x2);
-    //angle between first and second vector
-    dtheta = theta2 - theta1;
-    //normalize angle to range [-PI;PI]
-    while (dtheta > M_PI)
-      dtheta -= (M_PI * 2.0);
-    while (dtheta < -M_PI)
-      dtheta += (M_PI * 2.0);
-    return(dtheta);
-  }
-
-  double spelHelper::interpolateFloat(double prevAngle, double nextAngle, int step, int numSteps)
-  {
-    double t;
-    if (numSteps != 0)
-      t = (double)step / (double)numSteps;
-    else
-      t = 0;
-    return prevAngle*(1.0 - t) + nextAngle*t;
-  }
-
   void spelHelper::RecalculateScoreIsWeak(std::vector <LimbLabel> &labels, std::string detectorName, float standardDiviationTreshold)
   {
-      //@TODO: Ignore this function for now, will be modified before release
+    //@TODO: Ignore this function for now, will be modified before release
     std::vector <float> scoreValues;
     float min = 1.0f;
     const uint32_t minCount = 600;
@@ -68,7 +34,7 @@ namespace SPEL
       float variance = (float)sqrSum / (float)(scoreValues.size());
       float standardDeviation = sqrt(variance);
       float variationCoeff = standardDeviation / (mean - min);
-      float dispersionIndex = variance/(mean - min);
+      float dispersionIndex = variance / (mean - min);
       if (scoreValues.size() < minCount)
         variationCoeff = variationCoeff * (1.0 + 1 / (4 * scoreValues.size()));
       isWeak = dispersionIndex < standardDiviationTreshold;

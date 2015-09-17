@@ -3,74 +3,61 @@
 #define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 namespace SPEL
 {
-  Detector::Detector(void)
+  Detector::Detector(void) noexcept
   {
   }
 
-  Detector::~Detector(void)
+  Detector::~Detector(void) noexcept
   {
   }
 
-  float Detector::getBoneLength(cv::Point2f begin, cv::Point2f end)
+  float Detector::getBoneLength(const cv::Point2f &begin, const cv::Point2f &end) noexcept
   {
-    return (begin == end) ? 1.0f : (float)sqrt(spelHelper::distSquared(begin, end));
+    return (begin == end) ? 1.0f : static_cast<float>(sqrt(spelHelper::distSquared(begin, end)));
   }
 
-  float Detector::getBoneWidth(float length, BodyPart bodyPart)
+  float Detector::getBoneWidth(const float &length, const BodyPart &bodyPart) noexcept
   {
     auto ratio = bodyPart.getLWRatio();
-    if (ratio == 0)
+    if (ratio == 0.0f)
     {
-      std::stringstream ss;
-      ss << "Ratio can't be 0";
-#ifdef DEBUG
-      std::cerr << ERROR_HEADER << ss.str() << std::endl;
-#endif  // DEBUG
-      throw std::logic_error(ss.str());
+      std::cerr << ERROR_HEADER << "Ratio can't be 0" << std::endl;
+      return 0.0f;
     }
     return length / ratio;
   }
 
-  POSERECT <cv::Point2f> Detector::getBodyPartRect(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Size blockSize)
+  POSERECT <cv::Point2f> Detector::getBodyPartRect(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Size blockSize) noexcept
   {
-    cv::Point2f boxCenter = j0 * 0.5 + j1 * 0.5;
+    auto boxCenter = j0 * 0.5 + j1 * 0.5;
     auto boneLength = getBoneLength(j0, j1);
     if (blockSize.width > 0)
     {
       if (boneLength < blockSize.width)
-      {
         boneLength = static_cast <float> (blockSize.width - 1);
-      }
       else
-      {
-        boneLength = boneLength + blockSize.width - ((int)boneLength % blockSize.width) - 1;
-      }
+        boneLength = boneLength + blockSize.width - (static_cast<int>(boneLength) % blockSize.width) - 1;
     }
     auto boxWidth = getBoneWidth(boneLength, bodyPart);
     if (blockSize.height > 0)
     {
       if (boxWidth < blockSize.height)
-      {
         boxWidth = static_cast <float> (blockSize.height - 1);
-      }
       else
-      {
-        boxWidth = boxWidth + blockSize.width - ((int)boxWidth % blockSize.height) - 1;
-      }
+        boxWidth = boxWidth + blockSize.width - (static_cast<int>(boxWidth) % blockSize.height) - 1;
     }
-    auto angle = static_cast <float> (spelHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
-    cv::Point2f c1, c2, c3, c4, polyCenter;
-    c1 = cv::Point2f(0.f, 0.5f * boxWidth);
-    c2 = cv::Point2f(boneLength, 0.5f * boxWidth);
-    c3 = cv::Point2f(boneLength, -0.5f * boxWidth);
-    c4 = cv::Point2f(0.f, -0.5f * boxWidth);
+    auto angle = spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
+    auto c1 = cv::Point2f(0.f, 0.5f * boxWidth);
+    auto c2 = cv::Point2f(boneLength, 0.5f * boxWidth);
+    auto c3 = cv::Point2f(boneLength, -0.5f * boxWidth);
+    auto c4 = cv::Point2f(0.f, -0.5f * boxWidth);
 
     c1 = spelHelper::rotatePoint2D(c1, cv::Point2f(0, 0), angle);
     c2 = spelHelper::rotatePoint2D(c2, cv::Point2f(0, 0), angle);
     c3 = spelHelper::rotatePoint2D(c3, cv::Point2f(0, 0), angle);
     c4 = spelHelper::rotatePoint2D(c4, cv::Point2f(0, 0), angle);
 
-    polyCenter = 0.25*c1 + 0.25*c2 + 0.25*c3 + 0.25*c4;
+    auto polyCenter = 0.25*c1 + 0.25*c2 + 0.25*c3 + 0.25*c4;
 
     c1 = c1 - polyCenter + boxCenter;
     c2 = c2 - polyCenter + boxCenter;
@@ -91,16 +78,13 @@ namespace SPEL
     {
       for (auto y = 0; y < size.height; y++)
       {
-        auto p = cv::Point2f((float)x, (float)y);
+        auto p = cv::Point2f(static_cast<float>(x), static_cast<float>(y));
+        p = spelHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
         try
         {
-          p = spelHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
           if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
             if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
-            {
-              auto color = imgSource.at<cv::Vec3b>((int)round(p.y), (int)round(p.x));
-              partImage.at<cv::Vec3b>(y, x) = color;
-            }
+              partImage.at<cv::Vec3b>(y, x) = imgSource.at<cv::Vec3b>(static_cast<int>(round(p.y)), static_cast<int>(round(p.x)));
         }
         catch (...)
         {
@@ -116,7 +100,7 @@ namespace SPEL
     return partImage;
   }
 
-  std::map <uint32_t, std::vector <LimbLabel>> Detector::merge(std::map <uint32_t, std::vector <LimbLabel>> first, std::map <uint32_t, std::vector <LimbLabel>> second, std::map <uint32_t, std::vector <LimbLabel>> secondUnfiltered)
+  std::map <uint32_t, std::vector <LimbLabel>> Detector::merge(const std::map <uint32_t, std::vector <LimbLabel>> &first, const std::map <uint32_t, std::vector <LimbLabel>> &second, const std::map <uint32_t, std::vector <LimbLabel>> &secondUnfiltered)
   {
     if (first.size() != second.size() && first.size() > 0 && second.size() > 0)
     {
@@ -128,13 +112,9 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
     if (first.size() == 0)
-    {
       return second;
-    }
     if (second.size() == 0)
-    {
       return first;
-    }
 
     std::map <std::string, float> detectorNames;
 
@@ -146,7 +126,7 @@ namespace SPEL
 
       //iterate through first list, compare to second list, any labels that are matched are combined and pushed
       //any labels that are not found, are added
-      for (auto firstIter : part.second) //for each label in first
+      for (const auto &firstIter : part.second) //for each label in first
       {
         auto isFound = false;
 
@@ -154,7 +134,7 @@ namespace SPEL
         try
         {
           auto s = second.at(part.first);
-          for (auto secondIter : s)
+          for (const auto &secondIter : s)
           {
             if (firstIter.getLimbID() == secondIter.getLimbID() && firstIter.getPolygon() == secondIter.getPolygon())
             {
@@ -177,10 +157,10 @@ namespace SPEL
           auto secondScores = sl.getScores();
           auto firstScores = newLabel.getScores();
 
-          for (auto i : secondScores)
+          for (const auto &i : secondScores)
           {
             auto scoreFound = false;
-            for (auto j : firstScores)
+            for (const auto &j : firstScores)
             {
               if (i == j)
               {
@@ -194,7 +174,7 @@ namespace SPEL
           }
           //emplace scores
           auto newLabelScores = newLabel.getScores();
-          for (auto i : newLabelScores)
+          for (const auto &i : newLabelScores)
             detectorNames.emplace(i.getDetName(), i.getCoeff());
           newLabel.setScores(newLabelScores);
           partResult.push_back(newLabel);
@@ -205,15 +185,15 @@ namespace SPEL
           auto newLabel(firstIter);
           //emplace scores
           auto newLabelScores = newLabel.getScores();
-          for (auto i : newLabelScores)
+          for (const auto &i : newLabelScores)
             detectorNames.emplace(i.getDetName(), i.getCoeff());
-                    
+
           auto foundUnfiltered = secondUnfiltered.find(firstIter.getLimbID());
           if (foundUnfiltered != secondUnfiltered.end())
           {
             auto bFound = false;
             LimbLabel foundLabel;
-            for (auto l : foundUnfiltered->second)
+            for (const auto &l : foundUnfiltered->second)
             {
               if (l.getLimbID() == firstIter.getLimbID() && l.getPolygon() == firstIter.getPolygon())
               {
@@ -224,7 +204,7 @@ namespace SPEL
             }
             if (bFound)
             {
-              for (auto i : foundLabel.getScores())
+              for (const auto &i : foundLabel.getScores())
               {
                 newLabelScores.push_back(i);
                 detectorNames.emplace(i.getDetName(), i.getCoeff());
@@ -241,10 +221,10 @@ namespace SPEL
       {
         auto s = second.at(part.first);
 
-        for (auto secondIter : s)
+        for (const auto &secondIter : s)
         {
           auto isFound = false;
-          for (auto resIter : partResult)
+          for (const auto &resIter : partResult)
           {
             if (secondIter.getLimbID() == resIter.getLimbID() && secondIter.getPolygon() == resIter.getPolygon())
             {
@@ -257,7 +237,7 @@ namespace SPEL
             auto newLabel(secondIter);
             auto newLabelScores = newLabel.getScores();
             //emplace scores
-            for (auto i : newLabelScores)
+            for (const auto &i : newLabelScores)
               detectorNames.emplace(i.getDetName(), i.getCoeff());
             newLabel.setScores(newLabelScores);
             partResult.push_back(newLabel);
@@ -276,17 +256,17 @@ namespace SPEL
 
     //look at each label, and add a score of 1.0 for each missing
 
-    for (auto &&r : result)
+    for (auto &r : result)
     {
-      for (auto &&l : r.second) //for each label
+      for (auto &l : r.second) //for each label
       {
         auto scores = l.getScores();
 
-        for (auto m : detectorNames) //for each detector, check whether label has a score for it
+        for (const auto &m : detectorNames) //for each detector, check whether label has a score for it
         {
           auto detFound = false;
 
-          for (auto &&i : scores)
+          for (auto &i : scores)
           {
             if (m.first == i.getDetName()) //name
             {
@@ -303,7 +283,7 @@ namespace SPEL
       }
     }
     //finally, sort the labels
-    for (auto &&l : result)
+    for (auto &l : result)
     {
       sort(l.second.begin(), l.second.end());
     }
@@ -314,7 +294,7 @@ namespace SPEL
   LimbLabel Detector::generateLabel(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, std::string detectorName, float _usedet)
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
-    auto rot = float(spelHelper::angle2D(1, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+    auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
     auto rect = getBodyPartRect(bodyPart, j0, j1);
 
     auto score = compare();
@@ -323,97 +303,64 @@ namespace SPEL
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
   }
 
-  Frame *Detector::getFrame(uint32_t frameId)
+  Frame *Detector::getFrame(uint32_t frameId) noexcept
   {
     for (auto f : frames)
-    {
       if (f->getID() == frameId)
         return f;
-    }
-    return 0;
+
+    return nullptr;
   }
 
   std::map <uint32_t, std::vector <LimbLabel>> Detector::detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels)
   {
-    auto searchDistCoeff = 0.5f;
-    const std::string sSearchDistCoeff = "searchDistCoeff";
-
-    auto minTheta = 90.0f; // border for search
-    const std::string sMinTheta = "minTheta";
-
-    auto maxTheta = 100.0f; // border for search
-    const std::string sMaxTheta = "maxTheta";
-
-    auto stepTheta = 10.0f; // angular step of search
-    const std::string sStepTheta = "stepTheta";
-
-    auto uniqueLocationCandidates = 0.1f; // limiting the choice of the solutions number for each bodypart
-    const std::string sUniqueLocationCandidates = "uniqueLocationCandidates";
-
-    auto uniqueAngleCandidates = 0.1f;
-    const std::string sUniqueAngleCandidates = "uniqueAngleCandidates";
-
-    auto scaleParam = 1.0f; // scaling coefficient
-    const std::string sScaleParam = "scaleParam";
-
-    auto searchDistCoeffMult = 1.25f;
-    const std::string sSearchDistCoeffMult = "searchDistCoeffMult";
-
-#ifdef DEBUG
-    uint8_t debugLevel = 5;
-#else
-    uint8_t debugLevel = 1;
-#endif // DEBUG
-    const std::string sDebugLevel = "debugLevel";
-
-    auto rotationThreshold = 0.025f;
-    const std::string sRotationThreshold = "rotationThreshold";
-
-    auto isWeakThreshold = 0.1f;
-    const std::string sisWeakThreshold = "isWeakThreshold";
-
-    auto searchStepCoeff = 0.2f;
-    const std::string sSearchStepCoeff = "searchStepCoeff";
-
     // first we need to check all used params
-    params.emplace(sSearchDistCoeff, searchDistCoeff);
-    params.emplace(sMinTheta, minTheta);
-    params.emplace(sMaxTheta, maxTheta);
-    params.emplace(sStepTheta, stepTheta);
-    params.emplace(sUniqueLocationCandidates, uniqueLocationCandidates);
-    params.emplace(sUniqueAngleCandidates, uniqueAngleCandidates);
-    params.emplace(sScaleParam, scaleParam);
-    params.emplace(sSearchDistCoeffMult, searchDistCoeffMult);
+    params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::MIN_THETA());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::MAX_THETA());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::STEP_THETA());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::SCALE_COEFFICIENT());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_MULT_COEFFICIENT());
 
-    params.emplace(sDebugLevel, debugLevel);
-    params.emplace(sRotationThreshold, rotationThreshold);
-    params.emplace(sisWeakThreshold, isWeakThreshold);
-    params.emplace(sSearchStepCoeff, searchStepCoeff);
+    params.emplace(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::ROTATION_THRESHOLD());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD());
+    params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT());
 
     //now set actual param values
-    searchDistCoeff = params.at(sSearchDistCoeff);
-    minTheta = params.at(sMinTheta);
-    maxTheta = params.at(sMaxTheta);
-    stepTheta = params.at(sStepTheta);
-    uniqueLocationCandidates = params.at(sUniqueLocationCandidates);
-    uniqueAngleCandidates = params.at(sUniqueAngleCandidates);
-    scaleParam = params.at(sScaleParam);
-    searchDistCoeffMult = params.at(sSearchDistCoeffMult);
-    debugLevel = params.at(sDebugLevel);
-    rotationThreshold = params.at(sRotationThreshold);
-    isWeakThreshold = params.at(sisWeakThreshold);
-    searchStepCoeff = params.at(sSearchStepCoeff);
-    debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
+    auto searchDistCoeff = params.at(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT().first);
+    auto minTheta = params.at(DETECTOR_DETECT_PARAMETERS::MIN_THETA().first);
+    auto maxTheta = params.at(DETECTOR_DETECT_PARAMETERS::MAX_THETA().first);
+    auto stepTheta = params.at(DETECTOR_DETECT_PARAMETERS::STEP_THETA().first);
+    auto uniqueLocationCandidates = params.at(DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT().first);
+    auto uniqueAngleCandidates = params.at(DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT().first);
+    auto scaleParam = params.at(DETECTOR_DETECT_PARAMETERS::SCALE_COEFFICIENT().first);
+    auto searchDistCoeffMult = params.at(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_MULT_COEFFICIENT().first);
+    auto rotationThreshold = params.at(DETECTOR_DETECT_PARAMETERS::ROTATION_THRESHOLD().first);
+    auto isWeakThreshold = params.at(DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD().first);
+    auto searchStepCoeff = params.at(DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().first);
+    debugLevelParam = static_cast <uint8_t> (params.at(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL().first));
 
     auto originalSize = frame->getFrameSize().height;
 
-    Frame *workFrame = 0;
+    Frame *workFrame = nullptr;
     if (frame->getFrametype() == KEYFRAME)
       workFrame = new Keyframe();
     else if (frame->getFrametype() == LOCKFRAME)
       workFrame = new Lockframe();
     else if (frame->getFrametype() == INTERPOLATIONFRAME)
       workFrame = new Interpolation();
+
+    if (workFrame == nullptr)
+    {
+      std::stringstream ss;
+      ss << "Unknown frame found";
+      if (debugLevelParam >= 1)
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      throw std::logic_error(ss.str());
+    }
 
     workFrame = frame->clone(workFrame);
 
@@ -431,7 +378,7 @@ namespace SPEL
     std::map <uint32_t, std::vector <LimbLabel>> sortedLabelsMap;
 
     // For all body parts
-    for (auto iteratorBodyPart : partTree)
+    for (const auto &iteratorBodyPart : partTree)
     { //Temporary variables
       std::vector <LimbLabel> labels;
       std::vector <LimbLabel> sortedLabels;
@@ -454,23 +401,15 @@ namespace SPEL
       auto boneLength = getBoneLength(j0, j1); // distance between nodes
       auto boxWidth = getBoneWidth(boneLength, iteratorBodyPart); // current body part polygon width
       auto direction = j1 - j0; // direction of bodypart vector
-      auto theta = float(spelHelper::angle2D(1.0, 0, direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
-      auto minDist = boxWidth * params.at(sSearchStepCoeff); // linear step of searching
-      if (minDist < 2) minDist = 2; // the minimal linear step
+      auto theta = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
+      auto minDist = boxWidth * searchStepCoeff; // linear step of searching
+      if (minDist < 2) 
+        minDist = 2; // the minimal linear step
+
       auto searchDistance = iteratorBodyPart.getSearchRadius();
-      try
-      {
-        if (searchDistance <= 0)
-          searchDistance = boneLength * params.at(sSearchDistCoeff); // the limiting of search area
-      }
-      catch (...)
-      {
-        std::stringstream ss;
-        ss << "Maybe there is no '" << sSearchDistCoeff << "' param";
-        if (debugLevelParam >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
-      }
+      if (searchDistance <= 0)
+        searchDistance = boneLength * searchDistCoeff; // the limiting of search area
+
       if (searchDistance <= 0)
         searchDistance = minDist + 1;
       auto suggestStart = 0.5 * j1 + 0.5 * j0; // reference point - the bodypart center
@@ -485,10 +424,10 @@ namespace SPEL
         {
           if (x < maskMat.cols && y < maskMat.rows && x >= 0 && y >= 0)
           {
-            uint8_t mintensity = 0;
+            auto mintensity = 0;
             try
             {
-              mintensity = maskMat.at<uint8_t>((int)y, (int)x); // copy mask at current pixel
+              mintensity = maskMat.at<uint8_t>(static_cast<int>(y), static_cast<int>(x)); // copy mask at current pixel
             }
             catch (...)
             {
@@ -501,26 +440,22 @@ namespace SPEL
             auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
             { // Scan the possible rotation zone
-              auto deltaTheta = abs(iteratorBodyPart.getRotationSearchRange());// + abs(rotationThreshold);
+              auto deltaTheta = abs(iteratorBodyPart.getRotationSearchRange());
               auto maxLocalTheta = iteratorBodyPart.getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
               auto minLocalTheta = iteratorBodyPart.getRotationSearchRange() == 0 ? minTheta : deltaTheta;
+              // build  the vector label
               for (auto rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
-              {
-                // build  the vector label
                 sortedLabels.push_back(generateLabel(boneLength, rot, x, y, iteratorBodyPart, workFrame)); // add label to current bodypart labels
-              }
             }
           }
         }
       }
+
+      // build  the vector label
       if (sortedLabels.size() == 0) // if labels for current body part is not builded
-      {
         for (auto rot = theta - minTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
-        {
-          // build  the vector label
           sortedLabels.push_back(generateLabel(boneLength, rot, suggestStart.x, suggestStart.y, iteratorBodyPart, workFrame)); // add label to current bodypart labels
-        }
-      }
+
       if (sortedLabels.size() > 0) // if labels vector is not empty
         labels = filterLimbLabels(sortedLabels, uniqueLocationCandidates, uniqueAngleCandidates);
 
@@ -532,15 +467,9 @@ namespace SPEL
 
     delete workFrame;
 
-    for (auto i = 0; i < tempLabelVector.size(); ++i)
-    {
-      for (auto j = 0; j < tempLabelVector.at(i).size(); ++j)
-      {
-        LimbLabel label = tempLabelVector.at(i).at(j);
+    for (auto &i : tempLabelVector)
+      for (auto &label : i.second)
         label.Resize(pow(resizeFactor, -1));
-        tempLabelVector[i][j] = label;
-      }
-    }
 
     return merge(limbLabels, tempLabelVector, sortedLabelsMap);
   }
@@ -548,11 +477,11 @@ namespace SPEL
   LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame)
   {
     // Create a new label vector and build it label
-    auto p0 = cv::Point2f(0, 0); // the point of unit vector
-    auto p1 = cv::Point2f(1.0, 0); // the point of unit vector
+    auto p0 = cv::Point2f(0.0f, 0.0f); // the point of unit vector
+    auto p1 = cv::Point2f(1.0f, 0.0f); // the point of unit vector
     p1 *= boneLength; // change the vector length 
     p1 = spelHelper::rotatePoint2D(p1, p0, rotationAngle); // rotate the vector
-    auto mid = 0.5 * p1; // center of the vector
+    auto mid = 0.5f * p1; // center of the vector
     p1 = p1 + cv::Point2f(x, y) - mid; // shift the vector to current point
     p0 = cv::Point2f(x, y) - mid; // shift the vector to current point
 
@@ -561,7 +490,7 @@ namespace SPEL
 
   std::vector<LimbLabel> Detector::filterLimbLabels(std::vector <LimbLabel> &sortedLabels, float uniqueLocationCandidates, float uniqueAngleCandidates)
   {
-    if (uniqueLocationCandidates<0 || uniqueLocationCandidates>1.0 || uniqueAngleCandidates< 0 || uniqueAngleCandidates>1.0)
+    if (uniqueLocationCandidates < 0.0f || uniqueLocationCandidates > 1.0f || uniqueAngleCandidates < 0.0f || uniqueAngleCandidates > 1.0f)
       return sortedLabels;
 
     std::map<float, std::map<float, std::vector<uint32_t> > > locationMap;
@@ -571,8 +500,8 @@ namespace SPEL
 
     for (auto index = 0; index < sortedLabels.size(); ++index)
     {
-      cv::Point2f location = sortedLabels[index].getCenter();
-      float angle = sortedLabels[index].getAngle();
+      auto location = sortedLabels[index].getCenter();
+      auto angle = sortedLabels[index].getAngle();
       if (locationMap.find(location.x) == locationMap.end()) //not found
       {
         std::map<float, std::vector<uint32_t> > yMap; //create the new map
@@ -583,7 +512,7 @@ namespace SPEL
       }
       else //found x coordinate
       {
-        std::map<float, std::vector<uint32_t> > yMap = locationMap.at(location.x);
+        auto yMap = locationMap.at(location.x);
         if (yMap.find(location.y) == yMap.end()) //not found
         {
           std::vector<uint32_t> indices; //read the existing vector
@@ -607,7 +536,7 @@ namespace SPEL
       }
       else //found
       {
-        std::vector<uint32_t> indices = angleMap.at(angle); //read the existing vector
+        auto indices = angleMap.at(angle); //read the existing vector
         indices.push_back(index); //push back another index
         angleMap.at(angle) = indices; //set in map
       }
@@ -616,27 +545,29 @@ namespace SPEL
     std::vector<uint32_t> bestByLocation;
     std::vector<uint32_t> bestByAngle;
 
-    for (auto iter = locationMap.begin(); iter != locationMap.end(); ++iter) //take the top from every location
+    for (const auto &yMap : locationMap) //take the top from every location
     {
-      std::map<float, std::vector<uint32_t> > yMap = iter->second;
-
-      for (auto yiter = yMap.begin(); yiter != yMap.end(); ++yiter) //take the top from every location
+      for (const auto &yiter : yMap.second) //take the top from every location
       {
-        std::vector<uint32_t> indices = yiter->second;
-        uint32_t numToPush = indices.size()*uniqueLocationCandidates;
-        if (numToPush < 1) numToPush = 1;
+        auto indices = yiter.second;
+        uint32_t numToPush = indices.size() * uniqueLocationCandidates;
+        if (numToPush < 1) 
+          numToPush = 1;
         for (auto i = 0; i < numToPush; ++i)
           bestByLocation.push_back(indices[i]);
       }
     }
-    for (auto iter = angleMap.begin(); iter != angleMap.end(); ++iter) //take the top from every angle
+
+    for (const auto &iter : angleMap) //take the top from every angle
     {
-      std::vector<uint32_t> indices = iter->second;
-      uint32_t numToPush = indices.size()*uniqueAngleCandidates;
-      if (numToPush < 1) numToPush = 1;
+      auto indices = iter.second;
+      auto numToPush = indices.size() * uniqueAngleCandidates;
+      if (numToPush < 1) 
+        numToPush = 1;
       for (auto i = 0; i < numToPush; ++i)
         bestByAngle.push_back(indices[i]);
     }
+
     //now intersect
     sort(bestByLocation.begin(), bestByLocation.end());
     sort(bestByAngle.begin(), bestByAngle.end());

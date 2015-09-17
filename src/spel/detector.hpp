@@ -3,6 +3,7 @@
 
 // SPEL definitions
 #include "predef.hpp"
+#include "spelParameters.hpp"
 
 // STL
 #ifdef WINDOWS
@@ -28,21 +29,21 @@ namespace SPEL
   class Detector
   {
   public:
-    Detector(void);
-    virtual ~Detector(void);
+    Detector(void) noexcept;
+    virtual ~Detector(void) noexcept;
     virtual int getID(void) const = 0;
     virtual void setID(int _id) = 0;
     virtual void train(std::vector <Frame*> frames, std::map <std::string, float> params) = 0;
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels);
-    virtual std::map <uint32_t, std::vector <LimbLabel>> merge(std::map <uint32_t, std::vector <LimbLabel>> first, std::map <uint32_t, std::vector <LimbLabel>> second, std::map <uint32_t, std::vector <LimbLabel>> secondUnfiltered);
+    virtual std::map <uint32_t, std::vector <LimbLabel>> merge(const std::map <uint32_t, std::vector <LimbLabel>> &first, const std::map <uint32_t, std::vector <LimbLabel>> &second, const std::map <uint32_t, std::vector <LimbLabel>> &secondUnfiltered);
   protected:
     std::vector <Frame*> frames;
     uint32_t maxFrameHeight;
     uint8_t debugLevelParam = 0;
-    virtual Frame *getFrame(uint32_t frameId);
-    virtual float getBoneLength(cv::Point2f begin, cv::Point2f end);
-    virtual float getBoneWidth(float length, BodyPart bodyPart);
-    virtual POSERECT <cv::Point2f> getBodyPartRect(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Size blockSize = cv::Size(0, 0));
+    virtual Frame *getFrame(uint32_t frameId) noexcept;
+    virtual float getBoneLength(const cv::Point2f &begin, const cv::Point2f &end) noexcept;
+    virtual float getBoneWidth(const float &length, const BodyPart &bodyPart) noexcept;
+    virtual POSERECT <cv::Point2f> getBodyPartRect(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Size blockSize = cv::Size(0, 0)) noexcept;
     virtual cv::Mat rotateImageToDefault(cv::Mat imgSource, POSERECT <cv::Point2f> &initialRect, float angle, cv::Size size);
     virtual LimbLabel generateLabel(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, std::string detectorName, float _usedet);
     virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *workFrame, cv::Point2f p0, cv::Point2f p1) = 0;

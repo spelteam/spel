@@ -329,7 +329,7 @@ namespace SPEL
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
     Point2f boxCenter = p0 * 0.5 + p1 * 0.5;
     float boneLength = detector.getBoneLength(p0, p1);
-    float rot = float(spelHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+    float rot = float(spelHelper::angle2D(1.0f, 0.0f, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
     uint32_t totalPixels = 0, pixelsInMask = 0, pixelsWithLabel = 0;
     float totalPixelLabelScore = 0, pixDistAvg = 0, pixDistNum = 0;
     stringstream detectorName;
