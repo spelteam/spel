@@ -4,6 +4,10 @@
 // SPEL definitions
 #include "predef.hpp"
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
+
 // STL
 #include <vector>
 
@@ -36,6 +40,10 @@ namespace SPEL
     virtual uint32_t size(void) const;
 
   private:
+#ifdef DEBUG
+    FRIEND_TEST(MinSpanningTree, getMST);
+    FRIEND_TEST(MinSpanningTree, AssigmentOperator);
+#endif  // DEBUG
     tree<int> mst;
   };
 
