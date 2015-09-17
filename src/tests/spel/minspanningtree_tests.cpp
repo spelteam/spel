@@ -12,6 +12,41 @@
 
 namespace SPEL
 {
+  TEST(MinSpanningTree, CopyConstructor)
+  {
+    //Create expected mst
+    tree<int> expected_mst;
+    int rootNode = 3;
+
+    tree<int>::iterator A = expected_mst.begin(), B;
+    A = expected_mst.insert(A, rootNode);
+    B = expected_mst.append_child(A, 0);
+    expected_mst.append_child(A, 5);
+    B = expected_mst.append_child(B, 1);
+    B = expected_mst.append_child(B, 4);
+    expected_mst.append_child(B, 2);
+    expected_mst.append_child(B, 6);
+
+    //Create actual mst
+    MinSpanningTree MST1;
+    MST1.mst = expected_mst;
+    MinSpanningTree MST(MST1);
+    tree<int> actual_mst = MST1.getMST();
+
+    //Compare
+    ASSERT_EQ(expected_mst.size(), actual_mst.size());
+    tree<int>::iterator actual_node = actual_mst.begin();
+    for (tree<int>::iterator expected_node = expected_mst.begin(); expected_node != expected_mst.end(); ++expected_node)
+    {
+      EXPECT_EQ(*expected_node, *actual_node);
+      //cout << *expected_node << "-" << *actual_node << endl;
+      actual_node++;
+    }
+
+    actual_mst.clear();
+    expected_mst.clear();
+    }
+
 
   TEST(MinSpanningTree, getMST)
   {

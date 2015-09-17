@@ -41,6 +41,7 @@ namespace SPEL
 
   private:
 #ifdef DEBUG
+    FRIEND_TEST(MinSpanningTree, CopyConstructor);
     FRIEND_TEST(MinSpanningTree, getMST);
     FRIEND_TEST(MinSpanningTree, AssigmentOperator);
 #endif  // DEBUG
