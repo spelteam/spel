@@ -33,7 +33,7 @@ bool SURFDetectorTest::drawSURFKeyPoints(map <uint32_t, map <uint32_t, PartModel
   for (map <uint32_t, map <uint32_t, PartModel>>::iterator i = partModels.begin(); i != partModels.end(); ++i)
   {
     Frame *frame = getFrame(i->first);
-    if (frame == 0)
+    if (frame == nullptr)
       continue;
     for (map <uint32_t, PartModel>::iterator j = i->second.begin(); j != i->second.end(); ++j)
     {
@@ -61,7 +61,7 @@ bool SURFDetectorTest::drawSURFKeyPoints(map <uint32_t, map <uint32_t, PartModel
   for (map <uint32_t, map <uint32_t, vector <PartModel>>>::iterator i = labelModels.begin(); i != labelModels.end(); ++i)
   {
     Frame *frame = getFrame(i->first);
-    if (frame == 0)
+    if (frame == nullptr)
       continue;
     for (map <uint32_t, vector <PartModel>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
     {

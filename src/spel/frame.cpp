@@ -171,6 +171,8 @@ namespace SPEL
 
   Frame *Frame::clone(Frame *dest)
   {
+    if (dest == nullptr)
+      return nullptr;
     dest->setGroundPoint(groundPoint);
     dest->setID(id);
     dest->setImage(image.clone());

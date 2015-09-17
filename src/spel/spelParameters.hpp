@@ -7,7 +7,7 @@ namespace SPEL
 {
   typedef std::pair<std::string, float> SPEL_PARAMETER;
 
-  inline SPEL_PARAMETER SPEL_SET_PARAMETER(const std::string &&name, const float &&value)
+  inline SPEL_PARAMETER SPEL_SET_PARAMETER(const std::string &name, const float &value)
   {
     return make_pair(name, value);
   }
@@ -38,6 +38,71 @@ namespace SPEL
     static SPEL_PARAMETER USE_CH_DETECTOR(void)
     {
       return SPEL_SET_PARAMETER("useCSdet", 1.0f);
+    }
+  };
+
+  class DETECTOR_DETECT_PARAMETERS
+  {
+  public:
+    static SPEL_PARAMETER SEARCH_DISTANCE_COEFFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("searchDistCoeff", 0.5f);
+    }
+
+    static SPEL_PARAMETER SEARCH_DISTANCE_MULT_COEFFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("searchDistCoeffMult", 1.25f);
+    }
+
+    static SPEL_PARAMETER SEARCH_STEP_COEFFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("searchStepCoeff", 0.2f);
+    }
+
+    // border for search
+    static SPEL_PARAMETER MIN_THETA(void)
+    {
+      return SPEL_SET_PARAMETER("minTheta", 90.0f);
+    }
+
+    // border for search
+    static SPEL_PARAMETER MAX_THETA(void)
+    {
+      return SPEL_SET_PARAMETER("maxTheta", 100.0f);
+    }
+
+    // angular step of search
+    static SPEL_PARAMETER STEP_THETA(void)
+    {
+      return SPEL_SET_PARAMETER("stepTheta", 10.0f);
+    }
+
+    // limiting the choice of the solutions number for each bodypart
+    static SPEL_PARAMETER UNIQUE_LOCATION_CANDIDATES_COEFFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("uniqueLocationCandidates", 0.1f);
+    }
+
+    // limiting the choice of the solutions number for each bodypart
+    static SPEL_PARAMETER UNIQUE_ANGLE_CANDIDATES_COEFFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("uniqueAngleCandidates", 0.1f);
+    }
+
+    // scaling coefficient
+    static SPEL_PARAMETER SCALE_COEFFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("scaleParam", 1.0f);
+    }
+
+    static SPEL_PARAMETER ROTATION_THRESHOLD(void)
+    {
+      return SPEL_SET_PARAMETER("rotationThreshold", 0.025f);
+    }
+
+    static SPEL_PARAMETER IS_WEAK_THRESHOLD(void)
+    {
+      return SPEL_SET_PARAMETER("isWeakThreshold", 0.1f);
     }
   };
 
