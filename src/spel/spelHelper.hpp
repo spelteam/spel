@@ -33,13 +33,13 @@ namespace SPEL
     ///two - second point
     ///Result:
     ///squared distance between one and two
-    template <typename T> 
+    template <typename T>
     static double distSquared(T one, T two)
     {
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
     }
 
-    template <typename T> 
+    template <typename T>
     static double distSquared3d(T one, T two)
     {
       return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0) + pow(one.z - two.z, 2.0);
@@ -53,17 +53,48 @@ namespace SPEL
     ///angle between first and second vector,
     ///positive counter clockwise
     ///angle is in the range [-PI; PI]
-    static double angle2D(double x1, double y1, double x2, double y2);
-    static double interpolateFloat(double prevAngle, double nextAngle, int step, int numSteps);
-    //
-    template <typename T> 
-    static T rotatePoint2D(const T point, const T pivot, const float degrees)
+    template <typename T>
+    static T angle2D(T x1, T y1, T x2, T y2)
     {
-      float radians = degrees * M_PI / 180.0;
-      T pt, cnt;
-      pt = point;
-      cnt = pivot;
-      pt -= cnt;
+      const T zero = static_cast<T> (0.0);
+      //input has a zero vector
+      //zero vector is both parallel and perpendicular to every vector
+      if ((x1 == zero && y1 == zero) || (x2 == zero && y2 == zero))
+        return zero;
+
+      //angle between Ox and first vector
+      auto theta1 = atan2(y1, x1);
+      //angle between Ox and second vector
+      auto theta2 = atan2(y2, x2);
+      //angle between first and second vector
+      auto dtheta = theta2 - theta1;
+      //normalize angle to range [-PI;PI]
+      while (dtheta > M_PI)
+        dtheta -= (M_PI * static_cast<T> (2.0));
+      while (dtheta < -M_PI)
+        dtheta += (M_PI * static_cast<T> (2.0));
+
+      return dtheta;
+    }
+
+    template <typename T, typename D, typename E>
+    static T interpolateFloat(T prevAngle, T nextAngle, D step, E numSteps) noexcept
+    {
+      const T zero = static_cast<T> (0.0);
+      T t;
+      if (numSteps != 0)
+        t = step / static_cast<T>(numSteps);
+      else
+        t = zero;
+      return prevAngle * (static_cast<T> (1.0) - t) + nextAngle * t;
+    }
+    //
+    template <typename T, typename D>
+    static T rotatePoint2D(const T point, const T pivot, const D degrees) noexcept
+    {
+      auto radians = degrees * M_PI / static_cast<D> (180.0);
+      auto cnt = pivot;
+      auto pt = point - cnt;
       T result;
       result.x = pt.x * cosf(radians) - pt.y * sinf(radians);
       result.y = pt.x * sinf(radians) + pt.y * cosf(radians);
@@ -159,7 +190,7 @@ namespace SPEL
       return contour;
     }
 
-    template <typename D> 
+    template <typename D>
     void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy)
     {
       minx = std::min(std::min(point1.x, point2.x), std::min(point3.x, point4.x));
@@ -168,7 +199,7 @@ namespace SPEL
       maxy = std::max(std::max(point1.y, point2.y), std::max(point3.y, point4.y));
     }
 
-    template <typename D> 
+    template <typename D>
     D GetCenter(void)
     {
       D center1 = 0.5 * point1 + 0.5 * point3;
@@ -184,7 +215,7 @@ namespace SPEL
       }
     }
 
-    POSERECT<T>& operator=(const POSERECT<T>& rect){
+    POSERECT<T>& operator=(const POSERECT<T>& rect) {
       if (&rect == this) return *this;
 
       point1 = rect.point1;
@@ -195,7 +226,7 @@ namespace SPEL
       return *this;
     }
 
-    POSERECT<T>& operator=(POSERECT<T>&& rect){
+    POSERECT<T>& operator=(POSERECT<T>&& rect) {
       std::swap(point1, rect.point1);
       std::swap(point2, rect.point2);
       std::swap(point3, rect.point3);
@@ -214,7 +245,7 @@ namespace SPEL
       return !(*this == rect);
     }
 
-    template <typename D> 
+    template <typename D>
     D RectSize(void)
     {
       return (D(sqrt(spelHelper::distSquared(point2, point3)), sqrt(spelHelper::distSquared(point1, point2))));

@@ -78,8 +78,8 @@ namespace SPEL
     ColorHistDetector chd2(nBins);
     ColorHistDetector::PartModel z(nBins);
     z.partHistogram[t][t][t] = 3.14f;
-    EXPECT_EQ(z.partHistogram[t][t][t], chd2.computePixelBelongingLikelihood(z, i, i, i));
-    EXPECT_EQ(0.f, chd2.computePixelBelongingLikelihood(z, outside, outside, outside));
+    EXPECT_EQ(z.partHistogram[t][t][t], z.computePixelBelongingLikelihood(i, i, i));
+    EXPECT_EQ(0.f, z.computePixelBelongingLikelihood(outside, outside, outside));
   }
 
   TEST(colorHistDetectorTest, Operators)
@@ -149,7 +149,7 @@ namespace SPEL
     //Create actual value
     detector.train(vFrames, params);
     model = detector.partModels.at(partID);
-    detector.setPartHistogram(partModel_actual, Colors);
+    partModel_actual.setPartHistogram(Colors);
 
     //Compare
     EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
@@ -182,7 +182,7 @@ namespace SPEL
     partModel_expected.fgBlankSizes.push_back(nBlankPixels);
 
     //Create actual value
-    detector.addPartHistogram(partModel_actual, Colors, nBlankPixels);
+    partModel_actual.addPartHistogram(Colors, nBlankPixels);
 
     //Compare
     EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
@@ -203,7 +203,7 @@ namespace SPEL
       Sum += partModel_expected.fgSampleSizes[i];
     Sum /= partModel_expected.fgNumSamples;
 
-    EXPECT_EQ(Sum, detector.getAvgSampleSizeFg(partModel_actual));
+    EXPECT_EQ(Sum, partModel_actual.getAvgSampleSizeFg());
   }
 
   // Testing function "getAvgSampleSizeFgBetween"
@@ -211,8 +211,8 @@ namespace SPEL
   {
     uint32_t s1 = 0, s2 = 0;
     float f = (partModel_expected.fgSampleSizes[s1] + partModel_expected.fgSampleSizes[s2]) / 2.0f;
-    EXPECT_EQ(f, detector.getAvgSampleSizeFgBetween(partModel_actual, s1, s2));
-    EXPECT_EQ(0.f, detector.getAvgSampleSizeFgBetween(partModel_actual, static_cast <uint32_t> (partModel_expected.fgSampleSizes.size()), s2));
+    EXPECT_EQ(f, partModel_actual.getAvgSampleSizeFgBetween(s1, s2));
+    EXPECT_EQ(0.f, partModel_actual.getAvgSampleSizeFgBetween(static_cast <uint32_t> (partModel_expected.fgSampleSizes.size()), s2));
   }
 
   // Testing function "matchPartHistogramsED"
@@ -223,7 +223,7 @@ namespace SPEL
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
         for (uint8_t b = 0; b < partModel_expected.nBins; b++)
           distance += pow(partModel_expected.partHistogram[r][g][b] - partModel_expected.partHistogram[r][g][b], 2.0f);
-    float f = detector.matchPartHistogramsED(partModel_expected, partModel_expected);
+    float f = partModel_expected.matchPartHistogramsED(partModel_expected);
     EXPECT_EQ(sqrt(distance), f);
   }
 
@@ -245,9 +245,9 @@ namespace SPEL
         for (uint8_t b = 0; b < partModel_expected.nBins; b++)
           partModel_expected.bgHistogram[r][g][b] /= (float)partModel_expected.sizeBG;
 
-    detector.addBackgroundHistogram(partModel_actual, cEmpty);
+    partModel_actual.addBackgroundHistogram(cEmpty);
     EXPECT_NE(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
-    detector.addBackgroundHistogram(partModel_actual, Colors);
+    partModel_actual.addBackgroundHistogram(Colors);
     EXPECT_EQ(partModel_expected.partHistogram, partModel_actual.partHistogram);
     EXPECT_EQ(partModel_expected.bgHistogram, partModel_actual.bgHistogram);
     EXPECT_EQ(partModel_expected.sizeFG, partModel_actual.sizeFG);
@@ -329,7 +329,7 @@ namespace SPEL
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
     Point2f boxCenter = p0 * 0.5 + p1 * 0.5;
     float boneLength = detector.getBoneLength(p0, p1);
-    float rot = float(spelHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+    float rot = float(spelHelper::angle2D(1.0f, 0.0f, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
     uint32_t totalPixels = 0, pixelsInMask = 0, pixelsWithLabel = 0;
     float totalPixelLabelScore = 0, pixDistAvg = 0, pixDistNum = 0;
     stringstream detectorName;

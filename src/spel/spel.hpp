@@ -2,6 +2,8 @@
 // SPEL definitions
 #include "predef.hpp"
 
+#include "spelParameters.hpp"
+
 #include "bodyJoint.hpp"
 #include "bodyPart.hpp"
 #include "colorHistDetector.hpp"

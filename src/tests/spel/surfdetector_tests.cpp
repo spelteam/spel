@@ -417,7 +417,7 @@ namespace SPEL
     vector<Score> scores;
     Score score(D.compare(bodyPart, partModel1, p0, p1), std::to_string(D.getID()));
     scores.push_back(score);
-    float rot = float(spelHelper::angle2D(1, 0, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
+    float rot = float(spelHelper::angle2D(1.0f, 0.0f, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
     LimbLabel expected_Label(partID, 0.5*(p0 + p1), rot, bodyPart.getPartPolygon().asVector(), scores, false);
     scores.clear();
 
