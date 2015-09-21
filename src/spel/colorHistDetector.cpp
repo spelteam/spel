@@ -5,15 +5,18 @@ namespace SPEL
 {
   // PartModel Constructor 
   // Initialization "partHistogram" and "bgHistogram" with _nBins^3 elements capacity 3-D arrays 
-  ColorHistDetector::PartModel::PartModel(uint8_t _nBins) noexcept : nBins(_nBins)
+  ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
   {
-    partHistogram.clear();
-    bgHistogram.clear();
+    if (_nBins == 0)
+      throw std::logic_error("nBins can't be zero");
 
     partHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, std::vector<float>(nBins, 0.0)));
     bgHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, std::vector<float>(nBins, 0.0)));
 
     sizeFG = 0;
+    sizeBG = 0;
+    fgNumSamples = 0;
+    bgNumSamples = 0;
   }
 
   // Copy all fields of the "PartModel" structure
@@ -32,9 +35,336 @@ namespace SPEL
     return *this;
   }
 
-  // Constructor with initialization of constant field "nBins"
-  ColorHistDetector::ColorHistDetector(uint8_t _nBins) noexcept : nBins(_nBins)
+  uint8_t ColorHistDetector::PartModel::calculateFactor(void)
   {
+    if (nBins == 0)
+      throw std::logic_error("nBins can't be zero");
+
+    return static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
+  }
+
+  // Returns relative frequency of the RGB-color reiteration in "PartModel" 
+  float ColorHistDetector::PartModel::computePixelBelongingLikelihood(uint8_t r, uint8_t g, uint8_t b)
+  {
+    if (nBins == 0)
+      throw std::logic_error("nBins can't be zero");
+
+    // Scaling of colorspace, finding the colors interval, which now gets this color
+    auto factor = calculateFactor();
+    try
+    {
+      return partHistogram.at(r / factor).at(g / factor).at(b / factor); // relative frequency of current color reiteration 
+    }
+    catch (...)
+    {
+      std::stringstream ss;
+      ss << "Couldn't find partHistogram " << "[" << (int)r / factor << "][" << (int)g / factor << "][" << (int)b / factor << "]";
+      throw std::logic_error(ss.str());
+    }
+  }
+
+  // Build into the "partModel" a histogram of the color set "partColors"
+  void ColorHistDetector::PartModel::setPartHistogram(const std::vector <cv::Point3i> &partColors)
+  {
+    if (nBins == 0)
+      throw std::logic_error("nBins can't be zero");
+
+    // do not add sample if the number of pixels is zero
+    if (partColors.size() == 0)
+      return;
+    auto factor = calculateFactor(); // colorspace scaling coefficient
+    sizeFG = static_cast <uint32_t> (partColors.size());
+    fgNumSamples = 1;
+    fgSampleSizes.clear();
+    fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
+
+    // clear histogram first
+    if (partHistogram.size() != nBins)
+      partHistogram.resize(nBins);
+    for (auto r = 0; r < nBins; r++)
+    {
+      if (partHistogram.at(r).size() != nBins)
+        partHistogram.at(r).resize(nBins);
+      for (auto g = 0; g < nBins; g++)
+      {
+        if (partHistogram.at(r).at(g).size() != nBins)
+          partHistogram.at(r).at(g).resize(nBins);
+        for (auto b = 0; b < nBins; b++)
+          partHistogram.at(r).at(g).at(b) = 0.0;
+      }
+    }
+
+    // Scaling of colorspace, reducing the capacity and number of colour intervals that are used to construct the histogram
+    for (auto i : partColors)
+    {
+      auto r = static_cast<uint8_t> (i.x / factor);
+      auto g = static_cast<uint8_t> (i.y / factor);
+      auto b = static_cast<uint8_t> (i.z / factor);
+
+      if (r >= nBins || g >= nBins || b >= nBins)
+      {
+        std::stringstream ss;
+        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        throw std::logic_error(ss.str());
+      }
+
+      partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+    }
+
+    // normalise the histograms
+    for (auto r = 0; r < nBins; r++)
+    {
+      for (auto g = 0; g < nBins; g++)
+      {
+        for (auto b = 0; b < nBins; b++)
+        {
+          partHistogram.at(r).at(g).at(b) /= static_cast<float>(sizeFG);
+        }
+      }
+    }
+  }
+
+  // Take stock of the additional set of colors in the histogram
+  void ColorHistDetector::PartModel::addPartHistogram(const std::vector <cv::Point3i> &partColors, uint32_t nBlankPixels)
+  {
+    if (partColors.size() == 0) //do not add sample if the number of pixels is zero
+      return;
+    //un-normalise
+    if (partHistogram.size() != nBins)
+    {
+      std::stringstream ss;
+      ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partHistogram.size() << std::endl;
+      throw std::logic_error(ss.str());
+    }
+    for (auto r = 0; r < nBins; r++)
+    {
+      if (partHistogram.at(r).size() != nBins)
+      {
+        std::stringstream ss;
+        ss << "Wrond size of partHistogram[" << r << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
+        throw std::logic_error(ss.str());
+      }
+      for (auto g = 0; g < nBins; g++)
+      {
+        if (partHistogram.at(r).at(g).size() != nBins)
+        {
+          std::stringstream ss;
+          ss << "Wrond size of partHistogram[" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).at(g).size() << std::endl;
+          throw std::logic_error(ss.str());
+        }
+        for (auto b = 0; b < nBins; b++)
+          partHistogram.at(r).at(g).at(b) *= static_cast<float>(sizeFG); // converting the colors relative frequency into the pixels number
+      }
+    }
+
+    auto factor = calculateFactor(); // colorspace scaling coefficient
+    sizeFG += static_cast <uint32_t> (partColors.size());
+
+    if (sizeFG == 0)
+      std::logic_error("sizeFG can't be zero");
+
+    fgNumSamples++;
+    fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
+
+    // Scaling of colorspace, reducing the capacity and number of colour intervals
+    // Adjustment of the histogram
+    for (auto color : partColors)
+    {
+      auto r = static_cast<uint8_t> (color.x / factor);
+      auto g = static_cast<uint8_t> (color.y / factor);
+      auto b = static_cast<uint8_t> (color.z / factor);
+
+      if (r >= nBins || g >= nBins || b >= nBins)
+      {
+        std::stringstream ss;
+        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        throw std::logic_error(ss.str());
+      }
+
+      partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+    }
+
+    //renormalise
+    for (auto r = 0; r < nBins; r++)
+    {
+      for (auto g = 0; g < nBins; g++)
+      {
+        for (auto b = 0; b < nBins; b++)
+        {
+          //normalise the histograms
+          partHistogram.at(r).at(g).at(b) /= static_cast<float>(sizeFG);
+        }
+      }
+    }
+
+    fgBlankSizes.push_back(nBlankPixels); // add the number of blank pixels for this model
+  }
+
+  // Totalization the number of used samples
+  float ColorHistDetector::PartModel::getAvgSampleSizeFg(void)
+  {
+    if (fgNumSamples == 0 && fgSampleSizes.size() > 0)
+      std::logic_error("fgNumSamples can't be zero");
+
+    auto sum = 0.0f;
+    for (const auto &i : fgSampleSizes)
+      sum += i;
+    sum /= static_cast<float>(fgNumSamples);
+    return sum;
+  }
+
+  // Averaging the number of samples, that united from two sets
+  float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(uint32_t s1, uint32_t s2)
+  {
+    if (s1 >= fgSampleSizes.size() || s2 >= fgSampleSizes.size())
+    {
+      std::stringstream ss;
+      ss << "Incorrect parameter. s1: " << s1 << " s2: " << s2 << " Actual size: " << fgSampleSizes.size() << std::endl;
+      throw std::logic_error(ss.str());
+    }
+    return (fgSampleSizes.at(s1) + fgSampleSizes.at(s2)) / 2.0f;
+  }
+
+  //TODO (Vitaliy Koshura): Need unit test
+  // Euclidean distance between part histograms
+  float ColorHistDetector::PartModel::matchPartHistogramsED(const PartModel &partModelPrev)
+  {
+    if (nBins == 0)
+      throw std::logic_error("nBins can't be zero");
+
+    if (nBins != partModelPrev.nBins)
+    {
+      std::stringstream ss;
+      ss << "Different nBins value. Expected: " << nBins << " Actual: " << partModelPrev.nBins << std::endl;
+      std::logic_error(ss.str());
+    }
+
+    auto distance = 0.0f;
+
+    if (partHistogram.size() != nBins)
+    {
+      std::stringstream ss;
+      ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partHistogram.size() << std::endl;
+      throw std::logic_error(ss.str());
+    }
+    if (partModelPrev.partHistogram.size() != nBins)
+    {
+      std::stringstream ss;
+      ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.size() << std::endl;
+      throw std::logic_error(ss.str());
+    }
+    for (auto r = 0; r < nBins; r++)
+    {
+      if (partHistogram.at(r).size() != nBins)
+      {
+        std::stringstream ss;
+        ss << "Wrond size of partHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
+        throw std::logic_error(ss.str());
+      }
+      if (partModelPrev.partHistogram.at(r).size() != nBins)
+      {
+        std::stringstream ss;
+        ss << "Wrond size of partHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.at(r).size() << std::endl;
+        throw std::logic_error(ss.str());
+      }
+      for (auto g = 0; g < nBins; g++)
+      {
+        if (partHistogram.at(r).at(g).size() != nBins)
+        {
+          std::stringstream ss;
+          ss << "Wrond size of partHistogram [" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).at(g).size() << std::endl;
+          throw std::logic_error(ss.str());
+        }
+        if (partModelPrev.partHistogram.at(r).at(g).size() != nBins)
+        {
+          std::stringstream ss;
+          ss << "Wrond size of partHistogram [" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.at(r).at(g).size() << std::endl;
+          throw std::logic_error(ss.str());
+        }
+        for (auto b = 0; b < nBins; b++)
+          // accumulation of the Euclidean distances between the points
+          distance += pow(partHistogram.at(r).at(g).at(b) - partModelPrev.partHistogram.at(r).at(g).at(b), 2);
+      }
+    }
+    return sqrt(distance);
+  }
+
+  // Background histogram
+  void ColorHistDetector::PartModel::addBackgroundHistogram(const std::vector <cv::Point3i> &bgColors)
+  {
+    if (bgColors.size() == 0)
+      return;
+
+    if (nBins == 0)
+      throw std::logic_error("nBins can't be zero");
+
+    // unnormalise
+    if (bgHistogram.size() != nBins)
+    {
+      std::stringstream ss;
+      ss << "Wrond size of bgHistogram. Expected: " << nBins << ". Actual: " << bgHistogram.size() << std::endl;
+      throw std::logic_error(ss.str());
+    }
+    for (auto r = 0; r < nBins; r++)
+    {
+      if (bgHistogram.at(r).size() != nBins)
+      {
+        std::stringstream ss;
+        ss << "Wrond size of bgHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << bgHistogram.at(r).size() << std::endl;
+        throw std::logic_error(ss.str());
+      }
+      for (auto g = 0; g < nBins; g++)
+      {
+        if (bgHistogram.at(r).at(g).size() != nBins)
+        {
+          std::stringstream ss;
+          ss << "Wrond size of bgHistogram[" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << bgHistogram.at(r).at(g).size() << std::endl;
+          throw std::logic_error(ss.str());
+        }
+        for (auto b = 0; b < nBins; b++)
+          bgHistogram.at(r).at(g).at(b) *= static_cast<float>(sizeBG);
+      }
+    }
+
+    auto factor = calculateFactor(); // colorspace scaling coefficient
+    sizeBG += static_cast <uint32_t> (bgColors.size());
+    bgNumSamples++;
+    bgSampleSizes.push_back(static_cast <uint32_t> (bgColors.size()));
+
+    if (sizeBG == 0)
+      std::logic_error("sizeBG can't be zero");
+
+    for (const auto &color : bgColors)
+    {
+      auto r = static_cast<uint8_t> (color.x / factor);
+      auto g = static_cast<uint8_t> (color.y / factor);
+      auto b = static_cast<uint8_t> (color.z / factor);
+
+      if (r >= nBins || g >= nBins || b >= nBins)
+      {
+        std::stringstream ss;
+        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        throw std::logic_error(ss.str());
+      }
+
+      bgHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+    }
+    // renormalise
+    for (auto r = 0; r < nBins; r++)
+      for (auto g = 0; g < nBins; g++)
+        for (auto b = 0; b < nBins; b++)
+          bgHistogram.at(r).at(g).at(b) /= static_cast<float>(sizeBG);
+  }
+
+  // Constructor with initialization of constant field "nBins"
+  ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
+  {
+    if (_nBins == 0)
+    {
+      std::stringstream ss;
+      ss << "nBins can't be zero";
+      throw std::logic_error(ss.str());
+    }
     id = 0x434844;
   }
 
@@ -213,124 +543,50 @@ namespace SPEL
           {
             auto partNumber = bodyPart.getPartID();
             auto bContainsPoint = false;
-            try
+            std::vector <POSERECT <cv::Point2f>> partPolygons;
+            // Copy poligons to "PartPoligons"
+            auto lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
+            transform(lower, upper, back_inserter(partPolygons), [](auto const &pair) { return pair.second; });
+            // Checking whether a pixel belongs to the current and to another polygons            
+            for (auto partPolygon : partPolygons)
+              if ((bContainsPoint = partPolygon.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j))) > 0) == true)
+                break; // was found polygon, which contain current pixel
+
+            std::vector <float> partDepths;
+            auto lowerP = polyDepth.lower_bound(partNumber), upperP = polyDepth.upper_bound(partNumber);
+            transform(lowerP, upperP, back_inserter(partDepths), [](auto const &pair) { return pair.second; }); // copy "polyDepth" to "PartDepth"
+            // Checkig polygons overlapping
+            for (const auto &partDepth : partDepths)
             {
-              std::vector <POSERECT <cv::Point2f>> partPolygons;
-              // Copy poligons to "PartPoligons"
-              auto lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
-              transform(lower, upper, back_inserter(partPolygons), [](auto const &pair) { return pair.second; });
-              // Checking whether a pixel belongs to the current and to another polygons            
-              for (auto partPolygon : partPolygons)
-                if ((bContainsPoint = partPolygon.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j))) > 0) == true)
-                  break; // was found polygon, which contain current pixel
-            }
-            catch (...)
-            {
-              std::stringstream ss;
-              ss << "There is no such polygon for body part " << partNumber;
-              if (debugLevelParam >= 1)
-                std::cerr << ERROR_HEADER << ss.str() << std::endl;
-              throw std::logic_error(ss.str());
-            }
-            try
-            {
-              std::vector <float> partDepths;
-              auto lower = polyDepth.lower_bound(partNumber), upper = polyDepth.upper_bound(partNumber);
-              transform(lower, upper, back_inserter(partDepths), [](auto const &pair) { return pair.second; }); // copy "polyDepth" to "PartDepth"
-              // Checkig polygons overlapping
-              for (const auto &partDepth : partDepths)
+              if (bContainsPoint && partHit == -1)
               {
-                if (bContainsPoint && partHit == -1)
-                {
-                  partHit = partNumber; // store the number of the first found polygon
-                  depth = partDepth;
-                }
-                else if (bContainsPoint && partDepth < depth) // How, for float tempDepthSign?/////////////////
-                {
-                  partHit = partNumber;
-                  depth = partDepth;
-                }
+                partHit = partNumber; // store the number of the first found polygon
+                depth = partDepth;
               }
-            }
-            catch (...)
-            {
-              std::stringstream ss;
-              ss << "There is no such polyDepth parameter for body part " << partNumber;
-              if (debugLevelParam >= 1)
-                std::cerr << ERROR_HEADER << ss.str() << std::endl;
-              throw std::logic_error(ss.str());
+              else if (bContainsPoint && partDepth < depth) // How, for float tempDepthSign?/////////////////
+              {
+                partHit = partNumber;
+                depth = partDepth;
+              }
             }
           }
           if (partHit != -1) // if was found polygon, that contains this pixel
           {
             if (!blackPixel) // if pixel color isn't black
             {
-              try
-              {
-                partPixelColours.at(partHit).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] colours
-              }
-              catch (...)
-              {
-                std::stringstream ss;
-                ss << "There is no partPixelColours for body part " << partHit;
-                if (debugLevelParam >= 1)
-                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
-                throw std::logic_error(ss.str());
-              }
+              partPixelColours.at(partHit).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] colours
+
               // For all bodyparts
               for (const auto &p : partTree)
-              {
                 if (p.getPartID() != partHit) // if current poligon wasn't found first in the previous enumeration???
-                {
-                  try
-                  {
-                    bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] background colours
-                  }
-                  catch (...)
-                  {
-                    std::stringstream ss;
-                    ss << "There is no such bgPixelColours for body part " << p.getPartID();
-                    if (debugLevelParam >= 1)
-                      std::cerr << ERROR_HEADER << ss.str() << std::endl;
-                    throw std::logic_error(ss.str());
-                  }
-                }
-              }
+                  bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] background colours
             }
             else
-            {
-              try
-              {
-                blankPixels.at(partHit)++; // otherwise take stock this pixel to blank pixel counter
-              }
-              catch (...)
-              {
-                std::stringstream ss;
-                ss << "There is no such blankPixels for body part " << partHit;
-                if (debugLevelParam >= 1)
-                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
-                throw std::logic_error(ss.str());
-              }
-            }
+              blankPixels.at(partHit)++; // otherwise take stock this pixel to blank pixel counter
           }
           else // if  not found polygon, that contains this pixel 
-          { // For all bodyparts
             for (const auto &p : partTree)
-            {
-              try
-              {
-                bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, green, blue));
-              }
-              catch (...)
-              {
-                std::stringstream ss;
-                ss << "There is no such bgPixelColours for body part " << p.getPartID();
-                if (debugLevelParam >= 1)
-                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
-                throw std::logic_error(ss.str());
-              }
-            }
-          }
+              bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, green, blue));
         }
       }
 
@@ -341,63 +597,16 @@ namespace SPEL
         if (partModels.find(partNumber) == partModels.end())
           partModels.insert(std::pair <int32_t, PartModel>(partNumber, PartModel(nBins))); //add a new model to end of models list
 
-        try
-        {
-          auto partModel = partModels.at(partNumber);
-          std::vector <cv::Point3i> partPixelColoursVector; // temporary variable
-          std::vector <cv::Point3i> bgPixelColoursVector; // temporary variable
-          int blankPixelsCount;
-          try
-          {
-            partPixelColoursVector = partPixelColours.at(partNumber); // copy part color set for current bodypart
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "There is no such partPixelColours for body part " << partNumber;
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-          try
-          {
-            blankPixelsCount = blankPixels.at(partNumber);  // copy blanck pixel count for current bodypart
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "There is no such blankPixels for body part " << partNumber;
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-          try
-          {
-            bgPixelColoursVector = bgPixelColours.at(partNumber); // copy background color set for current bodypart
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "There is no such bgPixelColours for body part " << partNumber;
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-          addPartHistogram(partModel, partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
-          addBackgroundHistogram(partModel, bgPixelColoursVector); // building histograms for current bodypart background colours
-          partModels.at(partNumber) = partModel; // copy result to part models set
-          if (debugLevelParam >= 2)
-            std::cerr << "Found part model: " << partNumber << std::endl;
-        }
-        catch (...)
-        {
-          std::stringstream ss;
-          ss << "Could not find part model " << partNumber;
-          if (debugLevelParam >= 1)
-            std::cerr << ERROR_HEADER << ss.str() << std::endl;
-          throw std::logic_error(ss.str());
-        }
+        auto partModel = partModels.at(partNumber);
+        auto partPixelColoursVector = partPixelColours.at(partNumber); // copy part color set for current bodypart
+        auto blankPixelsCount = blankPixels.at(partNumber);  // copy blanck pixel count for current bodypart
+        auto bgPixelColoursVector = bgPixelColours.at(partNumber); // copy background color set for current bodypart
 
+        partModel.addPartHistogram(partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
+        partModel.addBackgroundHistogram(bgPixelColoursVector); // building histograms for current bodypart background colours
+        partModels.at(partNumber) = partModel; // copy result to part models set
+        if (debugLevelParam >= 2)
+          std::cerr << "Found part model: " << partNumber << std::endl;
       }
       delete workFrame;
     }
@@ -433,300 +642,6 @@ namespace SPEL
   uint8_t ColorHistDetector::getNBins(void) const noexcept
   {
     return nBins;
-  }
-
-  // Returns relative frequency of the RGB-color reiteration in "PartModel" 
-  float ColorHistDetector::computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b)
-  { // Scaling of colorspace, finding the colors interval, which now gets this color
-    auto factor = static_cast<uint8_t> (ceil(pow(2, 8) / partModel.nBins));
-    try
-    {
-      return partModel.partHistogram.at(r / factor).at(g / factor).at(b / factor); // relative frequency of current color reiteration 
-    }
-    catch (...)
-    {
-      std::stringstream ss;
-      ss << "Couldn't find partHistogram " << "[" << (int)r / factor << "][" << (int)g / factor << "][" << (int)b / factor << "]";
-      if (debugLevelParam >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::logic_error(ss.str());
-    }
-  }
-
-  // Build into the "partModel" a histogram of the color set "partColors"
-  void ColorHistDetector::setPartHistogram(PartModel &partModel, const std::vector <cv::Point3i> &partColors)
-  {
-    // do not add sample if the number of pixels is zero
-    if (partColors.size() == 0)
-      return;
-    auto factor = static_cast<uint8_t> (ceil(pow(2, 8) / partModel.nBins)); // colorspace scaling coefficient
-    partModel.sizeFG = static_cast <uint32_t> (partColors.size());
-    partModel.fgNumSamples = 1;
-    partModel.fgSampleSizes.clear();
-    partModel.fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
-
-    // clear histogram first
-    for (auto r = 0; r < partModel.nBins; r++)
-    {
-      for (auto g = 0; g < partModel.nBins; g++)
-      {
-        for (auto b = 0; b < partModel.nBins; b++)
-        {
-          try
-          {
-            partModel.partHistogram.at(r).at(g).at(b) = 0.0;
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-        }
-      }
-    }
-    // Scaling of colorspace, reducing the capacity and number of colour intervals that are used to construct the histogram
-    for (auto i : partColors)
-    {
-      auto r = static_cast<uint8_t> (i.x / factor);
-      auto g = static_cast<uint8_t> (i.y / factor);
-      auto b = static_cast<uint8_t> (i.z / factor);
-      try
-      {
-        partModel.partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
-      }
-      catch (...)
-      {
-        std::stringstream ss;
-        ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-        if (debugLevelParam >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
-      }
-    }
-    for (auto r = 0; r < partModel.nBins; r++)
-    {
-      for (auto g = 0; g < partModel.nBins; g++)
-      {
-        for (auto b = 0; b < partModel.nBins; b++)
-        {
-          // normalise the histograms
-          try
-          {
-            partModel.partHistogram.at(r).at(g).at(b) /= partModel.sizeFG;
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-        }
-      }
-    }
-  }
-
-  // Take stock of the additional set of colors in the histogram
-  void ColorHistDetector::addPartHistogram(PartModel &partModel, const std::vector <cv::Point3i> &partColors, uint32_t nBlankPixels)
-  {
-    if (partColors.size() == 0) //do not add sample if the number of pixels is zero
-      return;
-    //un-normalise
-    for (auto r = 0; r < partModel.nBins; r++)
-    {
-      for (auto g = 0; g < partModel.nBins; g++)
-      {
-        for (auto b = 0; b < partModel.nBins; b++)
-        {
-          try
-          {
-            partModel.partHistogram.at(r).at(g).at(b) *= partModel.sizeFG; // converting the colors relative frequency into the pixels number
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-        }
-      }
-    }
-
-    auto factor = static_cast<int>(ceil(pow(2, 8) / partModel.nBins)); // colorspace scaling coefficient
-    partModel.sizeFG += static_cast <uint32_t> (partColors.size());
-    partModel.fgNumSamples++;
-    partModel.fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
-
-    // Scaling of colorspace, reducing the capacity and number of colour intervals
-    // Adjustment of the histogram
-    for (auto color : partColors)
-    {
-      auto r = static_cast<uint8_t> (color.x / factor);
-      auto g = static_cast<uint8_t> (color.y / factor);
-      auto b = static_cast<uint8_t> (color.z / factor);
-      try
-      {
-        partModel.partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
-      }
-      catch (...)
-      {
-        std::stringstream ss;
-        ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-        if (debugLevelParam >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
-      }
-    }
-
-    //renormalise
-    for (auto r = 0; r < partModel.nBins; r++)
-    {
-      for (auto g = 0; g < partModel.nBins; g++)
-      {
-        for (auto b = 0; b < partModel.nBins; b++)
-        {
-          //normalise the histograms
-          try
-          {
-            partModel.partHistogram.at(r).at(g).at(b) /= partModel.sizeFG;
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-        }
-      }
-    }
-
-    partModel.fgBlankSizes.push_back(nBlankPixels); // add the number of blank pixels for this model
-  }
-
-  // Totalization the number of used samples
-  float ColorHistDetector::getAvgSampleSizeFg(const PartModel &partModel) noexcept
-  {
-    auto sum = 0.0f;
-    for (const auto &i : partModel.fgSampleSizes)
-      sum += i;
-    sum /= partModel.fgNumSamples;
-    return sum;
-  }
-
-  // Averaging the number of samples, that united from two sets
-  float ColorHistDetector::getAvgSampleSizeFgBetween(const PartModel &partModel, uint32_t s1, uint32_t s2) noexcept
-  {
-    if (s1 >= partModel.fgSampleSizes.size() || s2 >= partModel.fgSampleSizes.size())
-      return 0;
-    return (partModel.fgSampleSizes.at(s1) + partModel.fgSampleSizes.at(s2)) / 2.0f;
-  }
-
-  //TODO (Vitaliy Koshura): Need unit test
-  // Euclidean distance between part histograms
-  float ColorHistDetector::matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel)
-  {
-    auto distance = 0.0f;
-    for (auto r = 0; r < partModel.nBins; r++)
-    {
-      for (auto g = 0; g < partModel.nBins; g++)
-      {
-        for (auto b = 0; b < partModel.nBins; b++)
-        {
-          // accumulation of the Euclidean distances between the points
-          try
-          {
-            distance += pow(partModel.partHistogram.at(r).at(g).at(b) - partModelPrev.partHistogram.at(r).at(g).at(b), 2);
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "Couldn't find partHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-        }
-      }
-    }
-    return sqrt(distance);
-  }
-
-  // Background histogram
-  void ColorHistDetector::addBackgroundHistogram(PartModel &partModel, const std::vector <cv::Point3i> &bgColors)
-  {
-    if (bgColors.size() == 0)
-      return;
-    // unnormalise
-    for (auto r = 0; r < partModel.nBins; r++)
-    {
-      for (auto g = 0; g < partModel.nBins; g++)
-      {
-        for (auto b = 0; b < partModel.nBins; b++)
-        {
-          try
-          {
-            partModel.bgHistogram.at(r).at(g).at(b) *= partModel.sizeBG;
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-        }
-      }
-    }
-    auto factor = static_cast<uint32_t>(ceil(pow(2, 8) / partModel.nBins)); // colorspace scaling coefficient
-    partModel.sizeBG += static_cast <uint32_t> (bgColors.size());
-    partModel.bgNumSamples++;
-    partModel.bgSampleSizes.push_back(static_cast <uint32_t> (bgColors.size()));
-    for (const auto &color : bgColors)
-    {
-      try
-      {
-        partModel.bgHistogram.at(color.x / factor).at(color.y / factor).at(color.z / factor)++; // increment the frequency of interval, that this color have hit
-      }
-      catch (...)
-      {
-        std::stringstream ss;
-        ss << "Couldn't find bgHistogram " << "[" << color.x / factor << "][" << color.y / factor << "][" << color.z / factor << "]";
-        if (debugLevelParam >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
-      }
-    }
-    // renormalise
-    for (auto r = 0; r < partModel.nBins; r++)
-    {
-      for (auto g = 0; g < partModel.nBins; g++)
-      {
-        for (auto b = 0; b < partModel.nBins; b++)
-        {
-          try
-          {
-            partModel.bgHistogram.at(r).at(g).at(b) /= static_cast<float>(partModel.sizeBG);
-          }
-          catch (...)
-          {
-            std::stringstream ss;
-            ss << "Couldn't find bgHistogram " << "[" << r << "][" << g << "][" << b << "]";
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-        }
-      }
-    }
   }
 
   // Returns a matrix, that contains relative frequency of the pixels colors reiteration 
@@ -770,7 +685,7 @@ namespace SPEL
             auto mintensity = maskMat.at<uint8_t>(y, x); // copy mask of the current pixel
             auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
 
-            t.at<float>(y, x) = blackPixel ? 0 : computePixelBelongingLikelihood(partModel, red, green, blue); // relative frequency of the current pixel color reiteration 
+            t.at<float>(y, x) = blackPixel ? 0 : partModel.computePixelBelongingLikelihood(red, green, blue); // relative frequency of the current pixel color reiteration 
           }
         }
       }
@@ -945,7 +860,7 @@ namespace SPEL
         std::cerr << ERROR_HEADER << ss.str() << std::endl;
       throw std::logic_error(ss.str());
     }
-    if (getAvgSampleSizeFg(model) == 0) // error if samples count is zero
+    if (model.getAvgSampleSizeFg() == 0) // error if samples count is zero
     {
       std::stringstream ss;
       ss << "Couldn't get avgSampleSizeFg";

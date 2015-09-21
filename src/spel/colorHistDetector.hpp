@@ -21,7 +21,7 @@ namespace SPEL
   protected:
     struct PartModel
     {
-      PartModel(uint8_t _nBins = 8) noexcept;
+      PartModel(uint8_t _nBins = 8);
       uint8_t nBins;
       std::vector <std::vector <std::vector <float>>> partHistogram;
       std::vector <std::vector <std::vector <float>>> bgHistogram;
@@ -33,9 +33,17 @@ namespace SPEL
       std::vector <uint32_t> bgSampleSizes;
       std::vector <uint32_t> fgBlankSizes;
       virtual PartModel &operator=(const PartModel &model) noexcept;
+      virtual uint8_t calculateFactor(void);
+      virtual float computePixelBelongingLikelihood(uint8_t r, uint8_t g, uint8_t b);
+      virtual void setPartHistogram(const std::vector <cv::Point3i> &partColors);
+      virtual void addPartHistogram(const std::vector <cv::Point3i> &partColors, uint32_t nBlankPixels);
+      virtual float getAvgSampleSizeFg(void);
+      virtual float getAvgSampleSizeFgBetween(uint32_t s1, uint32_t s2);
+      virtual float matchPartHistogramsED(const PartModel &partModelPrev);
+      virtual void addBackgroundHistogram(const std::vector <cv::Point3i> &bgColors);
     };
   public:
-    ColorHistDetector(uint8_t _nBins = 8) noexcept;  // default is 8 for 32 bit colourspace
+    ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
     virtual ~ColorHistDetector(void) noexcept;
     virtual int getID(void) const noexcept;
     virtual void setID(int _id) noexcept;
@@ -68,14 +76,7 @@ namespace SPEL
     float useCSdet = 1.0f;
     std::map <int32_t, cv::Mat> pixelDistributions;
     std::map <int32_t, cv::Mat> pixelLabels;
-
-    virtual float computePixelBelongingLikelihood(const PartModel &partModel, uint8_t r, uint8_t g, uint8_t b);
-    virtual void setPartHistogram(PartModel &partModel, const std::vector <cv::Point3i> &partColors);
-    virtual void addPartHistogram(PartModel &partModel, const std::vector <cv::Point3i> &partColors, uint32_t nBlankPixels);
-    virtual void addBackgroundHistogram(PartModel &partModel, const std::vector <cv::Point3i> &bgColors);
-    virtual float getAvgSampleSizeFg(const PartModel &partModel) noexcept;
-    virtual float getAvgSampleSizeFgBetween(const PartModel &partModel, uint32_t s1, uint32_t s2) noexcept;
-    virtual float matchPartHistogramsED(const PartModel &partModelPrev, const PartModel &partModel);
+        
     virtual std::map <int32_t, cv::Mat> buildPixelDistributions(Frame *frame);
     virtual std::map <int32_t, cv::Mat> buildPixelLabels(Frame *frame, std::map <int32_t, cv::Mat> pixelDistributions);
     virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1);
