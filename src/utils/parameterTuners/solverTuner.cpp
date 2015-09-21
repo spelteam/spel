@@ -383,7 +383,7 @@ vector<Solvlet> solvletsFromSkeleton(vector<Frame*> vFrames)
             float boxWidth= boneLength / ratio;
             auto boxCenter=0.5*j0+0.5*j1; //the midpoint
 
-            auto angle = static_cast <float> (spelHelper::angle2D(1.0, 0, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
+            auto angle = static_cast <float> (spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
             Point2f c1, c2, c3, c4, polyCenter;
             c1 = Point2f(0.f, 0.5f * boxWidth);
             c2 = Point2f(boneLength, 0.5f * boxWidth);
