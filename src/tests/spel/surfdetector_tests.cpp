@@ -467,7 +467,8 @@ namespace SPEL
     map <string, float> params;
     D.train(SFrames, params);
     ASSERT_GT(D.getPartModels().size(), 0);
-    map<uint32_t, vector<LimbLabel>> limbLabels = D.detect(SFrames[1], params, limbLabels);
+    map<uint32_t, vector<LimbLabel>> limbLabels;
+    limbLabels = D.detect(SFrames[1], params, limbLabels);
     ASSERT_GT(limbLabels.size(), 0);
 
     // Create output file
