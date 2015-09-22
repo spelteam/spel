@@ -46,7 +46,7 @@ namespace SPEL
     virtual int getParentFrameID(void) const noexcept;
     virtual void setParentFrameID(int _parentFrameID) noexcept;
     virtual float Resize(uint32_t maxHeight) noexcept;
-    virtual Frame *clone(Frame *dest) noexcept;
+    virtual Frame *clone(Frame *dest) const noexcept;
     virtual cv::Size getFrameSize(void) const;
     virtual cv::Size getImageSize(void) const noexcept;
     virtual cv::Size getMaskSize(void) const noexcept;

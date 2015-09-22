@@ -35,7 +35,7 @@ namespace SPEL
     id = _id;
   }
 
-  void SurfDetector::train(std::vector <Frame*> _frames, std::map <std::string, float> params)
+  void SurfDetector::train(const std::vector <Frame*> &_frames, std::map <std::string, float> params)
   {
     frames = _frames;
 
@@ -102,7 +102,7 @@ namespace SPEL
 
   }
 
-  std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
   {
     const std::string sMinHessian = "minHessian";
     const std::string sUseSURFdet = "useSURFdet";
@@ -265,7 +265,7 @@ namespace SPEL
     return partModel;
   }
 
-  LimbLabel SurfDetector::generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1)
+  LimbLabel SurfDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1)
   {
     std::stringstream detectorName;
     detectorName << getID();

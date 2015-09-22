@@ -32,8 +32,8 @@ namespace SPEL
     virtual ~HogDetector(void);
     virtual int getID(void) const;
     virtual void setID(int _id);
-    virtual void train(std::vector <Frame*> _frames, std::map <std::string, float> params);
-    virtual std::map <uint32_t, std::vector <LimbLabel>> detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels);
+    virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float> params);
+    virtual std::map <uint32_t, std::vector <LimbLabel>> detect(Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels);
     virtual std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> getLabelModels(void);
     virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void);
 
@@ -75,10 +75,10 @@ namespace SPEL
     int derivAperture = 1;
     int histogramNormType = cv::HOGDescriptor::L2Hys;
     // Variables for score comparer
-    BodyPart *comparer_bodyPart = 0;
+    BodyPart const *comparer_bodyPart = 0;
     PartModel *comparer_model = 0;
 
-    virtual LimbLabel generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1);
+    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1);
 
     virtual std::map <uint32_t, cv::Size> getMaxBodyPartHeightWidth(std::vector <Frame*> frames, cv::Size blockSize, float resizeFactor);
     virtual PartModel computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, int nbins, cv::Size wndSize, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);

@@ -291,7 +291,7 @@ namespace SPEL
     return result;
   }
 
-  LimbLabel Detector::generateLabel(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, std::string detectorName, float _usedet)
+  LimbLabel Detector::generateLabel(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const std::string &detectorName, float _usedet)
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
     auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
@@ -312,7 +312,7 @@ namespace SPEL
     return nullptr;
   }
 
-  std::map <uint32_t, std::vector <LimbLabel>> Detector::detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel>> Detector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
   {
     // first we need to check all used params
     params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT());

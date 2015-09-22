@@ -164,7 +164,7 @@ namespace SPEL
     return factor;
   }
 
-  Frame *Frame::clone(Frame *dest) noexcept
+  Frame *Frame::clone(Frame *dest) const noexcept
   {
     if (dest == nullptr)
       return nullptr;

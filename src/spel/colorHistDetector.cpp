@@ -389,7 +389,7 @@ namespace SPEL
   }
 
   // Builds a histograms of all polygons for pre-marked frames
-  void ColorHistDetector::train(std::vector <Frame*> _frames, std::map <std::string, float> params)
+  void ColorHistDetector::train(const std::vector <Frame*> &_frames, std::map <std::string, float> params)
   {
     frames = _frames; // vector of pointers - presents a sequence of frames
     sort(frames.begin(), frames.end(), Frame::FramePointerComparer); // sorting frames by id
@@ -406,7 +406,7 @@ namespace SPEL
 
     params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first, frames.at(0)->getFrameSize().height);
 
-    maxFrameHeight = params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first);
+    maxFrameHeight = static_cast<uint32_t>(params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first));
 
     auto bFind = false; // flag, indicate the presence of marked frame in the sequence
     for (auto f : frames)
@@ -431,8 +431,6 @@ namespace SPEL
     {
       if (frameNum->getFrametype() != KEYFRAME && frameNum->getFrametype() != LOCKFRAME)
         continue; // skip unmarked frames
-
-      auto originalSize = frameNum->getFrameSize().height;
 
       Frame *workFrame = nullptr;
       if (frameNum->getFrametype() == KEYFRAME)
@@ -490,7 +488,7 @@ namespace SPEL
         }
         auto j1 = joint->getImageLocation(); // coordinates of current joint
         auto direction = j1 - j0; // used as estimation of the vector's direction
-        auto rotationAngle = spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0f / M_PI); //bodypart tilt angle 
+        auto rotationAngle = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0f / M_PI)); //bodypart tilt angle 
         bodyPart.setRotationSearchRange(rotationAngle);
         auto poserect = getBodyPartRect(bodyPart, j0, j1);
         polygons.insert(std::pair <int32_t, POSERECT <cv::Point2f>>(bodyPart.getPartID(), poserect));
@@ -613,7 +611,7 @@ namespace SPEL
   }
 
   // Returns a labels vector of possible body parts position
-  std::map <uint32_t, std::vector <LimbLabel> > ColorHistDetector::detect(Frame *frame, std::map <std::string, float> params, std::map <uint32_t, std::vector <LimbLabel>> limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel> > ColorHistDetector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
   {
     params.emplace(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR());
 
@@ -645,7 +643,7 @@ namespace SPEL
   }
 
   // Returns a matrix, that contains relative frequency of the pixels colors reiteration 
-  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelDistributions(Frame *frame)
+  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelDistributions(const Frame *frame)
   {
     auto skeleton = frame->getSkeleton(); // copy skeleton from the frame
     auto partTree = skeleton.getPartTree(); // copy part tree from the skeleton
@@ -655,7 +653,7 @@ namespace SPEL
     auto height = imgMat.rows;
     auto mwidth = maskMat.cols;
     auto mheight = maskMat.rows;
-    std::map <int32_t, cv::Mat> pixelDistributions;
+    std::map <int32_t, cv::Mat> tempPixelDistributions;
     if (width != mwidth || height != mheight) // error if mask and image sizes don't match
     {
       std::stringstream ss;
@@ -697,19 +695,19 @@ namespace SPEL
           std::cerr << ERROR_HEADER << ss.str() << std::endl;
         throw std::logic_error(ss.str());
       }
-      pixelDistributions.insert(std::pair <int32_t, cv::Mat>(partID, t)); // add the current bodypart matrix to the set 
+      tempPixelDistributions.insert(std::pair <int32_t, cv::Mat>(partID, t)); // add the current bodypart matrix to the set 
     }
-    return pixelDistributions;
+    return tempPixelDistributions;
   }
 
-  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelLabels(Frame *frame, std::map <int32_t, cv::Mat> pixelDistributions)
+  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelLabels(const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelDistributions)
   {
     auto maskMat = frame->getMask(); // copy mask from the frame
     auto width = maskMat.cols;
     auto height = maskMat.rows;
     auto skeleton = frame->getSkeleton(); // copy skeleton from the frame
     auto partTree = skeleton.getPartTree(); // copy part tree from the skeleton
-    std::map <int32_t, cv::Mat> pixelLabels;
+    std::map <int32_t, cv::Mat> _pixelLabels;
     // For all body parts
     for (const auto &bodyPart : partTree)
     {
@@ -717,7 +715,7 @@ namespace SPEL
       cv::Mat tt;
       try
       { // Matrix, that contains relative frequency of the pixels colors reiteration for current body part
-        tt = pixelDistributions.at(bodyPart.getPartID());
+        tt = _pixelDistributions.at(bodyPart.getPartID());
       }
       catch (...)
       {
@@ -744,7 +742,7 @@ namespace SPEL
               cv::Mat temp;
               try
               {
-                temp = pixelDistributions.at(i.getPartID()); // matrix of the pixels colors frequency for current body part
+                temp = _pixelDistributions.at(i.getPartID()); // matrix of the pixels colors frequency for current body part
               }
               catch (...)
               {
@@ -799,9 +797,9 @@ namespace SPEL
           }
         }
       }
-      pixelLabels.insert(std::pair<int32_t, cv::Mat>(bodyPart.getPartID(), t)); // insert the resulting matrix into the set "pixelLabels" 
+      _pixelLabels.insert(std::pair<int32_t, cv::Mat>(bodyPart.getPartID(), t)); // insert the resulting matrix into the set "pixelLabels" 
     }
-    return pixelLabels;
+    return _pixelLabels;
   }
 
   float ColorHistDetector::compare(void)
@@ -835,7 +833,7 @@ namespace SPEL
     }
   }
 
-  float ColorHistDetector::compare(BodyPart bodyPart, Frame *frame, std::map <int32_t, cv::Mat> pixelDistributions, std::map <int32_t, cv::Mat> pixelLabels, cv::Point2f j0, cv::Point2f j1)
+  float ColorHistDetector::compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelDistributions, const std::map <int32_t, cv::Mat> &_pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1)
   {
     auto maskMat = frame->getMask(); // copy mask from the frame 
     auto imgMat = frame->getImage(); // copy image from the frame
@@ -873,7 +871,7 @@ namespace SPEL
     cv::Mat bodyPartPixelDistribution;
     try
     {
-      bodyPartPixelDistribution = pixelDistributions.at(bodyPart.getPartID());
+      bodyPartPixelDistribution = _pixelDistributions.at(bodyPart.getPartID());
     }
     catch (...)
     {
@@ -886,7 +884,7 @@ namespace SPEL
     cv::Mat bodyPartLixelLabels;
     try
     {
-      bodyPartLixelLabels = pixelLabels.at(bodyPart.getPartID());
+      bodyPartLixelLabels = _pixelLabels.at(bodyPart.getPartID());
     }
     catch (...)
     {
@@ -932,7 +930,7 @@ namespace SPEL
               {
                 try
                 {
-                  pixDistAvg += bodyPartPixelDistribution.at<float>(j, i); // Accumulation the "distributions" of contained pixels
+                  pixDistAvg += bodyPartPixelDistribution.at<float>(static_cast<int32_t>(j), static_cast<int32_t>(i)); // Accumulation the "distributions" of contained pixels
                 }
                 catch (...)
                 {
@@ -945,9 +943,9 @@ namespace SPEL
                 pixDistNum++; // counting of the all scanned pixels
                 try
                 {
-                  if (bodyPartLixelLabels.at<float>(j, i))
+                  if (bodyPartLixelLabels.at<float>(static_cast<int32_t>(j), static_cast<int32_t>(i)))
                   {
-                    totalPixelLabelScore += bodyPartLixelLabels.at<float>(j, i); // Accumulation of the pixel labels
+                    totalPixelLabelScore += bodyPartLixelLabels.at<float>(static_cast<int32_t>(j), static_cast<int32_t>(i)); // Accumulation of the pixel labels
                   }
                 }
                 catch (...)
@@ -982,7 +980,7 @@ namespace SPEL
     throw std::logic_error(ss.str());
   }
 
-  LimbLabel ColorHistDetector::generateLabel(BodyPart bodyPart, Frame *frame, cv::Point2f j0, cv::Point2f j1)
+  LimbLabel ColorHistDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1)
   {
     std::stringstream detectorName;
     detectorName << getID();
