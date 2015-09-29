@@ -16,8 +16,8 @@ namespace SPEL
       p[3] = Point2f(0.0, 1.0);
       p[4] = Point2f(-1.0, 0.0);
       p[5] = Point2f(3.0, 1.0);
-      p[6] = Point2f(2.0, 2.732050808);
-      p[7] = Point2f(1.0, 1.732050808);
+      p[6] = Point2f(2.0, 2.732050808f);
+      p[7] = Point2f(1.0, 1.732050808f);
       p[8] = Point2f(4.0, 6.0);
       p[9] = Point2f(9.0, 4.0);
     }
@@ -47,52 +47,64 @@ namespace SPEL
   }
 
   TEST_F(spelHelperTest, Angle2D){
-    EXPECT_DOUBLE_EQ(-M_PI / 4, spelHelper::angle2D(p[1].x, p[1].y, p[2].x, p[2].y));
-    EXPECT_DOUBLE_EQ(-M_PI / 2, spelHelper::angle2D(p[3].x, p[3].y, p[2].x, p[2].y));
-    EXPECT_DOUBLE_EQ(M_PI / 4, spelHelper::angle2D(p[2].x, p[2].y, p[1].x, p[1].y));
-    EXPECT_DOUBLE_EQ(M_PI / 2, spelHelper::angle2D(p[2].x, p[2].y, p[3].x, p[3].y));
-    const double error = 0.00001;
-    EXPECT_NEAR(M_PI / 3, spelHelper::angle2D(p[2].x, p[2].y, p[7].x, p[7].y), error);
-    EXPECT_NEAR(-M_PI / 6, spelHelper::angle2D(p[3].x, p[3].y, p[7].x, p[7].y), error);
-    float angle32 = 32.3474435 * (M_PI / 180);
-    EXPECT_NEAR(-angle32, spelHelper::angle2D(p[8].x, p[8].y, p[9].x, p[9].y), error);
+    const double error = 0.000001;
+    float a = static_cast<float>(M_PI / 4);
+    float b = static_cast<float>(M_PI / 2);
+    float c = static_cast<float>(M_PI / 3);
+    float d = static_cast<float>(M_PI / 6);
+    float e = static_cast<float>(32.3474435 * (M_PI / 180));
+    EXPECT_NEAR(-a, spelHelper::angle2D(p[1].x, p[1].y, p[2].x, p[2].y), error);
+    EXPECT_NEAR(-b, spelHelper::angle2D(p[3].x, p[3].y, p[2].x, p[2].y), error);
+    EXPECT_NEAR( a, spelHelper::angle2D(p[2].x, p[2].y, p[1].x, p[1].y), error);
+    EXPECT_NEAR( b, spelHelper::angle2D(p[2].x, p[2].y, p[3].x, p[3].y), error);
+    EXPECT_NEAR( c, spelHelper::angle2D(p[2].x, p[2].y, p[7].x, p[7].y), error);
+    EXPECT_NEAR(-d, spelHelper::angle2D(p[3].x, p[3].y, p[7].x, p[7].y), error); 
+    EXPECT_NEAR(-e, spelHelper::angle2D(p[8].x, p[8].y, p[9].x, p[9].y), error);
     //testing with null vector
-    EXPECT_DOUBLE_EQ(0.0, spelHelper::angle2D(p[0].x, p[0].y, p[1].x, p[1].y));
-    EXPECT_DOUBLE_EQ(0.0, spelHelper::angle2D(p[0].x, p[0].y, p[3].x, p[3].y));
-    EXPECT_DOUBLE_EQ(0.0, spelHelper::angle2D(p[0].x, p[0].y, p[0].x, p[0].y));
+    EXPECT_NEAR(0.0f, spelHelper::angle2D(p[0].x, p[0].y, p[1].x, p[1].y), error);
+    EXPECT_NEAR(0.0f, spelHelper::angle2D(p[0].x, p[0].y, p[3].x, p[3].y), error);
+    EXPECT_NEAR(0.0f, spelHelper::angle2D(p[0].x, p[0].y, p[0].x, p[0].y), error);
     //testing with itsefl
-    EXPECT_DOUBLE_EQ(0.0, spelHelper::angle2D(p[5].x, p[5].y, p[5].x, p[5].y));
-    EXPECT_DOUBLE_EQ(0.0, spelHelper::angle2D(p[8].x, p[8].y, p[8].x, p[8].y));
+    EXPECT_NEAR(0.0f, spelHelper::angle2D(p[5].x, p[5].y, p[5].x, p[5].y), error);
+    EXPECT_NEAR(0.0f, spelHelper::angle2D(p[8].x, p[8].y, p[8].x, p[8].y), error);
   }
 
   TEST_F(spelHelperTest, distSquared3D)
   {
     double b = sqrt(1.0 / 3.0);
+    float f = static_cast<float>(b);
 
     Point3d A = Point3d(0.0, 0.0, 0.0);
     Point3d B = Point3d(b, b, b);
-    Point3f C = Point3f(-b, -b, -b);
+    Point3f C = Point3f(-f, -f, -f);
 
     EXPECT_DOUBLE_EQ(0.0, spelHelper::distSquared3d(A, A));
     EXPECT_DOUBLE_EQ(1.0, spelHelper::distSquared3d(A, B));
-    EXPECT_FLOAT_EQ(1.0, (float)spelHelper::distSquared3d(Point3f(0.0, 0.0, 0.0), C));
+    EXPECT_FLOAT_EQ(1.0f, (float)spelHelper::distSquared3d(Point3f(0.0, 0.0, 0.0), C));
   }
-
-  TEST_F(spelHelperTest, angleTest)
+  
+  TEST_F(spelHelperTest, angle2D_double)
   {
+    const unsigned int n = 5;
+    Point2d P[n];
+    for (unsigned int i = 0; i < n; i++)
+      P[i] = static_cast<Point2d>(p[i]);
+
+    const double error = 0.000001;
+
     double controlAngle45 = 45;
     double controlAngle0 = 0;
     double controlAngle90 = 90;
     double controlAngle180 = 180;
 
-    double angle45 = spelHelper::angle2D(p[1].x, p[1].y, p[3].x, p[3].y) * (180.0 / M_PI);
-    double angle0 = spelHelper::angle2D(p[3].x, p[3].y, p[3].x, p[3].y) * (180.0 / M_PI);
-    double angle90 = spelHelper::angle2D(p[2].x, p[2].y, p[3].x, p[3].y) * (180.0 / M_PI);
-    double angle180 = spelHelper::angle2D(p[2].x, p[2].y, p[4].x, p[4].y) * (180.0 / M_PI);
+    double angle45 = spelHelper::angle2D(P[1].x, P[1].y, P[3].x, P[3].y) * (180.0 / M_PI);
+    double angle0 = spelHelper::angle2D(P[3].x, P[3].y, P[3].x, P[3].y) * (180.0 / M_PI);
+    double angle90 = spelHelper::angle2D(P[2].x, P[2].y, P[3].x, P[3].y) * (180.0 / M_PI);
+    double angle180 = spelHelper::angle2D(P[2].x, P[2].y, P[4].x, P[4].y) * (180.0 / M_PI);
 
-    EXPECT_DOUBLE_EQ(controlAngle45, angle45);
-    EXPECT_DOUBLE_EQ(controlAngle0, angle0);
-    EXPECT_DOUBLE_EQ(controlAngle90, angle90);
-    EXPECT_DOUBLE_EQ(controlAngle180, angle180);
+    EXPECT_NEAR(controlAngle45, angle45, error);
+    EXPECT_NEAR(controlAngle0, angle0, error);
+    EXPECT_NEAR(controlAngle90, angle90, error);
+    EXPECT_NEAR(controlAngle180, abs(angle180), error);
   }
 }

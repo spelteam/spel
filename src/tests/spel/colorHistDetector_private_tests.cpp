@@ -15,6 +15,7 @@
 
 namespace SPEL
 {
+  //IT'S TEMPORARY TESTS
   class LimbIDCompare
   {
   public:
@@ -30,12 +31,12 @@ namespace SPEL
     ColorHistDetector::PartModel;
   };
 
-  //IT'S TEMPORARY TESTS
-
-  //Global variables - each next test uses data from previous
+  //Fixtures are not available if using "FRIEND_TEST"
+  //Global variables 
   const int  partID = 12;
   int FirstKeyframe;
   vector<Frame*> vFrames;
+  map <string, float> vParams;
   Skeleton skeleton;
   tree <BodyPart> partTree;
   BodyPart bodyPart;
@@ -44,13 +45,58 @@ namespace SPEL
   POSERECT<Point2f> rect;
   vector <Point3i> Colors;
   ColorHistDetector detector;
-  TestColorHistDetector::PartModel model;
-  TestColorHistDetector::PartModel partModel_expected(NBins);
-  TestColorHistDetector::PartModel partModel_actual(NBins);
   map <int32_t, Mat> pixelDistributions;
   map<int32_t, Mat> pixelLabels;
   Mat image, mask;
   auto seq = new Sequence();
+  bool ProjectLoaded = false;
+
+  // Setting of the "ColorHistDetectorTests" global variables
+  void prepareTestData()
+  {
+    //Load the input data
+    vFrames = LoadTestProject(vParams, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    
+    //Create actual value
+    detector.train(vFrames, vParams);
+
+    //Copy image and skeleton from first keyframe
+    FirstKeyframe = FirstKeyFrameNum(vFrames);
+    image = vFrames[FirstKeyframe]->getImage();
+    mask = vFrames[FirstKeyframe]->getMask();
+    skeleton = vFrames[FirstKeyframe]->getSkeleton();
+    partTree = skeleton.getPartTree();
+
+    //Select body part for testing
+    bodyPart = *skeleton.getBodyPart(partID);
+    j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());
+    j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
+    rect = BuildPartRect(j0, j1, bodyPart.getLWRatio());
+
+    //Build part colorset
+    Colors = GetPartColors(image, mask, rect);
+  }
+
+  void ClearGlobalVariables()
+  {
+    for (map <int32_t, Mat>::iterator I = pixelDistributions.begin(); I != pixelDistributions.end(); ++I)
+      I->second.release();
+    pixelDistributions.clear();
+    pixelLabels.clear();
+    partTree.clear();
+    image.release();
+    mask.release();
+    Colors.clear();
+    for (int i = 0; i < vFrames.size(); i++)
+      delete vFrames[i];
+    vFrames.clear();
+  }
+
+  TEST(colorHistDetectorTest, PrepareTestData)
+  {
+    prepareTestData();
+    ProjectLoaded = true;
+  }
 
   TEST(colorHistDetectorTest, Constructors)
   {
@@ -68,18 +114,18 @@ namespace SPEL
     EXPECT_EQ(_nBins, chd1.nBins);
   }
 
+  //Testing  function "computePixelBelongingLikelihood"
   TEST(colorHistDetectorTest, computePixelBelongingLikelihood)
   {
-    //Testing  function "computePixelBelongingLikelihood"
     const uint8_t nBins = 8, outside = 255;
     const uint8_t _factor = static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
     uint8_t i = 70;
     uint8_t t = i / _factor;
     ColorHistDetector chd2(nBins);
-    ColorHistDetector::PartModel z(nBins);
-    z.partHistogram[t][t][t] = 3.14f;
-    EXPECT_EQ(z.partHistogram[t][t][t], z.computePixelBelongingLikelihood(i, i, i));
-    EXPECT_EQ(0.f, z.computePixelBelongingLikelihood(outside, outside, outside));
+    ColorHistDetector::PartModel partModel(nBins);
+    partModel.partHistogram[t][t][t] = 3.14f;
+    EXPECT_EQ(partModel.partHistogram[t][t][t], partModel.computePixelBelongingLikelihood(i, i, i));
+    EXPECT_EQ(0.f, partModel.computePixelBelongingLikelihood(outside, outside, outside));
   }
 
   TEST(colorHistDetectorTest, Operators)
@@ -105,37 +151,17 @@ namespace SPEL
     EXPECT_EQ(x.bgSampleSizes, y.bgSampleSizes);
     EXPECT_EQ(x.fgBlankSizes, y.fgBlankSizes);
   }
-
+ 
+  // Testing function "setPartHistogram"
+  //This test uses the global variables
   TEST(colorHistDetectorTest, setPartHistogram)
   {
-    //Load the input data
-    vFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+      prepareTestData();
 
-    //Setting parameters 
-    map <string, float> params = SetParams(vFrames, &seq);
-	
-    for (auto f : vFrames)
-      delete f;
-    vFrames.clear();
-    vFrames = seq->getFrames();
-    
-    //Copy image and skeleton from first keyframe
-    FirstKeyframe = FirstKeyFrameNum(vFrames);
-    image = vFrames[FirstKeyframe]->getImage();
-    mask = vFrames[FirstKeyframe]->getMask();
-    skeleton = vFrames[FirstKeyframe]->getSkeleton();
-    partTree = skeleton.getPartTree();
-
-    //Select body part for testing
-    bodyPart = *skeleton.getBodyPart(partID);
-    j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());
-    j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
-    rect = BuildPartRect(j0, j1, bodyPart.getLWRatio());
-      
-    //Build part colorset
-    Colors = GetPartColors(image, mask, rect);
-
-    //Create expected value	  
+    //Create expected value	
+    TestColorHistDetector::PartModel partModel_expected;
     partModel_expected.sizeFG = Colors.size();
     partModel_expected.fgNumSamples = 1;
     partModel_expected.fgSampleSizes.push_back(static_cast <uint32_t> (Colors.size()));
@@ -147,8 +173,7 @@ namespace SPEL
           partModel_expected.partHistogram[r][g][b] /= Colors.size();
 
     //Create actual value
-    detector.train(vFrames, params);
-    model = detector.partModels.at(partID);
+    TestColorHistDetector::PartModel partModel_actual;
     partModel_actual.setPartHistogram(Colors);
 
     //Compare
@@ -160,11 +185,24 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+
+    if (ProjectLoaded == false)
+      ClearGlobalVariables();
   }
 
+  // Testing function "addpartHistogram"
+  //This test uses the global variables
   TEST(colorHistDetectorTest, addpartHistogram)
   {
-    //Create expected value
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+      prepareTestData();
+
+    //Initialisation of "partModel_expected" and "partModel_actual"
+    TestColorHistDetector::PartModel partModel_expected = detector.partModels.at(partID);
+    TestColorHistDetector::PartModel partModel_actual = detector.partModels.at(partID);
+
+    //Calculate the expected value
     uint32_t nBlankPixels = 10;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
@@ -193,43 +231,92 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+
+    if (ProjectLoaded == false)
+      ClearGlobalVariables();
   }
 
   // Testing function "getAvgSampleSizeFg"
   TEST(colorHistDetectorTest, getAvgSampleSizeFg)
   {
-    float Sum = 0;
-    for (uint32_t i = 0; i < partModel_expected.fgSampleSizes.size(); i++)
-      Sum += partModel_expected.fgSampleSizes[i];
-    Sum /= partModel_expected.fgNumSamples;
+    //Create partModel
+    TestColorHistDetector::PartModel partModel(NBins);
 
-    EXPECT_EQ(Sum, partModel_actual.getAvgSampleSizeFg());
+    //Setting "sampleSizes" values
+    vector<uint32_t> sampleSizes = { 1, 2, 2, 3};
+    for (unsigned int i = 0; i < sampleSizes.size(); i++)
+      partModel.fgSampleSizes.push_back(sampleSizes[i]);
+    partModel.fgNumSamples = sampleSizes.size();
+
+    /*//Create expected value
+    float Sum = 0;
+    TestColorHistDetector::PartModel partModel(NBins);
+    for (uint32_t i = 0; i < sampleSizes.size(); i++)
+    Sum += sampleSizes[i];
+    Sum /= sampleSizes.size();*/
+
+    //Compare
+    EXPECT_EQ(2.0f, partModel.getAvgSampleSizeFg()); // Must be equal: Sum(sampleSizes) / sampleSizes.size()
   }
 
   // Testing function "getAvgSampleSizeFgBetween"
   TEST(colorHistDetectorTest, getAvgSampleSizeFgBetween)
   {
-    uint32_t s1 = 0, s2 = 0;
-    float f = (partModel_expected.fgSampleSizes[s1] + partModel_expected.fgSampleSizes[s2]) / 2.0f;
-    EXPECT_EQ(f, partModel_actual.getAvgSampleSizeFgBetween(s1, s2));
-    EXPECT_EQ(0.f, partModel_actual.getAvgSampleSizeFgBetween(static_cast <uint32_t> (partModel_expected.fgSampleSizes.size()), s2));
+    //Create partModel
+    TestColorHistDetector::PartModel partModel(NBins);
+
+    //Setting "sampleSizes" values
+    vector<uint32_t> sampleSizes = { 1, 2, 2};
+    for (unsigned int i = 0; i < sampleSizes.size(); i++)
+      partModel.fgSampleSizes.push_back(sampleSizes[i]);
+
+    //Compare
+    EXPECT_EQ(1.5f, partModel.getAvgSampleSizeFgBetween(0, 1)); // Must be equal: (sampleSizes[0] + sampleSizes[1]) / 2
+    EXPECT_EQ(2.0f, partModel.getAvgSampleSizeFgBetween(1, 2)); // Must be equal: (sampleSizes[1] + sampleSizes[2]) / 2
   }
 
   // Testing function "matchPartHistogramsED"
+  // This test uses the global variables
   TEST(colorHistDetectorTest, matchPartHistogramsED)
   {
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+      prepareTestData();
+
+    //Create expected values
+    TestColorHistDetector::PartModel partModel0 = detector.partModels.at(partID);
+    TestColorHistDetector::PartModel partModel1 = detector.partModels.at(partID);
+    partModel1.addPartHistogram(Colors, 0);
     float distance = 0;
-    for (uint8_t r = 0; r < partModel_expected.nBins; r++)
-      for (uint8_t g = 0; g < partModel_expected.nBins; g++)
-        for (uint8_t b = 0; b < partModel_expected.nBins; b++)
-          distance += pow(partModel_expected.partHistogram[r][g][b] - partModel_expected.partHistogram[r][g][b], 2.0f);
-    float f = partModel_expected.matchPartHistogramsED(partModel_expected);
-    EXPECT_EQ(sqrt(distance), f);
+    for (uint8_t r = 0; r < partModel1.nBins; r++)
+      for (uint8_t g = 0; g < partModel1.nBins; g++)
+        for (uint8_t b = 0; b < partModel1.nBins; b++)
+          distance += pow(partModel1.partHistogram[r][g][b] - partModel0.partHistogram[r][g][b], 2.0f);
+
+    //Create actual values
+    float ED1 = partModel0.matchPartHistogramsED(partModel0);
+    float ED2 = partModel0.matchPartHistogramsED(partModel1);
+
+    //Compare
+    EXPECT_EQ(0.0f, ED1);
+    EXPECT_EQ(sqrt(distance), ED2);
+
+    if (ProjectLoaded == false)
+      ClearGlobalVariables();
   }
 
   // Testing function "addBackgroundHistogram"
+  //This test uses the global variables
   TEST(colorHistDetectorTest, addBackgroundHistogram)
   {
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+      prepareTestData();
+
+    //Initialisation of "partModel_expected" and "partModel_actual"
+    TestColorHistDetector::PartModel partModel_expected = detector.partModels.at(partID);
+    TestColorHistDetector::PartModel partModel_actual = detector.partModels.at(partID);
+
     vector <Point3i> cEmpty;
     for (uint8_t r = 0; r < partModel_expected.nBins; r++)
       for (uint8_t g = 0; g < partModel_expected.nBins; g++)
@@ -256,11 +343,19 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.fgSampleSizes, partModel_actual.fgSampleSizes);
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
+
+    if (ProjectLoaded == false)
+      ClearGlobalVariables();
   }
 
   // Testing function buildPixelDistributions
+  //This test uses the global variables
   TEST(colorHistDetectorTest, buildPixelDistributions)
   {
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+      prepareTestData();
+
     Mat t(image.rows, image.cols, DataType <float>::type);
     ColorHistDetector::PartModel partModel = detector.partModels[partID];
     for (int x = 0; x < image.cols; x++)
@@ -284,11 +379,22 @@ namespace SPEL
 
     // we need to save pixelDistibutions in private class member
     detector.pixelDistributions = pixelDistributions;
+
+    if (ProjectLoaded == false)
+      ClearGlobalVariables();
   }
 
   // Testing function "BuildPixelLabels"
+  //This test uses the global variables
   TEST(colorHistDetectorTest, BuildPixelLabels)
   {
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+    {
+      prepareTestData();
+      detector.pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
+    }
+
     Mat p(image.rows, image.cols, DataType <float>::type);
     for (int x = 0; x < image.cols; x++)
       for (int y = 0; y < image.rows; y++)
@@ -320,11 +426,23 @@ namespace SPEL
 
     // we need to save pixelLabels in private class member
     detector.pixelLabels = pixelLabels;
+
+    if (ProjectLoaded == false)
+      ClearGlobalVariables();
   }
   
-  // Testing function generateLabel
+  // Testing function "generateLabel"
+  //This test uses the global variables
   TEST(colorHistDetectorTest, generateLabel)
   {
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+    {
+      prepareTestData();
+      detector.pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
+      detector.pixelLabels = detector.buildPixelLabels(vFrames[FirstKeyframe], pixelDistributions);
+    }
+
     vector <Score> s;
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
     Point2f boxCenter = p0 * 0.5 + p1 * 0.5;
@@ -412,12 +530,18 @@ namespace SPEL
       }
     }
 
-    EXPECT_EQ(model.bgHistogram, detector.partModels[partID].bgHistogram);
+    if (ProjectLoaded == false)
+      ClearGlobalVariables();
   }
 
   // Testing function "detect"
+  //This test uses the global variables
   TEST(colorHistDetectorTest, detect)
   {
+    //Loading test data if only one test runned
+    if(vFrames.size() == 0)
+      prepareTestData();
+
     ofstream fout("Output_CHDTest_detect.txt");
 
     // Copy skeleton from keyframe to frames[1] 
@@ -538,17 +662,13 @@ namespace SPEL
     }
     if (!EffectiveLabbelsInTop) cout << endl;
 
-    for (map <int32_t, Mat>::iterator I = pixelDistributions.begin(); I != pixelDistributions.end(); ++I)
-      I->second.release();
-    pixelDistributions.clear();
-    detector.partModels.clear();
-    pixelLabels.clear();
-    partTree.clear();
-    image.release();
-    mask.release();
-    Colors.clear();
-    for (int i = 0; i < vFrames.size(); i++)
-      delete vFrames[i];
-    vFrames.clear();
+    if (ProjectLoaded == false)
+        ClearGlobalVariables();
+  }
+
+  TEST(ColorHistDetectorTest, Clear)
+  {
+    if (ProjectLoaded == true)
+      ClearGlobalVariables();
   }
 }

@@ -419,16 +419,18 @@ namespace SPEL
   {
     //Load the input data
     ColorHistDetector CHD;
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
     CHD.frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+
+    //Create actual value
     Frame* frame = CHD.getFrame(0);
 
-    EXPECT_EQ(frame->getFrametype(), frames[0]->getFrametype());
-    EXPECT_EQ(frame->getID(), frames[0]->getID());
-    EXPECT_EQ(frame->getFrameSize(), frames[0]->getFrameSize());
-    EXPECT_EQ(frame->getSkeleton(), frames[0]->getSkeleton());
-    EXPECT_EQ(frame->getImageSize(), frames[0]->getImageSize());
-    EXPECT_EQ(frame->getMaskSize(), frames[0]->getMaskSize());
+    //Compare
+    EXPECT_EQ(CHD.frames[0]->getFrametype(), frame->getFrametype());
+    EXPECT_EQ(CHD.frames[0]->getID(), frame->getID());
+    EXPECT_EQ(CHD.frames[0]->getFrameSize(), frame->getFrameSize());
+    EXPECT_EQ(CHD.frames[0]->getSkeleton(), frame->getSkeleton());
+    EXPECT_EQ(CHD.frames[0]->getImageSize(), frame->getImageSize());
+    EXPECT_EQ(CHD.frames[0]->getMaskSize(), frame->getMaskSize());
   }
 
   TEST(DetectorTests, getBoneLength)

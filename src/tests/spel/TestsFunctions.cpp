@@ -169,7 +169,6 @@ namespace SPEL
   }
 
   //Loading frames from project
-
   vector<Frame*> LoadTestProject(string FilePath, string FileName)
   {
 #if defined(WINDOWS) && defined(_MSC_VER)
@@ -187,6 +186,7 @@ namespace SPEL
     return frames;
   }
 
+  /*
   //Set parameters from the frames sequence
   map <string, float> SetParams(vector<Frame*> frames, Sequence **seq)
   {
@@ -199,7 +199,40 @@ namespace SPEL
       (*seq)->computeInterpolation(params);
     }
     return params;
+  }*/
+
+  //Loading frames from project and set "params"
+  vector<Frame*> LoadTestProject(map <string, float> &params, string FilePath, string FileName)
+  {
+
+#if defined(WINDOWS) && defined(_MSC_VER)
+      if (IsDebuggerPresent())
+          FilePath = "Debug/" + FilePath;
+#endif
+      ProjectLoader projectLoader(FilePath);
+      projectLoader.Load(FilePath + FileName);
+      vector<Frame*> frames, temp = projectLoader.getFrames();
+
+      for (int i = 0; i < temp.size(); i++)
+      {
+        frames.push_back(new Frame(temp[i]->getFrametype()));
+        temp[i]->clone(frames[i]);
+      }
+
+      Sequence *seq = new Sequence(0, "colorHistDetector", frames);
+      if (seq != 0)
+      {
+        seq->estimateUniformScale(params);
+        seq->computeInterpolation(params);
+      }
+      for (auto f : frames)
+          delete f;
+      frames.clear();
+      frames = seq->getFrames();
+
+      return frames;
   }
+
 
   //Counting of keyframes in set of frames 
   int keyFramesCount(vector<Frame*> frames)

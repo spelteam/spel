@@ -156,10 +156,17 @@ namespace SPEL
       for (int k = 0; k < G[i].size(); k++)
         for (int n = 0; n < G[i][k].size(); n++)
           EXPECT_EQ(G[i][k][n], partModel.gradientStrengths[i][k][n]);
+
+    for (int i = 0; i < HFrames.size(); i++)
+      delete HFrames[i];
+    HFrames.clear();
   }
 
   TEST(HOGDetectorTests, computeDescriptors)
   {
+    //Load the input data
+    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
@@ -223,10 +230,17 @@ namespace SPEL
 
     }
     allDescriptors.clear();
+
+    for (int i = 0; i < HFrames.size(); i++)
+      delete HFrames[i];
+    HFrames.clear();
   }
 
   TEST(HOGDetectorTests, getMaxBodyPartHeightWidth)
   {
+    //Load the input data
+    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
@@ -262,10 +276,17 @@ namespace SPEL
     HogDetector D;
     map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     EXPECT_EQ(partsSize, partsSize_actual);
+
+    for (int i = 0; i < HFrames.size(); i++)
+      delete HFrames[i];
+    HFrames.clear();
   }
 
   TEST(HOGDetectorTests, train)
   {
+    //Load the input data
+    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
@@ -324,10 +345,17 @@ namespace SPEL
       allDescriptors[partID].clear();
     }
     allDescriptors.clear();
+
+    for (int i = 0; i < HFrames.size(); i++)
+      delete HFrames[i];
+    HFrames.clear();
   }
 
   TEST(HOGDetectorTests, generateLabel)
   {
+    //Load the input data
+    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
@@ -404,10 +432,17 @@ namespace SPEL
     cout << "Center = " << label_actual.getCenter() << endl;
     cout << "Polygon = " << label_actual.getPolygon() << endl;
 
+
+    for (int i = 0; i < HFrames.size(); i++)
+      delete HFrames[i];
+    HFrames.clear();
   }
 
   TEST(HOGDetectorTests, detect)
   {
+    //Load the input data
+    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+
     //Counting a keyframes
     int KeyframesCount = 0;
     int FirstKeyframe = 0;
@@ -558,8 +593,11 @@ namespace SPEL
 
     image.release();
     mask.release();
-    /*for (int i = 0; i < frames.size(); i++)
-        delete frames[i];	*/
+
+    for (int i = 0; i < HFrames.size(); i++)
+      delete HFrames[i];
+    HFrames.clear();
+
   }
 
   TEST(HOGDetectorTests, compare)

@@ -66,6 +66,6 @@ namespace SPEL
     vector <Frame*> actual_frames = chd.getFrames();
     for (int i = 0; i < frames.size(); i++)
       EXPECT_EQ(Vec3b(i, i, i), actual_frames[i]->getImage().at<Vec3b>(0, 0));
-
   }
+
 }

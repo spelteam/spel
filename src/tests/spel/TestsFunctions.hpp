@@ -21,7 +21,9 @@ namespace SPEL
   void  Normalize(vector <vector <vector <float>>> &Histogramm, int nBins, int pixelsCount); // Normalization of the  histogram
   void PutHistogram(ofstream &fout, vector <vector <vector <float>>> &Histogramm, int sizeFG); // Output histogram into text file
   vector<Frame*> LoadTestProject(string FilePath, string FileName); // Loading frames from project
-  map <string, float> SetParams(vector<Frame*> frames, Sequence **seq); // Set parameters from the frames sequence 
+  //map <string, float> SetParams(vector<Frame*> frames, Sequence **seq); // Set parameters from the frames sequence
+  vector<Frame*> LoadTestProject(map <string, float> &params, string FilePath, string FileName); 
+
   int keyFramesCount(vector<Frame*> frames); // Counting of keyframes in set of frames 
   int FirstKeyFrameNum(vector<Frame*> frames); // Returns  index of first keyframe
 }
