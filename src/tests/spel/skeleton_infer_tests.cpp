@@ -3,7 +3,8 @@
 #endif
 #include <gtest/gtest.h>
 #include <skeleton.hpp>
-#include <projectLoader.hpp>
+//#include <projectLoader.hpp>
+#include "TestsFunctions.hpp"
 
 #ifdef WINDOWS
 #include <direct.h>
@@ -15,6 +16,33 @@
 
 namespace SPEL
 {
+  TEST(skeletonTest, infer2D)
+  {
+    float scale = 1.2f;
+
+    //Load the input data
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    Skeleton skeleton = frames[0]->getSkeleton();
+
+
+    //Create expected value
+    map<int, pair<Point2f, Point2f>> expected_partLocations = getPartLocations(skeleton);
+    for (int i= 0; i < expected_partLocations.size(); i++)
+    {
+      expected_partLocations[i].first *= scale;
+      expected_partLocations[i].second *= scale;
+    }
+
+    //Create actual value
+    skeleton.setScale(scale);
+    skeleton.infer2D();
+    map<int, pair<Point2f, Point2f>> actual_partLocations = getPartLocations(skeleton);
+    //cout << "skeleton.scale = " << skeleton.getScale() << endl;
+
+    //Compare
+    EXPECT_EQ(expected_partLocations, actual_partLocations);
+  }
+
   TEST(skeletonTest, infer3dTest)
   {
     string curFolder;
