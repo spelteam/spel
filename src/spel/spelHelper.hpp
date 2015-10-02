@@ -200,7 +200,7 @@ namespace SPEL
     }
 
     template <typename D>
-    D GetCenter(void)
+    D GetCenter(void) const
     {
       D center1 = 0.5 * point1 + 0.5 * point3;
       D center2 = 0.5 * point2 + 0.5 * point4;

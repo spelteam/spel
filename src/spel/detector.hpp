@@ -30,6 +30,13 @@
 
 namespace SPEL
 {
+  class DetectorHelper
+  {
+  public:
+    DetectorHelper(void);
+    virtual ~DetectorHelper(void);
+  };
+
   class Detector
   {
   public:
@@ -38,7 +45,8 @@ namespace SPEL
     virtual int getID(void) const = 0;
     virtual void setID(int _id) = 0;
     virtual void train(const std::vector <Frame*> &frames, std::map <std::string, float> params) = 0;
-    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels);
+    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) = 0;
+    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels, DetectorHelper *detectorHelper);
     virtual std::map <uint32_t, std::vector <LimbLabel>> merge(const std::map <uint32_t, std::vector <LimbLabel>> &first, const std::map <uint32_t, std::vector <LimbLabel>> &second, const std::map <uint32_t, std::vector <LimbLabel>> &secondUnfiltered);
   protected:
 #ifdef DEBUG
@@ -47,15 +55,15 @@ namespace SPEL
     std::vector <Frame*> frames;
     uint32_t maxFrameHeight;
     uint8_t debugLevelParam = 0;
-    virtual Frame *getFrame(uint32_t frameId) noexcept;
+    virtual Frame *getFrame(const int32_t &frameId) noexcept;
     virtual float getBoneLength(const cv::Point2f &begin, const cv::Point2f &end) noexcept;
     virtual float getBoneWidth(const float &length, const BodyPart &bodyPart) noexcept;
-    virtual POSERECT <cv::Point2f> getBodyPartRect(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Size blockSize = cv::Size(0, 0)) noexcept;
-    virtual cv::Mat rotateImageToDefault(cv::Mat imgSource, POSERECT <cv::Point2f> &initialRect, float angle, cv::Size size);
-    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const std::string &detectorName, float _usedet);
-    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *workFrame, const cv::Point2f &p0, const cv::Point2f &p1) = 0;
-    virtual LimbLabel generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame);
-    virtual float compare(void) = 0;
+    virtual POSERECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1) noexcept;
+    virtual POSERECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Size &blockSize) noexcept;
+    virtual cv::Mat rotateImageToDefault(const cv::Mat &imgSource, const POSERECT <cv::Point2f> &initialRect, const float &angle, const cv::Size &size);
+    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const std::string &detectorName, float _usedet, std::function<float()> compare);
+    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *workFrame, const cv::Point2f &p0, const cv::Point2f &p1, DetectorHelper *detectorHelper, std::map <std::string, float> params) = 0;
+    virtual LimbLabel generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame, DetectorHelper *detectorHelper, std::map <std::string, float> params);
     virtual std::vector <LimbLabel> filterLimbLabels(std::vector <LimbLabel> &sortedLabels, float uniqueLocationCandidates, float uniqueAngleCandidates);
   };
 }

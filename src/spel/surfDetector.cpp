@@ -1,4 +1,5 @@
 #include "surfDetector.hpp"
+#include "surfDetector.hpp"
 
 #define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 
@@ -42,30 +43,16 @@ namespace SPEL
     partModels.clear();
     labelModels.clear();
 
-#ifdef DEBUG
-    const uint8_t debugLevel = 5;
-#else
-    const uint8_t debugLevel = 1;
-#endif // DEBUG
-    const std::string sDebugLevel = "debugLevel";
-    const uint32_t minHessian = 500;
-    const std::string sMinHessian = "minHessian";
+    params.emplace(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL());
+    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
+    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT());
 
-    params.emplace(sDebugLevel, debugLevel);
-    params.emplace(sMinHessian, minHessian);
-
-    const std::string sMaxFrameHeight = "maxFrameHeight";
-
-    params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
-
-    maxFrameHeight = params.at(sMaxFrameHeight);
-    //maxFrameHeight=frames.at(0)->getFrameSize().height; //@TODO fix this later
-
-    debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
+    debugLevelParam = static_cast <uint8_t> (params.at(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL().first));
+    auto minHessian = static_cast<uint32_t> (params.at(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
+    maxFrameHeight = params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first);
 
     for (std::vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
     {
-
       if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
       {
         continue;
@@ -83,7 +70,7 @@ namespace SPEL
 
       workFrame = (*frameNum)->clone(workFrame);
 
-      workFrame->Resize(params.at(sMaxFrameHeight));
+      workFrame->Resize(maxFrameHeight);
 
       if (debugLevelParam >= 2)
         std::cerr << "Training on frame " << workFrame->getID() << std::endl;
@@ -99,26 +86,21 @@ namespace SPEL
 
       delete workFrame;
     }
-
   }
 
-  std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
   {
-    const std::string sMinHessian = "minHessian";
-    const std::string sUseSURFdet = "useSURFdet";
-    const std::string sKnnMatchCoeff = "knnMathCoeff";
-
     // first we need to check all used params
-    params.emplace(sMinHessian, minHessian);
-    params.emplace(sUseSURFdet, useSURFdet);
-    params.emplace(sKnnMatchCoeff, knnMatchCoeff);
+    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
+    params.emplace(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR());
+    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT());
 
     //now set actual param values
-    minHessian = params.at(sMinHessian);
-    useSURFdet = params.at(sUseSURFdet);
-    knnMatchCoeff = params.at(sKnnMatchCoeff);
+    auto minHessian = params.at(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first);
 
     auto imgMat = frame->getImage();
+
+    auto detectorHelper = new SurfDetectorHelper();
 
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
@@ -126,13 +108,14 @@ namespace SPEL
 #else
     cv::Ptr <cv::SurfFeatureDetector> detector = cv::SurfFeatureDetector::create(minHessian);
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
-    detector->detect(imgMat, keyPoints);
+    detector->detect(imgMat, detectorHelper->keyPoints);
 #else
     cv::SurfFeatureDetector detector(minHessian);
-    detector.detect(imgMat, keyPoints);
+    detector.detect(imgMat, detectorHelper->keyPoints);
 #endif // OpenCV_VERSION_MAJOR == 3
-    if (keyPoints.empty())
+    if (detectorHelper->keyPoints.empty())
     {
+      delete detectorHelper;
       std::stringstream ss;
       ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
       if (debugLevelParam >= 1)
@@ -140,9 +123,9 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
 
-    auto result = Detector::detect(frame, params, limbLabels);
+    auto result = Detector::detect(frame, params, limbLabels, detectorHelper);
 
-    keyPoints.clear();
+    delete detectorHelper;
 
     return result;
   }
@@ -265,46 +248,42 @@ namespace SPEL
     return partModel;
   }
 
-  LimbLabel SurfDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1)
+  LimbLabel SurfDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params)
   {
     std::stringstream detectorName;
     detectorName << getID();
 
-    comparer_bodyPart = &bodyPart;
+    SurfDetectorHelper* helper = 0;
+    try
+    {
+      helper = dynamic_cast<SurfDetectorHelper*> (detectorHelper);
+    }
+    catch (...)
+    {
+      std::stringstream ss;
+      ss << "Wrong type: detectorHelper is not SurfDetectorHelper";
+      throw std::logic_error(ss.str());
+    }
 
-    PartModel generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), minHessian, keyPoints);
+    auto minHessian = static_cast<uint32_t> (params.at(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
+    auto useSURFdet = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().first);
+    auto knnMatchCoeff = params.at(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT().first);
 
-    comparer_model = &generatedPartModel;
-    comparer_j0 = &j0;
-    comparer_j1 = &j1;
+    auto generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), minHessian, helper->keyPoints);
 
-    LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useSURFdet);
+    auto comparer = [&]() -> float
+    {
+      return compare(bodyPart, generatedPartModel, j0, j1, knnMatchCoeff);
+    };
+
+    auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useSURFdet, comparer);
 
     labelModels[frame->getID()][bodyPart.getPartID()].push_back(generatedPartModel);
-
-    comparer_bodyPart = 0;
-    comparer_model->descriptors.release();
-    comparer_model = 0;
-    comparer_j0 = 0;
-    comparer_j1 = 0;
 
     return label;
   }
 
-  float SurfDetector::compare(void)
-  {
-    if (comparer_bodyPart == 0 || comparer_model == 0 || comparer_j0 == 0 || comparer_j1 == 0)
-    {
-      std::stringstream ss;
-      ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_model == 0 ? "comparer_model == 0 " : "") << (comparer_j0 == 0 ? "comparer_j0 == 0 " : "") << (comparer_j1 == 0 ? "comparer_j1 == 0" : "") << std::endl;
-      if (debugLevelParam >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::logic_error(ss.str());
-    }
-    return compare(*comparer_bodyPart, *comparer_model, *comparer_j0, *comparer_j1);
-  }
-
-  float SurfDetector::compare(BodyPart bodyPart, PartModel model, cv::Point2f j0, cv::Point2f j1)
+  float SurfDetector::compare(BodyPart bodyPart, PartModel model, cv::Point2f j0, cv::Point2f j1, float knnMatchCoeff)
   {
     if (model.descriptors.empty())
     {
@@ -386,4 +365,16 @@ namespace SPEL
     return labelModels;
   }
 
+  SurfDetectorHelper::SurfDetectorHelper(void)
+  {
+  }
+
+  SurfDetectorHelper::~SurfDetectorHelper(void)
+  {
+  }
+
+  SurfDetector::PartModel::~PartModel(void)
+  {
+    descriptors.release();
+  }
 }

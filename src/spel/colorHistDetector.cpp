@@ -35,7 +35,7 @@ namespace SPEL
     return *this;
   }
 
-  uint8_t ColorHistDetector::PartModel::calculateFactor(void)
+  uint8_t ColorHistDetector::PartModel::calculateFactor(void) const
   {
     if (nBins == 0)
       throw std::logic_error("nBins can't be zero");
@@ -44,7 +44,7 @@ namespace SPEL
   }
 
   // Returns relative frequency of the RGB-color reiteration in "PartModel" 
-  float ColorHistDetector::PartModel::computePixelBelongingLikelihood(uint8_t r, uint8_t g, uint8_t b)
+  float ColorHistDetector::PartModel::computePixelBelongingLikelihood(const uint8_t &r, const uint8_t &g, const uint8_t &b) const
   {
     if (nBins == 0)
       throw std::logic_error("nBins can't be zero");
@@ -125,7 +125,7 @@ namespace SPEL
   }
 
   // Take stock of the additional set of colors in the histogram
-  void ColorHistDetector::PartModel::addPartHistogram(const std::vector <cv::Point3i> &partColors, uint32_t nBlankPixels)
+  void ColorHistDetector::PartModel::addPartHistogram(const std::vector <cv::Point3i> &partColors, const uint32_t &nBlankPixels)
   {
     if (partColors.size() == 0) //do not add sample if the number of pixels is zero
       return;
@@ -201,7 +201,7 @@ namespace SPEL
   }
 
   // Totalization the number of used samples
-  float ColorHistDetector::PartModel::getAvgSampleSizeFg(void)
+  float ColorHistDetector::PartModel::getAvgSampleSizeFg(void) const
   {
     if (fgNumSamples == 0 && fgSampleSizes.size() > 0)
       std::logic_error("fgNumSamples can't be zero");
@@ -214,7 +214,7 @@ namespace SPEL
   }
 
   // Averaging the number of samples, that united from two sets
-  float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(uint32_t s1, uint32_t s2)
+  float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(const uint32_t &s1, const uint32_t &s2) const
   {
     if (s1 >= fgSampleSizes.size() || s2 >= fgSampleSizes.size())
     {
@@ -227,7 +227,7 @@ namespace SPEL
 
   //TODO (Vitaliy Koshura): Need unit test
   // Euclidean distance between part histograms
-  float ColorHistDetector::PartModel::matchPartHistogramsED(const PartModel &partModelPrev)
+  float ColorHistDetector::PartModel::matchPartHistogramsED(const PartModel &partModelPrev) const
   {
     if (nBins == 0)
       throw std::logic_error("nBins can't be zero");
@@ -370,10 +370,6 @@ namespace SPEL
 
   ColorHistDetector::~ColorHistDetector(void) noexcept
   {
-    for (auto &p : pixelDistributions)
-      p.second.release();
-    for (auto &p : pixelLabels)
-      p.second.release();
   }
 
   // Returns unique ID of "ColorHistDetector" object
@@ -615,23 +611,14 @@ namespace SPEL
   {
     params.emplace(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR());
 
-    //now set actual param values
-    useCSdet = params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first);
+    auto detectorHelper = new ColorHistDetectorHelper();
 
-    pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
-    pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
+    detectorHelper->pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
+    detectorHelper->pixelLabels = buildPixelLabels(frame, detectorHelper->pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
 
-    auto result = Detector::detect(frame, params, limbLabels);
+    auto result = Detector::detect(frame, params, limbLabels, detectorHelper);
 
-    for (auto &var : pixelDistributions)
-      var.second.release();
-
-    pixelDistributions.clear();
-
-    for (auto &var : pixelLabels)
-      var.second.release();
-
-    pixelLabels.clear();
+    delete detectorHelper;
 
     return result;
   }
@@ -802,37 +789,6 @@ namespace SPEL
     return _pixelLabels;
   }
 
-  float ColorHistDetector::compare(void)
-  {
-    if (comparer_bodyPart == 0 || comparer_frame == 0 || comparer_j0 == 0 || comparer_j1 == 0)
-    {
-      std::stringstream ss;
-      ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_frame == 0 ? "comparer_frame == 0 " : "") << (comparer_j0 == 0 ? "comparer_j0 == 0" : "") << (comparer_j1 == 0 ? "comparer_j1 == 0" : "") << std::endl;
-      if (debugLevelParam >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::logic_error(ss.str());
-    }
-    try
-    {
-      return compare(*comparer_bodyPart, *comparer_frame, pixelDistributions, pixelLabels, *comparer_j0, *comparer_j1);
-    }
-    catch (std::logic_error ex)
-    {
-      if (debugLevelParam >= 1)
-      {
-        std::string frameType;
-        if ((*comparer_frame)->getFrametype() == KEYFRAME)
-          frameType = "Keyframe";
-        else if ((*comparer_frame)->getFrametype() == LOCKFRAME)
-          frameType = "Lockframe";
-        else
-          frameType = "Interpolation";
-        std::cerr << ERROR_HEADER << "Dirty Label: " << " Frame(" << frameType << "): " << (*comparer_frame)->getID() << " Part: " << comparer_bodyPart->getPartID() << " " << ex.what() << std::endl;
-      }
-      return -1.0f;
-    }
-  }
-
   float ColorHistDetector::compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelDistributions, const std::map <int32_t, cv::Mat> &_pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1)
   {
     auto maskMat = frame->getMask(); // copy mask from the frame 
@@ -980,22 +936,31 @@ namespace SPEL
     throw std::logic_error(ss.str());
   }
 
-  LimbLabel ColorHistDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1)
+  LimbLabel ColorHistDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params)
   {
     std::stringstream detectorName;
     detectorName << getID();
 
-    comparer_bodyPart = &bodyPart;
-    comparer_frame = &frame;
-    comparer_j0 = &j0;
-    comparer_j1 = &j1;
+    params.emplace(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR());
 
-    auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useCSdet);
+    ColorHistDetectorHelper* helper = 0;
+    try
+    {
+      helper = dynamic_cast<ColorHistDetectorHelper*> (detectorHelper);
+    }
+    catch (...)
+    {
+      std::stringstream ss;
+      ss << "Wrong type: detectorHelper is not ColorHistDetectorHelper";
+      throw std::logic_error(ss.str());
+    }
 
-    comparer_bodyPart = 0;
-    comparer_frame = 0;
-    comparer_j0 = 0;
-    comparer_j1 = 0;
+    auto comparer = [&]() -> float 
+    {
+      return compare(bodyPart, frame, helper->pixelDistributions, helper->pixelLabels, j0, j1);
+    };
+
+    auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first), comparer);
 
     return label;
   }
@@ -1011,6 +976,18 @@ namespace SPEL
   {
     this->frames = c.getFrames();
     return *this;
+  }
+
+  ColorHistDetectorHelper::ColorHistDetectorHelper()
+  {
+  }
+
+  ColorHistDetectorHelper::~ColorHistDetectorHelper(void)
+  {
+    for (auto &p : pixelDistributions)
+    p.second.release();
+    for (auto &p : pixelLabels)
+    p.second.release();
   }
 
 }

@@ -5,17 +5,7 @@ namespace SPEL
   // default constructor
   BodyPart::BodyPart(void) noexcept
   {
-    partID = 0;
-    partName = "";
-    parentJoint = 0;
-    childJoint = 0;  
-    isOccluded = false;
-    expectedDistance = 0;
-    partPolygon = POSERECT<cv::Point2f>();
-    lwRatio = 0;
-    relativeLength = 0;
-    searchRadius = 0;
-    rotationSearchRange = 0;
+    BodyPart(0, "", 0, 0, false, 0.0f);
   }
 
   //copy constructor
@@ -51,14 +41,23 @@ namespace SPEL
   {
   }
 
+  BodyPart::BodyPart(const int & id, const std::string & name, const int & pJoint, const int & cJoint) noexcept
+  {
+    BodyPart(id, name, pJoint, cJoint, false, 0.0f);
+  }
+
+  BodyPart::BodyPart(const int & id, const std::string & name, const int & pJoint, const int & cJoint, const bool & isOcc) noexcept
+  {
+    BodyPart(id, name, pJoint, cJoint, isOcc, 0.0f);
+  }
 
   // constructor with params
-  BodyPart::BodyPart(int id, std::string name, int pJoint, int cJoint, bool isOcc, float spaceLen) noexcept
+  BodyPart::BodyPart(const int &id, const std::string &name, const int &pJoint, const int &cJoint, const bool &isOcc, const float &spaceLen) noexcept
   {
     partID = id;
     partName = name;
     parentJoint = pJoint;
-    childJoint =cJoint;
+    childJoint = cJoint;
     isOccluded = isOcc;
     expectedDistance = spaceLen;
     partPolygon = POSERECT<cv::Point2f>();
@@ -78,7 +77,7 @@ namespace SPEL
     return partID;
   }
 
-  void BodyPart::setPartID(int _partID) noexcept
+  void BodyPart::setPartID(const int &_partID) noexcept
   {
     partID = _partID;
   }
@@ -88,7 +87,7 @@ namespace SPEL
     return partName;
   }
 
-  void BodyPart::setPartName(std::string _partName) noexcept
+  void BodyPart::setPartName(const std::string &_partName) noexcept
   {
     partName = _partName;
   }
@@ -98,7 +97,7 @@ namespace SPEL
     return parentJoint;
   }
 
-  void BodyPart::setParentJoint(int _parentJoint) noexcept
+  void BodyPart::setParentJoint(const int &_parentJoint) noexcept
   {
     parentJoint = _parentJoint;
   }
@@ -108,7 +107,7 @@ namespace SPEL
     return childJoint;
   }
 
-  void BodyPart::setChildJoint(int _childJoint) noexcept
+  void BodyPart::setChildJoint(const int &_childJoint) noexcept
   {
     childJoint = _childJoint;
   }
@@ -118,7 +117,7 @@ namespace SPEL
     return isOccluded;
   }
 
-  void BodyPart::setIsOccluded(bool _isOccluded) noexcept
+  void BodyPart::setIsOccluded(const bool &_isOccluded) noexcept
   {
     isOccluded = _isOccluded;
   }
@@ -128,7 +127,7 @@ namespace SPEL
     return searchRadius;
   }
 
-  void BodyPart::setSearchRadius(float _searchRadius) noexcept
+  void BodyPart::setSearchRadius(const float &_searchRadius) noexcept
   {
     searchRadius = _searchRadius;
   }
@@ -138,7 +137,7 @@ namespace SPEL
     return expectedDistance;
   }
 
-  void BodyPart::setExpectedDistance(float _expectedDistance) noexcept
+  void BodyPart::setExpectedDistance(const float &_expectedDistance) noexcept
   {
     expectedDistance = _expectedDistance;
   }
@@ -198,7 +197,7 @@ namespace SPEL
     return partPolygon;
   }
 
-  void BodyPart::setPartPolygon(POSERECT <cv::Point2f> _partPolygon) noexcept
+  void BodyPart::setPartPolygon(const POSERECT <cv::Point2f> &_partPolygon) noexcept
   {
     partPolygon = _partPolygon;
   }
@@ -208,7 +207,7 @@ namespace SPEL
     return lwRatio;
   }
 
-  void BodyPart::setLWRatio(float _lwRatio) noexcept
+  void BodyPart::setLWRatio(const float &_lwRatio) noexcept
   {
     lwRatio = _lwRatio;
   }
@@ -218,7 +217,7 @@ namespace SPEL
     return relativeLength;
   }
 
-  void BodyPart::setRelativeLength(float _relativeLength) noexcept
+  void BodyPart::setRelativeLength(const float &_relativeLength) noexcept
   {
     relativeLength = _relativeLength;
   }
@@ -228,7 +227,7 @@ namespace SPEL
     return rotationSearchRange;
   }
 
-  void BodyPart::setRotationSearchRange(float _rotationAngle) noexcept
+  void BodyPart::setRotationSearchRange(const float &_rotationAngle) noexcept
   {
     rotationSearchRange = _rotationAngle;
   }

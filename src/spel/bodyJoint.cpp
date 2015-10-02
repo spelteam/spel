@@ -5,15 +5,11 @@ namespace SPEL
   //default constructor
   BodyJoint::BodyJoint(void) noexcept
   {
-    limbID = 0;
-    jointName = "";
-    imageLocation = { 0.0, 0.0 };
-    spaceLocation = { 0.0, 0.0, 0.0 };
-    depthSign = false;
+    BodyJoint(0, "", cv::Point2f(0.0f, 0.0f), cv::Point3f(0.0f, 0.0f, 0.0f), false);
   }
 
   // constructor with params
-  BodyJoint::BodyJoint(int id, std::string name, cv::Point2f imgLoc, cv::Point3f spaceLoc, bool depth) noexcept
+  BodyJoint::BodyJoint(const int &id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc, const bool &depth) noexcept
   {
     limbID = id;
     jointName = name;
@@ -42,6 +38,16 @@ namespace SPEL
   {
   }
 
+  BodyJoint::BodyJoint(const int & id, const std::string & name, const cv::Point2f & imgLoc) noexcept
+  {
+    BodyJoint(id, name, imgLoc, cv::Point3f(0.0f, 0.0f, 0.0f), false);
+  }
+
+  BodyJoint::BodyJoint(const int & id, const std::string & name, const cv::Point2f & imgLoc, const cv::Point3f & spaceLoc) noexcept
+  {
+    BodyJoint(id, name, imgLoc, spaceLoc, false);
+  }
+
   BodyJoint::~BodyJoint(void) noexcept
   {
     return;
@@ -52,7 +58,7 @@ namespace SPEL
     return limbID;
   }
 
-  void BodyJoint::setLimbID(int _limbID) noexcept
+  void BodyJoint::setLimbID(const int &_limbID) noexcept
   {
     limbID = _limbID;
   }
@@ -62,7 +68,7 @@ namespace SPEL
     return jointName;
   }
 
-  void BodyJoint::setJointName(std::string _jointName) noexcept
+  void BodyJoint::setJointName(const std::string &_jointName) noexcept
   {
     jointName = _jointName;
   }
@@ -72,7 +78,7 @@ namespace SPEL
     return imageLocation;
   }
 
-  void BodyJoint::setImageLocation(cv::Point2f _imageLocation) noexcept
+  void BodyJoint::setImageLocation(const cv::Point2f &_imageLocation) noexcept
   {
     imageLocation = _imageLocation;
   }
@@ -82,7 +88,7 @@ namespace SPEL
     return spaceLocation;
   }
 
-  void BodyJoint::setSpaceLocation(cv::Point3f _spaceLocation) noexcept
+  void BodyJoint::setSpaceLocation(const cv::Point3f &_spaceLocation) noexcept
   {
     spaceLocation = _spaceLocation;
   }
@@ -92,7 +98,7 @@ namespace SPEL
     return depthSign;
   }
 
-  void BodyJoint::setDepthSign(bool _depthSign) noexcept
+  void BodyJoint::setDepthSign(const bool &_depthSign) noexcept
   {
     depthSign = _depthSign;
   }

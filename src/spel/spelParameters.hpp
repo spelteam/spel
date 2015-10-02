@@ -39,6 +39,16 @@ namespace SPEL
     {
       return SPEL_SET_PARAMETER("useCSdet", 1.0f);
     }
+
+    static SPEL_PARAMETER USE_HOG_DETECTOR(void)
+    {
+      return SPEL_SET_PARAMETER("useHoGdet", 1.0f);
+    }
+
+    static SPEL_PARAMETER USE_SURF_DETECTOR(void)
+    {
+      return SPEL_SET_PARAMETER("useSURFdet", 1.0f);
+    }
   };
 
   class DETECTOR_DETECT_PARAMETERS
@@ -114,11 +124,24 @@ namespace SPEL
   class COMMON_HOG_DETECTOR_PARAMETERS
   {
   public:
+    static SPEL_PARAMETER USE_GRAY_IMAGES(void)
+    {
+      return SPEL_SET_PARAMETER("grayImages", 0.0f);
+    }
   };
 
   class COMMON_SURF_DETECTOR_PARAMETERS
   {
   public:
+    static SPEL_PARAMETER MIN_HESSIAN(void)
+    {
+      return SPEL_SET_PARAMETER("minHessian", 500.0f);
+    }
+
+    static SPEL_PARAMETER KNN_MATCH_COEFFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("knnMathCoeff", 0.8f);
+    }
   };
 
   class COMMON_SOLVER_PARAMETERS

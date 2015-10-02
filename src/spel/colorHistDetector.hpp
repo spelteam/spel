@@ -16,6 +16,15 @@
 
 namespace SPEL
 {
+  class ColorHistDetectorHelper : public DetectorHelper
+  {
+  public:
+    ColorHistDetectorHelper(void);
+    virtual ~ColorHistDetectorHelper(void);
+    std::map <int32_t, cv::Mat> pixelDistributions;
+    std::map <int32_t, cv::Mat> pixelLabels;
+  };
+
   class ColorHistDetector : public Detector
   {
   protected:
@@ -33,13 +42,13 @@ namespace SPEL
       std::vector <uint32_t> bgSampleSizes;
       std::vector <uint32_t> fgBlankSizes;
       virtual PartModel &operator=(const PartModel &model) noexcept;
-      virtual uint8_t calculateFactor(void);
-      virtual float computePixelBelongingLikelihood(uint8_t r, uint8_t g, uint8_t b);
+      virtual uint8_t calculateFactor(void) const;
+      virtual float computePixelBelongingLikelihood(const uint8_t &r, const uint8_t &g, const uint8_t &b) const;
       virtual void setPartHistogram(const std::vector <cv::Point3i> &partColors);
-      virtual void addPartHistogram(const std::vector <cv::Point3i> &partColors, uint32_t nBlankPixels);
-      virtual float getAvgSampleSizeFg(void);
-      virtual float getAvgSampleSizeFgBetween(uint32_t s1, uint32_t s2);
-      virtual float matchPartHistogramsED(const PartModel &partModelPrev);
+      virtual void addPartHistogram(const std::vector <cv::Point3i> &partColors, const uint32_t &nBlankPixels);
+      virtual float getAvgSampleSizeFg(void) const;
+      virtual float getAvgSampleSizeFgBetween(const uint32_t &s1, const uint32_t &s2) const;
+      virtual float matchPartHistogramsED(const PartModel &partModelPrev) const;
       virtual void addBackgroundHistogram(const std::vector <cv::Point3i> &bgColors);
     };
   public:
@@ -73,21 +82,10 @@ namespace SPEL
   protected:
     const uint8_t nBins;
     std::map <int32_t, PartModel> partModels;
-    float useCSdet = 1.0f;
-    std::map <int32_t, cv::Mat> pixelDistributions;
-    std::map <int32_t, cv::Mat> pixelLabels;
         
     virtual std::map <int32_t, cv::Mat> buildPixelDistributions(const Frame *frame);
     virtual std::map <int32_t, cv::Mat> buildPixelLabels(const Frame *frame, const std::map <int32_t, cv::Mat> &pixelDistributions);
-    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1);
-
-    // Variables for score comparer
-    BodyPart const *comparer_bodyPart = 0;
-    Frame const **comparer_frame = 0;
-    cv::Point2f const *comparer_j0 = 0;
-    cv::Point2f const *comparer_j1 = 0;
-
-    virtual float compare(void);
+    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params);
     virtual float compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &pixelDistributions, const std::map <int32_t, cv::Mat> &pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1);
   };
 }

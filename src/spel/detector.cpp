@@ -20,14 +20,16 @@ namespace SPEL
   {
     auto ratio = bodyPart.getLWRatio();
     if (ratio == 0.0f)
-    {
-      std::cerr << ERROR_HEADER << "Ratio can't be 0" << std::endl;
       return 0.0f;
-    }
     return length / ratio;
   }
 
-  POSERECT <cv::Point2f> Detector::getBodyPartRect(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Size blockSize) noexcept
+  POSERECT<cv::Point2f> Detector::getBodyPartRect(const BodyPart & bodyPart, const cv::Point2f & j0, const cv::Point2f & j1) noexcept
+  {
+    return getBodyPartRect(bodyPart, j0, j1, cv::Size(0, 0));
+  }
+
+  POSERECT <cv::Point2f> Detector::getBodyPartRect(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Size &blockSize) noexcept
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
     auto boneLength = getBoneLength(j0, j1);
@@ -67,7 +69,7 @@ namespace SPEL
     return POSERECT <cv::Point2f>(c1, c2, c3, c4);
   }
 
-  cv::Mat Detector::rotateImageToDefault(cv::Mat imgSource, POSERECT <cv::Point2f> &initialRect, float angle, cv::Size size)
+  cv::Mat Detector::rotateImageToDefault(const cv::Mat &imgSource, const POSERECT <cv::Point2f> &initialRect, const float &angle, const cv::Size &size)
   {
     auto partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
     auto center = initialRect.GetCenter<cv::Point2f>();
@@ -192,7 +194,6 @@ namespace SPEL
           if (foundUnfiltered != secondUnfiltered.end())
           {
             auto bFound = false;
-            LimbLabel foundLabel;
             for (const auto &l : foundUnfiltered->second)
             {
               if (l.getLimbID() == firstIter.getLimbID() && l.getPolygon() == firstIter.getPolygon())
@@ -291,7 +292,7 @@ namespace SPEL
     return result;
   }
 
-  LimbLabel Detector::generateLabel(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const std::string &detectorName, float _usedet)
+  LimbLabel Detector::generateLabel(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const std::string &detectorName, float _usedet, std::function<float()> compare)
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
     auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
@@ -303,7 +304,7 @@ namespace SPEL
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
   }
 
-  Frame *Detector::getFrame(uint32_t frameId) noexcept
+  Frame *Detector::getFrame(const int32_t &frameId) noexcept
   {
     for (auto f : frames)
       if (f->getID() == frameId)
@@ -312,7 +313,7 @@ namespace SPEL
     return nullptr;
   }
 
-  std::map <uint32_t, std::vector <LimbLabel>> Detector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel>> Detector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels, DetectorHelper *detectorHelper)
   {
     // first we need to check all used params
     params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT());
@@ -336,14 +337,9 @@ namespace SPEL
     auto stepTheta = params.at(DETECTOR_DETECT_PARAMETERS::STEP_THETA().first);
     auto uniqueLocationCandidates = params.at(DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT().first);
     auto uniqueAngleCandidates = params.at(DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT().first);
-    auto scaleParam = params.at(DETECTOR_DETECT_PARAMETERS::SCALE_COEFFICIENT().first);
-    auto searchDistCoeffMult = params.at(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_MULT_COEFFICIENT().first);
-    auto rotationThreshold = params.at(DETECTOR_DETECT_PARAMETERS::ROTATION_THRESHOLD().first);
     auto isWeakThreshold = params.at(DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD().first);
     auto searchStepCoeff = params.at(DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().first);
     debugLevelParam = static_cast <uint8_t> (params.at(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL().first));
-
-    auto originalSize = frame->getFrameSize().height;
 
     Frame *workFrame = nullptr;
     if (frame->getFrametype() == KEYFRAME)
@@ -445,7 +441,7 @@ namespace SPEL
               auto minLocalTheta = iteratorBodyPart.getRotationSearchRange() == 0 ? minTheta : deltaTheta;
               // build  the vector label
               for (auto rot = theta - minLocalTheta; rot < theta + maxLocalTheta; rot += stepTheta)
-                sortedLabels.push_back(generateLabel(boneLength, rot, x, y, iteratorBodyPart, workFrame)); // add label to current bodypart labels
+                sortedLabels.push_back(generateLabel(boneLength, rot, x, y, iteratorBodyPart, workFrame, detectorHelper, params)); // add label to current bodypart labels
             }
           }
         }
@@ -454,7 +450,7 @@ namespace SPEL
       // build  the vector label
       if (sortedLabels.size() == 0) // if labels for current body part is not builded
         for (auto rot = theta - minTheta; (rot < theta + maxTheta || (rot == theta - minTheta && rot >= theta + maxTheta)); rot += stepTheta)
-          sortedLabels.push_back(generateLabel(boneLength, rot, suggestStart.x, suggestStart.y, iteratorBodyPart, workFrame)); // add label to current bodypart labels
+          sortedLabels.push_back(generateLabel(boneLength, rot, suggestStart.x, suggestStart.y, iteratorBodyPart, workFrame, detectorHelper, params)); // add label to current bodypart labels
 
       if (sortedLabels.size() > 0) // if labels vector is not empty
         labels = filterLimbLabels(sortedLabels, uniqueLocationCandidates, uniqueAngleCandidates);
@@ -474,7 +470,7 @@ namespace SPEL
     return merge(limbLabels, tempLabelVector, sortedLabelsMap);
   }
 
-  LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame)
+  LimbLabel Detector::generateLabel(float boneLength, float rotationAngle, float x, float y, BodyPart bodyPart, Frame *workFrame, DetectorHelper *detectorHelper, std::map <std::string, float> params)
   {
     // Create a new label vector and build it label
     auto p0 = cv::Point2f(0.0f, 0.0f); // the point of unit vector
@@ -485,7 +481,7 @@ namespace SPEL
     p1 = p1 + cv::Point2f(x, y) - mid; // shift the vector to current point
     p0 = cv::Point2f(x, y) - mid; // shift the vector to current point
 
-    return generateLabel(bodyPart, workFrame, p0, p1); // build  the vector label
+    return generateLabel(bodyPart, workFrame, p0, p1, detectorHelper, params); // build  the vector label
   }
 
   std::vector<LimbLabel> Detector::filterLimbLabels(std::vector <LimbLabel> &sortedLabels, float uniqueLocationCandidates, float uniqueAngleCandidates)
@@ -550,10 +546,10 @@ namespace SPEL
       for (const auto &yiter : yMap.second) //take the top from every location
       {
         auto indices = yiter.second;
-        uint32_t numToPush = indices.size() * uniqueLocationCandidates;
+        auto numToPush = static_cast<uint32_t>(indices.size() * uniqueLocationCandidates);
         if (numToPush < 1) 
           numToPush = 1;
-        for (auto i = 0; i < numToPush; ++i)
+        for (auto i = 0U; i < numToPush; ++i)
           bestByLocation.push_back(indices[i]);
       }
     }
@@ -580,6 +576,14 @@ namespace SPEL
       labels.push_back(sortedLabels.at(index));
 
     return labels;
+  }
+
+  DetectorHelper::DetectorHelper(void)
+  {
+  }
+
+  DetectorHelper::~DetectorHelper(void)
+  {
   }
 
 }

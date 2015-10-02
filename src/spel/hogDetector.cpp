@@ -31,7 +31,7 @@ namespace SPEL
     id = _id;
   }
 
-  HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, int nbins, cv::Size wndSize, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
+  HogDetector::PartModel HogDetector::computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, int nbins, cv::Size wndSize, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages)
   {
     float boneLength = getBoneLength(j0, j1);
     if (boneLength < blockSize.width)
@@ -194,7 +194,7 @@ namespace SPEL
     return partModel;
   }
 
-  std::map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType)
+  std::map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(Frame *frame, int nbins, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages)
   {
     std::map <uint32_t, PartModel> parts;
     cv::Size wndSize;
@@ -242,7 +242,7 @@ namespace SPEL
       part->setRotationSearchRange(rotationAngle);
       try
       {
-        parts.insert(std::pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
+        parts.insert(std::pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages)));
       }
       catch (std::logic_error err)
       {
@@ -324,26 +324,14 @@ namespace SPEL
     partModels.clear();
     labelModels.clear();
 
-#ifdef DEBUG
-    const uint8_t debugLevel = 5;
-#else
-    const uint8_t debugLevel = 1;
-#endif // DEBUG
-    const std::string sDebugLevel = "debugLevel";
+    params.emplace(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL());
+    debugLevelParam = static_cast <uint8_t> (params.at(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL().first));
 
-    params.emplace(sDebugLevel, debugLevel);
+    params.emplace(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES());
+    auto bGrayImages = params.at(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().first) != 0.0f;
 
-    debugLevelParam = static_cast <uint8_t> (params.at(sDebugLevel));
-
-    const std::string sGrayImages = "grayImages";
-
-    params.emplace(sGrayImages, bGrayImages == true ? 1.0f : 0.0f);
-
-    const std::string sMaxFrameHeight = "maxFrameHeight";
-
-    params.emplace(sMaxFrameHeight, frames.at(0)->getFrameSize().height);
-
-    maxFrameHeight = params.at(sMaxFrameHeight);
+    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT());
+    maxFrameHeight = params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first);
 
     bool bFirstConversion = true;
     for (std::vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
@@ -365,7 +353,7 @@ namespace SPEL
 
       workFrame = (*frameNum)->clone(workFrame);
 
-      float scale = workFrame->Resize(params.at(sMaxFrameHeight));
+      float scale = workFrame->Resize(maxFrameHeight);
 
       if (bFirstConversion)
       {
@@ -378,7 +366,7 @@ namespace SPEL
 
       try
       {
-        partModels.insert(std::pair <uint32_t, std::map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType)));
+        partModels.insert(std::pair <uint32_t, std::map <uint32_t, PartModel>>(workFrame->getID(), computeDescriptors(workFrame, nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages)));
       }
       catch (...)
       {
@@ -389,26 +377,27 @@ namespace SPEL
     }
   }
 
-  std::map <uint32_t, std::vector <LimbLabel> > HogDetector::detect(Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel> > HogDetector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
   {
-    const std::string sUseHoGdet = "useHoGdet";
+    auto detectorHelper = new HogDetectorHelper();
 
-    const std::string sGrayImages = "grayImages";
+    params.emplace(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR());
+    params.emplace(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES());
 
-    params.emplace(sUseHoGdet, useHoGdet);
-    params.emplace(sGrayImages, bGrayImages == true ? 1.0f : 0.0f);
+    auto result = Detector::detect(frame, params, limbLabels, detectorHelper);
 
-    useHoGdet = params.at(sUseHoGdet);
+    delete detectorHelper;
 
-    return Detector::detect(frame, params, limbLabels);
+    return result;
   }
 
-  LimbLabel HogDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1)
+  LimbLabel HogDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params)
   {
     std::stringstream detectorName;
     detectorName << getID();
 
-    comparer_bodyPart = &bodyPart;
+    auto useHoGdet = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().first);
+    auto bGrayImages = params.at(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().first) != 0.0f;
 
     cv::Size size;
     try
@@ -425,31 +414,19 @@ namespace SPEL
         throw std::logic_error(ss.str());
       }
     }
-    PartModel generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
 
-    comparer_model = &generatedPartModel;
+    PartModel generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
 
-    LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useHoGdet);
+    auto comparer = [&]() -> float 
+    {
+      return compare(bodyPart, generatedPartModel, nbins);
+    };
+
+    LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useHoGdet, comparer);
 
     labelModels[frame->getID()][bodyPart.getPartID()].push_back(generatedPartModel);
 
-    comparer_bodyPart = 0;
-    comparer_model = 0;
-
     return label;
-  }
-
-  float HogDetector::compare(void)
-  {
-    if (comparer_bodyPart == 0 || comparer_model == 0)
-    {
-      std::stringstream ss;
-      ss << "Compare parameters are invalid: " << (comparer_bodyPart == 0 ? "comparer_bodyPart == 0 " : "") << (comparer_model == 0 ? "comparer_model == 0" : "") << std::endl;
-      if (debugLevelParam >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::logic_error(ss.str());
-    }
-    return compare(*comparer_bodyPart, *comparer_model, nbins);
   }
 
   float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins)
@@ -531,6 +508,14 @@ namespace SPEL
   uint8_t HogDetector::getnbins(void)
   {
     return nbins;
+  }
+
+  HogDetectorHelper::HogDetectorHelper(void)
+  {
+  }
+
+  HogDetectorHelper::~HogDetectorHelper(void)
+  {
   }
 
 }

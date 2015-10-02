@@ -15,6 +15,13 @@
 
 namespace SPEL
 {
+  class HogDetectorHelper : public DetectorHelper
+  {
+  public:
+    HogDetectorHelper(void);
+    virtual ~HogDetectorHelper(void);
+  };
+
   class HogDetector : public Detector
   {
   protected:
@@ -33,7 +40,7 @@ namespace SPEL
     virtual int getID(void) const;
     virtual void setID(int _id);
     virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float> params);
-    virtual std::map <uint32_t, std::vector <LimbLabel>> detect(Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels);
+    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels);
     virtual std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> getLabelModels(void);
     virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void);
 
@@ -59,8 +66,6 @@ namespace SPEL
     std::map <uint32_t, cv::Size> partSize;
     std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
     std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> labelModels;
-    bool bGrayImages = false;
-    float useHoGdet = 1.0f;
     //TODO(Vitaliy Koshura): Make some of them as detector params
     cv::Size blockSize = cv::Size(16, 16);
     cv::Size blockStride = cv::Size(8, 8);
@@ -74,17 +79,12 @@ namespace SPEL
     cv::Size padding = cv::Size(32, 32);
     int derivAperture = 1;
     int histogramNormType = cv::HOGDescriptor::L2Hys;
-    // Variables for score comparer
-    BodyPart const *comparer_bodyPart = 0;
-    PartModel *comparer_model = 0;
 
-    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1);
-
+    virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params);
     virtual std::map <uint32_t, cv::Size> getMaxBodyPartHeightWidth(std::vector <Frame*> frames, cv::Size blockSize, float resizeFactor);
-    virtual PartModel computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, int nbins, cv::Size wndSize, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
-    virtual std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType);
+    virtual PartModel computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, int nbins, cv::Size wndSize, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages);
+    virtual std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, int nbins, cv::Size blockSize, cv::Size blockStride, cv::Size cellSize, double wndSigma, double thresholdL2hys, bool gammaCorrection, int nlevels, int derivAperture, int histogramNormType, bool bGrayImages);
     virtual float compare(BodyPart bodyPart, PartModel partModel, uint8_t nbins);
-    virtual float compare(void);
   };
 }
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_
