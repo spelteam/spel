@@ -396,6 +396,9 @@ namespace SPEL
     std::stringstream detectorName;
     detectorName << getID();
 
+    params.emplace(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR());
+    params.emplace(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES());
+
     auto useHoGdet = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().first);
     auto bGrayImages = params.at(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().first) != 0.0f;
 

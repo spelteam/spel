@@ -138,7 +138,7 @@ namespace SPEL
     //Calculate actual value
     HogDetector D;
     HogDetector::PartModel partModel;
-    partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+    partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
 
     //Calculate expected value
     vector<float> descriptorsValues;
@@ -197,7 +197,7 @@ namespace SPEL
     HogDetector D;
     D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     map <uint32_t, HogDetector::PartModel> partModels;
-    partModels = D.computeDescriptors(HFrames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+    partModels = D.computeDescriptors(HFrames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
 
     //Calculate expected value
     vector<vector<float>> allDescriptors;
@@ -400,8 +400,12 @@ namespace SPEL
     D.train(HFrames, params);
     bool useHOGDet = true;
     HogDetector::PartModel partModel = D.getPartModels()[0][partID];
-    LimbLabel label_actual = D.generateLabel(bodyPart, HFrames[FirstKeyframe], p0, p1);
+    auto detectorHelper = new HogDetectorHelper();
+    map <string, float> detectParams;
 
+    LimbLabel label_actual = D.generateLabel(bodyPart, HFrames[FirstKeyframe], p0, p1, detectorHelper, detectParams);
+
+    delete detectorHelper;
 
     //Create expected LimbLabel value
     Point2f center = 0.5*(p0 + p1);

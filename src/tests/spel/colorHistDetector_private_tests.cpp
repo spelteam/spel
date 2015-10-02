@@ -377,9 +377,6 @@ namespace SPEL
       for (int y = 0; y < t.rows; y++)
         EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
 
-    // we need to save pixelDistibutions in private class member
-    detector.pixelDistributions = pixelDistributions;
-
     if (ProjectLoaded == false)
       ClearGlobalVariables();
   }
@@ -390,10 +387,7 @@ namespace SPEL
   {
     //Loading test data if only one test runned
     if(vFrames.size() == 0)
-    {
       prepareTestData();
-      detector.pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
-    }
 
     Mat p(image.rows, image.cols, DataType <float>::type);
     for (int x = 0; x < image.cols; x++)
@@ -424,9 +418,6 @@ namespace SPEL
       for (int y = 0; y < p.rows; y++)
         EXPECT_EQ(p.at<float>(y, x), pixelLabels[partID].at<float>(y, x)) << q++ << ": " << x << ", " << y;
 
-    // we need to save pixelLabels in private class member
-    detector.pixelLabels = pixelLabels;
-
     if (ProjectLoaded == false)
       ClearGlobalVariables();
   }
@@ -439,8 +430,6 @@ namespace SPEL
     if(vFrames.size() == 0)
     {
       prepareTestData();
-      detector.pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
-      detector.pixelLabels = detector.buildPixelLabels(vFrames[FirstKeyframe], pixelDistributions);
     }
 
     vector <Score> s;
@@ -494,7 +483,16 @@ namespace SPEL
       limbLabel_e = LimbLabel(partID, boxCenter, rot, rect.asVector(), s);
     }
 
-    LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), vFrames[0], p0, p1);
+    auto detectorHelper = new ColorHistDetectorHelper();
+
+    detectorHelper->pixelDistributions = pixelDistributions; // matrix contains the probability that the particular pixel belongs to current bodypart
+    detectorHelper->pixelLabels = pixelLabels; // matrix contains relative estimations that the particular pixel belongs to current bodypart
+
+    map <string, float> detectParams;
+
+    LimbLabel limbLabel_a = detector.generateLabel(*skeleton.getBodyPart(partID), vFrames[0], p0, p1, detectorHelper, detectParams);
+
+    delete detectorHelper;
 
     EXPECT_EQ(limbLabel_e.getLimbID(), limbLabel_a.getLimbID());
     EXPECT_EQ(limbLabel_e.getCenter(), limbLabel_a.getCenter());

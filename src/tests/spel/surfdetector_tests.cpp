@@ -294,6 +294,8 @@ namespace SPEL
     D1.detect(image, _keyPoints);
 #endif
 
+    const float knnMatchKoeff = 0.8f;
+
     Point2f shift1(100, 40), shift2(-100, 0);
     float boneLength = D.getBoneLength(p0, p1);
     float boneWidth = D.getBoneWidth(boneLength, bodyPart);
@@ -332,9 +334,9 @@ namespace SPEL
     D.train(SFrames, params);
 
     //Run "compare" function
-    float score0 = D.compare(bodyPart, partModel0, p0, p1);
-    float score1 = D.compare(bodyPart, partModel1, p0 + shift1, p1 + shift1);
-    float score2 = D.compare(bodyPart, partModel2, p0 + shift2, p1 + shift2);
+    float score0 = D.compare(bodyPart, partModel0, p0, p1, knnMatchKoeff);
+    float score1 = D.compare(bodyPart, partModel1, p0 + shift1, p1 + shift1, knnMatchKoeff);
+    float score2 = D.compare(bodyPart, partModel2, p0 + shift2, p1 + shift2, knnMatchKoeff);
 
     //Put results
     cout << "\npartModel0.keyPoints.size = " << partModel0.keyPoints.size() << endl;
@@ -385,6 +387,7 @@ namespace SPEL
 
     //Calculate part models descriptors 
     uint32_t minHessian = 500;
+    const float knnMatchCoeff = 0.8f;
     SurfDetector D;
     map <uint32_t, SurfDetector::PartModel> PartModels = D.computeDescriptors(SFrames[FirstKeyframe], minHessian);
 
@@ -415,14 +418,20 @@ namespace SPEL
 #endif
 
     vector<Score> scores;
-    Score score(D.compare(bodyPart, partModel1, p0, p1), std::to_string(D.getID()));
+    Score score(D.compare(bodyPart, partModel1, p0, p1, knnMatchCoeff), std::to_string(D.getID()));
     scores.push_back(score);
     float rot = float(spelHelper::angle2D(1.0f, 0.0f, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
     LimbLabel expected_Label(partID, 0.5*(p0 + p1), rot, bodyPart.getPartPolygon().asVector(), scores, false);
     scores.clear();
 
+    map <string, float> detectParams;
+    auto detectorHelper = new SurfDetectorHelper();
+    detectorHelper->keyPoints = partModel1.keyPoints;
+
     //Run "GenerateLabel"
-    LimbLabel actual_Label = D.generateLabel(bodyPart, SFrames[FirstKeyframe], p0, p1);
+    LimbLabel actual_Label = D.generateLabel(bodyPart, SFrames[FirstKeyframe], p0, p1, detectorHelper, detectParams);
+
+    delete detectorHelper;
 
     //Compare
     EXPECT_EQ(expected_Label.getAngle(), actual_Label.getAngle());

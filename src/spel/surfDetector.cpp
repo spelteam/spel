@@ -265,6 +265,10 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
 
+    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
+    params.emplace(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR());
+    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT());
+
     auto minHessian = static_cast<uint32_t> (params.at(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
     auto useSURFdet = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().first);
     auto knnMatchCoeff = params.at(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT().first);

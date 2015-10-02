@@ -67,16 +67,6 @@ namespace SPEL
 #endif  // DEBUG
     int id;
   protected:
-    /*uint32_t minHessian = 500;
-    float useSURFdet = 1.0f;
-    float knnMatchCoeff = 0.8f;*/
-    //std::vector <cv::KeyPoint> keyPoints;
-    // Variables for score comparer
-    //BodyPart const *comparer_bodyPart = 0;
-    //PartModel *comparer_model = 0;
-    //cv::Point2f const *comparer_j0 = 0;
-    //cv::Point2f const *comparer_j1 = 0;
-
     std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
     std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> labelModels;
 
