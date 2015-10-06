@@ -10,10 +10,10 @@ map <uint32_t, vector <LimbLabel> > HoGDetectorTest::detect(Frame *frame, map <s
 }
 void HoGDetectorTest::DrawSpecific(string outFolder)
 {
-  drawHoGDescriptors(getPartModels(), getLabelModels(), outFolder, Scalar(255, 0, 0), Scalar(0, 255, 0), 1, 1, getCellSize(), getnbins());
+  drawHoGDescriptors(getPartModels(), outFolder, Scalar(255, 0, 0), Scalar(0, 255, 0), 1, 1, getCellSize(), getnbins());
 }
 
-bool HoGDetectorTest::drawHoGDescriptors(map <uint32_t, map <uint32_t, PartModel>> partModels, map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins)
+bool HoGDetectorTest::drawHoGDescriptors(map <uint32_t, map <uint32_t, PartModel>> partModels, string outFolder, Scalar lineColor, Scalar descriptorColor, int lineWidth, int descriptorWidth, Size cellSize, uint8_t nbins)
 {
   ProjectLoader::CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
@@ -47,41 +47,6 @@ bool HoGDetectorTest::drawHoGDescriptors(map <uint32_t, map <uint32_t, PartModel
       cerr << "Writing file " << out << endl;
       imwrite(out, img);
       img.release();
-    }
-  }
-
-  outFileName = tempFileName;
-  outFileName += "labelModels/";
-  ProjectLoader::CreateDirectorySystemIndependent(outFileName);
-
-  for (map <uint32_t, map <uint32_t, vector <PartModel>>>::iterator i = labelModels.begin(); i != labelModels.end(); ++i)
-  {
-    for (map <uint32_t, vector <PartModel>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
-    {
-      int c = 0;
-      for (vector <PartModel>::iterator n = j->second.begin(); n != j->second.end(); ++n)
-      {
-        string out = outFileName;
-        stringstream ss;
-        ss << i->first << "/";
-        out += ss.str();
-        ProjectLoader::CreateDirectorySystemIndependent(out);
-        ss.str(string());
-        ss.clear();
-        ss << j->first << "/";
-        out += ss.str();
-        ProjectLoader::CreateDirectorySystemIndependent(out);
-        ss.str(string());
-        ss.clear();
-        ss << c << ".png";
-        out += ss.str();
-        Mat img = drawHoGDescriptors(*n, lineColor, descriptorColor, lineWidth, descriptorWidth, cellSize, nbins);
-
-        cerr << "Writing file " << out << endl;
-        imwrite(out, img);
-        img.release();
-        c++;
-      }
     }
   }
   return true;

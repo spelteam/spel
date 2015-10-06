@@ -111,9 +111,8 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Can't merge vectors with different sizes (different count of BodyPart): First: " << first.size() << " Second: " << second.size();
-#ifdef DEBUG
-      std::cerr << ERROR_HEADER << ss.str() << std::endl;
-#endif  // DEBUG
+      if (debugLevel > 1)
+        std::cerr << ERROR_HEADER << ss.str() << std::endl;
       throw std::logic_error(ss.str());
     }
     if (first.size() == 0)
@@ -295,7 +294,7 @@ namespace SPEL
     return result;
   }
 
-  LimbLabel Detector::generateLabel(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const std::string &detectorName, float _usedet, std::function<float()> compare) const 
+  LimbLabel Detector::generateLabel(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const std::string &detectorName, float _usedet, std::function<float()> compare) const
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
     auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI));
@@ -307,7 +306,7 @@ namespace SPEL
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
   }
 
-  void Detector::setDebugLevel(uint8_t _debugLevel) noexcept
+  void Detector::setDebugLevel(const uint8_t &_debugLevel) noexcept
   {
     debugLevel = _debugLevel;
   }

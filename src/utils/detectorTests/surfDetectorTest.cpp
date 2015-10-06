@@ -11,10 +11,10 @@ map <uint32_t, vector <LimbLabel> > SURFDetectorTest::detect(Frame *frame, map <
 
 void SURFDetectorTest::DrawSpecific(string outFolder)
 {
-  drawSURFKeyPoints(getPartModels(), getLabelModels(), outFolder, Scalar(0, 255, 0));
+  drawSURFKeyPoints(getPartModels(), outFolder, Scalar(0, 255, 0));
 }
 
-bool SURFDetectorTest::drawSURFKeyPoints(map <uint32_t, map <uint32_t, PartModel>> partModels, map <uint32_t, map <uint32_t, vector <PartModel>>> labelModels, string outFolder, Scalar color)
+bool SURFDetectorTest::drawSURFKeyPoints(map <uint32_t, map <uint32_t, PartModel>> partModels, string outFolder, Scalar color)
 {
   ProjectLoader::CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
@@ -51,44 +51,6 @@ bool SURFDetectorTest::drawSURFKeyPoints(map <uint32_t, map <uint32_t, PartModel
       cerr << "Writing file " << out << endl;
       imwrite(out, img);
       img.release();
-    }
-  }
-
-  outFileName = tempFileName;
-  outFileName += "labelModels/";
-  ProjectLoader::CreateDirectorySystemIndependent(outFileName);
-
-  for (map <uint32_t, map <uint32_t, vector <PartModel>>>::iterator i = labelModels.begin(); i != labelModels.end(); ++i)
-  {
-    Frame *frame = getFrame(i->first);
-    if (frame == nullptr)
-      continue;
-    for (map <uint32_t, vector <PartModel>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
-    {
-      int c = 0;
-      for (vector <PartModel>::iterator n = j->second.begin(); n != j->second.end(); ++n)
-      {
-        string out = outFileName;
-        stringstream ss;
-        ss << i->first << "/";
-        out += ss.str();
-        ProjectLoader::CreateDirectorySystemIndependent(out);
-        ss.str(string());
-        ss.clear();
-        ss << j->first << "/";
-        out += ss.str();
-        ProjectLoader::CreateDirectorySystemIndependent(out);
-        ss.str(string());
-        ss.clear();
-        ss << c << ".png";
-        out += ss.str();
-        Mat img = drawSURFKeyPoints(frame, *n, color);
-
-        cerr << "Writing file " << out << endl;
-        imwrite(out, img);
-        img.release();
-        c++;
-      }
     }
   }
   return true;

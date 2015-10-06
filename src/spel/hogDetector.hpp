@@ -38,14 +38,13 @@ namespace SPEL
     HogDetector(void) noexcept;
     virtual ~HogDetector(void) noexcept;
     virtual int getID(void) const noexcept;
-    virtual void setID(int _id);
+    virtual void setID(const int &_id) noexcept;
     virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float> params);
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
-    virtual std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> getLabelModels(void) const;
-    virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void);
+    virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) const noexcept;
 
-    virtual cv::Size getCellSize(void);
-    virtual uint8_t getnbins(void);
+    virtual cv::Size getCellSize(void) const noexcept;
+    virtual uint8_t getnbins(void) const noexcept;
   private:
 #ifdef DEBUG
     FRIEND_TEST(HOGDetectorTests, computeDescriptor);
@@ -55,7 +54,6 @@ namespace SPEL
     FRIEND_TEST(HOGDetectorTests, generateLabel);
     FRIEND_TEST(HOGDetectorTests, detect);
     FRIEND_TEST(HOGDetectorTests, compare);
-    FRIEND_TEST(HOGDetectorTests, getLabelModels);
     FRIEND_TEST(HOGDetectorTests, getPartModels);
     FRIEND_TEST(HOGDetectorTests, getCellSize);
     FRIEND_TEST(HOGDetectorTests, getNBins);
@@ -65,7 +63,6 @@ namespace SPEL
     const uint8_t nbins = 9;
     std::map <uint32_t, cv::Size> partSize;
     std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
-    std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> labelModels;
     //TODO(Vitaliy Koshura): Make some of them as detector params
     cv::Size blockSize = cv::Size(16, 16);
     cv::Size blockStride = cv::Size(8, 8);
@@ -84,7 +81,7 @@ namespace SPEL
     virtual std::map <uint32_t, cv::Size> getMaxBodyPartHeightWidth(std::vector <Frame*> frames, cv::Size blockSize, float resizeFactor) const;
     virtual PartModel computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const int &nbins, const cv::Size &wndSize, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double &wndSigma, const double &thresholdL2hys, const bool &gammaCorrection, const int &nlevels, const int &derivAperture, const int &histogramNormType, const bool &bGrayImages) const;
     virtual std::map <uint32_t, PartModel> computeDescriptors(const Frame *frame, const int &nbins, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double &wndSigma, const double &thresholdL2hys, const bool &gammaCorrection, const int &nlevels, const int &derivAperture, const int &histogramNormType, const bool &bGrayImages) const;
-    virtual float compare(BodyPart bodyPart, PartModel partModel, uint8_t nbins) const;
+    virtual float compare(const BodyPart &bodyPart, const PartModel &partModel, const uint8_t &nbins) const;
   };
 }
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

@@ -55,7 +55,7 @@ namespace SPEL
     ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
     virtual ~ColorHistDetector(void) noexcept;
     virtual int getID(void) const noexcept;
-    virtual void setID(int _id) noexcept;
+    virtual void setID(const int &_id) noexcept;
     virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float> params);
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
     virtual uint8_t getNBins(void) const noexcept;

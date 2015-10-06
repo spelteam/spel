@@ -43,7 +43,7 @@ namespace SPEL
     Detector(void) noexcept;
     virtual ~Detector(void) noexcept;
     virtual int getID(void) const noexcept = 0;
-    virtual void setID(int _id) = 0;
+    virtual void setID(const int &_id) = 0;
     virtual void train(const std::vector <Frame*> &frames, std::map <std::string, float> params) = 0;
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const = 0;
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels, DetectorHelper *detectorHelper) const;
@@ -55,7 +55,7 @@ namespace SPEL
     std::vector <Frame*> frames;
     uint32_t maxFrameHeight;
     uint8_t debugLevel = 1;
-    virtual void setDebugLevel(uint8_t _debugLevel) noexcept;
+    virtual void setDebugLevel(const uint8_t &_debugLevel) noexcept;
     virtual uint8_t getDebugLevel(void) const noexcept;
     virtual Frame *getFrame(const int32_t &frameId) const noexcept;
     virtual float getBoneLength(const cv::Point2f &begin, const cv::Point2f &end) const noexcept;

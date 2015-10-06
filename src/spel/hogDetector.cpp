@@ -14,11 +14,6 @@ namespace SPEL
     for (auto &p : partModels)
       for (auto &pp : p.second)
         pp.second.partImage.release();
-
-    for (auto &p : labelModels)
-      for (auto &pp : p.second)
-        for (auto &ppp : pp.second)
-          ppp.partImage.release();
   }
 
   int HogDetector::getID(void) const noexcept
@@ -26,7 +21,7 @@ namespace SPEL
     return id;
   }
 
-  void HogDetector::setID(int _id)
+  void HogDetector::setID(const int &_id) noexcept
   {
     id = _id;
   }
@@ -221,8 +216,6 @@ namespace SPEL
         throw std::logic_error(ss.str());
       }
       auto j1 = joint->getImageLocation();
-      auto direction = j1 - j0; // used as estimation of the vector's direction
-      auto rotationAngle = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle 
       try
       {
         parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(), computeDescriptors(part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages)));
@@ -281,7 +274,7 @@ namespace SPEL
           {
             maxSize = result.at(bodyPart.getPartID());
           }
-          catch (...){}
+          catch (...) {}
         }
         result[bodyPart.getPartID()] = cv::Size(std::max(maxSize.width, static_cast <int> (boneLength * resizeFactor)), std::max(maxSize.height, static_cast <int> (boneWidth * resizeFactor)));
       }
@@ -301,7 +294,6 @@ namespace SPEL
 
     partSize.clear();
     partModels.clear();
-    labelModels.clear();
 
     params.emplace(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES());
     auto bGrayImages = params.at(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().first) != 0.0f;
@@ -385,104 +377,94 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Can't get partSize for body part " << bodyPart.getPartID();
-      if (debugLevelParam >= 1)
-      {
+      if (debugLevel >= 1)
         std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
-      }
+      throw std::out_of_range(ss.str());
     }
 
-    PartModel generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
+    auto generatedPartModel = computeDescriptors(bodyPart, j0, j1, frame->getImage(), nbins, size, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
 
-    auto comparer = [&]() -> float 
+    auto comparer = [&]() -> float
     {
       return compare(bodyPart, generatedPartModel, nbins);
     };
 
-    LimbLabel label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useHoGdet, comparer);
-
-    labelModels[frame->getID()][bodyPart.getPartID()].push_back(generatedPartModel);
-
-    return label;
+    return Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useHoGdet, comparer);
   }
 
-  float HogDetector::compare(BodyPart bodyPart, PartModel model, uint8_t nbins) const
+  float HogDetector::compare(const BodyPart &bodyPart, const PartModel &model, const uint8_t &nbins) const
   {
-    float score = 0;
-    uint32_t totalcount = 0;
-    for (std::map <uint32_t, std::map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
+    auto score = 0.0f;
+    auto totalcount = 0U;
+    for (const auto &framePartModels : partModels)
     {
-      for (std::map <uint32_t, PartModel>::iterator partModel = framePartModels->second.begin(); partModel != framePartModels->second.end(); ++partModel)
+      PartModel partModel;
+      try
       {
-        if (partModel->first != static_cast <uint32_t> (bodyPart.getPartID()))
+        partModel = framePartModels.second.at(bodyPart.getPartID());
+      }
+      catch (...)
+      {
+        std::stringstream ss;
+        ss << "Can't find part model for body part " << bodyPart.getPartID();
+        if (debugLevel > 1)
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::out_of_range(ss.str());
+      }
+      if (model.gradientStrengths.size() != partModel.gradientStrengths.size())
+      {
+        std::stringstream ss;
+        ss << "Invalid descriptor count. Need: " << model.gradientStrengths.size() << ". Have: " << partModel.gradientStrengths.size();
+        if (debugLevel >= 1)
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::logic_error(ss.str());
+      }
+      auto count = 0U;
+      for (auto i = 0U; i < model.gradientStrengths.size(); i++)
+      {
+        if (model.gradientStrengths.at(i).size() != partModel.gradientStrengths.at(i).size())
         {
-          continue;
+          std::stringstream ss;
+          ss << "Invalid descriptor count. Need: " << model.gradientStrengths.at(i).size() << ". Have: " << partModel.gradientStrengths.at(i).size();
+          if (debugLevel >= 1)
+            std::cerr << ERROR_HEADER << ss.str() << std::endl;
+          throw std::logic_error(ss.str());
         }
-        else
+        for (auto j = 0U; j < model.gradientStrengths.at(i).size(); j++)
         {
-          if (model.gradientStrengths.size() != partModel->second.gradientStrengths.size())
+          for (auto b = 0; b < nbins; b++)
           {
-            std::stringstream ss;
-            ss << "Invalid descriptor count. Need: " << model.gradientStrengths.size() << ". Have: " << partModel->second.gradientStrengths.size();
-            if (debugLevelParam >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
-            throw std::logic_error(ss.str());
-          }
-          uint32_t count = 0;
-          for (uint32_t i = 0; i < model.gradientStrengths.size(); i++)
-          {
-            if (model.gradientStrengths.at(i).size() != partModel->second.gradientStrengths.at(i).size())
+            try
+            {
+              count++;
+              score += abs(model.gradientStrengths.at(i).at(j).at(b) - partModel.gradientStrengths.at(i).at(j).at(b));
+            }
+            catch (...)
             {
               std::stringstream ss;
-              ss << "Invalid descriptor count. Need: " << model.gradientStrengths.at(i).size() << ". Have: " << partModel->second.gradientStrengths.at(i).size();
-              if (debugLevelParam >= 1)
+              ss << "Can't get some descriptor at [" << i << "][" << j << "][" << b << "]";
+              if (debugLevel >= 1)
                 std::cerr << ERROR_HEADER << ss.str() << std::endl;
-              throw std::logic_error(ss.str());
-            }
-            for (uint32_t j = 0; j < model.gradientStrengths.at(i).size(); j++)
-            {
-              for (uint8_t b = 0; b < nbins; b++)
-              {
-                try
-                {
-                  count++;
-                  score += abs(model.gradientStrengths.at(i).at(j).at(b) - partModel->second.gradientStrengths.at(i).at(j).at(b));
-                }
-                catch (...)
-                {
-                  std::stringstream ss;
-                  ss << "Can't get some descriptor at [" << i << "][" << j << "][" << b << "]";
-                  if (debugLevelParam >= 1)
-                    std::cerr << ERROR_HEADER << ss.str() << std::endl;
-                  throw std::logic_error(ss.str());
-                }
-              }
+              throw std::out_of_range(ss.str());
             }
           }
-          totalcount += count;
-          break;
         }
       }
     }
-    return (score / (float)totalcount);
+    return (score / static_cast<float>(totalcount));
   }
 
-  std::map <uint32_t, std::map <uint32_t, std::vector <HogDetector::PartModel>>> HogDetector::getLabelModels(void) const
-  {
-    return labelModels;
-  }
-
-  std::map <uint32_t, std::map <uint32_t, HogDetector::PartModel>> HogDetector::getPartModels(void)
+  std::map <uint32_t, std::map <uint32_t, HogDetector::PartModel>> HogDetector::getPartModels(void) const noexcept
   {
     return partModels;
   }
 
-  cv::Size HogDetector::getCellSize(void)
+  cv::Size HogDetector::getCellSize(void) const noexcept
   {
     return cellSize;
   }
 
-  uint8_t HogDetector::getnbins(void)
+  uint8_t HogDetector::getnbins(void) const noexcept
   {
     return nbins;
   }

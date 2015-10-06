@@ -48,14 +48,13 @@ namespace SPEL
       cv::Mat descriptors;
     };
   public:
-    SurfDetector(void);
-    virtual ~SurfDetector(void);
+    SurfDetector(void) noexcept;
+    virtual ~SurfDetector(void) noexcept;
     virtual int getID(void) const noexcept;
-    virtual void setID(int _id);
+    virtual void setID(const int &_id) noexcept;
     virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float>);
-    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels);
-    virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void);
-    virtual std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> getLabelModels(void);
+    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
+    virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) const noexcept;
 
   private:
 #ifdef DEBUG
@@ -68,12 +67,11 @@ namespace SPEL
     int id;
   protected:
     std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
-    std::map <uint32_t, std::map <uint32_t, std::vector <PartModel>>> labelModels;
 
-    virtual std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, uint32_t minHessian);
-    virtual PartModel computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, uint32_t minHessian, std::vector <cv::KeyPoint> keyPoints);
+    virtual std::map <uint32_t, PartModel> computeDescriptors(const Frame *frame, const uint32_t &minHessian) const;
+    virtual PartModel computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t &minHessian, const std::vector <cv::KeyPoint> &keyPoints) const;
     virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const;
-    virtual float compare(BodyPart bodyPart, PartModel model, cv::Point2f j0, cv::Point2f j1, float knnMatchCoeff);
+    virtual float compare(const BodyPart &bodyPart, const PartModel &model, const cv::Point2f &j0, const cv::Point2f &j1, const float &knnMatchCoeff) const;
   };
 }
 

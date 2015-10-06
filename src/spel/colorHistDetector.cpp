@@ -379,7 +379,7 @@ namespace SPEL
   }
 
   // Change ID of "ColorHistDetector" object
-  void ColorHistDetector::setID(int _id) noexcept
+  void ColorHistDetector::setID(const int &_id) noexcept
   {
     id = _id;
   }

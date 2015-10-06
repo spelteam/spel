@@ -6,7 +6,7 @@
 namespace SPEL
 {
 
-  SurfDetector::SurfDetector(void)
+  SurfDetector::SurfDetector(void) noexcept
   {
     id = 0x5344;
 #if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
@@ -14,16 +14,12 @@ namespace SPEL
 #endif
   }
 
-  SurfDetector::~SurfDetector(void)
+  SurfDetector::~SurfDetector(void) noexcept
   {
-    for (auto i : partModels)
-      for (auto j : i.second)
+    for (auto &i : partModels)
+      for (auto &j : i.second)
         j.second.descriptors.release();
 
-    for (auto i : labelModels)
-      for (auto j : i.second)
-        for (auto k : j.second)
-          k.descriptors.release();
   }
 
   int SurfDetector::getID(void) const noexcept
@@ -31,7 +27,7 @@ namespace SPEL
     return id;
   }
 
-  void SurfDetector::setID(int _id)
+  void SurfDetector::setID(const int &_id) noexcept
   {
     id = _id;
   }
@@ -41,39 +37,32 @@ namespace SPEL
     frames = _frames;
 
     partModels.clear();
-    labelModels.clear();
 
-    params.emplace(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL());
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
     params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT());
 
-    debugLevelParam = static_cast <uint8_t> (params.at(COMMON_SPEL_PARAMETERS::DEBUG_LEVEL().first));
     auto minHessian = static_cast<uint32_t> (params.at(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
     maxFrameHeight = params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first);
 
-    for (std::vector <Frame*>::iterator frameNum = frames.begin(); frameNum != frames.end(); ++frameNum)
+    for (const auto frameNum : frames)
     {
-      if ((*frameNum)->getFrametype() != KEYFRAME && (*frameNum)->getFrametype() != LOCKFRAME)
-      {
+      if (frameNum->getFrametype() != KEYFRAME && frameNum->getFrametype() != LOCKFRAME)
         continue;
-      }
 
-      int originalSize = (*frameNum)->getFrameSize().height;
+      auto originalSize = frameNum->getFrameSize().height;
 
       Frame *workFrame = 0;
-      if ((*frameNum)->getFrametype() == KEYFRAME)
+      if (frameNum->getFrametype() == KEYFRAME)
         workFrame = new Keyframe();
-      else if ((*frameNum)->getFrametype() == LOCKFRAME)
+      else if (frameNum->getFrametype() == LOCKFRAME)
         workFrame = new Lockframe();
-      else if ((*frameNum)->getFrametype() == INTERPOLATIONFRAME)
-        workFrame = new Interpolation();
 
-      workFrame = (*frameNum)->clone(workFrame);
+      workFrame = frameNum->clone(workFrame);
 
       workFrame->Resize(maxFrameHeight);
 
-      if (debugLevelParam >= 2)
-        std::cerr << "Training on frame " << workFrame->getID() << std::endl;
+      if (debugLevel >= 2)
+        std::cout << "Training on frame " << workFrame->getID() << std::endl;
 
       try
       {
@@ -88,7 +77,7 @@ namespace SPEL
     }
   }
 
-  std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels)
+  std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
   {
     // first we need to check all used params
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
@@ -97,16 +86,14 @@ namespace SPEL
 
     //now set actual param values
     auto minHessian = params.at(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first);
-
     auto imgMat = frame->getImage();
-
     auto detectorHelper = new SurfDetectorHelper();
 
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-    cv::Ptr <cv::xfeatures2d::SurfFeatureDetector> detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
+    auto detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
 #else
-    cv::Ptr <cv::SurfFeatureDetector> detector = cv::SurfFeatureDetector::create(minHessian);
+    auto detector = cv::SurfFeatureDetector::create(minHessian);
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
     detector->detect(imgMat, detectorHelper->keyPoints);
 #else
@@ -118,7 +105,7 @@ namespace SPEL
       delete detectorHelper;
       std::stringstream ss;
       ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
-      if (debugLevelParam >= 1)
+      if (debugLevel >= 1)
         std::cerr << ERROR_HEADER << ss.str() << std::endl;
       throw std::logic_error(ss.str());
     }
@@ -130,19 +117,19 @@ namespace SPEL
     return result;
   }
 
-  std::map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(Frame *frame, uint32_t minHessian)
+  std::map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(const Frame *frame, const uint32_t &minHessian) const
   {
     std::map <uint32_t, PartModel> parts;
-    Skeleton skeleton = frame->getSkeleton();
-    tree <BodyPart> partTree = skeleton.getPartTree();
-    cv::Mat imgMat = frame->getImage();
+    auto skeleton = frame->getSkeleton();
+    auto partTree = skeleton.getPartTree();
+    auto imgMat = frame->getImage();
     std::vector <cv::KeyPoint> keyPoints;
 
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-    cv::Ptr <cv::xfeatures2d::SurfFeatureDetector> detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
+    auto detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
 #else
-    cv::Ptr <cv::SurfFeatureDetector> detector = cv::SurfFeatureDetector::create(minHessian);
+    auto detector = cv::SurfFeatureDetector::create(minHessian);
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
     detector->detect(imgMat, keyPoints);
 #else
@@ -153,102 +140,88 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
-      if (debugLevelParam >= 1)
+      if (debugLevel >= 1)
         std::cerr << ERROR_HEADER << ss.str() << std::endl;
       throw std::logic_error(ss.str());
     }
 
-    for (tree <BodyPart>::iterator part = partTree.begin(); part != partTree.end(); ++part)
+    for (const auto &part : partTree)
     {
-      cv::Point2f j0, j1;
-      BodyJoint *joint = skeleton.getBodyJoint(part->getParentJoint());
+      auto *joint = skeleton.getBodyJoint(part.getParentJoint());
       if (joint == 0)
       {
         std::stringstream ss;
         ss << "Invalid parent joint";
-        if (debugLevelParam >= 1)
+        if (debugLevel >= 1)
           std::cerr << ERROR_HEADER << ss.str() << std::endl;
         throw std::logic_error(ss.str());
       }
-      j0 = joint->getImageLocation();
+      auto j0 = joint->getImageLocation();
       joint = 0;
-      joint = skeleton.getBodyJoint(part->getChildJoint());
+      joint = skeleton.getBodyJoint(part.getChildJoint());
       if (joint == 0)
       {
         std::stringstream ss;
         ss << "Invalid child joint";
-        if (debugLevelParam >= 1)
+        if (debugLevel >= 1)
           std::cerr << ERROR_HEADER << ss.str() << std::endl;
         throw std::logic_error(ss.str());
       }
-      j1 = joint->getImageLocation();
-      cv::Point2f direction = j1 - j0; // used as estimation of the vector's direction
-      float rotationAngle = float(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0 / M_PI)); //bodypart tilt angle
-      part->setRotationSearchRange(rotationAngle);
+      auto j1 = joint->getImageLocation();
       try
       {
-        parts.insert(std::pair <uint32_t, PartModel>(part->getPartID(), computeDescriptors(*part, j0, j1, imgMat, minHessian, keyPoints)));
+        parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(), computeDescriptors(part, j0, j1, imgMat, minHessian, keyPoints)));
       }
       catch (std::logic_error err)
       {
         std::stringstream ss;
-        ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part->getPartID() << std::endl;
+        ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part.getPartID() << std::endl;
         ss << "\t" << err.what();
-        if (debugLevelParam >= 1)
+        if (debugLevel >= 1)
           std::cerr << ERROR_HEADER << ss.str() << std::endl;
         throw std::logic_error(ss.str());
       }
     }
-    skeleton.setPartTree(partTree);
-    frame->setSkeleton(skeleton);
     return parts;
   }
 
-  SurfDetector::PartModel SurfDetector::computeDescriptors(BodyPart bodyPart, cv::Point2f j0, cv::Point2f j1, cv::Mat imgMat, uint32_t minHessian, std::vector <cv::KeyPoint> keyPoints)
+  SurfDetector::PartModel SurfDetector::computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t &minHessian, const std::vector <cv::KeyPoint> &keyPoints) const
   {
-    float boneLength = getBoneLength(j0, j1);
-    float boneWidth = getBoneWidth(boneLength, bodyPart);
-    cv::Size originalSize = cv::Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
-    POSERECT <cv::Point2f> rect = getBodyPartRect(bodyPart, j0, j1, originalSize);
+    auto boneLength = getBoneLength(j0, j1);
+    auto boneWidth = getBoneWidth(boneLength, bodyPart);
+    auto originalSize = cv::Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
+    auto rect = getBodyPartRect(bodyPart, j0, j1, originalSize);
 
     PartModel partModel;
     partModel.partModelRect = rect;
 
-    for (std::vector <cv::KeyPoint>::iterator kp = keyPoints.begin(); kp != keyPoints.end(); ++kp)
-    {
-      if (rect.containsPoint(kp->pt) > 0)
-      {
-        partModel.keyPoints.push_back(*kp);
-      }
-    }
+    for (const auto &kp : keyPoints)
+      if (rect.containsPoint(kp.pt) > 0)
+        partModel.keyPoints.push_back(kp);
 
     if (partModel.keyPoints.empty())
-    {
-      if (debugLevelParam >= 2)
+      if (debugLevel >= 2)
         std::cerr << ERROR_HEADER << "Couldn't detect keypoints of body part " << bodyPart.getPartID() << std::endl;
-    }
-    else
-    {
+      else
+      {
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-      cv::Ptr <cv::xfeatures2d::SurfDescriptorExtractor> extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
+        auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
 #else
-      cv::Ptr <cv::SurfDescriptorExtractor> extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
+        auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
-      extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
+        extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
 #else
-      cv::SurfDescriptorExtractor extractor;
-      extractor.compute(imgMat, partModel.keyPoints, partModel.descriptors);
+        cv::SurfDescriptorExtractor extractor;
+        extractor.compute(imgMat, partModel.keyPoints, partModel.descriptors);
 #endif // OpenCV_VERSION_MAJOR == 3
-      if (partModel.descriptors.empty() && debugLevelParam >= 2)
-      {
-        std::cerr << ERROR_HEADER << "Couldn't compute descriptors of body part " << bodyPart.getPartID() << std::endl;
+        if (partModel.descriptors.empty() && debugLevel >= 2)
+          std::cerr << ERROR_HEADER << "Couldn't compute descriptors of body part " << bodyPart.getPartID() << std::endl;
       }
-    }
     return partModel;
   }
 
-  LimbLabel SurfDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const 
+  LimbLabel SurfDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const
   {
     std::stringstream detectorName;
     detectorName << getID();
@@ -282,91 +255,87 @@ namespace SPEL
 
     auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useSURFdet, comparer);
 
-    labelModels[frame->getID()][bodyPart.getPartID()].push_back(generatedPartModel);
-
     return label;
   }
 
-  float SurfDetector::compare(BodyPart bodyPart, PartModel model, cv::Point2f j0, cv::Point2f j1, float knnMatchCoeff)
+  float SurfDetector::compare(const BodyPart &bodyPart, const PartModel &model, const cv::Point2f &j0, const cv::Point2f &j1, const float &knnMatchCoeff) const
   {
     if (model.descriptors.empty())
     {
-      if (debugLevelParam >= 2)
+      if (debugLevel >= 2)
         std::cerr << ERROR_HEADER << "Model descriptors are empty" << std::endl;
       return -1.0f;
     }
 
-    float score = 0;
-    uint32_t count = 0;
+    auto score = 0.0f;
+    auto count = 0U;
     cv::FlannBasedMatcher matcher;
     std::vector <std::vector <cv::DMatch>> matches;
 
-    float length = getBoneLength(j0, j1);
-    float width = getBoneWidth(length, bodyPart);
-    float coeff = sqrt(pow(length, 2) + pow(width, 2));
+    auto length = getBoneLength(j0, j1);
+    auto width = getBoneWidth(length, bodyPart);
+    auto coeff = sqrt(pow(length, 2) + pow(width, 2));
 
-    for (std::map <uint32_t, std::map <uint32_t, PartModel>>::iterator framePartModels = partModels.begin(); framePartModels != partModels.end(); ++framePartModels)
+    for (const auto &framePartModels : partModels)
     {
-      for (std::map <uint32_t, PartModel>::iterator partModel = framePartModels->second.begin(); partModel != framePartModels->second.end(); ++partModel)
+      PartModel partModel;
+      try
       {
-        if (partModel->first != static_cast <uint32_t> (bodyPart.getPartID()))
+        partModel = framePartModels.second.at(bodyPart.getPartID());
+      }
+      catch (...)
+      {
+        std::stringstream ss;
+        ss << "Can't find part model for body part " << bodyPart.getPartID();
+        if (debugLevel > 1)
+          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        throw std::out_of_range(ss.str());
+      }
+
+      if (partModel.descriptors.empty() || model.descriptors.empty())
+      {
+        if (debugLevel >= 2)
+          std::cerr << ERROR_HEADER << "PartModel descriptors of body part [" << bodyPart.getPartID() << "] are empty" << std::endl;
+      }
+      else
+      {
+        try
         {
-          continue;
-        }
-        else
-        {
-          if (partModel->second.descriptors.empty() || model.descriptors.empty())
+          if (partModel.descriptors.rows > 1 && model.descriptors.rows > 1)
           {
-            if (debugLevelParam >= 2)
-              std::cerr << ERROR_HEADER << "PartModel descriptors of body part [" << partModel->first << "] are empty" << std::endl;
+            matcher.knnMatch(model.descriptors, partModel.descriptors, matches, 2);
+            auto s = 0.0f;
+            for (const auto &i : matches)
+            {
+              if (i.size() == 2 && (i[0].distance < knnMatchCoeff * (i[1].distance)))
+              {
+                s += i[0].distance / coeff;
+                count++;
+              }
+            }
+            score += s / matches.size();
           }
           else
           {
-            try
-            {
-              if (partModel->second.descriptors.rows > 1 && model.descriptors.rows > 1)
-              {
-                matcher.knnMatch(model.descriptors, partModel->second.descriptors, matches, 2);
-                float s = 0;
-                for (uint32_t i = 0; i < matches.size(); i++)
-                {
-                  if ((matches[i][0].distance < knnMatchCoeff * (matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
-                  {
-                    s += matches[i][0].distance / coeff;
-                    count++;
-                  }
-                }
-                score += s / matches.size();
-              }
-              else
-              {
-                if (debugLevelParam >= 1)
-                  std::cerr << ERROR_HEADER << "Can't match descriptors of body part [" << partModel->first << "]: Not enough descriptors" << std::endl;
-              }
-            }
-            catch (...)
-            {
-              if (debugLevelParam >= 1)
-                std::cerr << ERROR_HEADER << "Can't match descriptors of body part [" << partModel->first << "]" << std::endl;
-            }
+            if (debugLevel >= 1)
+              std::cerr << ERROR_HEADER << "Can't match descriptors of body part [" << bodyPart.getPartID() << "]: Not enough descriptors" << std::endl;
           }
-          break;
+        }
+        catch (...)
+        {
+          if (debugLevel >= 1)
+            std::cerr << ERROR_HEADER << "Can't match descriptors of body part [" << bodyPart.getPartID() << "]" << std::endl;
         }
       }
     }
     if (count == 0)
       return -1.0f;
-    return (score / (float)count);
+    return (score / static_cast<float>(count));
   }
 
-  std::map <uint32_t, std::map <uint32_t, SurfDetector::PartModel>> SurfDetector::getPartModels(void)
+  std::map <uint32_t, std::map <uint32_t, SurfDetector::PartModel>> SurfDetector::getPartModels(void) const noexcept
   {
     return partModels;
-  }
-
-  std::map <uint32_t, std::map <uint32_t, std::vector <SurfDetector::PartModel>>> SurfDetector::getLabelModels(void)
-  {
-    return labelModels;
   }
 
   SurfDetectorHelper::SurfDetectorHelper(void) noexcept
