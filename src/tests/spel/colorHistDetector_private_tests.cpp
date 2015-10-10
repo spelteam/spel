@@ -485,7 +485,6 @@ namespace SPEL
 
     auto detectorHelper = new ColorHistDetectorHelper();
 
-    detectorHelper->pixelDistributions = pixelDistributions; // matrix contains the probability that the particular pixel belongs to current bodypart
     detectorHelper->pixelLabels = pixelLabels; // matrix contains relative estimations that the particular pixel belongs to current bodypart
 
     map <string, float> detectParams;

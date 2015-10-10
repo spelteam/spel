@@ -21,7 +21,6 @@ namespace SPEL
   public:
     ColorHistDetectorHelper(void) noexcept;
     virtual ~ColorHistDetectorHelper(void) noexcept;
-    std::map <int32_t, cv::Mat> pixelDistributions;
     std::map <int32_t, cv::Mat> pixelLabels;
   };
 
@@ -86,7 +85,7 @@ namespace SPEL
     virtual std::map <int32_t, cv::Mat> buildPixelDistributions(const Frame *frame) const;
     virtual std::map <int32_t, cv::Mat> buildPixelLabels(const Frame *frame, const std::map <int32_t, cv::Mat> &pixelDistributions) const;
     virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const;
-    virtual float compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &pixelDistributions, const std::map <int32_t, cv::Mat> &pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1) const;
+    virtual float compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1) const;
   };
 }
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

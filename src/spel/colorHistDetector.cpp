@@ -609,8 +609,11 @@ namespace SPEL
 
     auto detectorHelper = new ColorHistDetectorHelper();
 
-    detectorHelper->pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
-    detectorHelper->pixelLabels = buildPixelLabels(frame, detectorHelper->pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
+    auto pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
+    detectorHelper->pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
+
+    for (auto &p : pixelDistributions)
+      p.second.release();
 
     auto result = Detector::detect(frame, params, limbLabels, detectorHelper);
 
@@ -785,7 +788,7 @@ namespace SPEL
     return _pixelLabels;
   }
 
-  float ColorHistDetector::compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelDistributions, const std::map <int32_t, cv::Mat> &_pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1) const
+  float ColorHistDetector::compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1) const
   {
     auto maskMat = frame->getMask(); // copy mask from the frame 
     auto imgMat = frame->getImage(); // copy image from the frame
@@ -795,8 +798,6 @@ namespace SPEL
     auto totalPixels = 0;
     auto pixelsInMask = 0;
     auto totalPixelLabelScore = 0.0f;
-    auto pixDistAvg = 0.0f;
-    auto pixDistNum = 0.0f;
     PartModel model;
     try
     {
@@ -820,19 +821,6 @@ namespace SPEL
     }
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
-    cv::Mat bodyPartPixelDistribution;
-    try
-    {
-      bodyPartPixelDistribution = _pixelDistributions.at(bodyPart.getPartID());
-    }
-    catch (...)
-    {
-      std::stringstream ss;
-      ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "]";
-      if (debugLevel >= 2)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::out_of_range(ss.str());
-    }
     cv::Mat bodyPartLixelLabels;
     try
     {
@@ -882,19 +870,6 @@ namespace SPEL
               {
                 try
                 {
-                  pixDistAvg += bodyPartPixelDistribution.at<float>(j, i); // Accumulation the "distributions" of contained pixels
-                }
-                catch (...)
-                {
-                  std::stringstream ss;
-                  ss << "Can't get pixesDistribution [" << bodyPart.getPartID() << "][" << j << "][" << i << "]";
-                  if (debugLevel >= 2)
-                    std::cerr << ERROR_HEADER << ss.str() << std::endl;
-                  throw std::out_of_range(ss.str());
-                }
-                pixDistNum++; // counting of the all scanned pixels
-                try
-                {
                   if (bodyPartLixelLabels.at<float>(j, i))
                   {
                     totalPixelLabelScore += bodyPartLixelLabels.at<float>(j, i); // Accumulation of the pixel labels
@@ -917,7 +892,6 @@ namespace SPEL
     }
     auto supportScore = 0.0f;
     auto inMaskSupportScore = 0.0f;
-    pixDistAvg /= static_cast<float>(pixDistNum);  // average "distributions"
     auto inMaskSuppWeight = 0.5f;
     if (totalPixelLabelScore > 0 && totalPixels > 10)
     {
@@ -929,7 +903,7 @@ namespace SPEL
     ss << "Dirty label!";
     if (debugLevel >= 2)
       std::cerr << ERROR_HEADER << ss.str() << std::endl;
-    throw std::logic_error(ss.str());
+    return -1.0f;
   }
 
   LimbLabel ColorHistDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const
@@ -953,7 +927,7 @@ namespace SPEL
 
     auto comparer = [&]() -> float 
     {
-      return compare(bodyPart, frame, helper->pixelDistributions, helper->pixelLabels, j0, j1);
+      return compare(bodyPart, frame, helper->pixelLabels, j0, j1);
     };
 
     auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first), comparer);
@@ -980,8 +954,6 @@ namespace SPEL
 
   ColorHistDetectorHelper::~ColorHistDetectorHelper(void) noexcept
   {
-    for (auto &p : pixelDistributions)
-    p.second.release();
     for (auto &p : pixelLabels)
     p.second.release();
   }
