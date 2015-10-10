@@ -503,7 +503,7 @@ namespace SPEL
     std::map<float, std::vector<uint32_t> > angleMap;
 
     std::vector <LimbLabel> copyLabels;
-    copyLabels.resize(sortedLabels.size());
+    copyLabels.reserve(sortedLabels.size());
     copy(sortedLabels.begin(), sortedLabels.end(), back_inserter(copyLabels));
 
     sort(copyLabels.begin(), copyLabels.end()); // sort labels by "SumScore" ?
