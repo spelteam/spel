@@ -189,7 +189,10 @@ namespace SPEL
       trainingFrames.push_back(frames[frameId]); //set training frame by index
       
       for (uint32_t i = 0; i < detectors.size(); ++i)
+      {
+        detectors[i]->setDebugLevel(0);
         detectors[i]->train(trainingFrames, params);
+      }
 
       //@TODO: This may need to be modified to propagate not from root frame, but from parent frame
       //but only if the solve was successful, otherwise propagate from the root frame

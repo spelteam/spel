@@ -25,6 +25,13 @@ int main (int argc, char **argv)
         curFolder += '/';
     }
 
+//    string curFolder = gtProj;
+//    curFolder = curFolder.substr(0, curFolder.find_last_of("/"));
+//    if (curFolder.back() != '/')
+//    {
+//        curFolder += '/';
+//    }
+
     ProjectLoader projectLoader(curFolder);
 
     cout << "Loading project..." << endl;

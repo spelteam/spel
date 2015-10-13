@@ -18,7 +18,11 @@ namespace SPEL
     static SPEL_PARAMETER MAX_FRAME_HEIGHT(void)
     {
       return SPEL_SET_PARAMETER("maxFrameHeight", 720.0f);
-    };
+    }
+//    static SPEL_PARAMETER DEBUG_LEVEL(void)
+//    {
+//        return SPEL_SET_PARAMETER("debugLevel", 1);
+//    }
   };
 
   class COMMON_DETECTOR_PARAMETERS
@@ -136,16 +140,76 @@ namespace SPEL
   class COMMON_SOLVER_PARAMETERS
   {
   public:
+      //      params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+      //      params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+      //      params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+      //      params.emplace("maxPartCandidates", 1.0); //set the max number of part candidates to allow into the solver
+      //      params.emplace("baseRotationRange", 40); //search angle range of +/- 60 degrees
+      //      float baseRotationRange = params.at("baseRotationRange");
+      //      params.emplace("baseRotationStep", baseRotationRange / 4.0); //search with angle step of 10 degrees
+      //      params.emplace("baseSearchRadius", image.rows / 30.0); //search a radius of 100 pixels
+      //      int baseSearchRadius = params.at("baseSearchRadius");
+      //      params.emplace("baseSearchStep", baseSearchRadius / 10.0); //search in a grid every 10 pixels
+      //      params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+      //      params.emplace("jointCoeff", 0.5); //set solver body part connectivity sensitivity
+      //      params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
+
   };
 
   class COMMON_NSKP_SOLVER_PARAMETERS
   {
   public:
+
+//      //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
+//      params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
+//      params.emplace("propagateFromLockframes", 1); //don't propagate from lockframes, only from keyframes
+
+//      //detector enablers
+//      params.emplace("useCSdet", 1.0); //determine if ColHist detector is used and with what coefficient
+//      params.emplace("useHoGdet", 0.0); //determine if HoG descriptor is used and with what coefficient
+//      params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+//      params.emplace("maxPartCandidates", 40); //set the max number of part candidates to allow into the solver
+
+//      //detector search parameters
+
+//      params.emplace("partDepthRotationCoeff", 1.2); // 20% increase at each depth level
+//      params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+//      params.emplace("anchorBindCoeff", 0.0); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+//      params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
+
+//      //detector search parameters
+//      params.emplace("baseRotationRange", 40); //search angle range of +/- 40 degrees
+//      float baseRotationRange = params.at("baseRotationRange");
+//      params.emplace("baseRotationStep", baseRotationRange / 4.0); //search with angle step of 10 degrees, this a per-part range and overrides globals
+//      params.emplace("stepTheta", baseRotationRange / 4.0); //search in a grid every 10 pixels
+
+//      params.emplace("baseSearchRadius", image.rows / 30.0); //search a radius of 100 pixels
+//      int baseSearchRadius = params.at("baseSearchRadius");
+//      params.emplace("baseSearchStep", baseSearchRadius / 10.0); //do 9-10 steps in each direction
+//      //solver sensitivity parameters
+//      params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+//      params.emplace("jointCoeff", 0.5); //set solver body part connectivity sensitivitymaxPartCandidates
+//      params.emplace("jointLeeway", 0.05); //set solver lenience for body part disconnectedness, as a percentage of part length
+//      params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+
+//      //solver eval parameters
+//      params.emplace("nskpLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
+
+      static SPEL_PARAMETER KNN_MATCH_COEFFICIENT(void)
+      {
+            return SPEL_SET_PARAMETER("nskpLockframeThreshold", 0.52);
+      }
   };
 
   class COMMON_TLPS_SOLVER_PARAMETERS
   {
   public:
+//      //params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
+//      params.emplace("temporalWindowSize", 0); //0 for unlimited window size
+//      params.emplace("partShiftCoeff", 1.5); //search radius multiplier of distance between part in current and prev frames
+//      params.emplace("partRotationCoeff", 1.5); //rotation radius multiplier of distance between part in current and prev frames
+//      params.emplace("tempCoeff", 0.1); //set the temporal link coefficient
+//      params.emplace("tlpsLockframeThreshold", 0.0); //set up the lockframe accept threshold by mask coverage
   };
 }
 #endif // _SPELPARAMETERS_HPP_

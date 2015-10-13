@@ -261,7 +261,7 @@ bool ProjectLoader::Load(string fileName)
     Mat image = imread(curFolder + imgFolderPath + imgPath, CV_LOAD_IMAGE_COLOR);
     if (!image.data)
     {
-      cerr << "Could not find file " << imgFolderPath + imgPath << endl;
+      cerr << "Could not find file " <<curFolder +  imgFolderPath + imgPath << endl;
       return false;
     }
     int32_t imageOriginalCols = image.cols;

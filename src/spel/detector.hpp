@@ -48,6 +48,8 @@ namespace SPEL
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const = 0;
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels, DetectorHelper *detectorHelper) const;
     virtual std::map <uint32_t, std::vector <LimbLabel>> merge(const std::map <uint32_t, std::vector <LimbLabel>> &first, const std::map <uint32_t, std::vector <LimbLabel>> &second, const std::map <uint32_t, std::vector <LimbLabel>> &secondUnfiltered) const;
+    virtual void setDebugLevel(const uint8_t &_debugLevel) noexcept;
+    virtual uint8_t getDebugLevel(void) const noexcept;
   protected:
 #ifdef DEBUG
     FRIEND_TEST(DetectorTests, getFrame);
@@ -55,8 +57,7 @@ namespace SPEL
     std::vector <Frame*> frames;
     uint32_t maxFrameHeight;
     uint8_t debugLevel = 1;
-    virtual void setDebugLevel(const uint8_t &_debugLevel) noexcept;
-    virtual uint8_t getDebugLevel(void) const noexcept;
+
     virtual Frame *getFrame(const int32_t &frameId) const noexcept;
     virtual float getBoneLength(const cv::Point2f &begin, const cv::Point2f &end) const noexcept;
     virtual float getBoneWidth(const float &length, const BodyPart &bodyPart) const noexcept;

@@ -140,6 +140,13 @@ namespace SPEL
         std::cout << "Interpolating slice " << sliceNumber << std::endl;
       std::vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
 
+      int maxSeqSize = 20;
+      if(seqSlice.size()>=maxSeqSize) //change this to a parameter later
+      {
+          std::cout << "Skipping slice " << sliceNumber << " since it is of length " << seqSlice.size() << " and over the maximum of " << maxSeqSize << "." << std::endl;
+          continue;
+      }
+
 
       std::vector<Detector*> detectors;
       if (useCS)
@@ -154,7 +161,10 @@ namespace SPEL
       trainingFrames.push_back(seqSlice.back());
 
       for (uint32_t i = 0; i < detectors.size(); ++i)
-        detectors[i]->train(trainingFrames, params);
+      {
+          detectors[i]->setDebugLevel(0);
+          detectors[i]->train(trainingFrames, params);
+      }
 
       std::vector<std::map<uint32_t, std::vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
 
