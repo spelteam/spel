@@ -903,9 +903,5 @@ int main (int argc, char **argv)
 
     cout << "Tuning finished, terminating. " << endl;
 
-#ifdef DEBUG
-    DumpUnfreed();
-#endif // DEBUG
-
     return 0;
 }

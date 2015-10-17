@@ -16,9 +16,7 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/utils/general" )
 
 # general
 LIST ( APPEND GENERAL_SRC ../general/projectLoader.cpp )
-LIST ( APPEND GENERAL_SRC ../../spel/memoryDebug.cpp )
 LIST ( APPEND GENERAL_HDR ../general/projectLoader.hpp )
-LIST ( APPEND GENERAL_HDR ../../spel/memoryDebug.hpp )
 
 # additional files
 LIST ( APPEND ${DETECTORTUNER_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}/tinyxml2.cpp )

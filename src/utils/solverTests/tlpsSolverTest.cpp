@@ -101,10 +101,6 @@ int main (int argc, char **argv)
     projectLoader.drawFrameSolvlets(solve[i], vFrames[solve[i].getFrameID()], argv[2], Scalar(0,0,255), 2);
   }
 
-#ifdef DEBUG
-  DumpUnfreed();
-#endif // DEBUG
-
   return 0;
 }
 

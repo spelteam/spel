@@ -1,4 +1,5 @@
 #include "sequence.hpp"
+#include <Eigen/StdVector>
 
 namespace SPEL
 {
