@@ -207,5 +207,9 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
   if (seq != 0)
     delete seq;
 
+#ifdef DEBUG
+  DumpUnfreed();
+#endif // DEBUG
+
   return 0;
 }

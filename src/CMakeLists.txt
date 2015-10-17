@@ -102,8 +102,10 @@ SET ( GOOGLE_TEST_PATH "../thirdparty/googletest" CACHE STRING "Path to Google T
 
 IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
   OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" ON )
+  OPTION ( MEMORY_DEBUG "Include memory debug" ON)
 ELSE ()
   OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
+  OPTION ( MEMORY_DEBUG "Include memory debug" OFF)
 ENDIF ()
 
 OPTION ( SPEL_GUI_BUILD "Build nice looking GUI application" ON )
@@ -124,6 +126,10 @@ IF ( NOT GOOGLE_TEST )
   SET ( GOOGLE_TEST:BOOL OFF )
 ENDIF()
 
+IF ( NOT MEMORY_DEBUG )
+  SET ( MEMORY_DEBUG:BOOL OFF )
+ENDIF()
+
 IF ( NOT SPEL_GUI_BUILD )
   SET ( SPEL_GUI_BUILD:BOOL OFF )
 ENDIF()
@@ -136,6 +142,9 @@ ENDIF()
 # Recurse into subdirectory
 # Compile Google Test Framework
 IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+  IF ( MEMORY_DEBUG )
+    ADD_DEFINITIONS ( "-DMEMORY_DEBUG" )
+  ENDIF()
   IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH )
     ADD_DEFINITIONS ( "-DPOSE_TEST" )
     IF ( MSVC )
