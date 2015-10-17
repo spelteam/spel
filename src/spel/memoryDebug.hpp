@@ -3,36 +3,26 @@
 
 #ifdef MEMORY_DEBUG
 
-#include <list>
-#include <fstream>
-
-typedef struct {
-  size_t address;
-  size_t size;
-  char file[64];
-  size_t line;
-} ALLOC_INFO;
-
-typedef std::list<ALLOC_INFO*> AllocList;
-
 void OutputDebugString(const char *str);
 
-void AddTrack(size_t addr, size_t asize, const char *fname, size_t lnum);
+class MemoryDebugAllocate
+{
+public:
+  MemoryDebugAllocate(char const *filename, int lineNum);
+  ~MemoryDebugAllocate(void);
+};
+
+template <class T> inline T *operator*(const MemoryDebugAllocate &stamp, T *p)
+{
+  return p;
+}
+
+void AddTrack(size_t addr, size_t asize);
 
 void RemoveTrack(size_t addr);
 
-void DumpUnfreed(void);
-
-void * operator new(size_t size, const char *file, int line);
-
-void * operator new[](size_t size, const char *file, int line);
-
-void operator delete(void *p);
-
-void operator delete[](void *p);
-
-#define DEBUG_NEW new(__FILE__, __LINE__)
-#define new DEBUG_NEW
+#define MEMORY_DEBUG_NEW MemoryDebugAllocate(__FILE__, __LINE__) * new
+#define new MEMORY_DEBUG_NEW
 
 #define EIGEN_DONT_ALIGN
 

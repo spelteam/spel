@@ -138,10 +138,6 @@ int main (int argc, char **argv)
 //        projectLoader.drawFrameSolvlets(solve[i], frame, argv[2], Scalar(0,0,255), 1);
 //    }
 
-#ifdef DEBUG
-    DumpUnfreed();
-#endif // DEBUG
-
     return 0;
 }
 
