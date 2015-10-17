@@ -40,6 +40,9 @@ LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PA
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/utils/general/projectLoader.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}/tinyxml2.cpp )
 
+LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/spel/memoryDebug.cpp )
+LIST ( APPEND ${TESTS_MODULE}_HDR ${${PROJECT_NAME}_SOURCE_DIR}/spel/memoryDebug.hpp )
+
 # libpose tests
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/TestsFunctions.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/bodyJoint_get_and_set_tests.cpp )

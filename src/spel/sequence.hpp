@@ -1,9 +1,6 @@
 #ifndef _SEQUENCE_HPP_
 #define _SEQUENCE_HPP_
 
-// SPEL definitions
-#include "predef.hpp"
-
 // STL
 #include <string>
 #include <math.h>
@@ -11,6 +8,10 @@
 // Eigen3
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
+
+// SPEL definitions
+#include "predef.hpp"
 
 #include "spelHelper.hpp"
 #include "interpolation.hpp"
