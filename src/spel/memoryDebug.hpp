@@ -1,6 +1,8 @@
 #ifndef _MEMORYDEBUG_HPP_
 #define _MEMORYDEBUG_HPP_
 
+#include <stddef.h>
+
 #ifdef MEMORY_DEBUG
 
 void OutputDebugString(const char *str);
