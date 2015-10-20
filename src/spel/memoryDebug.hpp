@@ -1,31 +1,3 @@
-#ifndef _MEMORYDEBUG_HPP_
-#define _MEMORYDEBUG_HPP_
-
-#include <stddef.h>
-
-#ifdef MEMORY_DEBUG
-
-//void OutputDebugString(const char *str);
-//
-//class MemoryDebugAllocate
-//{
-//public:
-//  MemoryDebugAllocate(char const *filename, int lineNum);
-//  ~MemoryDebugAllocate(void);
-//};
-//
-//template <class T> inline T *operator*(const MemoryDebugAllocate &stamp, T *p)
-//{
-//  return p;
-//}
-//
-//void AddTrack(size_t addr, size_t asize);
-//
-//void RemoveTrack(size_t addr);
-//
-//#define MEMORY_DEBUG_NEW MemoryDebugAllocate(__FILE__, __LINE__) * new
-//#define new MEMORY_DEBUG_NEW
-
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
 All rights reserved.
@@ -59,8 +31,10 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef MemTrack_H_
-#define MemTrack_H_
+#ifndef _MEMORYDEBUG_HPP_
+#define _MEMORYDEBUG_HPP_
+
+#ifdef MEMORY_DEBUG
 
 #include <typeinfo>
 
@@ -101,8 +75,6 @@ namespace MemTrack
 
 #define MEMTRACK_NEW MemTrack::MemStamp(__FILE__, __LINE__) * new
 #define new MEMTRACK_NEW
-
-#endif    // MemTrack_H_
 
 #define EIGEN_DONT_ALIGN
 

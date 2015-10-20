@@ -1,132 +1,3 @@
-#include <list>
-#include <fstream>
-
-#include "memoryDebug.hpp"
-
-#ifdef MEMORY_DEBUG
-//#undef new
-//
-//void OutputDebugString(const char *str)
-//{
-//  std::ofstream log;
-//  log.open("memorydebug.log", std::fstream::out | std::fstream::app);
-//  if (log.is_open())
-//  {
-//    log << str << std::endl;
-//    log.close();
-//  }
-//}
-//
-//typedef struct {
-//  size_t address;
-//  size_t size;
-//} ALLOC_INFO;
-//
-//typedef std::list<ALLOC_INFO*> AllocList;
-//
-//AllocList *allocList;
-//
-//void AddTrack(size_t addr, size_t asize)
-//{
-//  static int recursecount = 0;
-//  if (recursecount > 0)
-//    return;
-//  ++recursecount;
-//  ALLOC_INFO *info;
-//
-//  if (!allocList) {
-//    allocList = new(AllocList);
-//  }
-//
-//  info = new(ALLOC_INFO);
-//  info->address = addr;
-//  info->size = asize;
-//  allocList->insert(allocList->begin(), info);
-//
-//  char buf[1024];
-//  snprintf(buf, 1024, "ADDRESS %zu\tSIZE %zu\n", addr, asize);
-//  OutputDebugString(buf);
-//  --recursecount;
-//}
-//
-//void RemoveTrack(size_t addr)
-//{
-//  AllocList::iterator i;
-//
-//  if (!allocList)
-//    return;
-//  for (i = allocList->begin(); i != allocList->end(); i++)
-//  {
-//    if ((*i)->address == addr)
-//    {
-//      char buf[1024];
-//      snprintf(buf, 1024, "FREED:\tADDRESS %zu\tSIZE %zu\n", (*i)->address, (*i)->size);
-//      OutputDebugString(buf);
-//
-//      allocList->remove((*i));
-//      break;
-//    }
-//  }
-//}
-//
-//void DumpUnfreed(void)
-//{
-//  AllocList::iterator i;
-//  size_t totalSize = 0;
-//  char buf[1024];
-//
-//  if (!allocList)
-//    return;
-//
-//  for (i = allocList->begin(); i != allocList->end(); i++)
-//  {
-//    snprintf(buf, 1024, "ADDRESS %zu\tSIZE %zu unfreed\n", (*i)->address, (*i)->size);
-//    OutputDebugString(buf);
-//    totalSize += (*i)->size;
-//  }
-//  snprintf(buf, 1024, "-----------------------------------------------------------\n");
-//  OutputDebugString(buf);
-//  snprintf(buf, 1024, "Total Unfreed: %zu bytes\n", totalSize);
-//  OutputDebugString(buf);
-//}
-//
-//void * operator new(size_t size) noexcept
-//{
-//  void *ptr = (void *)malloc(size);
-//  AddTrack((size_t)ptr, size);
-//  return(ptr);
-//}
-//
-//void * operator new[](size_t size) noexcept
-//{
-//  void *ptr = (void *)malloc(size);
-//  AddTrack((size_t)ptr, size);
-//  return(ptr);
-//}
-//
-//void operator delete(void *p) noexcept
-//{
-//  RemoveTrack((size_t)p);
-//  free(p);
-//}
-//
-//void operator delete[](void *p) noexcept
-//{
-//  RemoveTrack((size_t)p);
-//  free(p);
-//}
-//
-//MemoryDebugAllocate::MemoryDebugAllocate(char const * filename, int lineNum)
-//{
-//  char buf[1024];
-//  snprintf(buf, 1024, "ALLOCATE:\t%s:%d\t", filename, lineNum);
-//  OutputDebugString(buf);
-//}
-//
-//MemoryDebugAllocate::~MemoryDebugAllocate(void)
-//{
-//}
-
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
 All rights reserved.
@@ -159,6 +30,23 @@ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+#include <fstream>
+
+#include "memoryDebug.hpp"
+
+#ifdef MEMORY_DEBUG
+
+void OutputDebugString(const char *str)
+{
+  std::ofstream log;
+  log.open("memorydebug.log", std::fstream::out | std::fstream::app);
+  if (log.is_open())
+  {
+    log << str << std::endl;
+    log.close();
+  }
+}
 
 /* ---------------------------------------- includes */
 
@@ -242,6 +130,9 @@ namespace MemTrack
     myFilename = filename;
     myLineNum = lineNum;
     myTypeName = typeName;
+    char buf[1024];
+    snprintf(buf, 1024, "ALLOCATION\t %s:%d\tTYPENAME %s\n", filename, lineNum, typeName);
+    OutputDebugString(buf);
   }
 
   /* ---------------------------------------- BlockHeader AddNode */
@@ -474,6 +365,10 @@ namespace MemTrack
     // Get the offset to the user chunk and return it.
     UserChunk *pUser = GetUserAddress(pProlog);
 
+    char buf[1024];
+    snprintf(buf, 1024, "ALLOCATED\tADDRESS\t%zu\tSIZE\t%zu\n", (size_t)pUser, size);
+    OutputDebugString(buf);
+
     return pUser;
   }
 
@@ -501,6 +396,10 @@ namespace MemTrack
     BlockHeader::RemoveNode(pBlockHeader);
     pBlockHeader->~BlockHeader();
     pBlockHeader = NULL;
+
+    char buf[1024];
+    snprintf(buf, 1024, "FREED\t%zu\n", (size_t)p);
+    OutputDebugString(buf);
 
     // Free the memory block.    
     free(pProlog);
@@ -533,12 +432,19 @@ namespace MemTrack
       (BlockHeader **)calloc(numBlocks, sizeof(*ppBlockHeader));
     BlockHeader::GetBlocks(ppBlockHeader);
 
+    char buf[1024];
+
     // Dump information about the memory blocks.
-    printf("\n");
-    printf("=====================\n");
-    printf("Current Memory Blocks\n");
-    printf("=====================\n");
-    printf("\n");
+    snprintf(buf, 1024, "\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "=====================\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "Current Memory Blocks\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "=====================\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "\n");
+    OutputDebugString(buf);
     for (size_t i = 0; i < numBlocks; i++)
     {
       BlockHeader *pBlockHeader = ppBlockHeader[i];
@@ -546,8 +452,10 @@ namespace MemTrack
       size_t size = pBlockHeader->GetRequestedSize();
       char const *fileName = pBlockHeader->GetFilename();
       int lineNum = pBlockHeader->GetLineNum();
-      printf("*** #%-6d %5d bytes %-50s\n", i, size, typeName);
-      printf("... %s:%d\n", fileName, lineNum);
+      snprintf(buf, 1024, "*** #%-6d %5d bytes %-50s\n", i, size, typeName);
+      OutputDebugString(buf);
+      snprintf(buf, 1024, "... %s:%d\n", fileName, lineNum);
+      OutputDebugString(buf);
     }
 
     // Clean up.
@@ -658,14 +566,23 @@ namespace MemTrack
       grandTotalSize += pMemDigestArray[i].totalSize;
     }
 
+    char buf[1024];
+
     // Dump the memory usage statistics.
-    printf("\n");
-    printf("-----------------------\n");
-    printf("Memory Usage Statistics\n");
-    printf("-----------------------\n");
-    printf("\n");
-    printf("%-50s%5s  %5s %7s %s \n", "allocated type", "blocks", "", "bytes", "");
-    printf("%-50s%5s  %5s %7s %s \n", "--------------", "------", "", "-----", "");
+    snprintf(buf, 1024, "\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "-----------------------\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "Memory Usage Statistics\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "-----------------------\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "\n");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "%-50s%5s  %5s %7s %s \n", "allocated type", "blocks", "", "bytes", "");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "%-50s%5s  %5s %7s %s \n", "--------------", "------", "", "-----", "");
+    OutputDebugString(buf);
 
     for (size_t i = 0; i < numUniqueTypes; i++)
     {
@@ -675,7 +592,7 @@ namespace MemTrack
       size_t totalSize = pMD->totalSize;
       double totalSizePct = 100.0 * totalSize / grandTotalSize;
 
-      printf(
+      snprintf(buf, 1024,
         "%-50s %5d %5.1f%% %7d %5.1f%%\n",
         pMD->typeName,
         blockCount,
@@ -683,9 +600,12 @@ namespace MemTrack
         totalSize,
         totalSizePct
         );
+      OutputDebugString(buf);
     }
-    printf("%-50s %5s %5s  %7s %s \n", "--------", "-----", "", "-------", "");
-    printf("%-50s %5d %5s  %7d %s \n", "[totals]", grandTotalNumBlocks, "", grandTotalSize, "");
+    snprintf(buf, 1024, "%-50s %5s %5s  %7s %s \n", "--------", "-----", "", "-------", "");
+    OutputDebugString(buf);
+    snprintf(buf, 1024, "%-50s %5d %5s  %7d %s \n", "[totals]", grandTotalNumBlocks, "", grandTotalSize, "");
+    OutputDebugString(buf);
 
     // Clean up.
     free(ppBlockHeader);
@@ -703,8 +623,8 @@ namespace MemTrack
 void *operator new(size_t size)
 {
   void *p = MemTrack::TrackMalloc(size);
-if (p == NULL) throw std::bad_alloc();
-return p;
+  if (p == NULL) throw std::bad_alloc();
+  return p;
 }
 
 /* ---------------------------------------- operator delete */
@@ -731,4 +651,3 @@ void operator delete[](void *p)
 }
 
 #endif // MEMORY_DEBUG
-
