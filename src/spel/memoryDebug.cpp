@@ -31,11 +31,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <fstream>
-
 #include "memoryDebug.hpp"
 
 #ifdef MEMORY_DEBUG
+#ifdef WINDOWS
+#include <fstream>
 
 void OutputDebugString(const char *str)
 {
@@ -650,4 +650,5 @@ void operator delete[](void *p)
   MemTrack::TrackFree(p);
 }
 
+#endif // WINDOWS
 #endif // MEMORY_DEBUG

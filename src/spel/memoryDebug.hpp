@@ -35,7 +35,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MEMORYDEBUG_HPP_
 
 #ifdef MEMORY_DEBUG
-
+#ifdef WINDOWS
 #include <typeinfo>
 
 namespace MemTrack
@@ -79,5 +79,5 @@ namespace MemTrack
 #define EIGEN_DONT_ALIGN
 
 #endif // MEMORY_DEBUG
-
-#endif  // _MEMORYDEBUG_HPP_
+#endif // WINDOWS
+#endif // _MEMORYDEBUG_HPP_

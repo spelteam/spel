@@ -102,11 +102,7 @@ SET ( GOOGLE_TEST_PATH "../thirdparty/googletest" CACHE STRING "Path to Google T
 
 IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
   OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" ON )
-  IF ( WIN32 )
-    OPTION ( MEMORY_DEBUG "Include memory debug" ON)
-  ELSE ()
-    OPTION ( MEMORY_DEBUG "Include memory debug" OFF)
-  ENDIF()
+  OPTION ( MEMORY_DEBUG "Include memory debug" ON)
 ELSE ()
   OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
   OPTION ( MEMORY_DEBUG "Include memory debug" OFF)
