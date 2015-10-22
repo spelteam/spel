@@ -1,6 +1,9 @@
 #ifndef SOLVEBOXWIDGET_H
 #define SOLVEBOXWIDGET_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QPushButton>

@@ -1,6 +1,9 @@
 #ifndef TOOLBOXWIDGET_H
 #define TOOLBOXWIDGET_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QGroupBox>
 #include "flowlayout.h"
 #include <QPushButton>

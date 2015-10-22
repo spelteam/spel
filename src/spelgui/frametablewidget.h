@@ -1,6 +1,9 @@
 #ifndef FRAMETABLEWIDGET_H
 #define FRAMETABLEWIDGET_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QTableWidget>
 
 class FrameTableWidget : public QTableWidget

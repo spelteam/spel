@@ -1,6 +1,9 @@
 #ifndef SOLVERPARAMETERSDIALOG_H
 #define SOLVERPARAMETERSDIALOG_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QDialog>
 
 namespace Ui {

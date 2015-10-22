@@ -1,6 +1,9 @@
 #ifndef FRAMEVIEW2D_H
 #define FRAMEVIEW2D_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QWidget>
 #include <QGraphicsView>
 #include <QGraphicsScene>

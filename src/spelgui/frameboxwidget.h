@@ -1,6 +1,9 @@
 #ifndef FRAMEBOXWIDGET_H
 #define FRAMEBOXWIDGET_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QPushButton>

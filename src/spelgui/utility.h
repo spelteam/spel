@@ -1,6 +1,9 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 //#include <functional>
 #include <QObject>
 #include <QString>

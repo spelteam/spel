@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QMainWindow>
 #include <QFutureWatcher>
 

@@ -1,6 +1,9 @@
 #ifndef FRAMEVIEW3D_H
 #define FRAMEVIEW3D_H
 
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QGLWidget>
 
 class FrameView3D : public QGLWidget
