@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "solverparametersdialog.h"
 #include "ui_solverparametersdialog.h"
 

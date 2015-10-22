@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "solveboxwidget.h"
 
 #include "solverparametersdialog.h"

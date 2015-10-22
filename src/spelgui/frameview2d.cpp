@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "frameview2d.h"
 #include "bodyjointitem.h"
 #include "bodypartitem.h"

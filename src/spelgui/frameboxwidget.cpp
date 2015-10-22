@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "frameboxwidget.h"
 #include "project.h"
 #include "frametablewidget.h"

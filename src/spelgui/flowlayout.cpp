@@ -37,6 +37,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+// SPEL definitions
+#include "predef.hpp"
 
 #include <QtWidgets>
 

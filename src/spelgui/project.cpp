@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include <QTime>
 #include <QDir>
 #include <nskpsolver.hpp>

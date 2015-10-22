@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "toolboxwidget.h"
 
 ToolBoxWidget::ToolBoxWidget(QWidget *parent) :

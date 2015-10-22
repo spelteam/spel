@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "bodyparthandler.h"
 
 #include <QDomElement>

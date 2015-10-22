@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "frametablewidget.h"
 #include <QHeaderView>
 #include <QScrollBar>
