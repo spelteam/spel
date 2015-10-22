@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include <gtest/gtest.h>
 #include <limbLabel.hpp>
 

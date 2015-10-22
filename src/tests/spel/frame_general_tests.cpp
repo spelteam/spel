@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include <gtest/gtest.h>
 
 //frame and derived from frame interfaces

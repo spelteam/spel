@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #if defined(WINDOWS) && defined(_MSC_VER)
 #include <Windows.h>
 #endif
