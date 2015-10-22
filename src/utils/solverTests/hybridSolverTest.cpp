@@ -8,6 +8,10 @@ using namespace SPEL;
 
 int main (int argc, char **argv)
 {
+#if defined(MEMORY_DEBUG) && defined(UNIX)
+  Debug(libcw_do.on());
+  Debug(dc::malloc.on());
+#endif  // MEMORY_DEBUG && UNIX
     if (argc != 3)
     {
         cout << "Usage hybridSolverTest [project.xml] [out directory]" << endl;
@@ -137,7 +141,9 @@ int main (int argc, char **argv)
 
 //        projectLoader.drawFrameSolvlets(solve[i], frame, argv[2], Scalar(0,0,255), 1);
 //    }
-
+#if defined(MEMORY_DEBUG) && defined(UNIX)
+    Debug(list_allocations_on(libcw_do));
+#endif  // MEMORY_DEBUG && UNIX
     return 0;
 }
 

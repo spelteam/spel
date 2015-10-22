@@ -275,6 +275,10 @@ void addKeyframeNoise(vector<Frame*>& frames, float mean, float sd, float max)
 
 int main (int argc, char **argv)
 {
+#if defined(MEMORY_DEBUG) && defined(UNIX)
+  Debug(libcw_do.on());
+  Debug(dc::malloc.on());
+#endif  // MEMORY_DEBUG && UNIX
     if (argc != 2)
     {
         cout << "Usage solverTuner [settings file]" << endl;
@@ -873,6 +877,8 @@ int main (int argc, char **argv)
     gtFrames.clear();
 
     cout << "Tuning finished, terminating. " << endl;
-
+#if defined(MEMORY_DEBUG) && defined(UNIX)
+    Debug(list_allocations_on(libcw_do));
+#endif  // MEMORY_DEBUG && UNIX
     return 0;
 }

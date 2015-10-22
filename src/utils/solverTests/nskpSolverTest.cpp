@@ -9,6 +9,10 @@ using namespace SPEL;
 
 int main (int argc, char **argv)
 {
+#if defined(MEMORY_DEBUG) && defined(UNIX)
+  Debug(libcw_do.on());
+  Debug(dc::malloc.on());
+#endif  // MEMORY_DEBUG && UNIX
     ios_base::sync_with_stdio(false); //turn off syncing of stdio for async operation
     unsigned int n = std::thread::hardware_concurrency();
     std::cout << n << " concurrent threads are supported.\n";
@@ -128,7 +132,9 @@ int main (int argc, char **argv)
 
         projectLoader.drawLockframeSolvlets(ism, solve[i], frame, parent, argv[2], Scalar(0,0,255), 1);
     }
-
+#if defined(MEMORY_DEBUG) && defined(UNIX)
+    Debug(list_allocations_on(libcw_do));
+#endif  // MEMORY_DEBUG && UNIX
     return 0;
 }
 

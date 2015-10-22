@@ -1,5 +1,4 @@
 #include "surfDetector.hpp"
-#include "surfDetector.hpp"
 
 #define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 

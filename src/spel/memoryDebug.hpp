@@ -78,6 +78,13 @@ namespace MemTrack
 
 #define EIGEN_DONT_ALIGN
 
+#elif UNIX
+#ifndef _GNU_SOURCE                     // Already defined by g++ 3.0 and higher.
+#define _GNU_SOURCE                     // This must be defined before including <libcwd/sys.h>
+#endif
+#include <libcwd/sys.h>                 // This must be the first header file
+// This line should actually be part of a custom "debug.h" file.  See tutorial 2.
+#include <libcwd/debug.h>
+#endif // WINDOWS or UNIX
 #endif // MEMORY_DEBUG
-#endif // WINDOWS
 #endif // _MEMORYDEBUG_HPP_
