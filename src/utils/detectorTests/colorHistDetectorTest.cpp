@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "colorHistDetectorTest.hpp"
 
 void ColorHistDetectorTest::train(vector <Frame*> _frames, map <string, float> params)

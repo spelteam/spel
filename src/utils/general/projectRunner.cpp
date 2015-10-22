@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "projectRunner.hpp"
 
 ProjectRunner::ProjectRunner(string _testName)

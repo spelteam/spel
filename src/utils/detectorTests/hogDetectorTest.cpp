@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "hogDetectorTest.hpp"
 
 void HoGDetectorTest::train(vector <Frame*> _frames, map <string, float> params)

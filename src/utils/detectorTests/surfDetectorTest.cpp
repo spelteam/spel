@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "surfDetectorTest.hpp"
 
 void SURFDetectorTest::train(vector <Frame*> _frames, map <string, float> params)
