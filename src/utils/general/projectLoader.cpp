@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "projectLoader.hpp"
 #include "imagesimilaritymatrix.hpp"
 #include "lockframe.hpp"
