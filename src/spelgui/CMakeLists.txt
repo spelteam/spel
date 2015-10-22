@@ -161,9 +161,7 @@ target_link_libraries( ${SPELGUI_MODULE}
     ${SPEL_MODULE}
     ${OpenCV_LIBS}
     ${HDF5_LIBRARIES}
-IF ( UNIX AND MEMORY_DEBUG )
     ${LibCWD_LIBRARIES}
-ENDIF ()
 )
 
 # Hide console window on Windows system
