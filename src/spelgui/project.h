@@ -1,5 +1,7 @@
 #ifndef PROJECT_H
 #define PROJECT_H
+// SPEL definitions
+#include "predef.hpp"
 
 #include <QObject>
 #include <QDomDocument>
