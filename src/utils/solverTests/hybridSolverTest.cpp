@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include <iostream>
 #include <nskpsolver.hpp>
 #include <tlpssolver.hpp>

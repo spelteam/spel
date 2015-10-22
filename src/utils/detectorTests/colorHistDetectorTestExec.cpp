@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include "colorHistDetectorTest.hpp"
 
 int main(int argc, char **argv)

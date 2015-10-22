@@ -1,5 +1,6 @@
 // SPEL definitions
 #include "predef.hpp"
+
 #include <gtest/gtest.h>
 #ifdef WINDOWS
 #include <conio.h>

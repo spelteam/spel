@@ -1,3 +1,6 @@
+// SPEL definitions
+#include "predef.hpp"
+
 #include <iostream>
 #include "colorHistDetectorTest.hpp"
 #include "hogDetectorTest.hpp"
