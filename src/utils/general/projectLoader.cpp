@@ -443,10 +443,10 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
-  outFileName += "img/";
+//  outFileName += "img/";
   CreateDirectorySystemIndependent(outFileName);
-  outFileName += "frameSolvlets/";
-  CreateDirectorySystemIndependent(outFileName);
+//  outFileName += "frameSolvlets/";
+//  CreateDirectorySystemIndependent(outFileName);
   stringstream ss;
   ss << frame->getID();
   ss << ".png";
@@ -541,7 +541,7 @@ bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
 //  outFileName += "img/";
-//  CreateDirectorySystemIndependent(outFileName);
+  CreateDirectorySystemIndependent(outFolder);
 //  outFileName += "lockframeSolvlets/";
 //  CreateDirectorySystemIndependent(outFileName);
 

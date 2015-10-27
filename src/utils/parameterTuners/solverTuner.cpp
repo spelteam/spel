@@ -894,10 +894,10 @@ int main (int argc, char **argv)
                 if(frame->getParentFrameID()!=-1)
                 {
                     Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-                    gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/").c_str(), Scalar(0,0,255), 2);
+                    gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+solverNames[param]+"/").c_str(), Scalar(0,0,255), 2);
                 }
                 else
-                    gtLoader.drawFrameSolvlets(fSolve[row], frame, (baseOutFolder+"/").c_str(), Scalar(0,0,255), 2);
+                    gtLoader.drawFrameSolvlets(fSolve[row], frame, (baseOutFolder+"/"+solverNames[param]+"/").c_str(), Scalar(0,0,255), 2);
             }
             cout << "done!" << endl;
             delete frame;
