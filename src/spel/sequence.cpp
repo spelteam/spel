@@ -59,6 +59,13 @@ namespace SPEL
     return frames_;
   }
 
+  Frame* Sequence::getFrame(uint32_t id) const
+  {
+      Frame* frame=frames.at(id);
+      return frame->clone(new Frame());
+
+  }
+
   void Sequence::setFrames(const std::vector<Frame *> _frames)
   {
     for (auto f : frames)

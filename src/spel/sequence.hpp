@@ -33,6 +33,7 @@ namespace SPEL
     virtual int getID(void) const;
     virtual void setID(const int& _id);
     virtual std::vector<Frame*> getFrames(void) const;
+    virtual Frame* getFrame(uint32_t id) const;
     virtual void setFrames(const std::vector<Frame*> _frames);
     ///compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
     virtual void computeInterpolation(std::map<std::string, float> &params);

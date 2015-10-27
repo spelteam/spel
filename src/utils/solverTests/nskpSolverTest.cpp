@@ -104,7 +104,7 @@ int main (int argc, char **argv)
     string ismFile(projectLoader.getProjectTitle()+".ism");
     if(!ism.read(ismFile))
     {
-        ism.buildImageSimilarityMatrix(vFrames, 288);
+        ism.buildImageSimilarityMatrix(vFrames, params.at("maxFrameHeight"));
         ism.write(ismFile);
         exit(0);
     }

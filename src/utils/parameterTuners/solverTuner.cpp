@@ -19,7 +19,7 @@
 using namespace std;
 using namespace SPEL;
 
-Mat computeErrorToGT(vector<Solvlet> solves, vector<Frame*> keyframes) //return squared error from solve to GT
+Mat computeErrorToGT(const vector<Solvlet>& solves, vector<Frame*> keyframes) //return squared error from solve to GT
 {
     Mat errorMatrix;
     if(solves.size()>keyframes.size())
@@ -850,22 +850,26 @@ int main (int argc, char **argv)
         // Store the time difference between start and end
         auto diffSolve = endSolve - endSeqBuild;
 
-        cout << "Squence solved in " << chrono::duration <double, milli> (diffSolve).count()  << " ms" << endl;
+        cout << "Sequence solved in " << chrono::duration <double, milli> (diffSolve).count()  << " ms" << endl;
 
         //now do the error solve and file output logic
 
         Mat errors; //used for storing errors
+        cerr << "Computing Errors to GT..." << endl;
         if(fSolve.size()>0)
             errors = computeErrorToGT(fSolve, gtFrames);
+        cerr << "done!" << endl;
 
         if(paramName=="Solver")
-            out << solverNames.at(param) << " " << chrono::duration <double, milli> (diffSolve).count() << endl;
+            out << solverNames.at(param) << "  " << chrono::duration <double, milli> (diffSolve).count() << endl;
         else
-            out << param << " " << chrono::duration <double, milli> (diffSolve).count() << endl;
+            out << param << "  " << chrono::duration <double, milli> (diffSolve).count() << endl;
         out << "{" << endl;
 
+        cout << "Saving errors..." << endl;
         for(auto row=0; row<errors.rows; ++row)
         {
+            cerr << "Processing error row " << row << endl;
             Frame* frame = seq.getFrames()[fSolve[row].getFrameID()];
 
             //this is a row in the output file
@@ -884,15 +888,21 @@ int main (int argc, char **argv)
             }
             out << endl; //newline at the end of the block
 
-//            //don't draw solutions
-//            if(frame->getParentFrameID()!=-1)
-//            {
-//                Frame* parent = seq.getFrames()[frame->getParentFrameID()];
-//                gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
-//            }
-//            else
-//                gtLoader.drawFrameSolvlets(fSolve[row], frame, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
+            cout << "Drawing solutions..." << endl;
+            if(paramName=="Solver") //draw solutions if we are doing optimal solves
+            {
+                if(frame->getParentFrameID()!=-1)
+                {
+                    Frame* parent = seq.getFrames()[frame->getParentFrameID()];
+                    gtLoader.drawLockframeSolvlets(ism, fSolve[row], frame, parent, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
+                }
+                else
+                    gtLoader.drawFrameSolvlets(fSolve[row], frame, (baseOutFolder+"/"+to_string(param)+"/").c_str(), Scalar(0,0,255), 2);
+            }
+            cout << "done!" << endl;
+            delete frame;
         }
+        cerr << "Error saved!" << endl;
 
         out << "}" << endl;
         //release errors

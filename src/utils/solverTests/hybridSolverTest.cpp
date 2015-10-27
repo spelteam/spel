@@ -60,10 +60,12 @@ int main (int argc, char **argv)
     //solve with some default params
     //ImageSimilarityMatrix ism(vFrames);
     ImageSimilarityMatrix ism;
-    if(!ism.read("testISM.ism"))
+    string ismFile(projectLoader.getProjectTitle()+".ism");
+    if(!ism.read(ismFile))
     {
-        ism.buildImageSimilarityMatrix(vFrames);
-        ism.write(("testISM.ism"));
+        ism.buildImageSimilarityMatrix(vFrames, params.at("maxFrameHeight"));
+        ism.write(ismFile);
+        exit(0);
     }
     //global settings
     params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
