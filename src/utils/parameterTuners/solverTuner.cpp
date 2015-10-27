@@ -696,7 +696,7 @@ int main (int argc, char **argv)
         params.emplace("hybridIters", 1);
 
         params.emplace("useOptimalKeyframes", 1); //use optimal keyframes by default
-        params.emplace("percentKeyframes", 10); //do a 10% keyframe solve by default
+        params.emplace("percentKeyframes", 4); //do a 10% keyframe solve by default
 
         //generate keyframe suggestions
         auto startSuggestions = chrono::steady_clock::now();
