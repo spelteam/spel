@@ -140,7 +140,7 @@ namespace SPEL
         std::cout << "Interpolating slice " << sliceNumber << std::endl;
       std::vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
 
-      int maxSeqSize = 20;
+      int maxSeqSize = 100;
       if(seqSlice.size()>=maxSeqSize) //change this to a parameter later
       {
           std::cout << "Skipping slice " << sliceNumber << " since it is of length " << seqSlice.size() << " and over the maximum of " << maxSeqSize << "." << std::endl;
