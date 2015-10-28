@@ -10,12 +10,14 @@
 // OpenCV
 #include <opencv2/opencv.hpp>
 
+#include "spelObject.hpp"
+
 namespace SPEL
 {
   /// Objects of this class used as elements for building a skeleton model
   /// See [[Skeleton]].hpp for more info
 
-  class BodyJoint
+  class BodyJoint : public SpelObject
   {
   public:
     BodyJoint(void) noexcept;

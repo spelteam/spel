@@ -5,9 +5,6 @@ namespace SPEL
 {
   Detector::Detector(void) noexcept
   {
-#ifdef DEBUG
-    debugLevel = 5;
-#endif // DEBUG
   }
 
   Detector::~Detector(void) noexcept
@@ -304,16 +301,6 @@ namespace SPEL
     std::vector <Score> s;
     s.push_back(Score(score, detectorName, _usedet));
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
-  }
-
-  void Detector::setDebugLevel(const uint8_t &_debugLevel) noexcept
-  {
-    debugLevel = _debugLevel;
-  }
-
-  uint8_t Detector::getDebugLevel(void) const noexcept
-  {
-    return debugLevel;
   }
 
   Frame *Detector::getFrame(const int32_t &frameId) const noexcept

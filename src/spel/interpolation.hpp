@@ -12,8 +12,8 @@ namespace SPEL
   class Interpolation : public Frame
   {
   public:
-    Interpolation(void);
-    virtual ~Interpolation(void);
+    Interpolation(void) noexcept;
+    virtual ~Interpolation(void) noexcept;
   };
 }
 #endif  // _INTERPOLATION_HPP_

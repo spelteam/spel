@@ -25,12 +25,12 @@ namespace SPEL
   public:
 
     ///constructors
-    ImageSimilarityMatrix(void);
-    ImageSimilarityMatrix(const ImageSimilarityMatrix& m);
+    ImageSimilarityMatrix(void) noexcept;
+    ImageSimilarityMatrix(const ImageSimilarityMatrix& m) noexcept;
     ImageSimilarityMatrix(const std::vector<Frame*>& frames);
 
     ///destructor
-    virtual ~ImageSimilarityMatrix(void);
+    virtual ~ImageSimilarityMatrix(void) noexcept;
 
     virtual void buildImageSimilarityMatrix(const std::vector<Frame*>& frames, int maxFrameHeight = 0);
     virtual void buildMaskSimilarityMatrix(const std::vector<Frame*>& frames, int maxFrameHeight = 0);

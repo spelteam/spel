@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "skeleton.hpp"
+#include "spelObject.hpp"
 
 namespace SPEL
 {
@@ -22,7 +23,7 @@ namespace SPEL
     INTERPOLATIONFRAME = 2
   };
 
-  class Frame
+  class Frame : public SpelObject
   {
   public:
     Frame(void) noexcept;

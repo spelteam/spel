@@ -2,11 +2,11 @@
 
 namespace SPEL
 {
-  ImageSimilarityMatrix::ImageSimilarityMatrix(void)
+  ImageSimilarityMatrix::ImageSimilarityMatrix(void) noexcept
   {
     //nothing to do
   }
-  ImageSimilarityMatrix::~ImageSimilarityMatrix(void)
+  ImageSimilarityMatrix::~ImageSimilarityMatrix(void) noexcept
   {
     imageSimilarityMatrix.release();
     imageShiftMatrix.release();
@@ -18,7 +18,7 @@ namespace SPEL
     buildImageSimilarityMatrix(frames);
   }
 
-  ImageSimilarityMatrix::ImageSimilarityMatrix(const ImageSimilarityMatrix& m)
+  ImageSimilarityMatrix::ImageSimilarityMatrix(const ImageSimilarityMatrix& m) noexcept
   {
     //by default use colour
     imageSimilarityMatrix = m.imageSimilarityMatrix;
@@ -28,7 +28,6 @@ namespace SPEL
   //get ISM value at (row, col)
   float ImageSimilarityMatrix::at(int row, int col) const
   {
-
     if (row >= imageSimilarityMatrix.rows)
     {
       std::cerr << "ISM contains " << imageSimilarityMatrix.rows << " rows, cannot request row " << std::endl; //<< to_string(row) << end;

@@ -14,8 +14,8 @@ namespace SPEL
   class Keyframe : public Frame
   {
   public:
-    Keyframe(void);
-    virtual ~Keyframe(void);
+    Keyframe(void) noexcept;
+    virtual ~Keyframe(void) noexcept;
   };
 
 }

@@ -13,8 +13,8 @@ namespace SPEL
   class Lockframe : public Frame
   {
   public:
-    Lockframe(void);
-    virtual ~Lockframe(void);
+    Lockframe(void) noexcept;
+    virtual ~Lockframe(void) noexcept;
   };
 }
 

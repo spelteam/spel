@@ -9,13 +9,14 @@
 
 #include "bodyJoint.hpp"
 #include "spelHelper.hpp"
+#include "spelObject.hpp"
 
 namespace SPEL
 {
   /// Objects of this class used as elements for building a skeleton model
   /// See [[Skeleton]].hpp for more info
 
-  class BodyPart
+  class BodyPart : public SpelObject
   {
   public:
     BodyPart(void) noexcept;
