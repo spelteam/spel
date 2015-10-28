@@ -395,7 +395,7 @@ namespace SPEL
   float HogDetector::compare(const BodyPart &bodyPart, const PartModel &model, const uint8_t &nbins) const
   {
     auto score = 0.0f;
-    auto totalcount = 0U;
+    auto count = 0.0f;
     for (const auto &framePartModels : partModels)
     {
       PartModel partModel;
@@ -419,7 +419,6 @@ namespace SPEL
           std::cerr << ERROR_HEADER << ss.str() << std::endl;
         throw std::logic_error(ss.str());
       }
-      auto count = 0U;
       for (auto i = 0U; i < model.gradientStrengths.size(); i++)
       {
         if (model.gradientStrengths.at(i).size() != partModel.gradientStrengths.at(i).size())
@@ -451,7 +450,7 @@ namespace SPEL
         }
       }
     }
-    return (score / static_cast<float>(totalcount));
+    return (score / count);
   }
 
   std::map <uint32_t, std::map <uint32_t, HogDetector::PartModel>> HogDetector::getPartModels(void) const noexcept
