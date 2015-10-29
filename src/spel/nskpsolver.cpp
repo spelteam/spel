@@ -265,7 +265,7 @@ namespace SPEL
         //            bool isBound=false;
         //            //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
         //            //and is the frame we are propagating from, a keyframe? (check only if we disallow bind to lockframes
-        //            if(abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
+        //            if(std::abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
         //                    (bindToLockframes || (frames[frameId]->getFrametype()==KEYFRAME))) //and whether we are actually allowed to bind
         //                isBound=true;
 
@@ -919,7 +919,7 @@ namespace SPEL
       {
         int thatFrame = j->x;
 
-        if (abs(thisFrame - thatFrame) < minKeyframeDist)
+        if (std::abs(thisFrame - thatFrame) < minKeyframeDist)
         {
           isOk = false;
           break;

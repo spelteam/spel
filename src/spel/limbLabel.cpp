@@ -117,7 +117,7 @@ namespace SPEL
     for_each(scores.begin(), scores.end(), [&](Score s)
     {
       count++;
-      sum += (bNegativeToPositive ? abs(s.getScore()) : s.getScore()) * s.getCoeff();
+      sum += (bNegativeToPositive ? std::abs(s.getScore()) : s.getScore()) * s.getCoeff();
     });
 
     //float result = ((count > 0) ? (sum / count) : 0.0f);

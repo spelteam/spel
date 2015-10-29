@@ -306,7 +306,7 @@ namespace SPEL
           }
         }
 
-        // maskSimilarityScore+=abs(mOne-mTwo);
+        // maskSimilarityScore+=std::abs(mOne-mTwo);
 
         if (mOne^mTwo) //maximum penalty if they are different
         {
@@ -442,7 +442,7 @@ namespace SPEL
         if(!blackPixel || !darkPixel)
             unionCount++;
 
-        //maskSimilarityScore += abs(mOne - mTwo);
+        //maskSimilarityScore += std::abs(mOne - mTwo);
       }
     }
     maskSimilarityScore =(float) intersectCount/(float)unionCount;

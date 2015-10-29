@@ -156,7 +156,7 @@ namespace SPEL
             if (counter.at(i / cellSize.height).at(j / cellSize.width) == 0)
               partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) = 0;
             else
-              partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) /= ((float)counter.at(i / cellSize.height).at(j / cellSize.width));
+              partModel.gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) /= (static_cast<float>(counter.at(i / cellSize.height).at(j / cellSize.width)));
           }
         }
       }

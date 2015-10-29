@@ -446,7 +446,7 @@ namespace SPEL
             auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
             if (!blackPixel)
             { // Scan the possible rotation zone
-              auto deltaTheta = abs(iteratorBodyPart.getRotationSearchRange());
+              auto deltaTheta = std::abs(iteratorBodyPart.getRotationSearchRange());
               auto maxLocalTheta = iteratorBodyPart.getRotationSearchRange() == 0 ? maxTheta : deltaTheta;
               auto minLocalTheta = iteratorBodyPart.getRotationSearchRange() == 0 ? minTheta : deltaTheta;
               // build  the vector label
