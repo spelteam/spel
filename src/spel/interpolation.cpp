@@ -2,11 +2,11 @@
 
 namespace SPEL
 {
-  Interpolation::Interpolation(void) : Frame(INTERPOLATIONFRAME)
+  Interpolation::Interpolation(void) noexcept : Frame(INTERPOLATIONFRAME)
   {
   }
 
-  Interpolation::~Interpolation(void)
+  Interpolation::~Interpolation(void) noexcept
   {
   }
 

@@ -1,4 +1,7 @@
 // All-in-one header
+#ifndef _SPEL_HPP_
+#define _SPEL_HPP_
+
 // SPEL definitions
 #include "predef.hpp"
 
@@ -24,5 +27,9 @@
 #include "solver.hpp"
 #include "solvlet.hpp"
 #include "spelHelper.hpp"
+#include "spelParameters.hpp"
+#include "spelObject.hpp"
 #include "surfDetector.hpp"
 #include "tlpssolver.hpp"
+
+#endif // _SPEL_HPP_

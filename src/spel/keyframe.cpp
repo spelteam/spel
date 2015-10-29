@@ -3,11 +3,11 @@
 namespace SPEL
 {
 
-  Keyframe::Keyframe(void) : Frame(KEYFRAME)
+  Keyframe::Keyframe(void) noexcept : Frame(KEYFRAME)
   {
   }
   
-  Keyframe::~Keyframe(void)
+  Keyframe::~Keyframe(void) noexcept
   {
   }
 }

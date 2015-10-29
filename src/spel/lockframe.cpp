@@ -2,11 +2,11 @@
 
 namespace SPEL
 {
-  Lockframe::Lockframe(void) : Frame(LOCKFRAME)
+  Lockframe::Lockframe(void) noexcept : Frame(LOCKFRAME)
   {
   }
 
-  Lockframe::~Lockframe(void)
+  Lockframe::~Lockframe(void) noexcept
   {
   }
 }
