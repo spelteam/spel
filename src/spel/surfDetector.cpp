@@ -1,7 +1,5 @@
 #include "surfDetector.hpp"
 
-#define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
-
 namespace SPEL
 {
 
@@ -60,7 +58,7 @@ namespace SPEL
 
       workFrame->Resize(maxFrameHeight);
 
-      if (debugLevel >= 2)
+      if (SpelObject::getDebugLevel() >= 2)
         std::cout << "Training on frame " << workFrame->getID() << std::endl;
 
       try
@@ -103,9 +101,8 @@ namespace SPEL
     {
       delete detectorHelper;
       std::stringstream ss;
-      ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
-      if (debugLevel >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      ss << "Couldn't detect keypoints for frame " << frame->getID();
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
 
@@ -138,9 +135,8 @@ namespace SPEL
     if (keyPoints.empty())
     {
       std::stringstream ss;
-      ss << ERROR_HEADER << "Couldn't detect keypoints for frame " << frame->getID();
-      if (debugLevel >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      ss << "Couldn't detect keypoints for frame " << frame->getID();
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
 
@@ -149,22 +145,18 @@ namespace SPEL
       auto *joint = skeleton.getBodyJoint(part.getParentJoint());
       if (joint == 0)
       {
-        std::stringstream ss;
-        ss << "Invalid parent joint";
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
+        const std::string str = "Invalid parent joint";
+        DebugMessage(str, 1);
+        throw std::logic_error(str);
       }
       auto j0 = joint->getImageLocation();
       joint = 0;
       joint = skeleton.getBodyJoint(part.getChildJoint());
       if (joint == 0)
       {
-        std::stringstream ss;
-        ss << "Invalid child joint";
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
+        const std::string str = "Invalid child joint";
+        DebugMessage(str, 1);
+        throw std::logic_error(str);
       }
       auto j1 = joint->getImageLocation();
       try
@@ -176,8 +168,7 @@ namespace SPEL
         std::stringstream ss;
         ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part.getPartID() << std::endl;
         ss << "\t" << err.what();
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
     }
@@ -199,24 +190,31 @@ namespace SPEL
         partModel.keyPoints.push_back(kp);
 
     if (partModel.keyPoints.empty())
-      if (debugLevel >= 2)
-        std::cerr << ERROR_HEADER << "Couldn't detect keypoints of body part " << bodyPart.getPartID() << std::endl;
-      else
-      {
+    {
+      std::stringstream ss;
+      ss << "Couldn't detect keypoints of body part " << bodyPart.getPartID();
+      DebugMessage(ss.str(), 2);
+    }
+    else
+    {
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
-        auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
+      auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
 #else
-        auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
+      auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
-        extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
+      extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
 #else
-        cv::SurfDescriptorExtractor extractor;
-        extractor.compute(imgMat, partModel.keyPoints, partModel.descriptors);
+      cv::SurfDescriptorExtractor extractor;
+      extractor.compute(imgMat, partModel.keyPoints, partModel.descriptors);
 #endif // OpenCV_VERSION_MAJOR == 3
-        if (partModel.descriptors.empty() && debugLevel >= 2)
-          std::cerr << ERROR_HEADER << "Couldn't compute descriptors of body part " << bodyPart.getPartID() << std::endl;
+      if (partModel.descriptors.empty())
+      {
+        std::stringstream ss;
+        ss << "Couldn't compute descriptors of body part " << bodyPart.getPartID();
+        DebugMessage(ss.str(), 2);
       }
+    }
     return partModel;
   }
 
@@ -261,8 +259,8 @@ namespace SPEL
   {
     if (model.descriptors.empty())
     {
-      if (debugLevel >= 2)
-        std::cerr << ERROR_HEADER << "Model descriptors are empty" << std::endl;
+      const std::string str = "Model descriptors are empty";
+      DebugMessage(str, 2);
       return -1.0f;
     }
 
@@ -286,15 +284,15 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Can't find part model for body part " << bodyPart.getPartID();
-        if (debugLevel > 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
 
       if (partModel.descriptors.empty() || model.descriptors.empty())
       {
-        if (debugLevel >= 2)
-          std::cerr << ERROR_HEADER << "PartModel descriptors of body part [" << bodyPart.getPartID() << "] are empty" << std::endl;
+        std::stringstream ss;       
+        ss << "PartModel descriptors of body part [" << bodyPart.getPartID() << "] are empty";
+        DebugMessage(ss.str(), 2);
       }
       else
       {
@@ -316,14 +314,16 @@ namespace SPEL
           }
           else
           {
-            if (debugLevel >= 1)
-              std::cerr << ERROR_HEADER << "Can't match descriptors of body part [" << bodyPart.getPartID() << "]: Not enough descriptors" << std::endl;
+            std::stringstream ss;
+            ss << "Can't match descriptors of body part [" << bodyPart.getPartID() << "]: Not enough descriptors";
+            DebugMessage(ss.str(), 1);
           }
         }
         catch (...)
         {
-          if (debugLevel >= 1)
-            std::cerr << ERROR_HEADER << "Can't match descriptors of body part [" << bodyPart.getPartID() << "]" << std::endl;
+          std::stringstream ss;
+          ss << "Can't match descriptors of body part [" << bodyPart.getPartID() << "]";
+          DebugMessage(ss.str(), 1);
         }
       }
     }

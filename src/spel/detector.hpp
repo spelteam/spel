@@ -38,7 +38,7 @@ namespace SPEL
     virtual ~DetectorHelper(void) noexcept;
   };
 
-  class Detector : public SpelObject
+  class Detector
   {
   public:
     Detector(void) noexcept;

@@ -16,7 +16,7 @@ namespace SPEL
   /// Objects of this class used as elements for building a skeleton model
   /// See [[Skeleton]].hpp for more info
 
-  class BodyPart : public SpelObject
+  class BodyPart
   {
   public:
     BodyPart(void) noexcept;

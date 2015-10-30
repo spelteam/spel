@@ -23,7 +23,7 @@ namespace SPEL
     INTERPOLATIONFRAME = 2
   };
 
-  class Frame : public SpelObject
+  class Frame
   {
   public:
     Frame(void) noexcept;

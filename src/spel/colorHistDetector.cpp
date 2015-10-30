@@ -1,6 +1,5 @@
 #include "colorHistDetector.hpp"
 
-#define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 namespace SPEL
 {
   // PartModel Constructor 
@@ -412,9 +411,9 @@ namespace SPEL
     }
     if (bFind == false)
     {
-      if (debugLevel >= 1)
-        std::cerr << ERROR_HEADER << "No neither keyframes nor lockframes" << std::endl;
-      throw std::logic_error("No neither keyframes nor lockframes");
+      const std::string str = "No neither keyframes nor lockframes";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
     }
 
     tree <BodyPart> partTree;
@@ -434,18 +433,16 @@ namespace SPEL
 
       if (workFrame == nullptr)
       {
-        std::stringstream ss;
-        ss << "Unknown frame found";
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
+        const std::string str = "Unknown frame found";
+        DebugMessage(str, 1);        
+        throw std::logic_error(str);
       }
 
       workFrame = frameNum->clone(workFrame);
 
       workFrame->Resize(maxFrameHeight);
 
-      if (debugLevel >= 2)
+      if (SpelObject::getDebugLevel() >= 2)
         std::cout << "Training on frame " << workFrame->getID() << std::endl;
       // Create local variables
       std::map <int32_t, std::vector <cv::Point3i>> partPixelColours; // the set of RGB-colours of pixel's for current body part
@@ -465,18 +462,18 @@ namespace SPEL
         auto joint = skeleton.getBodyJoint(bodyPart.getParentJoint()); // the parent node of current body part pointer 
         if (joint == 0)
         {
-          if (debugLevel >= 1)
-            std::cerr << ERROR_HEADER << "Invalid parent joint" << std::endl;
-          break; // a joint has no marking on the frame
+          const std::string str = "Invalid parent joint";
+          DebugMessage(str, 1);          
+          throw std::logic_error(str); // a joint has no marking on the frame
         }
         auto j0 = joint->getImageLocation(); // coordinates of current joint
         joint = 0;
         joint = skeleton.getBodyJoint(bodyPart.getChildJoint()); // the child node of current body part pointer
         if (joint == 0)
         {
-          if (debugLevel >= 1)
-            std::cerr << ERROR_HEADER << "Invalid child joint" << std::endl;
-          break; // a joint has no marking on the frame
+          const std::string str = "Invalid child joint";
+          DebugMessage(str, 1);          
+          throw std::logic_error(str); // a joint has no marking on the frame
         }
         auto j1 = joint->getImageLocation(); // coordinates of current joint
         auto direction = j1 - j0; // used as estimation of the vector's direction
@@ -504,8 +501,7 @@ namespace SPEL
           {
             std::stringstream ss;
             ss << "Couldn't get imgMat value of indeces " << "[" << j << "][" << i << "]";
-            if (debugLevel >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            DebugMessage(ss.str(), 1);
             throw std::out_of_range(ss.str());
           }
           // Copy the current pixel colour components
@@ -521,8 +517,7 @@ namespace SPEL
           {
             std::stringstream ss;
             ss << "Couldn't get maskMat value of indeces " << "[" << j << "][" << i << "]";
-            if (debugLevel >= 1)
-              std::cerr << ERROR_HEADER << ss.str() << std::endl;
+            DebugMessage(ss.str(), 1);
             throw std::out_of_range(ss.str());
           }
           auto blackPixel = mintensity < 10;
@@ -595,7 +590,7 @@ namespace SPEL
         partModel.addPartHistogram(partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
         partModel.addBackgroundHistogram(bgPixelColoursVector); // building histograms for current bodypart background colours
         partModels.at(partNumber) = partModel; // copy result to part models set
-        if (debugLevel >= 2)
+        if (SpelObject::getDebugLevel() >= 2)
           std::cout << "Found part model: " << partNumber << std::endl;
       }
       delete workFrame;
@@ -642,11 +637,9 @@ namespace SPEL
     std::map <int32_t, cv::Mat> tempPixelDistributions;
     if (width != mwidth || height != mheight) // error if mask and image sizes don't match
     {
-      std::stringstream ss;
-      ss << "Mask size not equal image size";
-      if (debugLevel >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::logic_error(ss.str());
+      const std::string str = "Mask size not equal image size";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
     }
     // For all bodyparts
     for (const auto &bodyPart : partTree)
@@ -677,8 +670,7 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Maybe couldn't find partModel " << partID;
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
       tempPixelDistributions.insert(std::pair <int32_t, cv::Mat>(partID, t)); // add the current bodypart matrix to the set 
@@ -707,8 +699,7 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Couldn't find distributions for body part " << bodyPart.getPartID();
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
       // For all pixels
@@ -734,8 +725,7 @@ namespace SPEL
               {
                 std::stringstream ss;
                 ss << "Couldn't find pixel distributions for body part " << i.getPartID();
-                if (debugLevel >= 1)
-                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                DebugMessage(ss.str(), 1);
                 throw std::out_of_range(ss.str());
               }
               try
@@ -748,8 +738,7 @@ namespace SPEL
               {
                 std::stringstream ss;
                 ss << "Couldn't find value of temp " << "[" << y << "][" << x << "]";
-                if (debugLevel >= 1)
-                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                DebugMessage(ss.str(), 1);
                 throw std::out_of_range(ss.str());
               }
             }
@@ -761,8 +750,7 @@ namespace SPEL
             {
               std::stringstream ss;
               ss << "Couldn't find t " << "[" << y << "][" << x << "] or tt [" << y << "][" << x << "]";
-              if (debugLevel >= 1)
-                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              DebugMessage(ss.str(), 1);
               throw std::out_of_range(ss.str());
             }
           }
@@ -776,8 +764,7 @@ namespace SPEL
             {
               std::stringstream ss;
               ss << "Couldn't find value of t " << "[" << y << "][" << x << "]";
-              if (debugLevel >= 1)
-                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              DebugMessage(ss.str(), 1);
               throw std::out_of_range(ss.str());
             }
           }
@@ -807,17 +794,14 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Couldn't get partModel of bodyPart " << bodyPart.getPartID();
-      if (debugLevel >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
     if (model.getAvgSampleSizeFg() == 0) // error if samples count is zero
     {
-      std::stringstream ss;
-      ss << "Couldn't get avgSampleSizeFg";
-      if (debugLevel >= 2)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::out_of_range(ss.str());
+      const std::string str = "Couldn't get avgSampleSizeFg";
+      DebugMessage(str, 1);
+      throw std::out_of_range(str);
     }
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
@@ -830,8 +814,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "]";
-      if (debugLevel >= 2)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
     // Scan the area near the bodypart center
@@ -861,8 +844,7 @@ namespace SPEL
               {
                 std::stringstream ss;
                 ss << "Can't get maskMat [" << j << "][" << i << "]";
-                if (debugLevel >= 2)
-                  std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                DebugMessage(ss.str(), 1);               
                 throw std::out_of_range(ss.str());
               }
               auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
@@ -879,8 +861,7 @@ namespace SPEL
                 {
                   std::stringstream ss;
                   ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << j << "][" << i << "]";
-                  if (debugLevel >= 2)
-                    std::cerr << ERROR_HEADER << ss.str() << std::endl;
+                  DebugMessage(ss.str(), 1);
                   throw std::out_of_range(ss.str());
                 }
                 pixelsInMask++; // counting pixels within the mask
@@ -899,10 +880,8 @@ namespace SPEL
       inMaskSupportScore = static_cast<float>(totalPixelLabelScore) / static_cast<float>(pixelsInMask);
       return 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + inMaskSuppWeight * inMaskSupportScore);
     }
-    std::stringstream ss;
-    ss << "Dirty label!";
-    if (debugLevel >= 2)
-      std::cerr << ERROR_HEADER << ss.str() << std::endl;
+    const std::string str = "Dirty label!";
+    DebugMessage(str, 2);
     return -1.0f;
   }
 

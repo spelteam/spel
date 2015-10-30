@@ -162,7 +162,7 @@ namespace SPEL
 
       for (uint32_t i = 0; i < detectors.size(); ++i)
       {
-          detectors[i]->setDebugLevel(0);
+//          detectors[i]->setDebugLevel(0);
           detectors[i]->train(trainingFrames, params);
       }
 

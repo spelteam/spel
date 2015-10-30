@@ -1,6 +1,5 @@
 #include "detector.hpp"
 
-#define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
 namespace SPEL
 {
   Detector::Detector(void) noexcept
@@ -92,9 +91,7 @@ namespace SPEL
         {
           std::stringstream ss;
           ss << "Couldn't get value of indeces " << "[" << x << "][" << y << "] from indeces [" << p.x << "][" << p.y << "]";
-#ifdef DEBUG
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-#endif  // DEBUG
+          DebugMessage(ss.str(), 1);
           throw std::out_of_range(ss.str());
         }
       }
@@ -108,8 +105,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Can't merge vectors with different sizes (different count of BodyPart): First: " << first.size() << " Second: " << second.size();
-      if (debugLevel > 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     if (first.size() == 0)
@@ -348,11 +344,9 @@ namespace SPEL
 
     if (workFrame == nullptr)
     {
-      std::stringstream ss;
-      ss << "Unknown frame found";
-      if (debugLevel >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
-      throw std::logic_error(ss.str());
+      const std::string str = "Unknown frame found";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
     }
 
     workFrame = frame->clone(workFrame);
@@ -384,11 +378,9 @@ namespace SPEL
       }
       catch (...)
       {
-        std::stringstream ss;
-        ss << "Can't get joints";
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::out_of_range(ss.str());
+        const std::string str = "Can't get joints";
+        DebugMessage(str, 1);
+        throw std::out_of_range(str);
       }
 
       auto boneLength = getBoneLength(j0, j1); // distance between nodes
@@ -426,8 +418,7 @@ namespace SPEL
             {
               std::stringstream ss;
               ss << "Can't get value in maskMat at " << "[" << (int)y << "][" << (int)x << "]";
-              if (debugLevel >= 1)
-                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              DebugMessage(ss.str(), 1);
               throw std::out_of_range(ss.str());
             }
             auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold

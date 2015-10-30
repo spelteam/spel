@@ -1,7 +1,5 @@
 #include "hogDetector.hpp"
 
-#define ERROR_HEADER __FILE__ << ":" << __LINE__ << ": "
-
 namespace SPEL
 {
   HogDetector::HogDetector(void) noexcept
@@ -98,9 +96,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Can't get gradientStrengths at [" << i / cellSize.height << "][" << j / cellSize.width << "]";
-#ifdef DEBUG
-      std::cerr << ERROR_HEADER << ss.str() << std::endl;
-#endif // DEBUG
+      DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
 
@@ -139,9 +135,7 @@ namespace SPEL
       ss << "Total image rows:\t" << wndSize.height << "\tTotal image cols:\t" << wndSize.width << std::endl;
       ss << "Total descriptors:\t" << descriptors.size() << std::endl;
       ss << "Trying to get descriptor at:\t" << d << std::endl;
-#ifdef DEBUG
-      std::cerr << ERROR_HEADER << ss.str() << std::endl;
-#endif // DEBUG
+      DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
 
@@ -165,9 +159,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Can't get gradientStrengths at [" << i / cellSize.height << "][" << j / cellSize.width << "]";
-#ifdef DEBUG
-      std::cerr << ERROR_HEADER << ss.str() << std::endl;
-#endif // DEBUG
+      DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
 
@@ -191,29 +183,24 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Couldn't get partSize for part " << part.getPartID();
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
       auto *joint = skeleton.getBodyJoint(part.getParentJoint());
       if (joint == 0)
       {
-        std::stringstream ss;
-        ss << "Invalid parent joint";
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
+        const std::string str = "Invalid parent joint";
+        DebugMessage(str, 1);
+        throw std::logic_error(str);
       }
       auto j0 = joint->getImageLocation();
       joint = 0;
       joint = skeleton.getBodyJoint(part.getChildJoint());
       if (joint == 0)
       {
-        std::stringstream ss;
-        ss << "Invalid child joint";
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
-        throw std::logic_error(ss.str());
+        const std::string str = "Invalid child joint";
+        DebugMessage(str, 1);
+        throw std::logic_error(str);
       }
       auto j1 = joint->getImageLocation();
       try
@@ -225,8 +212,7 @@ namespace SPEL
         std::stringstream ss;
         ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part.getPartID() << std::endl;
         ss << "\t" << err.what();
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
     }
@@ -248,24 +234,23 @@ namespace SPEL
         auto joint = skeleton.getBodyJoint(bodyPart.getParentJoint());
         if (joint == 0)
         {
-          if (debugLevel >= 1)
-            std::cerr << ERROR_HEADER << "Invalid parent joint" << std::endl;
-          break;
+          const std::string str = "Invalid parent joint";
+          DebugMessage(str, 1);
+          throw std::logic_error(str);
         }
         auto j0 = joint->getImageLocation();
         joint = 0;
         joint = skeleton.getBodyJoint(bodyPart.getChildJoint());
         if (joint == 0)
         {
-          if (debugLevel >= 1)
-            std::cerr << ERROR_HEADER << "Invalid child joint" << std::endl;
-          break;
+          const std::string str = "Invalid child joint";
+          DebugMessage(str, 1);
+          throw std::logic_error(str);
         }
         auto j1 = joint->getImageLocation();
         auto boneLength = getBoneLength(j0, j1);
-        //TODO (Vitaliy Koshura): Check this!
-        auto boneWidth = 0.0f;
-        boneWidth = getBoneWidth(boneLength, bodyPart);
+        //TODO (Vitaliy Koshura): Check this!        
+        auto boneWidth = getBoneWidth(boneLength, bodyPart);
 
         auto maxSize = cv::Size(static_cast <uint32_t> (boneLength * resizeFactor), static_cast <uint32_t> (boneWidth * resizeFactor));
         if (result.size() > 0)
@@ -327,7 +312,7 @@ namespace SPEL
         bFirstConversion = false;
       }
 
-      if (debugLevel >= 2)
+      if (SpelObject::getDebugLevel() >= 2)
         std::cout << "Training on frame " << workFrame->getID() << std::endl;
 
       try
@@ -377,8 +362,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Can't get partSize for body part " << bodyPart.getPartID();
-      if (debugLevel >= 1)
-        std::cerr << ERROR_HEADER << ss.str() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
 
@@ -407,16 +391,14 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Can't find part model for body part " << bodyPart.getPartID();
-        if (debugLevel > 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
       if (model.gradientStrengths.size() != partModel.gradientStrengths.size())
       {
         std::stringstream ss;
         ss << "Invalid descriptor count. Need: " << model.gradientStrengths.size() << ". Have: " << partModel.gradientStrengths.size();
-        if (debugLevel >= 1)
-          std::cerr << ERROR_HEADER << ss.str() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
       for (auto i = 0U; i < model.gradientStrengths.size(); i++)
@@ -425,8 +407,7 @@ namespace SPEL
         {
           std::stringstream ss;
           ss << "Invalid descriptor count. Need: " << model.gradientStrengths.at(i).size() << ". Have: " << partModel.gradientStrengths.at(i).size();
-          if (debugLevel >= 1)
-            std::cerr << ERROR_HEADER << ss.str() << std::endl;
+          DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
         for (auto j = 0U; j < model.gradientStrengths.at(i).size(); j++)
@@ -442,8 +423,7 @@ namespace SPEL
             {
               std::stringstream ss;
               ss << "Can't get some descriptor at [" << i << "][" << j << "][" << b << "]";
-              if (debugLevel >= 1)
-                std::cerr << ERROR_HEADER << ss.str() << std::endl;
+              DebugMessage(ss.str(), 1);
               throw std::out_of_range(ss.str());
             }
           }
