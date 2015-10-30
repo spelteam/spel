@@ -7,7 +7,11 @@ namespace SPEL
   ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
   {
     if (_nBins == 0)
-      throw std::invalid_argument("nBins can't be zero");
+    {
+      const std::string str = "nBins can't be zero";
+      DebugMessage(str, 1);
+      throw std::invalid_argument(str);
+    }
 
     partHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, std::vector<float>(nBins, 0.0)));
     bgHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, std::vector<float>(nBins, 0.0)));
@@ -37,7 +41,11 @@ namespace SPEL
   uint8_t ColorHistDetector::PartModel::calculateFactor(void) const
   {
     if (nBins == 0)
-      throw std::logic_error("nBins can't be zero");
+    {
+      const std::string str = "nBins can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     return static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
   }
@@ -46,7 +54,11 @@ namespace SPEL
   float ColorHistDetector::PartModel::computePixelBelongingLikelihood(const uint8_t &r, const uint8_t &g, const uint8_t &b) const
   {
     if (nBins == 0)
-      throw std::logic_error("nBins can't be zero");
+    {
+      const std::string str = "nBins can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     // Scaling of colorspace, finding the colors interval, which now gets this color
     auto factor = calculateFactor();
@@ -57,7 +69,8 @@ namespace SPEL
     catch (...)
     {
       std::stringstream ss;
-      ss << "Couldn't find partHistogram " << "[" << (int)r / factor << "][" << (int)g / factor << "][" << (int)b / factor << "]";
+      ss << "Couldn't find partHistogram " << "[" << r / factor << "][" << g / factor << "][" << b / factor << "]";
+      DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
   }
@@ -66,7 +79,11 @@ namespace SPEL
   void ColorHistDetector::PartModel::setPartHistogram(const std::vector <cv::Point3i> &partColors)
   {
     if (nBins == 0)
-      throw std::logic_error("nBins can't be zero");
+    {
+      const std::string str = "nBins can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     // do not add sample if the number of pixels is zero
     if (partColors.size() == 0)
@@ -104,6 +121,7 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
 
@@ -133,6 +151,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partHistogram.size() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     for (auto r = 0; r < nBins; r++)
@@ -141,6 +160,7 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Wrond size of partHistogram[" << r << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
       for (auto g = 0; g < nBins; g++)
@@ -149,6 +169,7 @@ namespace SPEL
         {
           std::stringstream ss;
           ss << "Wrond size of partHistogram[" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).at(g).size() << std::endl;
+          DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
         for (auto b = 0; b < nBins; b++)
@@ -160,7 +181,11 @@ namespace SPEL
     sizeFG += static_cast <uint32_t> (partColors.size());
 
     if (sizeFG == 0)
-      std::logic_error("sizeFG can't be zero");
+    {
+      const std::string str = "sizeFG can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     fgNumSamples++;
     fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
@@ -177,6 +202,7 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
 
@@ -203,7 +229,11 @@ namespace SPEL
   float ColorHistDetector::PartModel::getAvgSampleSizeFg(void) const
   {
     if (fgNumSamples == 0 && fgSampleSizes.size() > 0)
-      std::logic_error("fgNumSamples can't be zero");
+    {
+      const std::string str = "fgNumSamples can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     auto sum = 0.0f;
     for (const auto &i : fgSampleSizes)
@@ -219,6 +249,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Incorrect parameter. s1: " << s1 << " s2: " << s2 << " Actual size: " << fgSampleSizes.size() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::invalid_argument(ss.str());
     }
     return (fgSampleSizes.at(s1) + fgSampleSizes.at(s2)) / 2.0f;
@@ -229,12 +260,17 @@ namespace SPEL
   float ColorHistDetector::PartModel::matchPartHistogramsED(const PartModel &partModelPrev) const
   {
     if (nBins == 0)
-      throw std::logic_error("nBins can't be zero");
+    {
+      const std::string str = "nBins can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     if (nBins != partModelPrev.nBins)
     {
       std::stringstream ss;
       ss << "Different nBins value. Expected: " << nBins << " Actual: " << partModelPrev.nBins << std::endl;
+      DebugMessage(ss.str(), 1);
       std::logic_error(ss.str());
     }
 
@@ -244,12 +280,14 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partHistogram.size() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     if (partModelPrev.partHistogram.size() != nBins)
     {
       std::stringstream ss;
       ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.size() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     for (auto r = 0; r < nBins; r++)
@@ -258,12 +296,14 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Wrond size of partHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
       if (partModelPrev.partHistogram.at(r).size() != nBins)
       {
         std::stringstream ss;
         ss << "Wrond size of partHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.at(r).size() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
       for (auto g = 0; g < nBins; g++)
@@ -272,12 +312,14 @@ namespace SPEL
         {
           std::stringstream ss;
           ss << "Wrond size of partHistogram [" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).at(g).size() << std::endl;
+          DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
         if (partModelPrev.partHistogram.at(r).at(g).size() != nBins)
         {
           std::stringstream ss;
           ss << "Wrond size of partHistogram [" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.at(r).at(g).size() << std::endl;
+          DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
         for (auto b = 0; b < nBins; b++)
@@ -295,13 +337,18 @@ namespace SPEL
       return;
 
     if (nBins == 0)
-      throw std::logic_error("nBins can't be zero");
+    {
+      const std::string str = "nBins can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     // unnormalise
     if (bgHistogram.size() != nBins)
     {
       std::stringstream ss;
       ss << "Wrond size of bgHistogram. Expected: " << nBins << ". Actual: " << bgHistogram.size() << std::endl;
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     for (auto r = 0; r < nBins; r++)
@@ -310,6 +357,7 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "Wrond size of bgHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << bgHistogram.at(r).size() << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
       for (auto g = 0; g < nBins; g++)
@@ -318,6 +366,7 @@ namespace SPEL
         {
           std::stringstream ss;
           ss << "Wrond size of bgHistogram[" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << bgHistogram.at(r).at(g).size() << std::endl;
+          DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
         for (auto b = 0; b < nBins; b++)
@@ -331,7 +380,11 @@ namespace SPEL
     bgSampleSizes.push_back(static_cast <uint32_t> (bgColors.size()));
 
     if (sizeBG == 0)
-      std::logic_error("sizeBG can't be zero");
+    {
+      const std::string str = "sizeBG can't be zero";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
 
     for (const auto &color : bgColors)
     {
@@ -343,6 +396,7 @@ namespace SPEL
       {
         std::stringstream ss;
         ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
 
@@ -360,9 +414,9 @@ namespace SPEL
   {
     if (_nBins == 0)
     {
-      std::stringstream ss;
-      ss << "nBins can't be zero";
-      throw std::invalid_argument(ss.str());
+      const std::string str = "nBins can't be zero";
+      DebugMessage(str, 1);
+      throw std::invalid_argument(str);
     }
     id = 0x434844;
   }
@@ -390,7 +444,11 @@ namespace SPEL
     sort(frames.begin(), frames.end(), Frame::FramePointerComparer); // sorting frames by id
 
     if (frames.size() == 0)
-      throw std::logic_error("No input frames"); // the sequence of frames is empty
+    {
+      const std::string str = "No input frames";
+      DebugMessage(str, 1);
+      throw std::logic_error(str); // the sequence of frames is empty
+    }
     partModels.clear();
     // Find skeleton from first keyframe or lockframe
     Skeleton skeleton;
@@ -899,9 +957,9 @@ namespace SPEL
     }
     catch (...)
     {
-      std::stringstream ss;
-      ss << "Wrong type: detectorHelper is not ColorHistDetectorHelper";
-      throw std::invalid_argument(ss.str());
+      const std::string str = "Wrong type: detectorHelper is not ColorHistDetectorHelper";
+      DebugMessage(str, 1);
+      throw std::invalid_argument(str);
     }
 
     auto comparer = [&]() -> float 
