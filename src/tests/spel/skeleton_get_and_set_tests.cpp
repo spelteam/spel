@@ -67,18 +67,18 @@ namespace SPEL
   TEST(skeletonTest, getBodyPart)
   {
     //Create set of parts
-    BodyPart A(0, "Head", 0, 1);
+    BodyPart A(0, "Head", 0, 1, false, 0.0f);
     A.setLWRatio(1.9f);
-    BodyPart B(1, "Left Hand", 1, 2);
+    BodyPart B(1, "Left Hand", 1, 2, false, 0.0f);
     B.setLWRatio(3.2f);
-    BodyPart C(2, "Right Hand", 1, 4);
+    BodyPart C(2, "Right Hand", 1, 4, false, 0.0f);
     C.setLWRatio(3.2f);
-    BodyPart D(3, "Trunk", 1, 3);
-    D.setLWRatio(1.454);
-    BodyPart E(4, "Left Leg", 3, 5);
-    E.setLWRatio(3.4);
-    BodyPart F(5, "Right Leg", 3, 6);
-    F.setLWRatio(3.4);
+    BodyPart D(3, "Trunk", 1, 3, false, 0.0f);
+    D.setLWRatio(1.454f);
+    BodyPart E(4, "Left Leg", 3, 5, false, 0.0f);
+    E.setLWRatio(3.4f);
+    BodyPart F(5, "Right Leg", 3, 6, false, 0.0f);
+    F.setLWRatio(3.4f);
 
     vector<BodyPart> parts;
     parts.push_back(A);
@@ -92,7 +92,7 @@ namespace SPEL
     tree<BodyPart> partTree;
     tree<BodyPart>::iterator p;
     p = partTree.begin();
-    p = partTree.append_child(p, A);
+    p = partTree.insert(p, A);
     partTree.append_child(p, B);
     partTree.append_child(p, C);
     p = partTree.append_child(p, D);
@@ -113,6 +113,7 @@ namespace SPEL
       EXPECT_EQ(parts[i].getChildJoint(), actual->getChildJoint());
       EXPECT_EQ(parts[i].getLWRatio(), actual->getLWRatio());
     }
+    parts.clear();
   }
 
 }
