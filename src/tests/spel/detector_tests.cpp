@@ -895,13 +895,6 @@ namespace SPEL
     partsRects_actual.clear();
   }
 
-  void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color)
-  {
-    polygon.push_back(polygon[0]);
-    for (int i = 1; i < polygon.size(); i++)
-      line(Image, polygon[i - 1], polygon[i], color, 1, 1);
-  }
-
   TEST(DetectorTests, getBodyPartRect_withBlockSize)
   {
     //Prepare input data

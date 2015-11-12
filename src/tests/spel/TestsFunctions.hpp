@@ -11,6 +11,7 @@ namespace SPEL
   
   const uint8_t Factor = static_cast<uint8_t> (ceil(pow(2, 8) / NBins)); // Colorspace scaling coefficient Model.nBins
 
+  void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color); // Drawing the part polygon
   map<int, POSERECT<Point2f>> SkeletonRects(Skeleton skeleton); // Build the rectangles for all of bodyparts
   POSERECT<Point2f> BuildPartRect(BodyJoint *j0, BodyJoint *j1, float LWRatio); // Build rectangle on bodypart joints
   map<int, pair<Point2f, Point2f>> getPartLocations(Skeleton skeleton); // Selecting locations of all body part from skeleton
@@ -26,6 +27,7 @@ namespace SPEL
 
   int keyFramesCount(vector<Frame*> frames); // Counting of keyframes in set of frames 
   int FirstKeyFrameNum(vector<Frame*> frames); // Returns  index of first keyframe
+
   vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1); // building a part rectangle on part joints, == DetectorGetPartRect, but used another way
   vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1, cv::Size blockSize);
 }

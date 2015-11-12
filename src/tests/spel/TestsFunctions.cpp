@@ -8,7 +8,15 @@
 #include "TestsFunctions.hpp"
   
 namespace SPEL
-{
+{  
+
+  void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color)
+  {
+    polygon.push_back(polygon[0]);
+    for (int i = 1; i < polygon.size(); i++)
+      line(Image, polygon[i - 1], polygon[i], color, 1, 1);
+  }
+
   //Build bodypart rectangle on bodypart joints
   POSERECT<Point2f> BuildPartRect(BodyJoint *j0, BodyJoint *j1, float LWRatio)
   {

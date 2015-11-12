@@ -24,13 +24,6 @@ namespace SPEL
 {
   vector<Frame*> SFrames;
 
-  void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color)
-  {
-    polygon.push_back(polygon[0]);
-    for (int i = 1; i < polygon.size(); i++)
-      line(Image, polygon[i - 1], polygon[i], color, 1, 1);
-  }
-
   vector <KeyPoint> SelectKeypoints(vector <KeyPoint> FrameKeypoints, POSERECT<Point2f> rect)
   {
     vector <KeyPoint> keyPoints;
