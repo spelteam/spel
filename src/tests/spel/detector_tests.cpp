@@ -819,4 +819,141 @@ namespace SPEL
 
   }
 
+  TEST(DetectorTests, getBodyPartRect)
+  {
+    //Prepare input data
+    vector<Point2f> p0; // parent joints locations/begin of each from parts vectors
+    vector<Point2f> p1; // child joints locations/end of each from parts vectors
+    p0.push_back(Point2f(1.0f, 1.0f)); p1.push_back(Point2f(1.2f, 0.5f));
+    p0.push_back(Point2f(2.0f, 5.0f)); p1.push_back(Point2f(5.0f, 2.0f));
+    p0.push_back(Point2f(5.0f, 2.0f)); p1.push_back(Point2f(2.0f, 5.0f));
+    p0.push_back(Point2f(5.0f, -5.0f)); p1.push_back(Point2f(2.0f, -2.0f));
+    p0.push_back(Point2f(-5.0f, -5.0f)); p1.push_back(Point2f(-2.0f, -2.0f));
+    p0.push_back(Point2f(5.0f, 1.0f)); p1.push_back(Point2f(0.0f, 0.0f));
+    p0.push_back(Point2f(1.0f, 5.0f)); p1.push_back(Point2f(0.0f, 0.0f));
+    p0.push_back(Point2f(5.0f, 0.0f)); p1.push_back(Point2f(1.0f, 0.0f));
+    float LWRatio = 1.5;
+    BodyJoint joint0(0, "j0", p0[0], Point3f(p0[0]), false);
+    BodyJoint joint1(1, "j0", p1[0], Point3f(p1[0]), false);
+    BodyPart part(0, "part1", 0, 1, false, 0);
+    part.setLWRatio(LWRatio);
+   
+    //Create expected value (used alternative function from "TestsFunctions.cpp")
+    /*
+    vector<Point2f> rect;
+    Point2f d = p0 - p1;
+    float L = sqrt(pow(p1.x - p0.x,2) + pow(p1.y - p0.y, 2));
+    float k = 0.5f/LWRatio;
+    float dx = k*(d.y);
+    float dy = k*(-d.x);
+    rect.push_back(Point2f(p0.x + dx, p0.y + dy));
+    rect.push_back(Point2f(p1.x + dx, p1.y + dy));
+    rect.push_back(Point2f(p1.x - dx, p1.y - dy));
+    rect.push_back(Point2f(p0.x - dx, p0.y - dy));
+    */
+    vector <vector<Point2f>> partsRects_expected;
+    for (unsigned int i = 0; i < p0.size(); i++)
+    {
+      vector<Point2f> temp = getPartRect(LWRatio, p0[i], p1[i]);
+      partsRects_expected.push_back(temp);
+      //temp.clear();
+    }
+
+    //Craete actual value
+    vector <vector<Point2f>> partsRects_actual;
+    ColorHistDetector D;
+    for (unsigned int i = 0; i < p0.size(); i++)
+    {
+      //joint0.setImageLocation(p0[i]);
+      //joint0.setSpaceLocation(Point3f(p0[i]));
+      //joint1.setImageLocation(p1[i]);
+      //joint1.setSpaceLocation(Point3f(p1[i]));
+      POSERECT<cv::Point2f> partRect = D.getBodyPartRect(part, p0[i], p1[i]);
+      partsRects_actual.push_back(partRect.asVector());
+    }
+
+    //Compare
+    //EXPECT_EQ(partsRects_expected, partsRects_actual);
+    float error = 0.000001;
+    for (unsigned int i = 0; i < partsRects_expected.size(); i++)
+    {
+      //cout << i << ": " << "Expected ~ Actual" << endl;
+      for (unsigned int k = 0; k < partsRects_expected[i].size(); k++)
+      {
+        //cout << partsRects_expected[i][k] << "~" << partsRects_actual[i][k] << endl;
+        //EXPECT_FLOAT_EQ(partsRects_expected[i][k].x, partsRects_actual[i][k].x);
+        //EXPECT_FLOAT_EQ(partsRects_expected[i][k].y, partsRects_actual[i][k].y);
+        EXPECT_NEAR(partsRects_expected[i][k].x, partsRects_actual[i][k].x, error);
+        EXPECT_NEAR(partsRects_expected[i][k].y, partsRects_actual[i][k].y, error);
+      }
+
+      partsRects_expected[i].clear();
+      partsRects_actual[i].clear();
+    }
+
+    partsRects_expected.clear();
+    partsRects_actual.clear();
+  }
+
+  void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color)
+  {
+    polygon.push_back(polygon[0]);
+    for (int i = 1; i < polygon.size(); i++)
+      line(Image, polygon[i - 1], polygon[i], color, 1, 1);
+  }
+
+  TEST(DetectorTests, getBodyPartRect_withBlockSize)
+  {
+    //Prepare input data
+    //Point2f p0 = Point2f(50.0f, 20.0f); // parent joint location/begin of the part vector
+    //Point2f p1 = Point2f(20.0f, 50.0f); // child joint location/end of ethe part vector
+    //Point2f p0 = Point2f(20.0f, 50.0f); // parent joint location/begin of the part vector
+    //Point2f p1 = Point2f(50.0f, 20.0f); // child joint location/end of ethe part vector
+    //Point2f p0 = Point2f(50.0f, 50.0f); // parent joint location/begin of the part vector
+    //Point2f p1 = Point2f(10.0f, 50.0f); // child joint location/end of the part vector
+    Point2f p0 = Point2f(10.0f, 50.0f); // parent joint location/begin of the part vector
+    Point2f p1 = Point2f(50.0f, 50.0f); // child joint location/end of the part vector
+
+    float LWRatio = 1.5;
+    BodyJoint joint0(0, "j0", p0, Point3f(p0), false);
+    BodyJoint joint1(1, "j0", p1, Point3f(p1), false);
+    BodyPart part(0, "part1", 0, 1, false, 0);
+    part.setLWRatio(LWRatio);
+   
+    //Create expected value (used alternative function from "TestsFunctions.cpp")
+    vector <vector<Point2f>> partsRect_expected;
+    vector<Point2f> partRect_expected = getPartRect(LWRatio, p0, p1, cv::Size(8,8));
+
+    //Craete actual value
+    ColorHistDetector D;
+    vector<Point2f> partRect_actual = D.getBodyPartRect(part, p0, p1, cv::Size(8, 8)).asVector();
+
+    Mat img1 = Mat(Size(100, 100), CV_8UC3, Scalar(255, 255, 255));
+    PutPartRect(img1, partRect_actual, Scalar(0, 0, 0));
+    PutPartRect(img1, partRect_expected, Scalar(0, 0, 255));
+    line(img1, p0, p1, Scalar(255, 0, 0), 1, 1);
+    imwrite("detector_getBodyPartRect.jpg", img1);
+
+    //POSERECT<cv::Point2f> partRect = D.getBodyPartRect(part, p0, p1);
+    //vector<Point2f> partRect_actual = partRect.asVector();
+    cout << "Expected part rect:" << endl << partRect_expected << endl;
+    cout << "Actual part rect:"<< endl << partRect_actual << endl;
+
+    cout << "Block size: 8 x 8" << endl;
+    cout << "Initial part size: ";
+    vector<Point2f> partRect = getPartRect(LWRatio, p0, p1);
+    cout << sqrt(pow(partRect[0].x - partRect[1].x, 2) + pow(partRect[0].y - partRect[1].y, 2)) << " x ";
+    cout << sqrt(pow(partRect[0].x - partRect[3].x, 2) + pow(partRect[0].y - partRect[3].y, 2)) << endl;
+    cout << "Expected part size: ";
+    cout << sqrt(pow(partRect_expected[0].x - partRect_expected[1].x, 2) + pow(partRect_expected[0].y - partRect_expected[1].y, 2)) << " x ";
+    cout << sqrt(pow(partRect_expected[0].x - partRect_expected[3].x, 2) + pow(partRect_expected[0].y - partRect_expected[3].y, 2)) << endl;
+    cout << "Actual part size: ";
+    cout << sqrt(pow(partRect_actual[0].x - partRect_actual[1].x, 2) + pow(partRect_actual[0].y - partRect_actual[1].y, 2)) << " x ";
+    cout << sqrt(pow(partRect_actual[0].x - partRect_actual[3].x, 2) + pow(partRect_actual[0].y - partRect_actual[3].y, 2)) << endl << endl;
+
+    EXPECT_EQ(partRect_expected, partRect_actual);
+    partRect_expected.clear();
+    partRect_actual.clear();
+  }
+
 }

@@ -1,6 +1,10 @@
 #ifndef _IMAGESIMILARITYMATRIX_HPP_
 #define _IMAGESIMILARITYMATRIX_HPP_
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
+
 // SPEL definitions
 #include "predef.hpp"
 
@@ -57,6 +61,10 @@ namespace SPEL
     virtual cv::Mat clone(); //return a Mat clone of ISM
 
   protected:
+#ifdef DEBUG
+    FRIEND_TEST(ImageSimilarityMatrixTests_, computeISMcell);
+    FRIEND_TEST(ImageSimilarityMatrixTests_, computeMSMcell);
+#endif  // DEBUG
 
     virtual void computeMSMcell(Frame* left, Frame* right, int maxFrameHeight);
     virtual void computeISMcell(Frame* left, Frame* right, int maxFrameHeight);

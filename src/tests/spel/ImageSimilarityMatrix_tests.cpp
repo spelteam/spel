@@ -19,11 +19,18 @@ namespace SPEL
   {
   public:
     Mat getImageShiftMatrix();
+    float ISMCell(Frame* left, Frame* right, int maxFrameHeight);
   };
 
   Mat TestSMatrix::getImageShiftMatrix()
   {
     return imageShiftMatrix;
+  }
+
+  float TestSMatrix::ISMCell(Frame* left, Frame* right, int maxFrameHeight)
+  {
+    computeISMcell(left, right, maxFrameHeight);
+    return imageSimilarityMatrix.at<float>(left->getID(), right->getID());
   }
 
   class ImageSimilarityMatrixTests : public testing::Test
@@ -199,16 +206,159 @@ namespace SPEL
     Y_ShiftMatrix.release();
   }
 
-  /*
-  TEST_F(ImageSimilarityMatrixTests, computeISMcell)
+  TEST(ImageSimilarityMatrixTests_, computeISMcell)
   {
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "trijumpSD_100x82.xml");
+    float r = 0.5 * 135;
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
     cout << "frames.size = " << frames.size() << endl;
     cout << "Image.size = " << frames[0]->getImage().size() << endl;
     cout << "Mask.size = " << frames[0]->getMask().size() << endl;
-    ImageSimilarityMatrix ISM(frames);
-    //ISM.buildImageSimilarityMatrix(frames, 0);
-    //ISM.buildMaskSimilarityMatrix(frames);    
-  }*/
+
+    //Create expected value
+    ImageSimilarityMatrix ISM_expected(frames);
+    const float A = 3*255 * 255 * pow(r, 2)*(4 - 3.14f);
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 1) = A;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 4) = A;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 5) = A;
+    ISM_expected.imageSimilarityMatrix.at<float>(2, 3) = A;
+
+    const float B = A + pow(r,2)*255*255;
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 3) = B;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 2) = B;
+    ISM_expected.imageSimilarityMatrix.at<float>(3, 4) = B;
+    ISM_expected.imageSimilarityMatrix.at<float>(3, 5) = B;
+
+    const float C = 4 * pow(r, 2)*255*255;
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 2) = C;
+    ISM_expected.imageSimilarityMatrix.at<float>(2, 4) = C;
+    ISM_expected.imageSimilarityMatrix.at<float>(2, 5) = C;
+
+    const float D = 3.14*pow(r, 2)*255*255;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 3) = D;
+
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 4) = 0;
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 5) = 0;
+    ISM_expected.imageSimilarityMatrix.at<float>(4, 5) = 0;
+    for (unsigned int i = 0; i < frames.size(); i++)
+      ISM_expected.imageSimilarityMatrix.at<float>(i, i) = 0;
+
+    for (unsigned int i = 1; i < frames.size(); i++)
+      for (unsigned int k = 0; k <= i; k++)
+        ISM_expected.imageSimilarityMatrix.at<float>(i, k) = ISM_expected.imageSimilarityMatrix.at<float>(k, i);
+
+    ISM_expected.write("seq_ISM_expected.txt");
+
+    //Craate actual value
+    ImageSimilarityMatrix ISM_actual(frames);
+
+    //Put results
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k <= i; k++)
+      {
+        ISM_actual.computeISMcell(frames[i], frames[k], 0);
+        cout << "ISM[" << i << ", " << k << "] = ";
+        cout << ISM_actual.at(frames[i]->getID(), frames[k]->getID()) << " ~ ";
+        cout << ISM_expected.at(frames[i]->getID(), frames[k]->getID()) << endl;	 
+      }
+
+    //Compare
+    float error = 0.1e+5;
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k < frames.size(); k++)
+      {
+        ISM_actual.computeISMcell(frames[i], frames[k], 0);
+        EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
+      }	
+    ISM_expected.write("seq_ISM_actual.txt");
+
+    //Testing function "buildImageSimilarityMatrix"
+    /*
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k < frames.size(); k++)
+        ISM_actual.imageSimilarityMatrix.at<float>(i, k) = 0;
+    ISM_actual.buildImageSimilarityMatrix(frames, 0);
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k < frames.size(); k++)
+        EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
+    */
+  }
+
+  TEST(ImageSimilarityMatrixTests_, computeMSMcell)
+  {
+    //Load the input data
+      float r = 0.5 * 135;
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    cout << "frames.size = " << frames.size() << endl;
+    cout << "Image.size = " << frames[0]->getImage().size() << endl;
+    cout << "Mask.size = " << frames[0]->getMask().size() << endl;
+
+    //Create expected value
+    ImageSimilarityMatrix ISM_expected(frames);
+    const float A = 3.14f/4;
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 1) = A;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 4) = A;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 5) = A;
+    ISM_expected.imageSimilarityMatrix.at<float>(2, 3) = A;
+
+    const float B = A; //+ pow(r,2)*255*255;
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 3) = B;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 2) = B;
+    ISM_expected.imageSimilarityMatrix.at<float>(3, 4) = B;
+    ISM_expected.imageSimilarityMatrix.at<float>(3, 5) = B;
+
+    const float C = 1; //4 * pow(r, 2) * 255 * 255;
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 2) = C;
+    ISM_expected.imageSimilarityMatrix.at<float>(2, 4) = C;
+    ISM_expected.imageSimilarityMatrix.at<float>(2, 5) = C;
+
+    const float D = 1; //3.14*pow(r, 2) * 255 * 255;
+    ISM_expected.imageSimilarityMatrix.at<float>(1, 3) = D;
+
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 4) = 0;
+    ISM_expected.imageSimilarityMatrix.at<float>(0, 5) = 0;
+    ISM_expected.imageSimilarityMatrix.at<float>(4, 5) = 0;
+    for (unsigned int i = 0; i < frames.size(); i++)
+      ISM_expected.imageSimilarityMatrix.at<float>(i, i) = 0;
+
+    for (unsigned int i = 1; i < frames.size(); i++)
+      for (unsigned int k = 0; k <= i; k++)
+        ISM_expected.imageSimilarityMatrix.at<float>(i, k) = ISM_expected.imageSimilarityMatrix.at<float>(k, i);
+
+    ISM_expected.write("seq_MSM_expected.txt");
+
+    //Craate actual value
+    ImageSimilarityMatrix ISM_actual(frames);
+
+    //Put results
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k <= i; k++)
+      {
+        ISM_actual.computeISMcell(frames[i], frames[k], 0);
+        cout << "MSM[" << i << ", " << k << "] = ";
+        cout << ISM_expected.at(frames[i]->getID(), frames[k]->getID()) << " ~ ";
+        cout << ISM_actual.at(frames[i]->getID(), frames[k]->getID()) << endl;
+      }
+
+    //Compare
+    float error = 0.1e+5;
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k < frames.size(); k++)
+      {
+        ISM_actual.computeISMcell(frames[i], frames[k], 0);
+        EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
+      }	
+    ISM_expected.write("seq_MSM_actual.txt");
+    /*
+    //Testing function "buildMaskSimilarityMatrix"
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k < frames.size(); k++)
+        ISM_actual.imageSimilarityMatrix.at<float>(i,k) = 0;
+    ISM_actual.buildMaskSimilarityMatrix(frames, 0);
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k < frames.size(); k++)
+        EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
+    */
+  }
+
 }

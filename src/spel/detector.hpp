@@ -52,6 +52,8 @@ namespace SPEL
   protected:
 #ifdef DEBUG
     FRIEND_TEST(DetectorTests, getFrame);
+    FRIEND_TEST(DetectorTests, getBodyPartRect);
+    FRIEND_TEST(DetectorTests, getBodyPartRect_withBlockSize);
 #endif  // DEBUG
     std::vector <Frame*> frames;
     uint32_t maxFrameHeight;

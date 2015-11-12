@@ -26,4 +26,6 @@ namespace SPEL
 
   int keyFramesCount(vector<Frame*> frames); // Counting of keyframes in set of frames 
   int FirstKeyFrameNum(vector<Frame*> frames); // Returns  index of first keyframe
+  vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1); // building a part rectangle on part joints, == DetectorGetPartRect, but used another way
+  vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1, cv::Size blockSize);
 }

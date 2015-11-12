@@ -6,8 +6,10 @@
 #endif
 
 #include <gtest/gtest.h>
+#include "frame.hpp"
 #include "lockframe.hpp"
 #include "keyframe.hpp"
+#include "interpolation.hpp"
 #include "bodyJoint.hpp"
 #include "bodyPart.hpp"
 #include "skeleton.hpp"
@@ -320,6 +322,30 @@ namespace SPEL
     mask0.release();
     image1.release();
     mask1.release();
+  }
 
+  TEST(FramesTests, getFrametype)
+  {
+    EXPECT_EQ(-1, UNDEFINED);
+    EXPECT_EQ(0, KEYFRAME);
+    EXPECT_EQ(1 ,LOCKFRAME);
+    EXPECT_EQ(2, INTERPOLATIONFRAME);
+
+    Frame *f;
+    f = new Frame();
+    EXPECT_EQ(UNDEFINED, f->getFrametype());
+    delete f;
+
+    f = new Keyframe();
+    EXPECT_EQ(KEYFRAME, f->getFrametype());
+    delete f;
+
+    f = new Lockframe();
+    EXPECT_EQ(LOCKFRAME, f->getFrametype());
+    delete f;
+    
+    f = new Interpolation();
+    EXPECT_EQ(INTERPOLATIONFRAME, f->getFrametype());
+    delete f;
   }
 }

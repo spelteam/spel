@@ -1,6 +1,10 @@
 #ifndef _SEQUENCE_HPP_
 #define _SEQUENCE_HPP_
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
+
 // SPEL definitions
 #include "predef.hpp"
 
@@ -43,6 +47,10 @@ namespace SPEL
     virtual std::vector<Frame*> interpolateSlice(std::vector<Frame*> slice, std::map<std::string, float> params);
     virtual std::vector<Frame*> interpolateSlice2D(std::vector<Frame*> slice, std::map<std::string, float> params);
   private:
+#ifdef DEBUG
+    FRIEND_TEST(SequenceTests, CopyConstructor);
+#endif  // DEBUG
+  
     /// detection score
     std::vector<Frame*> frames;
     ///sequence name

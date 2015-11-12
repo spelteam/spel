@@ -259,4 +259,52 @@ namespace SPEL
     }
     return FirstKeyframe;
   }
+
+  vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1) // == DetectorGetPartRect, used another way
+  {
+    vector<Point2f> partRect;
+    Point2f d = p0 - p1;
+    float L = sqrt(pow(p1.x - p0.x,2) + pow(p1.y - p0.y, 2));
+    float k = 0.5f/LWRatio;
+    float dx = k*(d.y);
+    float dy = k*(-d.x);
+    partRect.push_back(Point2f(p0.x + dx, p0.y + dy));
+    partRect.push_back(Point2f(p1.x + dx, p1.y + dy));
+    partRect.push_back(Point2f(p1.x - dx, p1.y - dy));
+    partRect.push_back(Point2f(p0.x - dx, p0.y - dy));
+
+    return partRect;
+  }
+
+  vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1, cv::Size blockSize) // == DetectorGetPartRect, used another way
+  {
+    Point2f d = p0 - p1;
+    //d.x = -d.x;
+    Point2f center = 0.5*(p0 + p1);
+    float L = sqrt(pow(d.x, 2) + pow(d.y, 2));
+    float L1 = 0;
+    if (blockSize.width > 0);
+      L1 = blockSize.width * ceil(L / blockSize.width);
+    float c = L1 / L;
+    Point2f d_ = c*d;
+    //Point2f p0_ = center - 0.5*d_;
+    //Point2f p1_ = center + 0.5*d_;
+    Point2f p0_ = p0 + 0.5*(d_ - d);
+    Point2f p1_ = p1 - 0.5*(d_ - d);
+    L = L1; //more logically without this line
+    float W = L / LWRatio;
+    if (blockSize.height > 0);
+      W = blockSize.height*ceil(W / blockSize.height);
+    float k = 0.5f*W / L;
+    float dx = k*(d_.y);
+    float dy = k*(-d_.x);
+    vector<Point2f> partRect;
+    partRect.push_back(Point2f(p0_.x + dx, p0_.y + dy));
+    partRect.push_back(Point2f(p1_.x + dx, p1_.y + dy));
+    partRect.push_back(Point2f(p1_.x - dx, p1_.y - dy));
+    partRect.push_back(Point2f(p0_.x - dx, p0_.y - dy));
+
+    return partRect;
+  }
+
 }
