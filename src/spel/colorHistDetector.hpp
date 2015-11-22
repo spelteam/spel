@@ -42,19 +42,17 @@ namespace SPEL
       std::vector <uint32_t> fgBlankSizes;
       virtual PartModel &operator=(const PartModel &model) noexcept;
       virtual uint8_t calculateFactor(void) const;
-      virtual float computePixelBelongingLikelihood(const uint8_t &r, const uint8_t &g, const uint8_t &b) const;
+      virtual float computePixelBelongingLikelihood(const uint8_t r, const uint8_t g, const uint8_t b) const;
       virtual void setPartHistogram(const std::vector <cv::Point3i> &partColors);
-      virtual void addPartHistogram(const std::vector <cv::Point3i> &partColors, const uint32_t &nBlankPixels);
+      virtual void addPartHistogram(const std::vector <cv::Point3i> &partColors, const uint32_t nBlankPixels);
       virtual float getAvgSampleSizeFg(void) const;
-      virtual float getAvgSampleSizeFgBetween(const uint32_t &s1, const uint32_t &s2) const;
+      virtual float getAvgSampleSizeFgBetween(const uint32_t s1, const uint32_t s2) const;
       virtual float matchPartHistogramsED(const PartModel &partModelPrev) const;
       virtual void addBackgroundHistogram(const std::vector <cv::Point3i> &bgColors);
     };
   public:
     ColorHistDetector(uint8_t _nBins = 8);  // default is 8 for 32 bit colourspace
     virtual ~ColorHistDetector(void) noexcept;
-    virtual int getID(void) const noexcept;
-    virtual void setID(const int &_id) noexcept;
     virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float> params);
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
     virtual uint8_t getNBins(void) const noexcept;
@@ -77,7 +75,6 @@ namespace SPEL
     FRIEND_TEST(colorHistDetectorTest, detect);
     FRIEND_TEST(colorHistDetectorTest, Train);
 #endif  // DEBUG
-    int id;
   protected:
     const uint8_t nBins;
     std::map <int32_t, PartModel> partModels;

@@ -5,7 +5,7 @@ namespace SPEL
 
   SurfDetector::SurfDetector(void) noexcept
   {
-    id = 0x5344;
+    id = 0x53440000;
 #if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
     cv::initModule_nonfree();
 #endif
@@ -17,16 +17,6 @@ namespace SPEL
       for (auto &j : i.second)
         j.second.descriptors.release();
 
-  }
-
-  int SurfDetector::getID(void) const noexcept
-  {
-    return id;
-  }
-
-  void SurfDetector::setID(const int &_id) noexcept
-  {
-    id = _id;
   }
 
   void SurfDetector::train(const std::vector <Frame*> &_frames, std::map <std::string, float> params)
@@ -113,7 +103,7 @@ namespace SPEL
     return result;
   }
 
-  std::map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(const Frame *frame, const uint32_t &minHessian) const
+  std::map <uint32_t, SurfDetector::PartModel> SurfDetector::computeDescriptors(const Frame *frame, const uint32_t minHessian) const
   {
     std::map <uint32_t, PartModel> parts;
     auto skeleton = frame->getSkeleton();
@@ -175,7 +165,7 @@ namespace SPEL
     return parts;
   }
 
-  SurfDetector::PartModel SurfDetector::computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t &minHessian, const std::vector <cv::KeyPoint> &keyPoints) const
+  SurfDetector::PartModel SurfDetector::computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t minHessian, const std::vector <cv::KeyPoint> &keyPoints) const
   {
     auto boneLength = getBoneLength(j0, j1);
     auto boneWidth = getBoneWidth(boneLength, bodyPart);
@@ -255,7 +245,7 @@ namespace SPEL
     return label;
   }
 
-  float SurfDetector::compare(const BodyPart &bodyPart, const PartModel &model, const cv::Point2f &j0, const cv::Point2f &j1, const float &knnMatchCoeff) const
+  float SurfDetector::compare(const BodyPart &bodyPart, const PartModel &model, const cv::Point2f &j0, const cv::Point2f &j1, const float knnMatchCoeff) const
   {
     if (model.descriptors.empty())
     {

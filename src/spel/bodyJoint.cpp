@@ -8,7 +8,7 @@ namespace SPEL
   }
 
   // constructor with params
-  BodyJoint::BodyJoint(const int &id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc, const bool &depth) noexcept
+  BodyJoint::BodyJoint(const int id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc, const bool depth) noexcept
   {
     limbID = id;
     jointName = name;
@@ -37,11 +37,11 @@ namespace SPEL
   {
   }
 
-  BodyJoint::BodyJoint(const int & id, const std::string & name, const cv::Point2f & imgLoc) noexcept : BodyJoint(id, name, imgLoc, cv::Point3f(0.0f, 0.0f, 0.0f), false)
+  BodyJoint::BodyJoint(const int id, const std::string & name, const cv::Point2f & imgLoc) noexcept : BodyJoint(id, name, imgLoc, cv::Point3f(0.0f, 0.0f, 0.0f), false)
   {    
   }
 
-  BodyJoint::BodyJoint(const int & id, const std::string & name, const cv::Point2f & imgLoc, const cv::Point3f & spaceLoc) noexcept : BodyJoint(id, name, imgLoc, spaceLoc, false)
+  BodyJoint::BodyJoint(const int id, const std::string & name, const cv::Point2f & imgLoc, const cv::Point3f & spaceLoc) noexcept : BodyJoint(id, name, imgLoc, spaceLoc, false)
   {    
   }
 
@@ -54,7 +54,7 @@ namespace SPEL
     return limbID;
   }
 
-  void BodyJoint::setLimbID(const int &_limbID) noexcept
+  void BodyJoint::setLimbID(const int _limbID) noexcept
   {
     limbID = _limbID;
   }
@@ -94,7 +94,7 @@ namespace SPEL
     return depthSign;
   }
 
-  void BodyJoint::setDepthSign(const bool &_depthSign) noexcept
+  void BodyJoint::setDepthSign(const bool _depthSign) noexcept
   {
     depthSign = _depthSign;
   }

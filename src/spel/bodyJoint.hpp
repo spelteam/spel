@@ -23,9 +23,9 @@ namespace SPEL
     BodyJoint(void) noexcept;
     BodyJoint(const BodyJoint& bodyJoint) noexcept;
     BodyJoint(BodyJoint&& bodyJoint) noexcept;
-    BodyJoint(const int &id, const std::string &name, const cv::Point2f &imgLoc) noexcept;
-    BodyJoint(const int &id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc) noexcept;
-    BodyJoint(const int &id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc, const bool &depth) noexcept;
+    BodyJoint(const int id, const std::string &name, const cv::Point2f &imgLoc) noexcept;
+    BodyJoint(const int id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc) noexcept;
+    BodyJoint(const int id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc, const bool depth) noexcept;
     virtual ~BodyJoint(void) noexcept;
     virtual BodyJoint& operator=(const BodyJoint& bodyJoint) noexcept;
     virtual BodyJoint& operator=(BodyJoint&& bodyJoint) noexcept;
@@ -35,7 +35,7 @@ namespace SPEL
     virtual bool operator!=(const BodyJoint &bj) const noexcept;
     // All these functions just give access to this object fields
     virtual int getLimbID(void) const noexcept;
-    virtual void setLimbID(const int &_limbID) noexcept;
+    virtual void setLimbID(const int _limbID) noexcept;
     virtual std::string getJointName(void) const noexcept;
     virtual void setJointName(const std::string &_jointName) noexcept;
     virtual cv::Point2f getImageLocation(void) const noexcept;
@@ -43,7 +43,7 @@ namespace SPEL
     virtual cv::Point3f getSpaceLocation(void) const noexcept;
     virtual void setSpaceLocation(const cv::Point3f &_spaceLocation) noexcept;
     virtual bool getDepthSign(void) const noexcept;
-    virtual void setDepthSign(const bool &_depthSign) noexcept;
+    virtual void setDepthSign(const bool _depthSign) noexcept;
   private:
     /// identifier, must be unique within the limits of class
     int limbID;

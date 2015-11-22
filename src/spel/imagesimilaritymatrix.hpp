@@ -28,50 +28,41 @@ namespace SPEL
   {
   public:
 
-    ///constructors
+    ///constructor
     ImageSimilarityMatrix(void) noexcept;
-    ImageSimilarityMatrix(const ImageSimilarityMatrix& m) noexcept;
-    ImageSimilarityMatrix(const std::vector<Frame*>& frames);
-
     ///destructor
     virtual ~ImageSimilarityMatrix(void) noexcept;
 
-    virtual void buildImageSimilarityMatrix(const std::vector<Frame*>& frames, int maxFrameHeight = 0);
-    virtual void buildMaskSimilarityMatrix(const std::vector<Frame*>& frames, int maxFrameHeight = 0);
+    virtual uint32_t getID(void);
+    virtual void setID(uint32_t _id);
 
-    virtual bool read(std::string filename);
-    virtual bool write(std::string filename) const;
+    virtual uint32_t size() const noexcept = 0;
 
-    virtual float min() const;
-    virtual float mean() const;
-    virtual float max() const;
-    virtual float stddev() const;
+    virtual void buildImageSimilarityMatrix(const std::vector<Frame*>& frames, const int maxFrameHeight = 0) = 0;
+    virtual void buildMaskSimilarityMatrix(const std::vector<Frame*>& frames, const int maxFrameHeight = 0) = 0;
 
-    virtual float at(int row, int col) const;
-    virtual cv::Point2f getShift(int row, int col) const;
+    virtual bool read(const std::string &filename) noexcept = 0;
+    virtual bool write(const std::string &filename) const noexcept = 0;
+
+    virtual float min() const noexcept = 0;
+    virtual float mean() const = 0;
+    virtual float max() const noexcept = 0;
+    virtual float stddev() const = 0;
+
+    virtual float at(const int row, const int col) const = 0;
+    virtual cv::Point2f getShift(const int row, const int col) const = 0;
     ///get cost for path through ISM
-    virtual float getPathCost(std::vector<int> path) const;
-
-    virtual uint32_t size() const;
-
-    virtual bool operator==(const ImageSimilarityMatrix &s) const;
-    virtual bool operator!=(const ImageSimilarityMatrix &s) const;
-    virtual ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s);
-
-    virtual cv::Mat clone(); //return a Mat clone of ISM
+    virtual float getPathCost(const std::vector<int> &path) const = 0;
 
   protected:
 #ifdef DEBUG
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeISMcell);
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeMSMcell);
 #endif  // DEBUG
+    uint32_t id;
 
-    virtual void computeMSMcell(Frame* left, Frame* right, int maxFrameHeight);
-    virtual void computeISMcell(Frame* left, Frame* right, int maxFrameHeight);
-    ///the image similarity matrix
-    cv::Mat imageSimilarityMatrix;
-    cv::Mat imageShiftMatrix;
-
+    virtual void computeMSMcell(const Frame* left, const Frame* right, const int maxFrameHeight) = 0;
+    virtual void computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight) = 0;
   };
 }
 #endif  // _IMAGESIMILARITYMATRIX_HPP_

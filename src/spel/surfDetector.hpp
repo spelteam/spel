@@ -50,8 +50,6 @@ namespace SPEL
   public:
     SurfDetector(void) noexcept;
     virtual ~SurfDetector(void) noexcept;
-    virtual int getID(void) const noexcept;
-    virtual void setID(const int &_id) noexcept;
     virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float>);
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
     virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) const noexcept;
@@ -64,14 +62,13 @@ namespace SPEL
     FRIEND_TEST(surfDetectorTests, generateLabel);
     //FRIEND_TEST(surfDetectorTests, detect);
 #endif  // DEBUG
-    int id;
   protected:
     std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
 
-    virtual std::map <uint32_t, PartModel> computeDescriptors(const Frame *frame, const uint32_t &minHessian) const;
-    virtual PartModel computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t &minHessian, const std::vector <cv::KeyPoint> &keyPoints) const;
+    virtual std::map <uint32_t, PartModel> computeDescriptors(const Frame *frame, const uint32_t minHessian) const;
+    virtual PartModel computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t minHessian, const std::vector <cv::KeyPoint> &keyPoints) const;
     virtual LimbLabel generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const;
-    virtual float compare(const BodyPart &bodyPart, const PartModel &model, const cv::Point2f &j0, const cv::Point2f &j1, const float &knnMatchCoeff) const;
+    virtual float compare(const BodyPart &bodyPart, const PartModel &model, const cv::Point2f &j0, const cv::Point2f &j1, const float knnMatchCoeff) const;
   };
 }
 

@@ -4,10 +4,21 @@ namespace SPEL
 {
   Detector::Detector(void) noexcept
   {
+    id = 0x00000000;
   }
 
   Detector::~Detector(void) noexcept
   {
+  }
+
+  int Detector::getID(void) const noexcept
+  {
+    return id;
+  }
+
+  void Detector::setID(const int _id)
+  {
+    id = _id;
   }
 
   float Detector::getBoneLength(const cv::Point2f &begin, const cv::Point2f &end) const noexcept
@@ -15,7 +26,7 @@ namespace SPEL
     return (begin == end) ? 1.0f : static_cast<float>(sqrt(spelHelper::distSquared(begin, end)));
   }
 
-  float Detector::getBoneWidth(const float &length, const BodyPart &bodyPart) const noexcept
+  float Detector::getBoneWidth(const float length, const BodyPart &bodyPart) const noexcept
   {
     auto ratio = bodyPart.getLWRatio();
     if (ratio == 0.0f)
@@ -68,7 +79,7 @@ namespace SPEL
     return POSERECT <cv::Point2f>(c1, c2, c3, c4);
   }
 
-  cv::Mat Detector::rotateImageToDefault(const cv::Mat &imgSource, const POSERECT <cv::Point2f> &initialRect, const float &angle, const cv::Size &size) const
+  cv::Mat Detector::rotateImageToDefault(const cv::Mat &imgSource, const POSERECT <cv::Point2f> &initialRect, const float angle, const cv::Size &size) const
   {
     auto partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
     auto center = initialRect.GetCenter<cv::Point2f>();
@@ -299,7 +310,7 @@ namespace SPEL
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, score == -1.0f);
   }
 
-  Frame *Detector::getFrame(const int32_t &frameId) const noexcept
+  Frame *Detector::getFrame(const int32_t frameId) const noexcept
   {
     for (auto f : frames)
       if (f->getID() == frameId)
@@ -458,7 +469,7 @@ namespace SPEL
     return merge(limbLabels, tempLabelVector, sortedLabelsMap);
   }
 
-  LimbLabel Detector::generateLabel(const float &boneLength, const float &rotationAngle, const float &x, const float &y, const BodyPart &bodyPart, const Frame *workFrame, DetectorHelper *detectorHelper, std::map <std::string, float> params) const
+  LimbLabel Detector::generateLabel(const float boneLength, const float rotationAngle, const float x, const float y, const BodyPart &bodyPart, const Frame *workFrame, DetectorHelper *detectorHelper, std::map <std::string, float> params) const
   {
     // Create a new label vector and build it label
     auto p0 = cv::Point2f(0.0f, 0.0f); // the point of unit vector
@@ -472,7 +483,7 @@ namespace SPEL
     return generateLabel(bodyPart, workFrame, p0, p1, detectorHelper, params); // build  the vector label
   }
 
-  std::vector<LimbLabel> Detector::filterLimbLabels(const std::vector <LimbLabel> &sortedLabels, const float &uniqueLocationCandidates, const float &uniqueAngleCandidates) const
+  std::vector<LimbLabel> Detector::filterLimbLabels(const std::vector <LimbLabel> &sortedLabels, const float uniqueLocationCandidates, const float uniqueAngleCandidates) const
   {
     if (uniqueLocationCandidates < 0.0f || uniqueLocationCandidates > 1.0f || uniqueAngleCandidates < 0.0f || uniqueAngleCandidates > 1.0f)
       return sortedLabels;

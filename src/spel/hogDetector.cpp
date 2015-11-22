@@ -4,7 +4,7 @@ namespace SPEL
 {
   HogDetector::HogDetector(void) noexcept
   {
-    id = 0x4844;
+    id = 0x48440000;
   }
 
   HogDetector::~HogDetector(void) noexcept
@@ -14,17 +14,7 @@ namespace SPEL
         pp.second.partImage.release();
   }
 
-  int HogDetector::getID(void) const noexcept
-  {
-    return id;
-  }
-
-  void HogDetector::setID(const int &_id) noexcept
-  {
-    id = _id;
-  }
-
-  HogDetector::PartModel HogDetector::computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const int &nbins, const cv::Size &wndSize, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double &wndSigma, const double &thresholdL2hys, const bool &gammaCorrection, const int &nlevels, const int &derivAperture, const int &histogramNormType, const bool &bGrayImages) const
+  HogDetector::PartModel HogDetector::computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const int nbins, const cv::Size &wndSize, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double wndSigma, const double thresholdL2hys, const bool gammaCorrection, const int nlevels, const int derivAperture, const int histogramNormType, const bool bGrayImages) const
   {
     auto boneLength = getBoneLength(j0, j1);
     if (boneLength < blockSize.width)
@@ -166,7 +156,7 @@ namespace SPEL
     return partModel;
   }
 
-  std::map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(const Frame *frame, const int &nbins, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double &wndSigma, const double &thresholdL2hys, const bool &gammaCorrection, const int &nlevels, const int &derivAperture, const int &histogramNormType, const bool &bGrayImages) const
+  std::map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(const Frame *frame, const int nbins, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double wndSigma, const double thresholdL2hys, const bool gammaCorrection, const int nlevels, const int derivAperture, const int histogramNormType, const bool bGrayImages) const
   {
     std::map <uint32_t, PartModel> parts;
     cv::Size wndSize;
@@ -376,7 +366,7 @@ namespace SPEL
     return Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useHoGdet, comparer);
   }
 
-  float HogDetector::compare(const BodyPart &bodyPart, const PartModel &model, const uint8_t &nbins) const
+  float HogDetector::compare(const BodyPart &bodyPart, const PartModel &model, const uint8_t nbins) const
   {
     auto score = 0.0f;
     auto count = 0.0f;

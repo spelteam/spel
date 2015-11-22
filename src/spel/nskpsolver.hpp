@@ -32,7 +32,7 @@
 #include "tlpssolver.hpp"
 #include "solver.hpp"
 #include "frame.hpp"
-#include "imagesimilaritymatrix.hpp"
+#include "imagepixelsimilaritymatrix.hpp"
 #include "minspanningtree.hpp"
 
 namespace SPEL

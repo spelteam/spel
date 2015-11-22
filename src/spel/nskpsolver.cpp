@@ -26,7 +26,7 @@ namespace SPEL
   std::vector<Solvlet> NSKPSolver::solve(Sequence& sequence, std::map<std::string, float> params) //inherited virtual
   {
     //compute the ISM here
-    ImageSimilarityMatrix ISM(sequence.getFrames());
+    ImagePixelSimilarityMatrix ISM(sequence.getFrames());
 
     //pass to solve function
     return this->solve(sequence, params, ISM);

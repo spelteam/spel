@@ -51,7 +51,7 @@ namespace SPEL
   }
 
   // Returns relative frequency of the RGB-color reiteration in "PartModel" 
-  float ColorHistDetector::PartModel::computePixelBelongingLikelihood(const uint8_t &r, const uint8_t &g, const uint8_t &b) const
+  float ColorHistDetector::PartModel::computePixelBelongingLikelihood(const uint8_t r, const uint8_t g, const uint8_t b) const
   {
     if (nBins == 0)
     {
@@ -142,7 +142,7 @@ namespace SPEL
   }
 
   // Take stock of the additional set of colors in the histogram
-  void ColorHistDetector::PartModel::addPartHistogram(const std::vector <cv::Point3i> &partColors, const uint32_t &nBlankPixels)
+  void ColorHistDetector::PartModel::addPartHistogram(const std::vector <cv::Point3i> &partColors, const uint32_t nBlankPixels)
   {
     if (partColors.size() == 0) //do not add sample if the number of pixels is zero
       return;
@@ -243,7 +243,7 @@ namespace SPEL
   }
 
   // Averaging the number of samples, that united from two sets
-  float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(const uint32_t &s1, const uint32_t &s2) const
+  float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(const uint32_t s1, const uint32_t s2) const
   {
     if (s1 >= fgSampleSizes.size() || s2 >= fgSampleSizes.size())
     {
@@ -418,23 +418,11 @@ namespace SPEL
       DebugMessage(str, 1);
       throw std::invalid_argument(str);
     }
-    id = 0x434844;
+    id = 0x43484400;
   }
 
   ColorHistDetector::~ColorHistDetector(void) noexcept
   {
-  }
-
-  // Returns unique ID of "ColorHistDetector" object
-  int ColorHistDetector::getID(void) const noexcept
-  {
-    return id;
-  }
-
-  // Change ID of "ColorHistDetector" object
-  void ColorHistDetector::setID(const int &_id) noexcept
-  {
-    id = _id;
   }
 
   // Builds a histograms of all polygons for pre-marked frames
