@@ -24,6 +24,12 @@ namespace SPEL
   ImagePixelSimilarityMatrix::~ImagePixelSimilarityMatrix(void) noexcept
   {    
   }
+
+  ImagePixelSimilarityMatrix & ImagePixelSimilarityMatrix::operator=(const ImagePixelSimilarityMatrix & s) noexcept
+  {
+    ImageSimilarityMatrix::operator=(s);
+    return *this;
+  }
   
   void ImagePixelSimilarityMatrix::computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight)
   {

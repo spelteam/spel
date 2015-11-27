@@ -21,6 +21,8 @@ namespace SPEL
 
     ///destructor
     virtual ~ImageHogSimilarityMatrix(void) noexcept;
+
+    virtual ImageHogSimilarityMatrix & operator=(const ImageHogSimilarityMatrix &s) noexcept;
   protected:
     const uint8_t nbins = 9;
     cv::Size blockSize = cv::Size(16, 16);

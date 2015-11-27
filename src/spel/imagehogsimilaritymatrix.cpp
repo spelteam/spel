@@ -19,6 +19,11 @@ namespace SPEL
   ImageHogSimilarityMatrix::~ImageHogSimilarityMatrix(void) noexcept
   {
   }
+  ImageHogSimilarityMatrix & ImageHogSimilarityMatrix::operator=(const ImageHogSimilarityMatrix & s) noexcept
+  {
+    ImageSimilarityMatrix::operator=(s);
+    return *this;
+  }
   void ImageHogSimilarityMatrix::computeISMcell(const Frame * left, const Frame * right, const int maxFrameHeight)
   {
     auto i = left->getID(), j = right->getID();

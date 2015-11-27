@@ -23,6 +23,12 @@ namespace SPEL
   {
   }
 
+  ImageMaskSimilarityMatrix & ImageMaskSimilarityMatrix::operator=(const ImageMaskSimilarityMatrix & s) noexcept
+  {
+    ImageSimilarityMatrix::operator=(s);
+    return *this;
+  }
+
   void ImageMaskSimilarityMatrix::computeISMcell(const Frame * left, const Frame * right, const int maxFrameHeight)
   {
     auto i = left->getID(), j = right->getID();

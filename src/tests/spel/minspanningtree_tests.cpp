@@ -9,7 +9,7 @@
 #include <tree_util.hh>
 
 #include "frame.hpp"
-#include "imagesimilaritymatrix.hpp"
+#include "imagepixelsimilaritymatrix.hpp"
 #include "minspanningtree.hpp"
 #include "TestsFunctions.hpp"
 
@@ -140,7 +140,7 @@ namespace SPEL
   TEST(MinSpanningTree, build)
   {
     //Read testing ISM matrix
-    ImageSimilarityMatrix ISM;
+    ImagePixelSimilarityMatrix ISM;
     bool b;
     string FilePath = "speltests_TestData/SimilarityMatrixTestsData/";
 #if defined(WINDOWS) && defined(_MSC_VER)
@@ -185,7 +185,7 @@ namespace SPEL
   TEST(MinSpanningTree, MinSpanningTree)
   {  
     //Read testing ISM matrix
-    ImageSimilarityMatrix ISM;
+    ImagePixelSimilarityMatrix ISM;
     bool b;
     string FilePath = "speltests_TestData/SimilarityMatrixTestsData/";
 #if defined(WINDOWS) && defined(_MSC_VER)

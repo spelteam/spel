@@ -6,7 +6,7 @@
 #endif
 
 #include <gtest/gtest.h>
-#include "imagesimilaritymatrix.hpp"
+#include "imagepixelsimilaritymatrix.hpp"
 #include "TestsFunctions.hpp"
 
 
@@ -15,7 +15,7 @@ using namespace cv;
 
 namespace SPEL
 {
-  class TestSMatrix : public ImageSimilarityMatrix
+  class TestSMatrix : public ImagePixelSimilarityMatrix
   {
   public:
     Mat getImageShiftMatrix();
@@ -47,7 +47,7 @@ namespace SPEL
     }
 
     String FilePath;
-    ImageSimilarityMatrix A;
+    ImagePixelSimilarityMatrix A;
     bool a;
   };
 
@@ -100,7 +100,7 @@ namespace SPEL
 
   TEST_F(ImageSimilarityMatrixTests, Operators)
   {
-    ImageSimilarityMatrix B, C;
+    ImagePixelSimilarityMatrix B, C;
     bool b, c;
 
     b = B.read(FilePath + "In_Matrix.txt");
@@ -216,7 +216,7 @@ namespace SPEL
     cout << "Mask.size = " << frames[0]->getMask().size() << endl;
 
     //Create expected value
-    ImageSimilarityMatrix ISM_expected(frames);
+    ImagePixelSimilarityMatrix ISM_expected(frames);
     const float A = 3*255 * 255 * pow(r, 2)*(4 - 3.14f);
     ISM_expected.imageSimilarityMatrix.at<float>(0, 1) = A;
     ISM_expected.imageSimilarityMatrix.at<float>(1, 4) = A;
@@ -250,7 +250,7 @@ namespace SPEL
     ISM_expected.write("seq_ISM_expected.txt");
 
     //Craate actual value
-    ImageSimilarityMatrix ISM_actual(frames);
+    ImagePixelSimilarityMatrix ISM_actual(frames);
 
     //Put results
     for (unsigned int i = 0; i < frames.size(); i++)
@@ -294,7 +294,7 @@ namespace SPEL
     cout << "Mask.size = " << frames[0]->getMask().size() << endl;
 
     //Create expected value
-    ImageSimilarityMatrix ISM_expected(frames);
+    ImagePixelSimilarityMatrix ISM_expected(frames);
     const float A = 3.14f/4;
     ISM_expected.imageSimilarityMatrix.at<float>(0, 1) = A;
     ISM_expected.imageSimilarityMatrix.at<float>(1, 4) = A;
@@ -328,7 +328,7 @@ namespace SPEL
     ISM_expected.write("seq_MSM_expected.txt");
 
     //Craate actual value
-    ImageSimilarityMatrix ISM_actual(frames);
+    ImagePixelSimilarityMatrix ISM_actual(frames);
 
     //Put results
     for (unsigned int i = 0; i < frames.size(); i++)
