@@ -100,7 +100,7 @@ int main (int argc, char **argv)
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params
     //ImageSimilarityMatrix ism(vFrames);
-    ImageSimilarityMatrix ism;
+    ImagePixelSimilarityMatrix ism;
     string ismFile(projectLoader.getProjectTitle()+".ism");
     if(!ism.read(ismFile))
     {
