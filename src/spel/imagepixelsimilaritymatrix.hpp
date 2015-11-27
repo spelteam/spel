@@ -14,13 +14,11 @@ namespace SPEL
     ///constructors
     ImagePixelSimilarityMatrix(void) noexcept;
     ImagePixelSimilarityMatrix(const ImagePixelSimilarityMatrix &m) noexcept;
-    ImagePixelSimilarityMatrix(const std::vector<Frame*> &frames) noexcept;
+    ImagePixelSimilarityMatrix(const std::vector<Frame*> &frames);
     ImagePixelSimilarityMatrix(ImagePixelSimilarityMatrix &&m) noexcept;
     ///destructor
     virtual ~ImagePixelSimilarityMatrix(void) noexcept;
   protected:
-
-    virtual void computeMSMcell(const Frame* left, const Frame* right, const int maxFrameHeight);
     virtual void computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight);
   };
 }

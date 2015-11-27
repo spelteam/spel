@@ -14,7 +14,7 @@ namespace SPEL
     ///constructors
     ImageHogSimilarityMatrix(void) noexcept;
     ImageHogSimilarityMatrix(const ImageHogSimilarityMatrix &m) noexcept;
-    ImageHogSimilarityMatrix(const std::vector<Frame*> &frames) noexcept;
+    ImageHogSimilarityMatrix(const std::vector<Frame*> &frames);
     ImageHogSimilarityMatrix(ImageHogSimilarityMatrix &&m) noexcept;
 
     ///destructor
@@ -33,6 +33,9 @@ namespace SPEL
     cv::Size padding = cv::Size(32, 32);
     int derivAperture = 1;
     int histogramNormType = cv::HOGDescriptor::L2Hys;
+
+    // Inherited via ImageSimilarityMatrix
+    virtual void computeISMcell(const Frame * left, const Frame * right, const int maxFrameHeight);
   };
 }
 

@@ -59,7 +59,6 @@ namespace SPEL
     virtual cv::Point2f getShift(const int row, const int col) const;
     ///get cost for path through ISM
     virtual float getPathCost(const std::vector<int> &path) const;
-    virtual cv::Point2f calculateDistance(const cv::Mat &imgMatOne, const cv::Mat &imgMatTwo) const noexcept;
 
     virtual cv::Mat clone() const noexcept; //return a Mat clone of ISM
   protected:
@@ -73,6 +72,7 @@ namespace SPEL
     cv::Mat imageSimilarityMatrix;
     cv::Mat imageShiftMatrix;
 
+    virtual cv::Point2f calculateDistance(const cv::Mat &imgMatOne, const cv::Mat &imgMatTwo) const noexcept;
     virtual void computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight) = 0;
   };
 }
