@@ -238,7 +238,7 @@ namespace posegui {
     params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
     params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
     //nskp solver solve
-    ImageSimilarityMatrix ism;
+    ImagePixelSimilarityMatrix ism;
     if (!ism.read("testISM.ism"))
     {
       ism.buildImageSimilarityMatrix(getFrames());
