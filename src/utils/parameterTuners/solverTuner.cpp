@@ -515,7 +515,7 @@ int main (int argc, char **argv)
 
     vector <Frame*> gtFrames = gtLoader.getFrames(); //the ground truth frames to compare against
 
-    ImageSimilarityMatrix ism;
+    ImagePixelSimilarityMatrix ism;
     string ismFile("ism/"+gtLoader.getProjectTitle()+".ism");
     if(!ism.read(ismFile))
     {

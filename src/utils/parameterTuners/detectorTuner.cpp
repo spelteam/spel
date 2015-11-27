@@ -135,7 +135,7 @@ vector<map<uint32_t, vector<LimbLabel> > > doInterpolationDetect(vector<Detector
     return allLabels;
 }
 
-vector<map<uint32_t, vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detectors, vector<Frame*> vFrames, ImageSimilarityMatrix ism, map<string,float> params)
+vector<map<uint32_t, vector<LimbLabel> > > doPropagationDetect(vector<Detector*> detectors, vector<Frame*> vFrames, const ImageSimilarityMatrix &ism, map<string,float> params)
 {
     vector<map<uint32_t, vector<LimbLabel> > > allLabels;
     //vector<Solvlet> solvlets;
@@ -376,7 +376,7 @@ int main (int argc, char **argv)
 
     vector <Frame*> gtFrames = gtLoader.getFrames(); //the ground truth frames to compare against
 
-    ImageSimilarityMatrix ism;
+    ImagePixelSimilarityMatrix ism;
     string ismFile("ism/"+gtLoader.getProjectTitle()+".ism");
     if(!ism.read(ismFile))
     {
