@@ -14,7 +14,7 @@ namespace SPEL
     ///constructors
     ImageMaskSimilarityMatrix(void) noexcept;
     ImageMaskSimilarityMatrix(const ImageMaskSimilarityMatrix &m) noexcept;
-    ImageMaskSimilarityMatrix(const std::vector<Frame*> &frames) noexcept;
+    ImageMaskSimilarityMatrix(const std::vector<Frame*> &frames);
     ImageMaskSimilarityMatrix(ImageMaskSimilarityMatrix &&m) noexcept;
 
     ///destructor
