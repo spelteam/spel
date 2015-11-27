@@ -348,6 +348,7 @@ namespace SPEL
 
   std::vector<std::vector<std::vector<float>>> HogDetector::calculateHog(const cv::Mat & image, std::vector<float>& descriptors, const cv::Size & wndSize, const cv::Size & blockSize, const cv::Size & blockStride, const cv::Size & cellSize, const int nbins, const int derivAperture, const double wndSigma, const int histogramNormType, const double thresholdL2hys, const bool gammaCorrection, const int nlevels)
   {
+    descriptors.clear();
     cv::HOGDescriptor detector(wndSize, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
 
     detector.compute(image, descriptors);

@@ -4,7 +4,9 @@
 // SPEL definitions
 #include "predef.hpp"
 
+// SPEL
 #include "imagesimilaritymatrix.hpp"
+#include "hogDetector.hpp"
 
 namespace SPEL
 {
@@ -24,7 +26,6 @@ namespace SPEL
     cv::Size blockSize = cv::Size(16, 16);
     cv::Size blockStride = cv::Size(8, 8);
     cv::Size cellSize = cv::Size(8, 8);
-    cv::Size wndSize = cv::Size(64, 128);
     double wndSigma = -1;
     double thresholdL2hys = 0.2;
     bool gammaCorrection = true;
