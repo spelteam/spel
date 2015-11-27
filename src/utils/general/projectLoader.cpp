@@ -533,7 +533,7 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   return imwrite(outFileName, image);
 }
 
-bool ProjectLoader::drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
+bool ProjectLoader::drawLockframeSolvlets(const ImageSimilarityMatrix &ism, Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
 {
   //draw
   CreateDirectorySystemIndependent(outFolder);

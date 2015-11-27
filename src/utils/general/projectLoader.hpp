@@ -44,7 +44,7 @@ public:
   bool Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame, string outFolder, int frameID, Scalar color, Scalar optimalColor, int lineWidth);
   bool drawSkeleton(Frame *frame, string outFolder, Scalar color, int lineWidth);
   bool drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolder, Scalar color, int lineWidth);
-  bool drawLockframeSolvlets(ImageSimilarityMatrix ism, Solvlet sol, Frame *frame, Frame * parentframe, string outFolder, Scalar color, int lineWidth);  
+  bool drawLockframeSolvlets(const ImageSimilarityMatrix &ism, Solvlet sol, Frame *frame, Frame * parentframe, string outFolder, Scalar color, int lineWidth);  
   void static ResizeImage(Mat &image, int32_t &cols, int32_t &rows);
   vector <Frame*> getFrames(void);
   string getProjectTitle();
