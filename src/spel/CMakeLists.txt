@@ -40,6 +40,7 @@ LIST ( APPEND ${SPEL_MODULE}_SRC sequence.cpp )
 LIST ( APPEND ${SPEL_MODULE}_SRC spelObject.cpp )
 LIST ( APPEND ${SPEL_MODULE}_SRC imagepixelsimilaritymatrix.cpp )
 LIST ( APPEND ${SPEL_MODULE}_SRC imagehogsimilaritymatrix.cpp )
+LIST ( APPEND ${SPEL_MODULE}_SRC imagemasksimilaritymatrix.cpp )
 
 LIST ( APPEND ${SPEL_MODULE}_HDR bodyJoint.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR bodyPart.hpp )
@@ -69,6 +70,7 @@ LIST ( APPEND ${SPEL_MODULE}_HDR tlpssolver.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR spelObject.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR imagepixelsimilaritymatrix.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR imagehogsimilaritymatrix.hpp )
+LIST ( APPEND ${SPEL_MODULE}_HDR imagemasksimilaritymatrix.hpp )
 
 # Create a static library
 ADD_LIBRARY ( ${SPEL_MODULE} STATIC ${${SPEL_MODULE}_SRC} ${${SPEL_MODULE}_HDR} )

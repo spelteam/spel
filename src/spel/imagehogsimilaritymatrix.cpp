@@ -2,8 +2,8 @@
 
 namespace SPEL
 {
-  /*ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(void) noexcept : ImageSimilarityMatrix()
+  ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(void) noexcept : ImageSimilarityMatrix()
   {
     id = 0x4948534D;
-  }*/
+  }
 }
