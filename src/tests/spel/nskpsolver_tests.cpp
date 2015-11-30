@@ -298,6 +298,7 @@ namespace SPEL
   }
 
   // "buildFrameMSTs" and "computeISMcell" don't work with current dataset
+  // Call of "propagateFrame" causes crash tests??
   // This test crashed and don't checked 
   TEST(nskpsolverTests, solve_0)
   {
@@ -321,7 +322,7 @@ namespace SPEL
   }
 
 
-  // DISABLED - call of "buildFrameMSTs" or "computeISMcell" causes crash tests??
+  // DISABLED - call of "propagateFrame" causes crash tests??
   // This test crashed and don't checked 
   TEST(nskpsolverTests, DISABLED_solve_1) 
   {
@@ -343,7 +344,7 @@ namespace SPEL
     CompareSolves(Solves, Frames, testISM);
   }
 
-  // DISABLED - call of "buildFrameMSTs" or "computeISMcell" causes crash tests??
+  // DISABLED - call of "propagateFrame" causes crash tests??
   // This test crashed and don't checked 
   TEST(nskpsolverTests, DISABLED_solve_2)
   {
@@ -365,7 +366,7 @@ namespace SPEL
     CompareSolves(Solves, Frames, testISM);
   }
 
-  // DISABLED - call of "buildFrameMSTs" or "computeISMcell" causes crash tests??
+  // DISABLED - call of "propagateFrame" causes crash tests??
   // This test crashed and don't checked 
   TEST(nskpsolverTests, propagateKeyframes)
   {
@@ -385,7 +386,7 @@ namespace SPEL
       trees.push_back(MinSpanningTree(MST));
     }
 
-    // Run "solve"
+    // Run "propagateKeyframes"
     int frameID = 0; // Select the frame as root frame for propagation
     NSKPSolver solver;
     std::vector<int> ignore;
