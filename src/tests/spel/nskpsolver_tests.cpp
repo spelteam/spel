@@ -10,6 +10,8 @@
 #include "bodyPart.hpp"
 #include "skeleton.hpp"
 #include "spelHelper.hpp"
+#include "TestsFunctions.hpp"
+#include "imagesimilaritymatrix.hpp"
 
 #include <iostream>
 
@@ -199,4 +201,200 @@ namespace SPEL
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
     cout << ExpectedValue << " ~ " << ActualValue << "\n";
   }
+
+  // Testing "propagateFrame" function.
+  // "ImagePixelSimilarityMatrix", "computeISMcell" - produce error and crash the test,
+  // - replaced by alternative buildISM function from "TestFunctions.hpp".
+  // "solver.buildFrameMSTs" - don't work with current dataset, and replaced by "MinSpanningTree::build".
+  // "solver.propagateFrame" - produce crash the test after "detect"
+  TEST(nskpsolverTests, propagateFrame) // "nskpsolver::propagateFrame" produce error: "unknown file: error: C++ exception with description "invalid vector<T> subscript" thrown in the test body"
+  {
+    //Load the input data
+    std::map<std::string, float>  params;
+    //vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/testdata1/", "trijumpSD_new.xml");
+    //vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+
+    // Build frames ISM
+    TestISM testISM;
+    testISM.build(Frames, false); // alternative buildISM function
+    testISM.write("speltests_nskpsolver_ISM.txt");
+
+    ImagePixelSimilarityMatrix ISM;
+    ISM.read("speltests_nskpsolver_ISM.txt");
+
+    cout << "ISM.size = " << ISM.size() << endl;
+
+    // Build trees for current frames seequence
+    //std::vector<MinSpanningTree> trees = solver.buildFrameMSTs(ISM, params); // it return all trees with sizes = 1
+    std::vector<MinSpanningTree> trees;
+    for (int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
+    {
+      MinSpanningTree MST;
+      MST.build(ISM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
+      trees.push_back(MinSpanningTree(MST));
+    }
+
+    // Temporary debug info
+    cout << "trees.size = " << trees.size() << endl;
+    cout << "'trees sizes':" << endl;
+    for (int i = 0; i < trees.size(); i++)
+      cout << i << ": " << trees[i].getMST().size() << endl;
+      //
+
+    // Run "propagateFrame"
+    int frameID = 0; // Select the frame as root frame for propagation
+    NSKPSolver solver;
+    std::vector<int> ignore;
+    std::vector<NSKPSolver::SolvletScore> allSolves;
+    allSolves = solver.propagateFrame(frameID, Frames, params, ISM, trees, ignore);
+
+
+    ASSERT_GT( allSolves.size(), 0);
+
+    // Copy ID of all frames, which identical to the selected frame ("frameID")
+    vector<int> IdenticalFramesID;
+    for (int i = 0; i < ISM.size(); i++)
+      if ((ISM.at(frameID, i) <= 0.05) && (Frames[i]->getFrametype() != KEYFRAME))
+        IdenticalFramesID.push_back(i);
+
+    ASSERT_GE(allSolves.size(), IdenticalFramesID.size());
+
+    // Copy skeleton joints location from selected keyframe
+    Skeleton skeleton = Frames[frameID]->getSkeleton();
+    map<int, pair<Point2f, Point2f>> PartLocations = getPartLocations(skeleton);
+
+    //Compare
+    // Search all frames, which identical to selected keyframe
+    float AcceptableError = 2; // 2 pixels
+    for (int i = 0; i < allSolves.size(); i++)	
+    {
+      for (int k = 0; k < IdenticalFramesID.size(); k++) 
+        if(allSolves[i].solvlet.getFrameID() == IdenticalFramesID[k])
+        {
+          vector<LimbLabel> Labels =  allSolves[i].solvlet.getLabels();
+          //Compare all parts from current lockframe
+          for (int t = 0; t < Labels.size(); t++)
+          {
+            Point2f l0, l1; // Actual current part joints locations
+            Labels[t].getEndpoints(l0, l1);
+            int partID = Labels[t].getLimbID();
+
+            Point2f p0, p1; // Expected current part joints locations
+            p0 = PartLocations[partID].first;// [t]
+            p1 = PartLocations[partID].second;// [t]
+
+            Point2f delta0 = l0 - p0;
+            Point2f  delta1 = l1 - p1;
+            float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+            delta0 = l0 - p1;
+            delta1 = l1 - p0;
+            float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+            float error = min(error_A, error_B); // Distance between ideal body part and label
+            EXPECT_LE(error, AcceptableError) << "RootFrameID = " << frameID << ", LockframeID = " << IdenticalFramesID[k] << ", PartID = " << partID << ", Error = " << error << "(pixels)" << endl;
+          }
+        }
+    }
+  }
+
+  // "buildFrameMSTs" and "computeISMcell" don't work with current dataset
+  // This test crashed and don't checked 
+  TEST(nskpsolverTests, solve_0)
+  {
+    //Load the input data
+    std::map<std::string, float>  params;
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    Sequence sequence(0, "colorHistDetector", Frames);
+
+    TestISM testISM;
+    testISM.build(Frames, false);
+
+    // Run "solve"
+    int frameID = 0; // Select the frame as root frame for propagation
+    NSKPSolver solver;
+    std::vector<int> ignore;
+    std::vector<Solvlet> Solves;
+    Solves = solver.solve(sequence, params, testISM);
+
+    // Compute expected value and compare
+    CompareSolves(Solves, Frames, testISM); 
+  }
+
+
+  // DISABLED - call of "buildFrameMSTs" or "computeISMcell" causes crash tests??
+  // This test crashed and don't checked 
+  TEST(nskpsolverTests, DISABLED_solve_1) 
+  {
+    //Load the input data
+    std::map<std::string, float>  params;
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    Sequence sequence(0, "colorHistDetector", Frames);
+
+    // Run "solve"
+    int frameID = 0; // Select the frame as root frame for propagation
+    NSKPSolver solver;
+    std::vector<int> ignore;
+    std::vector<Solvlet> Solves;
+    Solves = solver.solve(sequence);
+
+    // Compute expected value and compare
+    TestISM testISM;
+    testISM.build(Frames, false);
+    CompareSolves(Solves, Frames, testISM);
+  }
+
+  // DISABLED - call of "buildFrameMSTs" or "computeISMcell" causes crash tests??
+  // This test crashed and don't checked 
+  TEST(nskpsolverTests, DISABLED_solve_2)
+  {
+    //Load the input data
+    std::map<std::string, float>  params;
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    Sequence sequence(0, "colorHistDetector", Frames);
+
+    // Run "solve"
+    int frameID = 0; // Select the frame as root frame for propagation
+    NSKPSolver solver;
+    std::vector<int> ignore;
+    std::vector<Solvlet> Solves;
+    Solves = solver.solve(sequence, params);
+
+    // Compute expected value and compare
+    TestISM testISM;
+    testISM.build(Frames, false);
+    CompareSolves(Solves, Frames, testISM);
+  }
+
+  // DISABLED - call of "buildFrameMSTs" or "computeISMcell" causes crash tests??
+  // This test crashed and don't checked 
+  TEST(nskpsolverTests, propagateKeyframes)
+  {
+    //Load the input data
+    std::map<std::string, float>  params;
+    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+      
+    TestISM testISM;
+    testISM.build(Frames, false);
+
+    // Build trees for current frames seequence
+    std::vector<MinSpanningTree> trees;
+    for (int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
+    {
+      MinSpanningTree MST;
+      MST.build(testISM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
+      trees.push_back(MinSpanningTree(MST));
+    }
+
+    // Run "solve"
+    int frameID = 0; // Select the frame as root frame for propagation
+    NSKPSolver solver;
+    std::vector<int> ignore;
+    std::vector<Solvlet> Solves;
+    Solves = solver.propagateKeyframes(Frames, params, testISM, trees, ignore);
+
+    // Compute expected value and compare
+
+    CompareSolves(Solves, Frames, testISM);
+  }
+
 }

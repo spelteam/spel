@@ -5,6 +5,7 @@
 #include <Windows.h>
 #endif
 
+#include <gtest/gtest.h>
 #include "TestsFunctions.hpp"
   
 namespace SPEL
@@ -315,4 +316,204 @@ namespace SPEL
     return partRect;
   }
 
+  void CompareSolves(vector<Solvlet> Solves, vector<Frame*> Frames, ImageSimilarityMatrix &ISM)
+  {
+    ASSERT_GE(Solves.size(), 0);
+
+    // Copy ID of all frames, which identical to the selected frame ("frameID")
+    map<int, vector<int>> IdenticalFrames;
+    for (int i = 0; i < ISM.size(); i++)
+      for (int k = 0; k < ISM.size(); k++)
+      {
+        vector<int> temp;
+        if((Frames[i]->getFrametype() == KEYFRAME))
+          if ((ISM.at(i, k) <= 0.05) && (Frames[k]->getFrametype() != KEYFRAME))
+            temp.push_back(k);
+        IdenticalFrames.emplace(pair<int, vector<int>>(i,temp));
+        temp.clear();
+      }// IdenticalFrames[i] consist ID of all lockframes, wich identical to Frames[i]  
+
+      // Compare parts from all identical frames
+      float AcceptableError = 2; // 2 pixels
+      for (int i = 0; i < IdenticalFrames.size(); i++)
+      {
+        Skeleton skeleton = Frames[i]->getSkeleton();
+        map<int, pair<Point2f, Point2f>> PartLocations = getPartLocations(skeleton);
+        for (int n = 0; n < IdenticalFrames[i].size(); n++)
+          for (int k = 0; k < Solves.size(); k++)
+            if (Solves[k].getFrameID() == IdenticalFrames[i][n])
+              {
+                vector<LimbLabel> Labels = Solves[k].getLabels();
+                //Compare all parts from current lockframe and root frame
+                for (int t = 0; t < Labels.size(); t++)
+                 {
+                   Point2f l0, l1; // Actual current part joints locations
+                   Labels[t].getEndpoints(l0, l1);
+                   int partID = Labels[t].getLimbID();
+
+                   Point2f p0, p1; // Expected current part joints locations
+                   p0 = PartLocations[partID].first;// [t]
+                   p1 = PartLocations[partID].second;// [t]
+
+                   Point2f delta0 = l0 - p0;
+                   Point2f  delta1 = l1 - p1;
+                   float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+                   delta0 = l0 - p1;
+                   delta1 = l1 - p0;
+                   float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+                   float error = min(error_A, error_B); // Distance between ideal body part and label
+                   EXPECT_LE(error, AcceptableError) << "RootFrameID = " << i << ", LockframeID = " << IdenticalFrames[i][n] << ", PartID = " << partID << ", Error = " << error << "(pixels)" << endl;
+                }
+              }
+        }
+  }
+
+// "TestISM" class
+TestISM::TestISM(void)
+  {
+    id = 0x4950534D;
+  }
+// Empty functions
+TestISM::TestISM(const TestISM & m): ImageSimilarityMatrix(m){}
+TestISM::TestISM(const std::vector<Frame*>& frames) : TestISM(){}
+TestISM::TestISM(TestISM && m): ImageSimilarityMatrix(std::move(m)){}
+TestISM::~TestISM(void){}
+TestISM & TestISM::operator=(const TestISM & s)
+{
+  return *this;
+}
+void TestISM::computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight){}
+
+// The smooth function
+ float F(float x)
+ {
+   return 1.0f - exp(-0.5f*x);
+ }
+
+ // Building normalized ISM of the frames sequence
+ // "useOverlapFactor" chooses gradual ("true") or abrupt("false") increase assesment of the mask mismatch
+ void TestISM::build(vector<Frame*> frames, bool useOverlapFactor = false)
+ {
+   int n = frames.size();
+   float max_ = 0;
+   Point2i N;
+   const int maxColorDist = 3 * pow(255, 2);
+   imageSimilarityMatrix = Mat::zeros(Size(n, n), cv::DataType<float>::type);
+   imageShiftMatrix = Mat::zeros(Size(n, n), cv::DataType<cv::Point2f>::type);
+   
+   for (int i = 0; i < n; i++)
+     for (int k = 0; k < i; k++)
+     {
+       Mat I1 = frames[i]->getImage();
+       Mat M1 = frames[i]->getMask();
+       Mat I2 = frames[k]->getImage();
+       Mat M2 = frames[k]->getMask();
+
+       Point2f M1_center = Point2f(0, 0);
+       Point2f M2_center = Point2f(0, 0);
+       int M1_area = 0, M2_area = 0, M_area = 0;
+
+       int rows = std::min(M1.rows, M2.rows);
+       int cols = std::min(M1.cols, M2.cols);
+
+       Point2f M1_min = Point2f(1.0e+7, 1.0e+7), M1_max = Point2f(0, 0);
+       Point2f M2_min = Point2f(1.0e+7, 1.0e+7), M2_max = Point2f(0, 0);
+
+       // calculation the masks area
+       for (int y = 0; y < rows; y++)
+         for (int x = 0; x < cols; x++)
+         {
+           if (M1.at<uchar>(y, x) >= 10)
+           {
+             M1_area++;
+             M1_center += Point2f(x, y);
+
+             if (M1_min.x > x) M1_min.x = x;
+             if (M1_min.y > y) M1_min.y = y;
+             if (M1_max.x < x) M1_max.x = x;
+             if (M1_max.y < y) M1_max.y = y;
+           }
+           if (M2.at<uchar>(y, x) >= 10)
+           {
+             M2_area++;
+             M2_center += Point2f(x, y);
+             
+             if (M2_min.x > x) M2_min.x = x;
+             if (M2_min.y > y) M2_min.y = y;
+             if (M2_max.x < x) M2_max.x = x;
+             if (M2_max.y < y) M2_max.y = y;
+           }
+         }
+
+       // calculation the shifts and normalized "frames similarity scores"
+       Point2f shift(2*cols, 2*rows); // default value: infinity - mask outside the frame
+       float CellScore = 0.0f;
+
+       if ((M1_area > 0) && (M2_area > 0))
+       { 
+         M1_center = M1_center*(1.0f / M1_area);
+         M2_center = M2_center*(1.0f / M2_area);
+         shift = M2_center - M1_center;
+
+         M1_min.x = std::max(M1_min.x, M2_min.x - shift.x);
+         M1_min.y = std::max(M1_min.y, M2_min.y - shift.y);
+         M1_max.x = std::min(M1_max.x, M2_max.x - shift.x);
+         M1_max.y = std::min(M1_max.y, M2_max.y - shift.y);
+
+         M_area = 0;
+         for (int x = M1_min.x; x < M1_max.x; x++)
+           for (int y = M1_min.y; y < M1_max.y; y++)
+           {			 
+             Point2f A(x, y);
+             Point2f B = A + shift;
+             float color_squareDistance = 0; // for background pixel 
+
+             if ((B.x >= 0) && (B.x < cols) && (B.y >= 0) && (B.y < rows))
+             {
+               if ((M1.at<uchar>(y, x) > 9) && (M2.at<uchar>(B.y, B.x) > 9))
+               {
+                 M_area++; // overlapped area
+                 Vec3b A_color = I1.at<Vec3b>(y, x);
+                 Vec3b B_color = I2.at<Vec3b>(y, x);
+                 color_squareDistance = 0;
+                 for (int q = 0; q < 3; q++)
+                   color_squareDistance += pow(B_color[q] - A_color[q], 2);
+               }
+               CellScore += color_squareDistance / maxColorDist;
+             }
+           }
+         float composite_area = M1_area + M2_area - M_area;
+
+         float mulct = 1.0f - static_cast<float>(M_area) / composite_area; // masks overlap factor
+         if (useOverlapFactor) mulct = F(100 * mulct); // initialized for non-overlapping pixels
+
+         //cout <<"M1_area = " << M1_area << ", M2_area = " << M2_area << ", M_area = " << M_area << ", mulct = " << mulct << endl;
+         CellScore = mulct + CellScore / composite_area; // == Summ(PixelScores)/Summ(MaxPixelScore) == (different_mask_area*maxColorDist + Summ(intersecrt_mask_area_ColorDistances)) / (maxColorDist*composite_area), in [0..1]
+       }
+       if ((M1_area <= 0) || (M2_area <= 0))
+         CellScore = 1.0f;
+       imageShiftMatrix.at<Point2f>(i, k) = shift;
+       imageShiftMatrix.at<Point2f>(k, i) = -shift;
+       imageSimilarityMatrix.at<float>(i, k) = CellScore;
+       imageSimilarityMatrix.at<float>(k, i) = CellScore;
+
+       // Temporary debug info
+       if (CellScore > max_)
+       {
+         max_ = CellScore;
+         N = Point2i(i, k);
+       }
+       //
+
+       I1.release();
+       M1.release();
+       I2.release();
+       M2.release();
+     }
+
+   // Temporary debug info
+   cout << "Max score = " << max_ << ", Frames =" << N << endl;
+   //
+
+ }  
 }

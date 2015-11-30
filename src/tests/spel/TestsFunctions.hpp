@@ -2,6 +2,7 @@
 #include "projectLoader.hpp"
 #include "colorHistDetector.hpp"
 #include "frame.hpp"
+#include "imagesimilaritymatrix.hpp"
 #include <fstream>
 #include <iostream>
   
@@ -30,4 +31,26 @@ namespace SPEL
 
   vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1); // building a part rectangle on part joints, == DetectorGetPartRect, but used another way
   vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1, cv::Size blockSize);
+
+  void CompareSolves(vector<Solvlet> Solves, vector<Frame*> Frames, ImageSimilarityMatrix &ISM);
+
+  class TestISM : public ImageSimilarityMatrix
+  {
+  private:
+    virtual void computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight);
+  public:	
+    TestISM(void);
+    TestISM(const TestISM &m);
+    TestISM(const std::vector<Frame*> &frames);
+    TestISM(TestISM &&m);
+    virtual ~TestISM(void);
+    virtual TestISM & operator=(const TestISM &s);
+    // Building normalized ISM of the frames sequence
+    // "useOverlapFactor" chooses gradual ("true") or abrupt("false") icrease assesment of the mask mismatch
+    void build(vector<Frame*> frames, bool useOverlapFactor); 
+    };
+
+  
+
+
 }
