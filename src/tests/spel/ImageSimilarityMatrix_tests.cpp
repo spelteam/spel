@@ -287,7 +287,7 @@ namespace SPEL
   TEST(ImageSimilarityMatrixTests_, computeMSMcell)
   {
     //Load the input data
-      float r = 0.5 * 135;
+    float r = 0.5 * 135;
     vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
     cout << "frames.size = " << frames.size() << endl;
     cout << "Image.size = " << frames[0]->getImage().size() << endl;

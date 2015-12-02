@@ -196,7 +196,7 @@ namespace SPEL
 
     ActualValue = S.evaluateSolution(frame, labels, params);
     ExpectedValue = (2 - e) / (2 + e);
-    ExpectedValue = ExpectedValue;
+    ExpectedValue = ExpectedValue - 1;
     epsilon = 0.04;
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
     cout << ExpectedValue << " ~ " << ActualValue << "\n";

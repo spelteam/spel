@@ -4,6 +4,10 @@
 // SPEL definitions
 #include "predef.hpp"
 
+#ifdef DEBUG
+#include <gtest/gtest_prod.h>
+#endif  // DEBUG
+
 // STL
 #include <vector>
 #include <opencv2/opencv.hpp>
@@ -45,7 +49,14 @@ namespace SPEL
     virtual std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params);
     virtual std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets);
   protected:
-
+#ifdef DEBUG
+    FRIEND_TEST(tlpssolverTests, solve_3);
+    FRIEND_TEST(tlpssolverTests, evaluateSolution);
+    FRIEND_TEST(tlpssolverTests, findFrameIndexById);
+    FRIEND_TEST(tlpssolverTests, ScoreCostAndJointCost);
+    FRIEND_TEST(tlpssolver_Tests, slice_);
+#endif  // DEBUG
+      
     virtual std::vector<Solvlet> solveWindowed(Sequence &sequence, std::map<std::string, float> params); //inherited virtual
     virtual std::vector<Solvlet> solveGlobal(Sequence &sequence, std::map<std::string, float> params); //inherited virtual
 

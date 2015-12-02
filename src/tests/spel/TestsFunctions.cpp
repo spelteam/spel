@@ -49,8 +49,8 @@ namespace SPEL
     tree<BodyPart> PartTree = skeleton.getPartTree();
     for (tree<BodyPart>::iterator BP_iterator = PartTree.begin(); BP_iterator != PartTree.end(); BP_iterator++)
     {
-      BodyJoint *j0 = skeleton.getBodyJoint(BP_iterator->getChildJoint());
-      BodyJoint *j1 = skeleton.getBodyJoint(BP_iterator->getParentJoint());
+      BodyJoint *j0 = skeleton.getBodyJoint(BP_iterator->getParentJoint());
+      BodyJoint *j1 = skeleton.getBodyJoint(BP_iterator->getChildJoint());
       POSERECT<Point2f> Rect = BuildPartRect(j0, j1, BP_iterator->getLWRatio());
       Rects.emplace(pair<int, POSERECT<Point2f>>((*BP_iterator).getPartID(), Rect));
     }
@@ -66,8 +66,8 @@ namespace SPEL
     tree <BodyPart> partTree = skeleton.getPartTree();
     for (tree <BodyPart>::iterator i = partTree.begin(); i != partTree.end(); ++i)
     {
-      J0 = skeleton.getBodyJoint(i->getChildJoint());
-      J1 = skeleton.getBodyJoint(i->getParentJoint());
+      J0 = skeleton.getBodyJoint(i->getParentJoint());
+      J1 = skeleton.getBodyJoint(i->getChildJoint());
       p0 = J0->getImageLocation();
       p1 = J1->getImageLocation();
       PartLocations.emplace(pair<int, pair<Point2f, Point2f>>(i->getPartID(), pair<Point2f, Point2f>(p0, p1)));

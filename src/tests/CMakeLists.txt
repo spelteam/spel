@@ -78,6 +78,8 @@ LIST ( APPEND ${TESTS_MODULE}_SRC spel/minspanningtree_tests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/spelObject_tests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/sequence_tests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/solver_tests.cpp )
+LIST ( APPEND ${TESTS_MODULE}_SRC spel/tlpssolver_tests.cpp )
+LIST ( APPEND ${TESTS_MODULE}_SRC spel/solvlet_tests.cpp )
 
 LIST ( APPEND ${TESTS_MODULE}_HDR spel/TestsFunctions.hpp )
 LIST ( APPEND ${TESTS_MODULE}_HDR ${${PROJECT_NAME}_SOURCE_DIR}/utils/general/projectLoader.hpp )
