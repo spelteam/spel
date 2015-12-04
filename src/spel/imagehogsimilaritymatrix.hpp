@@ -37,6 +37,9 @@ namespace SPEL
     int derivAperture = 1;
     int histogramNormType = cv::HOGDescriptor::L2Hys;
 
+    virtual void calculateROI(const Frame *frame, cv::Point2i &topLeft, cv::Point2i &bottomRight) const noexcept;
+    virtual int8_t extendSize(int &topLeftMin, int &topLeftMax, int &bottomRightMin, int &bottomRightMax, const int maxsize, const int add) const;
+
     // Inherited via ImageSimilarityMatrix
     virtual void computeISMcell(const Frame * left, const Frame * right, const int maxFrameHeight);
   };
