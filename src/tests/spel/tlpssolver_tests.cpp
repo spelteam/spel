@@ -29,7 +29,7 @@ namespace SPEL
   TEST(tlpssolverTests, solve_0)
   {
     //Load the input data
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -46,7 +46,7 @@ namespace SPEL
   TEST(tlpssolverTests, solve_1)
   {
     //Load the input data
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -68,7 +68,7 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -86,7 +86,7 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solveGlobal"
@@ -318,7 +318,7 @@ namespace SPEL
  TEST(tlpssolver_Tests, slice_)
  {
    //Load the input data
-   vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+   vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
 
    //Create actual value
    TLPSSolver S;

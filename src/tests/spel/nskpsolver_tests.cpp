@@ -220,7 +220,7 @@ namespace SPEL
     std::map<std::string, float>  params;
     //vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/testdata1/", "trijumpSD_new.xml");
     //vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
-    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
 
     // Build frames ISM
     TestISM testISM;
@@ -311,7 +311,7 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     Sequence sequence(0, "colorHistDetector", Frames);
 
     TestISM testISM;
@@ -335,7 +335,7 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -357,7 +357,7 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -379,7 +379,7 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22--.xml");
+    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
       
     TestISM testISM;
     testISM.build(Frames, false);
