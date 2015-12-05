@@ -101,6 +101,7 @@ ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/CHDTrainTestData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/CHDTrainTestData )
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/SurfDetectorTestsData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/SurfDetectorTestsData )
 ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/SimilarityMatrixTestsData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/SimilarityMatrixTestsData )
+ADD_CUSTOM_COMMAND ( TARGET ${TESTS_MODULE} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${${PROJECT_NAME}_SOURCE_DIR}/tests/nskpsolverTestData $<TARGET_FILE_DIR:${TESTS_MODULE}>/${TESTS_MODULE}_TestData/nskpsolverTestData )
 
 # Installation instructions for the test module
 # Please specify the installation instructions sprcific
