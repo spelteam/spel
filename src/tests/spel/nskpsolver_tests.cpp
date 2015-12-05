@@ -20,6 +20,13 @@ using namespace cv;
 
 namespace SPEL
 {
+  TEST(tlpssolverTests, NSKPSolver)
+  {
+    NSKPSolver solver;
+    EXPECT_EQ(1, solver.getId());
+    EXPECT_EQ("NSKP", solver.getName());
+  }
+
   TEST(nskpsolverTests, findFrameIndexById)
   {
     NSKPSolver S;

@@ -59,4 +59,24 @@ namespace SPEL
     EXPECT_EQ(spaceLength, bp5.getExpectedDistance());
     EXPECT_FALSE(&bp4 == &bp5);
   }
+
+  TEST(bodyPartTest, MoveConstructor)
+  {
+    int partID = 3;
+    string partName = "Part Name";
+    int parentJoint = 0;
+    int childJoint = 0;
+    bool isOccluded = true;
+    float spaceLength = 1.343f;
+
+    BodyPart bp1(partID, partName, parentJoint, childJoint);
+
+    BodyPart bp2(static_cast<BodyPart&&>(bp1));
+    EXPECT_EQ(partID, bp2.getPartID());
+    EXPECT_EQ(partName, bp2.getPartName());
+    EXPECT_EQ(parentJoint, bp2.getParentJoint());
+    EXPECT_EQ(childJoint, bp2.getChildJoint());
+    EXPECT_FALSE(bp2.getIsOccluded());
+    EXPECT_EQ(0, bp2.getExpectedDistance());
+  }
 }

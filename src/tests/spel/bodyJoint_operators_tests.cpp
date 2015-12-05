@@ -49,4 +49,26 @@ namespace SPEL
     EXPECT_EQ(spaceLocation, bj5.getSpaceLocation());
     EXPECT_EQ(depthSign, bj5.getDepthSign());
   }
+
+  TEST(bodyJointTest, MoveAssigmentOperaor)
+  {
+    BodyJoint bj1;
+    const int limbID = 5;
+    const string jointName = "Some Name";
+    const Point2f imageLocation(2.534f, -1.635f);
+    const Point3f spaceLocation(2.534f, -1.635f, -1.5f);
+    const bool depthSign = true;
+    bj1.setLimbID(limbID);
+    bj1.setJointName(jointName);
+    bj1.setImageLocation(imageLocation);
+    bj1.setSpaceLocation(spaceLocation);
+    bj1.setDepthSign(depthSign);
+
+    BodyJoint bj2 = static_cast<BodyJoint&&>(bj1);
+    EXPECT_EQ(limbID, bj2.getLimbID());
+    EXPECT_EQ(jointName, bj2.getJointName());
+    EXPECT_EQ(imageLocation, bj2.getImageLocation());
+    EXPECT_EQ(spaceLocation, bj2.getSpaceLocation());
+    EXPECT_EQ(depthSign, bj2.getDepthSign());
+  }
 }

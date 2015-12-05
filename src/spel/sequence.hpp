@@ -49,6 +49,7 @@ namespace SPEL
   private:
 #ifdef DEBUG
     FRIEND_TEST(SequenceTests, CopyConstructor);
+    FRIEND_TEST(SequenceTests, interpolateSlice2D);
 #endif  // DEBUG
   
     /// detection score

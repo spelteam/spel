@@ -135,4 +135,58 @@ namespace SPEL
     EXPECT_FALSE(label1 > label2) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label2.getAvgScore() << " = false" << endl;
     EXPECT_FALSE(label1 > label1) << " Operator '>', expected: " << label1.getAvgScore() << " > " << label1.getAvgScore() << " = false" << endl;
   }
+
+  TEST(limbLabel, ToString)
+  {
+    //Prepare input data
+    int id = 1;
+    Point2f center = Point2f(10.0f, 10.0f);
+    float angle = 0.866302f;
+    bool isOccluded = false;
+    float score1Value = 0.1f, score2Value = 0.3f;
+    float scoreCoeff = 1.0f;
+    Score score1(score1Value, "Test", scoreCoeff);
+    Score score2(score2Value, "Test", scoreCoeff);
+    vector <Score> scores;
+    scores.push_back(score1);
+    scores.push_back(score2);
+    vector<Point2f> polygon = { Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2) };
+    LimbLabel label(id, center, angle, polygon, scores, isOccluded);
+
+    //Compare
+    EXPECT_EQ("1 10.000000 10.000000 0.866302 10.000000 2.000000 10.000000 18.000000 0 Test 0.100000 Test 0.300000 ", label.toString());
+
+    scores.clear();
+    polygon.clear();
+  }
+
+  TEST(limbLabel, resize)
+  {
+    //Prepare input data
+    int id = 1;
+    Point2f center = Point2f(10.0f, 10.0f);
+    float angle = 0.866302f;
+    bool isOccluded = false;
+    float score1Value = 0.1f, score2Value = 0.3f;
+    float scoreCoeff = 1.0f;
+    Score score1(score1Value, "", scoreCoeff);
+    Score score2(score2Value, "", scoreCoeff);
+    vector <Score> scores;
+    scores.push_back(score1);
+    scores.push_back(score1);
+    Point2f A(6.0f, 2.0f), B(6.0f, 18.0f), C(14.0f, 18.0f), D(14.0f, 2.0f);
+    vector<Point2f> polygon = { A, B, C, D };
+    LimbLabel label(id, center, angle, polygon, scores, isOccluded);
+    float factor = 10.0f;
+    vector<Point2f> expected_polygon = { A*factor, B*factor, C*factor, D*factor };
+
+    //Compare
+    label.Resize(factor);
+    EXPECT_EQ(center*10.0f, label.getCenter());
+    EXPECT_EQ(expected_polygon, label.getPolygon());
+
+    scores.clear();
+    polygon.clear();
+  }
+
 }

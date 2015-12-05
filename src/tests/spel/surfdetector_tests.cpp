@@ -584,4 +584,60 @@ namespace SPEL
         if (SFrames[i] != 0) delete SFrames[i];
     SFrames.clear();
   }
+
+  TEST(surfDetectorTests, PartModel)
+  {
+    // Default partModel
+    SurfDetector::PartModel partModel;
+
+    EXPECT_EQ(0, static_cast<int>(partModel.keyPoints.size()));
+    EXPECT_EQ(Size(0, 0), partModel.descriptors.size());
+    Point2f X(0.0f, 0.0f);
+    EXPECT_EQ(POSERECT<cv::Point2f>(X, X, X, X), partModel.partModelRect);
+
+    // Assigned partModel
+    Point2f z(1.0f, 2.0f);
+    POSERECT<cv::Point2f> rect(X, X, X, X);
+
+    vector <cv::KeyPoint> KeyPoints;
+    cv::KeyPoint abstract_keypoint;
+    abstract_keypoint.pt = Point2f(0.1f, 0.2f);
+    abstract_keypoint.size = 1;
+    abstract_keypoint.angle = 0.3f;
+    abstract_keypoint.response = 0.4f;
+    abstract_keypoint.octave = 0; 
+    abstract_keypoint.class_id = 1;
+    KeyPoints.push_back(abstract_keypoint);
+
+    cv::Mat abstract_descriptors = Mat(8, 8, CV_8UC3, Scalar(8, 8, 8));
+
+    partModel.partModelRect = rect;
+    partModel.keyPoints = KeyPoints;
+    partModel.descriptors = abstract_descriptors;
+
+    EXPECT_EQ(rect, partModel.partModelRect);
+    EXPECT_EQ(KeyPoints.size(), partModel.keyPoints.size());
+    EXPECT_EQ(abstract_keypoint.pt, partModel.keyPoints[0].pt);
+    EXPECT_EQ(abstract_keypoint.size, partModel.keyPoints[0].size);
+    EXPECT_EQ(abstract_keypoint.angle, partModel.keyPoints[0].angle);
+    EXPECT_EQ(abstract_keypoint.response, partModel.keyPoints[0].response);
+    EXPECT_EQ(abstract_keypoint.octave, partModel.keyPoints[0].octave);
+    EXPECT_EQ(abstract_keypoint.class_id, partModel.keyPoints[0].class_id);
+    EXPECT_EQ(abstract_descriptors.size(), partModel.descriptors.size());
+    EXPECT_EQ(abstract_descriptors.data, partModel.descriptors.data);
+    
+    // Copyed partModel
+    SurfDetector::PartModel partModel1 = partModel;	
+
+    EXPECT_EQ(rect, partModel1.partModelRect);
+    EXPECT_EQ(KeyPoints.size(), partModel1.keyPoints.size());
+    EXPECT_EQ(abstract_keypoint.pt, partModel1.keyPoints[0].pt);
+    EXPECT_EQ(abstract_keypoint.size, partModel1.keyPoints[0].size);
+    EXPECT_EQ(abstract_keypoint.angle, partModel1.keyPoints[0].angle);
+    EXPECT_EQ(abstract_keypoint.response, partModel1.keyPoints[0].response);
+    EXPECT_EQ(abstract_keypoint.octave, partModel1.keyPoints[0].octave);
+    EXPECT_EQ(abstract_keypoint.class_id, partModel1.keyPoints[0].class_id);
+    EXPECT_EQ(abstract_descriptors.size(), partModel1.descriptors.size());
+    EXPECT_EQ(abstract_descriptors.data, partModel1.descriptors.data);
+  }
 }
