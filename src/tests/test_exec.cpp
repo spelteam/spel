@@ -17,8 +17,18 @@ int main(int argc, char* argv[]) {
   Debug(list_allocations_on(libcw_do));
 #endif  // MEMORY_DEBUG && UNIX
 #ifdef WINDOWS
-  if (argc == 2 && strcmp(argv[1], "-m") == 0)
-    getch();
+  if (argc > 1)
+  {
+    auto bPause = false;
+    for (auto i = 0; i < argc; ++i)
+      if (strcmp(argv[i], "-m") == 0)
+      {
+        bPause = true;
+        break;
+      }
+    if (bPause)
+      getch();
+  }
 #endif  // WINDOWS
   return res;
 }
