@@ -152,7 +152,7 @@ namespace SPEL
     EXPECT_FLOAT_EQ(8.0, A.getPathCost(path));
 
     path.push_back(4);
-    EXPECT_FLOAT_EQ(-1.0, A.getPathCost(path));
+    EXPECT_THROW(A.getPathCost(path), std::out_of_range);
     path.clear();
   }
 

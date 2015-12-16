@@ -28,20 +28,19 @@ namespace SPEL
 
   bool ImageSimilarityMatrix::operator==(const ImageSimilarityMatrix & s) const noexcept
   {
-    auto result = static_cast<cv::Mat>(imageSimilarityMatrix == s.imageSimilarityMatrix);
-
-    auto res = true;
+    if (imageSimilarityMatrix.rows != s.imageSimilarityMatrix.rows || imageSimilarityMatrix.cols != s.imageSimilarityMatrix.cols)
+      return false;
 
     //if every element is 1
-    for (auto i = 0; i < result.rows; ++i)
+    for (auto i = 0; i < imageSimilarityMatrix.rows; ++i)
     {
-      for (auto j = 0; j < result.cols; ++j)
+      for (auto j = 0; j < imageSimilarityMatrix.cols; ++j)
       {
-        if (result.at<float>(i, j) == 0)
-          res = false;
+        if (imageSimilarityMatrix.at<float>(i, j) != s.imageSimilarityMatrix.at<float>(i, j))
+          return false;
       }
     }
-    return res;
+    return true;
   }
 
   bool ImageSimilarityMatrix::operator!=(const ImageSimilarityMatrix & s) const noexcept
