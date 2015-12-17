@@ -31,15 +31,11 @@ namespace SPEL
     if (imageSimilarityMatrix.rows != s.imageSimilarityMatrix.rows || imageSimilarityMatrix.cols != s.imageSimilarityMatrix.cols)
       return false;
 
-    //if every element is 1
     for (auto i = 0; i < imageSimilarityMatrix.rows; ++i)
-    {
       for (auto j = 0; j < imageSimilarityMatrix.cols; ++j)
-      {
         if (imageSimilarityMatrix.at<float>(i, j) != s.imageSimilarityMatrix.at<float>(i, j))
           return false;
-      }
-    }
+
     return true;
   }
 
