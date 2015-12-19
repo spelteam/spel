@@ -169,7 +169,7 @@ namespace SPEL
     ///1 - point lies in rectangle
     ///-1 - point doesn't lies in rectangle
     ///0 - point lies on the edge(vertex)
-    int8_t containsPoint(T point)
+    int8_t containsPoint(const T &point)
     {
       std::vector <T> contour;
       contour.push_back(point1);

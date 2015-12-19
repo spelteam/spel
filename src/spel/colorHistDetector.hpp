@@ -30,6 +30,7 @@ namespace SPEL
     struct PartModel
     {
       PartModel(uint8_t _nBins = 8);
+      virtual ~PartModel(void);
       uint8_t nBins;
       std::vector <std::vector <std::vector <float>>> partHistogram;
       std::vector <std::vector <std::vector <float>>> bgHistogram;

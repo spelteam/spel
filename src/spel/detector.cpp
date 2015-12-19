@@ -128,7 +128,7 @@ namespace SPEL
 
     std::map <uint32_t, std::vector <LimbLabel>> result;
 
-    for (auto part : first) //for each part
+    for (const auto &part : first) //for each part
     {
       std::vector<LimbLabel> partResult;
 
@@ -141,7 +141,7 @@ namespace SPEL
         LimbLabel foundLabel;
         try
         {
-          auto s = second.at(part.first);
+          const auto &s = second.at(part.first);
           for (const auto &secondIter : s)
           {
             if (firstIter.getLimbID() == secondIter.getLimbID() && firstIter.getPolygon() == secondIter.getPolygon())
@@ -226,7 +226,7 @@ namespace SPEL
       //now iterate through the second list, and push back any labels that are not found in result vector
       try
       {
-        auto s = second.at(part.first);
+        const auto &s = second.at(part.first);
 
         for (const auto &secondIter : s)
         {
@@ -511,7 +511,7 @@ namespace SPEL
       }
       else //found x coordinate
       {
-        auto yMap = locationMap.at(location.x);
+        auto &yMap = locationMap.at(location.x);
         if (yMap.find(location.y) == yMap.end()) //not found
         {
           std::vector<uint32_t> indices; //read the existing vector
@@ -524,8 +524,6 @@ namespace SPEL
           indices.push_back(index);
           yMap.at(location.y) = indices;
         }
-        //update the location map
-        locationMap.at(location.x) = yMap;
       }
       if (angleMap.find(angle) == angleMap.end()) //not found
       {
@@ -535,9 +533,8 @@ namespace SPEL
       }
       else //found
       {
-        auto indices = angleMap.at(angle); //read the existing vector
+        auto &indices = angleMap.at(angle); //read the existing vector
         indices.push_back(index); //push back another index
-        angleMap.at(angle) = indices; //set in map
       }
     }
 

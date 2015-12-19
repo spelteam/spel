@@ -22,6 +22,10 @@ namespace SPEL
     bgNumSamples = 0;
   }
 
+  ColorHistDetector::PartModel::~PartModel(void)
+  {
+  }
+
   // Copy all fields of the "PartModel" structure
   ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(const PartModel &model) noexcept
   {
@@ -111,7 +115,7 @@ namespace SPEL
     }
 
     // Scaling of colorspace, reducing the capacity and number of colour intervals that are used to construct the histogram
-    for (auto i : partColors)
+    for (const auto &i : partColors)
     {
       auto r = static_cast<uint8_t> (i.x / factor);
       auto g = static_cast<uint8_t> (i.y / factor);
@@ -192,7 +196,7 @@ namespace SPEL
 
     // Scaling of colorspace, reducing the capacity and number of colour intervals
     // Adjustment of the histogram
-    for (auto color : partColors)
+    for (const auto &color : partColors)
     {
       auto r = static_cast<uint8_t> (color.x / factor);
       auto g = static_cast<uint8_t> (color.y / factor);
@@ -579,7 +583,7 @@ namespace SPEL
             auto lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
             transform(lower, upper, back_inserter(partPolygons), [](auto const &pair) { return pair.second; });
             // Checking whether a pixel belongs to the current and to another polygons            
-            for (auto partPolygon : partPolygons)
+            for (auto &partPolygon : partPolygons)
               if ((bContainsPoint = partPolygon.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j))) > 0) == true)
                 break; // was found polygon, which contain current pixel
 
@@ -628,14 +632,13 @@ namespace SPEL
         if (partModels.find(partNumber) == partModels.end())
           partModels.insert(std::pair <int32_t, PartModel>(partNumber, PartModel(nBins))); //add a new model to end of models list
 
-        auto partModel = partModels.at(partNumber);
-        auto partPixelColoursVector = partPixelColours.at(partNumber); // copy part color set for current bodypart
+        auto &partModel = partModels.at(partNumber);
+        const auto &partPixelColoursVector = partPixelColours.at(partNumber); // copy part color set for current bodypart
         auto blankPixelsCount = blankPixels.at(partNumber);  // copy blanck pixel count for current bodypart
-        auto bgPixelColoursVector = bgPixelColours.at(partNumber); // copy background color set for current bodypart
+        const auto &bgPixelColoursVector = bgPixelColours.at(partNumber); // copy background color set for current bodypart
 
         partModel.addPartHistogram(partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
         partModel.addBackgroundHistogram(bgPixelColoursVector); // building histograms for current bodypart background colours
-        partModels.at(partNumber) = partModel; // copy result to part models set
         if (SpelObject::getDebugLevel() >= 2)
           std::cout << "Found part model: " << partNumber << std::endl;
       }
@@ -694,13 +697,13 @@ namespace SPEL
       auto partID = bodyPart.getPartID();
       try
       {
-        auto partModel = partModels.at(partID); // copy part model of current bodybart
+        const auto &partModel = partModels.at(partID); // copy part model of current bodybart
         // For all pixels
         for (auto x = 0; x < width; x++)
         {
           for (auto y = 0; y < height; y++)
           {
-            auto intensity = imgMat.at<cv::Vec3b>(y, x);
+            const auto &intensity = imgMat.at<cv::Vec3b>(y, x);
             // Copy components of the current pixel color
             auto blue = intensity.val[0];
             auto green = intensity.val[1];
