@@ -522,7 +522,6 @@ namespace SPEL
         {
           std::vector<uint32_t> indices;
           indices.push_back(index);
-          yMap.at(location.y) = indices;
         }
       }
       if (angleMap.find(angle) == angleMap.end()) //not found

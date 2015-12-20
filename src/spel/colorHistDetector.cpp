@@ -583,7 +583,7 @@ namespace SPEL
             auto lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
             transform(lower, upper, back_inserter(partPolygons), [](auto const &pair) { return pair.second; });
             // Checking whether a pixel belongs to the current and to another polygons            
-            for (auto &partPolygon : partPolygons)
+            for (const auto &partPolygon : partPolygons)
               if ((bContainsPoint = partPolygon.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j))) > 0) == true)
                 break; // was found polygon, which contain current pixel
 
@@ -628,13 +628,13 @@ namespace SPEL
       // Create model for each bodypart
       for (const auto &bodyPart : partTree)
       {
-        auto partNumber = bodyPart.getPartID();
+        const auto &partNumber = bodyPart.getPartID();
         if (partModels.find(partNumber) == partModels.end())
           partModels.insert(std::pair <int32_t, PartModel>(partNumber, PartModel(nBins))); //add a new model to end of models list
 
         auto &partModel = partModels.at(partNumber);
         const auto &partPixelColoursVector = partPixelColours.at(partNumber); // copy part color set for current bodypart
-        auto blankPixelsCount = blankPixels.at(partNumber);  // copy blanck pixel count for current bodypart
+        const auto &blankPixelsCount = blankPixels.at(partNumber);  // copy blanck pixel count for current bodypart
         const auto &bgPixelColoursVector = bgPixelColours.at(partNumber); // copy background color set for current bodypart
 
         partModel.addPartHistogram(partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
