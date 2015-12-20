@@ -42,21 +42,21 @@ namespace SPEL
   POSERECT <cv::Point2f> Detector::getBodyPartRect(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Size &blockSize) const noexcept
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
-    auto boneLength = getBoneLength(j0, j1);
+    auto boneLength = round(getBoneLength(j0, j1));
     if (blockSize.width > 0)
     {
       if (boneLength < blockSize.width)
-        boneLength = static_cast <float> (blockSize.width - 1);
-      else
-        boneLength = boneLength + blockSize.width - (static_cast<int>(boneLength) % blockSize.width) - 1;
+        boneLength = static_cast <float> (blockSize.width);
+      else if (static_cast<int>(boneLength) % blockSize.width != 0)
+        boneLength = boneLength + blockSize.width - (static_cast<int>(boneLength) % blockSize.width);
     }
-    auto boxWidth = getBoneWidth(boneLength, bodyPart);
+    auto boxWidth = round(getBoneWidth(boneLength, bodyPart));
     if (blockSize.height > 0)
     {
       if (boxWidth < blockSize.height)
-        boxWidth = static_cast <float> (blockSize.height - 1);
-      else
-        boxWidth = boxWidth + blockSize.width - (static_cast<int>(boxWidth) % blockSize.height) - 1;
+        boxWidth = static_cast <float> (blockSize.height);
+      else if (static_cast<int>(boxWidth) % blockSize.height != 0)
+        boxWidth = boxWidth + blockSize.height - (static_cast<int>(boxWidth) % blockSize.height);
     }
     auto angle = spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) * (180.0 / M_PI);
     auto c1 = cv::Point2f(0.f, 0.5f * boxWidth);
