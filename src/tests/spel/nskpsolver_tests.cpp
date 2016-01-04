@@ -46,10 +46,10 @@ namespace SPEL
     string csName = "4409412";
     string surfName = "21316";
     int id = 0;
-    Point2f center = Point2f(10, 10);
-    float angle = 0;
+    Point2f center = Point2f(10.0f, 10.0f);
+    float angle = 0.0f;
     bool isOccluded = false;
-    float score1Value = 0.1, score2Value = 0.3;
+    float score1Value = 0.1f, score2Value = 0.3f;
     float scoreCoeff = 1;
     vector<Point2f> polygon = { Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2) };
     float LimbLength = polygon[1].y - polygon[0].y;
@@ -70,8 +70,8 @@ namespace SPEL
     params.emplace("useSURFdet", 0.0);
     NSKPSolver S;
 
-    //Testing function "computeScoreCost"
     /*
+    //Testing function "computeScoreCost"
     //scores[0] = score1Value, isWeak = true, isOccluded = false, 
     EXPECT_EQ(0, S.computeScoreCost(label1, params));
 
@@ -83,8 +83,12 @@ namespace SPEL
     label1.isOccluded = false;
     EXPECT_EQ(0, S.computeScoreCost(label2, params));
     */
-    float expected_scoreCost = (scores[0].getScore() + scores[1].getScore());
-    EXPECT_EQ(expected_scoreCost, S.computeScoreCost(label1, params)); // ScoreCost == Summ of scores?
+
+    //Testing function "computeScoreCost"
+    LimbLabel label2;
+    float expected_scoreCost = score1Value + score2Value;
+    EXPECT_EQ(expected_scoreCost, S.computeScoreCost(label1, params)); // scores = {score1Value, score2Value}
+    EXPECT_EQ(1.0f, S.computeScoreCost(label2, params));	// scores is empty
 
     //Testing function "computeJointCost"
     EXPECT_EQ(0, S.computeJointCost(label1, label1, params, false));
@@ -126,11 +130,10 @@ namespace SPEL
   vector<Point2f> shiftPolygon(vector<Point2f> polygon, float dx, float dy)
   {
     vector<Point2f> X = polygon;
-    for (int i = 0; i < polygon.size(); i++)
+    for (unsigned int i = 0; i < polygon.size(); i++)
       X[i] += Point2f(dx, dy);
     return X;
   }
-
 
   TEST(nskpsolverTests, evaluateSolution)
   {
@@ -138,10 +141,10 @@ namespace SPEL
     Point2f center = Point2f(10, 10);
     float angle = 0;
     bool isOccluded = false;
-    float score1Value = 0.1, score2Value = 0.3;
+    float score1Value = 0.1f, score2Value = 0.3f;
     float scoreCoeff = 1;
     vector<Point2f> polygon = { Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2) };
-    float LimbLength = polygon[1].y - polygon[0].y;
+    //float LimbLength = polygon[1].y - polygon[0].y;
     float LimbWidth = polygon[2].x - polygon[1].x;
 
     vector <Score> scores;
@@ -151,9 +154,9 @@ namespace SPEL
     scores.push_back(score2);
 
     //Create labels
-    int dx = 60;
+    float dx = 60.0f;
     LimbLabel label1(id, center, angle, polygon, scores, isOccluded);
-    LimbLabel label2(id + 1, center, angle, shiftPolygon(polygon, dx, 0), scores, isOccluded);
+    LimbLabel label2(id + 1, center, angle, shiftPolygon(polygon, dx, 0.0f), scores, isOccluded);
 
     //Create labels vector
     vector<LimbLabel> labels;
@@ -166,7 +169,7 @@ namespace SPEL
 
     for (int i = 0; i < rows; i++)
       for (int k = 0; k < cols; k++)
-        if (label1.containsPoint(Point2f(k, i)) || label2.containsPoint(Point2f(k, i)))
+        if (label1.containsPoint(Point2f(float(k), float(i))) || label2.containsPoint(Point2f(float(k), float(i))))
           mask.at<uchar>(i, k) = 255;
 
     imwrite("mask.jpg", mask);
@@ -177,36 +180,38 @@ namespace SPEL
 
     //Tesing function "evaluateSolution"
     map<string, float> params;
-    double solutionEval = 1;
+    params.emplace("maxFrameHeight", 100);
     NSKPSolver S;
 
     //All labels pixels in mask
-    EXPECT_EQ(1, S.evaluateSolution(frame, labels, params));
-    cout << "\n";
+    float ActualValue = S.evaluateSolution(frame, labels, params);
+    float ExpectedValue = 1;
+    EXPECT_EQ(ExpectedValue, ActualValue);
+    cout << ExpectedValue << " ~ " << ActualValue << endl << endl;
 
     //30% of "labels[1]" not in mask
-    float e = 0.3; // Relative shift
+    float e = 0.3f; // Relative shift
     LimbLabel label3(id + 1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
-    labels[1] = label3;
+    labels[1] = label3; // Replace the label
 
-    double ActualValue = S.evaluateSolution(frame, labels, params);
-    double ExpectedValue = (2 - e) / (2 + e); // (2 - e) / ( 2 - e + 2*e);
-    float epsilon = 0.02;
+    ActualValue = S.evaluateSolution(frame, labels, params);
+    ExpectedValue = (2 - e) / (2 + e); // (2 - e) / ( 2 - e + 2*e);
+    float epsilon = 0.04f;
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
-    cout << ExpectedValue << " ~ " << ActualValue << "\n\n";
+    cout << ExpectedValue << " ~ " << ActualValue << endl << endl;
 
     //90% of "labels[1]" not in mask
     //"labels[1]" is badly lokalised
-    e = 0.9; // Relative shift of "label[1]"
+    e = 0.9f; // Relative shift of "label[1]"
     LimbLabel label4(id + 1, center, angle, shiftPolygon(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
-    labels[1] = label4;
+    labels[1] = label4; // Replace the label
 
     ActualValue = S.evaluateSolution(frame, labels, params);
     ExpectedValue = (2 - e) / (2 + e);
     ExpectedValue = ExpectedValue - 1;
-    epsilon = 0.04;
+    epsilon = 0.04f;
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
-    cout << ExpectedValue << " ~ " << ActualValue << "\n";
+    cout << ExpectedValue << " ~ " << ActualValue << endl;
   }
 
   // Testing "propagateFrame" function.
@@ -235,7 +240,7 @@ namespace SPEL
     // Build trees for current frames seequence
     //std::vector<MinSpanningTree> trees = solver.buildFrameMSTs(ISM, params); // it return all trees with sizes = 1
     std::vector<MinSpanningTree> trees;
-    for (int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
+    for (unsigned int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
     {
       MinSpanningTree MST;
       MST.build(ISM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
@@ -245,23 +250,23 @@ namespace SPEL
     // Temporary debug info
     cout << "trees.size = " << trees.size() << endl;
     cout << "'trees sizes':" << endl;
-    for (int i = 0; i < trees.size(); i++)
+    for (unsigned int i = 0; i < trees.size(); i++)
       cout << i << ": " << trees[i].getMST().size() << endl;
       //
 
     // Run "propagateFrame"
     int frameID = 0; // Select the frame as root frame for propagation
     NSKPSolver solver;
-    std::vector<int> ignore;
+    std::vector<int> ignored;
     std::vector<NSKPSolver::SolvletScore> allSolves;
-    allSolves = solver.propagateFrame(frameID, Frames, params, ISM, trees, ignore);
+    allSolves = solver.propagateFrame(frameID, Frames, params, ISM, trees, ignored);
 
 
     ASSERT_GT( allSolves.size(), 0);
 
     // Copy ID of all frames, which identical to the selected frame ("frameID")
     vector<int> IdenticalFramesID;
-    for (int i = 0; i < ISM.size(); i++)
+    for (unsigned int i = 0; i < ISM.size(); i++)
       if ((ISM.at(frameID, i) <= 0.05) && (Frames[i]->getFrametype() != KEYFRAME))
         IdenticalFramesID.push_back(i);
 
@@ -274,14 +279,14 @@ namespace SPEL
     //Compare
     // Search all frames, which identical to selected keyframe
     float AcceptableError = 2; // 2 pixels
-    for (int i = 0; i < allSolves.size(); i++)	
+    for (unsigned int i = 0; i < allSolves.size(); i++)
     {
-      for (int k = 0; k < IdenticalFramesID.size(); k++) 
+      for (unsigned int k = 0; k < IdenticalFramesID.size(); k++)
         if(allSolves[i].solvlet.getFrameID() == IdenticalFramesID[k])
         {
           vector<LimbLabel> Labels =  allSolves[i].solvlet.getLabels();
           //Compare all parts from current lockframe
-          for (int t = 0; t < Labels.size(); t++)
+          for (unsigned int t = 0; t < Labels.size(); t++)
           {
             Point2f l0, l1; // Actual current part joints locations
             Labels[t].getEndpoints(l0, l1);
@@ -318,9 +323,7 @@ namespace SPEL
     testISM.build(Frames, false);
 
     // Run "solve"
-    int frameID = 0; // Select the frame as root frame for propagation
     NSKPSolver solver;
-    std::vector<int> ignore;
     std::vector<Solvlet> Solves;
     Solves = solver.solve(sequence, params, testISM);
 
@@ -339,9 +342,7 @@ namespace SPEL
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
-    int frameID = 0; // Select the frame as root frame for propagation
     NSKPSolver solver;
-    std::vector<int> ignore;
     std::vector<Solvlet> Solves;
     Solves = solver.solve(sequence);
 
@@ -361,9 +362,7 @@ namespace SPEL
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
-    int frameID = 0; // Select the frame as root frame for propagation
     NSKPSolver solver;
-    std::vector<int> ignore;
     std::vector<Solvlet> Solves;
     Solves = solver.solve(sequence, params);
 
@@ -386,7 +385,7 @@ namespace SPEL
 
     // Build trees for current frames seequence
     std::vector<MinSpanningTree> trees;
-    for (int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
+    for (unsigned int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
     {
       MinSpanningTree MST;
       MST.build(testISM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
@@ -394,11 +393,10 @@ namespace SPEL
     }
 
     // Run "propagateKeyframes"
-    int frameID = 0; // Select the frame as root frame for propagation
     NSKPSolver solver;
-    std::vector<int> ignore;
+    std::vector<int> ignored;
     std::vector<Solvlet> Solves;
-    Solves = solver.propagateKeyframes(Frames, params, testISM, trees, ignore);
+    Solves = solver.propagateKeyframes(Frames, params, testISM, trees, ignored);
 
     // Compute expected value and compare
 
