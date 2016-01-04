@@ -234,7 +234,7 @@ namespace SPEL
     ISM_expected.imageSimilarityMatrix.at<float>(2, 4) = C;
     ISM_expected.imageSimilarityMatrix.at<float>(2, 5) = C;
 
-    const float D = 3.14*pow(r, 2)*255*255;
+    const float D = 3.14f*pow(r, 2)*255.0f*255.0f;
     ISM_expected.imageSimilarityMatrix.at<float>(1, 3) = D;
 
     ISM_expected.imageSimilarityMatrix.at<float>(0, 4) = 0;
@@ -287,7 +287,7 @@ namespace SPEL
   TEST(ImageSimilarityMatrixTests_, computeMSMcell)
   {
     //Load the input data
-    float r = 0.5 * 135;
+    //float r = 0.5 * 135;
     vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
     cout << "frames.size = " << frames.size() << endl;
     cout << "Image.size = " << frames[0]->getImage().size() << endl;

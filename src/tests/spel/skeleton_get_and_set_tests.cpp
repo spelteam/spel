@@ -104,7 +104,7 @@ namespace SPEL
     skeleton.setPartTree(partTree);
 
     //Get part by ID and compare
-    for (int i = 0; i < parts.size(); i++)
+    for (unsigned int i = 0; i < parts.size(); i++)
     {
       BodyPart* actual = skeleton.getBodyPart(i);
       EXPECT_EQ(parts[i], *actual);

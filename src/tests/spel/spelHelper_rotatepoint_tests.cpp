@@ -40,10 +40,10 @@ namespace SPEL
     EXPECT_FLOAT_EQ(c1p4.x, t1p4.x);
     EXPECT_FLOAT_EQ(c1p4.y, t1p4.y);
 
-    Point2f c2p1 = Point2f(-1.4142135623731, 0.0);
-    Point2f c2p2 = Point2f(0.0, 1.4142135623731);
-    Point2f c2p3 = Point2f(1.4142135623731, 0.0);
-    Point2f c2p4 = Point2f(0.0, -1.4142135623731);
+    Point2f c2p1 = Point2f(-1.4142135623731f, 0.0f);
+    Point2f c2p2 = Point2f(0.0f, 1.4142135623731f);
+    Point2f c2p3 = Point2f(1.4142135623731f, 0.0f);
+    Point2f c2p4 = Point2f(0.0f, -1.4142135623731f);
 
     Point2f t2p1 = spelHelper::rotatePoint2D(p1, center0, angle45);
     Point2f t2p2 = spelHelper::rotatePoint2D(p2, center0, angle45);
@@ -59,10 +59,10 @@ namespace SPEL
     EXPECT_FLOAT_EQ(c2p4.x, t2p4.x);
     EXPECT_FLOAT_EQ(c2p4.y, t2p4.y);
 
-    Point2f c3p1 = Point2f(0.0, 1.4142135623731);
-    Point2f c3p2 = Point2f(1.4142135623731, 0.0);
-    Point2f c3p3 = Point2f(0.0, -1.4142135623731);
-    Point2f c3p4 = Point2f(-1.4142135623731, 0.0);
+    Point2f c3p1 = Point2f(0.0f, 1.4142135623731f);
+    Point2f c3p2 = Point2f(1.4142135623731f, 0.0f);
+    Point2f c3p3 = Point2f(0.0f, -1.4142135623731f);
+    Point2f c3p4 = Point2f(-1.4142135623731f, 0.0f);
 
     Point2f t3p1 = spelHelper::rotatePoint2D(p1, center0, angle45 * (-1.0));
     Point2f t3p2 = spelHelper::rotatePoint2D(p2, center0, angle45 * (-1.0));
@@ -116,10 +116,10 @@ namespace SPEL
     EXPECT_FLOAT_EQ(c5p4.x, t5p4.x);
     EXPECT_FLOAT_EQ(c5p4.y, t5p4.y);
 
-    Point2f c6p1 = Point2f(-0.4142135623731, -0.4142135623731);
-    Point2f c6p2 = Point2f(1.0, 1.0);
-    Point2f c6p3 = Point2f(2.4142135623731, -0.4142135623731);
-    Point2f c6p4 = Point2f(1.0, -1.8284271247462);
+    Point2f c6p1 = Point2f(-0.4142135623731f, -0.4142135623731f);
+    Point2f c6p2 = Point2f(1.0f, 1.0f);
+    Point2f c6p3 = Point2f(2.4142135623731f, -0.4142135623731f);
+    Point2f c6p4 = Point2f(1.0f, -1.8284271247462f);
 
     Point2f t6p1 = spelHelper::rotatePoint2D(p1, center11, angle45);
     Point2f t6p2 = spelHelper::rotatePoint2D(p2, center11, angle45);
@@ -154,10 +154,10 @@ namespace SPEL
     EXPECT_FLOAT_EQ(c7p4.x, t7p4.x);
     EXPECT_FLOAT_EQ(c7p4.y, t7p4.y);
 
-    Point2f c8p1 = Point2f(-0.4142135623731, 2.4142135623731);
-    Point2f c8p2 = Point2f(1.0, 1.0);
-    Point2f c8p3 = Point2f(-0.4142135623731, -0.4142135623731);
-    Point2f c8p4 = Point2f(-1.8284271247462, 1.0);
+    Point2f c8p1 = Point2f(-0.4142135623731f, 2.4142135623731f);
+    Point2f c8p2 = Point2f(1.0f, 1.0f);
+    Point2f c8p3 = Point2f(-0.4142135623731f, -0.4142135623731f);
+    Point2f c8p4 = Point2f(-1.8284271247462f, 1.0f);
 
     Point2f t8p1 = spelHelper::rotatePoint2D(p1, center11, angle45 * (-1.0));
     Point2f t8p2 = spelHelper::rotatePoint2D(p2, center11, angle45 * (-1.0));
@@ -173,18 +173,18 @@ namespace SPEL
     EXPECT_FLOAT_EQ(c8p4.x, t8p4.x);
     EXPECT_FLOAT_EQ(c8p4.y, t8p4.y);
 
-    Point2f p5 = Point2f(0.0, 2.5871);
-    Point2f p6 = Point2f(18.1097, 2.5871);
-    Point2f p7 = Point2f(18.1097, -2.5871);
-    Point2f p8 = Point2f(0.0, -2.5871);
+    Point2f p5 = Point2f(0.0f, 2.5871f);
+    Point2f p6 = Point2f(18.1097f, 2.5871f);
+    Point2f p7 = Point2f(18.1097f, -2.5871f);
+    Point2f p8 = Point2f(0.0f, -2.5871f);
 
-    Point2f center90 = Point2f(9.05485, 0.0);
+    Point2f center90 = Point2f(9.05485f, 0.0f);
     double angle59 = -59.7705;
 
-    Point2f c1p5 = Point2f(6.7313461216324, 9.126046496688);
-    Point2f c1p6 = Point2f(15.848943894977, -6.5210185614465);
-    Point2f c1p7 = Point2f(11.378353878368, -9.126046496688);
-    Point2f c1p8 = Point2f(2.2607561050225, 6.5210185614465);
+    Point2f c1p5 = Point2f(6.7313461216324f, 9.126046496688f);
+    Point2f c1p6 = Point2f(15.848943894977f, -6.5210185614465f);
+    Point2f c1p7 = Point2f(11.378353878368f, -9.126046496688f);
+    Point2f c1p8 = Point2f(2.2607561050225f, 6.5210185614465f);
 
     Point2f t1p5 = spelHelper::rotatePoint2D(p5, center90, angle59);
     Point2f t1p6 = spelHelper::rotatePoint2D(p6, center90, angle59);

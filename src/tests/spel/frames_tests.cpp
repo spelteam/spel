@@ -46,14 +46,14 @@ namespace SPEL
     sort(frames.begin(), frames.end(), Frame::FramePointerComparer);
     bool FramesIsSorted = true;
     int id = frames[0]->getID();
-    for (int i = 0; i < frames.size(); i++)
+    for (unsigned int i = 0; i < frames.size(); i++)
     {
       if (id > frames[i]->getID())
         FramesIsSorted = false;
       id = frames[i]->getID();
     }
     EXPECT_TRUE(FramesIsSorted);
-    for (int i = 0; i < frames.size(); i++)
+    for (unsigned int i = 0; i < frames.size(); i++)
       delete frames[i];
     frames.clear();
   }
@@ -65,7 +65,7 @@ namespace SPEL
     Mat image, mask;
 
     Point2f p0(10, 2), p1(10, 18);
-    int LimbLength = p1.y - p0.y;
+    float LimbLength = p1.y - p0.y;
     POSERECT<Point2f> partPolygon(Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2));
 
     //Create body joints
@@ -99,8 +99,8 @@ namespace SPEL
     EXPECT_EQ(0, frame->getParentFrameID());
 
     //Lockframe "get-" and "setGroundPoint"
-    frame->setGroundPoint(Point2f(0, 0.4));
-    EXPECT_EQ(Point2f(0, 0.4), frame->getGroundPoint());
+    frame->setGroundPoint(Point2f(0.0f, 0.4f));
+    EXPECT_EQ(Point2f(0.0f, 0.4f), frame->getGroundPoint());
 
     //Lockframe "get-" and "setImage"
     image = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
@@ -138,8 +138,8 @@ namespace SPEL
     EXPECT_EQ(0, frame->getParentFrameID());
 
     //Keyframe "get-" and "setGroundPoint"
-    frame->setGroundPoint(Point2f(0, 0.4));
-    EXPECT_EQ(Point2f(0, 0.4), frame->getGroundPoint());
+    frame->setGroundPoint(Point2f(0.0f, 0.4f));
+    EXPECT_EQ(Point2f(0.0f, 0.4f), frame->getGroundPoint());
 
     //Keyframe "get-" and "setImage"
     image = Mat(Size(cols, rows), CV_8UC3, Scalar(0, 0, 0));
@@ -199,7 +199,7 @@ namespace SPEL
     //Create shifted points vector 
     Point2f shift(10, 10);
     map<int, Point2f> locations_expected = getImageLocations_ft(skeleton);
-    for (int i = 0; i < locations_expected.size(); i++)
+    for (unsigned int i = 0; i < locations_expected.size(); i++)
       locations_expected[i] += shift;
 
     //Run "shiftSkeleton2D"
@@ -234,12 +234,12 @@ namespace SPEL
     float X = 2.0f;
     Mat image = frame->getImage().clone();
     int oldHeight = image.size().height;
-    uint32_t newHeight = X*oldHeight;
+    uint32_t newHeight = static_cast<uint32_t>(X*oldHeight);
 
     //Create scalling points vector 
     Point2f shift(10, 10);
     map<int, Point2f> locations_expected = getImageLocations_ft(skeleton);
-    for (int i = 0; i < locations_expected.size(); i++)
+    for (unsigned int i = 0; i < locations_expected.size(); i++)
       locations_expected[i] *= X;
 
     //Run "Resize"

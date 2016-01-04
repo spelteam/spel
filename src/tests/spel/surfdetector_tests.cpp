@@ -22,12 +22,12 @@ using namespace xfeatures2d;
 
 namespace SPEL
 {
-  vector<Frame*> SFrames;
+  //vector<Frame*> SFrames;
 
   vector <KeyPoint> SelectKeypoints(vector <KeyPoint> FrameKeypoints, POSERECT<Point2f> rect)
   {
     vector <KeyPoint> keyPoints;
-    for (int i = 0; i < FrameKeypoints.size(); i++)
+    for (unsigned int i = 0; i < FrameKeypoints.size(); i++)
       if (rect.containsPoint(FrameKeypoints[i].pt) > 0)
         keyPoints.push_back(FrameKeypoints[i]);
     return keyPoints;
@@ -102,7 +102,7 @@ namespace SPEL
     EXPECT_EQ(expected_PartKeyPoints.size(), actual_PartModels[partID].keyPoints.size());
 
     //Compare current part keypoints
-    for (int i = 0; i < min(expected_PartKeyPoints.size(), actual_PartModels[partID].keyPoints.size()); i++)
+    for (unsigned int i = 0; i < min(expected_PartKeyPoints.size(), actual_PartModels[partID].keyPoints.size()); i++)
       EXPECT_EQ(expected_PartKeyPoints[i].pt, actual_PartModels[partID].keyPoints[i].pt);
 
     //Compare current part model descriptrors
@@ -137,7 +137,7 @@ namespace SPEL
     image.release();
     mask.release();
     
-    for (int i = 0; i < SFrames.size(); i++)
+    for (unsigned int i = 0; i < SFrames.size(); i++)
       if (SFrames[i] != 0) delete SFrames[i];
     SFrames.clear();
   }
@@ -192,7 +192,7 @@ namespace SPEL
       POSERECT<Point2f>  rect = D.getBodyPartRect(*part, p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
       expected_rects[partID] = rect.asVector();
 
-      for (int i = 0; i < keyPoints.size(); i++)
+      for (unsigned int i = 0; i < keyPoints.size(); i++)
         if (rect.containsPoint(keyPoints[i].pt) > 0)
           temp.push_back(keyPoints[i]);
       expected_Keypoints.emplace(pair<uint32_t, vector<KeyPoint>>(partID, temp));
@@ -212,14 +212,14 @@ namespace SPEL
 
     //Compare
     vector<Point2f> empty_rect = { Point2f(0, 0), Point2f(0, 0), Point2f(0, 0), Point2f(0, 0) };
-    for (int f = 0; f < SFrames.size(); f++)
+    for (unsigned int f = 0; f < SFrames.size(); f++)
       for (tree<BodyPart>::iterator p = partTree.begin(); p != partTree.end(); p++)
       {
         int partID = p->getPartID();
         if (SFrames[f]->getFrametype() != INTERPOLATIONFRAME)
         {
           EXPECT_EQ(expected_rects[partID], D.partModels[f][partID].partModelRect.asVector());
-          for (int i = 0; i < expected_Keypoints[partID].size(); i++)
+          for (unsigned int i = 0; i < expected_Keypoints[partID].size(); i++)
             EXPECT_EQ(expected_Keypoints[partID][i].pt, D.partModels[f][partID].keyPoints[i].pt);
           bool All_values_equal = true;
           Size size = expected_descriptors[partID].size();
@@ -232,7 +232,7 @@ namespace SPEL
         {
           EXPECT_EQ(empty_rect, D.partModels[f][partID].partModelRect.asVector()); //?
           EXPECT_TRUE(D.partModels[f][partID].keyPoints.empty());
-          for (int i = 0; i < D.partModels[f][partID].keyPoints.size(); i++)
+          for (unsigned int i = 0; i < D.partModels[f][partID].keyPoints.size(); i++)
             cout << D.partModels[f][partID].keyPoints[i].pt << endl;
         }
         expected_Keypoints[partID].clear();
@@ -242,8 +242,8 @@ namespace SPEL
     
     image.release();
     mask.release();
-    for (int i = 0; i < SFrames.size(); i++)
-        if (SFrames[i] != 0) delete SFrames[i];
+    for (unsigned int i = 0; i < SFrames.size(); i++)
+      if (SFrames[i] != 0) delete SFrames[i];
     SFrames.clear();
   }
 
@@ -299,7 +299,7 @@ namespace SPEL
     partModel1.partModelRect = D.getBodyPartRect(bodyPart, p0 + shift1, p1 + shift1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
     partModel2.partModelRect = D.getBodyPartRect(bodyPart, p0 + shift2, p1 + shift2, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
 
-    for (int i = 0; i < _keyPoints.size(); i++)
+    for (unsigned int i = 0; i < _keyPoints.size(); i++)
     {
       if (partModel1.partModelRect.containsPoint(_keyPoints[i].pt) > 0)
         partModel1.keyPoints.push_back(_keyPoints[i]);
@@ -352,8 +352,8 @@ namespace SPEL
     
     image.release();
     mask.release();
-    for (int i = 0; i < SFrames.size(); i++)
-        if (SFrames[i] != 0) delete SFrames[i];
+    for (unsigned int i = 0; i < SFrames.size(); i++)
+      if (SFrames[i] != 0) delete SFrames[i];
     SFrames.clear();
   }
 
@@ -400,7 +400,7 @@ namespace SPEL
     float boneWidth = D.getBoneWidth(boneLength, bodyPart);
     SurfDetector::PartModel partModel1;
     partModel1.partModelRect = D.getBodyPartRect(bodyPart, p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
-    for (int i = 0; i < _keyPoints.size(); i++)
+    for (unsigned int i = 0; i < _keyPoints.size(); i++)
     {
      if (partModel1.partModelRect.containsPoint(_keyPoints[i].pt) > 0)
        partModel1.keyPoints.push_back(_keyPoints[i]);
@@ -446,7 +446,7 @@ namespace SPEL
      
     image.release();
     mask.release();
-    for (int i = 0; i < SFrames.size(); i++)
+    for (unsigned int i = 0; i < SFrames.size(); i++)
       if (SFrames[i] != 0) delete SFrames[i];
     SFrames.clear();
   }
@@ -454,7 +454,7 @@ namespace SPEL
   TEST(surfDetectorTests, detect)
   {   
     //Load the input data
-    SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
 
     //Copy image and skeleton from first keyframe
     int FirstKeyframe = 0;
@@ -481,15 +481,15 @@ namespace SPEL
 
     // Output top of "limbLabels" into text file
     fout << "\nTop Labels, sorted by part id:\n\n";
-    for (int i = 0; i < limbLabels.size(); i++) // For all body parts
+    for (unsigned int i = 0; i < limbLabels.size(); i++) // For all body parts
     {
-      for (int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
+      for (unsigned int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
       {
         Point2f p0, p1;
         limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
         fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
         vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
-        for (int t = 0; t < scores.size(); t++)
+        for (unsigned int t = 0; t < scores.size(); t++)
           fout << scores[t].getScore() << ", "; // Put all scores of the Label
         fout << "}\n";
       }
@@ -508,14 +508,14 @@ namespace SPEL
 
     fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
 
-    for (int id = 0; id < limbLabels.size(); id++)
+    for (unsigned int id = 0; id < limbLabels.size(); id++)
     {
       fout << "\nPartID = " << id << ":\n";
       Point2f l0, l1, p0, p1, delta0, delta1;
       vector<LimbLabel> temp;
       p0 = PartLocation[id].first; // Ideal boby part point
       p1 = PartLocation[id].second; // Ideal boby part point
-      for (int k = 0; k < limbLabels[id].size(); k++)
+      for (int k = 0; k < static_cast<int>(limbLabels[id].size()); k++)
       {
         limbLabels[id][k].getEndpoints(l0, l1); // Label points
         delta0 = l0 - p0;
@@ -545,15 +545,15 @@ namespace SPEL
 
     //Output top of "effectiveLabels" into text file
     fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
-    for (int i = 0; i < effectiveLabels.size(); i++)
+    for (unsigned int i = 0; i < effectiveLabels.size(); i++)
     {
-      for (int k = 0; k < effectiveLabels[i].size(); k++)
+      for (unsigned int k = 0; k < effectiveLabels[i].size(); k++)
       {
         Point2f p0, p1;
         limbLabels[i][k].getEndpoints(p0, p1);
         fout << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
         vector<Score> scores = effectiveLabels[i][k].getScores();
-        for (int t = 0; t < scores.size(); t++)
+        for (unsigned int t = 0; t < scores.size(); t++)
           fout << scores[t].getScore() << ", ";
         fout << "}\n";
       }
@@ -569,7 +569,7 @@ namespace SPEL
     if (!EffectiveLabbelsInTop)
     {
       cout << "Body parts with id: ";
-        for (int i = 0; i < WithoutGoodLabelInTop.size(); i++)
+        for (unsigned int i = 0; i < WithoutGoodLabelInTop.size(); i++)
         {
           cout << WithoutGoodLabelInTop[i];
           if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";
@@ -580,8 +580,8 @@ namespace SPEL
 
     image.release();
     mask.release();
-    for (int i = 0; i < SFrames.size(); i++)
-        if (SFrames[i] != 0) delete SFrames[i];
+    for (unsigned int i = 0; i < SFrames.size(); i++)
+      if (SFrames[i] != 0) delete SFrames[i];
     SFrames.clear();
   }
 

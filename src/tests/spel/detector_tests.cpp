@@ -468,9 +468,9 @@ namespace SPEL
       for (unsigned int i = 0; i < X[p].size(); i++)
       {
         fout << endl << "  limbID " << X[p][i].getLimbID() << ", angle " << X[p][i].getAngle() << ", poligon" << X[p][i].getPolygon() << ", scores ";
-        vector<Score> S = X[p][i].getScores();
-        for (unsigned  int k = 0; k < S.size(); k++)
-          fout << S[k].getScore() << ", ";
+        vector<Score> Scores = X[p][i].getScores();
+        for (unsigned  int k = 0; k < Scores.size(); k++)
+          fout << Scores[k].getScore() << ", ";
       }
       fout << endl;
     }
@@ -874,7 +874,7 @@ namespace SPEL
 
     //Compare
     //EXPECT_EQ(partsRects_expected, partsRects_actual);
-    float error = 0.000001;
+    float error = 0.000001f;
     for (unsigned int i = 0; i < partsRects_expected.size(); i++)
     {
       //cout << i << ": " << "Expected ~ Actual" << endl;

@@ -90,7 +90,7 @@ namespace SPEL
     image.release();
     mask.release();
     Colors.clear();
-    for (int i = 0; i < vFrames.size(); i++)
+    for (unsigned int i = 0; i < vFrames.size(); i++)
       delete vFrames[i];
     vFrames.clear();
   }
@@ -438,7 +438,7 @@ namespace SPEL
     vector <Score> s;
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
     Point2f boxCenter = p0 * 0.5 + p1 * 0.5;
-    float boneLength = detector.getBoneLength(p0, p1);
+    //float boneLength = detector.getBoneLength(p0, p1);
     float rot = float(spelHelper::angle2D(1.0f, 0.0f, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
     uint32_t totalPixels = 0, pixelsInMask = 0, pixelsWithLabel = 0;
     float totalPixelLabelScore = 0, pixDistAvg = 0, pixDistNum = 0;
@@ -448,8 +448,8 @@ namespace SPEL
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
     bool PartContainPoints = false;
-    for (int i = xmin; i < xmax; i++)
-      for (int j = ymin; j < ymax; j++)
+    for (int i = int(xmin); i < int(xmax); i++)
+      for (int j = int(ymin); j < int(ymax); j++)
         if (rect.containsPoint(Point2f((float)i, (float)j)) > 0)
         {
           totalPixels++;
@@ -504,7 +504,7 @@ namespace SPEL
     EXPECT_EQ(limbLabel_e.getScores().size(), limbLabel_a.getScores().size());
     if (limbLabel_e.getScores().size() == limbLabel_a.getScores().size())
     {
-      for (int i = 0; i < limbLabel_e.getScores().size(); i++)
+      for (unsigned int i = 0; i < limbLabel_e.getScores().size(); i++)
       {
         EXPECT_TRUE(fabs(limbLabel_e.getScores().at(i).getScore() - limbLabel_a.getScores().at(i).getScore()) <= 0.005);
       }
@@ -523,7 +523,7 @@ namespace SPEL
     EXPECT_EQ(limbLabel_e.getPolygon().size(), limbLabel_a.getPolygon().size());
     if (limbLabel_e.getPolygon().size() == limbLabel_a.getPolygon().size())
     {
-      for (int i = 0; i < limbLabel_e.getPolygon().size(); i++)
+      for (unsigned int i = 0; i < limbLabel_e.getPolygon().size(); i++)
       {
         EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).x, limbLabel_a.getPolygon().at(i).x);
         EXPECT_FLOAT_EQ(limbLabel_e.getPolygon().at(i).y, limbLabel_a.getPolygon().at(i).y);
@@ -559,15 +559,15 @@ namespace SPEL
 
     // Output top of "limbLabels" into text file
     fout << "\nTop Labels, sorted by part id:\n\n";
-    for (int i = 0; i < limbLabels.size(); i++) // For all body parts
+    for (unsigned int i = 0; i < limbLabels.size(); i++) // For all body parts
     {
-      for (int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
+      for (unsigned int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
       {
         Point2f p0, p1;
         limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
         fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
         vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
-        for (int t = 0; t < scores.size(); t++)
+        for (unsigned int t = 0; t < scores.size(); t++)
         {
           fout << scores[t].getScore() << ", "; // Put all scores of the Label
         }
@@ -580,8 +580,8 @@ namespace SPEL
     map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(skeleton);
 
     // Compare labels with ideal bodyparts from keyframe, and output debug information 
-    float TolerableCoordinateError = 7; // Linear error in pixels
-    float TolerableAngleError = 0.1; // 10% (not used in this test)
+    float TolerableCoordinateError = 7.0f; // Linear error in pixels
+    //float TolerableAngleError = 0.1f; // 10% (not used in this test)
     int TopListLabelsCount = 4; // Size of "labels top list"
     map<int, vector<LimbLabel>> effectiveLabels;
     vector<int> WithoutGoodLabelInTop;
@@ -589,14 +589,14 @@ namespace SPEL
 
     fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
 
-    for (int id = 0; id < limbLabels.size(); id++)
+    for (unsigned int id = 0; id < limbLabels.size(); id++)
     {
       fout << "\nPartID = " << id << ":\n";
       Point2f l0, l1, p0, p1, delta0, delta1;
       vector<LimbLabel> temp;
       p0 = PartLocation[id].first; // Ideal body part point
       p1 = PartLocation[id].second; // Ideal body part point
-      for (int k = 0; k < limbLabels[id].size(); k++)
+      for (int k = 0; k < static_cast<int>(limbLabels[id].size()); k++)
       {
         limbLabels[id][k].getEndpoints(l0, l1); // Label points
         delta0 = l0 - p0;
@@ -626,15 +626,15 @@ namespace SPEL
 
     //Output top of "effectiveLabels" into text file
     fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
-    for (int i = 0; i < effectiveLabels.size(); i++)
+    for (unsigned int i = 0; i < effectiveLabels.size(); i++)
     {
-      for (int k = 0; k < effectiveLabels[i].size(); k++)
+      for (unsigned int k = 0; k < effectiveLabels[i].size(); k++)
       {
         Point2f p0, p1;
         limbLabels[i][k].getEndpoints(p0, p1);
         fout << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
         vector<Score> scores = effectiveLabels[i][k].getScores();
-        for (int t = 0; t < scores.size(); t++)
+        for (unsigned int t = 0; t < scores.size(); t++)
         {
           fout << scores[t].getScore() << ", ";
         }
@@ -653,7 +653,7 @@ namespace SPEL
     if (!EffectiveLabbelsInTop)
     {
       cout << "Body parts with id: ";
-      for (int i = 0; i < WithoutGoodLabelInTop.size(); i++)
+      for (unsigned int i = 0; i < WithoutGoodLabelInTop.size(); i++)
       {
         cout << WithoutGoodLabelInTop[i];
         if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";

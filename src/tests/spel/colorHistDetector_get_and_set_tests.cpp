@@ -67,8 +67,12 @@ namespace SPEL
 
     // Get "chd" frames and compare
     vector <Frame*> actual_frames = chd.getFrames();
-    for (int i = 0; i < frames.size(); i++)
-      EXPECT_EQ(Vec3b(i, i, i), actual_frames[i]->getImage().at<Vec3b>(0, 0));
+    for (unsigned int i = 0; i < frames.size(); i++)
+    {
+      uchar b = static_cast<uchar>(i);
+      EXPECT_EQ(Vec3b(b, b, b), actual_frames[i]->getImage().at<Vec3b>(0, 0));
+    }
+
   }
 
 }

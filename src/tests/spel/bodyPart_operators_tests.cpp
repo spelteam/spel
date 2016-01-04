@@ -18,12 +18,12 @@ namespace SPEL
     bool isOccluded = true;
     float spaceLength = 1.343f;
 
-    float expectedDistance = 3.4;
+    float expectedDistance = 3.4f;
     POSERECT <Point2f> partPolygon(Point2f(0.0, 0.0), Point2f(1.0, 1.0), Point2f(2.0, 2.0), Point2f(3.0, 3.0));
-    float lwRatio = 1.8;
-    float relativeLength = 0.6;
-    float searchRadius = 0.5;
-    float rotationSearchRange = 3.14;
+    float lwRatio = 1.8f;
+    float relativeLength = 0.6f;
+    float searchRadius = 0.5f;
+    float rotationSearchRange = 3.14f;
 
     BodyPart bp1(partID, partName, parentJoint, childJoint, isOccluded, spaceLength);
     BodyPart bp2(partID, partName, parentJoint, childJoint, isOccluded, spaceLength);
@@ -61,12 +61,12 @@ namespace SPEL
     bool isOccluded = true;
     float spaceLength = 1.343f;
 
-    float expectedDistance = 3.4;
+    float expectedDistance = 3.4f;
     POSERECT <Point2f> partPolygon(Point2f(0.0, 0.0), Point2f(1.0, 1.0), Point2f(2.0, 2.0), Point2f(3.0, 3.0));
-    float lwRatio = 1.8;
-    float relativeLength = 0.6;
-    float searchRadius = 0.5;
-    float rotationSearchRange = 3.14;
+    float lwRatio = 1.8f;
+    float relativeLength = 0.6f;
+    float searchRadius = 0.5f;
+    float rotationSearchRange = 3.14f;
     BodyPart bp1(partID, partName, parentJoint, childJoint, isOccluded, spaceLength);
     bp1.setExpectedDistance(expectedDistance);
     bp1.setPartPolygon(partPolygon);

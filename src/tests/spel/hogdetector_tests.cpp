@@ -39,21 +39,21 @@ namespace SPEL
       }
     }
 
-    uint32_t d = 0;
-    for (uint32_t n = 0; n + blockStride.height < wndSize.height; n += blockStride.height)// window rows
-      for (uint32_t k = 0; k + blockStride.width < wndSize.width; k += blockStride.width)// window cols				
-        for (uint32_t r = n; r < n + blockSize.height; r += cellSize.height)// block rows					
-          for (uint32_t c = k; c < k + blockSize.width; c += cellSize.width)// block cols						
-            for (uint32_t b = 0; b < nbins; b++)// nbins
+    int d = 0;
+    for (int n = 0; n + blockStride.height < wndSize.height; n += blockStride.height)// window rows
+      for (int k = 0; k + blockStride.width < wndSize.width; k += blockStride.width)// window cols				
+        for (int r = n; r < n + blockSize.height; r += cellSize.height)// block rows					
+          for (int c = k; c < k + blockSize.width; c += cellSize.width)// block cols						
+            for (int b = 0; b < nbins; b++)// nbins
             {
               gradientStrengths.at(r / cellSize.height).at(c / cellSize.width).at(b) += descriptors.at(d);
               if (b == 0) counter.at(r / cellSize.height).at(c / cellSize.width)++;
               d++;
             }
 
-    for (uint32_t i = 0; i < wndSize.height; i += cellSize.height)
-      for (uint32_t j = 0; j < wndSize.width; j += cellSize.width)
-        for (uint8_t b = 0; b < nbins; b++)
+    for (int i = 0; i < wndSize.height; i += cellSize.height)
+      for (int j = 0; j < wndSize.width; j += cellSize.width)
+        for (int b = 0; b < nbins; b++)
           if (counter.at(i / cellSize.height).at(j / cellSize.width) == 0)
             gradientStrengths.at(i / cellSize.height).at(j / cellSize.width).at(b) = 0;
           else
@@ -104,7 +104,7 @@ namespace SPEL
     HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
+    //int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
@@ -151,16 +151,16 @@ namespace SPEL
 
     // Compare
     EXPECT_EQ(descriptorsValues.size(), partModel.descriptors.size());
-    for (int i = 0; i < descriptorsValues.size(); i++)
+    for (unsigned int i = 0; i < descriptorsValues.size(); i++)
       EXPECT_EQ(descriptorsValues[i], partModel.descriptors[i]);
 
     vector <vector <vector <float>>> G = decodeDescriptor(descriptorsValues, wndSize, blockSize, blockStride, cellSize, nbins);
-    for (int i = 0; i < G.size(); i++)
-      for (int k = 0; k < G[i].size(); k++)
-        for (int n = 0; n < G[i][k].size(); n++)
+    for (unsigned int i = 0; i < G.size(); i++)
+      for (unsigned int k = 0; k < G[i].size(); k++)
+        for (unsigned int n = 0; n < G[i][k].size(); n++)
           EXPECT_EQ(G[i][k][n], partModel.gradientStrengths[i][k][n]);
 
-    for (int i = 0; i < HFrames.size(); i++)
+    for (unsigned int i = 0; i < HFrames.size(); i++)
       delete HFrames[i];
     HFrames.clear();
   }
@@ -171,7 +171,7 @@ namespace SPEL
     HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
+    //int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
@@ -204,12 +204,12 @@ namespace SPEL
 
     //Calculate expected value
     vector<vector<float>> allDescriptors;
-    for (int partID = 0; partID < partTree.size(); partID++)
+    for (unsigned int partID = 0; partID < partTree.size(); partID++)
     {
       vector<float> descriptorsValues;
       BodyPart bodyPart = *skeleton.getBodyPart(partID);//Copy body part	
-      BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());//Copy part joints 
-      BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
+      //BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());//Copy part joints 
+      //BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
       HOGDescriptor d(D.partSize[partID], blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
       d.compute(partModels[partID].partImage, descriptorsValues);
       allDescriptors.push_back(descriptorsValues);
@@ -217,16 +217,16 @@ namespace SPEL
 
     //Compare		
     Skeleton S = HFrames[FirstKeyframe]->getSkeleton();
-    for (int partID = 0; partID < partTree.size(); partID++)
+    for (unsigned int partID = 0; partID < partTree.size(); partID++)
     {
       EXPECT_EQ(allDescriptors[partID].size(), partModels[partID].descriptors.size());
-      for (int i = 0; i < allDescriptors[partID].size(); i++)
+      for (unsigned int i = 0; i < allDescriptors[partID].size(); i++)
         EXPECT_EQ(allDescriptors[partID][i], partModels[partID].descriptors[i]);
 
       vector <vector <vector <float>>> G = decodeDescriptor(allDescriptors[partID], D.partSize[partID], blockSize, blockStride, cellSize, nbins);
-      for (int i = 0; i < G.size(); i++)
-        for (int k = 0; k < G[i].size(); k++)
-          for (int n = 0; n < G[i][k].size(); n++)
+      for (unsigned int i = 0; i < G.size(); i++)
+        for (unsigned int k = 0; k < G[i].size(); k++)
+          for (unsigned int n = 0; n < G[i][k].size(); n++)
             EXPECT_EQ(G[i][k][n], partModels[partID].gradientStrengths[i][k][n]);
 
       allDescriptors[partID].clear();
@@ -234,7 +234,7 @@ namespace SPEL
     }
     allDescriptors.clear();
 
-    for (int i = 0; i < HFrames.size(); i++)
+    for (unsigned int i = 0; i < HFrames.size(); i++)
       delete HFrames[i];
     HFrames.clear();
   }
@@ -245,7 +245,7 @@ namespace SPEL
     HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
+    //int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
@@ -268,10 +268,10 @@ namespace SPEL
       uint32_t childID = bodyPart->getChildJoint();
       float lwRatio = bodyPart->getLWRatio();
       Point2f delta = Locations[parentID] - Locations[childID];
-      float length = norm(delta);
+      float length = static_cast<float>(norm(delta));
       float width = length / lwRatio;
-      uint32_t L = ceil(length / blockSize.width)*blockSize.width;
-      uint32_t W = ceil(width / blockSize.height)*blockSize.height;
+      uint32_t L = static_cast<uint32_t>(ceil(length / blockSize.width)*blockSize.width);
+      uint32_t W = static_cast<uint32_t>(ceil(width / blockSize.height)*blockSize.height);
       partsSize.emplace(pair<uint32_t, Size>(partID, Size(L, W)));
     }
 
@@ -280,7 +280,7 @@ namespace SPEL
     map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     EXPECT_EQ(partsSize, partsSize_actual);
 
-    for (int i = 0; i < HFrames.size(); i++)
+    for (unsigned int i = 0; i < HFrames.size(); i++)
       delete HFrames[i];
     HFrames.clear();
   }
@@ -291,7 +291,7 @@ namespace SPEL
     HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
+    //int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
@@ -323,33 +323,33 @@ namespace SPEL
 
     //Calculate expected value
     vector<vector<float>> allDescriptors;
-    for (int partID = 0; partID < partTree.size(); partID++)
+    for (unsigned int partID = 0; partID < partTree.size(); partID++)
     {
       vector<float> descriptorsValues;
       BodyPart bodyPart = *skeleton.getBodyPart(partID);//Copy body part	
-      BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());//Copy part joints 
-      BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
+      //BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());//Copy part joints 
+      //BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
       HOGDescriptor d(D.partSize[partID], blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
       d.compute(D.partModels[0][partID].partImage, descriptorsValues);
       allDescriptors.push_back(descriptorsValues);
     }
 
     //Compare	
-    for (int partID = 0; partID < partTree.size(); partID++)
+    for (unsigned int partID = 0; partID < partTree.size(); partID++)
     {
       EXPECT_EQ(allDescriptors[partID].size(), D.partModels[0][partID].descriptors.size());
-      for (int i = 0; i < allDescriptors[partID].size(); i++)
+      for (unsigned int i = 0; i < allDescriptors[partID].size(); i++)
         EXPECT_EQ(allDescriptors[partID][i], D.partModels[0][partID].descriptors[i]);
       vector <vector <vector <float>>> G = decodeDescriptor(allDescriptors[partID], D.partSize[partID], blockSize, blockStride, cellSize, nbins);
-      for (int i = 0; i < G.size(); i++)
-        for (int k = 0; k < G[i].size(); k++)
-          for (int n = 0; n < G[i][k].size(); n++)
+      for (unsigned int i = 0; i < G.size(); i++)
+        for (unsigned int k = 0; k < G[i].size(); k++)
+          for (unsigned int n = 0; n < G[i][k].size(); n++)
             EXPECT_EQ(G[i][k][n], D.partModels[0][partID].gradientStrengths[i][k][n]);
       allDescriptors[partID].clear();
     }
     allDescriptors.clear();
 
-    for (int i = 0; i < HFrames.size(); i++)
+    for (unsigned int i = 0; i < HFrames.size(); i++)
       delete HFrames[i];
     HFrames.clear();
   }
@@ -360,7 +360,7 @@ namespace SPEL
     HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
+    //int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
@@ -387,21 +387,21 @@ namespace SPEL
     Size cellSize = Size(8, 8);
     Size wndSize = Size(64, 128);
     const int nbins = 9;
-    double wndSigma = -1;
-    double thresholdL2hys = 0.2;
-    bool gammaCorrection = true;
-    int nlevels = 64;
+    //double wndSigma = -1;
+    //double thresholdL2hys = 0.2;
+    //bool gammaCorrection = true;
+    //int nlevels = 64;
     Size wndStride = Size(8, 8);
     Size padding = Size(32, 32);
-    int derivAperture = 1;
-    int histogramNormType = HOGDescriptor::L2Hys;
+    //int derivAperture = 1;
+    //int histogramNormType = HOGDescriptor::L2Hys;
 
     //Calculate actual value
     HogDetector D;
     D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     map<string, float> params;
     D.train(HFrames, params);
-    bool useHOGDet = true;
+    //bool useHOGDet = true;
     HogDetector::PartModel partModel = D.getPartModels()[0][partID];
     auto detectorHelper = new HogDetectorHelper();
     map <string, float> detectParams;
@@ -440,7 +440,7 @@ namespace SPEL
     cout << "Polygon = " << label_actual.getPolygon() << endl;
 
 
-    for (int i = 0; i < HFrames.size(); i++)
+    for (unsigned int i = 0; i < HFrames.size(); i++)
       delete HFrames[i];
     HFrames.clear();
   }
@@ -451,7 +451,7 @@ namespace SPEL
     HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
 
     //Counting a keyframes
-    int KeyframesCount = 0;
+    //int KeyframesCount = 0;
     int FirstKeyframe = 0;
 
     //Copy image and skeleton from first keyframe
@@ -472,14 +472,14 @@ namespace SPEL
     Size cellSize = Size(8, 8);
     Size wndSize = Size(64, 128);
     const int nbins = 9;
-    double wndSigma = -1;
-    double thresholdL2hys = 0.2;
-    bool gammaCorrection = true;
-    int nlevels = 64;
+    //double wndSigma = -1;
+    //double thresholdL2hys = 0.2;
+    //bool gammaCorrection = true;
+    //int nlevels = 64;
     Size wndStride = Size(8, 8);
     Size padding = Size(32, 32);
-    int derivAperture = 1;
-    int histogramNormType = HOGDescriptor::L2Hys;
+    //int derivAperture = 1;
+    //int histogramNormType = HOGDescriptor::L2Hys;
 
     // Run "detect"
     HogDetector D;
@@ -495,15 +495,15 @@ namespace SPEL
 
     // Output top of "limbLabels" into text file
     fout << "\nTop Labels, sorted by part id:\n\n";
-    for (int i = 0; i < limbLabels.size(); i++) // For all body parts
+    for (unsigned int i = 0; i < limbLabels.size(); i++) // For all body parts
     {
-      for (int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
+      for (unsigned int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
       {
         Point2f p0, p1;
         limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
         fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
         vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
-        for (int t = 0; t < scores.size(); t++)
+        for (unsigned int t = 0; t < scores.size(); t++)
         {
           fout << scores[t].getScore() << ", "; // Put all scores of the Label
         }
@@ -516,8 +516,8 @@ namespace SPEL
     map<int, pair<Point2f, Point2f>> PartLocation = _getPartLocations(skeleton);
     
     // Compare labels with ideal bodyparts from keyframe, and output debug information 
-    float TolerableCoordinateError = 7; // Linear error in pixels
-    float TolerableAngleError = 0.1; // 10% (not used in this test)
+    float TolerableCoordinateError = 7.0f; // Linear error in pixels
+    //float TolerableAngleError = 0.1; // 10% (not used in this test)
     int TopListLabelsCount = 4; // Size of "labels top list"
     map<int, vector<LimbLabel>> effectiveLabels;
     vector<int> WithoutGoodLabelInTop;
@@ -525,14 +525,14 @@ namespace SPEL
 
     fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
 
-    for (int id = 0; id < limbLabels.size(); id++)
+    for (unsigned int id = 0; id < limbLabels.size(); id++)
     {
       fout << "\nPartID = " << id << ":\n";
       Point2f l0, l1, p0, p1, delta0, delta1;
       vector<LimbLabel> temp;
       p0 = PartLocation[id].first; // Ideal boby part point
       p1 = PartLocation[id].second; // Ideal boby part point
-      for (int k = 0; k < limbLabels[id].size(); k++)
+      for (int k = 0; k < static_cast<int>(limbLabels[id].size()); k++)
       {
         limbLabels[id][k].getEndpoints(l0, l1); // Label points
         delta0 = l0 - p0;
@@ -562,15 +562,15 @@ namespace SPEL
 
     //Output top of "effectiveLabels" into text file
     fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
-    for (int i = 0; i < effectiveLabels.size(); i++)
+    for (unsigned int i = 0; i < effectiveLabels.size(); i++)
     {
-      for (int k = 0; k < effectiveLabels[i].size(); k++)
+      for (unsigned int k = 0; k < effectiveLabels[i].size(); k++)
       {
         Point2f p0, p1;
         limbLabels[i][k].getEndpoints(p0, p1);
         fout << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
         vector<Score> scores = effectiveLabels[i][k].getScores();
-        for (int t = 0; t < scores.size(); t++)
+        for (unsigned int t = 0; t < scores.size(); t++)
         {
           fout << scores[t].getScore() << ", ";
         }
@@ -589,7 +589,7 @@ namespace SPEL
     if (!EffectiveLabbelsInTop)
     {
       cout << "Body parts with id: ";
-      for (int i = 0; i < WithoutGoodLabelInTop.size(); i++)
+      for (unsigned int i = 0; i < WithoutGoodLabelInTop.size(); i++)
       {
         cout << WithoutGoodLabelInTop[i];
         if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";
@@ -601,7 +601,7 @@ namespace SPEL
     image.release();
     mask.release();
 
-    for (int i = 0; i < HFrames.size(); i++)
+    for (unsigned int i = 0; i < HFrames.size(); i++)
       delete HFrames[i];
     HFrames.clear();
 
@@ -667,9 +667,9 @@ namespace SPEL
       map <uint32_t, HogDetector::PartModel> temp_Parts;
       for (uint32_t p = 0; p < P; p++)
       {
-        HogDetector::PartModel X;
-        X.partModelRect = POSERECT<Point2f>(Point2f(f, f), Point2f(p, p), Point2f(0, 0), Point2f(0, 0));
-        X.partImage = Mat(imageSize, CV_8UC3, Scalar(f, p, 0));
+        HogDetector::PartModel X_temp;
+        X_temp.partModelRect = POSERECT<Point2f>(Point2f(float(f), float(f)), Point2f(float(p), float(p)), Point2f(0.0f, 0.0f), Point2f(0.0f, 0.0f));
+        X_temp.partImage = Mat(imageSize, CV_8UC3, Scalar(f, p, 0));
         for (int i = 0; i < I; i++)
         {
           vector <vector <float>> temp_k;
@@ -677,14 +677,14 @@ namespace SPEL
           {
             vector <float> temp_n;
             for (int n = 0; n < N; n++)
-              temp_n.push_back(p + f + i + k);
+              temp_n.push_back(float(p + f + i + k));
             temp_k.push_back(temp_n);
             temp_n.clear();
           }
-          X.gradientStrengths.push_back(temp_k);
+          X_temp.gradientStrengths.push_back(temp_k);
           temp_k.clear();
         }
-        temp_Parts.emplace(pair<uint32_t, HogDetector::PartModel>(p, X));
+        temp_Parts.emplace(pair<uint32_t, HogDetector::PartModel>(p, X_temp));
       }
       expected_PartModels.emplace(pair<uint32_t, map <uint32_t, HogDetector::PartModel>>(f, temp_Parts));
       temp_Parts.clear();

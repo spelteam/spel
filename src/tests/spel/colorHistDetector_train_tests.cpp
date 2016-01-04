@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 #include <tree.hh>
 #include <string>
+#include <iostream>
 #include "colorHistDetector.hpp"
 #include "bodyPart.hpp"
 #include "skeleton.hpp"
@@ -51,30 +52,30 @@ namespace SPEL
 
     //Calculate the parts histograms
     map <int32_t, ColorHistDetector::PartModel> partModels;
-    for (int i = 0; i < Rects.size(); i++)
+    for (unsigned int i = 0; i < Rects.size(); i++)
     {
       ColorHistDetector::PartModel Model(8);
       Model.sizeFG = 0;
-      float xmin, ymin, xmax, ymax;
-      Rects[i].GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+      int xmin, ymin, xmax, ymax;
+      Rects[i].GetMinMaxXY<int>(xmin, ymin, xmax, ymax);
       for (int x = xmin; x < xmax; x++)
       {
         for (int y = ymin; y < ymax; y++)
         {
           bool b = true;
-          if (Rects[i].containsPoint(Point2f(x, y)) > 0)
+          if (Rects[i].containsPoint(Point2f(float(x), float(y))) > 0)
           {
-            int k = 0;
+            unsigned int k = 0;
 
             while ((k < Crossings[i].size()) && b)
             {
-              if (Rects[Crossings[i][k].first].containsPoint(Point2f(x, y)) > 0)
+              if (Rects[Crossings[i][k].first].containsPoint(Point2f(float(x),float(y))) > 0)
                 b = false;
               k++;
             }
             if (b)
             {
-              int c = 50 + i * 10;
+              uchar c = static_cast<uchar>(50 + i * 10);
               image1.at<Vec3b>(y, x) = Vec3b(c, c, c);
               Vec3b color = image.at<Vec3b>(y, x);
               Model.partHistogram[color[0] / Factor][color[1] / Factor][color[2] / Factor]++;
@@ -93,9 +94,9 @@ namespace SPEL
 
     ofstream fout("TrainUnitTest_Output.txt");
     fout << "\n--------------------------Don't equal----------------------\n";
-    cout << "\nTolerable error: " << delta << endl;
+    cout << endl << "Tolerable error: " << delta << endl;
     fout << "Tolerable error: " << delta << endl;
-    for (int i = 0; i < partModels.size(); i++)
+    for (unsigned int i = 0; i < partModels.size(); i++)
     {
       for (int r = 0; r < nBins; r++)
         for (int g = 0; g < nBins; g++)
@@ -118,7 +119,7 @@ namespace SPEL
 
     fout << "\n-----------Expected histogram-----------\n";
     fout << "In format:\nHistogramm[r, g, b] = pixelsCount\n";
-    for (int i = 0; i < partModels.size(); i++)
+    for (unsigned int i = 0; i < partModels.size(); i++)
     {
       fout << endl << "Rect[" << i << "]:" << endl;
       PutHistogram(fout, partModels[i].partHistogram, 1);
@@ -126,17 +127,17 @@ namespace SPEL
 
     fout << "\n-----------Actual histogram-----------\n";
     fout << "In format:\nHistogramm[b, g, r] = Histogram[b, g, r]*Part.SizeFG/KeyframesCout\n";
-    for (int i = 0; i < detector.partModels.size(); i++)
+    for (unsigned int i = 0; i < detector.partModels.size(); i++)
     {
       fout << endl << "Rect[" << i << "]:" << endl;
       PutHistogram(fout, detector.partModels[i].partHistogram, detector.partModels[i].sizeFG / KeyframesCount);
     }
 
     fout << "\n------------Occluded polygons-----------\nSorted by layer\n";
-    for (int i = 0; i < Crossings.size(); i++)
+    for (unsigned int i = 0; i < Crossings.size(); i++)
     {
       fout << "\nPolygon[" << i << "] crossed by polygons: ";
-      for (int k = 0; k < Crossings[i].size(); k++)
+      for (unsigned int k = 0; k < Crossings[i].size(); k++)
         fout << Crossings[i][k].first << "; ";
       Crossings[i].clear();
     }

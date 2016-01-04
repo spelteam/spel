@@ -118,16 +118,16 @@ namespace SPEL
     map<int, POSERECT<Point2f>> PartRects = SkeletonRects(skeleton);
     map<int, pair<Point2f, Point2f>> PartsLocations = getPartLocations(skeleton);
 
-    for (int i = 0; i < PartRects.size(); i++)
+    for (unsigned int i = 0; i < PartRects.size(); i++)
     {
       vector<Point2f> polygon = PartRects[i].asVector();	  
       Point2f center = Point2f(0, 0);
-      for (int k = 0; k < polygon.size(); k++)
+      for (unsigned int k = 0; k < polygon.size(); k++)
         center += polygon[k];
       center = 0.25*center;
       Point2f p0 = PartsLocations[i].first;
       Point2f p1 = PartsLocations[i].second;
-      float angle = spelHelper::angle2D(p0.x, p0.y, p1.x, p1.y)* (180.0 / M_PI);
+      float angle = spelHelper::angle2D(p0.x, p0.y, p1.x, p1.y)*static_cast<float>(180.0 / M_PI);
       vector<Score> scores = { Score(0.0f, "", 1.0f) };
       LimbLabel label(i, center, angle, polygon, scores);
       Labels.push_back(label);
@@ -151,7 +151,7 @@ namespace SPEL
     map<int, pair<Point2f, Point2f>> ExpectedPartsLocations = getPartLocations(Expected_Skeleton);
 
     // Temporary debug info
-    for (int i = 0; i < ExpectedPartsLocations.size(); i++)
+    for (unsigned int i = 0; i < ExpectedPartsLocations.size(); i++)
     {
       cout << "Locations(PartID = " << i << "):" << endl;
       cout << "  Expected: {e0 = " << ExpectedPartsLocations[i].first << ", e1 = " << ExpectedPartsLocations[i].second << "}" << endl;
@@ -178,7 +178,7 @@ namespace SPEL
     // Compare part joints
     float error = 5.0f; // pixels
     bool JointsIsNear = true;
-    for (int i = 0; i < ExpectedPartsLocations.size(); i++)
+    for (unsigned int i = 0; i < ExpectedPartsLocations.size(); i++)
     {
       //EXPECT_NEAR(ExpectedPartsLocations[i].first.x, ActualPartsLocations[i].first.x, error);
       //EXPECT_NEAR(ExpectedPartsLocations[i].first.y, ActualPartsLocations[i].first.y, error);

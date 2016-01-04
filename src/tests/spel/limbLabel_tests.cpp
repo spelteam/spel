@@ -12,11 +12,11 @@ namespace SPEL
   TEST(limbLabel, ConstructorTest)
   {
     int id = 1;
-    Point2f center = Point2f(10, 10);
-    float angle = 0.866302;
+    Point2f center = Point2f(10.0f, 10.0f);
+    float angle = 0.866302f;
     bool isOccluded = false;
-    float score1Value = 0.1, score2Value = 0.3;
-    float scoreCoeff = 1;
+    float score1Value = 0.1f, score2Value = 0.3f;
+    float scoreCoeff = 1.0f;
     Score score1(score1Value, "", scoreCoeff);
     Score score2(score2Value, "", scoreCoeff);
     vector <Score> scores;
@@ -73,7 +73,7 @@ namespace SPEL
     //
 
     //Testing function AddScore()
-    float score3Value = 0.1;
+    float score3Value = 0.1f;
     Score score3(score3Value, "", scoreCoeff);
     scores.push_back(score3);
     label3.addScore(score3);
@@ -89,7 +89,7 @@ namespace SPEL
     //    1---2
 
     //Testing function containsPoint()
-    bool b = label1.containsPoint(center);
+    //bool b = label1.containsPoint(center);
     EXPECT_TRUE(label1.containsPoint(center));
     EXPECT_FALSE(label1.containsPoint(Point2f(-1.0, -1.0)));
 
@@ -98,11 +98,11 @@ namespace SPEL
   TEST(limbLabel, Operators)
   {
     int id = 1;
-    Point2f center = Point2f(10, 10);
-    float angle = 0.866302;
+    Point2f center = Point2f(10.0f, 10.0f);
+    float angle = 0.866302f;
     bool isOccluded = false;
-    float score1Value = 0.1, score2Value = 0.3;
-    float scoreCoeff = 1.0;
+    float score1Value = 0.1f, score2Value = 0.3f;
+    float scoreCoeff = 1.0f;
     Score score1(score1Value, "", scoreCoeff);
     Score score2(score2Value, "", scoreCoeff);
     vector <Score> scores;

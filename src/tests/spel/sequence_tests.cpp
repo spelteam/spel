@@ -210,7 +210,7 @@ namespace SPEL
     map<int, pair<Point2f, Point2f>> A = getPartLocations(skeleton0);
     map<int, pair<Point2f, Point2f>> B = getPartLocations(skeleton2);
     map<int, pair<Point2f, Point2f>> expected_locations;
-    for (int i = 0; i < A.size(); i++)
+    for (unsigned int i = 0; i < A.size(); i++)
     {
       pair<Point2f, Point2f > temp(0.5f*(A[i].first + B[i].first), 0.5f*(A[i].second + B[i].second));
       expected_locations.emplace(pair<int, pair<Point2f, Point2f>>(i, temp));
@@ -218,10 +218,10 @@ namespace SPEL
     A.clear();
     B.clear();
 
-    for (int i = 1; i < slice.size() - 1; i++)
+    for (unsigned int i = 1; i < slice.size() - 1; i++)
     {
       // Copy the expected frame fields
-      int expected_frameID = frames[firstKeyframeNum + i]->getID();
+      //int expected_frameID = frames[firstKeyframeNum + i]->getID();
       Point2f expected_groundPoit = frames[firstKeyframeNum + i]->getGroundPoint();
       cv::Mat expected_Image = frames[firstKeyframeNum + i]->getImage();
       cv::Mat expected_Mask = frames[firstKeyframeNum + i]->getMask();
@@ -233,7 +233,7 @@ namespace SPEL
       EXPECT_EQ(INTERPOLATIONFRAME, actual_slice[i]->getFrametype());
       EXPECT_EQ(expected_groundPoit, actual_slice[i]->getGroundPoint());
       EXPECT_EQ(expected_locations, actual_locations);
-      cv:Mat actual_Image = actual_slice[i]->getImage();
+      cv::Mat actual_Image = actual_slice[i]->getImage();
       ASSERT_EQ(actual_Image.data, actual_Image.data);
       /*bool images_is_equal = true;
       ASSERT_EQ(expected_Image.size(), actual_Image.size());

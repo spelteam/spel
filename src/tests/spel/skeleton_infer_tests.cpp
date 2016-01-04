@@ -30,7 +30,7 @@ namespace SPEL
 
     //Create expected value
     map<int, pair<Point2f, Point2f>> expected_partLocations = getPartLocations(skeleton);
-    for (int i= 0; i < expected_partLocations.size(); i++)
+    for (unsigned int i= 0; i < expected_partLocations.size(); i++)
     {
       expected_partLocations[i].first *= scale;
       expected_partLocations[i].second *= scale;

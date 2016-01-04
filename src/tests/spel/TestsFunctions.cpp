@@ -14,7 +14,7 @@ namespace SPEL
   void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color)
   {
     polygon.push_back(polygon[0]);
-    for (int i = 1; i < polygon.size(); i++)
+    for (unsigned int i = 1; i < polygon.size(); i++)
       line(Image, polygon[i - 1], polygon[i], color, 1, 1);
   }
 
@@ -79,9 +79,9 @@ namespace SPEL
   bool IsCrossed(vector<Point2f> PolygonPoints, POSERECT<Point2f> rect)
   {
     bool Crossed = 0;
-    for (int i = 0; i < PolygonPoints.size() - 1; i++)
+    for (unsigned int i = 0; i < PolygonPoints.size() - 1; i++)
     {
-      int k = i;
+      unsigned int k = i;
       if (k == PolygonPoints.size() - 1)
         k = 0;
       Point2f delta = PolygonPoints[i + 1] - PolygonPoints[k];
@@ -89,7 +89,7 @@ namespace SPEL
       float dx = delta.x / n;
       float dy = delta.y / n;
       float x = PolygonPoints[i].x, y = PolygonPoints[i].y;
-      for (int k = 0; k < n; k++)
+      for (int m = 0; m < n; m++)
       {
         Crossed = Crossed || (rect.containsPoint(Point2f(x, y)) > 0);
         y = y + dy;
@@ -122,11 +122,11 @@ namespace SPEL
   vector<vector<pair<int, int>>> CrossingsList(map<int, POSERECT<Point2f>> Rects, map<int, int> depth)
   {
     vector<vector<pair<int, int>>> Crosses;
-    for (int i = 0; i < Rects.size(); i++)
+    for (unsigned int i = 0; i < Rects.size(); i++)
     {
       vector<pair<int, int>> X;
       vector<Point2f> Polygon = Rects[i].asVector();
-      for (int k = 0; k < Rects.size(); k++)
+      for (unsigned int k = 0; k < Rects.size(); k++)
         if (depth[k] < depth[i])
         {
           if (IsCrossed(Polygon, Rects[k]))
@@ -144,13 +144,13 @@ namespace SPEL
   vector <Point3i> GetPartColors(Mat image, Mat mask, POSERECT < Point2f > rect)
   {
     vector <Point3i> PartColors;
-    float xmin, ymin, xmax, ymax;
-    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
+    int xmin, ymin, xmax, ymax;
+    rect.GetMinMaxXY <int>(xmin, ymin, xmax, ymax);
     for (int x = xmin; x < xmax; x++)
     {
       for (int y = ymin; y < ymax; y++)
       {
-        if ((rect.containsPoint(Point2f(x, y)) > 0) && (mask.at<uint8_t>(y, x) > 9))
+        if ((rect.containsPoint(Point2f(float(x), float(y))) > 0) && (mask.at<uint8_t>(y, x) > 9))
         {
           Vec3b color = image.at<Vec3b>(y, x);
           PartColors.push_back(Point3i(color[0], color[1], color[2]));
@@ -190,7 +190,7 @@ namespace SPEL
     ProjectLoader projectLoader(FilePath);
     projectLoader.Load(FilePath + FileName);
     vector<Frame*> frames, temp = projectLoader.getFrames();
-    for (int i = 0; i < temp.size(); i++)
+    for (unsigned int i = 0; i < temp.size(); i++)
     {
       frames.push_back(new Frame(temp[i]->getFrametype()));
       temp[i]->clone(frames[i]);
@@ -225,7 +225,7 @@ namespace SPEL
       projectLoader.Load(FilePath + FileName);
       vector<Frame*> frames, temp = projectLoader.getFrames();
 
-      for (int i = 0; i < temp.size(); i++)
+      for (unsigned int i = 0; i < temp.size(); i++)
       {
         frames.push_back(new Frame(temp[i]->getFrametype()));
         temp[i]->clone(frames[i]);
@@ -250,7 +250,7 @@ namespace SPEL
   int keyFramesCount(vector<Frame*> frames)
   {
     int KeyframesCount = 0;
-    for (int i = 0; i < frames.size(); i++)
+    for (unsigned int i = 0; i < frames.size(); i++)
       if (frames[i]->getFrametype() == KEYFRAME)
         KeyframesCount++;
     return KeyframesCount;
@@ -259,7 +259,8 @@ namespace SPEL
   //Returns  index of first keyframe
   int FirstKeyFrameNum(vector<Frame*> frames)
   {
-    int i = 0, FirstKeyframe = -1;
+	unsigned int i = 0;
+	int FirstKeyframe = -1;
     while ((i < frames.size()) && (FirstKeyframe == -1))
     {
       if (frames[i]->getFrametype() == KEYFRAME)
@@ -273,7 +274,7 @@ namespace SPEL
   {
     vector<Point2f> partRect;
     Point2f d = p0 - p1;
-    float L = sqrt(pow(p1.x - p0.x,2) + pow(p1.y - p0.y, 2));
+    //float L = sqrt(pow(p1.x - p0.x,2) + pow(p1.y - p0.y, 2));
     float k = 0.5f/LWRatio;
     float dx = k*(d.y);
     float dy = k*(-d.x);
@@ -292,7 +293,7 @@ namespace SPEL
     Point2f center = 0.5*(p0 + p1);
     float L = sqrt(pow(d.x, 2) + pow(d.y, 2));
     float L1 = 0;
-    if (blockSize.width > 0);
+    if (blockSize.width > 0)
       L1 = blockSize.width * ceil(L / blockSize.width);
     float c = L1 / L;
     Point2f d_ = c*d;
@@ -302,7 +303,7 @@ namespace SPEL
     Point2f p1_ = p1 - 0.5*(d_ - d);
     L = L1; //more logically without this line
     float W = L / LWRatio;
-    if (blockSize.height > 0);
+    if (blockSize.height > 0)
       W = blockSize.height*ceil(W / blockSize.height);
     float k = 0.5f*W / L;
     float dx = k*(d_.y);
@@ -322,8 +323,8 @@ namespace SPEL
 
     // Copy ID of all frames, which identical to the selected frame ("frameID")
     map<int, vector<int>> IdenticalFrames;
-    for (int i = 0; i < ISM.size(); i++)
-      for (int k = 0; k < ISM.size(); k++)
+    for (unsigned int i = 0; i < ISM.size(); i++)
+      for (unsigned int k = 0; k < ISM.size(); k++)
       {
         vector<int> temp;
         if((Frames[i]->getFrametype() == KEYFRAME))
@@ -335,17 +336,17 @@ namespace SPEL
 
       // Compare parts from all identical frames
       float AcceptableError = 2; // 2 pixels
-      for (int i = 0; i < IdenticalFrames.size(); i++)
+      for (unsigned int i = 0; i < IdenticalFrames.size(); i++)
       {
         Skeleton skeleton = Frames[i]->getSkeleton();
         map<int, pair<Point2f, Point2f>> PartLocations = getPartLocations(skeleton);
-        for (int n = 0; n < IdenticalFrames[i].size(); n++)
-          for (int k = 0; k < Solves.size(); k++)
+        for (unsigned int n = 0; n < IdenticalFrames[i].size(); n++)
+          for (unsigned int k = 0; k < Solves.size(); k++)
             if (Solves[k].getFrameID() == IdenticalFrames[i][n])
               {
                 vector<LimbLabel> Labels = Solves[k].getLabels();
                 //Compare all parts from current lockframe and root frame
-                for (int t = 0; t < Labels.size(); t++)
+                for (unsigned int t = 0; t < Labels.size(); t++)
                  {
                    Point2f l0, l1; // Actual current part joints locations
                    Labels[t].getEndpoints(l0, l1);
@@ -375,7 +376,7 @@ TestISM::TestISM(void)
   }
 // Empty functions
 TestISM::TestISM(const TestISM & m): ImageSimilarityMatrix(m){}
-TestISM::TestISM(const std::vector<Frame*>& frames) : TestISM(){}
+//TestISM::TestISM(const std::vector<Frame*>& frames) : TestISM(){}
 TestISM::TestISM(TestISM && m): ImageSimilarityMatrix(std::move(m)){}
 TestISM::~TestISM(void){}
 TestISM & TestISM::operator=(const TestISM & s)
@@ -397,7 +398,7 @@ void TestISM::computeISMcell(const Frame* left, const Frame* right, const int ma
    int n = frames.size();
    float max_ = 0;
    Point2i N;
-   const int maxColorDist = 3 * pow(255, 2);
+   const int maxColorDist = static_cast<int>(3 * pow(255, 2));
    imageSimilarityMatrix = Mat::zeros(Size(n, n), cv::DataType<float>::type);
    imageShiftMatrix = Mat::zeros(Size(n, n), cv::DataType<cv::Point2f>::type);
    
@@ -426,27 +427,27 @@ void TestISM::computeISMcell(const Frame* left, const Frame* right, const int ma
            if (M1.at<uchar>(y, x) >= 10)
            {
              M1_area++;
-             M1_center += Point2f(x, y);
+             M1_center += Point2f(float(x), float(y));
 
-             if (M1_min.x > x) M1_min.x = x;
-             if (M1_min.y > y) M1_min.y = y;
-             if (M1_max.x < x) M1_max.x = x;
-             if (M1_max.y < y) M1_max.y = y;
+             if (M1_min.x > float(x)) M1_min.x = float(x);
+             if (M1_min.y > float(y)) M1_min.y = float(y);
+             if (M1_max.x < float(x)) M1_max.x = float(x);
+             if (M1_max.y < float(y)) M1_max.y = float(y);
            }
            if (M2.at<uchar>(y, x) >= 10)
            {
              M2_area++;
-             M2_center += Point2f(x, y);
+             M2_center += Point2f(float(x), float(y));
              
-             if (M2_min.x > x) M2_min.x = x;
-             if (M2_min.y > y) M2_min.y = y;
-             if (M2_max.x < x) M2_max.x = x;
-             if (M2_max.y < y) M2_max.y = y;
+             if (M2_min.x > float(x)) M2_min.x = float(x);
+             if (M2_min.y > float(y)) M2_min.y = float(y);
+             if (M2_max.x < float(x)) M2_max.x = float(x);
+             if (M2_max.y < float(y)) M2_max.y = float(y);
            }
          }
 
        // calculation the shifts and normalized "frames similarity scores"
-       Point2f shift(2*cols, 2*rows); // default value: infinity - mask outside the frame
+       Point2f shift(float(2*cols), float(2*rows)); // default value: infinity - mask outside the frame
        float CellScore = 0.0f;
 
        if ((M1_area > 0) && (M2_area > 0))
@@ -461,28 +462,28 @@ void TestISM::computeISMcell(const Frame* left, const Frame* right, const int ma
          M1_max.y = std::min(M1_max.y, M2_max.y - shift.y);
 
          M_area = 0;
-         for (int x = M1_min.x; x < M1_max.x; x++)
-           for (int y = M1_min.y; y < M1_max.y; y++)
+         for (int x = (int)M1_min.x; x < (int)M1_max.x; x++)
+           for (int y = (int)M1_min.y; y < (int)M1_max.y; y++)
            {			 
-             Point2f A(x, y);
+             Point2f A = Point2f(float(x), float(y));
              Point2f B = A + shift;
              float color_squareDistance = 0; // for background pixel 
 
              if ((B.x >= 0) && (B.x < cols) && (B.y >= 0) && (B.y < rows))
              {
-               if ((M1.at<uchar>(y, x) > 9) && (M2.at<uchar>(B.y, B.x) > 9))
+               if ((M1.at<uchar>(y, x) > 9) && (M2.at<uchar>(static_cast<int>(B.y), static_cast<int>(B.x)) > 9))
                {
                  M_area++; // overlapped area
                  Vec3b A_color = I1.at<Vec3b>(y, x);
                  Vec3b B_color = I2.at<Vec3b>(y, x);
                  color_squareDistance = 0;
                  for (int q = 0; q < 3; q++)
-                   color_squareDistance += pow(B_color[q] - A_color[q], 2);
+                   color_squareDistance += static_cast<float>(pow(B_color[q] - A_color[q], 2));
                }
                CellScore += color_squareDistance / maxColorDist;
              }
            }
-         float composite_area = M1_area + M2_area - M_area;
+         float composite_area = static_cast<float>(M1_area + M2_area - M_area);
 
          float mulct = 1.0f - static_cast<float>(M_area) / composite_area; // masks overlap factor
          if (useOverlapFactor) mulct = F(100 * mulct); // initialized for non-overlapping pixels

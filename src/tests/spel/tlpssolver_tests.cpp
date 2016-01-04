@@ -57,7 +57,7 @@ namespace SPEL
     Solves = solver.solve(sequence, params, Solves);
 
     // Compute expected value and compare
-    for (int i = 1; i < Solves.size(); i++)
+    for (unsigned int i = 1; i < Solves.size(); i++)
       EXPECT_LE(Solves[i - 1].getFrameID(), Solves[i].getFrameID());
     //TestISM testISM;
     //testISM.build(Frames, false);
@@ -108,7 +108,7 @@ namespace SPEL
   vector<Point2f> shiftPolygon_(vector<Point2f> polygon, float dx, float dy)
   {
     vector<Point2f> X = polygon;
-    for (int i = 0; i < polygon.size(); i++)
+    for (unsigned int i = 0; i < polygon.size(); i++)
       X[i] += Point2f(dx, dy);
     return X;
   }
@@ -119,10 +119,10 @@ namespace SPEL
     Point2f center = Point2f(10, 10);
     float angle = 0;
     bool isOccluded = false;
-    float score1Value = 0.1, score2Value = 0.3;
-    float scoreCoeff = 1;
+    float score1Value = 0.1f, score2Value = 0.3f;
+    float scoreCoeff = 1.0f;
     vector<Point2f> polygon = { Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2) };
-    float LimbLength = polygon[1].y - polygon[0].y;
+    //float LimbLength = polygon[1].y - polygon[0].y;
     float LimbWidth = polygon[2].x - polygon[1].x;
 
     vector <Score> scores;
@@ -132,9 +132,9 @@ namespace SPEL
     scores.push_back(score2);
 
     //Create labels
-    int dx = 60;
+    float dx = 60.0f;
     LimbLabel label1(id, center, angle, polygon, scores, isOccluded);
-    LimbLabel label2(id + 1, center, angle, shiftPolygon_(polygon, dx, 0), scores, isOccluded);
+    LimbLabel label2(id + 1, center, angle, shiftPolygon_(polygon, dx, 0.0f), scores, isOccluded);
 
     //Create labels vector
     vector<LimbLabel> labels;
@@ -147,7 +147,7 @@ namespace SPEL
 
     for (int i = 0; i < rows; i++)
       for (int k = 0; k < cols; k++)
-        if (label1.containsPoint(Point2f(k, i)) || label2.containsPoint(Point2f(k, i)))
+        if (label1.containsPoint(Point2f(float(k), float(i))) || label2.containsPoint(Point2f(float(k), float(i))))
           mask.at<uchar>(i, k) = 255;
 
     imwrite("mask.jpg", mask);
@@ -168,26 +168,26 @@ namespace SPEL
     cout << ExpectedValue << " ~ " << ActualValue << endl << endl;
 
     //30% of "labels[1]" not in mask
-    float e = 0.3; // Relative shift
+    float e = 0.3f; // Relative shift
     LimbLabel label3(id + 1, center, angle, shiftPolygon_(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
     labels[1] = label3; // Replace the label
 
     ActualValue = S.evaluateSolution(frame, labels, params);
     ExpectedValue = (2 - e) / (2 + e); // (2 - e) / ( 2 - e + 2*e);
-    float epsilon = 0.04;
+    float epsilon = 0.04f;
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
     cout << ExpectedValue << " ~ " << ActualValue << endl << endl;
 
     //90% of "labels[1]" not in mask
     //"labels[1]" is badly lokalised
-    e = 0.9; // Relative shift of "label[1]"
+    e = 0.9f; // Relative shift of "label[1]"
     LimbLabel label4(id + 1, center, angle, shiftPolygon_(polygon, dx - LimbWidth*e, 0), scores, isOccluded);
     labels[1] = label4; // Replace the label
 
     ActualValue = S.evaluateSolution(frame, labels, params);
     ExpectedValue = (2 - e) / (2 + e);
     ExpectedValue = ExpectedValue - 1;
-    epsilon = 0.04;
+    epsilon = 0.04f;
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
     cout << ExpectedValue << " ~ " << ActualValue << endl;
   }
@@ -230,7 +230,8 @@ namespace SPEL
 
    // Create body part
    Point2f center = 0.5f*(p0 + p1);
-   vector<Point2f> polygon = BuildPartRect(j0, j1, 0.3f).asVector();
+   float LWRatio = 0.3f;
+   vector<Point2f> polygon = BuildPartRect(j0, j1, LWRatio).asVector();
    bool isOccluded = false;
    BodyPart bodyPart(id, "", j0->getLimbID(), j1->getLimbID(), false, LimbLength);
    tree<BodyPart> partsTree;
@@ -247,8 +248,8 @@ namespace SPEL
    frame->setSkeleton(skeleton);
 
    // Create labels
-   float score1Value = 0.1, score2Value = 0.3;
-   float scoreCoeff = 1;
+   float score1Value = 0.1f, score2Value = 0.3f;
+   float scoreCoeff = 1.0f;
    Score score1(score1Value, csName, scoreCoeff);
    Score score2(score2Value, csName, scoreCoeff);
    vector <Score> scores;
@@ -269,7 +270,7 @@ namespace SPEL
    TLPSSolver S;
 
    // Set acceptable error for "EXPECT_NEAR"
-   float error = 1.0e-4;
+   float error = 1.0e-4f;
 
    //Testing function "computeScoreCost"
    float expected_scoreCost = score1Value + score2Value;
@@ -328,7 +329,7 @@ namespace SPEL
    int ExpectedSliceSize = keyFramesCount(Frames) - 1;
    ASSERT_EQ(Actual_Slice.size(), ExpectedSliceSize);
    int SliceFramesCount = 0;
-   for (int i = 0; i < Actual_Slice.size(); i++)
+   for (unsigned int i = 0; i < Actual_Slice.size(); i++)
    {
      SliceFramesCount += Actual_Slice[i].size();
      EXPECT_GT(Actual_Slice[i].size(), 2);

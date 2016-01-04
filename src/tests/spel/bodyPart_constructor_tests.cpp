@@ -66,8 +66,8 @@ namespace SPEL
     string partName = "Part Name";
     int parentJoint = 0;
     int childJoint = 0;
-    bool isOccluded = true;
-    float spaceLength = 1.343f;
+    //bool isOccluded = true;
+    //float spaceLength = 1.343f;
 
     BodyPart bp1(partID, partName, parentJoint, childJoint);
 
