@@ -770,19 +770,20 @@ namespace SPEL
   TEST(ColorHistDetectorHelperTest, pixelLabels)
   {
     //Create test data
+    int n = 4;
     ColorHistDetectorHelper X;
-    for (uchar i = 0; i < 4; i++)
+    for (int i = 0; i < n; i++)
     {
-      Mat temp = Mat(Size(i, i), CV_8UC3, Scalar(i, i, i));
+      Mat temp = Mat(n, n, cv::DataType <float>::type, static_cast<float>(i));
       X.pixelLabels.emplace(pair<int32_t, cv::Mat>(i, temp));
     }
-
+    
     //Compare
-    for (uchar i = 0; i < X.pixelLabels.size(); i++)
+    for (unsigned int i = 0; i < X.pixelLabels.size(); i++)
     {
-      EXPECT_EQ(i, X.pixelLabels[i].size().height);
-      EXPECT_EQ(i, X.pixelLabels[i].size().width);
-      EXPECT_EQ(Vec3b(i, i, i), X.pixelLabels[i].at<Vec3b>(0, 0));
+      EXPECT_EQ(n, X.pixelLabels[i].size().height);
+      EXPECT_EQ(n, X.pixelLabels[i].size().width);
+      EXPECT_EQ(static_cast<float>(i), X.pixelLabels[i].at<float>(0, 0));
       X.pixelLabels[i].release();
     }
     X.pixelLabels.clear();
