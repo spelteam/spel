@@ -6,7 +6,8 @@
 #endif
 
 #include <gtest/gtest.h>
-#include "imagepixelsimilaritymatrix.hpp"
+#include <imagesimilaritymatrix.hpp>
+#include <imagepixelsimilaritymatrix.hpp>
 #include "TestsFunctions.hpp"
 
 
@@ -15,19 +16,19 @@ using namespace cv;
 
 namespace SPEL
 {
-  class TestSMatrix : public ImagePixelSimilarityMatrix
+  class TestsMatrix : public ImagePixelSimilarityMatrix
   {
   public:
     Mat getImageShiftMatrix();
     float ISMCell(Frame* left, Frame* right, int maxFrameHeight);
   };
 
-  Mat TestSMatrix::getImageShiftMatrix()
+  Mat TestsMatrix::getImageShiftMatrix()
   {
     return imageShiftMatrix;
   }
 
-  float TestSMatrix::ISMCell(Frame* left, Frame* right, int maxFrameHeight)
+  float TestsMatrix::ISMCell(Frame* left, Frame* right, int maxFrameHeight)
   {
     computeISMcell(left, right, maxFrameHeight);
     return imageSimilarityMatrix.at<float>(left->getID(), right->getID());
@@ -54,7 +55,7 @@ namespace SPEL
   TEST_F(ImageSimilarityMatrixTests, WriteAndRead)
     {
       int rows = 3, cols = rows;
-      TestSMatrix X, Y;
+      TestsMatrix X, Y;
 
       // Testing "read""
       bool b = X.read(FilePath + "In_Matrix.txt");
@@ -100,7 +101,7 @@ namespace SPEL
 
   TEST_F(ImageSimilarityMatrixTests, Operators)
   {
-    ImagePixelSimilarityMatrix B, C;
+    ImagePixelSimilarityMatrix B, C, D;
     bool b, c;
 
     b = B.read(FilePath + "In_Matrix.txt");
@@ -118,6 +119,10 @@ namespace SPEL
     //Operator "="
     C = A;
     EXPECT_TRUE(A == C);
+
+    //Move assigment operator
+    D = static_cast<ImagePixelSimilarityMatrix&&>(C);
+    EXPECT_TRUE(D == C);
   }
 
   TEST_F(ImageSimilarityMatrixTests, min)
@@ -176,7 +181,7 @@ namespace SPEL
 
   TEST_F(ImageSimilarityMatrixTests, DefaultConstructor)
   {
-    TestSMatrix X;
+    TestsMatrix X;
     Mat X_ShiftMatrix = X.getImageShiftMatrix();
 
     EXPECT_EQ(0, X.size());
@@ -185,11 +190,11 @@ namespace SPEL
 
   TEST_F(ImageSimilarityMatrixTests, CopyConstructor)
   {
-    TestSMatrix X;
+    TestsMatrix X;
     bool b = X.read(FilePath + "In_Matrix.txt");
 
     ASSERT_TRUE(b);
-    TestSMatrix Y(X);
+    TestsMatrix Y(X);
     Mat X_ShiftMatrix = X.getImageShiftMatrix();
     Mat Y_ShiftMatrix = Y.getImageShiftMatrix();
     int X_rows = X_ShiftMatrix.size().height;
@@ -204,6 +209,29 @@ namespace SPEL
       }
     X_ShiftMatrix.release();
     Y_ShiftMatrix.release();
+  }
+
+  TEST_F(ImageSimilarityMatrixTests, MoveConstructor)
+  {
+      TestsMatrix X;
+      bool b = X.read(FilePath + "In_Matrix.txt");
+
+      ASSERT_TRUE(b);
+      TestsMatrix Y(static_cast<TestsMatrix&&>(X));
+      Mat X_ShiftMatrix = X.getImageShiftMatrix();
+      Mat Y_ShiftMatrix = Y.getImageShiftMatrix();
+      int X_rows = X_ShiftMatrix.size().height;
+      int Y_rows = Y_ShiftMatrix.size().height;
+
+      ASSERT_EQ(X_rows, Y_rows);
+      for (int i = 0; i < X_rows; i++)
+        for (int k = 0; k < Y_rows; k++)
+        {
+          EXPECT_EQ(X.at(i, k), Y.at(i, k));
+          EXPECT_EQ(X_ShiftMatrix.at<Point2f>(i, k), Y_ShiftMatrix.at<Point2f>(i, k));
+        }
+      X_ShiftMatrix.release();
+      Y_ShiftMatrix.release();
   }
 
   TEST(ImageSimilarityMatrixTests_, computeISMcell)
@@ -249,14 +277,14 @@ namespace SPEL
 
     ISM_expected.write("seq_ISM_expected.txt");
 
-    //Craate actual value
+    //Create actual value
     ImagePixelSimilarityMatrix ISM_actual(frames);
 
     //Put results
     for (unsigned int i = 0; i < frames.size(); i++)
       for (unsigned int k = 0; k <= i; k++)
       {
-        ISM_actual.computeISMcell(frames[i], frames[k], 0);
+        ISM_actual.ImagePixelSimilarityMatrix::computeISMcell(frames[i], frames[k], 0);
         cout << "ISM[" << i << ", " << k << "] = ";
         cout << ISM_actual.at(frames[i]->getID(), frames[k]->getID()) << " ~ ";
         cout << ISM_expected.at(frames[i]->getID(), frames[k]->getID()) << endl;	 
@@ -267,13 +295,14 @@ namespace SPEL
     for (unsigned int i = 0; i < frames.size(); i++)
       for (unsigned int k = 0; k < frames.size(); k++)
       {
-        ISM_actual.computeISMcell(frames[i], frames[k], 0);
+        //ISM_actual.computeISMcell(frames[i], frames[k], 0);
         EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
       }	
     ISM_expected.write("seq_ISM_actual.txt");
 
+    cout << "======================================================" << endl;
+    cout << "Testing function 'buildImageSimilarityMatrix:'" << endl;
     //Testing function "buildImageSimilarityMatrix"
-    /*
     for (unsigned int i = 0; i < frames.size(); i++)
       for (unsigned int k = 0; k < frames.size(); k++)
         ISM_actual.imageSimilarityMatrix.at<float>(i, k) = 0;
@@ -281,9 +310,8 @@ namespace SPEL
     for (unsigned int i = 0; i < frames.size(); i++)
       for (unsigned int k = 0; k < frames.size(); k++)
         EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
-    */
   }
-
+  /*
   TEST(ImageSimilarityMatrixTests_, computeMSMcell)
   {
     //Load the input data
@@ -349,7 +377,7 @@ namespace SPEL
         EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
       }	
     ISM_expected.write("seq_MSM_actual.txt");
-    /*
+    
     //Testing function "buildMaskSimilarityMatrix"
     for (unsigned int i = 0; i < frames.size(); i++)
       for (unsigned int k = 0; k < frames.size(); k++)
@@ -358,7 +386,15 @@ namespace SPEL
     for (unsigned int i = 0; i < frames.size(); i++)
       for (unsigned int k = 0; k < frames.size(); k++)
         EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
-    */
+    
+  }
+  */
+  TEST(ImageSimilarityMatrixTests_, setID_getID)
+  {
+    int id = 356;
+    ImagePixelSimilarityMatrix C;
+    C.setID(id);
+    EXPECT_EQ(id, C.getID());
   }
 
 }

@@ -741,4 +741,11 @@ namespace SPEL
 
     EXPECT_EQ(nBins, detector.getnbins());
   }
+
+  TEST(HOGDetectorTests, constructor)
+  {
+    int id = 0x48440000;
+    HogDetector d;
+    EXPECT_EQ(id, d.getID());
+  }
 }

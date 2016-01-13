@@ -22,8 +22,10 @@ namespace SPEL
     EXPECT_FALSE(bj1.getDepthSign());
 
     int limbID = 5;
+    bool depthSign = true;
     string jointName = "Some Name";
     Point2f imageLocation(1.234f, -4.321f);
+    Point3f spaceLocation(1.234f, -4.321f, 0.0f);
 
     BodyJoint bj2(limbID, jointName, imageLocation);
     EXPECT_EQ(limbID, bj2.getLimbID());
@@ -39,6 +41,22 @@ namespace SPEL
     EXPECT_EQ(imageLocation, bj3.getImageLocation());
     EXPECT_EQ(f3, bj3.getSpaceLocation());
     EXPECT_FALSE(bj3.getDepthSign());
+
+    //Testing constructor "BodyJoint(limbID, jointName, imageLocation, spaceLocation)"
+    BodyJoint bj4(limbID, jointName, imageLocation, spaceLocation);
+    EXPECT_EQ(limbID, bj4.getLimbID());
+    EXPECT_EQ(jointName, bj4.getJointName());
+    EXPECT_EQ(imageLocation, bj4.getImageLocation());
+    EXPECT_EQ(spaceLocation, bj4.getSpaceLocation());
+    EXPECT_FALSE(bj4.getDepthSign());
+
+    //Testing constructor "BodyJoint(limbID, jointName, imageLocation, spaceLocation, depthSign)"
+    BodyJoint bj5(limbID, jointName, imageLocation, spaceLocation, depthSign);
+    EXPECT_EQ(limbID, bj5.getLimbID());
+    EXPECT_EQ(jointName, bj5.getJointName());
+    EXPECT_EQ(imageLocation, bj5.getImageLocation());
+    EXPECT_EQ(spaceLocation, bj5.getSpaceLocation());
+    EXPECT_TRUE(bj5.getDepthSign());
   }
 
   TEST(bodyJointTest, MoveConstructor)
@@ -54,4 +72,5 @@ namespace SPEL
     EXPECT_EQ(imageLocation, bj2.getImageLocation());
     EXPECT_FALSE(bj2.getDepthSign());
   }
+
 }

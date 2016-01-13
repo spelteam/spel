@@ -2,6 +2,7 @@
 #include "predef.hpp"
 
 #include <gtest/gtest.h>
+#include <fstream>
 #include <bodyPart.hpp>
 
 using namespace std;
@@ -87,5 +88,30 @@ namespace SPEL
     EXPECT_EQ(relativeLength, bp2.getRelativeLength());
     EXPECT_EQ(searchRadius, bp2.getSearchRadius());
     EXPECT_EQ(rotationSearchRange, bp2.getRotationSearchRange());
+  }
+ 
+  TEST(bodyPartTest, OutputOperator)
+  {
+    //Create bodyPart
+    int partID = 3;
+    string partName = "Part Name";
+    int parentJoint = 0;
+    int childJoint = 0;
+    bool isOccluded = true;
+    float spaceLength = 1.343f;
+    BodyPart bodyPart(partID, partName, parentJoint, childJoint, isOccluded, spaceLength);
+
+    //Testing operator "<<"
+    ofstream f1("bodyPartTest_OutputOperator.txt");
+    f1 << bodyPart;
+    f1.close();
+    ifstream f2("bodyPartTest_OutputOperator.txt");
+    ASSERT_TRUE(f2.is_open());
+    //char S[255];
+    //f2.getline(S, 255);
+    int i;
+    f2 >> i;
+    EXPECT_EQ(partID, i);
+
   }
 }

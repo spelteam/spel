@@ -259,8 +259,8 @@ namespace SPEL
   //Returns  index of first keyframe
   int FirstKeyFrameNum(vector<Frame*> frames)
   {
-	unsigned int i = 0;
-	int FirstKeyframe = -1;
+    unsigned int i = 0;
+    int FirstKeyframe = -1;
     while ((i < frames.size()) && (FirstKeyframe == -1))
     {
       if (frames[i]->getFrametype() == KEYFRAME)

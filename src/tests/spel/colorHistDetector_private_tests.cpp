@@ -666,9 +666,125 @@ namespace SPEL
         ClearGlobalVariables();
   }
 
+  TEST(ColorHistDetectorTest, CalculateFactor)
+  {
+    ColorHistDetector::PartModel X(8);
+    uchar expected_factor = 32, factor = X.calculateFactor();
+    EXPECT_EQ(expected_factor, factor);
+  }
+
+  TEST(ColorHistDetectorTest, compare)
+  {
+    //Prepare test data
+
+    //Create body part 
+    int partID = 0, j0_ID = 0, j1_ID = 1;
+    Point2f p0(80, 50), p1(120, 50);
+    Point2f d = p1 - p0;
+    Point2f shift = Point2f(0.5f*d.x, 0.0f);
+    float partLength = sqrt(d.x*d.x + d.y*d.y);
+    float LWRatio = 1.3f;
+    BodyJoint j0(j0_ID, "", p0);
+    BodyJoint j1(j1_ID, "", p1);
+
+    bool Occluded = false;
+    BodyPart bodyPart(partID,"",j0_ID, j1_ID, false, partLength);
+    bodyPart.setLWRatio(LWRatio);
+    vector<Point2f> partRect = getPartRect(LWRatio, p0, p1);
+    //cout << partRect << endl;
+
+    //Create part image and mask
+    float P = 1.0f;
+    int rows = 100, cols = 200;
+    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
+    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0,0,0));
+    Mat pixelLabel = Mat(rows, cols, cv::DataType <float>::type);
+    Mat ShiftedPixelLabel = Mat(rows, cols, cv::DataType <float>::type);
+    for (int x = 0; x < cols; x++)
+      for (int y = 0; y < rows; y++)
+        if(pointPolygonTest(partRect, Point2f(x, y), false) > 0)
+        {
+          Image.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+          pixelLabel.at<float>(y, x) = P;
+          ShiftedPixelLabel.at<float>(y-shift.y, x-shift.x) = P;
+        } 
+    cvtColor(Image, Mask, CV_BGR2GRAY);
+    //imwrite("ColorHistDetectorTest_compare_Image.jpg", Image);
+    //imwrite("ColorHistDetectorTest_compare_Mask.jpg", Mask);
+
+    //Create frame
+    Frame * frame = new Lockframe();
+    frame->setMask(Mask);
+    frame->setImage(Image);
+
+    //Create ColorHistDetector
+    int nBins = 8;
+    ColorHistDetector detector(nBins);
+    ColorHistDetector::PartModel partModel(nBins);
+    partModel.fgSampleSizes.push_back(1);
+    partModel.fgNumSamples = 1;
+    detector.partModels.emplace(pair<int, ColorHistDetector::PartModel>(partID,partModel));
+
+    //Run "ColorHistDetector::compare"
+    map <int32_t, cv::Mat> pixelsLabels1, pixelsLabels2;
+    pixelsLabels1.emplace(pair<int, cv::Mat>(partID, pixelLabel));
+    pixelsLabels2.emplace(pair<int, cv::Mat>(partID, ShiftedPixelLabel));
+
+    float score = detector.compare(bodyPart, frame, pixelsLabels1, p0, p1); // Part rect, mask and PixelsLabels fully coincide
+    float ShiftedPart_Score = detector.compare(bodyPart, frame, pixelsLabels1, p0 - shift, p1 - shift); //  Part rect shifted
+    float ShiftedPixelsLabels_Score = detector.compare(bodyPart, frame, pixelsLabels2, p0, p1); // PixelsLabels shifted
+    float SmallPartScore = detector.compare(bodyPart, frame, pixelsLabels1, p0, p0 + Point2f(3.0f, 3.0f)); // Part rect area less then 10 pixels
+
+    pixelsLabels2[partID] = Mat(rows, cols, cv::DataType <float>::type);
+    float EmptyPixelsLabels_Score = detector.compare(bodyPart, frame, pixelsLabels2, p0, p1); //"PixelLabels" is empty
+
+    Mat EmptyMask = Mat(rows, cols, CV_8UC1, 0);
+    frame->setMask(EmptyMask);
+    float EmpyMaskScore = detector.compare(bodyPart, frame, pixelsLabels1, p0, p1); // Mask is empty
+
+	//Put results
+    cout << "Score = " << score << endl;
+    cout << "ShiftedScore = " << ShiftedPart_Score << endl;
+    cout << "ShiftedPixelsLabelScore = " << ShiftedPixelsLabels_Score << endl;
+    cout << "SmallPartScore = " << SmallPartScore << endl;
+    cout << "EmptyPixelsLabels_Score = " << EmptyPixelsLabels_Score << endl;
+    cout << "EmpyMaskScore = " << EmpyMaskScore << endl;
+
+    //Compare
+    float error = 0.013f;
+    EXPECT_EQ(1.0f - P, score);
+    EXPECT_NEAR(1.0f - 0.5f*(0.5f + 1.0f), ShiftedPart_Score, error);
+    EXPECT_NEAR(1.0f - 0.5f*(0.5f + 0.5f), ShiftedPixelsLabels_Score, error);
+    EXPECT_EQ(-1.0f, SmallPartScore);
+    EXPECT_EQ(-1.0f, EmptyPixelsLabels_Score);
+    EXPECT_EQ(-1.0f, EmpyMaskScore);
+
+  }
+
   TEST(ColorHistDetectorTest, Clear)
   {
     if (ProjectLoaded == true)
       ClearGlobalVariables();
+  }
+
+  TEST(ColorHistDetectorHelperTest, pixelLabels)
+  {
+    //Create test data
+    ColorHistDetectorHelper X;
+    for (uchar i = 0; i < 4; i++)
+    {
+      Mat temp = Mat(Size(i, i), CV_8UC3, Scalar(i, i, i));
+      X.pixelLabels.emplace(pair<int32_t, cv::Mat>(i, temp));
+    }
+
+    //Compare
+    for (uchar i = 0; i < X.pixelLabels.size(); i++)
+    {
+      EXPECT_EQ(i, X.pixelLabels[i].size().height);
+      EXPECT_EQ(i, X.pixelLabels[i].size().width);
+      EXPECT_EQ(Vec3b(i, i, i), X.pixelLabels[i].at<Vec3b>(0, 0));
+      X.pixelLabels[i].release();
+    }
+    X.pixelLabels.clear();
   }
 }

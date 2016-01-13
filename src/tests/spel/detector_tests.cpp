@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 #include <detector.hpp>
 #include <colorHistDetector.hpp>
+#include <surfDetector.hpp>
 #include <fstream>
 #include "TestsFunctions.hpp"
 
@@ -129,6 +130,25 @@ namespace SPEL
           if (j > (int)Max.y) { Max.y = (float)j; }
         }
   }
+
+  TEST(DetectorTests, getID_SetID)
+  {
+    int id = 18;
+    Detector* d = new ColorHistDetector(8);
+    d->setID(id);
+    EXPECT_EQ(id, d->getID());
+
+    delete d;
+    d = new HogDetector();
+    d->setID(id);
+    EXPECT_EQ(id, d->getID());
+
+    delete d;
+    d = new SurfDetector();
+    d->setID(id);
+    EXPECT_EQ(id, d->getID());
+  }
+
 
   TEST(DetectorTests, rotateImageToDefault_OneColor)
   {

@@ -29,8 +29,8 @@ namespace SPEL
     bj2.setSpaceLocation(spaceLocation);
     bj2.setDepthSign(depthSign);
 
+    //Testing operator "=="
     EXPECT_TRUE(bj1 == bj2);
-    EXPECT_FALSE(bj1 != bj2);
 
     //Testing operator "="
     bj3 = bj2;
@@ -48,6 +48,12 @@ namespace SPEL
     EXPECT_EQ(imageLocation, bj5.getImageLocation());
     EXPECT_EQ(spaceLocation, bj5.getSpaceLocation());
     EXPECT_EQ(depthSign, bj5.getDepthSign());
+
+    //Testing operator "!="
+    bj1.setLimbID(limbID + 1);
+    EXPECT_FALSE(bj1 != bj2);
+    EXPECT_TRUE(bj3 != bj2);
+
   }
 
   TEST(bodyJointTest, MoveAssigmentOperaor)

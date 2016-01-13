@@ -32,6 +32,27 @@ namespace SPEL
     EXPECT_EQ(-1, frame->getID());
     EXPECT_EQ(Point2f(0, 0), frame->getGroundPoint());
     delete frame;
+
+    frame = new Frame(KEYFRAME);
+    EXPECT_EQ(KEYFRAME, frame->getFrametype());
+    EXPECT_EQ(-1, frame->getParentFrameID());
+    EXPECT_EQ(-1, frame->getID());
+    EXPECT_EQ(Point2f(0, 0), frame->getGroundPoint());
+    delete frame;
+
+    frame = new Frame(LOCKFRAME);
+    EXPECT_EQ(LOCKFRAME, frame->getFrametype());
+    EXPECT_EQ(-1, frame->getParentFrameID());
+    EXPECT_EQ(-1, frame->getID());
+    EXPECT_EQ(Point2f(0, 0), frame->getGroundPoint());
+    delete frame;
+
+    frame = new Frame(INTERPOLATIONFRAME);
+    EXPECT_EQ(INTERPOLATIONFRAME, frame->getFrametype());
+    EXPECT_EQ(-1, frame->getParentFrameID());
+    EXPECT_EQ(-1, frame->getID());
+    EXPECT_EQ(Point2f(0, 0), frame->getGroundPoint());
+    delete frame;
   }
 
   TEST(FramesTests, FramePointerComparer)

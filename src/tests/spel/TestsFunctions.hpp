@@ -36,8 +36,6 @@ namespace SPEL
 
   class TestISM : public ImageSimilarityMatrix
   {
-  private:
-    virtual void computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight);
   public:	
     TestISM(void);
     TestISM(const TestISM &m);
@@ -48,7 +46,9 @@ namespace SPEL
     // Building normalized ISM of the frames sequence
     // "useOverlapFactor" chooses gradual ("true") or abrupt("false") icrease assesment of the mask mismatch
     void build(vector<Frame*> frames, bool useOverlapFactor); 
-    };
+  private:
+    virtual void computeISMcell(const Frame* left, const Frame* right, const int maxFrameHeight);
+  };
 
   
 
