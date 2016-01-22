@@ -41,7 +41,7 @@ namespace SPEL
         for (int x = 0; x < imageSize.width - 1; x++)
         {
           ImagesIsEqual = (image0.at<Vec3b>(y, x) == image1.at<Vec3b>(y, x));
-          MasksIsEqual = (mask0.at<Vec3b>(y, x) == mask1.at<Vec3b>(y, x));
+          MasksIsEqual = (mask0.at<uchar>(y, x) == mask1.at<uchar>(y, x));
         }
       EXPECT_TRUE(ImagesIsEqual);
       EXPECT_TRUE(MasksIsEqual);
@@ -94,7 +94,7 @@ namespace SPEL
         for (int x = 0; x < imageSize.width - 1; x++)
         {
           ImagesIsEqual = (image0.at<Vec3b>(y, x) == image1.at<Vec3b>(y, x));
-          MasksIsEqual = (mask0.at<Vec3b>(y, x) == mask1.at<Vec3b>(y, x));
+          MasksIsEqual = (mask0.at<uchar>(y, x) == mask1.at<uchar>(y, x));
         }
       EXPECT_TRUE(ImagesIsEqual);
       EXPECT_TRUE(MasksIsEqual);
@@ -166,7 +166,7 @@ namespace SPEL
         for (int x = 0; x < imageSize.width - 1; x++)
         {
           ImagesIsEqual = (image0.at<Vec3b>(y, x) == image1.at<Vec3b>(y, x));
-          MasksIsEqual = (mask0.at<Vec3b>(y, x) == mask1.at<Vec3b>(y, x));
+          MasksIsEqual = (mask0.at<uchar>(y, x) == mask1.at<uchar>(y, x));
         }
       EXPECT_TRUE(ImagesIsEqual);
       EXPECT_TRUE(MasksIsEqual);
@@ -176,6 +176,50 @@ namespace SPEL
       image1.release();
       mask1.release();
     } 
+  }
+
+//Testing "Sequence(int idx, std::string seqName, std::vector<Frame*> seq)"
+  TEST(SequenceTests, getFamePointer)
+  {
+    //Load the input data
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    Sequence sequence;
+    sequence.setFrames(frames);
+    int frameNum = 0;
+    int frameID = frames[frameNum]->getID();
+
+    //Create actual value
+
+	Frame* actual_frame = sequence.getFrame(frameID);
+
+    //Compare
+	EXPECT_EQ(frames[frameNum]->getID(), actual_frame->getID());
+	EXPECT_EQ(frames[frameNum]->getGroundPoint(), actual_frame->getGroundPoint());
+	EXPECT_EQ(frames[frameNum]->getParentFrameID(), actual_frame->getParentFrameID());
+	EXPECT_EQ(frames[frameNum]->getSkeleton(), actual_frame->getSkeleton());
+
+	Mat image0 = frames[frameNum]->getImage();
+	Mat mask0 = frames[frameNum]->getMask();
+	Mat image1 = actual_frame->getImage();
+	Mat mask1 = actual_frame->getMask();
+	bool ImagesIsEqual = true, MasksIsEqual = true;
+
+	ASSERT_EQ(mask0.size(), image0.size());
+	ASSERT_EQ(image0.size(), image1.size());
+	ASSERT_EQ(mask0.size(), mask1.size());
+	for (int y = 0; y < image0.size().height - 1; y++)
+	  for (int x = 0; x < image0.size().width - 1; x++)
+	  {
+	    ImagesIsEqual = (image0.at<Vec3b>(y, x) == image1.at<Vec3b>(y, x));
+	    MasksIsEqual = (mask0.at<uchar>(y, x) == mask1.at<uchar>(y, x));
+	  }
+	EXPECT_TRUE(ImagesIsEqual);
+	EXPECT_TRUE(MasksIsEqual);
+
+	image0.release();
+	mask0.release();
+	image1.release();
+	mask1.release();
   }
 
   TEST(SequenceTests, setAndGetID)

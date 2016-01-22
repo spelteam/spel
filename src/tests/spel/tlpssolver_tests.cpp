@@ -307,6 +307,11 @@ namespace SPEL
    EXPECT_EQ(0.0f, S.computeFutureTempCost(label1, label1, params));
    EXPECT_EQ(2.0f*squareDistance, S.computeFutureTempCost(label1, label3, params));
 
+   //Testing function "computeNormFutureTempCost"
+   float x = 2.0f;
+   EXPECT_EQ(0.0f, S.computeNormFutureTempCost(label1, label1, params, x));
+   EXPECT_EQ(squareDistance, S.computeNormFutureTempCost(label1, label3, params, x));
+
    //Testing function "computeAnchorCost"
    EXPECT_EQ(0.0f, S.computeAnchorCost(label1, frame, params));
    EXPECT_EQ(4.0f*squareDistance, S.computeAnchorCost(label3, frame, params));

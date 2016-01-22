@@ -24,6 +24,12 @@ namespace SPEL
 
     virtual ImageHogSimilarityMatrix & operator=(const ImageHogSimilarityMatrix &s) noexcept;
   protected:
+#ifdef DEBUG
+    FRIEND_TEST(ImageHogSimilarityMatrix, defaultConstructor);
+    FRIEND_TEST(ImageHogSimilarityMatrix, MoveConstructor);
+    FRIEND_TEST(ImageHogSimilarityMatrix, calculateROI);
+#endif  // DEBUG
+      
     const uint8_t nbins = 9;
     cv::Size blockSize = cv::Size(16, 16);
     cv::Size blockStride = cv::Size(8, 8);

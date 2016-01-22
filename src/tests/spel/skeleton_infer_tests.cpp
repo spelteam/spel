@@ -27,6 +27,14 @@ namespace SPEL
     vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
     Skeleton skeleton = frames[0]->getSkeleton();
 
+    //Set the skeleton joints space locations!
+    tree <BodyJoint> jointsTree = skeleton.getJointTree();
+    for (tree <BodyJoint>::iterator i = jointsTree.begin(); i != jointsTree.end(); ++i)
+    {
+      Point2f p0 = i->getImageLocation();
+      i->setSpaceLocation(Point3f(p0.x, p0.y, 0.0f));
+    }
+    skeleton.setJointTree(jointsTree);
 
     //Create expected value
     map<int, pair<Point2f, Point2f>> expected_partLocations = getPartLocations(skeleton);

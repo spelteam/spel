@@ -123,6 +123,13 @@ namespace SPEL
     //Move assigment operator
     D = static_cast<ImagePixelSimilarityMatrix&&>(C);
     EXPECT_TRUE(D == C);
+
+    //ImagePixelSimilarityMatrix operator "="
+    TestsMatrix X, Y;
+    b = X.read(FilePath + "In_Matrix.txt");
+    ASSERT_TRUE(b);
+    Y = X;
+    EXPECT_TRUE(Y == X);
   }
 
   TEST_F(ImageSimilarityMatrixTests, min)
@@ -395,6 +402,31 @@ namespace SPEL
     ImagePixelSimilarityMatrix C;
     C.setID(id);
     EXPECT_EQ(id, C.getID());
+  }
+
+  TEST(ImageSimilarityMatrixTests_, calculateDistance)
+  {
+    Point2f shift(10, 0);
+    int rows = 100, cols = 140;
+    vector<Point2f> rect = { Point2f(20,40), Point2f(40,40), Point2f(40,30), Point2f(20, 30) };
+
+    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    Mat ShiftedImage = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
+    Mat ShiftedMask = Mat(rows, cols, CV_8UC1, 0);
+    for (int x = 0; x < cols; x++)
+      for (int y = 0; y < rows; y++)
+        if(pointPolygonTest(rect, Point2f(x, y), false) > 0)
+         {
+           Image.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+           ShiftedImage.at<Vec3b>(y + shift.y, x + shift.x) = Vec3b(255, 255, 255);
+         } 
+    cvtColor(Image, Mask, CV_BGR2GRAY);
+    cvtColor(ShiftedImage, ShiftedMask, CV_BGR2GRAY);
+
+    ImagePixelSimilarityMatrix X;
+    Point2f actual_shift = X.calculateDistance(Mask, ShiftedMask);
+    EXPECT_EQ(shift, actual_shift);
   }
 
 }

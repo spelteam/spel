@@ -33,6 +33,14 @@ namespace SPEL
     return keyPoints;
   }
 
+  TEST(surfDetectorTests, Constructor)
+  {
+    uint32_t id = 0x53440000;
+
+    SurfDetector d;
+    EXPECT_EQ(id, d.getID());
+  }
+
   //Testing "computeDescriptors" functions
   TEST(surfDetectorTests, computeDescriptors)
   {

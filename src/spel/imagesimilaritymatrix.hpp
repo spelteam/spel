@@ -65,6 +65,10 @@ namespace SPEL
 #ifdef DEBUG
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeISMcell);
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeMSMcell);
+    FRIEND_TEST(ImageSimilarityMatrixTests_, calculateDistance);
+    FRIEND_TEST(MaskSimilarityMatrixTests, DefaultConstructor);
+    FRIEND_TEST(MaskSimilarityMatrixTests, CopyConstructor);
+    FRIEND_TEST(MaskSimilarityMatrixTests, MoveConstructor);
 #endif  // DEBUG
     uint32_t id;
 

@@ -22,6 +22,9 @@ namespace SPEL
 
     virtual ImageMaskSimilarityMatrix & operator=(const ImageMaskSimilarityMatrix &s) noexcept;
   protected:
+#ifdef DEBUG
+    FRIEND_TEST(MaskSimilarityMatrixTests, computeISMCell);
+#endif  // DEBUG
     // Inherited via ImageSimilarityMatrix
     virtual void computeISMcell(const Frame * left, const Frame * right, const int maxFrameHeight);
   };
