@@ -462,7 +462,7 @@ namespace SPEL
     Point2f begin(0, 0), end(1, 0);
 
     float length = detector.GetBoneLength(begin, end);
-    cout << length;
+    cout << length << endl;
     EXPECT_EQ(end.x - begin.x, length);
   }
 
@@ -475,7 +475,7 @@ namespace SPEL
     float length = 1;
 
     float width = detector.GetBoneWidth(length, part);
-    cout << length;
+    cout << length << endl;
     EXPECT_EQ(length / lwRatio, width);
   }
 
