@@ -51,8 +51,8 @@ namespace SPEL
 
     //Testing operator "!="
     bj1.setLimbID(limbID + 1);
-    EXPECT_FALSE(bj1 != bj2);
-    EXPECT_TRUE(bj3 != bj2);
+    EXPECT_TRUE(bj1 != bj2);
+    EXPECT_FALSE(bj3 != bj2);
 
   }
 

@@ -202,6 +202,7 @@ TEST(skeletonTest, getPartTreePtr)
       EXPECT_EQ(i->getImageLocation(), k->getImageLocation());
       EXPECT_EQ(i->getSpaceLocation(), k->getSpaceLocation());
       EXPECT_EQ(i->getDepthSign(), k->getDepthSign());
+      k++;
     }
     EXPECT_TRUE(equal(joinntTree_actual->begin(), joinntTree_actual->end(), jointTree.begin()));
 
