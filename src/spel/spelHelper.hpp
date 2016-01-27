@@ -268,7 +268,7 @@ namespace SPEL
 
     bool operator < (const PHPoint& pt) const
     {
-      return (this->x < pt.x && this->y < pt.y);
+      return (this->x < pt.x || (this->x == pt.x && this->y < pt.y));
     }
   };
 
@@ -286,7 +286,7 @@ namespace SPEL
 
     bool operator < (const PHPoint3& pt) const
     {
-      return (this->x < pt.x && this->y < pt.y && this->z < pt.z);
+      return (this->x < pt.x || (this->x == pt.x && this->y < pt.y) || (this->x == pt.x && this->y == pt.y && this->z < pt.z));
     }
   };
 
