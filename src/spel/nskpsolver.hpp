@@ -69,6 +69,7 @@ namespace SPEL
     FRIEND_TEST(nskpsolverTests, findFrameIndexById);
     FRIEND_TEST(nskpsolverTests, propagateFrame);
     FRIEND_TEST(nskpsolverTests, propagateKeyframes);
+    FRIEND_TEST(nskpsolverTests, buildMSTs);
 #endif  // DEBUG
   protected:
     virtual std::vector<Solvlet> propagateKeyframes(std::vector<Frame*>& frames, std::map<std::string, float>  params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);

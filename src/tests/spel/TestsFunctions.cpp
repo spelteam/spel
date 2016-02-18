@@ -369,6 +369,88 @@ namespace SPEL
         }
   }
 
+   //Copyed from: http://www.juergenwiki.de/work/wiki/doku.php?id=public:hog_descriptor_computation_and_visualization
+  vector<vector<vector<float>>> averageGradientStrengths(const cv::Mat & Image, std::vector<float>& descriptors, const cv::Size & winSize, const cv::Size & blockSize, const cv::Size & blockStride, const cv::Size & cellSize, const int nBins, const int derivAper, const double winSigma, const int histogramNormType, const double L2HysThresh, const bool gammaCorrection, const int nlevels)
+  {
+    //prepare data structure
+    int cells_in_x_dir = winSize.width / cellSize.width;
+    int cells_in_y_dir = winSize.height / cellSize.height;
+    int totalnrofcells = cells_in_x_dir * cells_in_y_dir;
+    float*** gradientStrengths = new float**[cells_in_y_dir];
+    int** cellUpdateCounter = new int*[cells_in_y_dir];
+    for (int y = 0; y<cells_in_y_dir; y++)
+    {
+      gradientStrengths[y] = new float*[cells_in_x_dir];
+      cellUpdateCounter[y] = new int[cells_in_x_dir];
+      for (int x = 0; x<cells_in_x_dir; x++)
+      {
+        gradientStrengths[y][x] = new float[nBins];
+        cellUpdateCounter[y][x] = 0;
+        for (int bin = 0; bin<nBins; bin++)
+          gradientStrengths[y][x][bin] = 0.0;
+      }
+    }
+
+    // compute gradient strengths per cell
+    int blocks_in_x_dir = cells_in_x_dir - 1;
+    int blocks_in_y_dir = cells_in_y_dir - 1;
+    int descriptorDataIdx = 0;
+    int cellx = 0;
+    int celly = 0;
+
+    for (int blockx = 0; blockx<blocks_in_x_dir; blockx++)
+      for (int blocky = 0; blocky<blocks_in_y_dir; blocky++)
+        for (int cellNr = 0; cellNr<4; cellNr++)
+        {
+          int cellx = blockx;
+          int celly = blocky;
+          if (cellNr == 1) celly++;
+          if (cellNr == 2) cellx++;
+          if (cellNr == 3)
+          {
+            cellx++;
+            celly++;
+          }
+          for (int bin = 0; bin<nBins; bin++)
+          {
+            float gradientStrength = descriptors[descriptorDataIdx];
+            descriptorDataIdx++;
+            gradientStrengths[celly][cellx][bin] += gradientStrength;
+          } 
+          cellUpdateCounter[celly][cellx]++;
+        }
+
+    // prepare data structure
+    vector<vector<vector<float>>> averageGradients(cells_in_y_dir);
+    for (int i = 0; i < cells_in_y_dir; i++)
+    {
+      averageGradients[i].resize(cells_in_x_dir);
+      for (int k = 0; k < cells_in_x_dir; k++)
+        averageGradients[i][k].resize(nBins);
+    }
+    // compute average gradient strengths
+    for (int celly = 0; celly<cells_in_y_dir; celly++)
+      for (int cellx = 0; cellx<cells_in_x_dir; cellx++)
+      {
+        float NrUpdatesForThisCell = (float)cellUpdateCounter[celly][cellx];
+        for (int bin = 0; bin<nBins; bin++)
+          averageGradients[celly][cellx][bin] = gradientStrengths[celly][cellx][bin] / NrUpdatesForThisCell;
+      }
+
+    // Clear
+    for (int y = 0; y<cells_in_y_dir; y++)
+    {
+      for (int x = 0; x<cells_in_x_dir; x++)
+        delete[] gradientStrengths[y][x];
+      delete[] gradientStrengths[y];
+      delete[] cellUpdateCounter[y];
+    }
+    delete[] gradientStrengths;
+    delete[] cellUpdateCounter;
+
+    return averageGradients;
+  }
+
 // "TestISM" class
 TestISM::TestISM(void)
   {
@@ -517,4 +599,6 @@ void TestISM::computeISMcell(const Frame* left, const Frame* right, const int ma
    //
 
  }  
+
+
 }

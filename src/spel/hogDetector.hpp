@@ -58,6 +58,7 @@ namespace SPEL
     FRIEND_TEST(HOGDetectorTests, getPartModels);
     FRIEND_TEST(HOGDetectorTests, getCellSize);
     FRIEND_TEST(HOGDetectorTests, getNBins);
+    FRIEND_TEST(HOGDetectorTests, calculateHog);
 #endif  // DEBUG
   protected:
     const uint8_t nbins = 9;

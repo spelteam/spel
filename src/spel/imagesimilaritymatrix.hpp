@@ -69,6 +69,8 @@ namespace SPEL
     FRIEND_TEST(MaskSimilarityMatrixTests, DefaultConstructor);
     FRIEND_TEST(MaskSimilarityMatrixTests, CopyConstructor);
     FRIEND_TEST(MaskSimilarityMatrixTests, MoveConstructor);
+    FRIEND_TEST(ImageSimilarityMatrixTests_, CalculateConstructor);
+    FRIEND_TEST(ImageHogSimilarityMatrix, frames_ISM);
 #endif  // DEBUG
     uint32_t id;
 

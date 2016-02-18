@@ -54,6 +54,10 @@ namespace SPEL
     FRIEND_TEST(DetectorTests, getFrame);
     FRIEND_TEST(DetectorTests, getBodyPartRect);
     FRIEND_TEST(DetectorTests, getBodyPartRect_withBlockSize);
+    FRIEND_TEST(DetectorTests, generateLabel1);
+    FRIEND_TEST(DetectorTests, generateLabel2);
+    FRIEND_TEST(DetectorTests, FilterLimbLabels);
+    FRIEND_TEST(DetectorTests, FilterLimbLabels_B);
 #endif  // DEBUG
     std::vector <Frame*> frames;
     uint32_t maxFrameHeight;

@@ -201,4 +201,72 @@ namespace SPEL
     Labels.clear();
   }
 
+  TEST(solvlet_Tests, evaluateSolution)
+  {
+    // Prepare test data
+    Point2f D = Point2f(0.0f, 50.0f);
+    float dx = 5.0f;
+    Point2f shift(dx, 0.0f);
+    vector<Point2f> polygon0 = {Point2f(10.0f, 10.0f), Point2f(30.0f, 10.0f), Point2f(30.0f, 20.0f), Point2f(10.0f, 20.0f) };
+    vector<Point2f> polygon1 = { Point2f(10.0f, 10.0f) + D, Point2f(30.0f, 10.0f) + D, Point2f(30.0f, 20.0f) + D, Point2f(10.0f, 20.0f) + D };
+    vector<Point2f> shifted_polygon0 = { Point2f(10.0f, 10.0f) + shift, Point2f(30.0f, 10.0f) + shift, Point2f(30.0f, 20.0f) + shift, Point2f(10.0f, 20.0f) + shift };
+    vector<Point2f> shifted_polygon1 = { Point2f(10.0f, 10.0f) + D + shift, Point2f(30.0f, 10.0f) + D + shift, Point2f(30.0f, 20.0f) + D + shift, Point2f(10.0f, 20.0f) + D + shift };
+    float L = polygon0[2].x - polygon0[0].x;
+    Point2f center(0.0f, 0.0f);
+    for (unsigned int i = 0; i < polygon0.size(); i++)
+      center += polygon0[i];
+    center = center * (1.0f / polygon0.size());
+    Score score(0.0f, "", 1.0f);
+    vector<Score> scores;
+    scores.push_back(score);
+    LimbLabel label0(0, center, 0.0f, polygon0, scores, false);
+    LimbLabel label1(1, center + D, 0.0f, polygon1, scores, false);
+    vector<LimbLabel> labels = {label0, label1};
+
+    LimbLabel shifted_label0(0, center + shift , 0.0f, shifted_polygon0, scores, false);
+    LimbLabel shifted_label1(1, center + D + shift, 0.0f, shifted_polygon1, scores, false);
+    vector<LimbLabel> shifted_labels = { shifted_label0, shifted_label1 };
+
+    Solvlet S;
+    S.setLabels(labels);
+
+    int rows = 200, cols = 300;
+    Mat image(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    for (int y = polygon0[0].y; y < polygon0[2].y + 1; y++)
+      for(int x = polygon0[0].x; x < polygon0[2].x + 1; x++)
+      {
+        image.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+        image.at<Vec3b>(y + D.y, x + D.x) = Vec3b(255, 255, 255);
+      }
+    //imwrite("S_evaluateSolution.jpg", image);
+
+    Mat mask;
+    cvtColor(image, mask, CV_RGB2GRAY);
+
+    Frame* frame = new Lockframe();
+    frame->setID(0);
+    frame->setImage(image);
+    frame->setMask(mask);
+
+
+    // Create actual value and compare
+    map<string, float> params;
+    params.emplace(pair<string, float>("maxFrameHeight", 0.0f));// image.rows));
+    double X = S.evaluateSolution(frame, params); // Ideal labels
+
+    EXPECT_EQ(1.0f, X);
+
+    S.setLabels(shifted_labels);
+    X = S.evaluateSolution(frame, params); // Shifted labels
+
+    float error = 0.06f;
+    EXPECT_NEAR((L-dx)/(L+dx), X, error);
+
+    params.emplace(pair<string, float>("badLabelThresh", 0.99f));
+    X = S.evaluateSolution(frame, params); // Shifted labels and higth "badLabelThresh"
+
+    EXPECT_NEAR((L - dx) / (L + dx) -1.0f, X, error);
+
+  }
+
 }

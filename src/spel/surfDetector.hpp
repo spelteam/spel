@@ -61,6 +61,7 @@ namespace SPEL
     FRIEND_TEST(surfDetectorTests, compare);
     FRIEND_TEST(surfDetectorTests, generateLabel);
     FRIEND_TEST(surfDetectorTests, PartModel);
+    FRIEND_TEST(surfDetectorTests, getPartModels);
     //FRIEND_TEST(surfDetectorTests, detect);
 #endif  // DEBUG
   protected:

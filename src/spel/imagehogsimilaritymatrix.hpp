@@ -28,6 +28,8 @@ namespace SPEL
     FRIEND_TEST(ImageHogSimilarityMatrix, defaultConstructor);
     FRIEND_TEST(ImageHogSimilarityMatrix, MoveConstructor);
     FRIEND_TEST(ImageHogSimilarityMatrix, calculateROI);
+    FRIEND_TEST(ImageHogSimilarityMatrix, calculateISMCell);
+    FRIEND_TEST(ImageHogSimilarityMatrix, frames_ISM);
 #endif  // DEBUG
       
     const uint8_t nbins = 9;

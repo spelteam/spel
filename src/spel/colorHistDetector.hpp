@@ -77,6 +77,9 @@ namespace SPEL
     FRIEND_TEST(colorHistDetectorTest, Train);
     FRIEND_TEST(ColorHistDetectorTest, CalculateFactor);
     FRIEND_TEST(ColorHistDetectorTest, compare);
+    FRIEND_TEST(DetectorTests, detect);
+    FRIEND_TEST(DetectorTests, generateLabel1);
+    FRIEND_TEST(DetectorTests, generateLabel2);
 #endif  // DEBUG
   protected:
     const uint8_t nBins;

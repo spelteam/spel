@@ -748,4 +748,110 @@ namespace SPEL
     HogDetector d;
     EXPECT_EQ(id, d.getID());
   }
+
+  TEST(HOGDetectorTests, calculateHog)
+  {
+    //Prepare test data
+    Size winSize(128, 64);
+    Size blockSize(16, 16);
+    Size blockStride(8, 8);
+    Size cellSize(8, 8);
+    int nBins = 9;
+    int derivAper = 0;
+    double winSigma = -1.0;
+    int histogramNormType = 0;
+    double L2HysThresh = 0.2;
+    bool gammaCorrection = true;
+    int nLevels = 64;
+
+    int rows = 64, cols = 128;
+    Mat Image(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    cv::ellipse(Image, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 0.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
+
+    cvtColor(Image, Image, CV_RGB2GRAY);
+
+    vector<float> descriptors;
+    
+    //Create expected value
+    vector<vector<vector<float>>> Expected;
+    HOGDescriptor d(winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+    d.compute(Image, descriptors);
+    Expected = averageGradientStrengths(Image, descriptors, winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+
+    //Create actual value
+    HogDetector HOGDetector;
+    vector<vector<vector<float>>> Actual;
+    Actual = HOGDetector.calculateHog(Image, descriptors, winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+    //Actual = decodeDescriptor(descriptors, winSize, blockSize, blockStride, cellSize, nBins);
+
+    //Compare
+    //EXPECT_EQ(Expected, Actual);
+    ASSERT_EQ(Expected.size(), Actual.size());
+    ASSERT_EQ(Expected[0].size(), Actual[0].size());
+    ASSERT_EQ(Expected[0][0].size(), Actual[0][0].size());
+    bool GradientStrengthsEqual = true;
+    for (int y = 0; y < Expected.size(); y++)
+      for (int x = 0; x < Expected[y].size(); x++)
+        for (int n = 0; n<Expected[y][x].size(); n++)
+          if(Expected[y][x][n] != Actual[y][x][n])
+          {
+            GradientStrengthsEqual = false;
+            //cout <<  "strength[" << y << ", " << x << ", " << ", " << n << "]: expected " << Expected[y][x][n] << ", actual " << Actual[y][x][n] << endl;
+          }   
+    EXPECT_TRUE(GradientStrengthsEqual);
+    
+    //Put result
+    if(!GradientStrengthsEqual)
+    {
+      cout << endl;
+      cout << "winSize = " << winSize << endl;
+      cout << "blockSize = " << blockSize << endl;
+      cout << "blockStride = " << blockStride << endl;
+      cout << "cellSize = " << cellSize << endl;
+      cout << "nBins = " << nBins << endl;
+      cout << "derivAper = " << derivAper << endl;
+      cout << "winSigma = " << winSigma << endl;
+      cout << "histogramNormType = " << histogramNormType << endl;
+      cout << "L2HysThresh = " << L2HysThresh << endl;
+      cout << "gammaCorrection = " << gammaCorrection << endl;
+      cout << "gammaCorrection = " << gammaCorrection << endl;
+      cout << "nLevels = " << nLevels << endl;
+      cout << endl;
+
+      cout << "Expected:" << endl;
+      for (int y = 0; y < Expected.size(); y++)
+        for (int x = 0; x < Expected[y].size(); x++)
+        {
+          cout << Point2f(x, y) << ": ";
+          for (int n = 0; n < Expected[y][x].size(); n++)
+            cout << Expected[y][x][n] << ", ";
+          cout << endl;
+        }
+      cout << endl;
+      cout << "Actual:" << endl;
+      for (int y = 0; y < Actual.size(); y++)
+        for (int x = 0; x < Actual[y].size(); x++)
+        {
+          cout << Point2f(x, y) << ": ";
+          for (int n = 0; n < Actual[y][x].size(); n++)
+            cout << Actual[y][x][n] << ", ";
+          cout << endl;
+        }
+     }
+
+    //Clear 
+    for (int y = 0; y < Expected.size(); y++)
+    {
+      for (int x = 0; x < Expected[y].size(); x++)
+        for (int n = 0; n < Expected[y][x].size(); n++)
+        {
+          Expected[y][x].clear();
+          Actual[y][x].clear();
+        }
+      Expected[y].clear();
+      Actual[y].clear();
+    }
+    Expected.clear();
+    Actual.clear();
+  }
 }

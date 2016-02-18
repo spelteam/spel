@@ -969,4 +969,448 @@ namespace SPEL
     partRect_actual.clear();
   }
 
+  TEST(DetectorTests, detect)
+  {
+    //Prepare test data
+    map<string, float> params;
+    vector<Frame*> frames = LoadTestProject(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    ColorHistDetector detector;
+    detector.train(frames, params);
+    Skeleton skeleton = frames[0]->getSkeleton(); // Copy skeleton from keyframe
+    frames[1]->setSkeleton(skeleton); // Set skeleton from keyframe to frames[1] 
+
+    //Run "detect"
+    map<uint32_t, vector<LimbLabel>> limbLabels;
+    ColorHistDetectorHelper* detectorHelper = new ColorHistDetectorHelper();
+    std::map <int32_t, cv::Mat> pixelDistributions = detector.buildPixelDistributions(frames[0]);
+    detectorHelper->pixelLabels = detector.buildPixelLabels(frames[0], pixelDistributions);
+    limbLabels = detector.Detector::detect(frames[1], params, limbLabels, detectorHelper);
+    ASSERT_GT(limbLabels.size(), 0);
+
+    // Output top of "limbLabels" into text file
+    ofstream fout("Output_DetectorTest_detect.txt");
+    fout << "\nTop Labels, sorted by part id:\n\n";
+    for (unsigned int i = 0; i < limbLabels.size(); i++) // For all body parts
+    {
+      for (unsigned int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
+      {
+        Point2f p0, p1;
+        limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
+        fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
+        vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
+        for (unsigned int t = 0; t < scores.size(); t++)
+        {
+          fout << scores[t].getScore() << ", "; // Put all scores of the Label
+        }
+        fout << "}\n";
+      }
+      fout << endl;
+    }
+
+    // Copy coordinates of BodyParts from skeleton
+    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(skeleton);
+
+    // Compare labels with ideal bodyparts from keyframe, and output debug information 
+    float TolerableCoordinateError = 7.0f; // Linear error in pixels
+    //float TolerableAngleError = 0.1f; // 10% (not used in this test)
+    int TopListLabelsCount = 4; // Size of "labels top list"
+    map<int, vector<LimbLabel>> effectiveLabels;
+    vector<int> WithoutGoodLabelInTop;
+    bool EffectiveLabbelsInTop = true;
+
+    fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
+
+    for (unsigned int id = 0; id < limbLabels.size(); id++)
+    {
+      fout << "\nPartID = " << id << ":\n";
+      Point2f l0, l1, p0, p1, delta0, delta1;
+      vector<LimbLabel> temp;
+      p0 = PartLocation[id].first; // Ideal body part point
+      p1 = PartLocation[id].second; // Ideal body part point
+      for (int k = 0; k < static_cast<int>(limbLabels[id].size()); k++)
+      {
+        limbLabels[id][k].getEndpoints(l0, l1); // Label points
+        delta0 = l0 - p0;
+        delta1 = l1 - p1;
+        float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+        delta0 = l0 - p1;
+        delta1 = l1 - p0;
+        float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+        float error = min(error_A, error_B); // Distance between ideal body part and label
+        if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >= 0) // Label is "effective" if it has small error and of not less than zero  Score  value
+          temp.push_back(limbLabels[id][k]); // Copy effective labels
+        // Put linear errors for all Labels into text file, copy indexes of a "badly processed parts"
+        fout << "    PartID = " << id << ", LabelIndex = " << k << ":    AvgScore = " << limbLabels[id][k].getAvgScore() << ", LinearError = " << error << endl;
+        if (k == TopListLabelsCount - 1)
+        {
+          fout << "    //End of part[" << id << "] top labels list\n";
+          if (!(skeleton.getBodyPart(id)->getIsOccluded()))
+            if (temp.size() < 1)
+            {
+              EffectiveLabbelsInTop = false; // false == Present not Occluded bodyparts, but no nave "effective labels" in the top of list
+              WithoutGoodLabelInTop.push_back(id); // Copy index of not Occluded parts, which no have "effective labels" in the top of labels list
+            }
+        }
+      }
+      effectiveLabels.emplace(pair<int, vector<LimbLabel>>(id, temp));
+    }
+
+    //Output top of "effectiveLabels" into text file
+    fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
+    for (unsigned int i = 0; i < effectiveLabels.size(); i++)
+    {
+      for (unsigned int k = 0; k < effectiveLabels[i].size(); k++)
+      {
+        Point2f p0, p1;
+        limbLabels[i][k].getEndpoints(p0, p1);
+        fout << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
+        vector<Score> scores = effectiveLabels[i][k].getScores();
+        for (unsigned int t = 0; t < scores.size(); t++)
+        {
+          fout << scores[t].getScore() << ", ";
+        }
+
+        fout << "}\n";
+      }
+      fout << endl;
+    }
+
+    fout.close();
+    cout << "\nLimbLabels saved in file: Output_DetectorTest_detect.txt\n";
+
+    // Output messages 
+    if (!EffectiveLabbelsInTop) cout << endl << "Detector_Tests.detect:" << endl;
+    EXPECT_TRUE(EffectiveLabbelsInTop);
+    if (!EffectiveLabbelsInTop)
+    {
+      cout << "Body parts with id: ";
+      for (unsigned int i = 0; i < WithoutGoodLabelInTop.size(); i++)
+      {
+        cout << WithoutGoodLabelInTop[i];
+        if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";
+      }
+      cout << " - does not have effective labels in the top of labels list." << endl;
+    }
+    if (!EffectiveLabbelsInTop) cout << endl;
+
+  }
+
+  float f(void)
+  {
+    return 0.5f;
+  };
+
+  TEST(DetectorTests, generateLabel1)
+  {
+    // Prepare test data
+    int part_id = 0, parentJoint_id = 0, childJoint_id = 1;
+    Point2f p0(30.0f, 10.0f), p1(60.0f, 10.0f);
+    Point2f d = p1 - p0;
+    float Length = sqrt(d.x*d.x + d.y*d.y);
+    Point2f shift(0.5f*d.x, 0);
+    bool isOccluded = false;
+    BodyPart* bodyPart0 = new BodyPart(part_id, "", parentJoint_id, childJoint_id, isOccluded, Length);
+    BodyPart* bodyPart1 = new BodyPart(part_id+1, "", parentJoint_id, childJoint_id, isOccluded, Length);
+    float LWRatio = 3.0f;
+    bodyPart0->setLWRatio(LWRatio);
+    bodyPart1->setLWRatio(LWRatio);
+    //BodyJoint j0(parentJoint_id, "", p0, Point3f(p0.x, p0.y, 0.0f), false);
+    //BodyJoint j1(parentJoint_id, "", p1, Point3f(p1.x, p1.y, 0.0f), false);
+
+    ColorHistDetector detector(8);
+    ColorHistDetector::PartModel model;
+    model.fgNumSamples = 1;
+    model.fgSampleSizes.push_back(1);
+    detector.partModels.emplace(pair<int32_t, ColorHistDetector::PartModel>(part_id, model));
+    detector.partModels.emplace(pair<int32_t, ColorHistDetector::PartModel>(part_id+1, model));
+    ColorHistDetectorHelper* detectorHelper = new ColorHistDetectorHelper();
+
+
+    int rows = 100, cols = 140;
+    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
+    Mat pixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
+    Mat ShiftedixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
+
+    vector<Point2f> rect = getPartRect(LWRatio, p0, p1);
+
+    for (int x = 0; x < cols; x++)
+      for (int y = 0; y < rows; y++)
+        if(pointPolygonTest(rect, Point2f(x, y), false) > 0)
+        {
+          Image.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+          pixelsLabels.at<float>(y, x) = 1.0f;
+          ShiftedixelsLabels.at<float>(y + shift.y, x + shift.x) = 1.0f;
+        }
+    detectorHelper->pixelLabels.emplace(pair<int32_t, cv::Mat>(part_id, pixelsLabels));
+    detectorHelper->pixelLabels.emplace(pair<int32_t, cv::Mat>(part_id+1, ShiftedixelsLabels));
+    cvtColor(Image, Mask, CV_BGR2GRAY);
+
+    Frame* frame0 = new Lockframe();
+    frame0->setID(0);
+    frame0->setImage(Image);
+    frame0->setMask(Mask);
+
+    BodyPart * bodyPart = bodyPart0;
+    auto comparer = [&]() -> float
+    {
+      return detector.compare(*bodyPart, frame0, detectorHelper->pixelLabels, p0, p1);
+    };
+     
+    // Create actual value
+    float usedet = 1.0f;
+    LimbLabel label = detector.Detector::generateLabel(*bodyPart0, p0, p1, "", usedet, comparer);// Part rect, mask and PixelsLabels fully coincide
+    cout << "label score = " << label.getAvgScore() << endl;
+    
+    cout << "Rect shift = " << shift << ", ";
+    LimbLabel shiftedLabel = detector.Detector::generateLabel(*bodyPart0, (p0 - shift), (p1 - shift), "", usedet, comparer);// Part rect shifted
+    cout << "shifted rect score = " << shiftedLabel.getAvgScore() << endl;
+  
+    cout << "PixelsLabels shift = " << - shift << ", ";
+    bodyPart = bodyPart1;
+    LimbLabel shiftedPLabels_Label = detector.Detector::generateLabel(*bodyPart1, p0, p1, "", usedet, comparer);// PixelsLabels shifted
+    cout << "label with shifted pixelsLabels score = " << shiftedPLabels_Label.getAvgScore() << endl << endl;
+
+    // Compare
+    float error = 0.05f;
+    EXPECT_EQ(0.0f, label.getAvgScore());
+    EXPECT_NEAR(1.0f - (0.5f*0.5f + 0.5f*1.0f), shiftedLabel.getAvgScore(), error);
+    EXPECT_NEAR(1.0f - 0.5f*(0.5f + 0.5f), shiftedPLabels_Label.getAvgScore(), error);
+
+    EXPECT_EQ(part_id, label.getLimbID());
+    EXPECT_EQ(part_id, shiftedLabel.getLimbID());
+    EXPECT_EQ(part_id + 1, shiftedPLabels_Label.getLimbID());
+    
+    EXPECT_EQ(0.5f*(p0 + p1), label.getCenter());
+    EXPECT_EQ(0.5f*(p0 + p1) - shift, shiftedLabel.getCenter());
+    EXPECT_EQ(0.5f*(p0 + p1), shiftedPLabels_Label.getCenter());
+
+    //error = 0.00001f;
+    //float angle = spelHelper::angle2D(p0.x, p0.y, p1.x, p1.y);
+    //EXPECT_NEAR(angle, label.getAngle(), error);
+    //EXPECT_NEAR(angle, shiftedLabel.getAngle(), error);
+    //EXPECT_NEAR(angle, shiftedPLabels_Label.getAngle(), error);
+    //Angle: expected angle2D(p0.x, p0.y, p1.x, p1.y) = -0.157, Actual label.getAngle() = 0. All must be 0.
+
+    Image.release();
+    Mask.release();
+    pixelsLabels.release();
+    ShiftedixelsLabels.release();
+  }
+
+ TEST(DetectorTests, generateLabel2)
+  {
+    // Prepare test data
+    int part_id = 0, parentJoint_id = 0, childJoint_id = 1;
+    Point2f p0(30.0f, 10.0f), p1(60.0f, 10.0f);
+    Point2f center = 0.5f*(p0 + p1);
+    float angle = spelHelper::angle2D(p0.x, p0.y, p1.x, p1.y);
+    Point2f d = p1 - p0;
+    float length = sqrt(d.x*d.x + d.y*d.y);
+    Point2f shift(0.5f*d.x, 0.5*d.y);
+    bool isOccluded = false;
+    BodyPart bodyPart0(part_id, "", parentJoint_id, childJoint_id, isOccluded, length);
+    BodyPart bodyPart1(part_id+1, "", parentJoint_id, childJoint_id, isOccluded, length);
+    float LWRatio = 3.0f;
+    bodyPart0.setLWRatio(LWRatio);
+    bodyPart1.setLWRatio(LWRatio);
+    //BodyJoint j0(parentJoint_id, "", p0, Point3f(p0.x, p0.y, 0.0f), false);
+    //BodyJoint j1(parentJoint_id, "", p1, Point3f(p1.x, p1.y, 0.0f), false);
+
+    ColorHistDetector detector(8);
+    ColorHistDetector::PartModel model;
+    model.fgNumSamples = 1;
+    model.fgSampleSizes.push_back(1);
+    detector.partModels.emplace(pair<int32_t, ColorHistDetector::PartModel>(part_id, model));
+    detector.partModels.emplace(pair<int32_t, ColorHistDetector::PartModel>(part_id+1, model));
+    ColorHistDetectorHelper* detectorHelper = new ColorHistDetectorHelper();
+
+
+    int rows = 100, cols = 140;
+    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
+    Mat pixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
+    Mat ShiftedixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
+
+    vector<Point2f> rect = getPartRect(LWRatio, p0, p1);
+
+    for (int x = 0; x < cols; x++)
+      for (int y = 0; y < rows; y++)
+        if(pointPolygonTest(rect, Point2f(x, y), false) > 0)
+        {
+          Image.at<Vec3b>(y, x) = Vec3b(255, 255, 255);
+          pixelsLabels.at<float>(y, x) = 1.0f;
+          ShiftedixelsLabels.at<float>(y + shift.y, x + shift.x) = 1.0f;
+        }
+    detectorHelper->pixelLabels.emplace(pair<int32_t, cv::Mat>(part_id, pixelsLabels));
+    detectorHelper->pixelLabels.emplace(pair<int32_t, cv::Mat>(part_id+1, ShiftedixelsLabels));
+    cvtColor(Image, Mask, CV_BGR2GRAY);
+
+    Frame* frame0 = new Lockframe();
+    frame0->setID(0);
+    frame0->setImage(Image);
+    frame0->setMask(Mask);
+     
+    // Create actual value
+    map<string, float> params;
+    LimbLabel label = detector.Detector::generateLabel(length, angle, center.x, center.y, bodyPart0, frame0, detectorHelper, params);// Part rect, mask and PixelsLabels fully coincide
+    cout << "label score = " << label.getAvgScore() << endl;
+    
+    cout << "Rect shift = " << shift << ", ";
+    LimbLabel shiftedLabel = detector.Detector::generateLabel(length, angle, center.x  + shift.x, center.y + shift.y, bodyPart0, frame0, detectorHelper, params);// Part rect shifted
+    cout << "shifted rect score = " << shiftedLabel.getAvgScore() << endl;
+ 
+    cout << "PixelsLabels shift = " << shift << ", ";
+    LimbLabel shiftedPLabels_Label = detector.Detector::generateLabel(length, angle, center.x, center.y, bodyPart1, frame0, detectorHelper, params);// PixelsLabels shifted
+    cout << "label with shifted pixelsLabels score = " << shiftedPLabels_Label.getAvgScore() << endl << endl;
+
+    // Compare
+    float error = 0.05f;
+    EXPECT_NEAR(0.0f, label.getAvgScore(), error);
+    EXPECT_NEAR(1.0f - (0.5f*0.5f + 0.5f*1.0f), shiftedLabel.getAvgScore(), error);
+    EXPECT_NEAR(1.0f - 0.5f*(0.5f + 0.5f), shiftedPLabels_Label.getAvgScore(), error);
+
+    EXPECT_EQ(part_id, label.getLimbID());
+    EXPECT_EQ(part_id, shiftedLabel.getLimbID());
+    EXPECT_EQ(part_id + 1, shiftedPLabels_Label.getLimbID());
+    
+    EXPECT_EQ(0.5f*(p0 + p1), label.getCenter());
+    EXPECT_EQ(0.5f*(p0 + p1) + shift, shiftedLabel.getCenter());
+    EXPECT_EQ(0.5f*(p0 + p1), shiftedPLabels_Label.getCenter());
+
+    error = 0.00001f;
+    EXPECT_NEAR(angle, label.getAngle(), error);
+    EXPECT_NEAR(angle, shiftedLabel.getAngle(), error);
+    EXPECT_NEAR(angle, shiftedPLabels_Label.getAngle(), error);
+
+    //vector<Point2f> polygon = getPartRect(LWRatio, p0, p1);
+    //EXPECT_EQ(polygon, stlabel.getPolygon());
+    //EXPECT_EQ(getPartRect(LWRatio, p0 + shift, p1 + shift), shiftedLabel.getPolygon());
+    //EXPECT_EQ(polygon, shiftedPLabels_Label.getPolygon());
+
+    Image.release();
+    Mask.release();
+    pixelsLabels.release();
+    ShiftedixelsLabels.release();
+  }
+
+  bool CompareLabels (LimbLabel X, LimbLabel Y)
+  {
+      return Y.getAvgScore() > X.getAvgScore();
+  }
+
+ TEST(DetectorTests, FilterLimbLabels)
+ {
+   // Create expected value
+   vector<LimbLabel> labels;
+   int N = 2, M = 2;
+   float P = 1.0f*N / (N + M);
+   int n = 3, m = 4, p = 3;
+   float d = 0.1f;
+   int id = 0;
+   for (int t = 0; t < N; t++)
+     for (int i = 0; i < n; i++)
+       for (int k = 0; k < m; k++)
+        for (int l = 0; l < p; l++)
+        { 
+          Score score(0.4f*rand()/RAND_MAX,"", 1.0f);
+          vector<Score> scores;
+          scores.push_back(score);
+          vector<Point2f> polygon;
+          labels.push_back(LimbLabel(id, Point2f(i*d, k*d), l*d, polygon, scores, false));
+          id++;
+        }
+   sort(labels.begin(), labels.end(), CompareLabels);
+
+   // Prepare test data
+   vector<LimbLabel> temp(labels.size());
+   copy(labels.begin(), labels.end(), temp.begin());
+   for (int t = 0; t < M; t++)
+     for (int i = 0; i < n; i++)
+       for (int k = 0; k < m; k++)
+         for (int l = 0; l < p; l++)
+         {
+           Score score(0.5f + 0.4f*rand() / RAND_MAX, "", 1.0f);
+           vector<Score> scores;
+           scores.push_back(score);
+           vector<Point2f> polygon;
+           temp.push_back(LimbLabel(id, Point2f(i*d, k*d), l*d, polygon, scores, false));
+           id++;
+         }
+   sort(temp.begin(), temp.end(), CompareLabels);
+
+   // Create actual value
+   ColorHistDetector detector(8);
+   vector<LimbLabel> labels_actual;
+   labels_actual = detector.filterLimbLabels(temp, P, P);
+   
+   ASSERT_EQ(labels.size(), labels_actual.size());
+   for (int i = 0; i < labels.size(); i++)
+     EXPECT_EQ(labels[i].getLimbID(), labels_actual[i].getLimbID());
+
+   /*
+   for (int i = 0; i < min(labels.size(), labels_actual.size()); i++)
+     cout << i << ": " << labels[i].getAvgScore() <<" ~ " << actual_labels[i].getAvgScore() << endl;
+   */
+ }
+
+  TEST(DetectorTests, FilterLimbLabels_B)
+ {
+   // Prepare test data
+   vector<LimbLabel> labels_expected;
+   vector<LimbLabel> temp;
+   int n = 3, m = 4, p = 3;
+   float d = 0.1f;
+   int id = 0;
+   for (int i = 1; i < n+1; i++)
+     for (int k = 1; k < m+1; k++)
+     { 
+       Score score1(1.0f*id/100.0f,"", 1.0f);
+       Score score2(1.0f*id/100.0f + 0.001f, "", 1.0f);
+       vector<Score> scores;
+       scores.push_back(score1);
+       vector<Point2f> polygon;
+       labels_expected.push_back(LimbLabel(id, Point2f(i*d, k*d), d, polygon, scores, false));
+       id++;
+       scores.clear();
+       scores.push_back(score2);
+       temp.push_back(LimbLabel(id, Point2f(i*d, k*d), d, polygon, scores, false));
+       id++;
+       scores.clear();
+     }
+   for (int l = 1; l < p+1; l++)
+   { 
+     Score score1(1.0f*id/100.0f,"", 1.0f);
+     Score score2(1.0f*id/100.0f + 0.001f, "", 1.0f);
+     vector<Score> scores;
+     scores.push_back(score1);
+     vector<Point2f> polygon;
+     labels_expected.push_back(LimbLabel(id, Point2f(d, d), l*d, polygon, scores, false));
+     id++;
+     scores.clear();
+     scores.push_back(score2);
+     temp.push_back(LimbLabel(id, Point2f(d, d), l*d, polygon, scores, false));
+     id++;
+     scores.clear();
+   }
+   sort(labels_expected.begin(), labels_expected.end(), CompareLabels);
+   sort(temp.begin(), temp.end(), CompareLabels);
+
+   vector<LimbLabel> temp2(2* labels_expected.size());
+   merge(labels_expected.begin(), labels_expected.end(), temp.begin(), temp.end(), temp2.begin());
+   cout << "temp size = "<< temp2.size() << endl;
+
+   // Create actual value
+   ColorHistDetector detector(8);
+   vector<LimbLabel> labels_actual;
+   labels_actual = detector.filterLimbLabels(temp2, 0.5f, 0.5f);
+
+   for (int i = 0; i < min(labels_expected.size(), labels_actual.size()); i++)
+     cout << i << ": " << labels_expected[i].getAvgScore() << " ~ " << labels_actual[i].getAvgScore() << endl;
+
+   ASSERT_EQ(labels_expected.size(), labels_actual.size());
+   for (int id = 0; id < labels_expected.size(); id++)
+     EXPECT_EQ(labels_expected[id].getLimbID(), labels_actual[id].getLimbID()) << endl;
+ }
+
 }

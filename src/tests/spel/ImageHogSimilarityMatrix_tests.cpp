@@ -149,4 +149,179 @@ namespace SPEL
     Mask.release();
   }
 
+  TEST(ImageHogSimilarityMatrix, calculateISMCell)
+  {
+    //Prepare test data
+    int rows = 64, cols = 128;
+    Mat Image0(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    Mat Image1(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+
+    Image0.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
+    Image1.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
+    Image0.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
+    Image1.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
+
+    cv::ellipse(Image0, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 0.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
+    cv::ellipse(Image1, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 180.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
+      
+    cvtColor(Image0, Image0, CV_RGB2GRAY);
+    cvtColor(Image1, Image1, CV_RGB2GRAY);
+    imwrite("hogISM_Image0.jpg", Image0);
+    imwrite("hogISM_Image1.jpg", Image1);
+
+    vector<Frame*> frames;
+    for (int i = 0; i < 2; i++)
+    {
+      frames.push_back(new Lockframe());
+      frames[i]->setID(i);
+    }
+    frames[0]->setImage(Image0);
+    frames[0]->setMask(Image0);
+    frames[1]->setImage(Image1);
+    frames[1]->setMask(Image1);
+
+    //Create expected value
+    Size winSize(128, 64); Size(0,1);
+    Size blockSize(16, 16);
+    Size blockStride(8, 8);
+    Size cellSize(8, 8);
+    int nBins = 9;
+    int derivAper = 0;
+    double winSigma = -1.0;	
+    int histogramNormType = 0;
+    double L2HysThresh = 0.2;
+    bool gammaCorrection = true;
+    int nLevels = 64;
+    vector<float> descriptors;	  
+    vector<vector<vector<float>>> GradientStrengths0, GradientStrengths1;
+
+    HOGDescriptor d(winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+    d.compute(Image0, descriptors);
+    GradientStrengths0 = averageGradientStrengths(Image0, descriptors, winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+    descriptors.clear();
+    d.compute(Image1, descriptors);
+    GradientStrengths1 = averageGradientStrengths(Image1, descriptors, winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+ 
+    float score_expected = 0.0f;
+    int N = static_cast<int>(winSize.height / cellSize.height);  
+    int M = static_cast<int>(winSize.width / cellSize.width);
+    for(int y = 0; y < N; y++)
+      for(int x = 0; x < M; x++)
+        for(int n= 0; n < nBins; n++)
+          score_expected += pow(GradientStrengths1[y][x][n] - GradientStrengths0[y][x][n], 2);
+
+    //Create actual value
+    ImageHogSimilarityMatrix X(frames);
+    X.computeISMcell(frames[0], frames[1], Image0.cols);
+    float score_actual = X.at(frames[0]->getID(), frames[1]->getID());
+
+    //Compare
+    EXPECT_EQ(score_expected, score_actual);
+
+    frames.clear();
+    Image0.release();
+    Image1.release();
+
+    for (int i = 0; i < GradientStrengths0.size(); i++)
+    {
+      for (int k = 0; k < GradientStrengths0[i].size(); k++)
+      {
+        GradientStrengths0[i][k].clear();
+        GradientStrengths1[i][k].clear();
+      }            
+      GradientStrengths0[i].clear();
+      GradientStrengths1[i].clear();
+    }
+    GradientStrengths0.clear();
+    GradientStrengths1.clear();
+  }
+
+
+  TEST(ImageHogSimilarityMatrix, frames_ISM)
+  {
+    //Prepare test data
+    int rows = 64, cols = 128;
+    int framesCount = 3;
+    vector<Frame*> frames;
+    for (int i = 0; i < framesCount; i++)
+    {
+      frames.push_back(new Lockframe());
+      frames[i]->setID(i);
+      Mat image(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+      image.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
+      image.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
+      cv::ellipse(image, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 360.0/i, 360.0, Scalar(255, 255, 255), 1, 0, 0);
+      cvtColor(image, image, CV_RGB2GRAY);
+      frames[i]->setImage(image);
+      frames[i]->setMask(image);
+    }
+
+    //Create expected value
+    Size winSize(128, 64); Size(0, 1);
+    Size blockSize(16, 16);
+    Size blockStride(8, 8);
+    Size cellSize(8, 8);
+    int nBins = 9;
+    int derivAper = 0;
+    double winSigma = -1.0;
+    int histogramNormType = 0;
+    double L2HysThresh = 0.2;
+    bool gammaCorrection = true;
+    int nLevels = 64;
+    int N = static_cast<int>(winSize.height / cellSize.height);
+    int M = static_cast<int>(winSize.width / cellSize.width);
+
+    //Create expected value
+    vector<float> descriptors;
+    vector<vector<vector<float>>> GradientStrengths0, GradientStrengths1;
+    HOGDescriptor d(winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+
+    Mat SimilarityMatrix(frames.size(), frames.size(), cv::DataType<float>::type, 0.0f);
+    for (int i = 0; i < frames.size(); i++)
+      for (int k = 0; k < frames.size(); k++)
+      {
+        d.compute(frames[i]->getImage(), descriptors);
+        GradientStrengths0 = averageGradientStrengths(frames[i]->getImage(), descriptors, winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+        descriptors.clear();
+        d.compute(frames[k]->getImage(), descriptors);
+        GradientStrengths1 = averageGradientStrengths(frames[k]->getImage(), descriptors, winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+        descriptors.clear();
+        float score_expected = 0.0f;
+        for (int y = 0; y < N; y++)
+          for (int x = 0; x < M; x++)
+            for (int n = 0; n < nBins; n++)
+              SimilarityMatrix.at<float>(i, k) += pow(GradientStrengths1[y][x][n] - GradientStrengths0[y][x][n], 2);		
+
+        for (int i = 0; i < GradientStrengths0.size(); i++)
+        {
+          for (int k = 0; k < GradientStrengths0[i].size(); k++)
+          {
+            GradientStrengths0[i][k].clear();
+            GradientStrengths1[i][k].clear();
+          }
+          GradientStrengths0[i].clear();
+          GradientStrengths1[i].clear();
+        }
+        GradientStrengths0.clear();
+        GradientStrengths1.clear();
+      }
+    ImageHogSimilarityMatrix expected;
+    expected.imageSimilarityMatrix = SimilarityMatrix;
+    expected.imageShiftMatrix = Mat(frames.size(), frames.size(), cv::DataType<Point2f>::type, 0.0f);
+    expected.write("frames_HOG_ISM.txt");
+
+    bool calculateActualUncommented = false;
+    /*
+    //Create actual value
+    ImageHogSimilarityMatrix actual(frames);
+
+    //Compare
+    EXPECT_EQ(expected, actual);
+    calculateActualUncommented = true;
+     */
+    EXPECT_TRUE(calculateActualUncommented);
+
+    SimilarityMatrix.release();
+    frames.clear();
+  }
 }

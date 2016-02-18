@@ -2,6 +2,7 @@
 #include "predef.hpp"
 
 #include <gtest/gtest.h>
+#include <tree_util.hh>
 #include "nskpsolver.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
@@ -12,6 +13,7 @@
 #include "spelHelper.hpp"
 #include "TestsFunctions.hpp"
 #include "imagesimilaritymatrix.hpp"
+
 
 #include <iostream>
 
@@ -403,4 +405,113 @@ namespace SPEL
     CompareSolves(Solves, Frames, testISM);
   }
 
+  Mat ToMatrix(tree<int> mst, ImageSimilarityMatrix &ism)
+  {
+    Mat X(ism.size(), ism.size(), cv::DataType<float>::type, 0.0f);
+    for (tree<int>::iterator i = mst.begin(); i != mst.end(); i++)
+      for (tree<int>::sibling_iterator k = i.begin(); k != i.end(); k++)
+      if((*i < X.rows) && (*k <X.cols))
+      {
+        X.at<float>(*i, *k) = 1.0f;
+        X.at<float>(*k, *i) = 1.0f;
+        /*X.at<float>(*k, *i) = ism.at(*i, *k);fixed_depth_iterator*/
+      }
+    return X;
+  }
+
+  TEST(nskpsolverTests, buildMSTs)
+  {
+    // Prepare test data
+    ImagePixelSimilarityMatrix ISM;
+    bool b;
+    string FilePath = "speltests_TestData/SimilarityMatrixTestsData/";
+#if defined(WINDOWS) && defined(_MSC_VER)
+    if (IsDebuggerPresent())
+      FilePath = "Debug/" + FilePath;
+#endif
+    b = ISM.read(FilePath + "ISM.txt");
+    ASSERT_TRUE(b);
+
+    tree<int> temp;
+    int rootNode = 3;
+    tree<int>::iterator A = temp.begin(), B;
+    A = temp.insert(A, rootNode);
+    B = temp.append_child(A, 0);
+    temp.append_child(A, 5);
+    B = temp.append_child(B, 1);
+    B = temp.append_child(B, 4);
+    temp.append_child(B, 2);
+    temp.append_child(B, 6);
+
+    // Create expected value
+    Mat Expected = ToMatrix(temp, ISM);
+    temp.clear();
+
+    // Create actual value
+    std::map<std::string, float> params;
+    params.emplace("mstThresh", 0.0f);
+    params.emplace("treeSize", ISM.size());
+
+    NSKPSolver s;
+    vector<MinSpanningTree > MSTs = s.buildFrameMSTs(ISM, params);
+
+    // Compare	  
+    bool EdgesMatched = true;
+    //float error = 1E-6;
+    for(int root_node = 0; root_node < MSTs.size(); root_node++)
+    {
+      tree<int> mst = MSTs[root_node].getMST();
+      Mat X = ToMatrix(mst, ISM);
+      EXPECT_EQ(root_node, *mst.begin());
+      ASSERT_EQ(Expected.rows, X.rows);
+      for(int i = 0; i < Expected.rows; i++)
+      {
+        for(int k = 0; k < Expected.cols; k++)
+        {
+          //if(abs(X.at<float>(i, k) - Expected.at<float>(i, k)) > error);
+          if(X.at<float>(i, k) != Expected.at<float>(i, k))
+          {
+            EdgesMatched = false;
+            cout << endl << "i = " << i << ", k= " << k << ", error = " << abs(X.at<float>(i, k) - Expected.at<float>(i, k)) << endl;
+          }
+        }
+      }
+      X.release();
+    }	  
+    EXPECT_TRUE(EdgesMatched);
+
+    // Put results
+    if(!EdgesMatched)
+    {
+      cout << endl << "Expected:" <<endl;
+      cout << "Frame i:" << endl;
+      cout << "root node: i";
+      for(int i = 0; i < Expected.rows; i++)
+      {
+        cout << endl;
+        for (int k = 0; k < Expected.cols; k++)
+        cout << Expected.at<float>(i, k) << " ";
+      }
+      Expected.release();
+
+      cout << endl << endl <<"Actual values:" << endl;
+      for(int t = 0; t < MSTs.size(); t++)
+      {
+        tree<int> mst = MSTs[t].getMST();
+        Mat X = ToMatrix(mst, ISM);
+        cout << endl << "Frame " << t << ":" << endl;
+        cout << "root node: " << *(mst.begin());
+        for(int i = 0; i < X.rows; i++)
+        {
+          cout << endl;
+          for(int k = 0; k < X.cols; k++)
+            cout << X.at<float>(i, k) << " ";
+        }
+        X.release();
+        cout << endl;
+      }
+    }
+
+    MSTs.clear();
+  }
 }

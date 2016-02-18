@@ -617,7 +617,7 @@ namespace SPEL
     abstract_keypoint.class_id = 1;
     KeyPoints.push_back(abstract_keypoint);
 
-    cv::Mat abstract_descriptors = Mat(8, 8, CV_8UC3, Scalar(8, 8, 8));
+    cv::Mat abstract_descriptors = Mat(8, 8, cv::DataType<float>::type, static_cast<float>(1.1f));
 
     partModel.partModelRect = rect;
     partModel.keyPoints = KeyPoints;
@@ -632,7 +632,7 @@ namespace SPEL
     EXPECT_EQ(abstract_keypoint.octave, partModel.keyPoints[0].octave);
     EXPECT_EQ(abstract_keypoint.class_id, partModel.keyPoints[0].class_id);
     EXPECT_EQ(abstract_descriptors.size(), partModel.descriptors.size());
-    EXPECT_EQ(abstract_descriptors.data, partModel.descriptors.data);
+    EXPECT_EQ(abstract_descriptors.at<float>(0, 0), partModel.descriptors.at<float>(0,0));
     
     // Copyed partModel
     SurfDetector::PartModel partModel1 = partModel;	
@@ -646,6 +646,80 @@ namespace SPEL
     EXPECT_EQ(abstract_keypoint.octave, partModel1.keyPoints[0].octave);
     EXPECT_EQ(abstract_keypoint.class_id, partModel1.keyPoints[0].class_id);
     EXPECT_EQ(abstract_descriptors.size(), partModel1.descriptors.size());
-    EXPECT_EQ(abstract_descriptors.data, partModel1.descriptors.data);
+    EXPECT_EQ(abstract_descriptors.at<float>(0, 0), partModel1.descriptors.at<float>(0, 0));
   }
+
+  TEST(surfDetectorTests, getPartModels)
+  {
+    // Prepare test data
+    SurfDetector detector;
+    for (uint32_t i = 0; i < 3; i++)
+    {
+      std::map <uint32_t, SurfDetector::PartModel> temp;
+      for (uint32_t k = 0; k < 3; k++)
+      {
+        // Assigned partModel
+        SurfDetector::PartModel partModel;
+        Point2f X(k, k);
+        POSERECT<cv::Point2f> rect(X, X, X, X);
+
+        vector <cv::KeyPoint> KeyPoints;
+        cv::KeyPoint abstract_keypoint;
+        abstract_keypoint.pt = Point2f(k, k);
+        abstract_keypoint.size = k;
+        abstract_keypoint.angle = k;
+        abstract_keypoint.response = k;
+        abstract_keypoint.octave = k;
+        abstract_keypoint.class_id = k;
+        KeyPoints.push_back(abstract_keypoint);
+
+        cv::Mat abstract_descriptors = Mat(8, 8, cv::DataType<float>::type, static_cast<float>(k));
+
+        partModel.partModelRect = rect;
+        partModel.keyPoints = KeyPoints;
+        partModel.descriptors = abstract_descriptors;
+        temp.emplace(pair<uint32_t, SurfDetector::PartModel>(k, partModel));
+      }
+      detector.partModels.emplace(pair<uint32_t, std::map <uint32_t, SurfDetector::PartModel>>(i, temp));
+      temp.clear();
+    }
+
+    for (uint32_t i = 0; i < 3; i++)
+    {
+      std::map <uint32_t, SurfDetector::PartModel> temp;
+      for (uint32_t k = 0; k < 3; k++)
+      {
+        // Assigned partModel
+        SurfDetector::PartModel partModel;
+        Point2f X(k, k);
+        POSERECT<cv::Point2f> rect(X, X, X, X);
+
+        vector <cv::KeyPoint> KeyPoints;
+        cv::KeyPoint abstract_keypoint;
+        abstract_keypoint.pt = Point2f(k, k);
+        abstract_keypoint.size = k;
+        abstract_keypoint.angle = k;
+        abstract_keypoint.response = k;
+        abstract_keypoint.octave = k;
+        abstract_keypoint.class_id = k;
+        KeyPoints.push_back(abstract_keypoint);
+
+        cv::Mat abstract_descriptors = Mat(8, 8, cv::DataType<float>::type, static_cast<float>(k));
+
+        EXPECT_EQ(rect, detector.partModels[i][k].partModelRect);
+        EXPECT_EQ(KeyPoints.size(), detector.partModels[i][k].keyPoints.size());
+        EXPECT_EQ(abstract_keypoint.pt, detector.partModels[i][k].keyPoints[0].pt);
+        EXPECT_EQ(abstract_keypoint.size, detector.partModels[i][k].keyPoints[0].size);
+        EXPECT_EQ(abstract_keypoint.angle, detector.partModels[i][k].keyPoints[0].angle);
+        EXPECT_EQ(abstract_keypoint.response, detector.partModels[i][k].keyPoints[0].response);
+        EXPECT_EQ(abstract_keypoint.octave, detector.partModels[i][k].keyPoints[0].octave);
+        EXPECT_EQ(abstract_keypoint.class_id, detector.partModels[i][k].keyPoints[0].class_id);
+        EXPECT_EQ(abstract_descriptors.size(), detector.partModels[i][k].descriptors.size());
+        EXPECT_EQ(abstract_descriptors.at<float>(0, 0), detector.partModels[i][k].descriptors.at<float>(0, 0));
+      }
+      detector.partModels[i].clear();
+    }
+    detector.partModels.clear();
+  }
+
 }
