@@ -429,7 +429,7 @@ namespace SPEL
     if (IsDebuggerPresent())
       FilePath = "Debug/" + FilePath;
 #endif
-    b = ISM.read(FilePath + "ISM.txt");
+    b = ISM.read(FilePath + "ISM1.txt");
     ASSERT_TRUE(b);
 
     tree<int> temp;
@@ -449,7 +449,7 @@ namespace SPEL
 
     // Create actual value
     std::map<std::string, float> params;
-    params.emplace("mstThresh", 0.0f);
+    params.emplace("mstThresh", 1.0f);
     params.emplace("treeSize", ISM.size());
 
     NSKPSolver s;
