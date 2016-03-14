@@ -68,8 +68,8 @@ namespace SPEL
     limbID = std::move(ll.getLimbID());
     center = std::move(ll.getCenter());
     angle = std::move(ll.getAngle());
-    std::swap(scores, ll.getScores());
-    std::swap(polygon, ll.getPolygon());
+    scores = std::move(ll.getScores());
+    polygon = std::move(ll.getPolygon());
     isOccluded = std::move(ll.getIsOccluded());
 
     return *this;
