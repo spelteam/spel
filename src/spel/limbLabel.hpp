@@ -20,6 +20,7 @@
 // OpenCV
 #include <opencv2/opencv.hpp>
 
+#include "spelObject.hpp"
 #include "score.hpp"
 
 namespace SPEL
@@ -27,31 +28,33 @@ namespace SPEL
   class LimbLabel
   {
   public:
-    LimbLabel();
-    LimbLabel(const LimbLabel& ll);
-    LimbLabel(int _id, cv::Point2f _centre, float _angle, std::vector<cv::Point2f> _polygon, std::vector<Score> _scores, bool _isOccluded = false);
-    virtual ~LimbLabel(void);
+    LimbLabel() noexcept;
+    LimbLabel(const LimbLabel &ll) noexcept;
+    LimbLabel(LimbLabel &&ll) noexcept;
+    LimbLabel(int _id, cv::Point2f _centre, float _angle, std::vector<cv::Point2f> _polygon, std::vector<Score> _scores, bool _isOccluded = false) noexcept;
+    virtual ~LimbLabel(void) noexcept;
     /// output labels as printable string
-    virtual std::string toString();
-    virtual LimbLabel & operator = (const LimbLabel &ll);
-    virtual bool operator == (const LimbLabel &ll) const;
-    virtual bool operator != (const LimbLabel &ll) const;
-    virtual bool operator < (const LimbLabel &ll) const;
-    virtual bool operator > (const LimbLabel &ll) const;
+    virtual std::string toString() const noexcept;
+    virtual LimbLabel & operator = (const LimbLabel &ll) noexcept;
+    virtual LimbLabel & operator = (LimbLabel &&ll) noexcept;
+    virtual bool operator == (const LimbLabel &ll) const noexcept;
+    virtual bool operator != (const LimbLabel &ll) const noexcept;
+    virtual bool operator < (const LimbLabel &ll) const noexcept;
+    virtual bool operator > (const LimbLabel &ll) const noexcept;
     // compute the endpoints of the limb that this label would produce
     virtual void getEndpoints(cv::Point2f &p0, cv::Point2f &p1) const;
-    virtual void addScore(Score detectionScore);
-    virtual cv::Point2f getCenter(void) const;
+    virtual void addScore(Score detectionScore) noexcept;
+    virtual cv::Point2f getCenter(void) const noexcept;
     ///get the label scores
-    virtual std::vector<Score> getScores(void) const;
-    virtual void setScores(std::vector <Score> _scores);
-    virtual int getLimbID(void) const;
-    virtual float getAngle(void) const;
-    virtual std::vector <cv::Point2f> getPolygon(void) const;
-    virtual bool getIsOccluded(void) const;
-    virtual float getAvgScore(bool bNegativeToPositive = false) const;
-    virtual void Resize(float factor);
-    virtual bool containsPoint(cv::Point2f pt);
+    virtual std::vector<Score> getScores(void) const noexcept;
+    virtual void setScores(std::vector <Score> _scores) noexcept;
+    virtual int getLimbID(void) const noexcept;
+    virtual float getAngle(void) const noexcept;
+    virtual std::vector <cv::Point2f> getPolygon(void) const noexcept;
+    virtual bool getIsOccluded(void) const noexcept;
+    virtual float getAvgScore(bool bNegativeToPositive = false) const noexcept;
+    virtual void Resize(float factor) noexcept;
+    virtual bool containsPoint(cv::Point2f pt) const;
   private:
 #ifdef DEBUG
     FRIEND_TEST(nskpsolverTests, ScoreCostAndJointCost); // Used for set isWeak to "false" in nskpsolver_tests.computeScoreCost

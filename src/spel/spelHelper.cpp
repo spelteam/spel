@@ -53,4 +53,34 @@ namespace SPEL
     }
   }
 
+  cv::Mat spelHelper::rotateImageToDefault(const cv::Mat &imgSource, const POSERECT <cv::Point2f> &initialRect, const float angle, const cv::Size &size)
+  {
+    auto partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
+    auto center = initialRect.GetCenter<cv::Point2f>();
+    auto newCenter = cv::Point2f(0.5f * size.width, 0.5f * size.height);
+    auto width = imgSource.size().width; // !!! For testing
+    auto height = imgSource.size().height; // !!! For testing
+    for (auto x = 0; x < size.width; x++)
+    {
+      for (auto y = 0; y < size.height; y++)
+      {
+        auto p = cv::Point2f(static_cast<float>(x), static_cast<float>(y));
+        p = spelHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
+        try
+        {
+          if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
+            if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
+              partImage.at<cv::Vec3b>(y, x) = imgSource.at<cv::Vec3b>(static_cast<int>(round(p.y)), static_cast<int>(round(p.x)));
+        }
+        catch (...)
+        {
+          std::stringstream ss;
+          ss << "Couldn't get value of indeces " << "[" << x << "][" << y << "] from indeces [" << p.x << "][" << p.y << "]";
+          DebugMessage(ss.str(), 1);
+          throw std::out_of_range(ss.str());
+        }
+      }
+    }
+    return partImage;
+  }
 }

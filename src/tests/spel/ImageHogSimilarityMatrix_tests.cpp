@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include "imagehogsimilaritymatrix.hpp"
+#include "lockframe.hpp"
 #include "TestsFunctions.hpp"
 
 

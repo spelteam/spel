@@ -8,6 +8,7 @@
 #include <detector.hpp>
 #include <colorHistDetector.hpp>
 #include <surfDetector.hpp>
+#include <lockframe.hpp>
 #include <fstream>
 #include "TestsFunctions.hpp"
 
@@ -26,17 +27,17 @@ namespace SPEL
 
   Mat TestingDetector::DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
   {
-    return  TestingDetector::rotateImageToDefault(imgSource, initialRect, angle, size);
+    return  spelHelper::rotateImageToDefault(imgSource, initialRect, angle, size);
   }
 
   float TestingDetector::GetBoneLength(Point2f begin, Point2f end)
   {
-    return TestingDetector::getBoneLength(begin, end);
+    return BodyPart::getBoneLength(begin, end);
   }
 
   float TestingDetector::GetBoneWidth(float length, BodyPart bodyPart)
   {
-    return  TestingDetector::getBoneWidth(length, bodyPart);
+    return  BodyPart::getBoneWidth(length, bodyPart);
   }
 
   POSERECT<Point2f> CreateRect(float x1, float x2, float y1, float y2)
@@ -888,7 +889,7 @@ namespace SPEL
       //joint0.setSpaceLocation(Point3f(p0[i]));
       //joint1.setImageLocation(p1[i]);
       //joint1.setSpaceLocation(Point3f(p1[i]));
-      POSERECT<cv::Point2f> partRect = D.getBodyPartRect(part, p0[i], p1[i]);
+      POSERECT<cv::Point2f> partRect = part.getBodyPartRect(p0[i], p1[i]);
       partsRects_actual.push_back(partRect.asVector());
     }
 
@@ -939,7 +940,7 @@ namespace SPEL
 
     //Craete actual value
     ColorHistDetector D;
-    vector<Point2f> partRect_actual = D.getBodyPartRect(part, p0, p1, cv::Size(8, 8)).asVector();
+    vector<Point2f> partRect_actual = part.getBodyPartRect(p0, p1, cv::Size(8, 8)).asVector();
 
     Mat img1 = Mat(Size(100, 100), CV_8UC3, Scalar(255, 255, 255));
     PutPartRect(img1, partRect_actual, Scalar(0, 0, 0));

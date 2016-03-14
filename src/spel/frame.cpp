@@ -1,94 +1,100 @@
 #include "frame.hpp"
+#include "spelObject.hpp"
 
 namespace SPEL
 {
-
   Frame::Frame(void) noexcept
   {    
   }
 
-  Frame::Frame(FRAMETYPE _frametype) noexcept : Frame()
+  Frame::Frame(FRAMETYPE frametype) noexcept : Frame()
   {
-    frametype = _frametype;
+    m_frametype = frametype;
   }
 
   Frame::~Frame(void) noexcept
   {
-    image.release();
-    mask.release();
+    m_image.release();
+    m_mask.release();
   }
 
   int Frame::getID(void) const noexcept
   {
-    return id;
+    return m_id;
   }
 
-  void Frame::setID(int _id) noexcept
+  void Frame::setID(int id) noexcept
   {
-    id = _id;
+    m_id = id;
   }
 
   cv::Mat Frame::getImage(void) const noexcept
   {
-    return image;
+    return m_image;
   }
 
-  void Frame::setImage(const cv::Mat &_image)
+  void Frame::setImage(const cv::Mat &image)
   {
-    cv::Size newImageSize(_image.cols, _image.rows);
+    cv::Size newImageSize(image.cols, image.rows);
     if (maskSize != cv::Size(-1, -1) && maskSize != newImageSize)
     {
       std::stringstream ss;
-      ss << "Image with size [" << newImageSize.width << "][" << newImageSize.height << "] can not be loaded because mask with different size [" << maskSize.width << "][" << maskSize.height << "] was loaded";
+      ss << "Image with size [" << newImageSize.width << "][" << 
+        newImageSize.height << 
+        "] can not be loaded because mask with different size [" << 
+        maskSize.width << "][" << maskSize.height << "] was loaded";
       throw std::logic_error(ss.str());
     }
-    image.release();
-    image = _image.clone();
+    m_image.release();
+    m_image = image.clone();
     imageSize = newImageSize;
   }
 
   cv::Mat Frame::getMask(void) const noexcept
   {
-    return mask;
+    return m_mask;
   }
 
-  void Frame::setMask(const cv::Mat &_mask)
+  void Frame::setMask(const cv::Mat &mask)
   {
-    cv::Size newMaskSize(_mask.cols, _mask.rows);
+    cv::Size newMaskSize(mask.cols, mask.rows);
     if (imageSize != cv::Size(-1, -1) && imageSize != newMaskSize)
     {
       std::stringstream ss;
-      ss << "Mask with size [" << newMaskSize.width << "][" << newMaskSize.height << "] can not be loaded because image with different size [" << imageSize.width << "][" << imageSize.height << "] was loaded";
+      ss << "Mask with size [" << newMaskSize.width << "][" << 
+        newMaskSize.height << 
+        "] can not be loaded because image with different size [" << 
+        imageSize.width << "][" << imageSize.height << "] was loaded";
       throw std::logic_error(ss.str());
     }
-    mask.release();
-    mask = _mask.clone();
+    m_mask.release();
+    m_mask = mask.clone();
     maskSize = newMaskSize;
   }
 
   Skeleton Frame::getSkeleton(void) const noexcept
   {
-    return skeleton;
+    return m_skeleton;
   }
 
   Skeleton* Frame::getSkeletonPtr() noexcept
   {
-    return &skeleton;
+    return &m_skeleton;
   }
 
-  void Frame::setSkeleton(const Skeleton &_skeleton) noexcept
+  void Frame::setSkeleton(const Skeleton &skeleton) noexcept
   {
-    skeleton = _skeleton;
+    m_skeleton = skeleton;
   }
 
   cv::Point2f Frame::getGroundPoint(void) const noexcept
   {
-    return groundPoint;
+    return m_groundPoint;
   }
 
-  void Frame::setGroundPoint(cv::Point2f _groundPoint) noexcept
+  void Frame::setGroundPoint(cv::Point2f groundPoint) noexcept
   {
-    groundPoint = _groundPoint;
+    m_groundPoint = groundPoint;
   }
 
   std::vector <cv::Point2f> Frame::getPartPolygon(int partID) const noexcept
@@ -104,38 +110,41 @@ namespace SPEL
     return std::vector <cv::Point2f>();
   }
 
-  void Frame::shiftSkeleton2D(cv::Point2f point) noexcept //shift in 2D and recompute 3D?
+  //shift in 2D and recompute 3D?
+  void Frame::shiftSkeleton2D(cv::Point2f point) noexcept 
   {
-    auto jointTree = skeleton.getJointTree();
+    auto jointTree = m_skeleton.getJointTree();
     //add point to every joint
     for (auto &i : jointTree)      
       i.setImageLocation(i.getImageLocation() + point);
 
-    skeleton.setJointTree(jointTree);
-    skeleton.infer3D();
+    m_skeleton.setJointTree(jointTree);
+    m_skeleton.infer3D();
   }
 
   int Frame::getParentFrameID(void) const noexcept
   {
-    return parentFrameID;
+    return m_parentFrameID;
   }
 
-  void Frame::setParentFrameID(int _parentFrameID) noexcept
+  void Frame::setParentFrameID(int parentFrameID) noexcept
   {
-    parentFrameID = _parentFrameID;
+    m_parentFrameID = parentFrameID;
   }
 
   float Frame::Resize(uint32_t maxHeight) noexcept
   {
-    auto factor = static_cast<float>(maxHeight) / static_cast<float>(image.rows);
-    if (image.rows != maxHeight)
+    auto factor = static_cast<float>(maxHeight) / 
+      static_cast<float>(m_image.rows);
+    if (m_image.rows != static_cast<int>(maxHeight))
     {
       cv::Mat newImage;
-      resize(image, newImage, cvSize(image.cols * factor, image.rows * factor));
-      image.release();
-      image = newImage.clone();
-      auto joints = skeleton.getJointTree();
-      auto parts = skeleton.getPartTree();
+      resize(m_image, newImage, cvSize(static_cast<int>(
+        m_image.cols * factor), static_cast<int>(m_image.rows * factor)));
+      m_image.release();
+      m_image = newImage.clone();
+      auto joints = m_skeleton.getJointTree();
+      auto parts = m_skeleton.getPartTree();
 
       for (auto &j : joints)
       {
@@ -144,21 +153,23 @@ namespace SPEL
         location.y *= factor;
         j.setImageLocation(location);
       }
-      skeleton.setJointTree(joints);
-      skeleton.infer3D();
+      m_skeleton.setJointTree(joints);
+      m_skeleton.infer3D();
       //update the search radius to match the new scaling
       for (auto &p : parts)
         p.setSearchRadius(p.getSearchRadius() * factor);
 
-      skeleton.setPartTree(parts);
+      m_skeleton.setPartTree(parts);
     }
-    if (mask.rows != maxHeight)
+    if (m_mask.rows != static_cast<int>(maxHeight))
     {
       cv::Mat newMask;
-      auto factor = static_cast<float>(maxHeight) / static_cast<float>(mask.rows);
-      resize(mask, newMask, cvSize(mask.cols * factor, mask.rows * factor));
-      mask.release();
-      mask = newMask.clone();
+      auto factorMask = static_cast<float>(maxHeight) / 
+        static_cast<float>(m_mask.rows);
+      resize(m_mask, newMask, cvSize(static_cast<int>(m_mask.cols * 
+        factorMask), static_cast<int>(m_mask.rows * factorMask)));
+      m_mask.release();
+      m_mask = newMask.clone();
     }
     return factor;
   }
@@ -167,13 +178,13 @@ namespace SPEL
   {
     if (dest == nullptr)
       return nullptr;
-    dest->setGroundPoint(groundPoint);
-    dest->setID(id);
-    dest->setImage(image.clone());
-    dest->setMask(mask.clone());
-    dest->setParentFrameID(parentFrameID);
-    dest->setSkeleton(skeleton);
-    dest->frametype = frametype;
+    dest->setGroundPoint(m_groundPoint);
+    dest->setID(m_id);
+    dest->setImage(m_image.clone());
+    dest->setMask(m_mask.clone());
+    dest->setParentFrameID(m_parentFrameID);
+    dest->setSkeleton(m_skeleton);
+    dest->m_frametype = m_frametype;
     return dest;
   }
 
@@ -199,7 +210,7 @@ namespace SPEL
 
   FRAMETYPE Frame::getFrametype(void) const noexcept
   {
-    return frametype;
+    return m_frametype;
   }
 
 }

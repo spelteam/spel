@@ -1,47 +1,50 @@
 #include "bodyJoint.hpp"
-// See bodyJoint.hpp and Skeleton.hpp for more info
+#include "spelObject.hpp"
+
 namespace SPEL
 {
-  //default constructor
   BodyJoint::BodyJoint(void) noexcept : BodyJoint(0, "", cv::Point2f(0.0f, 0.0f), cv::Point3f(0.0f, 0.0f, 0.0f), false)
   {    
   }
-
-  // constructor with params
-  BodyJoint::BodyJoint(const int id, const std::string &name, const cv::Point2f &imgLoc, const cv::Point3f &spaceLoc, const bool depth) noexcept
+  
+  BodyJoint::BodyJoint(const int id, const std::string &name,
+    const cv::Point2f &imageLocation, const cv::Point3f &spaceLocation,
+    const bool depth) noexcept
   {
-    limbID = id;
-    jointName = name;
-    imageLocation = imgLoc;
-    spaceLocation = spaceLoc;
-    depthSign = depth;
+    m_limbID = id;
+    m_jointName = name;
+    m_imageLocation = imageLocation;
+    m_spaceLocation = spaceLocation;
+    m_depthSign = depth;
   }
 
-  //copy constructor
   BodyJoint::BodyJoint(const BodyJoint &bodyJoint) noexcept
-    : limbID(bodyJoint.limbID),
-    jointName(bodyJoint.jointName),
-    imageLocation(bodyJoint.imageLocation),
-    spaceLocation(bodyJoint.spaceLocation),
-    depthSign(bodyJoint.depthSign)
+    : m_limbID(bodyJoint.m_limbID),
+    m_jointName(bodyJoint.m_jointName),
+    m_imageLocation(bodyJoint.m_imageLocation),
+    m_spaceLocation(bodyJoint.m_spaceLocation),
+    m_depthSign(bodyJoint.m_depthSign)
   {
   }
 
-  //move constructor
   BodyJoint::BodyJoint(BodyJoint &&bodyJoint) noexcept
-    : limbID(std::move(bodyJoint.limbID)),
-    jointName(std::move(bodyJoint.jointName)),
-    imageLocation(std::move(bodyJoint.imageLocation)),
-    spaceLocation(std::move(bodyJoint.spaceLocation)),
-    depthSign(std::move(bodyJoint.depthSign))
+    : m_limbID(std::move(bodyJoint.m_limbID)),
+    m_jointName(std::move(bodyJoint.m_jointName)),
+    m_imageLocation(std::move(bodyJoint.m_imageLocation)),
+    m_spaceLocation(std::move(bodyJoint.m_spaceLocation)),
+    m_depthSign(std::move(bodyJoint.m_depthSign))
   {
   }
 
-  BodyJoint::BodyJoint(const int id, const std::string & name, const cv::Point2f & imgLoc) noexcept : BodyJoint(id, name, imgLoc, cv::Point3f(0.0f, 0.0f, 0.0f), false)
+  BodyJoint::BodyJoint(const int id, const std::string & name, 
+    const cv::Point2f & imageLocation) noexcept : BodyJoint(id, name, imageLocation, 
+      cv::Point3f(0.0f, 0.0f, 0.0f), false)
   {    
   }
 
-  BodyJoint::BodyJoint(const int id, const std::string & name, const cv::Point2f & imgLoc, const cv::Point3f & spaceLoc) noexcept : BodyJoint(id, name, imgLoc, spaceLoc, false)
+  BodyJoint::BodyJoint(const int id, const std::string & name,
+    const cv::Point2f & imageLocation, const cv::Point3f & spaceLocation) noexcept : 
+  BodyJoint(id, name, imageLocation, spaceLocation, false)
   {    
   }
 
@@ -51,52 +54,52 @@ namespace SPEL
 
   int BodyJoint::getLimbID(void) const noexcept
   {
-    return limbID;
+    return m_limbID;
   }
 
-  void BodyJoint::setLimbID(const int _limbID) noexcept
+  void BodyJoint::setLimbID(const int limbID) noexcept
   {
-    limbID = _limbID;
+    m_limbID = limbID;
   }
 
   std::string BodyJoint::getJointName(void) const noexcept
   {
-    return jointName;
+    return m_jointName;
   }
 
-  void BodyJoint::setJointName(const std::string &_jointName) noexcept
+  void BodyJoint::setJointName(const std::string &jointName) noexcept
   {
-    jointName = _jointName;
+    m_jointName = jointName;
   }
 
   cv::Point2f BodyJoint::getImageLocation(void) const noexcept
   {
-    return imageLocation;
+    return m_imageLocation;
   }
 
-  void BodyJoint::setImageLocation(const cv::Point2f &_imageLocation) noexcept
+  void BodyJoint::setImageLocation(const cv::Point2f &imageLocation) noexcept
   {
-    imageLocation = _imageLocation;
+    m_imageLocation = imageLocation;
   }
 
   cv::Point3f BodyJoint::getSpaceLocation(void) const noexcept
   {
-    return spaceLocation;
+    return m_spaceLocation;
   }
 
-  void BodyJoint::setSpaceLocation(const cv::Point3f &_spaceLocation) noexcept
+  void BodyJoint::setSpaceLocation(const cv::Point3f &spaceLocation) noexcept
   {
-    spaceLocation = _spaceLocation;
+    m_spaceLocation = spaceLocation;
   }
 
   bool BodyJoint::getDepthSign(void) const noexcept
   {
-    return depthSign;
+    return m_depthSign;
   }
 
-  void BodyJoint::setDepthSign(const bool _depthSign) noexcept
+  void BodyJoint::setDepthSign(const bool depthSign) noexcept
   {
-    depthSign = _depthSign;
+    m_depthSign = depthSign;
   }
 
   BodyJoint& BodyJoint::operator=(const BodyJoint& bodyJoint) noexcept
@@ -104,34 +107,33 @@ namespace SPEL
     if (&bodyJoint == this) 
       return *this;
 
-    limbID = bodyJoint.limbID;
-    jointName = bodyJoint.jointName;
-    imageLocation = bodyJoint.imageLocation;
-    spaceLocation = bodyJoint.spaceLocation;
-    depthSign = bodyJoint.depthSign;
+    m_limbID = bodyJoint.m_limbID;
+    m_jointName = bodyJoint.m_jointName;
+    m_imageLocation = bodyJoint.m_imageLocation;
+    m_spaceLocation = bodyJoint.m_spaceLocation;
+    m_depthSign = bodyJoint.m_depthSign;
 
     return *this;
   }
 
   BodyJoint& BodyJoint::operator=(BodyJoint&& bodyJoint) noexcept
   {
-    limbID = std::move(bodyJoint.limbID);
-    std::swap(jointName, bodyJoint.jointName);
-    std::swap(imageLocation, bodyJoint.imageLocation);
-    std::swap(spaceLocation, bodyJoint.spaceLocation);
-    depthSign = std::move(bodyJoint.depthSign);
+    m_limbID = std::move(bodyJoint.m_limbID);
+    std::swap(m_jointName, bodyJoint.m_jointName);
+    std::swap(m_imageLocation, bodyJoint.m_imageLocation);
+    std::swap(m_spaceLocation, bodyJoint.m_spaceLocation);
+    m_depthSign = std::move(bodyJoint.m_depthSign);
 
     return *this;
   }
 
-  bool BodyJoint::operator==(const BodyJoint &bj) const noexcept
+  bool BodyJoint::operator==(const BodyJoint &bodyJoint) const noexcept
   {
-    return this->getLimbID() == bj.getLimbID();
+    return m_limbID == bodyJoint.getLimbID();
   }
 
   bool BodyJoint::operator!=(const BodyJoint &bj) const noexcept
   {
     return !(*this == bj);
   }
-
 }

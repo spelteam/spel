@@ -6,6 +6,7 @@
 #endif
 #include <gtest/gtest.h>
 #include <skeleton.hpp>
+#include <sequence.hpp>
 //#include <projectLoader.hpp>
 #include "TestsFunctions.hpp"
 

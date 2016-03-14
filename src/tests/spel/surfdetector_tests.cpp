@@ -77,9 +77,9 @@ namespace SPEL
     //Calculate expected values
 
     // Part rect
-    float boneLength = D.getBoneLength(p0, p1);
-    float boneWidth = D.getBoneWidth(boneLength, bodyPart);
-    POSERECT <Point2f> rect = D.getBodyPartRect(bodyPart, p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
+    float boneLength = BodyPart::getBoneLength(p0, p1);
+    float boneWidth = bodyPart.getBoneWidth(boneLength);
+    POSERECT <Point2f> rect = bodyPart.getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
     //Frame keypoints
     vector <KeyPoint> expected_FrameKeyPoints;
 #if OpenCV_VERSION_MAJOR == 3
@@ -195,9 +195,9 @@ namespace SPEL
       BodyJoint* j1 = skeleton.getBodyJoint(part->getChildJoint());
       Point2f p0 = j0->getImageLocation();
       Point2f p1 = j1->getImageLocation();
-      float boneLength = D.getBoneLength(p0, p1);
-      float boneWidth = D.getBoneWidth(boneLength, *part);
-      POSERECT<Point2f>  rect = D.getBodyPartRect(*part, p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
+      float boneLength = BodyPart::getBoneLength(p0, p1);
+      float boneWidth = (*part).getBoneWidth(boneLength);
+      POSERECT<Point2f>  rect = (*part).getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
       expected_rects[partID] = rect.asVector();
 
       for (unsigned int i = 0; i < keyPoints.size(); i++)
@@ -301,11 +301,11 @@ namespace SPEL
     const float knnMatchKoeff = 0.8f;
 
     Point2f shift1(100, 40), shift2(-100, 0);
-    float boneLength = D.getBoneLength(p0, p1);
-    float boneWidth = D.getBoneWidth(boneLength, bodyPart);
+    float boneLength = BodyPart::getBoneLength(p0, p1);
+    float boneWidth = bodyPart.getBoneWidth(boneLength);
     SurfDetector::PartModel partModel1, partModel2;
-    partModel1.partModelRect = D.getBodyPartRect(bodyPart, p0 + shift1, p1 + shift1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
-    partModel2.partModelRect = D.getBodyPartRect(bodyPart, p0 + shift2, p1 + shift2, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
+    partModel1.partModelRect = bodyPart.getBodyPartRect(p0 + shift1, p1 + shift1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
+    partModel2.partModelRect = bodyPart.getBodyPartRect(p0 + shift2, p1 + shift2, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
 
     for (unsigned int i = 0; i < _keyPoints.size(); i++)
     {
@@ -404,10 +404,10 @@ namespace SPEL
      SurfFeatureDetector D1(minHessian);
      D1.detect(image, _keyPoints);
 #endif
-    float boneLength = D.getBoneLength(p0, p1);
-    float boneWidth = D.getBoneWidth(boneLength, bodyPart);
+    float boneLength = BodyPart::getBoneLength(p0, p1);
+    float boneWidth = bodyPart.getBoneWidth(boneLength);
     SurfDetector::PartModel partModel1;
-    partModel1.partModelRect = D.getBodyPartRect(bodyPart, p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
+    partModel1.partModelRect = bodyPart.getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
     for (unsigned int i = 0; i < _keyPoints.size(); i++)
     {
      if (partModel1.partModelRect.containsPoint(_keyPoints[i].pt) > 0)

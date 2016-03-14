@@ -2,6 +2,7 @@
 #include "predef.hpp"
 
 #include "projectRunner.hpp"
+#include <sequence.hpp>
 
 ProjectRunner::ProjectRunner(string _testName)
 {

@@ -1,11 +1,15 @@
 #include "surfDetector.hpp"
+#include "keyframe.hpp"
+#include "lockframe.hpp"
+#include "interpolation.hpp"
+#include "spelParameters.hpp"
 
 namespace SPEL
 {
 
   SurfDetector::SurfDetector(void) noexcept
   {
-    id = 0x53440000;
+    m_id = 0x53440000;
 #if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
     cv::initModule_nonfree();
 #endif
@@ -167,10 +171,10 @@ namespace SPEL
 
   SurfDetector::PartModel SurfDetector::computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t minHessian, const std::vector <cv::KeyPoint> &keyPoints) const
   {
-    auto boneLength = getBoneLength(j0, j1);
-    auto boneWidth = getBoneWidth(boneLength, bodyPart);
+    auto boneLength = BodyPart::getBoneLength(j0, j1);
+    auto boneWidth = bodyPart.getBoneWidth(boneLength);
     auto originalSize = cv::Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
-    auto rect = getBodyPartRect(bodyPart, j0, j1, originalSize);
+    auto rect = BodyPart::getBodyPartRect(bodyPart, j0, j1, originalSize);
 
     PartModel partModel;
     partModel.partModelRect = rect;
@@ -259,8 +263,8 @@ namespace SPEL
     cv::FlannBasedMatcher matcher;
     std::vector <std::vector <cv::DMatch>> matches;
 
-    auto length = getBoneLength(j0, j1);
-    auto width = getBoneWidth(length, bodyPart);
+    auto length = BodyPart::getBoneLength(j0, j1);
+    auto width = bodyPart.getBoneWidth(length);
     auto coeff = sqrt(pow(length, 2) + pow(width, 2));
 
     for (const auto &framePartModels : partModels)

@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 #include <colorHistDetector.hpp>
-/*#include "keyframe.hpp"
-#include "bodyPart.hpp"
+#include "keyframe.hpp"
+/*#include "bodyPart.hpp"
 #include "bodyJoint.hpp"
 #include "skeleton.cpp"*/
 

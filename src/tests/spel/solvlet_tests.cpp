@@ -6,6 +6,7 @@
 #endif
 #include <gtest/gtest.h>
 #include <solvlet.hpp>
+#include <lockframe.hpp>
 #include "TestsFunctions.hpp"
 
 #ifdef WINDOWS

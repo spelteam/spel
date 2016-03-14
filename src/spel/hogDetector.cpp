@@ -1,10 +1,14 @@
 #include "hogDetector.hpp"
+#include "keyframe.hpp"
+#include "lockframe.hpp"
+#include "interpolation.hpp"
+#include "spelParameters.hpp"
 
 namespace SPEL
 {
   HogDetector::HogDetector(void) noexcept
   {
-    id = 0x48440000;
+    m_id = 0x48440000;
   }
 
   HogDetector::~HogDetector(void) noexcept
@@ -16,20 +20,20 @@ namespace SPEL
 
   HogDetector::PartModel HogDetector::computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const int nbins, const cv::Size &wndSize, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double wndSigma, const double thresholdL2hys, const bool gammaCorrection, const int nlevels, const int derivAperture, const int histogramNormType, const bool bGrayImages) const
   {
-    auto boneLength = getBoneLength(j0, j1);
+    auto boneLength = BodyPart::getBoneLength(j0, j1);
     if (boneLength < blockSize.width)
       boneLength = static_cast <float> (blockSize.width);
     else
       boneLength = boneLength + blockSize.width - (static_cast<int>(boneLength) % blockSize.width);
 
-    auto boneWidth = getBoneWidth(boneLength, bodyPart);
+    auto boneWidth = bodyPart.getBoneWidth(boneLength);
     if (boneWidth < blockSize.height)
       boneWidth = static_cast <float> (blockSize.height);
     else
       boneWidth = boneWidth + blockSize.width - (static_cast<int>(boneWidth) % blockSize.height);
 
     auto originalSize = cv::Size(static_cast <uint32_t> (boneLength), static_cast <uint32_t> (boneWidth));
-    auto rect = getBodyPartRect(bodyPart, j0, j1, blockSize);
+    auto rect = bodyPart.getBodyPartRect(j0, j1, blockSize);
 
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
@@ -37,7 +41,7 @@ namespace SPEL
     auto rotationAngle = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0 / M_PI));
     PartModel partModel;
     partModel.partModelRect = rect;
-    auto partImage = rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
+    auto partImage = spelHelper::rotateImageToDefault(imgMat, partModel.partModelRect, rotationAngle, originalSize);
     auto partImageResized = cv::Mat(wndSize.height, wndSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
     resize(partImage, partImageResized, wndSize);
     if (bGrayImages)
@@ -146,9 +150,9 @@ namespace SPEL
           throw std::logic_error(str);
         }
         auto j1 = joint->getImageLocation();
-        auto boneLength = getBoneLength(j0, j1);
+        auto boneLength = BodyPart::getBoneLength(j0, j1);
         //TODO (Vitaliy Koshura): Check this!        
-        auto boneWidth = getBoneWidth(boneLength, bodyPart);
+        auto boneWidth = bodyPart.getBoneWidth(boneLength);
 
         auto maxSize = cv::Size(static_cast <uint32_t> (boneLength * resizeFactor), static_cast <uint32_t> (boneWidth * resizeFactor));
         if (result.size() > 0)

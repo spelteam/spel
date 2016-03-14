@@ -413,7 +413,7 @@ namespace SPEL
     //Create expected LimbLabel value
     Point2f center = 0.5*(p0 + p1);
     float angle = bodyPart.getRotationSearchRange();
-    POSERECT<Point2f> rect = D.getBodyPartRect(bodyPart, p0, p1);
+    POSERECT<Point2f> rect = bodyPart.getBodyPartRect(p0, p1);
     vector<Point2f> polygon = rect.asVector();
     Score score;
     vector<Score> scores;

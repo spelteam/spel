@@ -6,6 +6,8 @@
 #endif
 
 #include <gtest/gtest.h>
+
+#include <sequence.hpp>
 #include "TestsFunctions.hpp"
   
 namespace SPEL

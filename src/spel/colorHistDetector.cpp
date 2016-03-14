@@ -1,9 +1,11 @@
 #include "colorHistDetector.hpp"
+#include "keyframe.hpp"
+#include "lockframe.hpp"
+#include "interpolation.hpp"
+#include "spelParameters.hpp"
 
 namespace SPEL
 {
-  // PartModel Constructor 
-  // Initialization "partHistogram" and "bgHistogram" with _nBins^3 elements capacity 3-D arrays 
   ColorHistDetector::PartModel::PartModel(uint8_t _nBins) : nBins(_nBins)
   {
     if (_nBins == 0)
@@ -13,8 +15,10 @@ namespace SPEL
       throw std::invalid_argument(str);
     }
 
-    partHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, std::vector<float>(nBins, 0.0)));
-    bgHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, std::vector<float>(nBins, 0.0)));
+    partHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, 
+      std::vector<float>(nBins, 0.0)));
+    bgHistogram.resize(nBins, std::vector<std::vector<float>>(nBins, 
+      std::vector<float>(nBins, 0.0)));
 
     sizeFG = 0;
     sizeBG = 0;
@@ -26,8 +30,8 @@ namespace SPEL
   {
   }
 
-  // Copy all fields of the "PartModel" structure
-  ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(const PartModel &model) noexcept
+  ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(
+    const PartModel &model) noexcept
   {
     this->nBins = model.nBins;
     this->partHistogram = model.partHistogram;
@@ -54,8 +58,8 @@ namespace SPEL
     return static_cast<uint8_t> (ceil(pow(2, 8) / nBins));
   }
 
-  // Returns relative frequency of the RGB-color reiteration in "PartModel" 
-  float ColorHistDetector::PartModel::computePixelBelongingLikelihood(const uint8_t r, const uint8_t g, const uint8_t b) const
+  float ColorHistDetector::PartModel::computePixelBelongingLikelihood(
+    const uint8_t r, const uint8_t g, const uint8_t b) const
   {
     if (nBins == 0)
     {
@@ -64,23 +68,26 @@ namespace SPEL
       throw std::logic_error(str);
     }
 
-    // Scaling of colorspace, finding the colors interval, which now gets this color
+    // Scaling of colorspace, finding the colors interval, 
+    // which now gets this color
     auto factor = calculateFactor();
     try
     {
-      return partHistogram.at(r / factor).at(g / factor).at(b / factor); // relative frequency of current color reiteration 
+      // relative frequency of current color reiteration 
+      return partHistogram.at(r / factor).at(g / factor).at(b / factor);
     }
     catch (...)
     {
       std::stringstream ss;
-      ss << "Couldn't find partHistogram " << "[" << r / factor << "][" << g / factor << "][" << b / factor << "]";
+      ss << "Couldn't find partHistogram " << "[" << r / factor << "][" << 
+        g / factor << "][" << b / factor << "]";
       DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
   }
 
-  // Build into the "partModel" a histogram of the color set "partColors"
-  void ColorHistDetector::PartModel::setPartHistogram(const std::vector <cv::Point3i> &partColors)
+  void ColorHistDetector::PartModel::setPartHistogram(
+    const std::vector <cv::Point3i> &partColors)
   {
     if (nBins == 0)
     {
@@ -92,7 +99,8 @@ namespace SPEL
     // do not add sample if the number of pixels is zero
     if (partColors.size() == 0)
       return;
-    auto factor = calculateFactor(); // colorspace scaling coefficient
+    // colorspace scaling coefficient
+    auto factor = calculateFactor();
     sizeFG = static_cast <uint32_t> (partColors.size());
     fgNumSamples = 1;
     fgSampleSizes.clear();
@@ -114,7 +122,8 @@ namespace SPEL
       }
     }
 
-    // Scaling of colorspace, reducing the capacity and number of colour intervals that are used to construct the histogram
+    // Scaling of colorspace, reducing the capacity and number of colour 
+    // intervals that are used to construct the histogram
     for (const auto &i : partColors)
     {
       auto r = static_cast<uint8_t> (i.x / factor);
@@ -124,12 +133,13 @@ namespace SPEL
       if (r >= nBins || g >= nBins || b >= nBins)
       {
         std::stringstream ss;
-        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r 
+          << " g = " << g << " b = " << b << std::endl;
         DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
-
-      partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+      // increment the frequency of interval, that this color have hit
+      partHistogram.at(r).at(g).at(b)++;
     }
 
     // normalise the histograms
@@ -145,16 +155,18 @@ namespace SPEL
     }
   }
 
-  // Take stock of the additional set of colors in the histogram
-  void ColorHistDetector::PartModel::addPartHistogram(const std::vector <cv::Point3i> &partColors, const uint32_t nBlankPixels)
+  void ColorHistDetector::PartModel::addPartHistogram(
+    const std::vector <cv::Point3i> &partColors, const uint32_t nBlankPixels)
   {
-    if (partColors.size() == 0) //do not add sample if the number of pixels is zero
+    //do not add sample if the number of pixels is zero
+    if (partColors.size() == 0)
       return;
     //un-normalise
     if (partHistogram.size() != nBins)
     {
       std::stringstream ss;
-      ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partHistogram.size() << std::endl;
+      ss << "Wrond size of partHistogram. Expected: " << nBins << 
+        ". Actual: " << partHistogram.size() << std::endl;
       DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
@@ -163,7 +175,8 @@ namespace SPEL
       if (partHistogram.at(r).size() != nBins)
       {
         std::stringstream ss;
-        ss << "Wrond size of partHistogram[" << r << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
+        ss << "Wrond size of partHistogram[" << r << "]. Expected: " << 
+          nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
         DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
@@ -172,12 +185,15 @@ namespace SPEL
         if (partHistogram.at(r).at(g).size() != nBins)
         {
           std::stringstream ss;
-          ss << "Wrond size of partHistogram[" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).at(g).size() << std::endl;
+          ss << "Wrond size of partHistogram[" << r << "][" << g << 
+            "]. Expected: " << nBins << ". Actual: " << 
+            partHistogram.at(r).at(g).size() << std::endl;
           DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
+        // converting the colors relative frequency into the pixels number
         for (auto b = 0; b < nBins; b++)
-          partHistogram.at(r).at(g).at(b) *= static_cast<float>(sizeFG); // converting the colors relative frequency into the pixels number
+          partHistogram.at(r).at(g).at(b) *= static_cast<float>(sizeFG);
       }
     }
 
@@ -194,7 +210,8 @@ namespace SPEL
     fgNumSamples++;
     fgSampleSizes.push_back(static_cast <uint32_t> (partColors.size()));
 
-    // Scaling of colorspace, reducing the capacity and number of colour intervals
+    // Scaling of colorspace, reducing the capacity and number of 
+    // colour intervals
     // Adjustment of the histogram
     for (const auto &color : partColors)
     {
@@ -205,12 +222,13 @@ namespace SPEL
       if (r >= nBins || g >= nBins || b >= nBins)
       {
         std::stringstream ss;
-        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << 
+          " g = " << g << " b = " << b << std::endl;
         DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
-
-      partHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+      // increment the frequency of interval, that this color have hit
+      partHistogram.at(r).at(g).at(b)++; 
     }
 
     //renormalise
@@ -225,11 +243,10 @@ namespace SPEL
         }
       }
     }
-
-    fgBlankSizes.push_back(nBlankPixels); // add the number of blank pixels for this model
+    // add the number of blank pixels for this model
+    fgBlankSizes.push_back(nBlankPixels);
   }
 
-  // Totalization the number of used samples
   float ColorHistDetector::PartModel::getAvgSampleSizeFg(void) const
   {
     if (fgNumSamples == 0 && fgSampleSizes.size() > 0)
@@ -246,22 +263,22 @@ namespace SPEL
     return sum;
   }
 
-  // Averaging the number of samples, that united from two sets
-  float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(const uint32_t s1, const uint32_t s2) const
+  float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(
+    const uint32_t s1, const uint32_t s2) const
   {
     if (s1 >= fgSampleSizes.size() || s2 >= fgSampleSizes.size())
     {
       std::stringstream ss;
-      ss << "Incorrect parameter. s1: " << s1 << " s2: " << s2 << " Actual size: " << fgSampleSizes.size() << std::endl;
+      ss << "Incorrect parameter. s1: " << s1 << " s2: " << s2 << 
+        " Actual size: " << fgSampleSizes.size() << std::endl;
       DebugMessage(ss.str(), 1);
       throw std::invalid_argument(ss.str());
     }
     return (fgSampleSizes.at(s1) + fgSampleSizes.at(s2)) / 2.0f;
   }
 
-  //TODO (Vitaliy Koshura): Need unit test
-  // Euclidean distance between part histograms
-  float ColorHistDetector::PartModel::matchPartHistogramsED(const PartModel &partModelPrev) const
+  float ColorHistDetector::PartModel::matchPartHistogramsED(
+    const PartModel &partModelPrev) const
   {
     if (nBins == 0)
     {
@@ -273,7 +290,8 @@ namespace SPEL
     if (nBins != partModelPrev.nBins)
     {
       std::stringstream ss;
-      ss << "Different nBins value. Expected: " << nBins << " Actual: " << partModelPrev.nBins << std::endl;
+      ss << "Different nBins value. Expected: " << nBins << " Actual: " << 
+        partModelPrev.nBins << std::endl;
       DebugMessage(ss.str(), 1);
       std::logic_error(ss.str());
     }
@@ -283,14 +301,16 @@ namespace SPEL
     if (partHistogram.size() != nBins)
     {
       std::stringstream ss;
-      ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partHistogram.size() << std::endl;
+      ss << "Wrond size of partHistogram. Expected: " << nBins << 
+        ". Actual: " << partHistogram.size() << std::endl;
       DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     if (partModelPrev.partHistogram.size() != nBins)
     {
       std::stringstream ss;
-      ss << "Wrond size of partHistogram. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.size() << std::endl;
+      ss << "Wrond size of partHistogram. Expected: " << nBins << 
+        ". Actual: " << partModelPrev.partHistogram.size() << std::endl;
       DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
@@ -299,14 +319,17 @@ namespace SPEL
       if (partHistogram.at(r).size() != nBins)
       {
         std::stringstream ss;
-        ss << "Wrond size of partHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
+        ss << "Wrond size of partHistogram [" << r << "]. Expected: " << 
+          nBins << ". Actual: " << partHistogram.at(r).size() << std::endl;
         DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
       if (partModelPrev.partHistogram.at(r).size() != nBins)
       {
         std::stringstream ss;
-        ss << "Wrond size of partHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.at(r).size() << std::endl;
+        ss << "Wrond size of partHistogram [" << r << "]. Expected: " << 
+          nBins << ". Actual: " << partModelPrev.partHistogram.at(r).size() << 
+          std::endl;
         DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
@@ -315,27 +338,32 @@ namespace SPEL
         if (partHistogram.at(r).at(g).size() != nBins)
         {
           std::stringstream ss;
-          ss << "Wrond size of partHistogram [" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partHistogram.at(r).at(g).size() << std::endl;
+          ss << "Wrond size of partHistogram [" << r << "][" << g << 
+            "]. Expected: " << nBins << ". Actual: " << 
+            partHistogram.at(r).at(g).size() << std::endl;
           DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
         if (partModelPrev.partHistogram.at(r).at(g).size() != nBins)
         {
           std::stringstream ss;
-          ss << "Wrond size of partHistogram [" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << partModelPrev.partHistogram.at(r).at(g).size() << std::endl;
+          ss << "Wrond size of partHistogram [" << r << "][" << g << 
+            "]. Expected: " << nBins << ". Actual: " << 
+            partModelPrev.partHistogram.at(r).at(g).size() << std::endl;
           DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
         for (auto b = 0; b < nBins; b++)
           // accumulation of the Euclidean distances between the points
-          distance += pow(partHistogram.at(r).at(g).at(b) - partModelPrev.partHistogram.at(r).at(g).at(b), 2);
+          distance += pow(partHistogram.at(r).at(g).at(b) - 
+            partModelPrev.partHistogram.at(r).at(g).at(b), 2);
       }
     }
     return sqrt(distance);
   }
 
-  // Background histogram
-  void ColorHistDetector::PartModel::addBackgroundHistogram(const std::vector <cv::Point3i> &bgColors)
+  void ColorHistDetector::PartModel::addBackgroundHistogram(
+    const std::vector <cv::Point3i> &bgColors)
   {
     if (bgColors.size() == 0)
       return;
@@ -351,7 +379,8 @@ namespace SPEL
     if (bgHistogram.size() != nBins)
     {
       std::stringstream ss;
-      ss << "Wrond size of bgHistogram. Expected: " << nBins << ". Actual: " << bgHistogram.size() << std::endl;
+      ss << "Wrond size of bgHistogram. Expected: " << nBins << 
+        ". Actual: " << bgHistogram.size() << std::endl;
       DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
@@ -360,7 +389,8 @@ namespace SPEL
       if (bgHistogram.at(r).size() != nBins)
       {
         std::stringstream ss;
-        ss << "Wrond size of bgHistogram [" << r << "]. Expected: " << nBins << ". Actual: " << bgHistogram.at(r).size() << std::endl;
+        ss << "Wrond size of bgHistogram [" << r << "]. Expected: " << 
+          nBins << ". Actual: " << bgHistogram.at(r).size() << std::endl;
         DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
@@ -369,7 +399,9 @@ namespace SPEL
         if (bgHistogram.at(r).at(g).size() != nBins)
         {
           std::stringstream ss;
-          ss << "Wrond size of bgHistogram[" << r << "][" << g << "]. Expected: " << nBins << ". Actual: " << bgHistogram.at(r).at(g).size() << std::endl;
+          ss << "Wrond size of bgHistogram[" << r << "][" << g << 
+            "]. Expected: " << nBins << ". Actual: " << 
+            bgHistogram.at(r).at(g).size() << std::endl;
           DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
@@ -399,12 +431,14 @@ namespace SPEL
       if (r >= nBins || g >= nBins || b >= nBins)
       {
         std::stringstream ss;
-        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << " g = " << g << " b = " << b << std::endl;
+        ss << "RGB value can't be greater " << nBins - 1 << ": r = " << r << 
+          " g = " << g << " b = " << b << std::endl;
         DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
 
-      bgHistogram.at(r).at(g).at(b)++; // increment the frequency of interval, that this color have hit
+      // increment the frequency of interval, that this color have hit
+      bgHistogram.at(r).at(g).at(b)++; 
     }
     // renormalise
     for (auto r = 0; r < nBins; r++)
@@ -413,7 +447,6 @@ namespace SPEL
           bgHistogram.at(r).at(g).at(b) /= static_cast<float>(sizeBG);
   }
 
-  // Constructor with initialization of constant field "nBins"
   ColorHistDetector::ColorHistDetector(uint8_t _nBins) : nBins(_nBins)
   {
     if (_nBins == 0)
@@ -422,18 +455,20 @@ namespace SPEL
       DebugMessage(str, 1);
       throw std::invalid_argument(str);
     }
-    id = 0x43484400;
+    m_id = 0x43484400;
   }
 
   ColorHistDetector::~ColorHistDetector(void) noexcept
   {
   }
 
-  // Builds a histograms of all polygons for pre-marked frames
-  void ColorHistDetector::train(const std::vector <Frame*> &_frames, std::map <std::string, float> params)
+  void ColorHistDetector::train(const std::vector <Frame*> &_frames, 
+    std::map <std::string, float> params)
   {
-    frames = _frames; // vector of pointers - presents a sequence of frames
-    sort(frames.begin(), frames.end(), Frame::FramePointerComparer); // sorting frames by id
+    // vector of pointers - presents a sequence of frames
+    frames = _frames;
+    // sorting frames by id
+    sort(frames.begin(), frames.end(), Frame::FramePointerComparer);
 
     if (frames.size() == 0)
     {
@@ -445,11 +480,14 @@ namespace SPEL
     // Find skeleton from first keyframe or lockframe
     Skeleton skeleton;
 
-    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first, frames.at(0)->getFrameSize().height);
+    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first, 
+      frames.at(0)->getFrameSize().height);
 
-    maxFrameHeight = static_cast<uint32_t>(params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first));
+    maxFrameHeight = static_cast<uint32_t>(params.at(
+      COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first));
 
-    auto bFind = false; // flag, indicate the presence of marked frame in the sequence
+    // flag, indicate the presence of marked frame in the sequence
+    auto bFind = false;
     for (auto f : frames)
     {
       if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
@@ -470,7 +508,8 @@ namespace SPEL
     // Handling all frames
     for (const auto &frameNum : frames)
     {
-      if (frameNum->getFrametype() != KEYFRAME && frameNum->getFrametype() != LOCKFRAME)
+      if (frameNum->getFrametype() != KEYFRAME && frameNum->getFrametype() != 
+        LOCKFRAME)
         continue; // skip unmarked frames
 
       Frame *workFrame = nullptr;
@@ -495,48 +534,79 @@ namespace SPEL
       if (SpelObject::getDebugLevel() >= 2)
         std::cout << "Training on frame " << workFrame->getID() << std::endl;
       // Create local variables
-      std::map <int32_t, std::vector <cv::Point3i>> partPixelColours; // the set of RGB-colours of pixel's for current body part
-      std::map <int32_t, std::vector <cv::Point3i>> bgPixelColours; // the set of RGB-colours for a pixels of background
-      std::map <int32_t, int> blankPixels;  // pixels outside the mask
-      skeleton = workFrame->getSkeleton(); // copy marking from current frame
-      std::multimap <int32_t, POSERECT <cv::Point2f>> polygons;  // polygons for this frame
-      std::multimap <int32_t, float> polyDepth; // used for evaluation of overlapped polygons
-      partTree = skeleton.getPartTree(); // the skeleton body parts
+      // the set of RGB-colours of pixel's for current body part
+      std::map <int32_t, std::vector <cv::Point3i>> partPixelColours;
+      // the set of RGB-colours for a pixels of background
+      std::map <int32_t, std::vector <cv::Point3i>> bgPixelColours;
+      // pixels outside the mask
+      std::map <int32_t, int> blankPixels;
+      // copy marking from current frame
+      skeleton = workFrame->getSkeleton();
+      // polygons for this frame
+      std::multimap <int32_t, POSERECT <cv::Point2f>> polygons;
+      // used for evaluation of overlapped polygons
+      std::multimap <int32_t, float> polyDepth;
+      // the skeleton body parts
+      partTree = skeleton.getPartTree();
       // Handling all bodyparts on the frames
       for (auto &bodyPart : partTree)
       {
-        partPixelColours.insert(std::pair <int32_t, std::vector <cv::Point3i>>(bodyPart.getPartID(), std::vector <cv::Point3i>())); // container initialization for conserve colours set for each of body parts
-        bgPixelColours.insert(std::pair <int32_t, std::vector <cv::Point3i>>(bodyPart.getPartID(), std::vector <cv::Point3i>())); // container initialization for conserve background colours set for each of body parts
-        blankPixels.insert(std::pair <int32_t, int>(bodyPart.getPartID(), 0)); // container initialization for counting blank pixels for each of body parts
+        // container initialization for conserve colours set 
+        // for each of body parts
+        partPixelColours.insert(std::pair <int32_t, 
+          std::vector <cv::Point3i>>(bodyPart.getPartID(), 
+            std::vector <cv::Point3i>()));
+        // container initialization for conserve background colours set 
+        // for each of body parts
+        bgPixelColours.insert(std::pair <int32_t, 
+          std::vector <cv::Point3i>>(bodyPart.getPartID(), 
+            std::vector <cv::Point3i>()));
+        // container initialization for counting blank pixels 
+        // for each of body parts
+        blankPixels.insert(std::pair <int32_t, int>(bodyPart.getPartID(), 0)); 
 
-        auto joint = skeleton.getBodyJoint(bodyPart.getParentJoint()); // the parent node of current body part pointer 
+        // the parent node of current body part pointer 
+        auto joint = skeleton.getBodyJoint(bodyPart.getParentJoint());
         if (joint == 0)
         {
           const std::string str = "Invalid parent joint";
-          DebugMessage(str, 1);          
-          throw std::logic_error(str); // a joint has no marking on the frame
+          DebugMessage(str, 1);        
+          // a joint has no marking on the frame
+          throw std::logic_error(str); 
         }
-        auto j0 = joint->getImageLocation(); // coordinates of current joint
+        // coordinates of current joint
+        auto j0 = joint->getImageLocation(); 
         joint = 0;
-        joint = skeleton.getBodyJoint(bodyPart.getChildJoint()); // the child node of current body part pointer
+        // the child node of current body part pointer
+        joint = skeleton.getBodyJoint(bodyPart.getChildJoint()); 
         if (joint == 0)
         {
           const std::string str = "Invalid child joint";
-          DebugMessage(str, 1);          
-          throw std::logic_error(str); // a joint has no marking on the frame
+          DebugMessage(str, 1);        
+          // a joint has no marking on the frame
+          throw std::logic_error(str); 
         }
-        auto j1 = joint->getImageLocation(); // coordinates of current joint
-        auto direction = j1 - j0; // used as estimation of the vector's direction
-        auto rotationAngle = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, direction.x, direction.y) * (180.0f / M_PI)); //bodypart tilt angle 
+        // coordinates of current joint
+        auto j1 = joint->getImageLocation(); 
+        // used as estimation of the vector's direction
+        auto direction = j1 - j0; 
+        //bodypart tilt angle 
+        auto rotationAngle = static_cast<float>(spelHelper::angle2D(1.0f, 
+          0.0f, direction.x, direction.y) * (180.0f / M_PI));
         bodyPart.setRotationSearchRange(rotationAngle);
-        auto poserect = getBodyPartRect(bodyPart, j0, j1);
-        polygons.insert(std::pair <int32_t, POSERECT <cv::Point2f>>(bodyPart.getPartID(), poserect));
-        polyDepth.insert(std::pair <int32_t, float>(bodyPart.getPartID(), skeleton.getBodyJoint(bodyPart.getParentJoint())->getSpaceLocation().z));
+        auto poserect = bodyPart.getBodyPartRect(j0, j1);
+        polygons.insert(std::pair <int32_t, POSERECT <cv::Point2f>>(
+          bodyPart.getPartID(), poserect));
+        polyDepth.insert(std::pair <int32_t, float>(bodyPart.getPartID(), 
+          skeleton.getBodyJoint(
+            bodyPart.getParentJoint())->getSpaceLocation().z));
       }
       skeleton.setPartTree(partTree);
       workFrame->setSkeleton(skeleton);
-      auto maskMat = workFrame->getMask(); // copy mask from the current frame
-      auto imgMat = workFrame->getImage(); // copy image from the current frame
+      // copy mask from the current frame
+      auto maskMat = workFrame->getMask();
+      // copy image from the current frame
+      auto imgMat = workFrame->getImage();
       // Range over all pixels of the frame
       for (auto i = 0; i < imgMat.cols; i++)
       {
@@ -545,12 +615,14 @@ namespace SPEL
           cv::Vec3b intensity;
           try
           {
-            intensity = imgMat.at<cv::Vec3b>(j, i);  // copy RGB color of current pixel
+            // copy RGB color of current pixel
+            intensity = imgMat.at<cv::Vec3b>(j, i);
           }
           catch (...)
           {
             std::stringstream ss;
-            ss << "Couldn't get imgMat value of indeces " << "[" << j << "][" << i << "]";
+            ss << "Couldn't get imgMat value of indeces " << "[" << j << 
+              "][" << i << "]";
             DebugMessage(ss.str(), 1);
             throw std::out_of_range(ss.str());
           }
@@ -561,17 +633,21 @@ namespace SPEL
           auto mintensity = 0;
           try
           {
-            mintensity = maskMat.at<uint8_t>(j, i);  // copy current pixel mask value 
+            // copy current pixel mask value 
+            mintensity = maskMat.at<uint8_t>(j, i);
           }
           catch (...)
           {
             std::stringstream ss;
-            ss << "Couldn't get maskMat value of indeces " << "[" << j << "][" << i << "]";
+            ss << "Couldn't get maskMat value of indeces " << "[" << j << 
+              "][" << i << "]";
             DebugMessage(ss.str(), 1);
             throw std::out_of_range(ss.str());
           }
           auto blackPixel = mintensity < 10;
-          auto partHit = -1; // will be equal to -1 until is not found polygon, which contains the point
+          // will be equal to -1 until is not found polygon, 
+          // which contains the point
+          auto partHit = -1;
           auto depth = 0.0f;
           // Handling all poligons
           for (const auto &bodyPart : partTree)
@@ -580,48 +656,70 @@ namespace SPEL
             auto bContainsPoint = false;
             std::vector <POSERECT <cv::Point2f>> partPolygons;
             // Copy poligons to "PartPoligons"
-            auto lower = polygons.lower_bound(partNumber), upper = polygons.upper_bound(partNumber);
-            transform(lower, upper, back_inserter(partPolygons), [](auto const &pair) { return pair.second; });
-            // Checking whether a pixel belongs to the current and to another polygons            
+            auto lower = polygons.lower_bound(partNumber), 
+              upper = polygons.upper_bound(partNumber);
+            transform(lower, upper, back_inserter(partPolygons), 
+              [](auto const &pair) { return pair.second; });
+            // Checking whether a pixel belongs to the current and 
+            // to another polygons            
             for (const auto &partPolygon : partPolygons)
-              if ((bContainsPoint = partPolygon.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j))) > 0) == true)
+              if ((bContainsPoint = partPolygon.containsPoint(
+                cv::Point2f(static_cast<float>(i), 
+                  static_cast<float>(j))) > 0) == true)
                 break; // was found polygon, which contain current pixel
 
             std::vector <float> partDepths;
-            auto lowerP = polyDepth.lower_bound(partNumber), upperP = polyDepth.upper_bound(partNumber);
-            transform(lowerP, upperP, back_inserter(partDepths), [](auto const &pair) { return pair.second; }); // copy "polyDepth" to "PartDepth"
+            auto lowerP = polyDepth.lower_bound(partNumber), 
+              upperP = polyDepth.upper_bound(partNumber);
+            // copy "polyDepth" to "PartDepth"
+            transform(lowerP, upperP, back_inserter(partDepths), 
+              [](auto const &pair) { return pair.second; }); 
             // Checkig polygons overlapping
             for (const auto &partDepth : partDepths)
             {
               if (bContainsPoint && partHit == -1)
               {
-                partHit = partNumber; // store the number of the first found polygon
+                // store the number of the first found polygon
+                partHit = partNumber; 
                 depth = partDepth;
               }
-              else if (bContainsPoint && partDepth < depth) // How, for float tempDepthSign?/////////////////
+              // How, for float tempDepthSign?/////////////////
+              else if (bContainsPoint && partDepth < depth) 
               {
                 partHit = partNumber;
                 depth = partDepth;
               }
             }
           }
-          if (partHit != -1) // if was found polygon, that contains this pixel
+          // if was found polygon, that contains this pixel
+          if (partHit != -1) 
           {
-            if (!blackPixel) // if pixel color isn't black
+            // if pixel color isn't black
+            if (!blackPixel) 
             {
-              partPixelColours.at(partHit).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] colours
+              // add colour of this pixel to part[partHit] colours
+              partPixelColours.at(partHit).push_back(
+                cv::Point3i(red, green, blue));
 
               // For all bodyparts
               for (const auto &p : partTree)
-                if (p.getPartID() != partHit) // if current poligon wasn't found first in the previous enumeration???
-                  bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, green, blue)); // add colour of this pixel to part[partHit] background colours
+                // if current poligon wasn't found first 
+                // in the previous enumeration???
+                if (p.getPartID() != partHit) 
+                  // add colour of this pixel to part[partHit] 
+                  // background colours
+                  bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, 
+                    green, blue)); 
             }
             else
-              blankPixels.at(partHit)++; // otherwise take stock this pixel to blank pixel counter
+              // otherwise take stock this pixel to blank pixel counter
+              blankPixels.at(partHit)++;
           }
-          else // if  not found polygon, that contains this pixel 
+          // if not found polygon, that contains this pixel 
+          else
             for (const auto &p : partTree)
-              bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, green, blue));
+              bgPixelColours.at(p.getPartID()).push_back(cv::Point3i(red, 
+                green, blue));
         }
       }
 
@@ -630,15 +728,22 @@ namespace SPEL
       {
         const auto &partNumber = bodyPart.getPartID();
         if (partModels.find(partNumber) == partModels.end())
-          partModels.insert(std::pair <int32_t, PartModel>(partNumber, PartModel(nBins))); //add a new model to end of models list
+          //add a new model to end of models list
+          partModels.insert(std::pair <int32_t, PartModel>(partNumber, 
+            PartModel(nBins)));
 
         auto &partModel = partModels.at(partNumber);
-        const auto &partPixelColoursVector = partPixelColours.at(partNumber); // copy part color set for current bodypart
-        const auto &blankPixelsCount = blankPixels.at(partNumber);  // copy blanck pixel count for current bodypart
-        const auto &bgPixelColoursVector = bgPixelColours.at(partNumber); // copy background color set for current bodypart
+        // copy part color set for current bodypart
+        const auto &partPixelColoursVector = partPixelColours.at(partNumber);
+        // copy blanck pixel count for current bodypart
+        const auto &blankPixelsCount = blankPixels.at(partNumber);
+        // copy background color set for current bodypart
+        const auto &bgPixelColoursVector = bgPixelColours.at(partNumber);
 
-        partModel.addPartHistogram(partPixelColoursVector, blankPixelsCount); // building histogram for current bodypart colours
-        partModel.addBackgroundHistogram(bgPixelColoursVector); // building histograms for current bodypart background colours
+        // building histogram for current bodypart colours
+        partModel.addPartHistogram(partPixelColoursVector, blankPixelsCount); 
+        // building histograms for current bodypart background colours
+        partModel.addBackgroundHistogram(bgPixelColoursVector); 
         if (SpelObject::getDebugLevel() >= 2)
           std::cout << "Found part model: " << partNumber << std::endl;
       }
@@ -647,15 +752,21 @@ namespace SPEL
   }
   
   // Returns a labels vector of possible body parts position
-  std::map <uint32_t, std::vector <LimbLabel> > ColorHistDetector::detect(const Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const 
+  std::map <uint32_t, std::vector <LimbLabel> > ColorHistDetector::detect(
+    const Frame *frame, std::map <std::string, float> params, 
+    const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
   {
     params.emplace(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR());
 
     auto detectorHelper = new ColorHistDetectorHelper();
 
-    auto pixelDistributions = buildPixelDistributions(frame); // matrix contains the probability that the particular pixel belongs to current bodypart
-    detectorHelper->pixelLabels = buildPixelLabels(frame, pixelDistributions); // matrix contains relative estimations that the particular pixel belongs to current bodypart
-
+    // matrix contains the probability that the particular pixel belongs 
+    // to current bodypart
+    auto pixelDistributions = buildPixelDistributions(frame);
+    // matrix contains relative estimations that the particular 
+    // pixel belongs to current bodypart
+    detectorHelper->pixelLabels = buildPixelLabels(frame, pixelDistributions); 
+    
     for (auto &p : pixelDistributions)
       p.second.release();
 
@@ -672,19 +783,26 @@ namespace SPEL
     return nBins;
   }
 
-  // Returns a matrix, that contains relative frequency of the pixels colors reiteration 
-  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelDistributions(const Frame *frame) const 
+  // Returns a matrix, that contains relative frequency of the pixels 
+  // colors reiteration 
+  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelDistributions(
+    const Frame *frame) const
   {
-    auto skeleton = frame->getSkeleton(); // copy skeleton from the frame
-    auto partTree = skeleton.getPartTree(); // copy part tree from the skeleton
-    auto imgMat = frame->getImage(); // copy image from the frame
-    auto maskMat = frame->getMask(); // copy mask from the frame
+    // copy skeleton from the frame
+    auto skeleton = frame->getSkeleton();
+    // copy part tree from the skeleton
+    auto partTree = skeleton.getPartTree();
+    // copy image from the frame
+    auto imgMat = frame->getImage();
+    // copy mask from the frame
+    auto maskMat = frame->getMask();
     auto width = imgMat.cols;
     auto height = imgMat.rows;
     auto mwidth = maskMat.cols;
     auto mheight = maskMat.rows;
     std::map <int32_t, cv::Mat> tempPixelDistributions;
-    if (width != mwidth || height != mheight) // error if mask and image sizes don't match
+    // error if mask and image sizes don't match
+    if (width != mwidth || height != mheight)
     {
       const std::string str = "Mask size not equal image size";
       DebugMessage(str, 1);
@@ -693,11 +811,13 @@ namespace SPEL
     // For all bodyparts
     for (const auto &bodyPart : partTree)
     {
-      auto t = cv::Mat(height, width, cv::DataType <float>::type); // create empty matrix
+      // create empty matrix
+      auto t = cv::Mat(height, width, cv::DataType <float>::type);
       auto partID = bodyPart.getPartID();
       try
       {
-        const auto &partModel = partModels.at(partID); // copy part model of current bodybart
+        // copy part model of current bodybart
+        const auto &partModel = partModels.at(partID);
         // For all pixels
         for (auto x = 0; x < width; x++)
         {
@@ -708,10 +828,14 @@ namespace SPEL
             auto blue = intensity.val[0];
             auto green = intensity.val[1];
             auto red = intensity.val[2];
-            auto mintensity = maskMat.at<uint8_t>(y, x); // copy mask of the current pixel
-            auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
-
-            t.at<float>(y, x) = blackPixel ? 0 : partModel.computePixelBelongingLikelihood(red, green, blue); // relative frequency of the current pixel color reiteration 
+            // copy mask of the current pixel
+            auto mintensity = maskMat.at<uint8_t>(y, x);
+            // pixel is not significant if the mask value is less 
+            // than this threshold
+            auto blackPixel = mintensity < 10;
+            // relative frequency of the current pixel color reiteration 
+            t.at<float>(y, x) = blackPixel ? 0 : 
+              partModel.computePixelBelongingLikelihood(red, green, blue);
           }
         }
       }
@@ -722,32 +846,42 @@ namespace SPEL
         DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
-      tempPixelDistributions.insert(std::pair <int32_t, cv::Mat>(partID, t)); // add the current bodypart matrix to the set 
+      // add the current bodypart matrix to the set 
+      tempPixelDistributions.insert(std::pair <int32_t, cv::Mat>(partID, t)); 
     }
     return tempPixelDistributions;
   }
 
-  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelLabels(const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelDistributions) const 
+  std::map <int32_t, cv::Mat> ColorHistDetector::buildPixelLabels(
+    const Frame *frame, 
+    const std::map <int32_t, cv::Mat> &_pixelDistributions) const
   {
-    auto maskMat = frame->getMask(); // copy mask from the frame
+    // copy mask from the frame
+    auto maskMat = frame->getMask();
     auto width = maskMat.cols;
     auto height = maskMat.rows;
-    auto skeleton = frame->getSkeleton(); // copy skeleton from the frame
-    auto partTree = skeleton.getPartTree(); // copy part tree from the skeleton
+    // copy skeleton from the frame
+    auto skeleton = frame->getSkeleton();
+    // copy part tree from the skeleton
+    auto partTree = skeleton.getPartTree();
     std::map <int32_t, cv::Mat> _pixelLabels;
     // For all body parts
     for (const auto &bodyPart : partTree)
     {
-      auto t = cv::Mat(height, width, cv::DataType <float>::type); // create empty matrix
+      // create empty matrix
+      auto t = cv::Mat(height, width, cv::DataType <float>::type);
       cv::Mat tt;
       try
-      { // Matrix, that contains relative frequency of the pixels colors reiteration for current body part
+      { 
+        // Matrix, that contains relative frequency of the pixels colors 
+        // reiteration for current body part
         tt = _pixelDistributions.at(bodyPart.getPartID());
       }
       catch (...)
       {
         std::stringstream ss;
-        ss << "Couldn't find distributions for body part " << bodyPart.getPartID();
+        ss << "Couldn't find distributions for body part " << 
+          bodyPart.getPartID();
         DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
@@ -756,8 +890,11 @@ namespace SPEL
       {
         for (auto y = 0; y < height; y++)
         {
-          auto mintensity = maskMat.at<uint8_t>(y, x); //copy the current pixel mask value
-          auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
+          //copy the current pixel mask value
+          auto mintensity = maskMat.at<uint8_t>(y, x);
+          // pixel is not significant if the mask value is less 
+          // than this threshold
+          auto blackPixel = mintensity < 10;
           if (!blackPixel)
           {
             auto top = 0.0f;
@@ -768,37 +905,44 @@ namespace SPEL
               cv::Mat temp;
               try
               {
-                temp = _pixelDistributions.at(i.getPartID()); // matrix of the pixels colors frequency for current body part
+                // matrix of the pixels colors frequency for current body part
+                temp = _pixelDistributions.at(i.getPartID());
               }
               catch (...)
               {
                 std::stringstream ss;
-                ss << "Couldn't find pixel distributions for body part " << i.getPartID();
+                ss << "Couldn't find pixel distributions for body part " << 
+                  i.getPartID();
                 DebugMessage(ss.str(), 1);
                 throw std::out_of_range(ss.str());
               }
               try
               {
-                if (temp.at<float>(y, x) > top) // search max value of the current bodypart pixel color frequency
+                // search max value of the current bodypart 
+                // pixel color frequency
+                if (temp.at<float>(y, x) > top)
                   top = temp.at<float>(y, x);
                 sum += temp.at<float>(y, x);
               }
               catch (...)
               {
                 std::stringstream ss;
-                ss << "Couldn't find value of temp " << "[" << y << "][" << x << "]";
+                ss << "Couldn't find value of temp " << "[" << y << "][" << 
+                  x << "]";
                 DebugMessage(ss.str(), 1);
                 throw std::out_of_range(ss.str());
               }
             }
             try
             {
-              t.at<float>(y, x) = (top == 0) ? 0 : tt.at<float>(y, x) / static_cast<float>(top);
+              t.at<float>(y, x) = (top == 0) ? 0 : tt.at<float>(y, x) / 
+                static_cast<float>(top);
             }
             catch (...)
             {
               std::stringstream ss;
-              ss << "Couldn't find t " << "[" << y << "][" << x << "] or tt [" << y << "][" << x << "]";
+              ss << "Couldn't find t " << "[" << y << "][" << x << 
+                "] or tt [" << y << "][" << x << "]";
               DebugMessage(ss.str(), 1);
               throw std::out_of_range(ss.str());
             }
@@ -812,32 +956,43 @@ namespace SPEL
             catch (...)
             {
               std::stringstream ss;
-              ss << "Couldn't find value of t " << "[" << y << "][" << x << "]";
+              ss << "Couldn't find value of t " << "[" << y << "][" << x 
+                << "]";
               DebugMessage(ss.str(), 1);
               throw std::out_of_range(ss.str());
             }
           }
         }
       }
-      _pixelLabels.insert(std::pair<int32_t, cv::Mat>(bodyPart.getPartID(), t)); // insert the resulting matrix into the set "pixelLabels" 
+      // insert the resulting matrix into the set "pixelLabels" 
+      _pixelLabels.insert(std::pair<int32_t, cv::Mat>(
+        bodyPart.getPartID(), t));
     }
     return _pixelLabels;
   }
 
-  float ColorHistDetector::compare(const BodyPart &bodyPart, const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelLabels, const cv::Point2f &j0, const cv::Point2f &j1) const
+  float ColorHistDetector::compare(const BodyPart &bodyPart, 
+    const Frame *frame, const std::map <int32_t, cv::Mat> &_pixelLabels, 
+    const cv::Point2f &j0, const cv::Point2f &j1) const
   {
-    auto maskMat = frame->getMask(); // copy mask from the frame 
-    auto imgMat = frame->getImage(); // copy image from the frame
-    auto boxCenter = j0 * 0.5 + j1 * 0.5; // segment center
-    auto boneLength = getBoneLength(j0, j1); // distance between joints
-    auto rect = getBodyPartRect(bodyPart, j0, j1); // expected bodypart location area?
+    // copy mask from the frame 
+    auto maskMat = frame->getMask();
+    // copy image from the frame
+    auto imgMat = frame->getImage();
+    // segment center
+    auto boxCenter = j0 * 0.5 + j1 * 0.5;
+    // distance between joints
+    auto boneLength = BodyPart::getBoneLength(j0, j1);
+    // expected bodypart location area?
+    auto rect = bodyPart.getBodyPartRect(j0, j1);
     auto totalPixels = 0;
     auto pixelsInMask = 0;
     auto totalPixelLabelScore = 0.0f;
     PartModel model;
     try
     {
-      model = partModels.at(bodyPart.getPartID()); // copy part model for the "bodyPart"
+      // copy part model for the "bodyPart"
+      model = partModels.at(bodyPart.getPartID());
     }
     catch (...)
     {
@@ -846,14 +1001,16 @@ namespace SPEL
       DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
-    if (model.getAvgSampleSizeFg() == 0) // error if samples count is zero
+    // error if samples count is zero
+    if (model.getAvgSampleSizeFg() == 0) 
     {
       const std::string str = "Couldn't get avgSampleSizeFg";
       DebugMessage(str, 1);
       throw std::out_of_range(str);
     }
     float xmax, ymax, xmin, ymin;
-    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); // highlight the extreme points of the body part rect
+    // highlight the extreme points of the body part rect
+    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); 
     cv::Mat bodyPartLixelLabels;
     try
     {
@@ -877,17 +1034,23 @@ namespace SPEL
     {
       for (auto j = searchYMin; j < searchYMax; j++)
       {
-        if (i < maskMat.cols && j < maskMat.rows && i >= 0 && j >= 0) // if the point is within the image
+        // if the point is within the image
+        if (i < maskMat.cols && j < maskMat.rows && i >= 0 && j >= 0) 
         {
-          if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) // if the point within the highlight area
+          // if the point within the highlight area
+          if (i <= xmax && i >= xmin && j <= ymax && j >= ymin) 
           {
-            if (rect.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j))) > 0) // if the point belongs to the rectangle
+            // if the point belongs to the rectangle
+            if (rect.containsPoint(cv::Point2f(static_cast<float>(i), 
+              static_cast<float>(j))) > 0) 
             {
-              totalPixels++; // counting of the contained pixels
+              // counting of the contained pixels
+              totalPixels++; 
               auto mintensity = 0;
               try
               {
-                mintensity = maskMat.at<uint8_t>(j, i); // copy current point mask value 
+                // copy current point mask value 
+                mintensity = maskMat.at<uint8_t>(j, i); 
               }
               catch (...)
               {
@@ -896,20 +1059,25 @@ namespace SPEL
                 DebugMessage(ss.str(), 1);               
                 throw std::out_of_range(ss.str());
               }
-              auto blackPixel = mintensity < 10; // pixel is not significant if the mask value is less than this threshold
+              // pixel is not significant if the mask value is less 
+              // than this threshold
+              auto blackPixel = mintensity < 10; 
               if (!blackPixel)
               {
                 try
                 {
                   if (bodyPartLixelLabels.at<float>(j, i))
                   {
-                    totalPixelLabelScore += bodyPartLixelLabels.at<float>(j, i); // Accumulation of the pixel labels
+                    // Accumulation of the pixel labels
+                    totalPixelLabelScore += 
+                      bodyPartLixelLabels.at<float>(j, i); 
                   }
                 }
                 catch (...)
                 {
                   std::stringstream ss;
-                  ss << "Can't get pixesLabels [" << bodyPart.getPartID() << "][" << j << "][" << i << "]";
+                  ss << "Can't get pixesLabels [" << bodyPart.getPartID() << 
+                    "][" << j << "][" << i << "]";
                   DebugMessage(ss.str(), 1);
                   throw std::out_of_range(ss.str());
                 }
@@ -925,16 +1093,22 @@ namespace SPEL
     auto inMaskSuppWeight = 0.5f;
     if (totalPixelLabelScore > 0 && totalPixels > 10)
     {
-      supportScore = static_cast<float>(totalPixelLabelScore) / static_cast<float>(totalPixels);
-      inMaskSupportScore = static_cast<float>(totalPixelLabelScore) / static_cast<float>(pixelsInMask);
-      return 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + inMaskSuppWeight * inMaskSupportScore);
+      supportScore = static_cast<float>(totalPixelLabelScore) / 
+        static_cast<float>(totalPixels);
+      inMaskSupportScore = static_cast<float>(totalPixelLabelScore) / 
+        static_cast<float>(pixelsInMask);
+      return 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + 
+        inMaskSuppWeight * inMaskSupportScore);
     }
     const std::string str = "Dirty label!";
     DebugMessage(str, 2);
     return -1.0f;
   }
 
-  LimbLabel ColorHistDetector::generateLabel(const BodyPart &bodyPart, const Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const
+  LimbLabel ColorHistDetector::generateLabel(const BodyPart &bodyPart, 
+    const Frame *frame, const cv::Point2f &j0, 
+    const cv::Point2f &j1, DetectorHelper *detectorHelper, 
+    std::map <std::string, float> params) const
   {
     std::stringstream detectorName;
     detectorName << getID();
@@ -948,7 +1122,8 @@ namespace SPEL
     }
     catch (...)
     {
-      const std::string str = "Wrong type: detectorHelper is not ColorHistDetectorHelper";
+      const std::string str = 
+        "Wrong type: detectorHelper is not ColorHistDetectorHelper";
       DebugMessage(str, 1);
       throw std::invalid_argument(str);
     }
@@ -958,7 +1133,9 @@ namespace SPEL
       return compare(bodyPart, frame, helper->pixelLabels, j0, j1);
     };
 
-    auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first), comparer);
+    auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first), 
+      comparer);
 
     return label;
   }
@@ -970,7 +1147,8 @@ namespace SPEL
   }
 
   //Used only as prevent a warning for "const uint8_t nBins";
-  ColorHistDetector &ColorHistDetector::operator=(const ColorHistDetector &c) noexcept
+  ColorHistDetector &ColorHistDetector::operator=(
+    const ColorHistDetector &c) noexcept
   {
     this->frames = c.getFrames();
     return *this;
@@ -985,5 +1163,4 @@ namespace SPEL
     for (auto &p : pixelLabels)
     p.second.release();
   }
-
 }
