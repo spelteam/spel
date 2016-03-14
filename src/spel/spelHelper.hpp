@@ -23,6 +23,8 @@
 
 namespace SPEL
 {
+  /// forward declaration
+  class spelHelper;
   ///represents rectangle
   template <class T>
   class POSERECT
