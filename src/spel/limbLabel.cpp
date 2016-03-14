@@ -66,7 +66,7 @@ namespace SPEL
   LimbLabel & LimbLabel::operator=(LimbLabel && ll) noexcept
   {
     limbID = std::move(ll.getLimbID());
-    std::swap(center, ll.getCenter());
+    center = std::move(ll.getCenter());
     angle = std::move(ll.getAngle());
     std::swap(scores, ll.getScores());
     std::swap(polygon, ll.getPolygon());
