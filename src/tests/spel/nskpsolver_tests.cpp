@@ -514,4 +514,81 @@ namespace SPEL
 
     MSTs.clear();
   }
+
+  TEST(nskpsolverTests, suggestKeyframes_A)
+  {
+  // Prepare test data
+    ImagePixelSimilarityMatrix ISM;
+    bool b;
+    string FilePath = "speltests_TestData/SimilarityMatrixTestsData/";
+#if defined(WINDOWS) && defined(_MSC_VER)
+    if (IsDebuggerPresent())
+      FilePath = "Debug/" + FilePath;
+#endif
+    b = ISM.read(FilePath + "ISM1.txt");
+    ASSERT_TRUE(b);
+
+    //Create expected value
+    vector<cv::Point2i> Expected = { Point2i(0, 7) };
+
+    // Create actual value
+    std::map<std::string, float> params;
+    //params.emplace("mstThresh", 1.0f);
+    //params.emplace("treeSize", ISM.size());
+    
+    NSKPSolver s;
+    vector<cv::Point2i> Actual;
+    try
+    {
+      Actual = s.suggestKeyframes(ISM, params);
+    }
+    catch(...)
+    {
+    }
+
+    // Compare	  
+    EXPECT_EQ(Expected, Actual);
+
+    Expected.clear();
+    Actual.clear();
+  }
+
+  TEST(nskpsolverTests, suggestKeyframes_B)
+  {
+  // Prepare test data
+    ImagePixelSimilarityMatrix ISM;
+    bool b;
+    string FilePath = "speltests_TestData/SimilarityMatrixTestsData/";
+#if defined(WINDOWS) && defined(_MSC_VER)
+    if (IsDebuggerPresent())
+      FilePath = "Debug/" + FilePath;
+#endif
+    b = ISM.read(FilePath + "ISM.txt");
+    ASSERT_TRUE(b);
+
+    //Create expected value
+    vector<cv::Point2i> Expected = { Point2i(0, 4), Point2i(2, 2) };
+
+    // Create actual value
+    std::map<std::string, float> params;
+    //params.emplace("mstThresh", 1.0f);
+    //params.emplace("treeSize", ISM.size());
+    
+    NSKPSolver s;
+    vector<cv::Point2i> Actual;
+    try
+    {
+      Actual = s.suggestKeyframes(ISM, params);
+    }
+    catch(...)
+    {
+    }
+
+    // Compare	  
+    EXPECT_EQ(Expected, Actual);
+
+    Expected.clear();
+    Actual.clear();
+  }
+
 }

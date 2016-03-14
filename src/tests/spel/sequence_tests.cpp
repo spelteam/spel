@@ -1,7 +1,9 @@
 #include "sequence.hpp"
 #include <Eigen/StdVector>
 #include <gtest/gtest.h>
+#include "spelHelper.hpp"
 #include "TestsFunctions.hpp"
+
 
 namespace SPEL
 {
@@ -190,36 +192,36 @@ namespace SPEL
 
     //Create actual value
 
-	Frame* actual_frame = sequence.getFrame(frameID);
+    Frame* actual_frame = sequence.getFrame(frameID);
 
     //Compare
-	EXPECT_EQ(frames[frameNum]->getID(), actual_frame->getID());
-	EXPECT_EQ(frames[frameNum]->getGroundPoint(), actual_frame->getGroundPoint());
-	EXPECT_EQ(frames[frameNum]->getParentFrameID(), actual_frame->getParentFrameID());
-	EXPECT_EQ(frames[frameNum]->getSkeleton(), actual_frame->getSkeleton());
+    EXPECT_EQ(frames[frameNum]->getID(), actual_frame->getID());
+    EXPECT_EQ(frames[frameNum]->getGroundPoint(), actual_frame->getGroundPoint());
+    EXPECT_EQ(frames[frameNum]->getParentFrameID(), actual_frame->getParentFrameID());
+    EXPECT_EQ(frames[frameNum]->getSkeleton(), actual_frame->getSkeleton());
 
-	Mat image0 = frames[frameNum]->getImage();
-	Mat mask0 = frames[frameNum]->getMask();
-	Mat image1 = actual_frame->getImage();
-	Mat mask1 = actual_frame->getMask();
-	bool ImagesIsEqual = true, MasksIsEqual = true;
+    Mat image0 = frames[frameNum]->getImage();
+    Mat mask0 = frames[frameNum]->getMask();
+    Mat image1 = actual_frame->getImage();
+    Mat mask1 = actual_frame->getMask();
+    bool ImagesIsEqual = true, MasksIsEqual = true;
 
-	ASSERT_EQ(mask0.size(), image0.size());
-	ASSERT_EQ(image0.size(), image1.size());
-	ASSERT_EQ(mask0.size(), mask1.size());
-	for (int y = 0; y < image0.size().height - 1; y++)
-	  for (int x = 0; x < image0.size().width - 1; x++)
-	  {
-	    ImagesIsEqual = (image0.at<Vec3b>(y, x) == image1.at<Vec3b>(y, x));
-	    MasksIsEqual = (mask0.at<uchar>(y, x) == mask1.at<uchar>(y, x));
-	  }
-	EXPECT_TRUE(ImagesIsEqual);
-	EXPECT_TRUE(MasksIsEqual);
+    ASSERT_EQ(mask0.size(), image0.size());
+    ASSERT_EQ(image0.size(), image1.size());
+    ASSERT_EQ(mask0.size(), mask1.size());
+    for (int y = 0; y < image0.size().height - 1; y++)
+      for (int x = 0; x < image0.size().width - 1; x++)
+      {
+        ImagesIsEqual = (image0.at<Vec3b>(y, x) == image1.at<Vec3b>(y, x));
+        MasksIsEqual = (mask0.at<uchar>(y, x) == mask1.at<uchar>(y, x));
+      }
+    EXPECT_TRUE(ImagesIsEqual);
+    EXPECT_TRUE(MasksIsEqual);
 
-	image0.release();
-	mask0.release();
-	image1.release();
-	mask1.release();
+    image0.release();
+    mask0.release();
+    image1.release();
+    mask1.release();
   }
 
   TEST(SequenceTests, setAndGetID)
@@ -333,6 +335,54 @@ namespace SPEL
 
     bool returns_a_value = false; // "Sequence::computeInterpolation" don't return a values and don't change a fields or parameters?
     EXPECT_TRUE(returns_a_value);
+  }
+
+  TEST(SequenceTests, estimateUniformScale)
+  {
+    //Load the input data
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    Sequence sequence(0, "colorHistDetector", frames);
+
+    //Prepare test data
+    Skeleton S = frames[0]->getSkeleton();
+    tree<BodyPart> partTree = S.getPartTree();
+    int k = 0;
+    for (tree<BodyPart>::iterator i = partTree.begin(); i != partTree.end(); ++i)
+    {
+      float len2d = sqrt(spelHelper::distSquared(S.getBodyJoint(i->getParentJoint())->getImageLocation(), S.getBodyJoint(i->getChildJoint())->getImageLocation()));
+      //cout << k << ": " << i->getPartID() << ", len2d = " << len2d;
+      if ((i->getPartID()) != 9) len2d *= 1.0f + 0.05f*rand()/RAND_MAX;
+      i->setRelativeLength(len2d);
+      //cout << ", len3d = " << i->getRelativeLength() << endl;
+      k++;
+    }
+    frames[0]->setSkeleton(S);
+    
+    S = frames[2]->getSkeleton();
+    for (tree<BodyPart>::iterator i = partTree.begin(); i != partTree.end(); ++i)
+    {
+      float len2d = sqrt(spelHelper::distSquared(S.getBodyJoint(i->getParentJoint())->getImageLocation(), S.getBodyJoint(i->getChildJoint())->getImageLocation()));
+      i->setRelativeLength(len2d);
+      //cout << ", len3d = " << i->getRelativeLength() << endl;
+    }
+    frames[1]->setSkeleton(S);
+
+    // Create actual value
+    sequence.setFrames(frames);
+    map<std::string, float> params;
+    sequence.estimateUniformScale(params);
+    /*
+    frames = sequence.getFrames();
+    Skeleton S0 = frames[0]->getSkeleton();
+    Skeleton S1 = frames[1]->getSkeleton();
+    Skeleton S2 = frames[2]->getSkeleton();*/
+
+    Skeleton S0 = sequence.getFrame(0)->getSkeleton();
+    Skeleton S1 = sequence.getFrame(1)->getSkeleton();
+    Skeleton S2 = sequence.getFrame(2)->getSkeleton();
+    EXPECT_FLOAT_EQ(1.0f, S0.getScale());
+    EXPECT_FLOAT_EQ(1.0f, S1.getScale());
+    EXPECT_FLOAT_EQ(1.0f, S2.getScale());
   }
 
 }

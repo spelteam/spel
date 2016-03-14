@@ -324,4 +324,37 @@ namespace SPEL
     SimilarityMatrix.release();
     frames.clear();
   }
+
+  TEST(ImageHogSimilarityMatrix, extendSize)
+  {
+    // int8_t ImageHogSimilarityMatrix::extendSize(int & topLeftMin, int & topLeftMax, int & bottomRightMin, int & bottomRightMax, const int maxsize, const int add) const
+    // Prepare test data
+    int A = 10, B = 40;
+    int A1 = 20, B1 = 40;
+    int A2 = 0, B2 = 40;
+    int A3 = 5, B3 = 15;
+
+    // Create actual value and compare
+    ImageHogSimilarityMatrix X;
+    int b = X.extendSize(A1, A, B1, B, 100, 0);
+    EXPECT_EQ(0, b);
+    EXPECT_EQ(15, A1);
+    EXPECT_EQ(45, B1);
+
+    b = X.extendSize(A1, A, B1, B, 100, 1);
+    EXPECT_EQ(0, b);
+    EXPECT_EQ(14, A1);
+    EXPECT_EQ(46, B1);
+
+    b = X.extendSize(A, A2, B, B2, 100, 0);
+    EXPECT_EQ(0, b);
+    EXPECT_EQ(5, A);
+    EXPECT_EQ(45, B);
+
+    b = X.extendSize(A3, A, B3, B, 100, 0);
+    EXPECT_EQ(0, b);
+    EXPECT_EQ(0, A3);
+    EXPECT_EQ(40, B3);
+  }
+
 }
