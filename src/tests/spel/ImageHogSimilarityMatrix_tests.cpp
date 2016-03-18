@@ -251,7 +251,7 @@ namespace SPEL
       Mat image(rows, cols, CV_8UC3, Scalar(0, 0, 0));
       image.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
       image.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
-      cv::ellipse(image, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 360.0/i, 360.0, Scalar(255, 255, 255), 1, 0, 0);
+      cv::ellipse(image, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 360.0/(i+1), 360.0, Scalar(255, 255, 255), 1, 0, 0);
       cvtColor(image, image, CV_RGB2GRAY);
       frames[i]->setImage(image);
       frames[i]->setMask(image);
@@ -311,16 +311,19 @@ namespace SPEL
     expected.imageShiftMatrix = Mat(frames.size(), frames.size(), cv::DataType<Point2f>::type, 0.0f);
     expected.write("frames_HOG_ISM.txt");
 
-    bool calculateActualUncommented = false;
-    /*
+    ImageHogSimilarityMatrix actual;
+    try
+    {
     //Create actual value
-    ImageHogSimilarityMatrix actual(frames);
+    ImageHogSimilarityMatrix temp(frames);
+    actual = temp;
+    }
+    catch (...)
+    {
+    }
 
     //Compare
     EXPECT_EQ(expected, actual);
-    calculateActualUncommented = true;
-     */
-    EXPECT_TRUE(calculateActualUncommented);
 
     SimilarityMatrix.release();
     frames.clear();

@@ -391,7 +391,10 @@ namespace SPEL
   {
     //Loading test data if only one test runned
     if(vFrames.size() == 0)
+    {
       prepareTestData();
+      pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
+    }
 
     Mat p(image.rows, image.cols, DataType <float>::type);
     for (int x = 0; x < image.cols; x++)
@@ -434,6 +437,8 @@ namespace SPEL
     if(vFrames.size() == 0)
     {
       prepareTestData();
+      pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
+      pixelLabels = detector.buildPixelLabels(vFrames[FirstKeyframe], pixelDistributions);
     }
 
     vector <Score> s;
@@ -449,11 +454,15 @@ namespace SPEL
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
     bool PartContainPoints = false;
-    for (int i = int(xmin); i < int(xmax); i++)
-      for (int j = int(ymin); j < int(ymax); j++)
+    Mat Image2 = image.clone();
+    for (int i = int(xmin); i <= int(xmax); i++)
+      for (int j = int(ymin); j <= int(ymax); j++)
         if (rect.containsPoint(Point2f((float)i, (float)j)) > 0)
         {
           totalPixels++;
+          Image2.at<Vec3b>(j, i) += Vec3b(255, 255, 255);
+          vector<int> params;
+          imwrite("test_image.jpg", Image2, params);
           uint8_t mintensity = mask.at<uint8_t>(j, i);
           if (mintensity >= 10)
           {
@@ -468,6 +477,7 @@ namespace SPEL
             PartContainPoints = true;
           }
         }
+
     float supportScore = 0, inMaskSupportScore = 0;
     float inMaskSuppWeight = 0.5;
     LimbLabel limbLabel_e;
@@ -506,9 +516,7 @@ namespace SPEL
     if (limbLabel_e.getScores().size() == limbLabel_a.getScores().size())
     {
       for (unsigned int i = 0; i < limbLabel_e.getScores().size(); i++)
-      {
-        EXPECT_TRUE(fabs(limbLabel_e.getScores().at(i).getScore() - limbLabel_a.getScores().at(i).getScore()) <= 0.005);
-      }
+        EXPECT_NEAR(limbLabel_e.getScores().at(i).getScore(),limbLabel_a.getScores().at(i).getScore(), 0.05);
     }
 
     EXPECT_EQ(limbLabel_e.getIsOccluded(), limbLabel_a.getIsOccluded());
@@ -743,7 +751,7 @@ namespace SPEL
     frame->setMask(EmptyMask);
     float EmpyMaskScore = detector.compare(bodyPart, frame, pixelsLabels1, p0, p1); // Mask is empty
 
-	//Put results
+    //Put results
     cout << "Score = " << score << endl;
     cout << "ShiftedScore = " << ShiftedPart_Score << endl;
     cout << "ShiftedPixelsLabelScore = " << ShiftedPixelsLabels_Score << endl;
