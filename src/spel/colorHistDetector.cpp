@@ -980,7 +980,7 @@ namespace SPEL
     // copy image from the frame
     auto imgMat = frame->getImage();
     // segment center
-    auto boxCenter = j0 * 0.5 + j1 * 0.5;
+    auto boxCenter = j0 * 0.5f + j1 * 0.5f;
     // distance between joints
     auto boneLength = BodyPart::getBoneLength(j0, j1);
     // expected bodypart location area?
@@ -1011,10 +1011,10 @@ namespace SPEL
     float xmax, ymax, xmin, ymin;
     // highlight the extreme points of the body part rect
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax); 
-    cv::Mat bodyPartLixelLabels;
+    cv::Mat bodyPartPixelLabels;
     try
     {
-      bodyPartLixelLabels = _pixelLabels.at(bodyPart.getPartID());
+      bodyPartPixelLabels = _pixelLabels.at(bodyPart.getPartID());
     }
     catch (...)
     {
@@ -1061,16 +1061,15 @@ namespace SPEL
               }
               // pixel is not significant if the mask value is less 
               // than this threshold
-              auto blackPixel = mintensity < 10; 
-              if (!blackPixel)
+              if (mintensity >= 10)
               {
                 try
                 {
-                  if (bodyPartLixelLabels.at<float>(j, i))
+                  if (bodyPartPixelLabels.at<float>(j, i))
                   {
                     // Accumulation of the pixel labels
                     totalPixelLabelScore += 
-                      bodyPartLixelLabels.at<float>(j, i); 
+                      bodyPartPixelLabels.at<float>(j, i); 
                   }
                 }
                 catch (...)
@@ -1088,8 +1087,8 @@ namespace SPEL
         }
       }
     }
-    auto inMaskSuppWeight = 0.5f;
-    if (totalPixelLabelScore > 0 && totalPixels > 10)
+    const auto inMaskSuppWeight = 0.5f;
+    if (totalPixelLabelScore > 0.0f && totalPixels > 10)
     {
       auto supportScore = static_cast<float>(totalPixelLabelScore) / 
         static_cast<float>(totalPixels);

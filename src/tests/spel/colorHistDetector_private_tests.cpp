@@ -708,7 +708,7 @@ namespace SPEL
     Mat Mask = Mat(rows, cols, CV_8UC1, 0);
     Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0,0,0));
     Mat pixelLabel = Mat(rows, cols, cv::DataType <float>::type);
-    Mat ShiftedPixelLabel = Mat(rows, cols, cv::DataType <float>::type);
+    Mat ShiftedPixelLabel = Mat(rows, cols, cv::DataType <float>::type, Scalar(0.0f));
     for (int x = 0; x < cols; x++)
       for (int y = 0; y < rows; y++)
         if(pointPolygonTest(partRect, Point2f(x, y), false) > 0)
