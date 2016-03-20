@@ -1088,14 +1088,12 @@ namespace SPEL
         }
       }
     }
-    auto supportScore = 0.0f;
-    auto inMaskSupportScore = 0.0f;
     auto inMaskSuppWeight = 0.5f;
     if (totalPixelLabelScore > 0 && totalPixels > 10)
     {
-      supportScore = static_cast<float>(totalPixelLabelScore) / 
+      auto supportScore = static_cast<float>(totalPixelLabelScore) / 
         static_cast<float>(totalPixels);
-      inMaskSupportScore = static_cast<float>(totalPixelLabelScore) / 
+      auto inMaskSupportScore = static_cast<float>(totalPixelLabelScore) / 
         static_cast<float>(pixelsInMask);
       return 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + 
         inMaskSuppWeight * inMaskSupportScore);

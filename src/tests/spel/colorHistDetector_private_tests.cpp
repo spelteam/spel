@@ -302,8 +302,8 @@ namespace SPEL
     float ED2 = partModel0.matchPartHistogramsED(partModel1);
 
     //Compare
-    EXPECT_EQ(0.0f, ED1);
-    EXPECT_EQ(sqrt(distance), ED2);
+    EXPECT_FLOAT_EQ(0.0f, ED1);
+    EXPECT_FLOAT_EQ(sqrt(distance), ED2);
 
     if (ProjectLoaded == false)
       ClearGlobalVariables();
