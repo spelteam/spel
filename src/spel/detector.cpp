@@ -513,7 +513,7 @@ namespace SPEL
         }
         else
         {
-          std::vector<uint32_t> indices;
+          auto &indices = yMap.at(location.y);
           indices.push_back(index);
         }
       }

@@ -59,7 +59,7 @@ namespace SPEL
     template <typename T>
     static T angle2D(T x1, T y1, T x2, T y2)
     {
-      const T zero = static_cast<T> (0.0);
+      const auto zero = static_cast<T> (0.0f);
       //input has a zero vector
       //zero vector is both parallel and perpendicular to every vector
       if ((x1 == zero && y1 == zero) || (x2 == zero && y2 == zero))
@@ -72,10 +72,10 @@ namespace SPEL
       //angle between first and second vector
       auto dtheta = theta2 - theta1;
       //normalize angle to range [-PI;PI]
-      while (dtheta > M_PI)
-        dtheta -= (M_PI * static_cast<T> (2.0));
-      while (dtheta < -M_PI)
-        dtheta += (M_PI * static_cast<T> (2.0));
+      while (dtheta > static_cast<T> (M_PI))
+        dtheta -= (static_cast<T> (M_PI) * static_cast<T> (2.0f));
+      while (dtheta < static_cast<T> (-M_PI))
+        dtheta += (static_cast<T> (M_PI) * static_cast<T> (2.0f));
 
       return dtheta;
     }
@@ -95,7 +95,7 @@ namespace SPEL
     template <typename T, typename D>
     static T rotatePoint2D(const T point, const T pivot, const D degrees) noexcept
     {
-      auto radians = degrees * M_PI / static_cast<D> (180.0);
+      auto radians = static_cast<D>(degrees * M_PI / static_cast<D> (180.0f));
       auto cnt = pivot;
       auto pt = point - cnt;
       T result;
