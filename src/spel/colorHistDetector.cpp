@@ -465,20 +465,19 @@ namespace SPEL
   void ColorHistDetector::train(const std::vector <Frame*> &_frames, 
     std::map <std::string, float> params)
   {
-    // vector of pointers - presents a sequence of frames
-    frames = _frames;
-    // sorting frames by id
-    sort(frames.begin(), frames.end(), Frame::FramePointerComparer);
-
-    if (frames.size() == 0)
+    if (_frames.size() == 0)
     {
       const std::string str = "No input frames";
       DebugMessage(str, 1);
       throw std::logic_error(str); // the sequence of frames is empty
     }
+
+    // vector of pointers - presents a sequence of frames
+    frames = _frames;
+    // sorting frames by id
+    sort(frames.begin(), frames.end(), Frame::FramePointerComparer);
+    
     partModels.clear();
-    // Find skeleton from first keyframe or lockframe
-    Skeleton skeleton;
 
     params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first, 
       frames.at(0)->getFrameSize().height);
@@ -486,48 +485,12 @@ namespace SPEL
     maxFrameHeight = static_cast<uint32_t>(params.at(
       COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first));
 
-    // flag, indicate the presence of marked frame in the sequence
-    auto bFind = false;
-    for (auto f : frames)
-    {
-      if (f->getFrametype() == KEYFRAME || f->getFrametype() == LOCKFRAME)
-      {
-        skeleton = f->getSkeleton();
-        bFind = true; // marked frame was found
-        break;
-      }
-    }
-    if (bFind == false)
-    {
-      const std::string str = "No neither keyframes nor lockframes";
-      DebugMessage(str, 1);
-      throw std::logic_error(str);
-    }
-
-    tree <BodyPart> partTree;
     // Handling all frames
-    for (const auto &frameNum : frames)
+    for (auto &workFrame : frames)
     {
-      if (frameNum->getFrametype() != KEYFRAME && frameNum->getFrametype() != 
-        LOCKFRAME)
-        continue; // skip unmarked frames
-
-      Frame *workFrame = nullptr;
-      if (frameNum->getFrametype() == KEYFRAME)
-        workFrame = new Keyframe();
-      else if (frameNum->getFrametype() == LOCKFRAME)
-        workFrame = new Lockframe();
-      else if (frameNum->getFrametype() == INTERPOLATIONFRAME)
-        workFrame = new Interpolation();
-
-      if (workFrame == nullptr)
-      {
-        const std::string str = "Unknown frame found";
-        DebugMessage(str, 1);        
-        throw std::logic_error(str);
-      }
-
-      workFrame = frameNum->clone(workFrame);
+      if (workFrame->getFrametype() != KEYFRAME && 
+        workFrame->getFrametype() != LOCKFRAME)
+        continue;
 
       workFrame->Resize(maxFrameHeight);
 
@@ -541,13 +504,13 @@ namespace SPEL
       // pixels outside the mask
       std::map <int32_t, int> blankPixels;
       // copy marking from current frame
-      skeleton = workFrame->getSkeleton();
+      auto skeleton = workFrame->getSkeleton();
       // polygons for this frame
       std::multimap <int32_t, POSERECT <cv::Point2f>> polygons;
       // used for evaluation of overlapped polygons
       std::multimap <int32_t, float> polyDepth;
       // the skeleton body parts
-      partTree = skeleton.getPartTree();
+      auto partTree = skeleton.getPartTree();
       // Handling all bodyparts on the frames
       for (auto &bodyPart : partTree)
       {
@@ -576,7 +539,6 @@ namespace SPEL
         }
         // coordinates of current joint
         auto j0 = joint->getImageLocation(); 
-        joint = 0;
         // the child node of current body part pointer
         joint = skeleton.getBodyJoint(bodyPart.getChildJoint()); 
         if (joint == 0)
@@ -608,9 +570,9 @@ namespace SPEL
       // copy image from the current frame
       auto imgMat = workFrame->getImage();
       // Range over all pixels of the frame
-      for (auto i = 0; i < imgMat.cols; i++)
+      for (auto i = 0; i < imgMat.cols; ++i)
       {
-        for (auto j = 0; j < imgMat.rows; j++)
+        for (auto j = 0; j < imgMat.rows; ++j)
         {
           cv::Vec3b intensity;
           try
@@ -649,16 +611,15 @@ namespace SPEL
           // which contains the point
           auto partHit = -1;
           auto depth = 0.0f;
-          // Handling all poligons
+          // Handling all polygons
           for (const auto &bodyPart : partTree)
           {
             auto partNumber = bodyPart.getPartID();
             auto bContainsPoint = false;
             std::vector <POSERECT <cv::Point2f>> partPolygons;
-            // Copy poligons to "PartPoligons"
-            auto lower = polygons.lower_bound(partNumber), 
-              upper = polygons.upper_bound(partNumber);
-            transform(lower, upper, back_inserter(partPolygons), 
+            // Copy polygons to "PartPolygons"
+            transform(polygons.lower_bound(partNumber), 
+              polygons.upper_bound(partNumber), back_inserter(partPolygons),
               [](auto const &pair) { return pair.second; });
             // Checking whether a pixel belongs to the current and 
             // to another polygons            
@@ -669,12 +630,11 @@ namespace SPEL
                 break; // was found polygon, which contain current pixel
 
             std::vector <float> partDepths;
-            auto lowerP = polyDepth.lower_bound(partNumber), 
-              upperP = polyDepth.upper_bound(partNumber);
             // copy "polyDepth" to "PartDepth"
-            transform(lowerP, upperP, back_inserter(partDepths), 
+            transform(polyDepth.lower_bound(partNumber), 
+              polyDepth.upper_bound(partNumber), back_inserter(partDepths),
               [](auto const &pair) { return pair.second; }); 
-            // Checkig polygons overlapping
+            // Checking polygons overlapping
             for (const auto &partDepth : partDepths)
             {
               if (bContainsPoint && partHit == -1)
@@ -683,7 +643,6 @@ namespace SPEL
                 partHit = partNumber; 
                 depth = partDepth;
               }
-              // How, for float tempDepthSign?/////////////////
               else if (bContainsPoint && partDepth < depth) 
               {
                 partHit = partNumber;
@@ -713,7 +672,7 @@ namespace SPEL
             }
             else
               // otherwise take stock this pixel to blank pixel counter
-              blankPixels.at(partHit)++;
+              ++blankPixels.at(partHit);
           }
           // if not found polygon, that contains this pixel 
           else
@@ -733,21 +692,14 @@ namespace SPEL
             PartModel(nBins)));
 
         auto &partModel = partModels.at(partNumber);
-        // copy part color set for current bodypart
-        const auto &partPixelColoursVector = partPixelColours.at(partNumber);
-        // copy blanck pixel count for current bodypart
-        const auto &blankPixelsCount = blankPixels.at(partNumber);
-        // copy background color set for current bodypart
-        const auto &bgPixelColoursVector = bgPixelColours.at(partNumber);
-
         // building histogram for current bodypart colours
-        partModel.addPartHistogram(partPixelColoursVector, blankPixelsCount); 
+        partModel.addPartHistogram(partPixelColours.at(partNumber), 
+          blankPixels.at(partNumber));
         // building histograms for current bodypart background colours
-        partModel.addBackgroundHistogram(bgPixelColoursVector); 
+        partModel.addBackgroundHistogram(bgPixelColours.at(partNumber));
         if (SpelObject::getDebugLevel() >= 2)
           std::cout << "Found part model: " << partNumber << std::endl;
       }
-      delete workFrame;
     }
   }
   
