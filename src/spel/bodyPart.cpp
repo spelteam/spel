@@ -363,6 +363,11 @@ namespace SPEL
     c3 = c3 - polyCenter + boxCenter;
     c4 = c4 - polyCenter + boxCenter;
 
+    c1 = spelHelper::round(c1);
+    c2 = spelHelper::round(c2);
+    c3 = spelHelper::round(c3);
+    c4 = spelHelper::round(c4);
+
     return POSERECT <cv::Point2f>(c1, c2, c3, c4);
   }
 

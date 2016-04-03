@@ -70,7 +70,7 @@ namespace SPEL
         {
           if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
             if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
-              partImage.at<cv::Vec3b>(y, x) = imgSource.at<cv::Vec3b>(static_cast<int>(round(p.y)), static_cast<int>(round(p.x)));
+              partImage.at<cv::Vec3b>(y, x) = imgSource.at<cv::Vec3b>(static_cast<int>(std::roundf(p.y)), static_cast<int>(std::roundf(p.x)));
         }
         catch (...)
         {
@@ -82,5 +82,10 @@ namespace SPEL
       }
     }
     return partImage;
+  }
+  
+  cv::Point2f spelHelper::round(const cv::Point2f& pt)
+  {
+    return cv::Point2f(std::roundf(pt.x), std::roundf(pt.y));
   }
 }

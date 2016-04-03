@@ -138,6 +138,8 @@ namespace SPEL
     static cv::Mat rotateImageToDefault(const cv::Mat &imgSource,
       const POSERECT <cv::Point2f> &initialRect, const float angle,
       const cv::Size &size);
+
+    static cv::Point2f round(const cv::Point2f& pt);
   };
 
   ///represents rectangle
