@@ -887,7 +887,7 @@ namespace SPEL
             }
             try
             {
-              t.at<float>(y, x) = (top == 0) ? 0 : tt.at<float>(y, x) / 
+              t.at<float>(y, x) = (top == 0.0f) ? 0.0f : tt.at<float>(y, x) / 
                 static_cast<float>(top);
             }
             catch (...)
@@ -903,7 +903,7 @@ namespace SPEL
           {
             try
             {
-              t.at<float>(y, x) = 0;
+              t.at<float>(y, x) = 0.0f;
             }
             catch (...)
             {
@@ -1042,9 +1042,9 @@ namespace SPEL
     const auto inMaskSuppWeight = 0.5f;
     if (totalPixelLabelScore > 0.0f && totalPixels > 10)
     {
-      auto supportScore = static_cast<float>(totalPixelLabelScore) / 
+      auto supportScore = totalPixelLabelScore / 
         static_cast<float>(totalPixels);
-      auto inMaskSupportScore = static_cast<float>(totalPixelLabelScore) / 
+      auto inMaskSupportScore = totalPixelLabelScore / 
         static_cast<float>(pixelsInMask);
       return 1.0f - ((1.0f - inMaskSuppWeight) * supportScore + 
         inMaskSuppWeight * inMaskSupportScore);

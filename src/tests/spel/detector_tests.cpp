@@ -1157,6 +1157,11 @@ namespace SPEL
     {
       return detector.compare(*bodyPart, frame0, detectorHelper->pixelLabels, p0, p1);
     };
+
+    auto comparer1 = [&]() -> float
+    {
+      return detector.compare(*bodyPart, frame0, detectorHelper->pixelLabels, (p0 - shift), (p1 - shift));
+    };
      
     // Create actual value
     float usedet = 1.0f;
@@ -1164,7 +1169,7 @@ namespace SPEL
     cout << "label score = " << label.getAvgScore() << endl;
     
     cout << "Rect shift = " << shift << ", ";
-    LimbLabel shiftedLabel = detector.Detector::generateLabel(*bodyPart0, (p0 - shift), (p1 - shift), "", usedet, comparer);// Part rect shifted
+    LimbLabel shiftedLabel = detector.Detector::generateLabel(*bodyPart0, (p0 - shift), (p1 - shift), "", usedet, comparer1);// Part rect shifted
     cout << "shifted rect score = " << shiftedLabel.getAvgScore() << endl;
   
     cout << "PixelsLabels shift = " << - shift << ", ";
