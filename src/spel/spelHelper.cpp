@@ -88,4 +88,10 @@ namespace SPEL
   {
     return cv::Point2f(std::roundf(pt.x), std::roundf(pt.y));
   }
+
+  POSERECT<cv::Point2f> spelHelper::round(const POSERECT<cv::Point2f>& rect)
+  {
+    return POSERECT<cv::Point2f>(round(rect.point1), round(rect.point2), 
+      round(rect.point3), round(rect.point4));
+  }
 }
