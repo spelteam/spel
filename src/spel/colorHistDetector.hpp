@@ -178,7 +178,6 @@ namespace SPEL
     FRIEND_TEST(DetectorTests, generateLabel1);
     FRIEND_TEST(DetectorTests, generateLabel2);
 #endif  // DEBUG
-  protected:
     /// <summary>The nbins.</summary>
     const uint8_t nBins; 
     /// <summary>The part models.</summary>

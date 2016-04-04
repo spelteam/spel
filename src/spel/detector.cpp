@@ -239,7 +239,7 @@ namespace SPEL
 
   LimbLabel Detector::generateLabel(const BodyPart &bodyPart, 
     const cv::Point2f &parent, const cv::Point2f &child, const 
-    std::string &detectorName, float coeff, std::function<float()> compare) 
+    std::string &detectorName, const float coeff, std::function<float()> compare) 
     const
   {
     auto boxCenter = parent * 0.5 + child * 0.5;
