@@ -936,7 +936,7 @@ namespace SPEL
     // distance between joints
     auto boneLength = BodyPart::getBoneLength(j0, j1);
     // expected bodypart location area?
-    auto rect = bodyPart.getBodyPartRect(j0, j1);
+    auto rect = spelHelper::round(bodyPart.getBodyPartRect(j0, j1));
     auto totalPixels = 0;
     auto pixelsInMask = 0;
     auto totalPixelLabelScore = 0.0f;

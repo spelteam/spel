@@ -140,6 +140,8 @@ namespace SPEL
       const cv::Size &size);
 
     static cv::Point2f round(const cv::Point2f& pt);
+
+    static POSERECT<cv::Point2f> round(const POSERECT <cv::Point2f> &rect);
   };
 
   ///represents rectangle

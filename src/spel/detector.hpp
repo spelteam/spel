@@ -124,7 +124,7 @@ namespace SPEL
     /// <returns>Generated label.</returns>
     LimbLabel generateLabel(const BodyPart &bodyPart, 
       const cv::Point2f &parent, const cv::Point2f &child, 
-      const std::string &detectorName, float coeff, 
+      const std::string &detectorName, const float coeff, 
       std::function<float()> compare) const;    
     /// <summary>Generates the label.</summary>
     /// <param name="bodyPart">The body part.</param>
