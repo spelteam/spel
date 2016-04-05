@@ -187,9 +187,8 @@ namespace SPEL
     auto similarityScore = 0.0f;
     std::vector <float> descriptors;
 
-    HogDetector detector;
-    auto gradientStrengthsOne = detector.calculateHog(imgMatNewOne, imgMatSizeOne, descriptors);
-    auto gradientStrengthsTwo = detector.calculateHog(imgMatNewTwo, imgMatSizeTwo, descriptors);
+    auto gradientStrengthsOne = HogDetector::calculateHog(imgMatNewOne, descriptors, imgMatSizeOne, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
+    auto gradientStrengthsTwo = HogDetector::calculateHog(imgMatNewTwo, descriptors, imgMatSizeTwo, blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
 
     if (gradientStrengthsOne.size() != gradientStrengthsTwo.size())
     {

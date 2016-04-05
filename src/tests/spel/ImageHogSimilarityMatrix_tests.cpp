@@ -21,7 +21,17 @@ namespace SPEL
   {
     ImageHogSimilarityMatrix X;
     EXPECT_EQ(uint32_t(0x4948534D), X.getID());
+    EXPECT_EQ(9, X.nbins);
     EXPECT_EQ(cv::Size(16, 16), X.blockSize);
+    EXPECT_EQ(cv::Size(8, 8), X.blockStride);
+    EXPECT_EQ(cv::Size(8, 8), X.cellSize);
+    EXPECT_EQ(0.2, X.thresholdL2hys);
+    EXPECT_EQ(true, X.gammaCorrection);
+    EXPECT_EQ(64, X.nlevels);
+    EXPECT_EQ(cv::Size(8, 8), X.wndStride);
+    EXPECT_EQ(cv::Size(32, 32), X.padding);
+    EXPECT_EQ(1, X.derivAperture);
+    EXPECT_EQ(cv::HOGDescriptor::L2Hys, X.histogramNormType);
   }
 
   TEST(ImageHogSimilarityMatrix, CopyConstructor)
