@@ -141,7 +141,7 @@ namespace SPEL
     //Calculate actual value
     HogDetector D;
     HogDetector::PartModel partModel;
-    partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
+    partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, wndSize, bGrayImages);
 
     //Calculate expected value
     vector<float> descriptorsValues;
@@ -198,9 +198,9 @@ namespace SPEL
 
     //Calculate actual value
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, 1.0f);
     map <uint32_t, HogDetector::PartModel> partModels;
-    partModels = D.computeDescriptors(HFrames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
+    partModels = D.computeDescriptors(HFrames[FirstKeyframe], bGrayImages);
 
     //Calculate expected value
     vector<vector<float>> allDescriptors;
@@ -256,7 +256,7 @@ namespace SPEL
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
     //Set blockSize value
-    Size blockSize = Size(8, 8);
+    Size blockSize = Size(16, 16);
 
     //Calculate expected parts size 
     map<int, Point2f> Locations = getImageLocations(skeleton);
@@ -277,7 +277,7 @@ namespace SPEL
 
     //Calculate actual parts size
     HogDetector D;
-    map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(HFrames, 1.0f);
     EXPECT_EQ(partsSize, partsSize_actual);
 
     for (unsigned int i = 0; i < HFrames.size(); i++)
@@ -317,7 +317,7 @@ namespace SPEL
 
     //Calculate actual value
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, 1.0f);
     map<string, float> params;
     D.train(HFrames, params);
 
@@ -398,7 +398,7 @@ namespace SPEL
 
     //Calculate actual value
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, 1.0f);
     map<string, float> params;
     D.train(HFrames, params);
     //bool useHOGDet = true;
@@ -483,7 +483,7 @@ namespace SPEL
 
     // Run "detect"
     HogDetector D;
-    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    D.partSize = D.getMaxBodyPartHeightWidth(HFrames, 1.0f);
     map<string, float> params;
     D.train(HFrames, params);
     map<uint32_t, vector<LimbLabel>> limbLabels;
@@ -636,20 +636,20 @@ namespace SPEL
     BodyPart bodyPart;
     bodyPart.setPartID(0);
 
-    float score = detector.compare(bodyPart, X, nbins);
+    float score = detector.compare(bodyPart, X);
     cout << "Score = " << score << endl;
     EXPECT_EQ(0, score);
 
     int N = X.gradientStrengths.size()*X.gradientStrengths[0].size()*X.gradientStrengths[0][0].size();
 
     X.gradientStrengths[0][0][0] += 1;
-    score = detector.compare(bodyPart, X, nbins);
+    score = detector.compare(bodyPart, X);
     cout << "Score = " << score << endl;
     float x = float(1.0 / (float)N);
     EXPECT_EQ(x, score);
 
     framePartModels.emplace(pair<uint32_t, map <uint32_t, HogDetector::PartModel>>(0, _partModels));
-    score = detector.compare(bodyPart, X, nbins);
+    score = detector.compare(bodyPart, X);
     cout << "Score = " << score << endl;
     x = float(1.0 / (float)N);
     EXPECT_EQ(x, score);
@@ -729,7 +729,6 @@ namespace SPEL
   {
     HogDetector detector;
     Size size = Size(8, 8);
-    detector.cellSize = size;
 
     EXPECT_EQ(size, detector.getCellSize());
   }
@@ -781,7 +780,7 @@ namespace SPEL
     //Create actual value
     HogDetector HOGDetector;
     vector<vector<vector<float>>> Actual;
-    Actual = HOGDetector.calculateHog(Image, descriptors, winSize, blockSize, blockStride, cellSize, nBins, derivAper, winSigma, histogramNormType, L2HysThresh, gammaCorrection, nLevels);
+    Actual = HOGDetector.calculateHog(Image, winSize, descriptors);
     //Actual = decodeDescriptor(descriptors, winSize, blockSize, blockStride, cellSize, nBins);
 
     //Compare
