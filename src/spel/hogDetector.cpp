@@ -178,7 +178,7 @@ namespace SPEL
         //TODO (Vitaliy Koshura): Check this!        
         const auto &boneWidth = bodyPart.getBoneWidth(boneLength);
 
-        auto maxSize = cv::Size(static_cast <uint32_t> (boneLength * 
+        auto &maxSize = cv::Size(static_cast <uint32_t> (boneLength * 
           resizeFactor), static_cast <uint32_t> (boneWidth * resizeFactor));
         if (result.size() > 0)
         {
