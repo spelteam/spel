@@ -320,9 +320,9 @@ namespace SPEL
     auto resizeFactor = workFrame->Resize(maxFrameHeight);
 
     std::map <uint32_t, std::vector <LimbLabel> > tempLabelVector;
-    auto skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
+    const auto &skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
     // copy tree of bodypart from the skeleton
-    auto partTree = skeleton.getPartTree(); 
+    const auto &partTree = skeleton.getPartTree(); 
 
     auto maskMat = workFrame->getMask(); // copy mask from the frame
 
