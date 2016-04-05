@@ -295,7 +295,7 @@ namespace SPEL
       throw std::out_of_range(ss.str());
     }
 
-    const auto generatedPartModel = computeDescriptors(bodyPart, j0, j1, 
+    const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1, 
       frame->getImage(), size, bGrayImages);
 
     auto comparer = [&]() -> float
