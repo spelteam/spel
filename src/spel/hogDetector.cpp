@@ -58,9 +58,9 @@ namespace SPEL
       direction.x, direction.y) * (180.0 / M_PI));
     PartModel partModel;
     partModel.partModelRect = rect;
-    const auto &partImage = spelHelper::rotateImageToDefault(imgMat, 
+    const auto partImage = spelHelper::rotateImageToDefault(imgMat, 
       partModel.partModelRect, rotationAngle, originalSize);
-    auto &partImageResized = cv::Mat(wndSize.height, wndSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
+    auto partImageResized = cv::Mat(wndSize.height, wndSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
     resize(partImage, partImageResized, wndSize);
     if (bGrayImages)
     {
