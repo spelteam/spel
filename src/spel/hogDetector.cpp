@@ -277,9 +277,9 @@ namespace SPEL
     params.emplace(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR());
     params.emplace(COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES());
 
-    const auto useHoGdet = params.at(
+    const auto &useHoGdet = params.at(
       COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().first);
-    const auto bGrayImages = params.at(
+    const auto &bGrayImages = params.at(
       COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().first) != 0.0f;
 
     cv::Size size;
