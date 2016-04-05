@@ -6,12 +6,12 @@
 
 namespace SPEL
 {
-  HogDetector::HogDetector(const uint8_t nbins, const cv::Size blockSize,
-    const cv::Size blockStride, const cv::Size cellSize,
-    const double wndSigma, const double thresholdL2hys, 
-    const bool gammaCorrection, const int nlevels, const cv::Size wndStride,
-    const cv::Size padding, const int derivAperture, 
-    const int histogramNormType) noexcept :
+  HogDetector::HogDetector(const uint8_t &nbins, const cv::Size &blockSize,
+    const cv::Size &blockStride, const cv::Size &cellSize,
+    const double &wndSigma, const double &thresholdL2hys, 
+    const bool &gammaCorrection, const int &nlevels, const cv::Size &wndStride,
+    const cv::Size &padding, const int &derivAperture, 
+    const int &histogramNormType) noexcept :
       m_nbins(nbins), m_blockSize(blockSize), m_blockStride(blockStride),
       m_cellSize(cellSize), m_wndSigma(wndSigma), 
       m_thresholdL2hys(thresholdL2hys), m_gammaCorrection(gammaCorrection),

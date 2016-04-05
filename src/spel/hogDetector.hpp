@@ -35,18 +35,18 @@ namespace SPEL
 #endif  // DEBUG
     };
   public:
-    HogDetector(const uint8_t nbins = 9, 
-      const cv::Size blockSize = cv::Size(16, 16), 
-      const cv::Size blockStride = cv::Size(8, 8),
-      const cv::Size cellSize = cv::Size(8, 8),
-      const double wndSigma = -1,
-      const double thresholdL2hys = 0.2,
-      const bool gammaCorrection = true,
-      const int nlevels = 64,
-      const cv::Size wndStride = cv::Size(8, 8),
-      const cv::Size padding = cv::Size(32, 32),
-      const int derivAperture = 1,
-      const int histogramNormType = cv::HOGDescriptor::L2Hys) noexcept;
+    HogDetector(const uint8_t &nbins = 9, 
+      const cv::Size &blockSize = cv::Size(16, 16), 
+      const cv::Size &blockStride = cv::Size(8, 8),
+      const cv::Size &cellSize = cv::Size(8, 8),
+      const double &wndSigma = -1,
+      const double &thresholdL2hys = 0.2,
+      const bool &gammaCorrection = true,
+      const int &nlevels = 64,
+      const cv::Size &wndStride = cv::Size(8, 8),
+      const cv::Size &padding = cv::Size(32, 32),
+      const int &derivAperture = 1,
+      const int &histogramNormType = cv::HOGDescriptor::L2Hys) noexcept;
     virtual ~HogDetector(void) noexcept;
     void train(const std::vector <Frame*> &_frames, 
       std::map <std::string, float> params);
