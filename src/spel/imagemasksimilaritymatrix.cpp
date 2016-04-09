@@ -48,16 +48,16 @@ namespace SPEL
     //cOne and cTwo now have the centres
     auto dX = calculateDistance(maskMatOne, maskMatTwo);
 
-    imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(dX.y, dX.x);
-    imageShiftMatrix.at<cv::Point2f>(j, i) = cv::Point2f(-dX.y, -dX.x);
+    imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(dX.x, dX.y); // 09.04.16 Replaced x and y
+    imageShiftMatrix.at<cv::Point2f>(j, i) = cv::Point2f(-dX.x, -dX.y); // 09.04.16 Replaced x and y
 
     auto maskSimilarityScore = 0.0f;
     auto intersectCount = 0, unionCount = 0;
-    for (auto x = 0; x < maskMatOne.rows; ++x)
+    for (auto y = 0; y < maskMatOne.rows; ++y)  // 09.04.16 Replaced x to y
     {
-      for (auto y = 0; y < maskMatOne.cols; ++y)
+      for (auto x = 0; x < maskMatOne.cols; ++x)  // 09.04.16 Replaced y to x
       {
-        auto mintensityOne = maskMatOne.at<uchar>(j, i);
+        auto mintensityOne = maskMatOne.at<uchar>(y, x); // 09.04.16 Changed "at<uchar>(j, i)" to "at<uchar>(y, x)"
         auto darkPixel = mintensityOne < 10; //if all intensities are zero
 
                                              //apply the transformation
@@ -76,7 +76,7 @@ namespace SPEL
         //maskSimilarityScore += std::abs(mOne - mTwo);
       }
     }
-    maskSimilarityScore = static_cast<float>(intersectCount) / static_cast<float>(unionCount);
+    maskSimilarityScore = static_cast<float>(intersectCount) / static_cast<float>(unionCount);   
     imageSimilarityMatrix.at<float>(i, j) = maskSimilarityScore;
     imageSimilarityMatrix.at<float>(j, i) = maskSimilarityScore;
 

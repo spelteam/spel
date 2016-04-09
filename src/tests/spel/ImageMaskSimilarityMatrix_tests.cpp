@@ -127,12 +127,15 @@ namespace SPEL
     ASSERT_TRUE(frames.size() > 0);
 
     ImageMaskSimilarityMatrix X;
-    X.imageSimilarityMatrix = Mat(frames.size(), frames.size(), cv::DataType<float>::type); 
-    X.computeISMcell(frames[0], frames[1], 0);
-    cout << X.at(0, 1) << endl;
 
-    //EXPECT_EQ(static_cast<float>(2.0/M_PI), X.at(0, 1));
-    EXPECT_NEAR(static_cast<float>(2.0/M_PI), X.at(0, 1), 0.01f);
+    X.imageSimilarityMatrix = Mat(frames.size(), frames.size(), cv::DataType<float>::type, 0.0f);
+    X.imageShiftMatrix = Mat(frames.size(), frames.size(), cv::DataType<Point2f>::type);
+
+    X.computeISMcell(frames[1], frames[0], 0);
+
+    float error = 0.05f;
+    EXPECT_NEAR(static_cast<float>(2.0/M_PI), X.at(0, 1), error);
+    EXPECT_NEAR(static_cast<float>(2.0 / M_PI), X.at(1, 0), error);
   }
 
   TEST(MaskSimilarityMatrixTests, buildISM)
