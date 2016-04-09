@@ -352,12 +352,12 @@ namespace SPEL
     cv::Point2f cOne, cTwo;
     auto mSizeOne = 0.0f, mSizeTwo = 0.0f;
 
-    for (auto x = 0; x < imgMatOne.rows; ++x)
+    for (auto y = 0; y < imgMatOne.rows; ++y) // 09.04.16 - replaced x and y
     {
-      for (auto y = 0; y < imgMatOne.cols; ++y)
+      for (auto x = 0; x < imgMatOne.cols; ++x) // 09.04.16 - replaced x and y
       {
-        auto intensity = static_cast<cv::Scalar>(imgMatOne.at<uchar>(x, y));
-        auto mintensity = static_cast<cv::Scalar>(imgMatTwo.at<uchar>(x, y));
+        auto intensity = static_cast<cv::Scalar>(imgMatOne.at<uchar>(y, x)); // 09.04.16 - replaced x and y
+        auto mintensity = static_cast<cv::Scalar>(imgMatTwo.at<uchar>(y, x)); // 09.04.16 - replaced x and y
 
         auto darkPixel = intensity.val[0] < 10;
         auto blackPixel = mintensity.val[0] < 10; //if all intensities are zero

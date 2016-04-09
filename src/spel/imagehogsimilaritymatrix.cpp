@@ -33,12 +33,12 @@ namespace SPEL
     auto xmax = 0;
     auto ymax = 0;
 
-    for (auto x = 0; x < image.rows; ++x)
+    for (auto y = 0; y < image.rows; ++y) // 09.04.16 - replaced x and y
     {
-      for (auto y = 0; y < image.cols; ++y)
+      for (auto x = 0; x < image.cols; ++x)// 09.04.16 - replaced x and y
       {
-        auto darkPixel = static_cast<cv::Scalar>(image.at<uchar>(x, y))[0] < 10;
-        if (darkPixel)
+        auto darkPixel = static_cast<cv::Scalar>(image.at<uchar>(y, x))[0] < 10; // 09.04.16 - replaced x and y
+        if (!darkPixel) // 09.04.16 - changed "if (darkPixel)" to "if (!darkPixel)"
         {
           if (xmin > x) xmin = x;
           if (ymin > y) ymin = y;

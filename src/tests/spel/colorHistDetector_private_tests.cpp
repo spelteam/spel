@@ -682,6 +682,12 @@ namespace SPEL
     EXPECT_EQ(expected_factor, factor);
   }
 
+  TEST(ColorHistDetectorTest, Clear)
+  {
+    if (ProjectLoaded == true)
+      ClearGlobalVariables();
+  }
+
   TEST(ColorHistDetectorTest, compare)
   {
     //Prepare test data
@@ -692,7 +698,7 @@ namespace SPEL
     Point2f d = p1 - p0;
     Point2f shift = Point2f(0.5f*d.x, 0.0f);
     float partLength = sqrt(d.x*d.x + d.y*d.y);
-    float LWRatio = 1.3f;
+    float LWRatio = 2.0f;
     BodyJoint j0(j0_ID, "", p0);
     BodyJoint j1(j1_ID, "", p1);
 
@@ -718,8 +724,8 @@ namespace SPEL
           ShiftedPixelLabel.at<float>(y-shift.y, x-shift.x) = P;
         } 
     cvtColor(Image, Mask, CV_BGR2GRAY);
-    //imwrite("ColorHistDetectorTest_compare_Image.jpg", Image);
-    //imwrite("ColorHistDetectorTest_compare_Mask.jpg", Mask);
+    imwrite("ColorHistDetectorTest_compare_Image.jpg", Image);
+    imwrite("ColorHistDetectorTest_compare_Mask.jpg", Mask);
 
     //Create frame
     Frame * frame = new Lockframe();
@@ -745,7 +751,8 @@ namespace SPEL
     float SmallPartScore = detector.compare(bodyPart, frame, pixelsLabels1, p0, p0 + Point2f(3.0f, 3.0f)); // Part rect area less then 10 pixels
 
     pixelsLabels2[partID] = Mat(rows, cols, cv::DataType <float>::type);
-    float EmptyPixelsLabels_Score = detector.compare(bodyPart, frame, pixelsLabels2, p0, p1); //"PixelLabels" is empty
+	shift = Point2f(0.0f, d.x);
+    float EmptyPixelsLabels_Score = detector.compare(bodyPart, frame, pixelsLabels2, p0 + shift, p1 + shift); //"PixelLabels" is empty
 
     Mat EmptyMask = Mat(rows, cols, CV_8UC1, 0);
     frame->setMask(EmptyMask);
@@ -770,11 +777,6 @@ namespace SPEL
 
   }
 
-  TEST(ColorHistDetectorTest, Clear)
-  {
-    if (ProjectLoaded == true)
-      ClearGlobalVariables();
-  }
 
   TEST(ColorHistDetectorHelperTest, pixelLabels)
   {
