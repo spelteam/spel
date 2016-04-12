@@ -354,10 +354,10 @@ namespace SPEL
     Mat  X3 = chd.DeRotate(Q3, RotatedRect, angle, size);
     Mat  X4 = chd.DeRotate(Q4, RotatedRect, angle, size);
 
-    imwrite("derotated_image1.jpg", X1);
-    imwrite("derotated_image2.jpg", X2);
-    imwrite("derotated_image3.jpg", X3);
-    imwrite("derotated_image4.jpg", X4);
+    imwrite("derotated_image1.bmp", X1);
+    imwrite("derotated_image2.bmp", X2);
+    imwrite("derotated_image3.bmp", X3);
+    imwrite("derotated_image4.bmp", X4);
 
     Point2f Min1, Max1;
     Point2f Min2, Max2;
