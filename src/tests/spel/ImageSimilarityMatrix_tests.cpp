@@ -347,7 +347,7 @@ namespace SPEL
       for (unsigned int k = 0; k <= i; k++)
         ISM_expected.imageSimilarityMatrix.at<float>(i, k) = ISM_expected.imageSimilarityMatrix.at<float>(k, i);
 
-    ISM_expected.write("seq_ISM_expected.txt");
+    ISM_expected.write("computeISMcell_ISM_expected.txt");
 
     //Create actual value
     ImagePixelSimilarityMatrix ISM_actual(frames);
@@ -362,6 +362,8 @@ namespace SPEL
         cout << ISM_expected.at(frames[i]->getID(), frames[k]->getID()) << endl;	 
       }
 
+    ISM_actual.write("computeISMcell_ISM_actual.txt");
+
     //Compare
     float error = 0.1e+5;
     for (unsigned int i = 0; i < frames.size(); i++)
@@ -370,7 +372,6 @@ namespace SPEL
         //ISM_actual.computeISMcell(frames[i], frames[k], 0);
         EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
       }	
-    ISM_expected.write("seq_ISM_actual.txt");
 
     cout << "======================================================" << endl;
     cout << "Testing function 'buildImageSimilarityMatrix:'" << endl;
