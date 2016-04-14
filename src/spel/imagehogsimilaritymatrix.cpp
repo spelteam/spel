@@ -181,8 +181,8 @@ namespace SPEL
     auto dX = calculateDistance(maskMatOne, maskMatTwo);
 
     //for real image coords, these points are actually reversed
-    imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(dX.y, dX.x);
-    imageShiftMatrix.at<cv::Point2f>(j, i) = cv::Point2f(-dX.y, -dX.x);
+    imageShiftMatrix.at<cv::Point2f>(i, j) = cv::Point2f(dX.x, dX.y);  // 14.06.16 Replaced x and y
+    imageShiftMatrix.at<cv::Point2f>(j, i) = cv::Point2f(-dX.x, -dX.y);  // 14.06.16 Replaced x and y
 
     auto similarityScore = 0.0f;
     std::vector <float> descriptors;

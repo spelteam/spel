@@ -349,7 +349,7 @@ namespace SPEL
 
   cv::Point2f ImageSimilarityMatrix::calculateDistance(const cv::Mat & imgMatOne, const cv::Mat & imgMatTwo) const noexcept
   {
-    cv::Point2f cOne, cTwo;
+    cv::Point2f cOne(0.0f, 0.0f), cTwo(0.0f, 0.0f); // 14.06.16 Added "(0.0f, 0.0f)"
     auto mSizeOne = 0.0f, mSizeTwo = 0.0f;
 
     for (auto y = 0; y < imgMatOne.rows; ++y) // 09.04.16 - replaced x and y
