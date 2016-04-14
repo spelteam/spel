@@ -42,7 +42,7 @@
  </BodyParts>
 
  <Frames>
-  <Frame id="0" imgPath="Abstraction-0.png" maskPath="Abstraction-0.png" camPath="0000_100x82.camu" isKeyframe="true" gpX="" gpY="">
+  <Frame id="0" imgPath="Abstraction-0.png" maskPath="Abstraction-0.pgm" camPath="0000_100x82.camu" isKeyframe="true" gpX="" gpY="">
    <BodyJoints>
     <BodyJoint x="24" y="21" depthSign="false" id="0"/>
     <BodyJoint x="25" y="8" depthSign="false" id="1"/>
@@ -83,11 +83,11 @@
     <BodyPart id="16" isOccluded="false"/>
    </BodyParts>
   </Frame>
-  <Frame id="1" imgPath="Abstraction-1.png" maskPath="Abstraction-1.png" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
-  <Frame id="2" imgPath="Abstraction-2.png" maskPath="Abstraction-2.png" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
-  <Frame id="3" imgPath="Abstraction-3.png" maskPath="Abstraction-3.png" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
-  <Frame id="4" imgPath="Abstraction-4.png" maskPath="Abstraction-4.png" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
-  <Frame id="5" imgPath="Abstraction-0.png" maskPath="Abstraction-0.png" camPath="0000_100x82.camu" isKeyframe="true" gpX="" gpY="">
+  <Frame id="1" imgPath="Abstraction-1.png" maskPath="Abstraction-1.pgm" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
+  <Frame id="2" imgPath="Abstraction-2.png" maskPath="Abstraction-2.pgm" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
+  <Frame id="3" imgPath="Abstraction-3.png" maskPath="Abstraction-3.pgm" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
+  <Frame id="4" imgPath="Abstraction-4.png" maskPath="Abstraction-4.pgm" camPath="0000_100x82.camu" isKeyframe="false" gpX="" gpY=""/>
+  <Frame id="5" imgPath="Abstraction-0.png" maskPath="Abstraction-0.pgm" camPath="0000_100x82.camu" isKeyframe="true" gpX="" gpY="">
    <BodyJoints>
     <BodyJoint x="24" y="21" depthSign="false" id="0"/>
     <BodyJoint x="25" y="8" depthSign="false" id="1"/>

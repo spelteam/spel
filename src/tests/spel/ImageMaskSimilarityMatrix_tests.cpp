@@ -131,11 +131,11 @@ namespace SPEL
     X.imageSimilarityMatrix = Mat(frames.size(), frames.size(), cv::DataType<float>::type, 0.0f);
     X.imageShiftMatrix = Mat(frames.size(), frames.size(), cv::DataType<Point2f>::type);
 
-    X.computeISMcell(frames[1], frames[0], 0);
+    X.computeISMcell(frames[3], frames[2], 0);
 
-    float error = 0.05f;
-    EXPECT_NEAR(static_cast<float>(2.0/M_PI), X.at(0, 1), error);
-    EXPECT_NEAR(static_cast<float>(2.0 / M_PI), X.at(1, 0), error);
+    float error = 0.076f;
+    EXPECT_NEAR(static_cast<float>(M_PI/4.0f), X.at(3, 2), error);
+    EXPECT_NEAR(static_cast<float>(M_PI/4.0f), X.at(2, 3), error);
   }
 
   TEST(MaskSimilarityMatrixTests, buildISM)
@@ -144,18 +144,27 @@ namespace SPEL
     int n = frames.size();
     ASSERT_TRUE(frames.size() > 0);
 
+    frames[n - 1]->setImage(frames[1]->getImage());
+    frames[n - 1]->setMask(frames[1]->getMask());
+
     ImageMaskSimilarityMatrix X(frames);
     ASSERT_EQ(n, X.size());
 
-    float x = static_cast<float>(2.0 / M_PI);
+    X.write("MSM.txt");
+
+    float error = 0.05f;
+    float x = static_cast<float>(M_PI/4.0);
     for (int i = 0; i < n; i++)
       for (int k = 0; k < n; k++)
-      {
-        if ((i != k) && ((k + i*(n-1)) % 2 > 0) )
-          EXPECT_NEAR(x, X.at(i, k), 0.01f);
-        else 
-          EXPECT_EQ(0.0f, X.at(i, k));
-      }
+        if (i != k)
+        {
+          if ((k + i*(n-1)) % 2 > 0 )
+            EXPECT_NEAR(x, X.at(i, k), error) << "i = " << i << ", k= " << k << endl;        
+          else
+            EXPECT_NEAR(1.0f, X.at(i, k), error) << "i = " << i << ", k= " << k << endl;
+        }
+    for (int i = 0; i < n; i++)
+      EXPECT_EQ(0.0f, X.at(i, i)) << "i = " << i << endl;
   }
 
 }
