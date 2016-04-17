@@ -261,24 +261,22 @@ bool ProjectLoader::Load(string fileName)
       f = new Interpolation();
     }
     f->setID(id);
-    Mat image = imread(curFolder + imgFolderPath + imgPath, CV_LOAD_IMAGE_COLOR);
+    auto imagePath = curFolder + imgFolderPath + imgPath;
+    Mat image = imread(imagePath, CV_LOAD_IMAGE_COLOR);
     if (!image.data)
     {
-      cerr << "Could not find file " <<curFolder +  imgFolderPath + imgPath << endl;
+      cerr << "Could not find file " << imagePath << endl;
       return false;
     }
-    int32_t imageOriginalCols = image.cols;
-    int32_t imageOriginalRows = image.rows;
-    ResizeImage(image, firstFrameCols, firstFrameRows);
-    f->setImage(image);
-    Mat mask = imread(curFolder + maskFolderPath + maskPath, CV_LOAD_IMAGE_GRAYSCALE);
+    f->SetImagePath(imagePath);
+    auto mskPath = curFolder + maskFolderPath + maskPath;
+    Mat mask = imread(mskPath, CV_LOAD_IMAGE_GRAYSCALE);
     if (!mask.data)
     {
-      cerr << "Could not find file " << maskFolderPath + maskPath << endl;
+      cerr << "Could not find file " << mskPath << endl;
       return false;
     }
-    ResizeImage(mask, firstFrameCols, firstFrameRows);
-    f->setMask(mask);
+    f->SetMaskPath(mskPath);
     f->setGroundPoint(gp);
     spelHelper::copyTree(trBodyJointsCopy, trBodyJoints);
     if (isKeyFrame)
@@ -296,13 +294,6 @@ bool ProjectLoader::Load(string fileName)
         id = e->IntAttribute(bodyJointIdParam.c_str());
         x = e->FloatAttribute(bodyJointXParam.c_str());
         y = e->FloatAttribute(bodyJointYParam.c_str());
-        if (imageOriginalCols != image.cols || imageOriginalRows != image.rows)
-        {
-          float colsFactor = (float)(image.cols / imageOriginalCols);
-          float rowsFactor = (float)(image.rows / imageOriginalRows);
-          x *= colsFactor;
-          y *= rowsFactor;
-        }
         depthSign = e->BoolAttribute(bodyJointDepthSignParam.c_str());
         BodyJoint *joint = 0;
         for (topBodyJoints = trBodyJointsCopy.begin(); topBodyJoints != trBodyJointsCopy.end(); ++topBodyJoints)
