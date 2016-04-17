@@ -254,7 +254,8 @@ namespace SPEL
 
   void Frame::AdjustScale(void) noexcept
   {
-    Scale(1.0f / m_scaleFactor);
+    if (m_scaleFactor != 0.0f)
+      Scale(1.0f / m_scaleFactor);
   }
 
   std::string Frame::GetImagePath(void) const noexcept
