@@ -59,13 +59,15 @@ namespace SPEL
     cv::Mat getImage(void);
     /// <summary>Sets the image.</summary>
     /// <param name="image">The image.</param>
-    void setImage(const cv::Mat &image);
+    /// <param name="savePath">If set do not delete the saved path.</param>
+    void setImage(const cv::Mat &image, const bool savePath = false);
     /// <summary>Gets the mask.</summary>
     /// <returns>The mask.</returns>
     cv::Mat getMask(void);
     /// <summary>Sets the mask.</summary>
     /// <param name="mask">The mask.</param>
-    void setMask(const cv::Mat &mask);
+    /// <param name="savePath">If set do not delete the saved path.</param>
+    void setMask(const cv::Mat &mask, const bool savePath = false);
     /// <summary>Gets the skeleton.</summary>
     /// <returns>The skeleton.</returns>
     Skeleton getSkeleton(void) const noexcept;
@@ -105,13 +107,13 @@ namespace SPEL
     Frame *clone(Frame *dest) const noexcept;
     /// <summary>Gets the size of the frame.</summary>
     /// <returns>The size of the frame.</returns>
-    cv::Size getFrameSize(void) const noexcept;
+    cv::Size getFrameSize(void) noexcept;
     /// <summary>Gets the size of the image.</summary>
     /// <returns>The size of the image.</returns>
-    cv::Size getImageSize(void) const noexcept;
+    cv::Size getImageSize(void) noexcept;
     /// <summary>Gets the size of the mask.</summary>
     /// <returns>The size of the mask.</returns>
-    cv::Size getMaskSize(void) const noexcept;
+    cv::Size getMaskSize(void) noexcept;
     /// <summary>Compares the frames given by pointers.</summary>
     /// <param name="frame1">The first frame.</param>
     /// <param name="frame2">The second frame.</param>

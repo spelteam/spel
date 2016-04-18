@@ -43,12 +43,13 @@ namespace SPEL
     return m_image;
   }
 
-  void Frame::setImage(const cv::Mat &image)
+  void Frame::setImage(const cv::Mat &image, const bool savePath)
   {
     // prevent image from unloading
-    m_imagePath = "";
+    if (!savePath)
+      m_imagePath = "";
     cv::Size newImageSize(image.cols, image.rows);
-    if (maskSize != cv::Size(-1, -1) && maskSize != newImageSize)
+    if (maskSize != cv::Size(-1, -1) && !m_mask.empty() && maskSize != newImageSize)
     {
       std::stringstream ss;
       ss << "Image with size [" << newImageSize.width << "][" <<
@@ -77,12 +78,13 @@ namespace SPEL
     return m_mask;
   }
 
-  void Frame::setMask(const cv::Mat &mask)
+  void Frame::setMask(const cv::Mat &mask, const bool savePath)
   {
     // prevent mask from unloading
-    m_imagePath = "";
+    if (!savePath)
+      m_imagePath = "";
     cv::Size newMaskSize(mask.cols, mask.rows);
-    if (imageSize != cv::Size(-1, -1) && imageSize != newMaskSize)
+    if (imageSize != cv::Size(-1, -1) && !m_image.empty() && imageSize != newMaskSize)
     {
       std::stringstream ss;
       ss << "Mask with size [" << newMaskSize.width << "][" <<
@@ -158,6 +160,11 @@ namespace SPEL
 
   float Frame::Resize(uint32_t maxHeight)
   {
+    if (m_image.empty())
+      LoadImage();
+    if (m_mask.empty())
+      LoadMask();
+
     if (m_image.rows != m_mask.rows || m_image.cols != m_mask.cols)
     {
       std::stringstream ss;
@@ -198,26 +205,36 @@ namespace SPEL
       return nullptr;
     dest->setGroundPoint(m_groundPoint);
     dest->setID(m_id);
-    dest->setImage(m_image.clone());
-    dest->setMask(m_mask.clone());
+    if (!m_image.empty())
+      dest->setImage(m_image.clone());
+    if (!m_mask.empty())
+      dest->setMask(m_mask.clone());
     dest->setParentFrameID(m_parentFrameID);
     dest->setSkeleton(m_skeleton);
     dest->m_frametype = m_frametype;
+    dest->SetImagePath(m_imagePath);
+    dest->SetMaskPath(m_maskPath);
     return dest;
   }
 
-  cv::Size Frame::getFrameSize() const noexcept
+  cv::Size Frame::getFrameSize() noexcept
   {
+    if (imageSize.height <= 0 || imageSize.width <= 0)
+      LoadAll();
     return imageSize;
   }
 
-  cv::Size Frame::getImageSize(void) const noexcept
+  cv::Size Frame::getImageSize(void) noexcept
   {
+    if (imageSize.height <= 0 || imageSize.width <= 0)
+      LoadImage();
     return imageSize;
   }
 
-  cv::Size Frame::getMaskSize(void) const noexcept
+  cv::Size Frame::getMaskSize(void) noexcept
   {
+    if (maskSize.height <= 0 || maskSize.width <= 0)
+      LoadMask();
     return maskSize;
   }
 
@@ -304,7 +321,7 @@ namespace SPEL
       ss << "Could not load image " << path;
       throw std::logic_error(ss.str());
     }
-    setImage(image);
+    setImage(image, true);
   }
 
   void Frame::LoadMask(void)
@@ -321,7 +338,7 @@ namespace SPEL
       ss << "Could not load mask " << path;
       throw std::logic_error(ss.str());
     }
-    setMask(mask);
+    setMask(mask, true);
   }
 
   bool Frame::UnloadAll(const bool force) noexcept
