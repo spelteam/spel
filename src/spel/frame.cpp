@@ -30,7 +30,7 @@ namespace SPEL
 
   cv::Mat Frame::getImage(void)
   {
-    if (m_image.empty())
+    if (m_image.empty() && (m_image.cols <= 0 || m_image.rows <= 0))
     {
       if (m_imagePath.empty())
       {
@@ -59,13 +59,19 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
     m_image.release();
-    m_image = image.clone();
+    if (image.empty() && image.rows > 0 && image.cols > 0)
+    {
+      m_image.rows = image.rows;
+      m_image.cols = image.cols;
+    }
+    else
+      m_image = image.clone();
     imageSize = newImageSize;
   }
 
   cv::Mat Frame::getMask(void)
   {
-    if (m_mask.empty())
+    if (m_mask.empty() && (m_mask.cols <= 0 || m_mask.rows <= 0))
     {
       if (m_maskPath.empty())
       {
@@ -94,7 +100,14 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
     m_mask.release();
-    m_mask = mask.clone();
+    if (mask.empty() && mask.rows > 0 && mask.cols > 0)
+    {
+      m_mask.rows = mask.rows;
+      m_mask.cols = mask.cols;
+    }
+    else
+      m_mask = mask.clone();
+
     maskSize = newMaskSize;
   }
 
