@@ -37,6 +37,19 @@ namespace SPEL
     Skeleton skeleton = frame->getSkeleton();
     tree<BodyPart> PartTree = skeleton.getPartTree();
 
+    // Set joints 3D locations manually
+    tree<BodyJoint> PartJoints = skeleton.getJointTree();
+    vector<float> z = { 2.0f, 2.0f, 1.0f, 3.0f, 2.0f, 0.0f, 4.0f, 0.0f, 3.0f, 2.0f, 0.0f, 4.0f, 1.0f, 3.0f, 0.0f, 4.0f, 1.0f, 3.0f };
+    for (tree<BodyJoint>::iterator i = PartJoints.begin(); i != PartJoints.end(); i++)
+    {
+      int id = i->getLimbID();
+      Point2f P = i->getImageLocation();
+      i->setSpaceLocation(Point3f(P.x, P.y, z[id]));
+    }
+    skeleton.setJointTree(PartJoints);
+    for (unsigned int i = 0; i < frames.size(); i++)
+      frames[i]->setSkeleton(skeleton);
+
     //Build the rectangles for all of bodyparts
     map<int, POSERECT<Point2f>> Rects = SkeletonRects(skeleton);
 
@@ -90,7 +103,7 @@ namespace SPEL
     //Put results
     int nBins = detector.nBins;
     bool AllValuesEqual = true;
-    int delta = 2; // tolerable linear error
+    int delta = 5; // tolerable linear error
 
     ofstream fout("TrainUnitTest_Output.txt");
     fout << "\n--------------------------Don't equal----------------------\n";

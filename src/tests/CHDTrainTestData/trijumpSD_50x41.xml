@@ -23,11 +23,11 @@
 
  <BodyParts>
   <BodyPart id="0" name="Root" parentJointId="0" childJointId="1" expectedDistance="0" lwRatio="1.9"/>
-  <BodyPart id="1" name="Left Hip" parentJointId="0" childJointId="2" expectedDistance="0" lwRatio="3.2"/>
-  <BodyPart id="2" name="Right Hip" parentJointId="0" childJointId="3" expectedDistance="0" lwRatio="3.2"/>
-  <BodyPart id="3" name="Neck" parentJointId="1" childJointId="4" expectedDistance="0" lwRatio="1.454"/>
-  <BodyPart id="4" name="Left Clavicle" parentJointId="1" childJointId="5" expectedDistance="0" lwRatio="3.4"/>
-  <BodyPart id="5" name="Right Clavicle" parentJointId="1" childJointId="6" expectedDistance="0" lwRatio="3.4"/>
+  <BodyPart id="1" name="Left Hip" parentJointId="0" childJointId="2" expectedDistance="0" lwRatio="1.0"/>
+  <BodyPart id="2" name="Right Hip" parentJointId="0" childJointId="3" expectedDistance="0" lwRatio="1.0"/>
+  <BodyPart id="3" name="Neck" parentJointId="1" childJointId="4" expectedDistance="0" lwRatio="1.0"/>
+  <BodyPart id="4" name="Left Clavicle" parentJointId="1" childJointId="5" expectedDistance="0" lwRatio="1.0"/>
+  <BodyPart id="5" name="Right Clavicle" parentJointId="1" childJointId="6" expectedDistance="0" lwRatio="1.0"/>
   <BodyPart id="6" name="Left Femur" parentJointId="2" childJointId="7" expectedDistance="0" lwRatio="3.059"/>
   <BodyPart id="7" name="Right Femur" parentJointId="3" childJointId="8" expectedDistance="0" lwRatio="3.059"/>
   <BodyPart id="8" name="Head" parentJointId="4" childJointId="9" expectedDistance="0" lwRatio="1.125"/>
@@ -46,7 +46,7 @@
    <BodyJoints>
     <BodyJoint x="24" y="21" depthSign="false" id="0"/>
     <BodyJoint x="25" y="8" depthSign="false" id="1"/>
-    <BodyJoint x="26" y="23" depthSign="false" id="2"/>
+    <BodyJoint x="26" y="24" depthSign="false" id="2"/>
     <BodyJoint x="20" y="22" depthSign="true" id="3"/>
     <BodyJoint x="25" y="6" depthSign="false" id="4"/>
     <BodyJoint x="29" y="10" depthSign="false" id="5"/>
@@ -61,7 +61,7 @@
     <BodyJoint x="12" y="7" depthSign="false" id="14"/>
     <BodyJoint x="25" y="25" depthSign="false" id="15"/>
     <BodyJoint x="46" y="39" depthSign="false" id="16"/>
-    <BodyJoint x="2" y="38" depthSign="true" id="17"/>
+    <BodyJoint x="2" y="39" depthSign="true" id="17"/>
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
@@ -88,7 +88,7 @@
    <BodyJoints>
     <BodyJoint x="24" y="21" depthSign="false" id="0"/>
     <BodyJoint x="25" y="8" depthSign="false" id="1"/>
-    <BodyJoint x="26" y="23" depthSign="false" id="2"/>
+    <BodyJoint x="26" y="24" depthSign="false" id="2"/>
     <BodyJoint x="20" y="22" depthSign="true" id="3"/>
     <BodyJoint x="25" y="6" depthSign="false" id="4"/>
     <BodyJoint x="29" y="10" depthSign="false" id="5"/>
@@ -103,7 +103,7 @@
     <BodyJoint x="12" y="7" depthSign="false" id="14"/>
     <BodyJoint x="25" y="25" depthSign="false" id="15"/>
     <BodyJoint x="46" y="39" depthSign="false" id="16"/>
-    <BodyJoint x="2" y="38" depthSign="true" id="17"/>
+    <BodyJoint x="2" y="39" depthSign="true" id="17"/>
    </BodyJoints>
    <BodyParts>
     <BodyPart id="0" isOccluded="false"/>
