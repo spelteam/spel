@@ -661,7 +661,7 @@ int main (int argc, char **argv)
 
         //solver settings
         params.emplace("nskpIters", 0); //do as many NSKP iterations as is useful at each run
-        params.emplace("nskpLockframeThreshold", 0.49); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
+        params.emplace("nskpLockframeThreshold", 0.52); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
 
         if(solverName=="hybridSolver")
             params.emplace("tlpsLockframeThreshold", 0.49); // 0.52 set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
@@ -677,7 +677,7 @@ int main (int argc, char **argv)
         params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
 
         params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 3.0); //use a larger default search radius of 3.5 widths
+        params.emplace("searchDistCoeff", 5.0); //use a larger default search radius of 3.5 widths
         params.emplace("searchStepCoeff", 0.2); //use a smaller search step
         params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
         params.emplace("baseRotationRange", 40); //use base 80 degrees rotation range
@@ -687,8 +687,8 @@ int main (int argc, char **argv)
 
         params.emplace("maxPartCandidates", 0.1); //Take the top 5% of candidates
         params.emplace("isWeakThreshold", 0.0); //if SD is less than 0.3 of mean-min
-        params.emplace("uniqueLocationCandidates", 0.1);
-        params.emplace("uniqueAngleCandidates", 0.1);
+        params.emplace("uniqueLocationCandidates", 0.3);
+        params.emplace("uniqueAngleCandidates", 0.3);
         params.emplace("debugLevel", 0);
 
         params.emplace("mstThresh", 3.0); //use outliners that are at least 2.5 stddev from the mean
@@ -696,7 +696,7 @@ int main (int argc, char **argv)
         params.emplace("hybridIters", 1);
 
         params.emplace("useOptimalKeyframes", 1); //use optimal keyframes by default
-        params.emplace("percentKeyframes", 4); //do a 10% keyframe solve by default
+        params.emplace("percentKeyframes", 30); //do a 10% keyframe solve by default
 
         //generate keyframe suggestions
         auto startSuggestions = chrono::steady_clock::now();
