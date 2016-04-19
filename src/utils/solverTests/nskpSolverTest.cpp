@@ -96,6 +96,7 @@ int main (int argc, char **argv)
 
     params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
     params.emplace("maxPartCandidates", 0.1); //set the max number of part candidates to allow into the solver
+    params.emplace("withTLPS", 0);
 
     cout << "Solving using NSKPSolver..." << endl;
     //solve with some default params
@@ -122,7 +123,7 @@ int main (int argc, char **argv)
 
     cout << "Seeting mstThresh to " << simThresh << endl;
 
-    params.emplace("mstThresh", 1.0+3.5*sd/min); //set similarity as multiple of minimum, MUST be >=1
+   params.emplace("mstThresh", 3.0); //set mstThresh as 3 SD away from mean
     //params.emplace("treeSize", 5); //no size limit
 
     solve = nSolver.solve(seq, params, ism);
