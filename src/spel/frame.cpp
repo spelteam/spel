@@ -32,13 +32,8 @@ namespace SPEL
   {
     if (m_image.empty() && (m_image.cols <= 0 || m_image.rows <= 0))
     {
-      if (m_imagePath.empty())
-      {
-        std::stringstream ss;
-        ss << "Could not load image: the path is not set.";
-        throw std::logic_error(ss.str());
-      }
-      LoadImage();
+      if (!m_imagePath.empty())
+        LoadImage();
     }
     return m_image;
   }
@@ -59,27 +54,16 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
     m_image.release();
-    if (image.empty() && image.rows > 0 && image.cols > 0)
-    {
-      m_image.rows = image.rows;
-      m_image.cols = image.cols;
-    }
-    else
-      m_image = image.clone();
+    m_image = image.clone();
     imageSize = newImageSize;
   }
 
   cv::Mat Frame::getMask(void)
   {
-    if (m_mask.empty() && (m_mask.cols <= 0 || m_mask.rows <= 0))
+    if (m_mask.empty())
     {
-      if (m_maskPath.empty())
-      {
-        std::stringstream ss;
-        ss << "Could not load mask: the path is not set.";
-        throw std::logic_error(ss.str());
-      }
-      LoadMask();
+      if (!m_maskPath.empty())
+        LoadMask();
     }
     return m_mask;
   }
@@ -100,13 +84,7 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
     m_mask.release();
-    if (mask.empty() && mask.rows > 0 && mask.cols > 0)
-    {
-      m_mask.rows = mask.rows;
-      m_mask.cols = mask.cols;
-    }
-    else
-      m_mask = mask.clone();
+    m_mask = mask.clone();
 
     maskSize = newMaskSize;
   }
