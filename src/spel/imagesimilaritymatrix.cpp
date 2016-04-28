@@ -390,7 +390,7 @@ namespace SPEL
   //----------------------------------------------------------
   // Alternative MSM
 
-  uchar C[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; // Mask for erode and dilate operations
+  uchar C[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; // Matrix for search contour operation
   cv::Point2i P[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) }; // Matrix for search contour operation
 
   // Search contour iteration
@@ -427,7 +427,7 @@ namespace SPEL
     cv::Mat mask1 = mask.clone(); // used only for erode and dilate operations
     if(Erode > 0 || Dilate > 0)
     {
-      cv::Mat element = cv::Mat(3, 3, CV_8U, 1);
+      cv::Mat element = cv::Mat(3, 3, CV_8U, 1); // Mask for erode and dilate operations
       element.at<uchar>(0, 0) = 0;
       element.at<uchar>(0, 2) = 0;
       element.at<uchar>(2, 0) = 0;
