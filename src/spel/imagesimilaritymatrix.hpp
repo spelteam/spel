@@ -47,6 +47,12 @@ namespace SPEL
 
     virtual void buildImageSimilarityMatrix(const std::vector<Frame*>& frames, const int maxFrameHeight = 0);
 
+    // Alternative buildMSM function
+    // Erode and Dilate - erode or dilate iteration count (= 0 .. 3, 0 = don't used), affects only to the shift masks center. 
+    virtual void buildImageSimilarityMatrix(const std::vector<Frame*>& frames,  int Erode, int Dilate); 
+    virtual void buildMSM_OnMaskArea(const std::vector<Frame*>& frames, int Erode, int Dilate);
+    //- alternative MSM
+
     virtual bool read(const std::string &filename) noexcept;
     virtual bool write(const std::string &filename) const noexcept;
 

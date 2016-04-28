@@ -167,4 +167,56 @@ namespace SPEL
       EXPECT_EQ(0.0f, X.at(i, i)) << "i = " << i << endl;
   }
 
+  // Write alternative MSM
+  TEST(MaskSimilarityMatrixTests, WriteNewMSM)
+  {
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/testdata1/", "trijumpSD_new.xml");
+    //vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    ASSERT_TRUE(frames.size() > 0);
+
+    ImageMaskSimilarityMatrix MSM;
+    MSM.buildImageSimilarityMatrix(frames, 0, 0);
+    /*
+    for (int i = 0; i < frames.size(); i++)
+    {
+      for (unsigned int k = 0; k < frames.size(); k++)
+      {
+        cout << MSM.at(i, k);
+        if(k != (frames.size() - 1)) cout << "\t";
+      }
+      cout << endl;
+    }*/
+    MSM.write("AlternativeMSM.txt");
+  }
+
+  // Testing alternative buildMSM function
+  TEST(MaskSimilarityMatrixTests, buildNewMSM)
+  {
+    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    int n = frames.size();
+    ASSERT_TRUE(frames.size() > 0);
+
+    frames[n - 1]->setImage(frames[1]->getImage());
+    frames[n - 1]->setMask(frames[1]->getMask());
+
+    ImageMaskSimilarityMatrix X(frames, 0, 0);
+    ASSERT_EQ(n, X.size());
+
+    X.write("MSM.txt");
+
+    float error = 0.05f;
+    float x = static_cast<float>(M_PI/4.0);
+    for (int i = 0; i < n; i++)
+      for (int k = 0; k < n; k++)
+        if (i != k)
+        {
+          if ((k + i*(n-1)) % 2 > 0 )
+            EXPECT_NEAR(x, X.at(i, k), error) << "i = " << i << ", k= " << k << endl;        
+          else
+            EXPECT_NEAR(1.0f, X.at(i, k), error) << "i = " << i << ", k= " << k << endl;
+        }
+    for (int i = 0; i < n; i++)
+      EXPECT_EQ(1.0f, X.at(i, i)) << "i = " << i << endl;
+  }
+
 }

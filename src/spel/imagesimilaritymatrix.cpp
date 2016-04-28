@@ -386,5 +386,220 @@ namespace SPEL
   {
     return imageSimilarityMatrix.clone();
   }
+
+  //----------------------------------------------------------
+  // Alternative MSM
+
+  uchar C[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; // Mask for erode and dilate operations
+  cv::Point2i P[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) }; // Matrix for search contour operation
+
+  // Search contour iteration
+  bool f(cv::Mat mask, cv::Point2i &p0, cv::Point2i &p1, cv::Point2i p00)
+  {
+    int Q = 9;
+    cv::Size size = mask.size();
+    bool color = 0;
+    cv::Point2i d = p0 - p1, p = p0;
+    int n = C[d.y + 1][d.x + 1];
+
+    int  k = 0;
+    while (!color)
+    { 
+      p0 = p;
+      p = p1 + P[n];
+      if (k > 7) p = p00;
+      if((p.x >= 0) && (p.x < size.width) && (p.y >= 0) && (p.y < size.height))
+      { color = (mask.at<uchar>(p.y, p.x) > Q); }
+      else { color = 0; }
+      n++;
+      if (n > 7) n = 0;
+      k++;
+    }
+    p1 = p;
+    return (p1 == p00);
+  }
+
+  // Search all ROI on the mask and return coordinates of max ROI: {topLeft, bottomRight}
+  // Erode - count of erode iterations, erode don't used if "Erode" = 0 
+  // Dilate - count of erode iterations, dilate don't used if "Erode" = 0 
+  std::vector<cv::Point2i> SearchROI(cv::Mat mask, int Erode = 0, int Dilate = 0)
+  {
+    cv::Mat mask1 = mask.clone(); // used only for erode and dilate operations
+    if(Erode > 0 || Dilate > 0)
+    {
+      cv::Mat element = cv::Mat(3, 3, CV_8U, 1);
+      element.at<uchar>(0, 0) = 0;
+      element.at<uchar>(0, 2) = 0;
+      element.at<uchar>(2, 0) = 0;
+      element.at<uchar>(2, 2) = 0;
+
+      if (Erode > 0) erode(mask, mask1, element, cv::Point2i(-1, -1), Erode);
+      if (Dilate > 0) dilate(mask, mask1, element, cv::Point2i(-1, -1), Dilate);
+    }
+
+    cv::Size size = mask.size();
+    int cols = size.width;
+    int rows = size.height;
+
+    int Q = 10 - 1;
+    int maxArea = 0;
+    int N = -1;
+
+    std::vector<std::pair<cv::Point2i, cv::Point2i>> ROI;
+
+    for (int y = 0; y < rows; y++)
+      for (int x = 0; x < cols; x++)
+      {
+        cv::Point2i p(x, y);
+        bool b = false;
+        for (int i = 0; i < ROI.size(); i++)
+        {
+          if((p.x >= ROI[i].first.x) && (p.x <= ROI[i].second.x) && (p.y >= ROI[i].first.y) && (p.y <= ROI[i].second.y))
+          {
+            x = ROI[i].second.x;
+            b = true;
+          }
+        }
+        if ((!b) && (mask1.at<uchar>(y, x) > Q))
+        {
+          cv::Point2i  p1 = p, p0 = p + cv::Point2i(-1, 0), p00 = p;
+
+          bool FindedStartPoint = false;
+          cv::Point2i A(cols, rows), B(0, 0);
+
+          while (!FindedStartPoint)
+          {
+            FindedStartPoint = f(mask1, p0, p1, p00);
+
+            if (p1.x < A.x) A.x = p1.x;
+            if (p1.x > B.x) B.x = p1.x;
+            if (p1.y < A.y) A.y = p1.y;
+            if (p1.y > B.y) B.y = p1.y;
+          }
+          ROI.push_back(std::pair<cv::Point2f, cv::Point2f>(A, B));
+          cv::Point2f P = B - A;
+          float S = P.x*P.y;
+          if ( S > maxArea)
+          {
+            maxArea = S;
+            N = ROI.size() - 1;
+          }
+        }		
+      }
+    std::vector<cv::Point2i> temp;
+    if (N > -1)
+    {
+      temp.push_back(ROI[N].first);
+      temp.push_back(ROI[N].second);
+    }
+
+    mask1.release();
+
+    return temp;
+    }
+
+  // Search center of mask in the ROI
+  // Erode - count of erode iterations, erode don't used if "Erode" = 0 
+  // Dilate - count of erode iterations, dilate don't used if "Erode" = 0 
+  cv::Point2i MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROI, int Erode = 0, int Dilate = 0)
+  {
+    cv::Mat mask1 = mask.clone(); // used only for erode and dilate operations
+    if(Erode > 0 || Dilate > 0)
+    {
+      cv::Mat element = cv::Mat(3, 3, CV_8U, 1);
+      element.at<uchar>(0, 0) = 0;
+      element.at<uchar>(0, 2) = 0;
+      element.at<uchar>(2, 0) = 0;
+      element.at<uchar>(2, 2) = 0;
+
+      if (Erode > 0) erode(mask, mask1, element, cv::Point2i(-1, -1), Erode);
+      if (Dilate > 0) dilate(mask, mask1, element, cv::Point2i(-1, -1), Dilate);
+    }
+
+    uchar Q = 10 - 1;
+    double N = 0;
+    cv::Point2d center(0.0, 0.0);
+    for (int y = ROI[0].y; y != ROI[1].y; y++ )
+      for (int x = ROI[0].x; x != ROI[1].x; x++)
+      {
+        if(mask1.at<uchar>(y,x) > Q)
+        { 
+          N++;
+          center = center + cv::Point2d(x, y);
+        }         
+      }
+
+    mask1.release();
+
+    return cv::Point2i(static_cast<int>(round(center.x/ N)), static_cast<int>(round(center.y/N)));
+  }
  
+  // Build MaskSimilarityMatrix  
+  // Erode - count of erode iterations, erode don't used if "Erode" = 0 
+  // Dilate - count of erode iterations, dilate don't used if "Erode" = 0
+  void ImageSimilarityMatrix::buildMSM_OnMaskArea(const std::vector<Frame*>& frames, int Erode, int Dilate)
+  {
+    std::vector<std::vector<cv::Point2i>> ROI;
+    std::vector<cv::Point2i> Center;
+    int n = frames.size();
+
+    imageSimilarityMatrix.release();
+    imageShiftMatrix.release();
+    imageSimilarityMatrix = cv::Mat::zeros(cv::Size(n, n), cv::DataType<float>::type);
+    imageShiftMatrix = cv::Mat::zeros(cv::Size(n, n), cv::DataType<cv::Point2f>::type);
+
+    for (unsigned int i = 0; i < frames.size(); i++)
+    {
+      ROI.push_back(SearchROI(frames[i]->getMask(), Erode, Dilate)); // Search ROI for akll frames
+      Center.push_back(MaskCenter(frames[i]->getMask(), ROI[i], Erode, Dilate)); // Search mask center for all frames
+    }
+
+    for (unsigned int i = 0; i < frames.size(); i++)
+      for (unsigned int k = 0; k < i; k++)
+      {
+        uchar Q = 9;
+        cv::Mat mask1 = frames[i]->getMask();
+        cv::Mat mask2 = frames[k]->getMask();
+        cv::Point2i d = Center[k] - Center[i]; // masks centers distance 
+        cv::Point2i A(std::min(ROI[i][0].x, ROI[k][0].x - d.x), std::min(ROI[i][0].y, ROI[k][0].y - d.y)); // exrended ROI top left point
+        cv::Point2i B(std::max(ROI[i][1].x, ROI[k][1].x - d.x), std::max(ROI[i][1].y, ROI[k][1].y - d.y)); // exrended ROI bottom right point
+        int /*S1 = 0, S2 = 0,*/ intersection = 0, difference = 0;
+        for (int y = A.y; y != B.y; y++)
+          for (int x = A.x; x != B.x; x++)
+          {
+            cv::Point2i p = cv::Point2i(x, y) + d;
+            if (p.x >= 0 && p.x < mask2.cols && p.y >= 0 && p.y < mask2.rows)
+            {
+              bool color1 = (mask1.at<uchar>(y, x) > Q);
+              bool color2 = (mask2.at<uchar>(p.y, p.x) > Q);
+              //if (color1) S1++; // mask1 area - don't used
+              //if (color2) S2++; // mask2 area - don't used
+              if (color1 && color2) intersection++;
+              if (color1 != color2) difference++;
+            }
+          }
+        cv::Point2i D = B - A;
+        float Score = static_cast<float>(intersection) / static_cast<float>(difference + intersection);
+        imageSimilarityMatrix.at<float>(i, k) = Score;
+        imageSimilarityMatrix.at<float>(k, i) = Score;
+        imageShiftMatrix.at<cv::Point2f>(i, k) = d;
+        imageShiftMatrix.at<cv::Point2f>(k, i) = -d;
+      }
+
+    for (unsigned int i = 0; i < frames.size(); i++)
+    {
+      imageSimilarityMatrix.at<float>(i, i) = 1.0f;
+      ROI[i].clear();
+    }
+    for (unsigned int i = 0; i < frames.size(); i++)
+    ROI.clear();
+    Center.clear();
+  }
+
+  void ImageSimilarityMatrix::buildImageSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate)
+  {
+    buildMSM_OnMaskArea(frames, Erode, Dilate);
+  }
+  //----------------------------------------------------------  
+
 }

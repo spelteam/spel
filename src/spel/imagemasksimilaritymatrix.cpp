@@ -83,4 +83,10 @@ namespace SPEL
     return;
   }
 
+  // Alternative MSM
+  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate) : ImageMaskSimilarityMatrix()
+  {
+    buildImageSimilarityMatrix(frames, Erode, Dilate);
+  }
+  //
 }
