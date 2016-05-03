@@ -1,4 +1,18 @@
 #include "spelHelper.hpp"
+#ifdef UNIX
+#include <uuid/uuid.h>
+#include <limits.h>
+#elif WINDOWS
+#include <rpc.h>
+#endif
+#include <random>
+#include <limits>
+#include <fstream>
+#include <stdlib.h>
+// windows defines max so we need to undefine this here
+#ifdef max
+#undef max
+#endif
 
 namespace SPEL
 {
@@ -83,7 +97,7 @@ namespace SPEL
     }
     return partImage;
   }
-  
+
   cv::Point2f spelHelper::round(const cv::Point2f& pt)
   {
     return cv::Point2f(std::roundf(pt.x), std::roundf(pt.y));
@@ -91,7 +105,99 @@ namespace SPEL
 
   POSERECT<cv::Point2f> spelHelper::round(const POSERECT<cv::Point2f>& rect)
   {
-    return POSERECT<cv::Point2f>(round(rect.point1), round(rect.point2), 
+    return POSERECT<cv::Point2f>(round(rect.point1), round(rect.point2),
       round(rect.point3), round(rect.point4));
+  }
+
+  std::string spelHelper::getRandomStr(void) noexcept
+  {
+    std::default_random_engine dre;
+    std::uniform_int_distribution<int> di(0, std::numeric_limits<int>::max());
+    return std::to_string(di(dre));
+  }
+
+  std::string spelHelper::getTempFileName(void)
+  {
+#ifdef WINDOWS
+    char buf[MAX_PATH], strName[MAX_PATH];
+    auto ret = GetTempPath(MAX_PATH, buf);
+    if (ret > MAX_PATH || ret == 0)
+    {
+      std::stringstream ss;
+      ss << "Can't get temporary directory";
+      DebugMessage(ss.str(), 1);
+      throw std::runtime_error(ss.str());
+    }
+    if (GetTempFileName(buf, "spel", 0, strName) != 0)
+      return std::string(strName);
+    else
+    {
+      while (true)
+      {
+        std::string str(buf);
+        if (str.back() != '\\')
+          str.push_back('\\');
+        str += getGUID();
+        if (!checkFileExists(str))
+          return str;
+      }        
+    }
+#elif UNIX
+    const auto env = getenv("TMPDIR");
+    std::string tmp;
+    if (env != 0)
+      tmp = env;
+    else
+      tmp = "/tmp/";
+    if (tmp.back() != '/')
+      tmp.push_back('/');
+    while (true)
+    {
+      char buf[PATH_MAX];
+      auto speltmp = tmp + "spelXXXXXX";
+      auto len = speltmp.copy(buf, speltmp.size());
+      buf[len] = '\0';
+      mktemp(buf);
+      if (buf[0] != '\0' && !checkFileExists(buf))
+        return std::string(buf);
+      else
+      {
+        auto str = tmp + getGUID();
+        if (!checkFileExists(str))
+          return str;
+      }
+    }
+#endif
+  }
+
+  bool spelHelper::checkFileExists(std::string file) noexcept
+  {
+    std::ifstream f(file);
+    return f.good();
+  }
+
+  std::string spelHelper::getGUID(void) noexcept
+  {
+    std::string guid;
+#ifdef WINDOWS
+    UUID uuid = { 0 };
+    UuidCreate(&uuid);
+    RPC_CSTR str = NULL;
+    if (UuidToString(&uuid, &str) == RPC_S_OK)
+    {
+      guid = (char*)str;
+      RpcStringFree(&str);
+    }
+    else
+      guid = getRandomStr();
+#elif UNIX
+    uuid_t uuid;
+    uuid_generate(uuid);
+    char buf[37];
+    uuid_unparse(uuid, buf);
+    guid = buf;
+#endif
+    std::transform(guid.begin(), guid.end(), guid.begin(), std::tolower);
+    return guid;
   }
 }

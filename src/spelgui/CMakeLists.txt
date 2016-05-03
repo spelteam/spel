@@ -150,6 +150,12 @@ if (WIN32)
   set (QtMain Qt5::WinMain)
 endif()
 
+IF ( UNIX )
+  SET ( GUID_LNK uuid )
+ELSEIF ( WIN32 )
+  SET ( GUID_LNK rpcrt4 )
+ENDIF()
+
 # Add libraries
 target_link_libraries( ${SPELGUI_MODULE}
     ${QtMain}
@@ -162,6 +168,7 @@ target_link_libraries( ${SPELGUI_MODULE}
     ${OpenCV_LIBS}
     ${HDF5_LIBRARIES}
     ${LibCWD_LIBRARIES}
+    ${GUID_LNK}
 )
 
 # Hide console window on Windows system
