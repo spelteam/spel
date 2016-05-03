@@ -57,13 +57,14 @@ namespace SPEL
     {
       for (auto x = 0; x < maskMatOne.cols; ++x)  // 09.04.16 Replaced y to x
       {
+        auto xTwo = x + dX.x;
+        auto yTwo = y + dX.y;
+        if (xTwo >= maskMatTwo.cols || yTwo >= maskMatTwo.rows)
+          break;
         auto mintensityOne = maskMatOne.at<uchar>(y, x); // 09.04.16 Changed "at<uchar>(j, i)" to "at<uchar>(y, x)"
         auto darkPixel = mintensityOne < 10; //if all intensities are zero
 
-                                             //apply the transformation
-        auto xTwo = x + dX.x;
-        auto yTwo = y + dX.y;
-
+        //apply the transformation
         auto mintensityTwo = maskMatTwo.at<uchar>(yTwo, xTwo);
 
         auto blackPixel = mintensityTwo < 10; //if all intensities are zero
@@ -72,11 +73,10 @@ namespace SPEL
           intersectCount++;
         if (!blackPixel || !darkPixel)
           unionCount++;
-
         //maskSimilarityScore += std::abs(mOne - mTwo);
       }
     }
-    maskSimilarityScore = static_cast<float>(intersectCount) / static_cast<float>(unionCount);   
+    maskSimilarityScore = static_cast<float>(intersectCount) / static_cast<float>(unionCount);
     imageSimilarityMatrix.at<float>(i, j) = maskSimilarityScore;
     imageSimilarityMatrix.at<float>(j, i) = maskSimilarityScore;
 
