@@ -186,7 +186,7 @@ namespace SPEL
 #else
 #error "Unsupported version of OS"
 #endif
-    std::transform(guid.begin(), guid.end(), guid.begin(), std::tolower);
+    std::transform(guid.begin(), guid.end(), guid.begin(), ::tolower);
     return guid;
   }
 }
