@@ -319,4 +319,32 @@ namespace SPEL
   {
     EXPECT_STRNE(spelHelper::getGUID().c_str(), spelHelper::getGUID().c_str());
   }
+
+  TEST(spelHelperTests_, getTempFileName)
+  {
+    EXPECT_STRNE(spelHelper::getTempFileName().c_str(), spelHelper::getTempFileName().c_str());
+    auto str = spelHelper::getTempFileName();
+    ifstream i(str);
+    EXPECT_FALSE(i.good());
+    ofstream of(str, ofstream::out);
+    EXPECT_TRUE(of.good());
+    EXPECT_NO_THROW({
+      of << "Test";
+      of.close();
+    });
+    EXPECT_EQ(remove(str.c_str()), 0);
+  }
+
+  TEST(spelHelperTests_, checkFileExists)
+  {
+    auto str = spelHelper::getTempFileName();
+    EXPECT_FALSE(spelHelper::checkFileExists(str));
+    ofstream of(str, ofstream::out);
+    EXPECT_TRUE(spelHelper::checkFileExists(str));
+    EXPECT_NO_THROW({
+      of << "Test";
+      of.close();
+    });
+    EXPECT_EQ(remove(str.c_str()), 0);
+  }
 }

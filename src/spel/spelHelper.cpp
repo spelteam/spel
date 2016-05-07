@@ -128,19 +128,14 @@ namespace SPEL
       DebugMessage(ss.str(), 1);
       throw std::runtime_error(ss.str());
     }
-    if (GetTempFileName(buf, "spel", 0, strName) != 0)
-      return std::string(strName);
-    else
+    while (true)
     {
-      while (true)
-      {
-        std::string str(buf);
-        if (str.back() != '\\')
-          str.push_back('\\');
-        str += getGUID();
-        if (!checkFileExists(str))
-          return str;
-      }        
+      std::string str(buf);
+      if (str.back() != '\\')
+        str.push_back('\\');
+      str += getGUID();
+      if (!checkFileExists(str))
+        return str;
     }
 #elif UNIX
     const auto env = getenv("TMPDIR");
@@ -153,19 +148,9 @@ namespace SPEL
       tmp.push_back('/');
     while (true)
     {
-      char buf[PATH_MAX];
-      auto speltmp = tmp + "spelXXXXXX";
-      auto len = speltmp.copy(buf, speltmp.size());
-      buf[len] = '\0';
-      mktemp(buf);
-      if (buf[0] != '\0' && !checkFileExists(buf))
-        return std::string(buf);
-      else
-      {
-        auto str = tmp + getGUID();
-        if (!checkFileExists(str))
-          return str;
-      }
+      auto str = tmp + getGUID();
+      if (!checkFileExists(str))
+        return str;
     }
 #else
 #error "Unsupported version of OS"
