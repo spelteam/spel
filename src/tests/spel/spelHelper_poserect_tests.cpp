@@ -310,4 +310,13 @@ namespace SPEL
       EXPECT_DOUBLE_EQ(1.0 + 1.0*double(step)/double(numSteps), spelHelper::interpolateFloat(prevAngle, nextAngle, step, numSteps));
   }
 
+  TEST(spelHelperTests_, getRandomStr)
+  {
+    EXPECT_STRNE(spelHelper::getRandomStr().c_str(), spelHelper::getRandomStr().c_str());
+  }
+
+  TEST(spelHelperTests_, getGUID)
+  {
+    EXPECT_STRNE(spelHelper::getGUID().c_str(), spelHelper::getGUID().c_str());
+  }
 }

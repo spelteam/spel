@@ -1,14 +1,14 @@
 #include "spelHelper.hpp"
 #ifdef UNIX
 #include <uuid/uuid.h>
-#include <limits.h>
 #elif WINDOWS
 #include <rpc.h>
 #endif
-#include <random>
 #include <limits>
 #include <fstream>
-#include <stdlib.h>
+#include <cstdlib>
+#include <random>
+#include <ctime>
 // windows defines max so we need to undefine this here
 #ifdef max
 #undef max
@@ -50,7 +50,7 @@ namespace SPEL
       float variationCoeff = standardDeviation / (mean - min);
       float dispersionIndex = variance / (mean - min);
       if (scoreValues.size() < minCount)
-        variationCoeff = variationCoeff * (1.0 + 1 / (4 * scoreValues.size()));
+        variationCoeff = variationCoeff * (1 + 1 / (4 * scoreValues.size()));
       isWeak = dispersionIndex < standardDiviationTreshold;
     }
     for (std::vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
@@ -111,8 +111,8 @@ namespace SPEL
 
   std::string spelHelper::getRandomStr(void) noexcept
   {
-    std::default_random_engine dre;
-    std::uniform_int_distribution<int> di(0, std::numeric_limits<int>::max());
+    static std::default_random_engine dre(time(0));
+    static std::uniform_int_distribution<int> di(0, std::numeric_limits<int>::max());
     return std::to_string(di(dre));
   }
 
@@ -167,6 +167,8 @@ namespace SPEL
           return str;
       }
     }
+#else
+#error "Unsupported version of OS"
 #endif
   }
 
@@ -196,6 +198,8 @@ namespace SPEL
     char buf[37];
     uuid_unparse(uuid, buf);
     guid = buf;
+#else
+#error "Unsupported version of OS"
 #endif
     std::transform(guid.begin(), guid.end(), guid.begin(), std::tolower);
     return guid;
