@@ -150,6 +150,8 @@ namespace SPEL
     static std::string getTempFileName(void);
 
     static bool checkFileExists(std::string file) noexcept;
+
+    static void copyFile(std::string dst, std::string src);
   };
 
   ///represents rectangle

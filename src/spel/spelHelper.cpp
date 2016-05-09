@@ -156,11 +156,27 @@ namespace SPEL
 #error "Unsupported version of OS"
 #endif
   }
-
+  
   bool spelHelper::checkFileExists(std::string file) noexcept
   {
     std::ifstream f(file);
     return f.good();
+  }
+
+  void spelHelper::copyFile(std::string dst, std::string src)
+  {
+    std::ifstream ifs(src, std::ios::binary);
+    std::ofstream ofs(dst, std::ios::binary);
+    if (ifs.bad() || ofs.bad())
+    {
+      std::stringstream ss;
+      ss << "Can't copy the content of the file '" << src << "' to the file '" << dst << "'";
+      DebugMessage(ss.str(), 1);
+      throw std::out_of_range(ss.str());
+    }
+    ofs << ifs.rdbuf();
+    ifs.close();
+    ofs.close();
   }
 
   std::string spelHelper::getGUID(void) noexcept

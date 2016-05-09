@@ -347,4 +347,22 @@ namespace SPEL
     });
     EXPECT_EQ(remove(str.c_str()), 0);
   }
+
+  TEST(spelHelperTests_, copyFile)
+  {
+    auto src = spelHelper::getTempFileName();
+    ofstream ofs(src);
+    ofs << src;
+    ofs.close();
+
+    auto dst = spelHelper::getTempFileName();
+    EXPECT_NO_THROW(spelHelper::copyFile(dst, src));
+
+    ifstream ifs(dst);
+    string ss;
+    ifs >> ss;
+    ifs.close();
+
+    EXPECT_STREQ(src.c_str(), ss.c_str());
+  }
 }
