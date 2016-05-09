@@ -364,5 +364,7 @@ namespace SPEL
     ifs.close();
 
     EXPECT_STREQ(src.c_str(), ss.c_str());
+    EXPECT_EQ(remove(src.c_str()), 0);
+    EXPECT_EQ(remove(dst.c_str()), 0);
   }
 }
