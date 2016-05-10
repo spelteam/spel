@@ -83,7 +83,8 @@ namespace SPEL
   void Frame::setMask(const cv::Mat &mask, const bool cacheFile)
   {
     cv::Size newMaskSize(mask.cols, mask.rows);
-    if (imageSize != cv::Size(-1, -1) && !m_image.empty() && imageSize != newMaskSize)
+    if (imageSize != cv::Size(-1, -1) && mask.cols > 0 && mask.rows > 0 && 
+      !m_image.empty() && imageSize != newMaskSize)
     {
       std::stringstream ss;
       ss << "Mask with size [" << newMaskSize.width << "][" <<
@@ -102,8 +103,11 @@ namespace SPEL
   void Frame::cacheMask(void)
   {
     if (m_maskPath.empty())
-      m_maskPath = spelHelper::getTempFileName(".png");
-    cv::imwrite(m_maskPath, m_mask);
+      m_maskPath = spelHelper::getTempFileName(".pgm");
+    std::vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_PXM_BINARY);
+    compression_params.push_back(0);
+    cv::imwrite(m_maskPath, m_mask, compression_params);
   }
 
   Skeleton Frame::getSkeleton(void) const noexcept
@@ -308,7 +312,7 @@ namespace SPEL
   {
     if (m_maskPath == path)
       return;
-    auto dst = spelHelper::getTempFileName(".png");
+    auto dst = spelHelper::getTempFileName(".pgm");
     spelHelper::copyFile(dst, path);
     m_maskPath = dst;
   }
@@ -353,7 +357,7 @@ namespace SPEL
   void Frame::LoadMask(const std::string & path)
   {
     cv::Mat mask = cv::imread(path, CV_LOAD_IMAGE_GRAYSCALE);
-    if (!mask.data)
+    if (!mask.data && (mask.rows == -1 || mask.cols == -1))
     {
       std::stringstream ss;
       ss << "Could not load mask " << path;
