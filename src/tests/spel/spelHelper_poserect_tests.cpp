@@ -323,7 +323,9 @@ namespace SPEL
   TEST(spelHelperTests_, getTempFileName)
   {
     EXPECT_STRNE(spelHelper::getTempFileName().c_str(), spelHelper::getTempFileName().c_str());
-    auto str = spelHelper::getTempFileName();
+    string ext = ".txt";
+    auto str = spelHelper::getTempFileName(ext);
+    EXPECT_STREQ(str.substr(str.length() - ext.length()).c_str(), ext.c_str());
     ifstream i(str);
     EXPECT_FALSE(i.good());
     ofstream of(str, ofstream::out);
