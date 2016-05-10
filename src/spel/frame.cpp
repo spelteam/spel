@@ -16,6 +16,12 @@ namespace SPEL
   {
     m_image.release();
     m_mask.release();
+    if (!m_imagePath.empty())
+      remove(m_imagePath.c_str());
+    m_imagePath.clear();
+    if (!m_maskPath.empty())
+      remove(m_maskPath.c_str());
+    m_maskPath.clear();
   }
 
   int Frame::getID(void) const noexcept
@@ -38,11 +44,8 @@ namespace SPEL
     return m_image;
   }
 
-  void Frame::setImage(const cv::Mat &image, const bool savePath)
+  void Frame::setImage(const cv::Mat &image, const bool cacheFile)
   {
-    // prevent image from unloading
-    if (!savePath)
-      m_imagePath = "";
     cv::Size newImageSize(image.cols, image.rows);
     if (maskSize != cv::Size(-1, -1) && !m_mask.empty() && maskSize != newImageSize)
     {
@@ -56,6 +59,15 @@ namespace SPEL
     m_image.release();
     m_image = image.clone();
     imageSize = newImageSize;
+    if (cacheFile || m_imagePath.empty())
+      cacheImage();
+  }
+
+  void Frame::cacheImage(void)
+  {
+    if (m_imagePath.empty())
+      m_imagePath = spelHelper::getTempFileName(".png");
+    cv::imwrite(m_imagePath, m_image);
   }
 
   cv::Mat Frame::getMask(void)
@@ -68,11 +80,8 @@ namespace SPEL
     return m_mask;
   }
 
-  void Frame::setMask(const cv::Mat &mask, const bool savePath)
+  void Frame::setMask(const cv::Mat &mask, const bool cacheFile)
   {
-    // prevent mask from unloading
-    if (!savePath)
-      m_imagePath = "";
     cv::Size newMaskSize(mask.cols, mask.rows);
     if (imageSize != cv::Size(-1, -1) && !m_image.empty() && imageSize != newMaskSize)
     {
@@ -85,8 +94,16 @@ namespace SPEL
     }
     m_mask.release();
     m_mask = mask.clone();
-
     maskSize = newMaskSize;
+    if (cacheFile || m_maskPath.empty())
+      cacheMask();
+  }
+
+  void Frame::cacheMask(void)
+  {
+    if (m_maskPath.empty())
+      m_maskPath = spelHelper::getTempFileName(".png");
+    cv::imwrite(m_maskPath, m_mask);
   }
 
   Skeleton Frame::getSkeleton(void) const noexcept
@@ -176,6 +193,7 @@ namespace SPEL
       m_image.cols * factor), static_cast<int>(m_image.rows * factor)));
     m_image.release();
     m_image = newImage.clone();
+    cacheImage();
 
     cv::Mat newMask;
     auto factorMask = static_cast<float>(maxHeight) /
@@ -184,6 +202,7 @@ namespace SPEL
       factorMask), static_cast<int>(m_mask.rows * factorMask)));
     m_mask.release();
     m_mask = newMask.clone();
+    cacheMask();
 
     Scale(factor);
 
@@ -203,8 +222,8 @@ namespace SPEL
     dest->setParentFrameID(m_parentFrameID);
     dest->setSkeleton(m_skeleton);
     dest->m_frametype = m_frametype;
-    dest->SetImagePath(m_imagePath);
-    dest->SetMaskPath(m_maskPath);
+    dest->SetImageFromPath(m_imagePath);
+    dest->SetMaskFromPath(m_maskPath);
     return dest;
   }
 
@@ -271,9 +290,13 @@ namespace SPEL
     return m_imagePath;
   }
 
-  void Frame::SetImagePath(const std::string & path) noexcept
+  void Frame::SetImageFromPath(const std::string & path)
   {
-    m_imagePath = path;
+    if (m_imagePath == path)
+      return;
+    auto dst = spelHelper::getTempFileName(".png");
+    spelHelper::copyFile(dst, path);
+    m_imagePath = dst;
   }
 
   std::string Frame::GetMaskPath(void) const noexcept
@@ -281,9 +304,13 @@ namespace SPEL
     return m_maskPath;
   }
 
-  void Frame::SetMaskPath(const std::string & path) noexcept
+  void Frame::SetMaskFromPath(const std::string & path)
   {
-    m_maskPath = path;
+    if (m_maskPath == path)
+      return;
+    auto dst = spelHelper::getTempFileName(".png");
+    spelHelper::copyFile(dst, path);
+    m_maskPath = dst;
   }
 
   void Frame::LoadAll(void)
@@ -312,7 +339,10 @@ namespace SPEL
       ss << "Could not load image " << path;
       throw std::logic_error(ss.str());
     }
-    setImage(image, true);
+    if (path == m_imagePath)
+      setImage(image, false);
+    else
+      setImage(image, true);
   }
 
   void Frame::LoadMask(void)
@@ -329,7 +359,10 @@ namespace SPEL
       ss << "Could not load mask " << path;
       throw std::logic_error(ss.str());
     }
-    setMask(mask, true);
+    if (path == m_maskPath)
+      setMask(mask, false);
+    else
+      setMask(mask, true);
   }
 
   bool Frame::UnloadAll(const bool force) noexcept

@@ -59,15 +59,23 @@ namespace SPEL
     cv::Mat getImage(void);
     /// <summary>Sets the image.</summary>
     /// <param name="image">The image.</param>
-    /// <param name="savePath">If set do not delete the saved path.</param>
-    void setImage(const cv::Mat &image, const bool savePath = false);
+    /// <param name="cacheFile">
+    /// if set to <c>true</c> then file will be cached.
+    /// </param>
+    void setImage(const cv::Mat &image, const bool cacheFile = true);
+    /// <summary>Caches the image.</summary>
+    void cacheImage(void);
     /// <summary>Gets the mask.</summary>
     /// <returns>The mask.</returns>
     cv::Mat getMask(void);
     /// <summary>Sets the mask.</summary>
     /// <param name="mask">The mask.</param>
-    /// <param name="savePath">If set do not delete the saved path.</param>
-    void setMask(const cv::Mat &mask, const bool savePath = false);
+    /// <param name="cacheFile">
+    /// if set to <c>true</c> then file will be cached.
+    /// </param>
+    void setMask(const cv::Mat &mask, const bool cacheFile = true);
+    /// <summary>Caches the mask.</summary>
+    void cacheMask(void);
     /// <summary>Gets the skeleton.</summary>
     /// <returns>The skeleton.</returns>
     Skeleton getSkeleton(void) const noexcept;
@@ -131,14 +139,14 @@ namespace SPEL
     /// <summary>Sets the image path.</summary>
     /// <param name="path">The path.</param>
     /// <returns></returns>
-    void SetImagePath(const std::string &path) noexcept;
+    void SetImageFromPath(const std::string &path);
     /// <summary>Gets the mask path.</summary>
     /// <returns>The mask path.</returns>
     std::string GetMaskPath(void) const noexcept;
     /// <summary>Sets the mask path.</summary>
     /// <param name="path">The path.</param>
     /// <returns></returns>
-    void SetMaskPath(const std::string &path) noexcept;
+    void SetMaskFromPath(const std::string &path);
     /// <summary>Loads image and mask.</summary>
     void LoadAll(void);
     /// <summary>Loads image and mask.</summary>

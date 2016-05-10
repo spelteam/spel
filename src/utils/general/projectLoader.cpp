@@ -268,7 +268,7 @@ bool ProjectLoader::Load(string fileName)
       cerr << "Could not find file " << imagePath << endl;
       return false;
     }
-    f->SetImagePath(imagePath);
+    f->SetImageFromPath(imagePath);
     auto mskPath = curFolder + maskFolderPath + maskPath;
     Mat mask = imread(mskPath, CV_LOAD_IMAGE_GRAYSCALE);
     if (!mask.data)
@@ -276,7 +276,7 @@ bool ProjectLoader::Load(string fileName)
       cerr << "Could not find file " << mskPath << endl;
       return false;
     }
-    f->SetMaskPath(mskPath);
+    f->SetMaskFromPath(mskPath);
     f->setGroundPoint(gp);
     spelHelper::copyTree(trBodyJointsCopy, trBodyJoints);
     if (isKeyFrame)

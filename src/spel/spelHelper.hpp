@@ -147,7 +147,7 @@ namespace SPEL
 
     static std::string getRandomStr(void) noexcept;
 
-    static std::string getTempFileName(void);
+    static std::string getTempFileName(std::string ext = "");
 
     static bool checkFileExists(std::string file) noexcept;
 

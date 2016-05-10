@@ -111,15 +111,15 @@ namespace SPEL
 
   std::string spelHelper::getRandomStr(void) noexcept
   {
-    static std::default_random_engine dre(time(0));
+    static std::default_random_engine dre((unsigned int)time(0));
     static std::uniform_int_distribution<int> di(0, std::numeric_limits<int>::max());
     return std::to_string(di(dre));
   }
 
-  std::string spelHelper::getTempFileName(void)
+  std::string spelHelper::getTempFileName(std::string ext)
   {
 #ifdef WINDOWS
-    char buf[MAX_PATH], strName[MAX_PATH];
+    char buf[MAX_PATH];
     auto ret = GetTempPath(MAX_PATH, buf);
     if (ret > MAX_PATH || ret == 0)
     {
@@ -134,6 +134,8 @@ namespace SPEL
       if (str.back() != '\\')
         str.push_back('\\');
       str += getGUID();
+      if (!ext.empty())
+        str += ext;
       if (!checkFileExists(str))
         return str;
     }
@@ -149,6 +151,8 @@ namespace SPEL
     while (true)
     {
       auto str = tmp + getGUID();
+      if (!ext.empty())
+        str += ext;
       if (!checkFileExists(str))
         return str;
     }
