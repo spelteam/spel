@@ -59,21 +59,25 @@ namespace SPEL
       {
         auto xTwo = x + dX.x;
         auto yTwo = y + dX.y;
-        if (xTwo >= maskMatTwo.cols || yTwo >= maskMatTwo.rows)
-          break;
-        auto mintensityOne = maskMatOne.at<uchar>(y, x); // 09.04.16 Changed "at<uchar>(j, i)" to "at<uchar>(y, x)"
-        auto darkPixel = mintensityOne < 10; //if all intensities are zero
+        /*if (xTwo >= maskMatTwo.cols || yTwo >= maskMatTwo.rows)
+          break;*/
+        if (xTwo >= 0 && yTwo >= 0 && xTwo < maskMatTwo.cols && yTwo < maskMatTwo.rows) // 10.05.16 Need for testing
+        {
+          auto mintensityOne = maskMatOne.at<uchar>(y, x); // 09.04.16 Changed "at<uchar>(j, i)" to "at<uchar>(y, x)"
+          auto darkPixel = mintensityOne < 10; //if all intensities are zero
 
-        //apply the transformation
-        auto mintensityTwo = maskMatTwo.at<uchar>(yTwo, xTwo);
+          //apply the transformation
+          auto mintensityTwo = maskMatTwo.at<uchar>(yTwo, xTwo);
 
-        auto blackPixel = mintensityTwo < 10; //if all intensities are zero
+          auto blackPixel = mintensityTwo < 10; //if all intensities are zero
 
-        if (!blackPixel && !darkPixel) //if neither is pixel is black
-          intersectCount++;
-        if (!blackPixel || !darkPixel)
-          unionCount++;
-        //maskSimilarityScore += std::abs(mOne - mTwo);
+          if (!blackPixel && !darkPixel) //if neither is pixel is black
+            intersectCount++;
+          if (!blackPixel || !darkPixel)
+            unionCount++;
+           //maskSimilarityScore += std::abs(mOne - mTwo);
+        }
+
       }
     }
     maskSimilarityScore = static_cast<float>(intersectCount) / static_cast<float>(unionCount);
@@ -84,9 +88,9 @@ namespace SPEL
   }
 
   // Alternative MSM
-  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate) : ImageMaskSimilarityMatrix()
+  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate, bool UseRGBScore, bool inverseScore) : ImageMaskSimilarityMatrix()
   {
-    buildImageSimilarityMatrix(frames, Erode, Dilate);
+    buildImageSimilarityMatrix(frames, Erode, Dilate, UseRGBScore, inverseScore);
   }
   //
 }

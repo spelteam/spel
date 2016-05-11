@@ -18,8 +18,7 @@ namespace SPEL
     ImageMaskSimilarityMatrix(ImageMaskSimilarityMatrix &&m) noexcept;
 
     // Alternative MSM
-    // Erode and Dilate - erode or dilate iteration count (= 0 .. 3, 0 = don't used), affects only to the shift masks center.
-    ImageMaskSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate);
+    ImageMaskSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate, bool UseRGBScore = false, bool inverseScore = false);
     //
 
     ///destructor

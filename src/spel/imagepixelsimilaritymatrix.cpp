@@ -117,9 +117,9 @@ namespace SPEL
   }
  
   // Alternative MSM
-  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate) : ImagePixelSimilarityMatrix()
+  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate, bool UseRGBScore, bool inverseScore) : ImagePixelSimilarityMatrix()
   {
-    buildImageSimilarityMatrix(frames, Erode, Dilate);
+    buildImageSimilarityMatrix(frames, Erode, Dilate, UseRGBScore, inverseScore);
   }
   //
 }

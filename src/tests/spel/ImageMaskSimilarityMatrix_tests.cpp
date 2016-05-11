@@ -152,7 +152,7 @@ namespace SPEL
 
     X.write("MSM.txt");
 
-    float error = 0.05f;
+    float error = 0.06f;
     float x = static_cast<float>(M_PI/4.0);
     for (int i = 0; i < n; i++)
       for (int k = 0; k < n; k++)
@@ -204,7 +204,7 @@ namespace SPEL
 
     X.write("MSM.txt");
 
-    float error = 0.05f;
+    float error = 0.06f;
     float x = static_cast<float>(M_PI/4.0);
     for (int i = 0; i < n; i++)
       for (int k = 0; k < n; k++)
@@ -216,7 +216,7 @@ namespace SPEL
             EXPECT_NEAR(1.0f, X.at(i, k), error) << "i = " << i << ", k= " << k << endl;
         }
     for (int i = 0; i < n; i++)
-      EXPECT_EQ(1.0f, X.at(i, i)) << "i = " << i << endl;
+      EXPECT_EQ(0.0f, X.at(i, i)) << "i = " << i << endl;
   }
 
 }
