@@ -59,12 +59,16 @@ namespace SPEL
 
   TEST(ImageHogSimilarityMatrix, Constructor)
   {
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    vector<Frame*> frames = project.getFrames();
     ASSERT_GT(frames.size(), 0);
 
     ImageHogSimilarityMatrix X(frames);
     X.write("HogSimilarityMatrix.txt");
 
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(ImageHogSimilarityMatrix, MoveConstructor)
@@ -148,6 +152,9 @@ namespace SPEL
     EXPECT_EQ(B, BottomRight);
     Image.release();
     Mask.release();
+
+    //Clear
+    delete frame;
   }
 
   TEST(ImageHogSimilarityMatrix, calculateISMCell)
@@ -219,9 +226,13 @@ namespace SPEL
     //Compare
     EXPECT_EQ(score_expected, score_actual);
 
-    frames.clear();
+
+    // Clear
     Image0.release();
     Image1.release();
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];  
+    frames.clear();
 
     for (int i = 0; i < GradientStrengths0.size(); i++)
     {
@@ -235,6 +246,7 @@ namespace SPEL
     }
     GradientStrengths0.clear();
     GradientStrengths1.clear();
+
   }
 
 
@@ -326,6 +338,10 @@ namespace SPEL
     EXPECT_EQ(expected, actual);
 
     SimilarityMatrix.release();
+
+    // Clear
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];
     frames.clear();
   }
 

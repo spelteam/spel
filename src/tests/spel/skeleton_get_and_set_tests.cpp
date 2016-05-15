@@ -44,17 +44,24 @@ namespace SPEL
   TEST(skeletonTest, Constructor)
   {
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
+
     Skeleton expected = frames[0]->getSkeleton();
     Skeleton actual(expected);
     ASSERT_EQ(expected.getPartTree().size(), actual.getPartTree().size());
     EXPECT_EQ(expected, actual);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(skeletonTest, getPartTreeCount)
   {
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
     Skeleton skeleton = frames[0]->getSkeleton();
 
     //Part count in the skeleton from "trijumpSD_50x41.xml"
@@ -62,6 +69,10 @@ namespace SPEL
 
     //Compare
     EXPECT_EQ(PartCount, skeleton.getPartTreeCount());
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(skeletonTest, getBodyPart)

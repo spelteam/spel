@@ -443,7 +443,8 @@ namespace SPEL
   {
     //Load the input data
     ColorHistDetector CHD;
-    CHD.frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    CHD.frames = project.getFrames();
 
     //Create actual value
     Frame* frame = CHD.getFrame(0);
@@ -455,6 +456,9 @@ namespace SPEL
     EXPECT_EQ(CHD.frames[0]->getSkeleton(), frame->getSkeleton());
     EXPECT_EQ(CHD.frames[0]->getImageSize(), frame->getImageSize());
     EXPECT_EQ(CHD.frames[0]->getMaskSize(), frame->getMaskSize());
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
   }
 
   TEST(DetectorTests, getBoneLength)
@@ -974,7 +978,11 @@ namespace SPEL
   {
     //Prepare test data
     map<string, float> params;
-    vector<Frame*> frames = LoadTestProject(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestSequence sequence(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = sequence.getFrames();
+    //sequence.TestSequence::~TestSequence();
+
+    //Run "train"
     ColorHistDetector detector;
     detector.train(frames, params);
     Skeleton skeleton = frames[0]->getSkeleton(); // Copy skeleton from keyframe
@@ -1094,12 +1102,11 @@ namespace SPEL
     }
     if (!EffectiveLabbelsInTop) cout << endl;
 
+    // Clear
+    for (int i = 0; i < frames.size(); i++)
+      delete frames[i];
+    frames.clear();
   }
-
-  float f(void)
-  {
-    return 0.5f;
-  };
 
   TEST(DetectorTests, generateLabel1)
   {
@@ -1198,10 +1205,12 @@ namespace SPEL
     //EXPECT_NEAR(angle, shiftedPLabels_Label.getAngle(), error);
     //Angle: expected angle2D(p0.x, p0.y, p1.x, p1.y) = -0.157, Actual label.getAngle() = 0. All must be 0.
 
+    // Clear
     Image.release();
     Mask.release();
     pixelsLabels.release();
     ShiftedixelsLabels.release();
+    delete frame0;
   }
 
  TEST(DetectorTests, generateLabel2)
@@ -1298,6 +1307,7 @@ namespace SPEL
     Mask.release();
     pixelsLabels.release();
     ShiftedixelsLabels.release();
+    delete frame0;
   }
 
   bool CompareLabels (LimbLabel X, LimbLabel Y)

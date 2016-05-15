@@ -39,7 +39,7 @@ namespace SPEL
   //Global variables 
   const int  partID = 12;
   int FirstKeyframe;
-  vector<Frame*> vFrames;
+  //vector<Frame*> vFrames;
   map <string, float> vParams;
   Skeleton skeleton;
   tree <BodyPart> partTree;
@@ -54,12 +54,15 @@ namespace SPEL
   Mat image, mask;
   auto seq = new Sequence();
   bool ProjectLoaded = false;
+  bool TrainWasRunned = false;
+  
 
   // Setting of the "ColorHistDetectorTests" global variables
-  void prepareTestData()
+  void prepareTestData(vector<Frame*> vFrames)
   {
-    //Load the input data
-    vFrames = LoadTestProject(vParams, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    /*//Load the input data
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();*/
     
     //Create actual value
     detector.train(vFrames, vParams);
@@ -79,9 +82,13 @@ namespace SPEL
 
     //Build part colorset
     Colors = GetPartColors(image, mask, rect);
+
+    /*// Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();*/
   }
 
-  void ClearGlobalVariables()
+  /*void ClearGlobalVariables()
   {
     for (map <int32_t, Mat>::iterator I = pixelDistributions.begin(); I != pixelDistributions.end(); ++I)
       I->second.release();
@@ -94,12 +101,18 @@ namespace SPEL
     for (unsigned int i = 0; i < vFrames.size(); i++)
       delete vFrames[i];
     vFrames.clear();
-  }
+  }*/
 
   TEST(colorHistDetectorTest, PrepareTestData)
   {
-    prepareTestData();
-    ProjectLoaded = true;
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+
+    prepareTestData(vFrames);
+    TrainWasRunned = true;
+
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear(); 
   }
 
   TEST(colorHistDetectorTest, Constructors)
@@ -161,8 +174,10 @@ namespace SPEL
   TEST(colorHistDetectorTest, setPartHistogram)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-      prepareTestData();
+    //if(vFrames.size() == 0)
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
 
     //Create expected value	
     TestColorHistDetector::PartModel partModel_expected;
@@ -190,8 +205,12 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
 
-    if (ProjectLoaded == false)
-      ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
+
+    /*if (ProjectLoaded == false)
+    ClearGlobalVariables();*/
   }
 
   // Testing function "addpartHistogram"
@@ -199,8 +218,10 @@ namespace SPEL
   TEST(colorHistDetectorTest, addpartHistogram)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-      prepareTestData();
+    //if(vFrames.size() == 0)
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
 
     //Initialisation of "partModel_expected" and "partModel_actual"
     TestColorHistDetector::PartModel partModel_expected = detector.partModels.at(partID);
@@ -236,8 +257,11 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
 
-    if (ProjectLoaded == false)
-      ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
+    /*if (ProjectLoaded == false)
+      ClearGlobalVariables();*/
   }
 
   // Testing function "getAvgSampleSizeFg"
@@ -284,8 +308,10 @@ namespace SPEL
   TEST(colorHistDetectorTest, matchPartHistogramsED)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-      prepareTestData();
+    //if(vFrames.size() == 0)
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
 
     //Create expected values
     TestColorHistDetector::PartModel partModel0 = detector.partModels.at(partID);
@@ -305,8 +331,11 @@ namespace SPEL
     EXPECT_FLOAT_EQ(0.0f, ED1);
     EXPECT_FLOAT_EQ(sqrt(distance), ED2);
 
-    if (ProjectLoaded == false)
-      ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
+    /*if (ProjectLoaded == false)
+      ClearGlobalVariables();*/
   }
 
   // Testing function "addBackgroundHistogram"
@@ -314,8 +343,9 @@ namespace SPEL
   TEST(colorHistDetectorTest, addBackgroundHistogram)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-      prepareTestData();
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
 
     //Initialisation of "partModel_expected" and "partModel_actual"
     TestColorHistDetector::PartModel partModel_expected = detector.partModels.at(partID);
@@ -348,8 +378,9 @@ namespace SPEL
     EXPECT_EQ(partModel_expected.bgSampleSizes, partModel_actual.bgSampleSizes);
     EXPECT_EQ(partModel_expected.fgBlankSizes, partModel_actual.fgBlankSizes);
 
-    if (ProjectLoaded == false)
-      ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
   }
 
   // Testing function buildPixelDistributions
@@ -357,8 +388,9 @@ namespace SPEL
   TEST(colorHistDetectorTest, buildPixelDistributions)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-      prepareTestData();
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
 
     Mat t(image.rows, image.cols, DataType <float>::type);
     ColorHistDetector::PartModel partModel = detector.partModels[partID];
@@ -381,8 +413,9 @@ namespace SPEL
       for (int y = 0; y < t.rows; y++)
         EXPECT_EQ(t.at<float>(y, x), pixelDistributions[partID].at<float>(y, x));
 
-    if (ProjectLoaded == false)
-      ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
   }
 
   // Testing function "BuildPixelLabels"
@@ -390,11 +423,11 @@ namespace SPEL
   TEST(colorHistDetectorTest, BuildPixelLabels)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-    {
-      prepareTestData();
-      pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
-    }
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
+    pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
+
 
     Mat p(image.rows, image.cols, DataType <float>::type);
     for (int x = 0; x < image.cols; x++)
@@ -425,8 +458,9 @@ namespace SPEL
       for (int y = 0; y < p.rows; y++)
         EXPECT_EQ(p.at<float>(y, x), pixelLabels[partID].at<float>(y, x)) << q++ << ": " << x << ", " << y;
 
-    if (ProjectLoaded == false)
-      ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
   }
   
   // Testing function "generateLabel"
@@ -434,12 +468,13 @@ namespace SPEL
   TEST(colorHistDetectorTest, generateLabel)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-    {
-      prepareTestData();
-      pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
-      pixelLabels = detector.buildPixelLabels(vFrames[FirstKeyframe], pixelDistributions);
-    }
+
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
+    pixelDistributions = detector.buildPixelDistributions(vFrames[FirstKeyframe]);
+    pixelLabels = detector.buildPixelLabels(vFrames[FirstKeyframe], pixelDistributions);
+
 
     vector <Score> s;
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
@@ -539,8 +574,9 @@ namespace SPEL
       }
     }
 
-    if (ProjectLoaded == false)
-      ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
   }
 
   // Testing function "detect"
@@ -548,8 +584,9 @@ namespace SPEL
   TEST(colorHistDetectorTest, detect)
   {
     //Loading test data if only one test runned
-    if(vFrames.size() == 0)
-      prepareTestData();
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> vFrames = project.getFrames();
+    if(!TrainWasRunned) prepareTestData(vFrames);
 
     ofstream fout("Output_CHDTest_detect.txt");
 
@@ -671,8 +708,9 @@ namespace SPEL
     }
     if (!EffectiveLabbelsInTop) cout << endl;
 
-    if (ProjectLoaded == false)
-        ClearGlobalVariables();
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    vFrames.clear();
   }
 
   TEST(ColorHistDetectorTest, CalculateFactor)
@@ -682,11 +720,11 @@ namespace SPEL
     EXPECT_EQ(expected_factor, factor);
   }
 
-  TEST(ColorHistDetectorTest, Clear)
+  /*TEST(ColorHistDetectorTest, Clear)
   {
     if (ProjectLoaded == true)
       ClearGlobalVariables();
-  }
+  }*/
 
   TEST(ColorHistDetectorTest, compare)
   {
@@ -751,7 +789,7 @@ namespace SPEL
     float SmallPartScore = detector.compare(bodyPart, frame, pixelsLabels1, p0, p0 + Point2f(3.0f, 3.0f)); // Part rect area less then 10 pixels
 
     pixelsLabels2[partID] = Mat(rows, cols, cv::DataType <float>::type);
-	shift = Point2f(0.0f, d.x);
+    shift = Point2f(0.0f, d.x);
     float EmptyPixelsLabels_Score = detector.compare(bodyPart, frame, pixelsLabels2, p0 + shift, p1 + shift); //"PixelLabels" is empty
 
     Mat EmptyMask = Mat(rows, cols, CV_8UC1, 0);
@@ -774,6 +812,8 @@ namespace SPEL
     EXPECT_EQ(-1.0f, SmallPartScore);
     EXPECT_EQ(-1.0f, EmptyPixelsLabels_Score);
     EXPECT_EQ(-1.0f, EmpyMaskScore);
+
+    delete frame;
 
   }
 

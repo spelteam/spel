@@ -29,7 +29,8 @@ namespace SPEL
   TEST(tlpssolverTests, solve_0)
   {
     //Load the input data
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = project.getFrames();
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -41,12 +42,17 @@ namespace SPEL
     TestISM testISM;
     testISM.build(Frames, false);
     CompareSolves(Solves, Frames, testISM); 
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    Frames.clear();
   }
 
   TEST(tlpssolverTests, solve_1)
   {
     //Load the input data
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = project.getFrames();
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -62,13 +68,18 @@ namespace SPEL
     //TestISM testISM;
     //testISM.build(Frames, false);
     //CompareSolves(Solves, Frames, testISM); 
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    Frames.clear();
   }
 
   TEST(tlpssolverTests, solve_2)
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = project.getFrames();
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -80,13 +91,18 @@ namespace SPEL
     TestISM testISM;
     testISM.build(Frames, false);
     CompareSolves(Solves, Frames, testISM);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    Frames.clear();
   }
 
   TEST(tlpssolverTests, solve_3)
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = project.getFrames();
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solveGlobal"
@@ -98,6 +114,10 @@ namespace SPEL
     TestISM testISM;
     testISM.build(Frames, false);
     CompareSolves(Solves, Frames, testISM);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    Frames.clear();
   }
 
   TEST(tlpssolverTests, DISABLED_solveWindowed)
@@ -203,6 +223,11 @@ namespace SPEL
     }
     uint32_t id = 6;
     EXPECT_EQ(id, S.findFrameIndexById(id, frames));   
+
+    // Clear
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];
+    frames.clear();
  }
 
  TEST(tlpssolverTests, ScoreCostAndJointCost)
@@ -319,12 +344,16 @@ namespace SPEL
    //Testing function "computeNormAnchorCost"
    EXPECT_EQ(0.0f, S.computeNormAnchorCost(label1, frame, params, max));
    EXPECT_EQ(4.0f*squareDistance, S.computeNormAnchorCost(label3, frame, params, max));
+
+   //Clear
+   delete frame;
  }
 
  TEST(tlpssolver_Tests, slice_)
  {
    //Load the input data
-   vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = project.getFrames();
 
    //Create actual value
    TLPSSolver S;
@@ -350,6 +379,13 @@ namespace SPEL
    }
    int ExpectedFramesCount = Frames.size() + keyFramesCount(Frames) - 2;
    EXPECT_EQ(ExpectedFramesCount, SliceFramesCount);
+
+   // Clear
+   //project.TestProjectLoader::~TestProjectLoader();
+   Frames.clear();
+   for (unsigned int i = 0; i < Actual_Slice.size(); i++)
+     Actual_Slice[i].clear();
+   Actual_Slice.clear();
  }
 
 }

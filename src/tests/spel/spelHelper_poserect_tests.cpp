@@ -266,7 +266,8 @@ namespace SPEL
   {
     //Loading part tree from existing project
     tree<BodyPart> partTree, copy;
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
     partTree = frames[0]->getSkeleton().getPartTree();
 
     spelHelper::copyTree(copy, partTree);
@@ -292,6 +293,10 @@ namespace SPEL
       c++;
       d++;
     }*/
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(spelHelperTests_, interpolateFloat)

@@ -40,6 +40,11 @@ namespace SPEL
     }
     uint32_t id = 6;
     EXPECT_EQ(id, S.findFrameIndexById(id, frames));
+
+    // Clear
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];
+    frames.clear();
   }
 
   TEST(nskpsolverTests, ScoreCostAndJointCost)
@@ -214,6 +219,9 @@ namespace SPEL
     epsilon = 0.04f;
     EXPECT_LE(abs(ActualValue - ExpectedValue), epsilon);
     cout << ExpectedValue << " ~ " << ActualValue << endl;
+
+    //Clear
+    delete frame;
   }
 
   // Testing "propagateFrame" function.
@@ -225,9 +233,11 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    //vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/testdata1/", "trijumpSD_new.xml");
-    //vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
-    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    //sequence.Load(params, "speltests_TestData/testdata1/", "trijumpSD_new.xml");
+    //sequence.Load(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> Frames = sequence.getFrames();
+    //sequence.TestSequence::~TestSequence();
 
     // Build frames ISM
     TestISM testISM;
@@ -309,6 +319,11 @@ namespace SPEL
           }
         }
     }
+
+    // Clear
+    for (unsigned int i = 0; i < Frames.size(); i++)
+      delete Frames[i];
+    Frames.clear();
   }
 
   // "buildFrameMSTs" and "computeISMcell" don't work with current dataset
@@ -318,8 +333,8 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
-    Sequence sequence(0, "colorHistDetector", Frames);
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = sequence.getFrames();
 
     TestISM testISM;
     testISM.build(Frames, false);
@@ -331,6 +346,12 @@ namespace SPEL
 
     // Compute expected value and compare
     CompareSolves(Solves, Frames, testISM); 
+
+    // Clear
+    //sequence.TestSequence::~TestSequence();
+    for (unsigned int i = 0; i < Frames.size(); i++)
+      delete Frames[i];
+    Frames.clear();
   }
 
 
@@ -340,8 +361,8 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
-    Sequence sequence(0, "colorHistDetector", Frames);
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = sequence.getFrames();
 
     // Run "solve"
     NSKPSolver solver;
@@ -352,6 +373,12 @@ namespace SPEL
     TestISM testISM;
     testISM.build(Frames, false);
     CompareSolves(Solves, Frames, testISM);
+
+    // Clear
+    //sequence.TestSequence::~TestSequence();
+    for (unsigned int i = 0; i < Frames.size(); i++)
+        delete Frames[i];
+    Frames.clear();
   }
 
   // DISABLED - call of "propagateFrame" causes crash tests??
@@ -360,8 +387,8 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
-    Sequence sequence(0, "colorHistDetector", Frames);
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = sequence.getFrames();
 
     // Run "solve"
     NSKPSolver solver;
@@ -372,6 +399,12 @@ namespace SPEL
     TestISM testISM;
     testISM.build(Frames, false);
     CompareSolves(Solves, Frames, testISM);
+
+    // Clear
+    //sequence.TestSequence::~TestSequence();
+    for (unsigned int i = 0; i < Frames.size(); i++)
+        delete Frames[i];
+    Frames.clear();
   }
 
   // DISABLED - call of "propagateFrame" causes crash tests??
@@ -380,7 +413,9 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    vector<Frame*> Frames = LoadTestProject(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = sequence.getFrames();
+    //sequence.TestSequence::~TestSequence();
       
     TestISM testISM;
     testISM.build(Frames, false);
@@ -403,6 +438,11 @@ namespace SPEL
     // Compute expected value and compare
 
     CompareSolves(Solves, Frames, testISM);
+
+    // Clear
+    for (unsigned int i = 0; i < Frames.size(); i++)
+      delete Frames[i];
+    Frames.clear();
   }
 
   Mat ToMatrix(tree<int> mst, ImageSimilarityMatrix &ism)

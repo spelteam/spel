@@ -63,7 +63,6 @@ namespace SPEL
     // Run "train" for setting frames in "chd"
     map <string, float> params;
     chd.train(frames, params);
-    frames.clear();
 
     // Get "chd" frames and compare
     vector <Frame*> actual_frames = chd.getFrames();
@@ -72,6 +71,12 @@ namespace SPEL
       uchar b = static_cast<uchar>(i);
       EXPECT_EQ(Vec3b(b, b, b), actual_frames[i]->getImage().at<Vec3b>(0, 0));
     }
+
+    // Clear
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];
+    frames.clear();
+	actual_frames.clear();
 
   }
 

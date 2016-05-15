@@ -11,7 +11,8 @@ namespace SPEL
   TEST(SequenceTests, CopyConstructor)
   {
     //Load the input data
-    vector<Frame*> expected_frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> expected_frames = project.getFrames();
   
     //Create expected value
     Sequence expected_sequence(0, "test sequence", expected_frames);
@@ -53,13 +54,18 @@ namespace SPEL
       image1.release();
       mask1.release();
     } 
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    expected_frames.clear();
   }
 
   //Testing "Sequence(int idx, std::string seqName, std::vector<Frame*> seq)"
   TEST(SequenceTests, Constructor)
   {
     //Load the input data
-    vector<Frame*> expected_frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> expected_frames = project.getFrames();
   
     //Create expected value
     Sequence expected_sequence(0, "trijumpSD_50x41.xml", expected_frames);
@@ -106,6 +112,14 @@ namespace SPEL
       image1.release();
       mask1.release();
     } 
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    expected_frames.clear();
+    for (unsigned int i = 0; i < actual_frames.size(); i++)
+      delete actual_frames[i];
+    actual_frames.clear();
+
   }
 
   TEST(SequenceTests, getName)
@@ -117,32 +131,43 @@ namespace SPEL
 
     //Compare
     EXPECT_EQ(expected_Name, sequence.getName());
+
+    // Clear
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];
+    frames.clear();
   }
 
   TEST(SequenceTests, setName)
   {
-      //Create expected value
-      vector<Frame*> frames;
-      string expected_Name = "test sequence";
-      Sequence sequence;
-      sequence.setName(expected_Name);
+    //Create expected value
+    vector<Frame*> frames;
+    string expected_Name = "test sequence";
+    Sequence sequence;
+    sequence.setName(expected_Name);
 
-      //Compare
-      EXPECT_EQ(expected_Name, sequence.getName());
+    //Compare
+    EXPECT_EQ(expected_Name, sequence.getName());
+
+    // Clear
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];
+    frames.clear();
   }
 
   //Testing "Sequence(int idx, std::string seqName, std::vector<Frame*> seq)"
   TEST(SequenceTests, setAndGetFames)
   {
     //Load the input data
-    vector<Frame*> expected_frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> expected_frames = project.getFrames();
 
     //Create expected value
     Sequence sequence;
     sequence.setFrames(expected_frames);
 
     //Compare
-    vector<Frame*> actual_frames =sequence.getFrames();
+    vector<Frame*> actual_frames = sequence.getFrames();
 
     //Compare
     ASSERT_EQ(expected_frames.size(), actual_frames.size());
@@ -178,13 +203,21 @@ namespace SPEL
       image1.release();
       mask1.release();
     } 
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    expected_frames.clear();
+    for (unsigned int i = 0; i < actual_frames.size(); i++)
+      delete actual_frames[i];
+    actual_frames.clear();
   }
 
 //Testing "Sequence(int idx, std::string seqName, std::vector<Frame*> seq)"
   TEST(SequenceTests, getFamePointer)
   {
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
     Sequence sequence;
     sequence.setFrames(frames);
     int frameNum = 0;
@@ -222,6 +255,11 @@ namespace SPEL
     mask0.release();
     image1.release();
     mask1.release();
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
+    delete actual_frame;
   }
 
   TEST(SequenceTests, setAndGetID)
@@ -235,7 +273,8 @@ namespace SPEL
   TEST(SequenceTests, interpolateSlice2D)
   {
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
     Sequence sequence(0, "colorHistDetector", frames);
 
     //Create Slice
@@ -301,6 +340,12 @@ namespace SPEL
       EXPECT_TRUE(masks_is_equal);
       */
     }
+
+    // Clear    
+    slice.clear();
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
+    actual_slice.clear();
   }
 
   TEST(SequenceTests, computeInterpolation)
@@ -340,7 +385,8 @@ namespace SPEL
   TEST(SequenceTests, estimateUniformScale)
   {
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
     Sequence sequence(0, "colorHistDetector", frames);
 
     //Prepare test data
@@ -383,6 +429,10 @@ namespace SPEL
     EXPECT_FLOAT_EQ(1.0f, S0.getScale());
     EXPECT_FLOAT_EQ(1.0f, S1.getScale());
     EXPECT_FLOAT_EQ(1.0f, S2.getScale());
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
 }

@@ -3,6 +3,7 @@
 #include "colorHistDetector.hpp"
 #include "frame.hpp"
 #include "imagesimilaritymatrix.hpp"
+#include <sequence.hpp>
 #include <fstream>
 #include <iostream>
   
@@ -22,9 +23,24 @@ namespace SPEL
   vector <Point3i> GetPartColors(Mat image, Mat mask, POSERECT < Point2f > rect); // Build set of the rect pixels colours 
   void  Normalize(vector <vector <vector <float>>> &Histogramm, int nBins, int pixelsCount); // Normalization of the  histogram
   void PutHistogram(ofstream &fout, vector <vector <vector <float>>> &Histogramm, int sizeFG); // Output histogram into text file
-  vector<Frame*> LoadTestProject(string FilePath, string FileName); // Loading frames from project
-  //map <string, float> SetParams(vector<Frame*> frames, Sequence **seq); // Set parameters from the frames sequence
-  vector<Frame*> LoadTestProject(map <string, float> &params, string FilePath, string FileName); 
+  
+  class TestProjectLoader : public ProjectLoader
+  {
+  public:
+    ~TestProjectLoader();
+    TestProjectLoader();
+    TestProjectLoader(string FilePath, string FileName);
+    bool Load(string FilePath, string FileName);
+  };
+  class TestSequence : public Sequence
+  {
+  public:
+    ~TestSequence();
+    bool Load(string FilePath, string FileName);
+    bool Load(map <string, float> &params, string FilePath, string FileName);
+    TestSequence(string FilePath, string FileName);
+    TestSequence(map <string, float> &params, string FilePath, string FileName);
+  };
 
   int keyFramesCount(vector<Frame*> frames); // Counting of keyframes in set of frames 
   int FirstKeyFrameNum(vector<Frame*> frames); // Returns  index of first keyframe

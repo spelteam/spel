@@ -6,8 +6,6 @@
 #endif
 
 #include <gtest/gtest.h>
-
-#include <sequence.hpp>
 #include "TestsFunctions.hpp"
   
 namespace SPEL
@@ -181,73 +179,70 @@ namespace SPEL
           if (Histogramm[b][g][r]>0)
             fout << "Histogram[" << r << "," << g << "," << b << "] = " << Histogramm[b][g][r] * sizeFG << ";\n";
   }
+//---------------------------------------------------------------------------------------
+//TestProjectLoader
+  TestProjectLoader::~TestProjectLoader()
+  {
+    ProjectLoader::~ProjectLoader();
+  }
 
-  //Loading frames from project
-  vector<Frame*> LoadTestProject(string FilePath, string FileName)
+  TestProjectLoader::TestProjectLoader()
+  {
+    SetCurFolder("");
+  }
+
+  TestProjectLoader::TestProjectLoader(string FilePath, string FileName)
+  {
+    TestProjectLoader::Load(FilePath, FileName);
+  }
+
+  bool TestProjectLoader::Load(string FilePath, string FileName)
   {
 #if defined(WINDOWS) && defined(_MSC_VER)
     if (IsDebuggerPresent())
       FilePath = "Debug/" + FilePath;
 #endif
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + FileName);
-    vector<Frame*> frames, temp = projectLoader.getFrames();
-    for (unsigned int i = 0; i < temp.size(); i++)
-    {
-      frames.push_back(new Frame(temp[i]->getFrametype()));
-      temp[i]->clone(frames[i]);
-    }
-    return frames;
+    SetCurFolder(FilePath);
+    bool loaded = ProjectLoader::Load(FilePath + FileName);
+    return loaded;
+  }
+//---------------------------------------------------------------------------------------
+//TestSequence
+  TestSequence::~TestSequence()
+  {
+    Sequence::~Sequence();
   }
 
-  /*
-  //Set parameters from the frames sequence
-  map <string, float> SetParams(vector<Frame*> frames, Sequence **seq)
+  bool TestSequence::Load(string FilePath, string FileName)
   {
-    //This fragment produces crash with message: "The program has exited with code 3 (0x3)."
-    map <string, float> params;
-    *seq = new Sequence(0, "colorHistDetector", frames);
-    if (*seq != 0)
-    {
-      (*seq)->estimateUniformScale(params);
-      (*seq)->computeInterpolation(params);
-    }
-    return params;
-  }*/
+    TestProjectLoader temp;
+    bool loaded = temp.Load(FilePath, FileName);
+    Sequence::setFrames(temp.getFrames());
+    Sequence::setName(FileName);
+    temp.ProjectLoader::~ProjectLoader();
 
-  //Loading frames from project and set "params"
-  vector<Frame*> LoadTestProject(map <string, float> &params, string FilePath, string FileName)
-  {
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-      if (IsDebuggerPresent())
-          FilePath = "Debug/" + FilePath;
-#endif
-      ProjectLoader projectLoader(FilePath);
-      projectLoader.Load(FilePath + FileName);
-      vector<Frame*> frames, temp = projectLoader.getFrames();
-
-      for (unsigned int i = 0; i < temp.size(); i++)
-      {
-        frames.push_back(new Frame(temp[i]->getFrametype()));
-        temp[i]->clone(frames[i]);
-      }
-
-      Sequence *seq = new Sequence(0, "colorHistDetector", frames);
-      if (seq != 0)
-      {
-        seq->estimateUniformScale(params);
-        seq->computeInterpolation(params);
-      }
-      for (auto f : frames)
-          delete f;
-      frames.clear();
-      frames = seq->getFrames();
-
-      return frames;
+    return loaded;
   }
 
+  bool TestSequence::Load(map <string, float> &params, string FilePath, string FileName)
+  {
+    bool loaded = TestSequence::Load(FilePath, FileName);
+    estimateUniformScale(params);
+    computeInterpolation(params);
 
+    return loaded;
+  }
+
+  TestSequence::TestSequence(string FilePath, string FileName)
+  {
+    TestSequence::Load(FilePath, FileName);
+  }
+
+  TestSequence::TestSequence(map <string, float> &params, string FilePath, string FileName)
+  {
+    TestSequence::Load(params, FilePath, FileName);
+  }
+//---------------------------------------------------------------------------------------
   //Counting of keyframes in set of frames 
   int keyFramesCount(vector<Frame*> frames)
   {

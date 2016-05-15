@@ -25,7 +25,8 @@ namespace SPEL
     float scale = 1.2f;
 
     //Load the input data
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
     Skeleton skeleton = frames[0]->getSkeleton();
 
     //Set the skeleton joints space locations!
@@ -53,6 +54,10 @@ namespace SPEL
 
     //Compare
     EXPECT_EQ(expected_partLocations, actual_partLocations);
+
+    //Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(skeletonTest, infer3dTest)
@@ -256,5 +261,6 @@ namespace SPEL
       }
     }
 
+    frames.clear();
   }
 }

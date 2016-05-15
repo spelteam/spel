@@ -23,7 +23,8 @@ namespace SPEL
   {
     //Load the input data
     map <string, float> params;
-    vector<Frame*> frames = LoadTestProject(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
     
     //Counting a keyframes
     int FirstKeyframe = FirstKeyFrameNum(frames);
@@ -158,12 +159,15 @@ namespace SPEL
 
     fout.close();
 
-    frames.clear();
+    // Clear
     params.clear();
     Crossings.clear();
     partModels.clear();
 
     image.release();
     image1.release();
+
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 }

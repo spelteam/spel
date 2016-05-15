@@ -45,7 +45,8 @@ namespace SPEL
   TEST(surfDetectorTests, computeDescriptors)
   {
     //Load the input data
-    vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = project.getFrames();
 
     //Counting a keyframes
     int FirstKeyframe = FirstKeyFrameNum(SFrames);
@@ -145,8 +146,7 @@ namespace SPEL
     image.release();
     mask.release();
     
-    for (unsigned int i = 0; i < SFrames.size(); i++)
-      if (SFrames[i] != 0) delete SFrames[i];
+    //project.TestProjectLoader::~TestProjectLoader();
     SFrames.clear();
   }
 
@@ -154,7 +154,8 @@ namespace SPEL
   TEST(surfDetectorTests, train)
   {
     //Load the input data
-    vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = project.getFrames();
 
     //Counting a keyframes
     int FirstKeyframe = FirstKeyFrameNum(SFrames);
@@ -250,8 +251,7 @@ namespace SPEL
     
     image.release();
     mask.release();
-    for (unsigned int i = 0; i < SFrames.size(); i++)
-      if (SFrames[i] != 0) delete SFrames[i];
+    //project.TestProjectLoader::~TestProjectLoader();
     SFrames.clear();
   }
 
@@ -259,7 +259,8 @@ namespace SPEL
   TEST(surfDetectorTests, compare)
   {
     //Load the input data
-    vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = project.getFrames();
 
     //Copy image and skeleton from first keyframe
     int FirstKeyframe = 0;
@@ -360,15 +361,15 @@ namespace SPEL
     
     image.release();
     mask.release();
-    for (unsigned int i = 0; i < SFrames.size(); i++)
-      if (SFrames[i] != 0) delete SFrames[i];
+    //project.TestProjectLoader::~TestProjectLoader();
     SFrames.clear();
   }
 
   TEST(surfDetectorTests, generateLabel)
   {
     //Load the input data
-    vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = project.getFrames();
 
     //Copy image and skeleton from first keyframe
     int FirstKeyframe = 0;
@@ -425,7 +426,7 @@ namespace SPEL
     Score score(D.compare(bodyPart, partModel1, p0, p1, knnMatchCoeff), std::to_string(D.getID()));
     scores.push_back(score);
     float rot = float(spelHelper::angle2D(1.0f, 0.0f, p1.x - p0.x, p1.y - p0.y) * (180.0 / M_PI));
-    LimbLabel expected_Label(partID, 0.5*(p0 + p1), rot, bodyPart.getPartPolygon().asVector(), scores, false);
+    LimbLabel expected_Label(partID, 0.5*(p0 + p1), rot, BuildPartRect(j0, j1, bodyPart.getLWRatio()).asVector(), scores, false);
     scores.clear();
 
     map <string, float> detectParams;
@@ -441,8 +442,10 @@ namespace SPEL
     EXPECT_EQ(expected_Label.getAngle(), actual_Label.getAngle());
     EXPECT_EQ(expected_Label.getCenter(), actual_Label.getCenter());
     EXPECT_EQ(expected_Label.getLimbID(), actual_Label.getLimbID());
-    EXPECT_EQ(expected_Label.getPolygon(), actual_Label.getPolygon());
     EXPECT_EQ(expected_Label.getScores(), actual_Label.getScores());
+    unsigned int n = expected_Label.getPolygon().size();
+    for (unsigned int i = 0; i < n; i++)
+      EXPECT_EQ(static_cast<Point2i>(expected_Label.getPolygon()[i]), static_cast<Point2i>(actual_Label.getPolygon()[i]));
 
     //Checking SurfDetector.LabelModels
    /*int n = D.labelModels[SFrames[FirstKeyframe]->getID()][bodyPart.getPartID()].size()-1;
@@ -454,15 +457,15 @@ namespace SPEL
      
     image.release();
     mask.release();
-    for (unsigned int i = 0; i < SFrames.size(); i++)
-      if (SFrames[i] != 0) delete SFrames[i];
+    //project.TestProjectLoader::~TestProjectLoader();
     SFrames.clear();
   }
 
   TEST(surfDetectorTests, detect)
   {   
     //Load the input data
-    vector<Frame*> SFrames = LoadTestProject("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = project.getFrames();
 
     //Copy image and skeleton from first keyframe
     int FirstKeyframe = 0;
@@ -588,8 +591,7 @@ namespace SPEL
 
     image.release();
     mask.release();
-    for (unsigned int i = 0; i < SFrames.size(); i++)
-      if (SFrames[i] != 0) delete SFrames[i];
+    //project.TestProjectLoader::~TestProjectLoader();
     SFrames.clear();
   }
 

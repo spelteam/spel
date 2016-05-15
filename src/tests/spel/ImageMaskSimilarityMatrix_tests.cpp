@@ -123,7 +123,9 @@ namespace SPEL
 
   TEST(MaskSimilarityMatrixTests, computeISMCell)
   {
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    TestProjectLoader project("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    vector<Frame*> frames = project.getFrames();
+
     ASSERT_TRUE(frames.size() > 0);
 
     ImageMaskSimilarityMatrix X;
@@ -136,11 +138,17 @@ namespace SPEL
     float error = 0.076f;
     EXPECT_NEAR(static_cast<float>(M_PI/4.0f), X.at(3, 2), error);
     EXPECT_NEAR(static_cast<float>(M_PI/4.0f), X.at(2, 3), error);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(MaskSimilarityMatrixTests, buildISM)
   {
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    TestProjectLoader project("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    vector<Frame*> frames = project.getFrames();
+
     int n = frames.size();
     ASSERT_TRUE(frames.size() > 0);
 
@@ -165,12 +173,19 @@ namespace SPEL
         }
     for (int i = 0; i < n; i++)
       EXPECT_EQ(0.0f, X.at(i, i)) << "i = " << i << endl;
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   // Write alternative MSM
   TEST(MaskSimilarityMatrixTests, WriteNewMSM)
   {
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/testdata1/", "trijumpSD_new.xml");
+    TestProjectLoader project("speltests_TestData/testdata1/", "trijumpSD_new.xml");
+    //project.Load("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    vector<Frame*> frames = project.getFrames();
+
     //vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
     ASSERT_TRUE(frames.size() > 0);
 
@@ -187,12 +202,18 @@ namespace SPEL
       cout << endl;
     }*/
     MSM.write("AlternativeMSM.txt");
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   // Testing alternative buildMSM function
   TEST(MaskSimilarityMatrixTests, buildNewMSM)
   {
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    TestProjectLoader project("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    vector<Frame*> frames = project.getFrames();
+
     int n = frames.size();
     ASSERT_TRUE(frames.size() > 0);
 
@@ -217,6 +238,10 @@ namespace SPEL
         }
     for (int i = 0; i < n; i++)
       EXPECT_EQ(0.0f, X.at(i, i)) << "i = " << i << endl;
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
 }

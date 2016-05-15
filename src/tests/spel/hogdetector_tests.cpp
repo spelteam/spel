@@ -19,7 +19,10 @@
 
 namespace SPEL
 {
+  /*string HOGDetectorTestProjectPath = "speltests_TestData/CHDTrainTestData/";
+  string HOGDetectorTestProjectPName = "trijumpSD_50x41.xml";
   vector<Frame*> HFrames;
+  HogDetector D;*/
 
   vector <vector <vector <float>>> decodeDescriptor(vector<float> descriptors, Size wndSize, Size blockSize, Size blockStride, Size cellSize, int nbins)
   {
@@ -101,7 +104,8 @@ namespace SPEL
   TEST(HOGDetectorTests, computeDescriptor)
   {
     //Load the input data
-    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> HFrames = project.getFrames();
 
     //Counting a keyframes
     //int KeyframesCount = 0;
@@ -160,15 +164,16 @@ namespace SPEL
         for (unsigned int n = 0; n < G[i][k].size(); n++)
           EXPECT_EQ(G[i][k][n], partModel.gradientStrengths[i][k][n]);
 
-    for (unsigned int i = 0; i < HFrames.size(); i++)
-      delete HFrames[i];
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
     HFrames.clear();
   }
 
   TEST(HOGDetectorTests, computeDescriptors)
   {
     //Load the input data
-    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> HFrames = project.getFrames();
 
     //Counting a keyframes
     //int KeyframesCount = 0;
@@ -234,15 +239,16 @@ namespace SPEL
     }
     allDescriptors.clear();
 
-    for (unsigned int i = 0; i < HFrames.size(); i++)
-      delete HFrames[i];
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
     HFrames.clear();
   }
 
   TEST(HOGDetectorTests, getMaxBodyPartHeightWidth)
   {
     //Load the input data
-    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> HFrames = project.getFrames();
 
     //Counting a keyframes
     //int KeyframesCount = 0;
@@ -280,84 +286,32 @@ namespace SPEL
     map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     EXPECT_EQ(partsSize, partsSize_actual);
 
-    for (unsigned int i = 0; i < HFrames.size(); i++)
-      delete HFrames[i];
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
     HFrames.clear();
   }
 
-  TEST(HOGDetectorTests, train)
+  /*TEST(HOGDetectorTests, PrepareTestData)
   {
-    //Load the input data
-    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+      //Load the input data
+      TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+      vector<Frame*> HFrames = project.getFrames();
 
-    //Counting a keyframes
-    //int KeyframesCount = 0;
-    int FirstKeyframe = 0;
+      //Run "train"
+      D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, D.m_blockSize, 1.0f);
+      map<string, float> params;
+      D.train(HFrames, params);
 
-    //Copy image and skeleton from first keyframe
-    Mat image = HFrames[FirstKeyframe]->getImage();
-    Mat mask = HFrames[FirstKeyframe]->getMask();
-    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
-    tree <BodyPart> partTree = skeleton.getPartTree();
-    tree <BodyJoint> jointsTree = skeleton.getJointTree();
-
-    // Set descriptor parameters
-    Size blockSize = Size(16, 16);
-    Size blockStride = Size(8, 8);
-    Size cellSize = Size(8, 8);
-    const int nbins = 9;
-    double wndSigma = -1;
-    double thresholdL2hys = 0.2;
-    bool gammaCorrection = true;
-    int nlevels = 64;
-    Size wndStride = Size(8, 8);
-    Size padding = Size(32, 32);
-    int derivAperture = 1;
-    int histogramNormType = HOGDescriptor::L2Hys;
-
-    //Calculate actual value
-    HogDetector D;
-    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
-    map<string, float> params;
-    D.train(HFrames, params);
-
-    //Calculate expected value
-    vector<vector<float>> allDescriptors;
-    for (unsigned int partID = 0; partID < partTree.size(); partID++)
-    {
-      vector<float> descriptorsValues;
-      BodyPart bodyPart = *skeleton.getBodyPart(partID);//Copy body part	
-      //BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());//Copy part joints 
-      //BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
-      HOGDescriptor d(D.m_partSize[partID], blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);
-      d.compute(D.m_partModels[0][partID].partImage, descriptorsValues);
-      allDescriptors.push_back(descriptorsValues);
-    }
-
-    //Compare	
-    for (unsigned int partID = 0; partID < partTree.size(); partID++)
-    {
-      EXPECT_EQ(allDescriptors[partID].size(), D.m_partModels[0][partID].descriptors.size());
-      for (unsigned int i = 0; i < allDescriptors[partID].size(); i++)
-        EXPECT_EQ(allDescriptors[partID][i], D.m_partModels[0][partID].descriptors[i]);
-      vector <vector <vector <float>>> G = decodeDescriptor(allDescriptors[partID], D.m_partSize[partID], blockSize, blockStride, cellSize, nbins);
-      for (unsigned int i = 0; i < G.size(); i++)
-        for (unsigned int k = 0; k < G[i].size(); k++)
-          for (unsigned int n = 0; n < G[i][k].size(); n++)
-            EXPECT_EQ(G[i][k][n], D.m_partModels[0][partID].gradientStrengths[i][k][n]);
-      allDescriptors[partID].clear();
-    }
-    allDescriptors.clear();
-
-    for (unsigned int i = 0; i < HFrames.size(); i++)
-      delete HFrames[i];
-    HFrames.clear();
-  }
+      //Clear
+      //project.TestProjectLoader::~TestProjectLoader();
+      HFrames.clear();
+  }*/
 
   TEST(HOGDetectorTests, generateLabel)
   {
     //Load the input data
-    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> HFrames = project.getFrames();
 
     //Counting a keyframes
     //int KeyframesCount = 0;
@@ -381,27 +335,12 @@ namespace SPEL
     Point2f p0 = j0->getImageLocation();
     Point2f p1 = j1->getImageLocation();
 
-    // Set descriptor parameters
-    Size blockSize = Size(16, 16);
-    Size blockStride = Size(8, 8);
-    Size cellSize = Size(8, 8);
-    Size wndSize = Size(64, 128);
-    const int nbins = 9;
-    //double wndSigma = -1;
-    //double thresholdL2hys = 0.2;
-    //bool gammaCorrection = true;
-    //int nlevels = 64;
-    Size wndStride = Size(8, 8);
-    Size padding = Size(32, 32);
-    //int derivAperture = 1;
-    //int histogramNormType = HOGDescriptor::L2Hys;
-
     //Calculate actual value
     HogDetector D;
-    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, D.m_blockSize, 1.0f);
     map<string, float> params;
     D.train(HFrames, params);
-    //bool useHOGDet = true;
+
     HogDetector::PartModel partModel = D.getPartModels()[0][partID];
     auto detectorHelper = new HogDetectorHelper();
     map <string, float> detectParams;
@@ -439,16 +378,88 @@ namespace SPEL
     cout << "Center = " << label_actual.getCenter() << endl;
     cout << "Polygon = " << label_actual.getPolygon() << endl;
 
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    HFrames.clear();
+  }
 
-    for (unsigned int i = 0; i < HFrames.size(); i++)
-      delete HFrames[i];
+  TEST(HOGDetectorTests, train)
+  {
+    //Load the input data
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> HFrames = project.getFrames();
+
+    //Counting a keyframes
+    //int KeyframesCount = 0;
+    int FirstKeyframe = 0;
+
+    //Copy image and skeleton from first keyframe
+    Mat image = HFrames[FirstKeyframe]->getImage();
+    Mat mask = HFrames[FirstKeyframe]->getMask();
+    Skeleton skeleton = HFrames[FirstKeyframe]->getSkeleton();
+    tree <BodyPart> partTree = skeleton.getPartTree();
+    tree <BodyJoint> jointsTree = skeleton.getJointTree();
+
+    // Set descriptor parameters
+    /*Size blockSize = Size(16, 16);
+    Size blockStride = Size(8, 8);
+    Size cellSize = Size(8, 8);
+    const int nbins = 9;
+    double wndSigma = -1;
+    double thresholdL2hys = 0.2;
+    bool gammaCorrection = true;
+    int nlevels = 64;
+    Size wndStride = Size(8, 8);
+    Size padding = Size(32, 32);
+    int derivAperture = 1;
+    int histogramNormType = HOGDescriptor::L2Hys;*/
+
+    //Calculate actual value
+    HogDetector D;
+    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, D.m_blockSize, 1.0f);
+    map<string, float> params;
+    D.train(HFrames, params);
+
+    //Calculate expected value
+    vector<vector<float>> allDescriptors;
+    for (unsigned int partID = 0; partID < partTree.size(); partID++)
+    {
+      vector<float> descriptorsValues;
+      BodyPart bodyPart = *skeleton.getBodyPart(partID);//Copy body part	
+      //BodyJoint* j0 = skeleton.getBodyJoint(bodyPart.getParentJoint());//Copy part joints 
+      //BodyJoint* j1 = skeleton.getBodyJoint(bodyPart.getChildJoint());
+      /*HOGDescriptor d(D.m_partSize[partID], blockSize, blockStride, cellSize, nbins, derivAperture, wndSigma, histogramNormType, thresholdL2hys, gammaCorrection, nlevels);*/
+      HOGDescriptor d(D.m_partSize[partID], D.m_blockSize, D.m_blockStride, D.m_cellSize, D.m_nbins, D.m_derivAperture, D.m_wndSigma, D.m_histogramNormType, D.m_thresholdL2hys, D.m_gammaCorrection, D.m_nlevels);
+      d.compute(D.m_partModels[0][partID].partImage, descriptorsValues);
+      allDescriptors.push_back(descriptorsValues);
+    }
+
+    //Compare	
+    for (unsigned int partID = 0; partID < partTree.size(); partID++)
+    {
+      EXPECT_EQ(allDescriptors[partID].size(), D.m_partModels[0][partID].descriptors.size());
+      for (unsigned int i = 0; i < allDescriptors[partID].size(); i++)
+        EXPECT_EQ(allDescriptors[partID][i], D.m_partModels[0][partID].descriptors[i]);
+      vector <vector <vector <float>>> G = decodeDescriptor(allDescriptors[partID], D.m_partSize[partID], D.m_blockSize, D.m_blockStride, D.m_cellSize, D.m_nbins);
+      for (unsigned int i = 0; i < G.size(); i++)
+        for (unsigned int k = 0; k < G[i].size(); k++)
+          for (unsigned int n = 0; n < G[i][k].size(); n++)
+            EXPECT_EQ(G[i][k][n], D.m_partModels[0][partID].gradientStrengths[i][k][n]);
+      allDescriptors[partID].clear();
+    }
+    allDescriptors.clear();
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
     HFrames.clear();
   }
 
   TEST(HOGDetectorTests, detect)
   {
     //Load the input data
-    HFrames = LoadTestProject("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project;
+    project.Load("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> HFrames = project.getFrames();
 
     //Counting a keyframes
     //int KeyframesCount = 0;
@@ -481,11 +492,13 @@ namespace SPEL
     //int derivAperture = 1;
     //int histogramNormType = HOGDescriptor::L2Hys;
 
-    // Run "detect"
+    // Run "train"
     HogDetector D;
     D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
     map<string, float> params;
     D.train(HFrames, params);
+
+    // Run "detect"
     map<uint32_t, vector<LimbLabel>> limbLabels;
     map <string, float> detectParams;
     limbLabels = D.detect(HFrames[1], detectParams, limbLabels);
@@ -560,7 +573,7 @@ namespace SPEL
       effectiveLabels.emplace(pair<int, vector<LimbLabel>>(id, temp));
     }
 
-    //Output top of "effectiveLabels" into text file
+    // Output top of "effectiveLabels" into text file
     fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
     for (unsigned int i = 0; i < effectiveLabels.size(); i++)
     {
@@ -598,15 +611,11 @@ namespace SPEL
     }
     if (!EffectiveLabbelsInTop) cout << endl;
 
-    image.release();
-    mask.release();
-
-    for (unsigned int i = 0; i < HFrames.size(); i++)
-      delete HFrames[i];
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
     HFrames.clear();
-
   }
-
+  
   TEST(HOGDetectorTests, compare)
   {
     int DescriptorLength = 3780;

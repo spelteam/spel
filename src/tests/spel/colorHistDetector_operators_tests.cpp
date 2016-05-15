@@ -40,7 +40,6 @@ namespace SPEL
     ColorHistDetector chd0;
     map <string, float> params;
     chd0.train(frames, params);
-    frames.clear();
 
     // Using operator "="
     ColorHistDetector copyed_chd = chd0;
@@ -52,6 +51,12 @@ namespace SPEL
       uchar b = static_cast<uchar>(i);
       EXPECT_EQ(Vec3b(b, b, b), actual_frames[i]->getImage().at<Vec3b>(0, 0));
     }
+
+    // Clear
+    for (unsigned int i = 0; i < frames.size(); i++)
+      delete frames[i];
+    frames.clear();
+    actual_frames.clear();
 
   }
 }

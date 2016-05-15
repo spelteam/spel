@@ -36,6 +36,7 @@ using namespace SPEL;
 class ProjectLoader
 {
 public:
+  ProjectLoader();
   ProjectLoader(string _curFolder);
   ~ProjectLoader();
   void SetCurFolder(string _curFolder);

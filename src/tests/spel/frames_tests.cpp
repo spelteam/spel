@@ -14,6 +14,7 @@
 #include "bodyPart.hpp"
 #include "skeleton.hpp"
 #include "projectLoader.hpp"
+#include "TestsFunctions.hpp"
 
 namespace SPEL
 {
@@ -199,22 +200,12 @@ namespace SPEL
 
   TEST(FramesTests, shiftSkeleton2D)
   {
-    String FilePath;
-    FilePath = "speltests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/speltests_TestData/CHDTrainTestData/";
-#endif
-
     //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
 
     //Copy skeleton from keyframe
-    Frame* frame = frames[0];
-    Skeleton skeleton = frame->getSkeleton();
+    Skeleton skeleton = frames[0]->getSkeleton();
     tree<BodyPart> PartTree = skeleton.getPartTree();
 
     //Create shifted points vector 
@@ -224,27 +215,24 @@ namespace SPEL
       locations_expected[i] += shift;
 
     //Run "shiftSkeleton2D"
-    frame->shiftSkeleton2D(shift);
-    map<int, Point2f> locations_actual = getImageLocations_ft(frame->getSkeleton());
+    frames[0]->shiftSkeleton2D(shift);
+    map<int, Point2f> locations_actual = getImageLocations_ft(frames[0]->getSkeleton());
 
     EXPECT_EQ(locations_expected, locations_actual) << " Skeleton shift error?!\n* Impact of 'skeleton.infer3D' not considered in this test!";
     //Impact of "skeleton.infer3D" in "shiftSkeleton2D" not considered in this test!;
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
+    locations_expected.clear();
+    locations_actual.clear();
   }
-  /**/
+
   TEST(FramesTests, Resize)
   {
-    String FilePath;
-    FilePath = "speltests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/speltests_TestData/CHDTrainTestData/";
-#endif
-
     //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
 
     //Copy skeleton from keyframe
     Frame* frame = frames[0];
@@ -291,22 +279,19 @@ namespace SPEL
       actual_searchRadius.emplace(pair<int, float>(p->getPartID(), p->getSearchRadius()*X));
 
     EXPECT_EQ(expected_searchRadius, actual_searchRadius);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
+    locations_expected.clear();
+    locations_actual.clear();
   }
 
   TEST(FramesTests, Clone)
   {
-    String FilePath;
-    FilePath = "speltests_TestData/CHDTrainTestData/";
-
-#if defined(WINDOWS) && defined(_MSC_VER)
-    if (IsDebuggerPresent())
-      FilePath = "Debug/speltests_TestData/CHDTrainTestData/";
-#endif
-
     //Load the input data
-    ProjectLoader projectLoader(FilePath);
-    projectLoader.Load(FilePath + "trijumpSD_50x41.xml");
-    vector<Frame*> frames = projectLoader.getFrames();
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> frames = project.getFrames();
 
     //Copy keyframe
     Frame* frame0 = frames[0];
@@ -343,6 +328,10 @@ namespace SPEL
     mask0.release();
     image1.release();
     mask1.release();
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(FramesTests, getFrametype)

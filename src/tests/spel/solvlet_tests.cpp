@@ -110,7 +110,8 @@ namespace SPEL
   TEST(solvlet_Tests, toSkeleton)
   {    
     //Load the input data
-    vector<Frame*> Frames = LoadTestProject( "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    vector<Frame*> Frames = project.getFrames();
     int frameID = 0;
     Skeleton skeleton = Frames[frameID]->getSkeleton();
     
@@ -200,6 +201,10 @@ namespace SPEL
     ExpectedPartsLocations.clear();
 
     Labels.clear();
+
+    //Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    Frames.clear();
   }
 
   TEST(solvlet_Tests, evaluateSolution)
@@ -268,6 +273,8 @@ namespace SPEL
 
     EXPECT_NEAR((L - dx) / (L + dx) -1.0f, X, error);
 
+    // Clear
+    delete frame;
   }
 
 }

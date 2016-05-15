@@ -6,6 +6,10 @@
 #include "lockframe.hpp"
 #include "spelHelper.hpp"
 
+ProjectLoader::ProjectLoader()
+{
+}
+
 ProjectLoader::ProjectLoader(string _curFolder)
 {
   curFolder = _curFolder;

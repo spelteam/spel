@@ -245,7 +245,8 @@ namespace SPEL
   {
     //Load the input data
     float r = 0.5 * 135;
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    TestProjectLoader project("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    vector<Frame*> frames = project.getFrames();
     cout << "frames.size = " << frames.size() << endl;
     cout << "Image.size = " << frames[0]->getImage().size() << endl;
     cout << "Mask.size = " << frames[0]->getMask().size() << endl;
@@ -304,13 +305,18 @@ namespace SPEL
           cout << ISM_expected.at(frames[i]->getID(), frames[k]->getID()) << endl;
         }
     EXPECT_FALSE(exceedsError);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
 
   TEST(ImageSimilarityMatrixTests_, computeISMcell)
   {
     //Load the input data
     float r = 0.5 * 135;
-    vector<Frame*> frames = LoadTestProject("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    TestProjectLoader project("speltests_TestData/SimilarityMatrixTestsData/", "Abstraction.xml");
+    vector<Frame*> frames = project.getFrames();
     cout << "frames.size = " << frames.size() << endl;
     cout << "Image.size = " << frames[0]->getImage().size() << endl;
     cout << "Mask.size = " << frames[0]->getMask().size() << endl;
@@ -383,6 +389,10 @@ namespace SPEL
     for (unsigned int i = 0; i < frames.size(); i++)
       for (unsigned int k = 0; k < frames.size(); k++)
         EXPECT_NEAR(ISM_expected.at(frames[i]->getID(), frames[k]->getID()), ISM_actual.at(frames[i]->getID(), frames[k]->getID()), error);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    frames.clear();
   }
   /*
   TEST(ImageSimilarityMatrixTests_, computeMSMcell)
