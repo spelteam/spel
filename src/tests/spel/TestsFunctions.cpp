@@ -181,11 +181,6 @@ namespace SPEL
   }
 //---------------------------------------------------------------------------------------
 //TestProjectLoader
-  TestProjectLoader::~TestProjectLoader()
-  {
-    ProjectLoader::~ProjectLoader();
-  }
-
   TestProjectLoader::TestProjectLoader()
   {
     SetCurFolder("");
@@ -208,11 +203,6 @@ namespace SPEL
   }
 //---------------------------------------------------------------------------------------
 //TestSequence
-  TestSequence::~TestSequence()
-  {
-    Sequence::~Sequence();
-  }
-
   bool TestSequence::Load(string FilePath, string FileName)
   {
     TestProjectLoader temp;

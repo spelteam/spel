@@ -27,7 +27,6 @@ namespace SPEL
   class TestProjectLoader : public ProjectLoader
   {
   public:
-    ~TestProjectLoader();
     TestProjectLoader();
     TestProjectLoader(string FilePath, string FileName);
     bool Load(string FilePath, string FileName);
@@ -35,7 +34,6 @@ namespace SPEL
   class TestSequence : public Sequence
   {
   public:
-    ~TestSequence();
     bool Load(string FilePath, string FileName);
     bool Load(map <string, float> &params, string FilePath, string FileName);
     TestSequence(string FilePath, string FileName);
