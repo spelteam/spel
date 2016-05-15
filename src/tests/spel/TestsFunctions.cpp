@@ -209,7 +209,7 @@ namespace SPEL
     bool loaded = temp.Load(FilePath, FileName);
     Sequence::setFrames(temp.getFrames());
     Sequence::setName(FileName);
-    temp.ProjectLoader::~ProjectLoader();
+    //temp.ProjectLoader::~ProjectLoader();
 
     return loaded;
   }
