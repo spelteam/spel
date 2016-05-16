@@ -339,7 +339,8 @@ namespace SPEL
     LoadMask();
   }
 
-  void Frame::LoadAll(const std::string & imagePath, const std::string & maskPath)
+  void Frame::LoadAll(const std::string & imagePath, 
+    const std::string & maskPath)
   {
     LoadImage(imagePath);
     LoadMask(maskPath);
