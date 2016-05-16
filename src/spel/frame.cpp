@@ -298,7 +298,15 @@ namespace SPEL
   {
     if (m_imagePath == path)
       return;
-    auto dst = spelHelper::getTempFileName(".png");
+    auto ext = std::string(".png");
+    auto pos = path.rfind('.');
+    if (pos != std::string::npos)
+    {
+      auto text = path.substr(pos + 1);
+      if (!text.empty())
+        ext = text;
+    }
+    auto dst = spelHelper::getTempFileName(ext);
     spelHelper::copyFile(dst, path);
     m_imagePath = dst;
   }
@@ -312,7 +320,15 @@ namespace SPEL
   {
     if (m_maskPath == path)
       return;
-    auto dst = spelHelper::getTempFileName(".pgm");
+    auto ext = std::string(".pgm");
+    auto pos = path.rfind('.');
+    if (pos != std::string::npos)
+    {
+      auto text = path.substr(pos + 1);
+      if (!text.empty())
+        ext = text;
+    }
+    auto dst = spelHelper::getTempFileName(ext);
     spelHelper::copyFile(dst, path);
     m_maskPath = dst;
   }
