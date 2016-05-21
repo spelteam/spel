@@ -2,7 +2,6 @@
 
 namespace SPEL
 {
-
   Keyframe::Keyframe(void) noexcept : Frame(KEYFRAME)
   {
   }

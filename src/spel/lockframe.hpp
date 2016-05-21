@@ -8,12 +8,20 @@
 
 namespace SPEL
 {
-  ///This class represents frames that
-  ///founded by solver
+  /// <summary>
+  /// This class represents frames that founded by solver.
+  /// </summary>
+  /// <seealso cref="Frame" />
   class Lockframe : public Frame
   {
   public:
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Lockframe"/> class.
+    /// </summary>
     Lockframe(void) noexcept;
+    /// <summary>
+    /// Finalizes an instance of the <see cref="Lockframe"/> class.
+    /// </summary>
     virtual ~Lockframe(void) noexcept;
   };
 }

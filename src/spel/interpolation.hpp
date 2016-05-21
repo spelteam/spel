@@ -7,12 +7,20 @@
 #include "frame.hpp"
 namespace SPEL
 {
-  ///This class represents frames that
-  ///interpolated between keyframes
+  /// <summary>
+  /// This class represents frames that interpolated between keyframes.
+  /// </summary>
+  /// <seealso cref="Frame" />
   class Interpolation : public Frame
   {
   public:
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Interpolation"/> class.
+    /// </summary>
     Interpolation(void) noexcept;
+    /// <summary>
+    /// Finalizes an instance of the <see cref="Interpolation"/> class.
+    /// </summary>
     virtual ~Interpolation(void) noexcept;
   };
 }
