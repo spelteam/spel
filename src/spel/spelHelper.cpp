@@ -118,6 +118,8 @@ namespace SPEL
 
   std::string spelHelper::getTempFileName(std::string ext)
   {
+    if (ext.find('.') == std::string::npos)
+      ext.insert(0, 1, '.');
 #ifdef WINDOWS
     char buf[MAX_PATH];
     auto ret = GetTempPath(MAX_PATH, buf);

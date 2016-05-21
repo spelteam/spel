@@ -448,9 +448,10 @@ namespace SPEL
 
     delete workFrame;
 
-    for (auto &i : tempLabelVector)
-      for (auto &label : i.second)
-        label.Resize(pow(resizeFactor, -1));
+    if (resizeFactor)
+      for (auto &i : tempLabelVector)
+        for (auto &label : i.second)
+          label.Resize(pow(resizeFactor, -1));
 
     return merge(limbLabels, tempLabelVector, sortedLabelsMap);
   }

@@ -302,7 +302,7 @@ namespace SPEL
     auto pos = path.rfind('.');
     if (pos != std::string::npos)
     {
-      auto text = path.substr(pos + 1);
+      auto text = path.substr(pos);
       if (!text.empty())
         ext = text;
     }
