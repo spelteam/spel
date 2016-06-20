@@ -66,7 +66,7 @@ namespace SPEL
 
   }
 
-  void Sequence::setFrames(const std::vector<Frame *> _frames)
+  void Sequence::setFrames(const std::vector<Frame *> &_frames)
   {
     for (auto f : frames)
       delete f;
@@ -198,9 +198,9 @@ namespace SPEL
       interpolatedSkeleton.infer3D(); //infer 3D from the interpolated 2D joints
       interpolatedFrame.setSkeleton(interpolatedSkeleton);
       interpolatedFrame.setID(slice[i]->getID());
-      interpolatedFrame.setMask(slice[i]->getMask());
+      interpolatedFrame.SetMaskFromPath(slice[i]->GetMaskPath());
       interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
-      interpolatedFrame.setImage(slice[i]->getImage());
+      interpolatedFrame.SetImageFromPath(slice[i]->GetImagePath());
 
       //delete slice[i];
       *slice[i] = interpolatedFrame;
@@ -380,9 +380,9 @@ namespace SPEL
       interpolatedSkeleton.infer2D(); //infer 2D from the interpolated 3D joints
       interpolatedFrame.setSkeleton(interpolatedSkeleton);
       interpolatedFrame.setID(slice[i]->getID());
-      interpolatedFrame.setMask(slice[i]->getMask());
+      interpolatedFrame.SetMaskFromPath(slice[i]->GetMaskPath());
       interpolatedFrame.setGroundPoint(slice[i]->getGroundPoint());
-      interpolatedFrame.setImage(slice[i]->getImage());
+      interpolatedFrame.SetImageFromPath(slice[i]->GetImagePath());
 
       //delete slice[i];
       *slice[i] = interpolatedFrame;

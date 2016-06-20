@@ -90,7 +90,6 @@ namespace SPEL
     cv::Size wndSize;
     auto skeleton = frame->getSkeleton();
     auto partTree = skeleton.getPartTree();
-    auto imgMat = frame->getImage();
     for (const auto &part : partTree)
     {
       try
@@ -123,10 +122,11 @@ namespace SPEL
       auto j1 = joint->getImageLocation();
       try
       {
-        parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(), computeDescriptors(part, j0, j1, imgMat, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages)));
+        parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(), computeDescriptors(part, j0, j1, frame->getImage(), nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages)));
       }
       catch (std::logic_error err)
       {
+        frame->UnloadAll();
         std::stringstream ss;
         ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part.getPartID() << std::endl;
         ss << "\t" << err.what();
@@ -134,6 +134,7 @@ namespace SPEL
         throw std::out_of_range(ss.str());
       }
     }
+    frame->UnloadAll();
     return parts;
   }
 
@@ -290,7 +291,7 @@ namespace SPEL
     {
       return compare(bodyPart, generatedPartModel, m_nbins);
     };
-
+    frame->UnloadAll();
     return Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useHoGdet, comparer);
   }
 

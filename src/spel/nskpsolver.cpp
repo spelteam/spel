@@ -60,7 +60,7 @@ namespace SPEL
       std::vector<Solvlet> sol = propagateKeyframes(propagatedFrames, params, ism, trees, ignore);
 
       //add the new solves to the return vector
-      for (auto s : sol)
+      for (const auto &s : sol)
         solvlets.push_back(s);
 
       //calculate number of lockframes in the sequence
@@ -96,10 +96,10 @@ namespace SPEL
     return solvlets;
   }
 
-  std::vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const std::vector<Frame*> frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree>& trees, std::vector<int>& ignore)
+  std::vector<NSKPSolver::SolvletScore> NSKPSolver::propagateFrame(int frameId, const std::vector<Frame*> &frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree>& trees, std::vector<int>& ignore)
   {
     std::vector<NSKPSolver::SolvletScore> allSolves;
-    cv::Mat image = frames[0]->getImage();
+    auto imageHeight = frames[0]->getImageSize().height;
     // //@Q should frame ordering matter? in this function it should not matter, so no checks are necessary
     // float mst_thresm_multiplier=params.at("mst_thresh_multiplier"); //@FIXME PARAM this is a param, not static
     // int mst_max_size=params.at("mst_max_size"); //@FIXME PARAM this is a param, not static
@@ -127,7 +127,7 @@ namespace SPEL
     params.emplace("baseRotationStep", baseRotationRange / 4.0); //search with angle step of 10 degrees, this a per-part range and overrides globals
     params.emplace("stepTheta", baseRotationRange / 4.0); //search in a grid every 10 pixels
 
-    params.emplace("baseSearchRadius", image.rows / 30.0); //search a radius of 100 pixels
+    params.emplace("baseSearchRadius", imageHeight / 30.0); //search a radius of 100 pixels
     int baseSearchRadius = params.at("baseSearchRadius");
     params.emplace("baseSearchStep", baseSearchRadius / 10.0); //do 9-10 steps in each direction
     //solver sensitivity parameters
@@ -241,8 +241,8 @@ namespace SPEL
 
 
         lockframe->setID(frames[*mstIter]->getID());
-        lockframe->setImage(frames[*mstIter]->getImage());
-        lockframe->setMask(frames[*mstIter]->getMask());
+        lockframe->SetImageFromPath(frames[*mstIter]->GetImagePath());
+        lockframe->SetMaskFromPath(frames[*mstIter]->GetMaskPath());
 
         //compute the shift between the frame we are propagating from and the current frame
         cv::Point2f shift;
@@ -587,9 +587,9 @@ namespace SPEL
 
     float acceptLockframeThreshold = params.at("nskpLockframeThreshold");
 
-    for (auto frameSolves : allSolves)
+    for (const auto &frameSolves : allSolves)
     {
-      for (auto solve : frameSolves)
+      for (const auto &solve : frameSolves)
       {
         if (solve.score >= acceptLockframeThreshold)
         {
@@ -603,15 +603,15 @@ namespace SPEL
 
     //now create skeletons for these solves
 
-    for (auto bs : bestSolves)
+    for (const auto &bs : bestSolves)
     {
       SolvletScore ss = bs.second;
       int thisFrameID = ss.solvlet.getFrameID();
       int parentFrameID = ss.parentFrame;//the ID of the frame the solve prior came from
       
       Lockframe * lockframe = new Lockframe();
-      lockframe->setImage(frames[thisFrameID]->getImage());
-      lockframe->setMask(frames[thisFrameID]->getMask());
+      lockframe->SetImageFromPath(frames[thisFrameID]->GetImagePath());
+      lockframe->SetMaskFromPath(frames[thisFrameID]->GetMaskPath());
       lockframe->setID(thisFrameID);
       Skeleton parentSkel = frames[parentFrameID]->getSkeleton();
       Skeleton skel = ss.solvlet.toSkeleton(parentSkel);
@@ -1073,6 +1073,8 @@ namespace SPEL
 
     if (debugLevel >= 1)
       std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << std::endl;
+    
+    frame->UnloadAll();
 
     return solutionEval;
   }

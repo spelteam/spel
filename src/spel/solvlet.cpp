@@ -264,6 +264,8 @@ namespace SPEL
     if (debugLevel >= 1)
       std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << std::endl;
 
+    frame->UnloadAll();
+
     return solutionEval;
   }
   

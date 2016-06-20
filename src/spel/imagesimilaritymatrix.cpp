@@ -598,6 +598,9 @@ namespace SPEL
 
     ROI.clear();
     Center.clear();
+
+    for (unsigned int i = 0; i < frames.size(); i++)
+      frames[i]->UnloadAll();
   }
 
   void ImageSimilarityMatrix::buildImageSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate, bool UseRGBScore, bool inverseScore)
@@ -627,6 +630,7 @@ namespace SPEL
         
         modified_frames[i]->setMask(mask);
         mask.release();
+        frames[i]->UnloadAll();
       }
 
       // Build ISM on modified frames

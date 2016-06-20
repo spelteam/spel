@@ -129,8 +129,8 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
 
                 vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
                 vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+                vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+                vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
 
                 actualKeyframes.push_back(frameID);
             }
@@ -170,8 +170,8 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
     \
                     vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
                     vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                    vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                    vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+                    vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+                    vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
 
                     actualKeyframes.push_back(frameID);
 
@@ -195,8 +195,8 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
             //copy all the data
 \
             vFrames[frameID]->setID(gtFrames[frameID]->getID());
-            vFrames[frameID]->setImage(gtFrames[frameID]->getImage().clone()); //deep copy image
-            vFrames[frameID]->setMask(gtFrames[frameID]->getMask().clone()); //deep copy mask
+            vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath()); //deep copy image
+            vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath()); //deep copy mask
 
             //actualKeyframes.push_back(frameID);
         }
@@ -232,8 +232,8 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
                 //copy all the data
                 vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
                 vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+                vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+                vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
 
                 actualKeyframes.push_back(frameID);
             }
@@ -247,8 +247,8 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
 
             vFrames[0]->setSkeleton(gtFrames[0]->getSkeleton());
             vFrames[0]->setID(gtFrames[0]->getID());
-            vFrames[0]->setImage(gtFrames[0]->getImage());
-            vFrames[0]->setMask(gtFrames[0]->getMask());
+            vFrames[0]->SetImageFromPath(gtFrames[0]->GetImagePath());
+            vFrames[0]->SetMaskFromPath(gtFrames[0]->GetMaskPath());
 
             actualKeyframes.push_back(0);
         }
@@ -261,8 +261,8 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
 
             vFrames[vFrames.size()-1]->setSkeleton(gtFrames[vFrames.size()-1]->getSkeleton());
             vFrames[vFrames.size()-1]->setID(gtFrames[vFrames.size()-1]->getID());
-            vFrames[vFrames.size()-1]->setImage(gtFrames[vFrames.size()-1]->getImage());
-            vFrames[vFrames.size()-1]->setMask(gtFrames[vFrames.size()-1]->getMask());
+            vFrames[vFrames.size()-1]->SetImageFromPath(gtFrames[vFrames.size()-1]->GetImagePath());
+            vFrames[vFrames.size()-1]->SetMaskFromPath(gtFrames[vFrames.size()-1]->GetMaskPath());
 
             actualKeyframes.push_back(vFrames.size()-1);
         }
@@ -293,8 +293,8 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
 
                 vFrames[maxGapIndex]->setSkeleton(gtFrames[maxGapIndex]->getSkeleton());
                 vFrames[maxGapIndex]->setID(gtFrames[maxGapIndex]->getID());
-                vFrames[maxGapIndex]->setImage(gtFrames[maxGapIndex]->getImage());
-                vFrames[maxGapIndex]->setMask(gtFrames[maxGapIndex]->getMask());
+                vFrames[maxGapIndex]->SetImageFromPath(gtFrames[maxGapIndex]->GetImagePath());
+                vFrames[maxGapIndex]->SetMaskFromPath(gtFrames[maxGapIndex]->GetMaskPath());
 
                 actualKeyframes.push_back(maxGapIndex);
             }
@@ -312,8 +312,8 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
 
             vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
             vFrames[frameID]->setID(gtFrames[frameID]->getID());
-            vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-            vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+            vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+            vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
 
             actualKeyframes.push_back(frameID);
         }
@@ -326,8 +326,8 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
 
             vFrames[vFrames.size()-1]->setSkeleton(gtFrames[vFrames.size()-1]->getSkeleton());
             vFrames[vFrames.size()-1]->setID(gtFrames[vFrames.size()-1]->getID());
-            vFrames[vFrames.size()-1]->setImage(gtFrames[vFrames.size()-1]->getImage());
-            vFrames[vFrames.size()-1]->setMask(gtFrames[vFrames.size()-1]->getMask());
+            vFrames[vFrames.size()-1]->SetImageFromPath(gtFrames[vFrames.size()-1]->GetImagePath());
+            vFrames[vFrames.size()-1]->SetMaskFromPath(gtFrames[vFrames.size()-1]->GetMaskPath());
 
             actualKeyframes.push_back(vFrames.size()-1);
         }
@@ -346,8 +346,8 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
             //copy all the data
 \
             vFrames[frameID]->setID(gtFrames[frameID]->getID());
-            vFrames[frameID]->setImage(gtFrames[frameID]->getImage()); //deep copy image
-            vFrames[frameID]->setMask(gtFrames[frameID]->getMask()); //deep copy mask
+            vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath()); //deep copy image
+            vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath()); //deep copy mask
 
             //actualKeyframes.push_back(frameID);
         }
@@ -786,7 +786,7 @@ int main (int argc, char **argv)
                     //do an iterative NSKP solve
                     nskpSolve = nSolver.solve(seq, params, ism);
 
-                    for(auto s: nskpSolve)
+                    for(const auto &s: nskpSolve)
                         finalSolve.push_back(s);
 
                 }
@@ -798,7 +798,7 @@ int main (int argc, char **argv)
 
                     tlpsSolve = tSolver.solve(seq, params);
 
-                    for(auto s: tlpsSolve)
+                    for(const auto &s: tlpsSolve)
                         finalSolve.push_back(s);
                 }
                 numIters++;
@@ -813,7 +813,7 @@ int main (int argc, char **argv)
 
             vector<Solvlet> tlpsSolve = tSolver.solve(seq, params);
 
-            for(auto s: tlpsSolve)
+            for(const auto &s: tlpsSolve)
                 finalSolve.push_back(s);
 
 

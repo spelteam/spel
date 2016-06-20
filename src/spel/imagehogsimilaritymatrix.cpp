@@ -158,6 +158,8 @@ namespace SPEL
     }
     catch (std::exception ex)
     {
+      left->UnloadAll();
+      right->UnloadAll();
       std::stringstream ss;
       ss << "It seems that coordinates are wrong and you need to invert x and y or width and height: " << ex.what();
       DebugMessage(ss.str(), 1);
@@ -169,6 +171,10 @@ namespace SPEL
 
     if (imgMatSizeOne != imgMatSizeTwo)
     {
+      left->UnloadAll();
+      right->UnloadAll();
+      imgMatNewOne.release();
+      imgMatNewTwo.release();
       std::stringstream ss;
       ss << "Frames have different sizes";
       DebugMessage(ss.str(), 1);
@@ -192,6 +198,10 @@ namespace SPEL
 
     if (gradientStrengthsOne.size() != gradientStrengthsTwo.size())
     {
+      left->UnloadAll();
+      right->UnloadAll();
+      imgMatNewOne.release();
+      imgMatNewTwo.release();
       std::stringstream ss;
       ss << "Results have different sizes: one=" << gradientStrengthsOne.size() << "\ttwo=" << gradientStrengthsTwo.size();
       DebugMessage(ss.str(), 1);
@@ -201,6 +211,10 @@ namespace SPEL
     {
       if (gradientStrengthsOne.at(i).size() != gradientStrengthsTwo.at(i).size())
       {
+        left->UnloadAll();
+        right->UnloadAll();
+        imgMatNewOne.release();
+        imgMatNewTwo.release();
         std::stringstream ss;
         ss << "Results have different sizes: one=" << gradientStrengthsOne.at(i).size() << "\ttwo=" << gradientStrengthsTwo.at(i).size();
         DebugMessage(ss.str(), 1);
@@ -210,6 +224,10 @@ namespace SPEL
       {
         if (gradientStrengthsOne.at(i).at(j).size() != gradientStrengthsTwo.at(i).at(j).size())
         {
+          left->UnloadAll();
+          right->UnloadAll();
+          imgMatNewOne.release();
+          imgMatNewTwo.release();
           std::stringstream ss;
           ss << "Results have different sizes: one=" << gradientStrengthsOne.at(i).at(j).size() << "\ttwo=" << gradientStrengthsTwo.at(i).at(j).size();
           DebugMessage(ss.str(), 1);
@@ -225,6 +243,8 @@ namespace SPEL
 
     imgMatNewOne.release();
     imgMatNewTwo.release();
+    left->UnloadAll();
+    right->UnloadAll();
 
     return;
   }

@@ -324,8 +324,6 @@ namespace SPEL
     // copy tree of bodypart from the skeleton
     const auto &partTree = skeleton.getPartTree(); 
 
-    const auto &maskMat = workFrame->getMask(); // copy mask from the frame
-
     std::stringstream detectorName;
     detectorName << getID();
 
@@ -377,6 +375,9 @@ namespace SPEL
       auto searchXMax = suggestStart.x + searchDistance * 0.5f;
       auto searchYMin = suggestStart.y - searchDistance * 0.5f;
       auto searchYMax = suggestStart.y + searchDistance * 0.5f;
+
+      const auto &maskMat = workFrame->getMask(); // copy mask from the frame
+
       // Scan the area around the reference point
       for (auto x = searchXMin; x < searchXMax; x += minDist)
       {

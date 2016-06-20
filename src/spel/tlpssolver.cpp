@@ -43,7 +43,6 @@ namespace SPEL
     if (frames.size() == 0)
       return std::vector<Solvlet>();
 
-    cv::Mat image(frames[0]->getImage());
     //the params vector should contain all necessary parameters, if a parameter is not present, default values should be used
     params.emplace("debugLevel", 1); //set up the lockframe accept threshold by mask coverage
     params.emplace("temporalWindowSize", 0); //0 for unlimited window size
@@ -59,7 +58,7 @@ namespace SPEL
     float baseRotationRange = params.at("baseRotationRange");
     params.emplace("baseRotationStep", baseRotationRange / 4.0); //search with angle step of 10 degrees
 
-    params.emplace("baseSearchRadius", image.rows / 30.0); //search a radius of 100 pixels
+    params.emplace("baseSearchRadius", frames[0]->getImageSize().height / 30.0); //search a radius of 100 pixels
     int baseSearchRadius = params.at("baseSearchRadius");
     params.emplace("baseSearchStep", baseSearchRadius / 10.0); //search in a grid every 10 pixels
 
@@ -304,7 +303,7 @@ namespace SPEL
         //construct the image score cost factors
         //label score cost
         std::cerr << "Computing Factors at Frame " << seqSlice[currentFrame]->getID() << std::endl;
-        auto labels = detections[currentFrame];
+        auto &labels = detections[currentFrame];
         for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter) //for each of the detected parts
         {
           std::vector<Score> scores = labels[partIter->getPartID()].at(0).getScores();
@@ -475,7 +474,7 @@ namespace SPEL
         }
       }
 
-      if (debugLevel >= 0)
+      if (debugLevel > 0)
       {
         float n, k;
         n = seqSlice.size() - 2; //num non-anchor frames
@@ -577,8 +576,8 @@ namespace SPEL
           int parentFrameID = thisFrameID;//this frame is it's own parent frame, since this is a temporal solve
 
           Lockframe * lockframe = new Lockframe();
-          lockframe->setImage(frames[thisFrameID]->getImage());
-          lockframe->setMask(frames[thisFrameID]->getMask());
+          lockframe->SetImageFromPath(frames[thisFrameID]->GetImagePath());
+          lockframe->SetMaskFromPath(frames[thisFrameID]->GetMaskPath());
           lockframe->setID(thisFrameID);
           Skeleton parentSkel = frames[parentFrameID]->getSkeleton(); //use skeleton to mimic the structure of
           Skeleton skel = solvlet.toSkeleton(parentSkel);
@@ -778,6 +777,8 @@ namespace SPEL
 
     if (debugLevel >= 1)
       std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << std::endl;
+
+    frame->UnloadAll();
 
     return solutionEval;
   }

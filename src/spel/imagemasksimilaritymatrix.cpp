@@ -84,6 +84,9 @@ namespace SPEL
     imageSimilarityMatrix.at<float>(i, j) = maskSimilarityScore;
     imageSimilarityMatrix.at<float>(j, i) = maskSimilarityScore;
 
+    left->UnloadAll();
+    right->UnloadAll();
+
     return;
   }
 

@@ -582,6 +582,7 @@ namespace SPEL
           }
           catch (...)
           {
+            workFrame->UnloadAll();
             std::stringstream ss;
             ss << "Couldn't get imgMat value of indeces " << "[" << j << 
               "][" << i << "]";
@@ -600,6 +601,7 @@ namespace SPEL
           }
           catch (...)
           {
+            workFrame->UnloadAll();
             std::stringstream ss;
             ss << "Couldn't get maskMat value of indeces " << "[" << j << 
               "][" << i << "]";

@@ -525,7 +525,9 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   cerr << "Writing file " << outFileName << endl;
   if (frame->getParentFrameID() != -1)
     cerr << "Parent Frame ID: " << frame->getParentFrameID() << endl;
-  return imwrite(outFileName, image);
+  auto result = imwrite(outFileName, image);
+  frame->UnloadAll();
+  return result;
 }
 
 bool ProjectLoader::drawLockframeSolvlets(const ImageSimilarityMatrix &ism, Solvlet sol, Frame *frame, Frame * parentFrame, string outFolder, Scalar color, int lineWidth)
@@ -710,7 +712,9 @@ bool ProjectLoader::drawLockframeSolvlets(const ImageSimilarityMatrix &ism, Solv
 
   parentFrame->shiftSkeleton2D(-shift); //undo the shift
 
-  return imwrite(outFileName, image);
+  auto result = imwrite(outFileName, image);
+  frame->UnloadAll();
+  return result;
 }
 
 bool ProjectLoader::drawSkeleton(Frame *frame, string outFolder, Scalar color, int lineWidth)
@@ -776,7 +780,9 @@ bool ProjectLoader::drawSkeleton(Frame *frame, string outFolder, Scalar color, i
 
   cerr << "Writing file " << outFileName << endl;
 
-  return imwrite(outFileName, image);
+  auto result = imwrite(outFileName, image);
+  frame->UnloadAll();
+  return result;
 }
 
 
@@ -1045,6 +1051,7 @@ bool ProjectLoader::Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame
       line(image, p4, p1, optimalColor, lineWidth, CV_AA);
       break;
     }
+    frame->UnloadAll();
   }
 
   cerr << "Writing file " << outFileName << endl;

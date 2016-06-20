@@ -168,8 +168,8 @@ vector<map<uint32_t, vector<LimbLabel> > > doPropagationDetect(vector<Detector*>
         //Skeleton shiftedPrior = frames[frameId]->getSkeleton();
         lockframe->setSkeleton(frames[kfr]->getSkeleton());
         lockframe->setID(frames[frame]->getID());
-        lockframe->setImage(frames[frame]->getImage());
-        lockframe->setMask(frames[frame]->getMask());
+        lockframe->SetImageFromPath(frames[frame]->GetImagePath());
+        lockframe->SetMaskFromPath(frames[frame]->GetMaskPath());
 
         //compute the shift between the frame we are propagating from and the current frame
         Point2f shift = ism.getShift(frames[kfr]->getID(),frames[frame]->getID());
@@ -513,8 +513,8 @@ int main (int argc, char **argv)
 \
                 vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
                 vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+                vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+                vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
 
                 actualKeyframes.push_back(frameID);
             }
@@ -548,8 +548,8 @@ int main (int argc, char **argv)
         \
                         vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
                         vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                        vFrames[frameID]->setImage(gtFrames[frameID]->getImage());
-                        vFrames[frameID]->setMask(gtFrames[frameID]->getMask());
+                        vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+                        vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
 
                         actualKeyframes.push_back(frameID);
 
@@ -571,8 +571,8 @@ int main (int argc, char **argv)
                 //copy all the data
 \
                 vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                vFrames[frameID]->setImage(gtFrames[frameID]->getImage().clone()); //deep copy image
-                vFrames[frameID]->setMask(gtFrames[frameID]->getMask().clone()); //deep copy mask
+                vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath()); //deep copy image
+                vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath()); //deep copy mask
 
                 //actualKeyframes.push_back(frameID);
             }

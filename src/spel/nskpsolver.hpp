@@ -88,7 +88,7 @@ namespace SPEL
     virtual float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params);
     virtual float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float min, float max);
 
-    virtual std::vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const std::vector<Frame *> frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);
+    virtual std::vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const std::vector<Frame *> &frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);
     virtual int test(int frameId, const std::vector<Frame*>& frames, std::map<std::string, float> params, const ImageSimilarityMatrix &ism, const std::vector<MinSpanningTree> &trees, std::vector<int>& ignore);
   };
 
