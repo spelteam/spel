@@ -12,6 +12,11 @@ namespace SPEL
     m_frametype = frametype;
   }
 
+  Frame::Frame(const Frame & frame) noexcept
+  {
+    frame.clone(this);
+  }
+
   Frame::~Frame(void) noexcept
   {
     m_image.release();
@@ -22,6 +27,15 @@ namespace SPEL
     if (!m_maskPath.empty())
       remove(m_maskPath.c_str());
     m_maskPath.clear();
+  }
+
+  Frame & Frame::operator=(const Frame & frame) noexcept
+  {
+    if (&frame == this)
+      return *this;
+
+    frame.clone(this);
+    return *this;
   }
 
   int Frame::getID(void) const noexcept

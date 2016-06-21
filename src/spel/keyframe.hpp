@@ -19,7 +19,17 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="Keyframe"/> class.
     /// </summary>
-    Keyframe(void) noexcept;
+    Keyframe(void) noexcept;    
+    /// <summary>
+    /// Copy constructor.
+    /// Initializes a new instance of the <see cref="Keyframe"/> class.
+    /// </summary>
+    /// <param name="frame">The frame.</param>
+    Keyframe(const Keyframe &frame) noexcept; 
+    /// <summary>Assignment operator.</summary>
+    /// <param name="frame">The frame.</param>
+    /// <returns>The frame.</returns>
+    Keyframe& operator=(const Keyframe &frame) noexcept;
     /// <summary>
     /// Finalizes an instance of the <see cref="Keyframe"/> class.
     /// </summary>

@@ -17,7 +17,17 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="Interpolation"/> class.
     /// </summary>
-    Interpolation(void) noexcept;
+    Interpolation(void) noexcept;    
+    /// <summary>
+    /// Copy constructor.
+    /// Initializes a new instance of the <see cref="Interpolation"/> class.
+    /// </summary>
+    /// <param name="frame">The frame.</param>
+    Interpolation(const Interpolation &frame) noexcept;    
+    /// <summary>Assignment operator.</summary>
+    /// <param name="frame">The frame.</param>
+    /// <returns>The frame.</returns>
+    Interpolation& operator=(const Interpolation &frame) noexcept;
     /// <summary>
     /// Finalizes an instance of the <see cref="Interpolation"/> class.
     /// </summary>

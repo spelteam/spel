@@ -6,6 +6,16 @@ namespace SPEL
   {
   }
   
+  Keyframe::Keyframe(const Keyframe & frame) noexcept : Frame(frame)
+  {
+  }
+    
+  Keyframe & Keyframe::operator=(const Keyframe & frame) noexcept
+  {
+    Frame::operator=(frame);
+    return *this;
+  }
+
   Keyframe::~Keyframe(void) noexcept
   {
   }

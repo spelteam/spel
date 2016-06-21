@@ -40,10 +40,20 @@ namespace SPEL
     /// <param name="frametype">The frametype.</param>
     Frame(FRAMETYPE frametype) noexcept;
     /// <summary>
+    /// Copy constructor.
+    /// Initializes a new instance of the <see cref="Frame"/> class.
+    /// </summary>
+    /// <param name="frame">The frame.</param>
+    Frame(const Frame &frame) noexcept;
+    /// <summary>
     /// Finalizes an instance of the <see cref="Frame"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~Frame(void) noexcept;
+    virtual ~Frame(void) noexcept;    
+    /// <summary>Assignment operator.</summary>
+    /// <param name="frame">The frame.</param>
+    /// <returns>The frame.</returns>
+    Frame& operator=(const Frame &frame) noexcept;
     /// <summary>Gets the part polygon.</summary>
     /// <param name="partID">The part identifier.</param>
     /// <returns>The part polygon.</returns>

@@ -6,6 +6,16 @@ namespace SPEL
   {
   }
 
+  Interpolation::Interpolation(const Interpolation & frame) noexcept : Frame(frame)
+  {
+  }
+
+  Interpolation & Interpolation::operator=(const Interpolation & frame) noexcept
+  {
+    Frame::operator=(frame);
+    return *this;
+  }
+
   Interpolation::~Interpolation(void) noexcept
   {
   }
