@@ -10,7 +10,6 @@
 #include "lockframe.hpp"
 #include "TestsFunctions.hpp"
 #include "spelHelper.hpp"
-#include <time.h>
 
 using namespace std;
 using namespace cv;
@@ -264,61 +263,61 @@ namespace SPEL
           for (int k = 0; k < s; k++)
             ScalledImage.at<cv::Vec3b>(y*s + i, x*s + k) = imgSource.at<cv::Vec3b>(y, x);
 
-      cv::Point2f dw = ROIRect[3] - ROIRect[0];
-      float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-      cv::Point2f dh = ROIRect[1] - ROIRect[0];
-      float height = sqrt(dh.x*dh.x + dh.y*dh.y);
+    cv::Point2f dw = ROIRect[3] - ROIRect[0];
+    float width = sqrt(dw.x*dw.x + dw.y*dw.y);
+    cv::Point2f dh = ROIRect[1] - ROIRect[0];
+    float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
-      int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
-      cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
+    int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
+    cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
 
-      dw = dw*(1.0f / static_cast<float>(m));
-      dh = dh*(1.0f / static_cast<float>(n));
+    dw = dw*(1.0f / static_cast<float>(m));
+    dh = dh*(1.0f / static_cast<float>(n));
 
-      cv::Point2f p0(round(ROIRect[0].x), round(ROIRect[0].y));
-      cv::Point2f currentPoint(p0);
+    cv::Point2f p0(round(ROIRect[0].x), round(ROIRect[0].y));
+    cv::Point2f currentPoint(p0);
       
-      for (int i = 0; i <= n; i++)
-          for (int k = 0; k <= m; k++)
+    for (int i = 0; i <= n; i++)
+      for (int k = 0; k <= m; k++)
+      {
+        std::vector<cv::Vec3b> colors;
+        std::vector<int> counts;
+        for (float p = -1.0f; p <= 1.0f; p++)
+          for (float t = -1.0f; t <= 1.0f; t++)
           {
-            std::vector<cv::Vec3b> colors;
-            std::vector<int> counts;
-            for (float p = -1.0f; p <= 1.0f; p++)
-              for (float t = -1.0f; t <= 1.0f; t++)
+            currentPoint = s*(p0 + static_cast<float>(i)*dh +0.5f*dh + 0.5f*dw + static_cast<float>(k)*dw + 0.3f*cv::Point2f(p, t)/*p*0.2f*dh + t*0.2f*dw*/);
+            cv::Vec3b color = ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x)));
+            ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) *= 0.2f;
+            ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) += cv::Vec3b(100, 100, 100);
+            int Q = -1;
+            for (int q = 0; q < colors.size(); q++)
+            {
+              if(colors[q] == color) 
               {
-                currentPoint = s*(p0 + static_cast<float>(i)*dh +0.5f*dh + 0.5f*dw + static_cast<float>(k)*dw + 0.3f*cv::Point2f(p, t)/*p*0.2f*dh + t*0.2f*dw*/);
-                cv::Vec3b color = ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x)));
-                ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) *= 0.2f;
-                ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) += cv::Vec3b(100, 100, 100);
-                int Q = -1;
-                for (int q = 0; q < colors.size(); q++)
-                {
-                  if(colors[q] == color) 
-                  {
-                    counts[q]++;
-                    Q = q;
-                  }
-                }
-                if (Q == -1)
-                {
-                  colors.push_back(color);
-                  counts.push_back(1);
-                }
+                counts[q]++;
+                Q = q;
               }
-              int max = 0;
-              cv::Vec3b color(0, 0, 0);
-              for (int t = 0; t < colors.size(); t++)
-              {
-                if(counts[t] > max)
-                {
-                  max = counts[t];
-                  color = colors[t];
-                }
-              }
-              Image.at<cv::Vec3b>(i, k) = color;
-              colors.clear();
-              counts.clear();
+            }
+            if (Q == -1)
+            {
+              colors.push_back(color);
+              counts.push_back(1);
+            }
           }
+          int max = 0;
+          cv::Vec3b color(0, 0, 0);
+          for (int t = 0; t < colors.size(); t++)
+          {
+            if(counts[t] > max)
+            {
+              max = counts[t];
+              color = colors[t];
+            }
+          }
+          Image.at<cv::Vec3b>(i, k) = color;
+          colors.clear();
+          counts.clear();
+        }
 
     imwrite("DeRotate_3_ScannedPoints.bmp", ScalledImage);
     ScalledImage.release();
@@ -352,45 +351,45 @@ namespace SPEL
       cv::Point2f currentPoint(p0);
       
       for (int i = 0; i <= n; i++)
-          for (int k = 0; k <= m; k++)
-          {
-            std::vector<cv::Vec3b> colors;
-            std::vector<int> counts;
-            for (float p = -1.0f; p <= 1.0f; p++)
-              for (float t = -1.0f; t <= 1.0f; t++)
+        for (int k = 0; k <= m; k++)
+        {
+          std::vector<cv::Vec3b> colors;
+          std::vector<int> counts;
+          for (float p = -1.0f; p <= 1.0f; p++)
+            for (float t = -1.0f; t <= 1.0f; t++)
+            {
+              currentPoint = s*(p0 + static_cast<float>(i)*dh +0.5f*dh + 0.5f*dw + static_cast<float>(k)*dw + 0.2f*(p*dh + t*dw));
+              cv::Vec3b color = ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x)));
+              ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) *= 0.2f;
+              ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) += cv::Vec3b(100, 100, 100);
+              int Q = -1;
+              for (int q = 0; q < colors.size(); q++)
               {
-                currentPoint = s*(p0 + static_cast<float>(i)*dh +0.5f*dh + 0.5f*dw + static_cast<float>(k)*dw + 0.2f*(p*dh + t*dw));
-                cv::Vec3b color = ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x)));
-                ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) *= 0.2f;
-                ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) += cv::Vec3b(100, 100, 100);
-                int Q = -1;
-                for (int q = 0; q < colors.size(); q++)
+                if(colors[q] == color) 
                 {
-                  if(colors[q] == color) 
-                  {
-                    counts[q]++;
-                    Q = q;
-                  }
-                }
-                if (Q == -1)
-                {
-                  colors.push_back(color);
-                  counts.push_back(1);
+                  counts[q]++;
+                  Q = q;
                 }
               }
-              int max = 0;
-              cv::Vec3b color(0, 0, 0);
-              for (int t = 0; t < colors.size(); t++)
+              if (Q == -1)
               {
-                if(counts[t] > max)
-                {
-                  max = counts[t];
-                  color = colors[t];
-                }
+                colors.push_back(color);
+                counts.push_back(1);
               }
-              Image.at<cv::Vec3b>(i, k) = color;
-              colors.clear();
-              counts.clear();
+            }
+            int max = 0;
+            cv::Vec3b color(0, 0, 0);
+            for (int t = 0; t < colors.size(); t++)
+            {
+              if(counts[t] > max)
+              {
+                max = counts[t];
+                color = colors[t];
+              }
+            }
+            Image.at<cv::Vec3b>(i, k) = color;
+            colors.clear();
+            counts.clear();
           }
 
       imwrite("DeRotate_3_ScannedPoints.bmp", ScalledImage);
