@@ -827,7 +827,8 @@ namespace SPEL
     // Aclinic polygon
     vector<Point2f> InitialPolygon = { Point2f(0.0f, 0.5f), Point2f(2.0f, 0.5f), Point2f(2.0f, -0.5f), Point2f(0.0f, -0.5f) };
     vector<Point2f> ExpectedPolygon = { Point2f(-0.5f, 1.0f), Point2f(2.5f, 1.0f), Point2f(2.5f, -1.0f), Point2f(-0.5f, -1.0f) };
-    vector<Point2f> ActualPolygon = ExtendSlantedROI(InitialPolygon, 0.5f, 0.5f);
+    vector<Point2f> ActualPolygon;
+    ActualPolygon = ExtendSlantedROI(InitialPolygon, 0.5f, 0.5f);
     EXPECT_EQ(ExpectedPolygon, ActualPolygon) << "- aclinic polygon" << endl;
 
     // Slanded polygon (45 degrees)
@@ -936,7 +937,8 @@ namespace SPEL
         temp << names[f] + "(image" << i << ")";
 
         Mat deRotatedImage;
-        vector<Point2f> StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
+        //vector<Point2f> StandledROI;
+        //StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
         t0 = clock();// GetTickCount();
         deRotatedImage = functions[f](images[i], RotatedRect.asVector(), 11.0f);
         //deRotatedImage = functions[f](images[i], StandledROI, 11.0f);
@@ -1077,7 +1079,8 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
       for (unsigned int i = 0; i < images.size(); i++)
       {
         Mat deRotatedImage;
-        vector<Point2f> StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
+        vector<Point2f> StandledROI;
+        StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
         t0 = clock();
         deRotatedImage = functions[f](images[i], StandledROI, 11.0f);
         t1 = clock();
