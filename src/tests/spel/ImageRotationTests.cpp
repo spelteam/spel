@@ -47,7 +47,7 @@ namespace SPEL
   }
 
   // New ROI polygon dimension = (polygon.width + 2*deltaWidth, polygon.height + 2*deltaHeight) 
-  std::vector<cv::Point2f> ExtendSlantedROI(std::vector<cv::Point2f> &ROIRect, float deltaWidth, float deltaHeight)
+  std::vector<cv::Point2f> ExtendSlantedROI(std::vector<cv::Point2f> ROIRect, float deltaWidth, float deltaHeight)
   {
     cv::Point2f dW = ROIRect[3] - ROIRect[0];
     float width = sqrt(dW.x*dW.x + dW.y*dW.y);
@@ -57,7 +57,8 @@ namespace SPEL
     float k_W = deltaWidth / width;
     float k_H = deltaHeight / height;
 
-    vector<Point2f> NewROIRect = ROIRect;
+    vector<Point2f> NewROIRect;
+    NewROIRect = ROIRect;
     NewROIRect[0] = NewROIRect[0] - (k_W*dW + k_H*dH);
     NewROIRect[1] = NewROIRect[1] - (k_W*dW - k_H*dH);
     NewROIRect[2] = NewROIRect[2] + (k_W*dW + k_H*dH);
@@ -937,10 +938,11 @@ namespace SPEL
         temp << names[f] + "(image" << i << ")";
 
         Mat deRotatedImage;
-        //vector<Point2f> StandledROI;
+        vector<Point2f> StandledROI;
+        StandledROI = RotatedRect.asVector();
         //StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
         t0 = clock();// GetTickCount();
-        deRotatedImage = functions[f](images[i], RotatedRect.asVector(), 11.0f);
+        deRotatedImage = functions[f](images[i], StandledROI, 11.0f);
         //deRotatedImage = functions[f](images[i], StandledROI, 11.0f);
         t1 = clock();// GetTickCount();
 
