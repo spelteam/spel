@@ -96,7 +96,6 @@ namespace SPEL
     EXPECT_TRUE(s0 < s1);
     EXPECT_TRUE(s1 > s0);
     EXPECT_FALSE(s0 > s1);
-    EXPECT_FALSE(s1 > s0);
     EXPECT_FALSE(s0 > s0);// ?
     EXPECT_FALSE(s0 < s0);// ?
 
