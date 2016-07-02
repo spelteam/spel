@@ -88,10 +88,9 @@ namespace SPEL
       workFrame = new Lockframe();
     else if (frame->getFrametype() == INTERPOLATIONFRAME)
       workFrame = new Interpolation();
-    workFrame = frame->clone(frame);
+    workFrame = frame->clone(workFrame);
     float resizeFactor = workFrame->Resize(maxFrameHeight);
-    imgMat = workFrame->getImage().clone();
-
+    imgMat = workFrame->getImage();
     // - all coordinates of key points must have identical scale with the skeleton
 
 #if OpenCV_VERSION_MAJOR == 3
