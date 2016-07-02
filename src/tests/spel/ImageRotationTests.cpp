@@ -1137,4 +1137,200 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
     selectedResults.clear();
   }
 
+  class ImageRotationExperiments_F : public ::testing::Test
+  {
+  protected:
+    virtual void SetUp()
+    {
+#ifdef WINDOWS
+#ifdef DEBUG
+      if (IsDebuggerPresent())
+        Path = "Debug/speltests_TestData/ImageRotationTestData/";
+      else
+        Path = "speltests_TestData/ImageRotationTestData/";
+#else
+    Path = "Release/speltests_TestData/ImageRotationTestData/";
+#endif  // DEBUG
+#else
+    Path = "speltests_TestData/ImageRotationTestData/";
+#endif 
+      for (int i = 1; i <= samplesCount; i++)
+      {
+        stringstream temp;
+        temp << i;
+        images.push_back(imread(Path + "Q" + temp.str()+".jpg"));
+        patterns.push_back(imread(Path + "Pattern" + temp.str() + ".bmp"));
+        temp.clear();
+      }
+      rect = { Point2f(48.748737, 35.464466), Point2f(20.464466, 63.748737), Point2f(-0.74873734, 42.535534), Point2f(27.535534, 14.251263) };
+    }
+
+    virtual void TearDown()
+    {
+      for (unsigned int i = 0; i < patterns.size(); i++)
+      {
+        patterns[i].release();
+        images[i].release();
+      }
+    }
+
+    const int samplesCount = 4;
+    String Path;
+    vector<Point2f> rect;
+    vector<Mat> images;
+    vector<Mat> patterns;
+  };
+
+
+  /* "RotateImageToDefault", 
+        "DeRotate_0", "DeRotate_7", "DeRotate_7_1", "DeRotate_2_visualization", "DeRotate_3_visualization", "DeRotate_4_visualisation",
+         "DeRotate_5", "DeRotate_5_1", "DeRotate_withScale","DeRotate_8", "DeRotate_8_1" ,"DeRotate_8_2" };*/
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_0)
+  {
+    vector<Mat> results;
+    vector<float> errors = {0.0f, 0.0f, 0.0f, 0.0f};
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();	  
+      results.push_back(DeRotate_0(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+      temp.release();
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_7)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_7(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+      temp.release();
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_7_1)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_7_1(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+      temp.release();
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_2_visualization)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_2_visualization(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_3_visualization)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_3_visualization(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_4_visualization)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_4_visualization(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_5)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_5(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_5_1)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_5_1(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_withScale)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_withScale(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_8)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_8(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_8_1)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_8_1(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+    }
+  }
+
+  TEST_F(ImageRotationExperiments_F, DeRotate_8_2)
+  {
+    vector<Mat> results;
+    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (unsigned int i = 0; i < images.size(); i++)
+    {
+      Mat temp = images[i].clone();
+      results.push_back(DeRotate_8_2(temp, rect, 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, errors[i]);
+      temp.release();
+    }
+  }
 }
