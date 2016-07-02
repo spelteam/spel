@@ -91,7 +91,6 @@ namespace SPEL
     workFrame = frame->clone(frame);
     float resizeFactor = workFrame->Resize(maxFrameHeight);
     imgMat = workFrame->getImage().clone();
-    imwrite("surfDetector_detect-TEMP.BMP", imgMat);
 
     // - all coordinates of key points must have identical scale with the skeleton
 
@@ -108,9 +107,10 @@ namespace SPEL
 #endif // OpenCV_VERSION_MAJOR == 3
     if (detectorHelper->keyPoints.empty())
     {
-      workFrame->UnloadAll(); // added 02.07.16
+
       frame->UnloadAll();
       delete detectorHelper;
+      delete workFrame; // added 02.07.16
       std::stringstream ss;
       ss << "Couldn't detect keypoints for frame " << frame->getID();
       DebugMessage(ss.str(), 1);
@@ -119,9 +119,10 @@ namespace SPEL
 
     auto result = Detector::detect(workFrame, params, limbLabels, detectorHelper); // 02.07.16 changed "frame" to "workFrame" (this is a "ñrutch")
 
+    delete workFrame; // added 02.07.16 
     delete detectorHelper;
     frame->UnloadAll();
-    workFrame->UnloadAll(); // added 02.07.16 
+
 
     return result;
   }
