@@ -507,8 +507,16 @@ namespace SPEL
       fout << endl;
     }
 
-    // Copy coordinates of BodyParts from skeleton
-    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(skeleton);
+    // Resize skeleton and copy coordinates of BodyParts
+    Frame * workFrame = new Keyframe();
+    workFrame = SFrames[0]->clone(workFrame);
+    const int maxFrameHeight = 720;
+    float resizeFactor = workFrame->Resize(maxFrameHeight);
+    Skeleton ResizedSkeleton = workFrame->getSkeleton();
+    imwrite("surfDetector_detect_test-TEMP.BMP", workFrame->getImage());
+    imwrite("surfDetector_detect_test-keyframe-image.BMP", SFrames[0]->getImage());
+    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(ResizedSkeleton);
+    delete workFrame;
 
     // Compare labels with ideal bodyparts from keyframe, and output debug information 
     float TolerableCoordinateError = 7; // Linear error in pixels
@@ -536,7 +544,7 @@ namespace SPEL
         delta1 = l1 - p0;
         float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
         float error = min(error_A, error_B); // Distance between ideal body part and label
-        if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >= 0) // Label is "effective" if it has small error and of not less than zero  Score  value
+        if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >= 0) // Label is "effective" if it has small error and not less than zero  Score  value
           temp.push_back(limbLabels[id][k]); // Copy effective labels
         // Put linear errors for all Lalbels into text file, copy indexes of a "badly processed parts"
         fout << "    PartID = " << id << ", LabelIndex = " << k << ":    AvgScore = " << limbLabels[id][k].getAvgScore() << ", LinearError = " << error << endl;

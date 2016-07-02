@@ -80,6 +80,21 @@ namespace SPEL
     auto imgMat = frame->getImage();
     auto detectorHelper = new SurfDetectorHelper();
 
+    // Resize frame - added 02.07.16 (is a "ñrutch")
+    Frame *workFrame = nullptr;
+    if (frame->getFrametype() == KEYFRAME)
+      workFrame = new Keyframe();
+    else if (frame->getFrametype() == LOCKFRAME)
+      workFrame = new Lockframe();
+    else if (frame->getFrametype() == INTERPOLATIONFRAME)
+      workFrame = new Interpolation();
+    workFrame = frame->clone(frame);
+    float resizeFactor = workFrame->Resize(maxFrameHeight);
+    imgMat = workFrame->getImage().clone();
+    imwrite("surfDetector_detect-TEMP.BMP", imgMat);
+
+    // - all coordinates of key points must have identical scale with the skeleton
+
 #if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
     auto detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
@@ -93,6 +108,7 @@ namespace SPEL
 #endif // OpenCV_VERSION_MAJOR == 3
     if (detectorHelper->keyPoints.empty())
     {
+      workFrame->UnloadAll(); // added 02.07.16
       frame->UnloadAll();
       delete detectorHelper;
       std::stringstream ss;
@@ -101,10 +117,11 @@ namespace SPEL
       throw std::logic_error(ss.str());
     }
 
-    auto result = Detector::detect(frame, params, limbLabels, detectorHelper);
+    auto result = Detector::detect(workFrame, params, limbLabels, detectorHelper); // 02.07.16 changed "frame" to "workFrame" (this is a "ñrutch")
 
     delete detectorHelper;
     frame->UnloadAll();
+    workFrame->UnloadAll(); // added 02.07.16 
 
     return result;
   }
