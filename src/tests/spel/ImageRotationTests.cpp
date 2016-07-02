@@ -86,24 +86,25 @@ namespace SPEL
   // Simplified cordinate system rotation
   cv::Mat DeRotate_0(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
-    cv::Point2f dw = ROIRect[3] - ROIRect[0];
-    float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2f dh = ROIRect[1] - ROIRect[0];
-    float height = sqrt(dh.x*dh.x + dh.y*dh.y);
+    cv::Point2d dw = ROIRect[3] - ROIRect[0];
+    double width = sqrt(dw.x*dw.x + dw.y*dw.y);
+    cv::Point2d dh = ROIRect[1] - ROIRect[0];
+    double height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
-    int n = round(height), m = round(width);
+    int n = round(height+0.4), m = round(width+0.4);
     cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
 
     dw = dw*(1.0 / width); //static_cast<float>(m));
     dh = dh*(1.0 / height); //static_cast<float>(n));
 
-    cv::Point2f currentPoint;
+    cv::Point2d currentPoint;
+    cv::Point2d p0(ROIRect[0].x, ROIRect[0].y);
     for (int i = 0; i < n; i++)
       for (int k = 0; k < m; k++)
       {
-        currentPoint = ROIRect[0] + static_cast<float>(i)*dh + static_cast<float>(k)*dw;
+        currentPoint = p0 + static_cast<double>(i)*dh + static_cast<double>(k)*dw;
         if (currentPoint.x >= 0 && currentPoint.x < imgSource.cols && currentPoint.y >= 0 && currentPoint.y < imgSource.rows)
-          Image.at<cv::Vec3b>(i, k) = imgSource.at<cv::Vec3b>(int(std::roundf(currentPoint.y)), int(std::roundf(currentPoint.x)));
+          Image.at<cv::Vec3b>(i, k) = imgSource.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x)));
       }
 
     return Image;
