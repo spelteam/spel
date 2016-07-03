@@ -662,6 +662,7 @@ namespace SPEL
     return rect;
   }
 
+
   pair<float, Point2i> CompareImages(Mat pattern, Mat image, bool useColorDistScore = false, bool considerExcess =true, int Q = 10 )
   {
     cv::Size pSize = pattern.size(), iSize = image.size(); 
@@ -740,7 +741,7 @@ namespace SPEL
     return max_size;
   }
 
-  Mat X0(int columns, Size CellSize, Size borderSize,Size textSize, /* vector<Mat> images, String name,*/ vector<String> names, float scale = 2.0f)
+  Mat X0(int columns, Size CellSize, Size borderSize,Size textSize, vector<String> names, float scale = 2.0f)
   {
     Size max_size(scale * CellSize.height + borderSize.height, scale * CellSize.width + borderSize.width);
 
@@ -778,6 +779,7 @@ namespace SPEL
       }
   }
 
+  // Testing of the test
   TEST(ImageRotationExperiments, SelectMaskRect)
   {
       Mat image(100, 100, CV_8UC3, Scalar(0, 0, 0));
@@ -789,6 +791,92 @@ namespace SPEL
       imwrite("temp150616.bmp", image(rect));
       image.release();
   }
+
+  // Testing of the test
+  TEST(ImageRotationExperiments, SelectMaskRect_size)
+  {
+    int n = 10, m = 10;
+    Mat Image = cv::Mat(n, m, CV_8UC3, cv::Scalar(255, 255, 255));
+    Rect ROI = SelectMaskRect(Image, 10);
+    Mat ImageROI = Image(ROI);
+    EXPECT_EQ(Image.size(), ImageROI.size());
+    Image.release();
+    ImageROI.release();
+  }
+
+  // Testing of the test
+  TEST(ImageRotationExperiments, CompareImages)
+  {
+    int n = 10, m = 10;
+    Mat pattern = cv::Mat(n, m , CV_8UC3, cv::Scalar(0, 0, 0));
+    Mat image = cv::Mat(2*n, 2*m, CV_8UC3, cv::Scalar(0, 0, 0));
+    image(Rect(Point2i(0, 0), Point2i(m - 1, m - 1))) += 255;
+
+    pair<float, Point2i> score = CompareImages(pattern, image);
+
+    EXPECT_NEAR(score.first, 1.0f, 0.1f);
+    EXPECT_EQ(score.second, Point2i(0,0));
+
+    image.release();
+    pattern.release();
+  }
+
+  // Testing of the test
+  TEST(ImageRotationExperiments, MaxSize)
+  {
+    int n = 10, m = 20, N = 3;
+    vector<Mat> images;
+    for(int i = 0; i < N; i++)
+      images.push_back(Mat(n, m, CV_8UC3, cv::Scalar(0, 0, 0)));
+
+    Point2i p0(1, 1), p1(3, 3);
+    images[0](Rect(p0, p1 + Point2i(0, 1))) += 255;
+    images[1](Rect(p0, p1)) += 255;
+    images[2](Rect(p0, p1 + Point2i(1, 0))) += 255;
+    imwrite("images_0.bmp", images[0]);
+    imwrite("images_1.bmp", images[1]);
+    imwrite("images_2.bmp", images[2]);
+
+    Size size = MaxSize(images);
+    EXPECT_EQ(Size(p1 - p0 + Point2i(1,1) + Point2i(2, 2)), size);
+
+    for (int i = 0; i < images.size(); i++)
+      images[i].release();
+  }
+
+  // Testing of the test
+  TEST(ImageRotationExperiments, X0)
+  {
+    vector<string> names = { "1", "12", "123", "1234" };
+    int *temp = new int();
+    Size textSize = maxTextSize(names, 5, 0.65f, temp);
+    Mat Image = X0(5, Size(40, 40), Size(0, 0), textSize, names, 2.0f);
+    Image.release();
+    delete temp;
+  }
+
+  // Testing of the test
+  TEST(ImageRotationExperiments, PutImages)
+  {
+      vector<string> names = { "1", "12", "123", "1234" };
+      int *temp = new int();
+      Size textSize = maxTextSize(names, 5, 0.65f, temp);
+      Point2i size(20, 20);
+      float scale = 2.0f;
+      int N = 5;
+      Mat Image = X0(5, Size(size*scale), Size(0, 0), textSize, names, scale);
+
+      vector<Mat> images;
+      for(int i = 0; i < N ; i++)
+        images.push_back(Mat(Size(size),CV_8UC3, cv::Scalar(0, 0, 0)));
+
+      for (int i = 0; i < N; i++)
+        images[i].release();
+      Image.release();
+      delete temp;
+  }
+
+// Testing the functions
 
   TEST(ImageRotationExperiments, ResizeSlandedROI)
   {
@@ -1181,11 +1269,6 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
     vector<Mat> images;
     vector<Mat> patterns;
   };
-
-
-  /* "RotateImageToDefault", 
-        "DeRotate_0", "DeRotate_7", "DeRotate_7_1", "DeRotate_2_visualization", "DeRotate_3_visualization", "DeRotate_4_visualisation",
-         "DeRotate_5", "DeRotate_5_1", "DeRotate_withScale","DeRotate_8", "DeRotate_8_1" ,"DeRotate_8_2" };*/
 
   TEST_F(ImageRotationExperiments_F, DeRotate_0)
   {
