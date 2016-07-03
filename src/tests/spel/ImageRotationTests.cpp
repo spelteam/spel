@@ -984,7 +984,7 @@ namespace SPEL
         
     // Create ROI polygon
     float angle = 45; // the rotation angle
-    float x1 = 9.0, x2 = 39.0, y1 = 19.0, y2 = 59.0; // the rectangle vertices
+    float x1 = 9.0f, x2 = 39.0f, y1 = 19.0f, y2 = 59.0f; // the rectangle vertices
     POSERECT <Point2f> rect = CreateRect1(x1, x2, y1, y2);
     POSERECT <Point2f> RotatedRect = RotateRect1(rect, angle);
     for (int i = 0; i < images.size(); i++)
@@ -1071,7 +1071,6 @@ namespace SPEL
 
     cout << "Results in 'ImageRotationExperiments.bmp'" << endl << endl;
     imwrite("ImageRotationExperiments.bmp", X);
-    waitKey(0);
     X.release();
 
     
@@ -1208,7 +1207,6 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
 
     cout << "Results in 'ImageRotationExperiments-ExtendedROI.bmp'" << endl << endl;
     imwrite("ImageRotationExperiments-ExtendedROI.bmp", X);
-    waitKey(0);
     X.release();
 
     // Clear
