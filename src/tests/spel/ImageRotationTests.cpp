@@ -1271,7 +1271,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_0)
   {
     vector<Mat> results;
-    vector<float> errors = {0.0f, 0.0f, 0.0f, 0.0f};
+    vector<float> errors = {0.90f, 0.93f, 0.95f, 0.96f};
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();	  
@@ -1284,7 +1284,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_7)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.90f, 0.95f, 0.97f, 0.97f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1297,7 +1297,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_7_1)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.15f, 0.35f, 0.50f, 0.60f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1322,7 +1322,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_3_visualization)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.8f, 0.91f, 0.92f, 0.93f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1334,7 +1334,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_4_visualization)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.8f, 0.91f, 0.93f, 0.94f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1346,7 +1346,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_5)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.015f, 0.28f, 0.51f, 0.63f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1358,7 +1358,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_5_1)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.16f, 0.35f, 0.55f, 0.65f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1370,7 +1370,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_withScale)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.17f, 0.35f, 0.54f, 0.67f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1382,7 +1382,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_8)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.90f, 0.98f, 0.98f, 0.98f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1394,7 +1394,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_8_1)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.89f, 0.99f, 0.99f, 0.99f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
@@ -1406,7 +1406,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_8_2)
   {
     vector<Mat> results;
-    vector<float> errors = { 0.0f, 0.0f, 0.0f, 0.0f };
+    vector<float> errors = { 0.91f, 0.99f, 0.99f, 0.99f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
