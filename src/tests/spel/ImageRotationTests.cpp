@@ -847,7 +847,7 @@ namespace SPEL
   // Testing of the test
   TEST(ImageRotationExperiments, X0)
   {
-    vector<string> names = { "1", "12", "123", "1234" };
+    vector<String> names = { "1", "12", "123", "1234" };
     int *temp = new int();
     Size textSize = maxTextSize(names, 5, 0.65f, temp);
     Mat Image = X0(5, Size(40, 40), Size(0, 0), textSize, names, 2.0f);
@@ -858,7 +858,7 @@ namespace SPEL
   // Testing of the test
   TEST(ImageRotationExperiments, PutImages)
   {
-      vector<string> names = { "1", "12", "123", "1234" };
+      vector<String> names = { "1", "12", "123", "1234" };
       int *temp = new int();
       Size textSize = maxTextSize(names, 5, 0.65f, temp);
       Point2i size(20, 20);
