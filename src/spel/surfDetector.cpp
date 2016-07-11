@@ -147,7 +147,6 @@ namespace SPEL
 #endif // OpenCV_VERSION_MAJOR == 3
     if (keyPoints.empty())
     {
-      frame->UnloadAll();
       std::stringstream ss;
       ss << "Couldn't detect keypoints for frame " << frame->getID();
       DebugMessage(ss.str(), 1);
@@ -159,7 +158,6 @@ namespace SPEL
       auto *joint = skeleton.getBodyJoint(part.getParentJoint());
       if (joint == 0)
       {
-        frame->UnloadAll();
         const std::string str = "Invalid parent joint";
         DebugMessage(str, 1);
         throw std::logic_error(str);
@@ -169,7 +167,6 @@ namespace SPEL
       joint = skeleton.getBodyJoint(part.getChildJoint());
       if (joint == 0)
       {
-        frame->UnloadAll();
         const std::string str = "Invalid child joint";
         DebugMessage(str, 1);
         throw std::logic_error(str);
@@ -181,7 +178,6 @@ namespace SPEL
       }
       catch (std::logic_error err)
       {
-        frame->UnloadAll();
         std::stringstream ss;
         ss << "Can't compute descriptors for the frame " << frame->getID() << " for the part " << part.getPartID() << std::endl;
         ss << "\t" << err.what();
@@ -269,7 +265,6 @@ namespace SPEL
     };
 
     auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), useSURFdet, comparer);
-    frame->UnloadAll();
     return label;
   }
 
