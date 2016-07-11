@@ -51,13 +51,22 @@ namespace SPEL
     virtual ~HogDetector(void) noexcept;
     void train(const std::vector <Frame*> &_frames, 
       std::map <std::string, float> params);
-    std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
-    std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) const noexcept;
+    std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, 
+      std::map <std::string, float> params, const std::map <uint32_t, 
+      std::vector <LimbLabel>> &limbLabels) const;
+    std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) 
+      const noexcept;
 
     cv::Size getCellSize(void) const noexcept;
     uint8_t getnbins(void) const noexcept;
 
-    static std::vector <std::vector <std::vector <float>>> calculateHog(const cv::Mat &image, std::vector <float> &descriptors, const cv::Size &wndSize, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const int nbins, const int derivAperture, const double wndSigma, const int histogramNormType, const double thresholdL2hys, const bool gammaCorrection, const int nlevels);
+    static std::vector <std::vector <std::vector <float>>> calculateHog(
+      const cv::Mat &image, std::vector <float> &descriptors, 
+      const cv::Size &wndSize, const cv::Size &blockSize, 
+      const cv::Size &blockStride, const cv::Size &cellSize, 
+      const int nbins, const int derivAperture, const double wndSigma, 
+      const int histogramNormType, const double thresholdL2hys, 
+      const bool gammaCorrection, const int nlevels);
 
   private:
 #ifdef DEBUG
@@ -87,12 +96,20 @@ namespace SPEL
     int m_nlevels;
     int m_derivAperture;
     int m_histogramNormType;
+    bool m_bGrayImages = false;
 
-    LimbLabel generateLabel(const BodyPart &bodyPart, Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const;
-    std::map <uint32_t, cv::Size> getMaxBodyPartHeightWidth(std::vector <Frame*> frames, cv::Size blockSize, float resizeFactor) const;
-    PartModel computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const int nbins, const cv::Size &wndSize, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double wndSigma, const double thresholdL2hys, const bool gammaCorrection, const int nlevels, const int derivAperture, const int histogramNormType, const bool bGrayImages) const;
-    std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, const int nbins, const cv::Size &blockSize, const cv::Size &blockStride, const cv::Size &cellSize, const double wndSigma, const double thresholdL2hys, const bool gammaCorrection, const int nlevels, const int derivAperture, const int histogramNormType, const bool bGrayImages) const;
-    float compare(const BodyPart &bodyPart, const PartModel &partModel, const uint8_t nbins) const;
+    LimbLabel generateLabel(const BodyPart &bodyPart, Frame *frame, 
+      const cv::Point2f &j0, const cv::Point2f &j1, 
+      DetectorHelper *detectorHelper, 
+      std::map <std::string, float> params) const;
+    std::map <uint32_t, cv::Size> getMaxBodyPartHeightWidth(
+      const cv::Size &blockSize, const float resizeFactor) const;
+    PartModel computeDescriptors(const BodyPart &bodyPart, 
+      const cv::Point2f &j0, const cv::Point2f &j1, 
+      const cv::Mat &imgMat, const cv::Size &wndSize) const;
+    std::map <uint32_t, PartModel> computeDescriptors(Frame *frame) const;
+    float compare(const BodyPart &bodyPart, const PartModel &partModel, 
+      const uint8_t nbins) const;
   };
 }
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

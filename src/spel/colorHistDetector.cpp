@@ -729,9 +729,7 @@ namespace SPEL
     auto result = Detector::detect(frame, params, limbLabels, detectorHelper);
 
     delete detectorHelper;
-
     frame->UnloadAll();
-
     return result;
   }
 

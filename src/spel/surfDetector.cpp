@@ -30,7 +30,8 @@ namespace SPEL
     partModels.clear();
 
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
-    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT());
+    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first,
+      frames.at(0)->getFrameSize().height);
 
     auto minHessian = static_cast<uint32_t> (params.at(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
     maxFrameHeight = params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first);
