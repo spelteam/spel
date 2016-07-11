@@ -16,8 +16,8 @@ ProjectLoader::ProjectLoader(string _curFolder)
 }
 ProjectLoader::~ProjectLoader()
 {
-  for(auto&& frame:vFrames)
-      delete frame;
+  for (auto&& frame : vFrames)
+    delete frame;
   vFrames.clear();
 }
 
@@ -438,10 +438,10 @@ bool ProjectLoader::drawFrameSolvlets(Solvlet sol, Frame *frame, string outFolde
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
-//  outFileName += "img/";
+  //  outFileName += "img/";
   CreateDirectorySystemIndependent(outFileName);
-//  outFileName += "frameSolvlets/";
-//  CreateDirectorySystemIndependent(outFileName);
+  //  outFileName += "frameSolvlets/";
+  //  CreateDirectorySystemIndependent(outFileName);
   stringstream ss;
   ss << frame->getID();
   ss << ".png";
@@ -537,10 +537,10 @@ bool ProjectLoader::drawLockframeSolvlets(const ImageSimilarityMatrix &ism, Solv
   string outFileName = outFolder;
   if (outFileName[outFileName.size()] != '/')
     outFileName += "/";
-//  outFileName += "img/";
+  //  outFileName += "img/";
   CreateDirectorySystemIndependent(outFolder);
-//  outFileName += "lockframeSolvlets/";
-//  CreateDirectorySystemIndependent(outFileName);
+  //  outFileName += "lockframeSolvlets/";
+  //  CreateDirectorySystemIndependent(outFileName);
 
   string labelsFileName = outFileName + to_string(frame->getID()) + ".bpsol";
   outFileName += to_string(frame->getID()) + ".png";
@@ -745,10 +745,10 @@ bool ProjectLoader::drawSkeleton(Frame *frame, string outFolder, Scalar color, i
 
   Scalar col((0, 255, 255)); //yellow for frames
 
-  if(frame->getFrametype()==KEYFRAME)
-      col = Scalar(0, 0, 255); //red for keyframes
+  if (frame->getFrametype() == KEYFRAME)
+    col = Scalar(0, 0, 255); //red for keyframes
 
-  //draw the skeletal prior
+//draw the skeletal prior
   for (tree<BodyPart>::iterator partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
   {
     //get joints

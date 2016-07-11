@@ -143,9 +143,9 @@ namespace SPEL
     bool bGrayImages = false;
 
     //Calculate actual value
-    HogDetector D;
+    HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
     HogDetector::PartModel partModel;
-    partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, nbins, wndSize, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
+    partModel = D.computeDescriptors(bodyPart, j0->getImageLocation(), j1->getImageLocation(), image, wndSize);
 
     //Calculate expected value
     vector<float> descriptorsValues;
@@ -190,6 +190,7 @@ namespace SPEL
     Size blockSize = Size(16, 16);
     Size blockStride = Size(8, 8);
     Size cellSize = Size(8, 8);
+    Size wndSize = Size(64, 128);
     const int nbins = 9;
     double wndSigma = -1;
     double thresholdL2hys = 0.2;
@@ -202,10 +203,11 @@ namespace SPEL
     bool bGrayImages = false;
 
     //Calculate actual value
-    HogDetector D;
-    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+    D.frames = HFrames;
+    D.m_partSize = D.getMaxBodyPartHeightWidth(blockSize, 1.0f);
     map <uint32_t, HogDetector::PartModel> partModels;
-    partModels = D.computeDescriptors(HFrames[FirstKeyframe], nbins, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType, bGrayImages);
+    partModels = D.computeDescriptors(HFrames[FirstKeyframe]);
 
     //Calculate expected value
     vector<vector<float>> allDescriptors;
@@ -263,6 +265,19 @@ namespace SPEL
 
     //Set blockSize value
     Size blockSize = Size(8, 8);
+    Size blockStride = Size(8, 8);
+    Size cellSize = Size(8, 8);
+    Size wndSize = Size(64, 128);
+    const int nbins = 9;
+    double wndSigma = -1;
+    double thresholdL2hys = 0.2;
+    bool gammaCorrection = true;
+    int nlevels = 64;
+    Size wndStride = Size(8, 8);
+    Size padding = Size(32, 32);
+    int derivAperture = 1;
+    int histogramNormType = HOGDescriptor::L2Hys;
+    bool bGrayImages = false;
 
     //Calculate expected parts size 
     map<int, Point2f> Locations = getImageLocations(skeleton);
@@ -282,8 +297,9 @@ namespace SPEL
     }
 
     //Calculate actual parts size
-    HogDetector D;
-    map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+    D.frames = HFrames;
+    map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(blockSize, 1.0f);
     EXPECT_EQ(partsSize, partsSize_actual);
 
     // Clear
@@ -336,11 +352,25 @@ namespace SPEL
     Point2f p1 = j1->getImageLocation();
 
     //Calculate actual value
-    HogDetector D;
-    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, D.m_blockSize, 1.0f);
+    Size blockSize = Size(16, 16);
+    Size blockStride = Size(8, 8);
+    Size cellSize = Size(8, 8);
+    Size wndSize = Size(64, 128);
+    const int nbins = 9;
+    double wndSigma = -1;
+    double thresholdL2hys = 0.2;
+    bool gammaCorrection = true;
+    int nlevels = 64;
+    Size wndStride = Size(8, 8);
+    Size padding = Size(32, 32);
+    int derivAperture = 1;
+    int histogramNormType = HOGDescriptor::L2Hys;
+    bool bGrayImages = false;
+    HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
     map<string, float> params;
+    //D.frames = HFrames;
+    //D.m_partSize = D.getMaxBodyPartHeightWidth(D.m_blockSize, 1.0f);
     D.train(HFrames, params);
-
     HogDetector::PartModel partModel = D.getPartModels()[0][partID];
     auto detectorHelper = new HogDetectorHelper();
     map <string, float> detectParams;
@@ -401,7 +431,7 @@ namespace SPEL
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
     // Set descriptor parameters
-    /*Size blockSize = Size(16, 16);
+    Size blockSize = Size(16, 16);
     Size blockStride = Size(8, 8);
     Size cellSize = Size(8, 8);
     const int nbins = 9;
@@ -412,11 +442,12 @@ namespace SPEL
     Size wndStride = Size(8, 8);
     Size padding = Size(32, 32);
     int derivAperture = 1;
-    int histogramNormType = HOGDescriptor::L2Hys;*/
+    int histogramNormType = HOGDescriptor::L2Hys;
+    Size wndSize = Size(64, 128);
 
     //Calculate actual value
-    HogDetector D;
-    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, D.m_blockSize, 1.0f);
+    HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
+    //D.m_partSize = D.getMaxBodyPartHeightWidth(D.m_blockSize, 1.0f);
     map<string, float> params;
     D.train(HFrames, params);
 
@@ -483,21 +514,21 @@ namespace SPEL
     Size cellSize = Size(8, 8);
     Size wndSize = Size(64, 128);
     const int nbins = 9;
-    //double wndSigma = -1;
-    //double thresholdL2hys = 0.2;
-    //bool gammaCorrection = true;
-    //int nlevels = 64;
+    double wndSigma = -1;
+    double thresholdL2hys = 0.2;
+    bool gammaCorrection = true;
+    int nlevels = 64;
     Size wndStride = Size(8, 8);
     Size padding = Size(32, 32);
-    //int derivAperture = 1;
-    //int histogramNormType = HOGDescriptor::L2Hys;
+    int derivAperture = 1;
+    int histogramNormType = HOGDescriptor::L2Hys;
 
     // Run "train"
-    HogDetector D;
-    D.m_partSize = D.getMaxBodyPartHeightWidth(HFrames, blockSize, 1.0f);
+    HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);  
     map<string, float> params;
-    D.train(HFrames, params);
-
+    //D.frames = HFrames;
+    //D.m_partSize = D.getMaxBodyPartHeightWidth(blockSize, 1.0f);
+    D.train(HFrames, params);    
     // Run "detect"
     map<uint32_t, vector<LimbLabel>> limbLabels;
     map <string, float> detectParams;
