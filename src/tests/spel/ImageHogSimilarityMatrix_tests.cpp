@@ -131,8 +131,8 @@ namespace SPEL
     Point2i A(20, 20), B(60, 40);
     vector<Point2f> rect = { Point2i(A.x, A.y), Point2i(B.x, A.y), Point2i(B.x, B.y), Point2i(A.x, B.y) };
 
-    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
-    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    Mat Mask = Mat::zeros(rows, cols, CV_8UC1);
+    Mat Image = Mat::zeros(rows, cols, CV_8UC3);
     for (int x = A.x; x <= B.x; x++)
       for (int y = A.y; y <= B.y; y++)
         Image.at<Vec3b>(y, x) = Vec3b(255, 255, 255);

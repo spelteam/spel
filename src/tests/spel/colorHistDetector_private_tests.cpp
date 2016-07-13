@@ -749,8 +749,8 @@ namespace SPEL
     //Create part image and mask
     float P = 1.0f;
     int rows = 100, cols = 200;
-    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
-    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0,0,0));
+    Mat Mask = Mat::zeros(rows, cols, CV_8UC1);
+    Mat Image = Mat::zeros(rows, cols, CV_8UC3);
     Mat pixelLabel = Mat(rows, cols, cv::DataType <float>::type);
     Mat ShiftedPixelLabel = Mat(rows, cols, cv::DataType <float>::type, Scalar(0.0f));
     for (int x = 0; x < cols; x++)
@@ -792,7 +792,7 @@ namespace SPEL
     shift = Point2f(0.0f, d.x);
     float EmptyPixelsLabels_Score = detector.compare(bodyPart, frame, pixelsLabels2, p0 + shift, p1 + shift); //"PixelLabels" is empty
 
-    Mat EmptyMask = Mat(rows, cols, CV_8UC1, 0);
+    Mat EmptyMask = Mat::zeros(rows, cols, CV_8UC1);
     frame->setMask(EmptyMask);
     float EmpyMaskScore = detector.compare(bodyPart, frame, pixelsLabels1, p0, p1); // Mask is empty
 

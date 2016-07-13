@@ -486,8 +486,8 @@ namespace SPEL
     int rows = 100, cols = 140;
     vector<Point2f> rect = { Point2f(20,40), Point2f(40,40), Point2f(40,30), Point2f(20, 30) };
 
-    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
-    Mat ShiftedImage = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
+    Mat Image = Mat::zeros(rows, cols, CV_8UC3);
+    Mat ShiftedImage = Mat::zeros(rows, cols, CV_8UC3);
     Mat Mask = Mat(rows, cols, CV_8UC1, 0);
     Mat ShiftedMask = Mat(rows, cols, CV_8UC1, 0);
     for (int x = 0; x < cols; x++)

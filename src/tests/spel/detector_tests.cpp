@@ -1135,8 +1135,8 @@ namespace SPEL
 
 
     int rows = 100, cols = 140;
-    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
-    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
+    Mat Image = Mat::zeros(rows, cols, CV_8UC3);
+    Mat Mask = Mat::zeros(rows, cols, CV_8UC1);
     Mat pixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
     Mat ShiftedixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
 
@@ -1242,8 +1242,8 @@ namespace SPEL
 
 
     int rows = 100, cols = 140;
-    Mat Image = Mat(rows, cols, CV_8UC3, Scalar(0, 0, 0));
-    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
+    Mat Image = Mat::zeros(rows, cols, CV_8UC3);
+    Mat Mask = Mat::zeros(rows, cols, CV_8UC1);
     Mat pixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
     Mat ShiftedixelsLabels = Mat(rows, cols, cv::DataType <float>::type, 0.0f);
 
