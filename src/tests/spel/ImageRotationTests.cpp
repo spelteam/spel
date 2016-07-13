@@ -24,7 +24,7 @@ namespace SPEL
   //  |        |
   //  |        |
   //  |        |
-  //  p4--j1--p1
+  //  p2--j1--p1
     
   // New ROI polygon dimension = (NewSize.width, NewSizeheight) 
   std::vector<cv::Point2f> ResizeSlantedROI(std::vector<cv::Point2f> &ROIRect, const cv::Size &NewSize)
@@ -86,19 +86,19 @@ namespace SPEL
   // Simplified cordinate system rotation
   cv::Mat DeRotate_0(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
-    cv::Point2d dw = ROIRect[3] - ROIRect[0];
+    cv::Point2d dw = ROIRect[0] - ROIRect[3];
     double width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2d dh = ROIRect[1] - ROIRect[0];
+    cv::Point2d dh = ROIRect[2] - ROIRect[3];
     double height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
-    int n = round(height+0.4), m = round(width+0.4);
+    int n = round(height), m = round(width);
     cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
 
     dw = dw*(1.0 / width); //static_cast<float>(m));
     dh = dh*(1.0 / height); //static_cast<float>(n));
 
     cv::Point2d currentPoint;
-    cv::Point2d p0(ROIRect[0].x, ROIRect[0].y);
+    cv::Point2d p0(ROIRect[3].x, ROIRect[3].y);
     for (int i = 0; i < n; i++)
       for (int k = 0; k < m; k++)
       {
@@ -113,9 +113,9 @@ namespace SPEL
   // Scanning the  vertices of a square  around the pixel center
   cv::Mat DeRotate_7(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
-    cv::Point2d dw = ROIRect[3] - ROIRect[0];
+    cv::Point2d dw = ROIRect[0] - ROIRect[3];
     double width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2d dh = ROIRect[1] - ROIRect[0];
+    cv::Point2d dh = ROIRect[2] - ROIRect[3];
     double height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = std::round(height) , m = std::round(width) ;
@@ -124,11 +124,11 @@ namespace SPEL
     dw = dw*(1.0 / width);  /*static_cast<double>(m));*/
     dh = dh*(1.0 / height); /*static_cast<double>(n));*/
 
-    cv::Point2d p0(ROIRect[0]);
-    cv::Point2d currentPoint(ROIRect[0]);
+    cv::Point2d p0(ROIRect[3]);
+    cv::Point2d currentPoint(p0);
 
-    for (int i = 0; i <= n; i++)
-      for (int k = 0; k <= m; k++)
+    for (int i = 0; i < n; i++)
+      for (int k = 0; k < m; k++)
       {
         std::vector<cv::Vec3b> colors;
         std::vector<int> counts;
@@ -169,9 +169,9 @@ namespace SPEL
   // Rotation using mixed color
   cv::Mat DeRotate_7_1(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
-    cv::Point2f dw = ROIRect[3] - ROIRect[0];
+    cv::Point2f dw = ROIRect[0] - ROIRect[3];
     float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2f dh = ROIRect[1] - ROIRect[0];
+    cv::Point2f dh = ROIRect[2] - ROIRect[3];
     float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
@@ -181,7 +181,7 @@ namespace SPEL
     dw = dw*(1.0f / width);
     dh = dh*(1.0f / height);
 
-    cv::Point2f p0(ROIRect[0].x, ROIRect[0].y);
+    cv::Point2f p0(ROIRect[3].x, ROIRect[3].y);
     cv::Point2f currentPoint(p0);
       
     float N = 10.0f;
@@ -215,7 +215,7 @@ namespace SPEL
   cv::Mat DeRotate_2_visualization(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
     float s = 11.0f;
-    auto ScalledImage = cv::Mat(imgSource.size().width*s, imgSource.size().height*s, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat ScalledImage = cv::Mat(imgSource.size().height*s, imgSource.size().width*s,  CV_8UC3, cv::Scalar(0, 0, 0));
     for (int x = 0; x < imgSource.size().width; x++)
       for (int y = 0; y < imgSource.size().height; y++)
       {
@@ -224,30 +224,39 @@ namespace SPEL
             ScalledImage.at<cv::Vec3b>(y*s+i, x*s+k) = imgSource.at<cv::Vec3b>(y,x);
       }
 
-    cv::Point2f dw = ROIRect[3] - ROIRect[0];
+    cv::Point2f dw = ROIRect[0] - ROIRect[3];
     float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2f dh = ROIRect[1] - ROIRect[0];
+    cv::Point2f dh = ROIRect[2] - ROIRect[3];
     float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
     cv::Mat Image = cv::Mat(n+1, m+1, CV_8UC3, cv::Scalar(0, 0, 0));
 
 
-    dw = dw*(1.0f/ width);
-    dh = dh*(1.0f/ height);
+    dw = dw*(1.0f/ round(width));
+    dh = dh*(1.0f/ round(height));
 
-    cv::Point2f p0(round(ROIRect[0].x), round(ROIRect[0].y));
+    cv::Point2f p0(round(ROIRect[3].x), round(ROIRect[3].y));
     cv::Point2f currentPoint(p0);
 
-    for (int i = 0; i <= n; i++)
-      for (int k = 0; k <= m; k++)	  
+    for (int i = 0; i < n; i++)
+      for (int k = 0; k < m; k++)	  
       {
-        currentPoint = s*(p0 + static_cast<float>(i)*dh + static_cast<float>(k)*dw + 0.5f*(dh+dw));
+        currentPoint = s*(p0 + static_cast<float>(i)*dh + static_cast<float>(k)*dw + 0.5f*(dh+dw) + Point2f(0.5,0.5));
         Image.at<cv::Vec3b>(i, k) = ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x)));
         ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x ))) *= 0.2f;
         ScalledImage.at<cv::Vec3b>(int(std::round(currentPoint.y)), int(std::round(currentPoint.x))) += cv:: Vec3b(100, 100, 100);
       }
 
+    PutPartRect(ScalledImage, { (ROIRect[0]  + Point2f(0.5f, 0.5f))* s, (ROIRect[1]+ Point2f(0.5f, 0.5f)) * s, (ROIRect[2]+ Point2f(0.5f, 0.5f)) * s, (ROIRect[3]+ Point2f(0.5f, 0.5f)) * s }, cv::Scalar(128, 128, 128));
+    //PutPartRect(ScalledImage, { (ExtendedROI[0] + Point2f(0.5f, 0.5f)) * s, (ROIRect[1] + Point2f(0.5f, 0.5f)) * s, (ROIRect[2] + Point2f(0.5f, 0.5f)) * s, (ROIRect[3] + Point2f(0.5f, 0.5f)) * s }, cv::Vec3b(0, 0, 128));
+    for (int i = 0; i < ROIRect.size(); i++)
+    {
+      stringstream S;
+      S << "P" << i;
+      putText(ScalledImage, S.str(), ROIRect[i] * s, 5, 0.65f, Scalar(128, 128, 128));
+      ScalledImage.at<cv::Vec3b>((ROIRect[i] + Point2f(0.5f, 0.5f)) * s) = cv::Vec3b(100, 100, 100);
+    }
     imwrite("DeRotate_2_ScannedPoints.bmp", ScalledImage);
     ScalledImage.release();
 
@@ -258,16 +267,16 @@ namespace SPEL
   cv::Mat DeRotate_3_visualization(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
     float s = 11.0f;
-    auto ScalledImage = cv::Mat(imgSource.size().width*s, imgSource.size().height*s, CV_8UC3, cv::Scalar(0, 0, 0));
+    auto ScalledImage = cv::Mat(imgSource.size().height*s, imgSource.size().width*s, CV_8UC3, cv::Scalar(0, 0, 0));
     for (int x = 0; x < imgSource.size().width; x++)
       for (int y = 0; y < imgSource.size().height; y++)
         for (int i = 0; i < s; i++)
           for (int k = 0; k < s; k++)
             ScalledImage.at<cv::Vec3b>(y*s + i, x*s + k) = imgSource.at<cv::Vec3b>(y, x);
 
-    cv::Point2f dw = ROIRect[3] - ROIRect[0];
+    cv::Point2f dw = ROIRect[0] - ROIRect[3];
     float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2f dh = ROIRect[1] - ROIRect[0];
+    cv::Point2f dh = ROIRect[2] - ROIRect[3];
     float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
@@ -276,7 +285,7 @@ namespace SPEL
     dw = dw*(1.0f / static_cast<float>(m));
     dh = dh*(1.0f / static_cast<float>(n));
 
-    cv::Point2f p0(round(ROIRect[0].x), round(ROIRect[0].y));
+    cv::Point2f p0(round(ROIRect[3].x), round(ROIRect[3].y));
     cv::Point2f currentPoint(p0);
       
     for (int i = 0; i <= n; i++)
@@ -331,16 +340,16 @@ namespace SPEL
   cv::Mat DeRotate_4_visualization(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
     float s = 11.0f;
-    auto ScalledImage = cv::Mat(imgSource.size().width*s, imgSource.size().height*s, CV_8UC3, cv::Scalar(0, 0, 0));
+    auto ScalledImage = cv::Mat(imgSource.size().height*s, imgSource.size().width*s,  CV_8UC3, cv::Scalar(0, 0, 0));
     for (int x = 0; x < imgSource.size().width; x++)
       for (int y = 0; y < imgSource.size().height; y++)
         for (int i = 0; i < s; i++)
           for (int k = 0; k < s; k++)
             ScalledImage.at<cv::Vec3b>(y*s + i, x*s + k) = imgSource.at<cv::Vec3b>(y, x);
 
-      cv::Point2f dw = ROIRect[3] - ROIRect[0];
+      cv::Point2f dw = ROIRect[0] - ROIRect[3];
       float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-      cv::Point2f dh = ROIRect[1] - ROIRect[0];
+      cv::Point2f dh = ROIRect[2] - ROIRect[3];
       float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
       int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
@@ -349,7 +358,7 @@ namespace SPEL
       dw = dw*(1.0f / static_cast<float>(m));
       dh = dh*(1.0f / static_cast<float>(n));
 
-      cv::Point2f p0(round(ROIRect[0].x), round(ROIRect[0].y));
+      cv::Point2f p0(round(ROIRect[3].x), round(ROIRect[3].y));
       cv::Point2f currentPoint(p0);
       
       for (int i = 0; i <= n; i++)
@@ -394,7 +403,7 @@ namespace SPEL
             counts.clear();
           }
 
-      imwrite("DeRotate_3_ScannedPoints.bmp", ScalledImage);
+      imwrite("DeRotate_4_ScannedPoints.bmp", ScalledImage);
       ScalledImage.release();
       //imwrite("DeRotate_3_Source.bmp", imgSource);
       return Image;
@@ -403,9 +412,9 @@ namespace SPEL
   // Rotation of scalled image
   cv::Mat DeRotate_5(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
-    cv::Point2f dw = ROIRect[3] - ROIRect[0];
+    cv::Point2f dw = ROIRect[0] - ROIRect[3];
     float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2f dh = ROIRect[1] - ROIRect[0];
+    cv::Point2f dh = ROIRect[2] - ROIRect[3];
     float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
@@ -419,7 +428,7 @@ namespace SPEL
     dw = dw*Scale*(1.0f / width);
     dh = dh*Scale*(1.0f / height);
 
-    cv::Point2f p0(ROIRect[0].x*Scale, ROIRect[0].y*Scale);
+    cv::Point2f p0(ROIRect[3].x*Scale, ROIRect[3].y*Scale);
     cv::Point2f currentPoint(p0);
       
     for (int i = 0; i < n; i++)
@@ -452,9 +461,9 @@ namespace SPEL
   // Rotation of scalled image
   cv::Mat DeRotate_5_1(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
-    cv::Point2d dw = ROIRect[3] - ROIRect[0];
+    cv::Point2d dw = ROIRect[0] - ROIRect[3];
     double width = sqrt(dw.x*dw.x + dw.y*dw.y);
-    cv::Point2d dh = ROIRect[1] - ROIRect[0];
+    cv::Point2d dh = ROIRect[2] - ROIRect[3];
     double height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
@@ -467,7 +476,7 @@ namespace SPEL
     dw = dw*Scale*(1.0f / width);
     dh = dh*Scale*(1.0f / height);
 
-    cv::Point2d p0(round(ROIRect[0].x*Scale), round(ROIRect[0].y*Scale));
+    cv::Point2d p0(round(ROIRect[3].x*Scale), round(ROIRect[3].y*Scale));
     cv::Point2d currentPoint(p0);
       
     for (int i = 0; i < n; i++)
@@ -507,9 +516,9 @@ namespace SPEL
       vector<Point2f> ROIRect(4);
       for (unsigned int i = 0; i < ROIRect1.size(); i++)
         ROIRect[i] = Scale*ROIRect1[i];
-      cv::Point2f dw = ROIRect[3] - ROIRect[0];
+      cv::Point2f dw = ROIRect[0] - ROIRect[3];
       float width = sqrt(dw.x*dw.x + dw.y*dw.y);
-      cv::Point2f dh = ROIRect[1] - ROIRect[0];
+      cv::Point2f dh = ROIRect[2] - ROIRect[3];
       float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
       int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
@@ -518,11 +527,11 @@ namespace SPEL
       dw = dw*(1.0f / width);
       dh = dh*(1.0f / height);
 
-      cv::Point2f currentPoint = ROIRect[0];
+      cv::Point2f currentPoint = ROIRect[3];
       for (int i = 0; i <= n; i++)
         for (int k = 0; k <= m; k++)
         {
-          currentPoint = ROIRect[0] + static_cast<float>(i)*dh + static_cast<float>(k)*dw;
+          currentPoint = ROIRect[3] + static_cast<float>(i)*dh + static_cast<float>(k)*dw;
           Image.at<cv::Vec3b>(i, k) = ImageCopy.at<cv::Vec3b>(int(std::roundf(currentPoint.y)), int(std::roundf(currentPoint.x)));
         }
 
@@ -639,7 +648,7 @@ namespace SPEL
 //===============================================================================================================================
 // TESTING
 
-  cv::Rect SelectMaskRect(const cv::Mat &Image, uchar Q)
+  cv::Rect SelectMaskRect(const cv::Mat &Image, uchar Q = 10)
   {
     cv::Size size = Image.size();
     Point2i p0(size.width, size.height), p1(0, 0);
@@ -663,7 +672,7 @@ namespace SPEL
   }
 
 
-  pair<float, Point2i> CompareImages(Mat pattern, Mat image, bool useColorDistScore = false, bool considerExcess =true, int Q = 10 )
+  pair<float, Point2i> CompareImages(Mat pattern, Mat image, bool useColorDistScore = false, bool considerExcess = true, int Q = 10 )
   {
     cv::Size pSize = pattern.size(), iSize = image.size(); 
     Point2i d(iSize.width - pSize.width, iSize.height - pSize.height);
@@ -674,7 +683,6 @@ namespace SPEL
       for (int k = 0; k <= d.x; k++)
       {
         double score = 0, ColorScore = 0;
-        int patternPoints = 0;
         for(int x = 0; x < iSize.width; x++)
           for(int y = 0; y < iSize.height; y++)
           {
@@ -683,7 +691,6 @@ namespace SPEL
             if( (p.x >= 0) && (p.y >= 0) && (p.x < pSize.width) && (p.y < pSize.height))
             {
               Vec3b pColor = pattern.at<Vec3b>(p.y, p.x);
-              patternPoints++;
               Vec3b D = pColor - iColor;
               float colorDist = sqrt(D.val[0] * D.val[0] + D.val[1] * D.val[1] + D.val[2] * D.val[2]);
               ColorScore = ColorScore + (colorDist / (255.0*sqrt(3.0)));
@@ -695,7 +702,7 @@ namespace SPEL
                 if(iColor.val[0] >=Q || iColor.val[1] >= Q || iColor.val[2] >= Q)
                 {
                   score--;
-                  ColorScore = ColorScore + sqrt(iColor.val[0]* iColor.val[0] + iColor.val[1]* iColor.val[1] + iColor.val[2]* iColor.val[2]/3.0)/255.0;
+                  ColorScore = ColorScore + sqrt((iColor.val[0]* iColor.val[0] + iColor.val[1]* iColor.val[1] + iColor.val[2])* iColor.val[2]/3.0)/255.0;
                 }
             }
           }
@@ -711,19 +718,23 @@ namespace SPEL
     return pair<float, Point2i>(maxScore, shift);
   }
 
-  Size MaxSize(vector<Mat> images, Size maxSize = Size(0,0))
+  Size MaxSize(vector<Mat> images, Size maxSize = Size(0,0), bool FullImage = false)
   {
-    vector<Rect> ImageROI;
+    Rect ImageROI;
     Size max_size = maxSize;
     for (int i = 0; i < images.size(); i++)
     {
-      ImageROI.push_back(SelectMaskRect(images[i], 10));
-      if(ImageROI[i].width > max_size.width)
-        max_size.width = ImageROI[i].width;
-      if (ImageROI[i].height > max_size.height)
-        max_size.height = ImageROI[i].height;
+      if(!FullImage) 
+        ImageROI = SelectMaskRect(images[i], 10);
+      if (FullImage) 
+        ImageROI = cv::Rect(Point2i(0,0),images[i].size());
+      if(ImageROI.width > max_size.width)
+        max_size.width = ImageROI.width;
+      if (ImageROI.height > max_size.height)
+        max_size.height = ImageROI.height;
     }
-    return max_size + Size(2, 2);
+
+    return max_size;
   }
 
 
@@ -732,7 +743,7 @@ namespace SPEL
     Size max_size(0, 0);
     for( int i = 0; i < names.size(); i++)
     {
-      Size textSize = getTextSize(names[i] + "__", fontFace, fontScale, thickness, baseLine);
+      Size textSize = getTextSize(names[i] + "X_", fontFace, fontScale, thickness, baseLine);
       if(textSize.width > max_size.width)
         max_size.width = textSize.width;
       if (textSize.height > max_size.height)
@@ -741,42 +752,86 @@ namespace SPEL
     return max_size;
   }
 
-  Mat X0(int columns, Size CellSize, Size borderSize,Size textSize, vector<String> names, float scale = 2.0f)
+
+  Mat PutImages(vector<String> names, vector<vector<Mat>> Images, float scale = 2.0f, Size borderSize = Size(0,0))
   {
-    Size max_size(scale * CellSize.height + borderSize.height, scale * CellSize.width + borderSize.width);
+    // Set cells count and size
+    int maxImageCount = 0;
+    Size maxImageSize(0, 0);
 
-    Mat X = Mat((names.size() + 2)*max_size.height, textSize.width + columns*max_size.width, CV_8UC3, Scalar(0, 0, 0));
+    for (unsigned int i = 0; i < Images.size(); i++)
+    {
+      maxImageSize = MaxSize(Images[i], maxImageSize);
+      if(Images[i].size() > maxImageCount)
+        maxImageCount = Images[i].size();
+    }
+    maxImageSize = maxImageSize + Size(4, 4);
+    Size cellSize = Size(scale*Point2f(maxImageSize));
 
-    for(int i = 0; i < columns; i++)
+    // Set font size
+    const int fontFace = 5;
+    double fontScale = 0.64f;
+    int thickness = 1;
+    int *baseLine = 0;
+    Size textSize(0,0);
+    while ((textSize.height < 7) && (fontScale < cellSize.height))
+    {
+      fontScale = fontScale + 0.01f;
+      textSize = getTextSize("X", fontFace, fontScale, thickness, baseLine);
+    }
+    textSize = maxTextSize(names, fontFace, fontScale, baseLine, thickness);
+    if (3 * textSize.height > cellSize.height)
+        cellSize.height = 3*textSize.height;
+    /*
+    while ((3*textSize.height > cellSize.height) && (fontScale > 0))
+    {
+      fontScale = fontScale - 0.01f;
+      textSize = getTextSize("X", fontFace, fontScale, thickness, baseLine);
+      cout << fontScale << endl;
+    }*/
+
+
+    // Create image
+    cellSize = Size(cellSize.width + borderSize.width, cellSize.height + borderSize.height);
+    Mat X(names.size()*cellSize.height, textSize.width + maxImageCount*cellSize.width, CV_8UC3, Scalar(0, 0, 0));
+
+    // Put lines
+    for(int i = 0; i < maxImageCount; i++)
       for(int y = 0; y < X.size().height; y++)
-        X.at<Vec3b>(y, textSize.width + i*(max_size.width)) = Vec3b(255, 0, 0);
+        X.at<Vec3b>(y, textSize.width + i*(cellSize.width)) = Vec3b(255, 0, 0);
 
-    for (int i = 0; i < names.size() + 2; i++)
+    for (int i = 0; i < names.size(); i++)
       for (int x = 0; x < X.size().width; x++)
-        X.at<Vec3b>(i*(max_size.height), x) = Vec3b(255, 0, 0);
+        X.at<Vec3b>(i*(cellSize.height), x) = Vec3b(255, 0, 0);
+    
+    // Put cells
     stringstream s;
     s << scale;
-    cv::putText(X, " Patterns", Point(0, 17 + 0 * max_size.height), 5, 0.65f, CV_RGB(0, 193, 0));
-    cv::putText(X, " scale = " + s.str(), Point(0, 10 + 3*textSize.height + 0 * max_size.height), 5, 0.65f, CV_RGB(255, 0, 0));
-    cv::putText(X, " Samples", Point(0, 17 + 1*max_size.height), 5, 0.65f, CV_RGB(0, 193, 0));
+    cv::putText(X, " scale = " + s.str(), Point(0, round(4.1 * textSize.height)), fontFace, fontScale, CV_RGB(255, 0, 0));
     s.clear();
-    for (int i = 0; i < names.size() ; i++)
-      cv::putText(X, " " + names[i], Point(0, 17 + (i + 2)*max_size.height), 5, 0.65f, CV_RGB(0, 193, 0));
+
+    for (unsigned int t = 0; t < Images.size(); t++)
+    {
+      Point2i p(0, 2*textSize.height + (t)*cellSize.height); // Row name coordinates
+      cv::putText(X, " " + names[t], p, fontFace, fontScale, CV_RGB(0, 193, 0), thickness); // Put row name
+      for (unsigned int i = 0; i < Images[t].size(); i++)
+      {
+        Rect ROI = SelectMaskRect(Images[t][i]);
+        Mat tempImage;
+        resize(Images[t][i](ROI), tempImage, cv::Size(0, 0), scale, scale, cv::INTER_NEAREST);
+        for (int y = 0; y < tempImage.size().height; y++)
+          for (int x = 0; x < tempImage.size().width; x++)
+          {
+            int x_ = textSize.width + i*cellSize.width + 0.5*(borderSize.width + cellSize.width - tempImage.size().width) + x;
+            int y_ = t*cellSize.height + 0.5*(borderSize.height + cellSize.height - tempImage.size().height) + y;
+            if (x_ >= 0 && x_ < X.size().width && y_ >= 0 && y_ < X.size().height)
+              X.at<Vec3b>(y_, x_) = tempImage.at<Vec3b>(y, x);
+          }
+        tempImage.release();
+      }
+    }
 
     return X;
-  }
-
-  void PutImages(Mat &Result, int row, vector<Mat> images, Size max_size, Size borderSize, Size textSize, float scale)
-  {
-     Size CellSize(scale * max_size.height + borderSize.height, scale * max_size.width + borderSize.width);
-     for (unsigned int i = 0; i < images.size(); i++)
-     {
-       Mat tempImage = images[i](SelectMaskRect(images[i], 10));
-       resize(tempImage, tempImage, cv::Size(0, 0), scale, scale, cv::INTER_NEAREST);
-       for (int y = 0; y < tempImage.size().height; y++)
-         for (int x = 0; x < tempImage.size().width; x++)
-           Result.at<Vec3b>(row *CellSize.height + 0.5*(borderSize.height + CellSize.height - tempImage.size().height) + y, textSize.width + i*CellSize.width + 0.5*(borderSize.width + CellSize.width - tempImage.size().width) + x) = tempImage.at<Vec3b>(y, x);
-      }
   }
 
   // Testing of the test
@@ -785,10 +840,10 @@ namespace SPEL
       Mat image(100, 100, CV_8UC3, Scalar(0, 0, 0));
       image.at<Vec3b>(10, 10) = Vec3b(255, 255, 255);
       image.at<Vec3b>(20, 20) = Vec3b(255, 255, 255);
-      Rect rect = SelectMaskRect(image, 2);
+      Rect rect = SelectMaskRect(image, 10);
 
       EXPECT_EQ(Rect(10, 10, 11, 11), rect);
-      imwrite("temp150616.bmp", image(rect));
+
       image.release();
   }
 
@@ -798,10 +853,9 @@ namespace SPEL
     int n = 10, m = 10;
     Mat Image = cv::Mat(n, m, CV_8UC3, cv::Scalar(255, 255, 255));
     Rect ROI = SelectMaskRect(Image, 10);
-    Mat ImageROI = Image(ROI);
-    EXPECT_EQ(Image.size(), ImageROI.size());
+    EXPECT_EQ(Image.size(), Image(ROI).size());
+
     Image.release();
-    ImageROI.release();
   }
 
   // Testing of the test
@@ -838,14 +892,14 @@ namespace SPEL
     imwrite("images_2.bmp", images[2]);
 
     Size size = MaxSize(images);
-    EXPECT_EQ(Size(p1 - p0 + Point2i(1,1) + Point2i(2, 2)), size);
+    EXPECT_EQ(Size(p1 - p0 + Point2i(1,1)), size);
 
     for (int i = 0; i < images.size(); i++)
       images[i].release();
   }
 
   // Testing of the test
-  TEST(ImageRotationExperiments, X0)
+  /*TEST(ImageRotationExperiments, X0)
   {
     vector<String> names = { "1", "12", "123", "1234" };
     int *temp = new int();
@@ -853,27 +907,42 @@ namespace SPEL
     Mat Image = X0(5, Size(40, 40), Size(0, 0), textSize, names, 2.0f);
     Image.release();
     delete temp;
-  }
+  }*/
 
   // Testing of the test
   TEST(ImageRotationExperiments, PutImages)
   {
-      vector<String> names = { "1", "12", "123", "1234" };
-      int *temp = new int();
-      Size textSize = maxTextSize(names, 5, 0.65f, temp);
-      Point2i size(20, 20);
-      float scale = 2.0f;
-      int N = 5;
-      Mat Image = X0(5, Size(size*scale), Size(0, 0), textSize, names, scale);
+    vector<String> names = { "1", "12", "123", "1234" };
+    Point2i size(4,4);
+    float scale = 2.0f;
+    int N = 5;
 
-      vector<Mat> images;
-      for(int i = 0; i < N ; i++)
-        images.push_back(Mat(Size(size),CV_8UC3, cv::Scalar(0, 0, 0)));
-
+    vector<Mat> ImagesRow;
+    vector<vector<Mat>> Images(4);
+    for (int t = 0; t < Images.size(); t++)
+    {
       for (int i = 0; i < N; i++)
-        images[i].release();
-      Image.release();
-      delete temp;
+      {
+        Mat X(size, CV_8UC3, cv::Scalar(255, 255, 255));
+        ImagesRow.push_back(X);
+        X.release();
+      }
+      Images[t] = ImagesRow;
+      ImagesRow.clear();
+    }
+
+    Mat Image = PutImages(names, Images, scale);
+    imwrite("100716-temp2156.bmp", Image);
+
+    for (int t = 0; t < Images.size(); t++)
+    {
+      for (int i = 0; i < N; i++)
+        Images[t][i].release();
+      Images[t].clear();
+    }
+
+    Images.clear();
+    Image.release();
   }
 
 // Testing the functions
@@ -964,130 +1033,110 @@ namespace SPEL
     // Read images
     vector<Mat> images;
     vector<Mat> patterns;
-    vector<Mat> results;
-    vector<Mat> selectedImages;
-    vector<Mat> selectedResults;
-    vector<long int> time;
-    vector<cv::Size> sizes;
-    vector<POSERECT <Point2f>> Rects;
+    vector<vector<Point2f>> ROIPolygons;
 
-    int samplesCount = 4;
+    int samplesCount = 12;
 
     for (int i = 1; i <= samplesCount; i++)
     {
       stringstream temp;
       temp << i;
-      images.push_back(imread(Path + "Q" + temp.str() + ".jpg"));
+      images.push_back(imread(Path + "Q" + temp.str() + ".bmp"));
       patterns.push_back(imread(Path + "Pattern" + temp.str() + ".bmp"));
       temp.clear();
     }
         
     // Create ROI polygon
-    float angle = 45; // the rotation angle
+    float angle = 45; // the rotation angle for samples 1..8
     float x1 = 9.0f, x2 = 39.0f, y1 = 19.0f, y2 = 59.0f; // the rectangle vertices
     POSERECT <Point2f> rect = CreateRect1(x1, x2, y1, y2);
     POSERECT <Point2f> RotatedRect = RotateRect1(rect, angle);
-    for (int i = 0; i < images.size(); i++)
-      Rects.push_back(RotatedRect);
+    for (int i = 0; i < 8; i++)
+      ROIPolygons.push_back(RotatedRect.asVector());
+    angle = 15; // the rotation angle  for samples 9..12 
+    RotatedRect = RotateRect1(rect, angle);
+    for (int i = 8; i < 12; i++)
+      ROIPolygons.push_back(RotatedRect.asVector());
 
     // Functions
     vector<Mat(*)(const cv::Mat &, std::vector<cv::Point2f> &, float)> functions = {RotateImageToDefault, 
         DeRotate_0, DeRotate_7, DeRotate_7_1, DeRotate_2_visualization, DeRotate_3_visualization, DeRotate_4_visualization,
         DeRotate_5, DeRotate_5_1, DeRotate_withScale, DeRotate_8, DeRotate_8_1, DeRotate_8_2 };
     vector<String> names = { "RotateImageToDefault", 
-        "DeRotate_0", "DeRotate_7", "DeRotate_7_1", "DeRotate_2_visualisation", "DeRotate_3_visualisation", "DeRotate_4_visualisation",
+        "DeRotate_0", "DeRotate_7", "DeRotate_7_1", "DeRotate_2_visualization", "DeRotate_3_visualization", "DeRotate_4_visualization",
          "DeRotate_5", "DeRotate_5_1", "DeRotate_withScale","DeRotate_8", "DeRotate_8_1" ,"DeRotate_8_2" };
 
     // Prepare visualization
-    Size max_size = MaxSize(images);
-    max_size = MaxSize(images, max_size);
- 
-    Size borderSize(0, 0);
+    int n0 = 2;
+    vector<vector<Mat>> selectedResults(functions.size() + n0);
+    selectedResults[0] = patterns;
+    selectedResults[1] = images;
+    float ImageVisualizationScale = 2.0f;
+    Mat X;
 
-    int fontFace = 5;
-    double fontScale = 0.65;
-    int *text_y = new int;
-
-    Size textSize = maxTextSize(names, fontFace, fontScale, text_y);
-    float scale = 2.0f;
-    int columns = images.size();
-    Mat X = X0(columns, max_size, borderSize, textSize, names, scale);
-    
-    PutImages(X, 0, patterns, max_size, borderSize, textSize, scale);
-    PutImages(X, 1, images, max_size, borderSize, textSize, scale);
-
-    
     // Call all rotation functions
-    for (unsigned int f = 0; f < functions.size(); f++)
+    for (unsigned int t = 0; t < functions.size(); t++)
     {
       long t0, t1;
       for (unsigned int i = 0; i < images.size(); i++)
       {
         stringstream temp;
-        temp << names[f] + "(image" << i << ")";
+        temp << names[t] + "(image" << i << ")";
 
-        Mat deRotatedImage;
         vector<Point2f> StandledROI;
-        StandledROI = RotatedRect.asVector();
-        //StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
+        StandledROI = ROIPolygons[i]; //StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
+        
+        // Run rotation
+        Mat deRotatedImage;
         t0 = clock();// GetTickCount();
-        deRotatedImage = functions[f](images[i], StandledROI, 11.0f);
-        //deRotatedImage = functions[f](images[i], StandledROI, 11.0f);
+        deRotatedImage = functions[t](images[i], StandledROI, 11.0f);
         t1 = clock();// GetTickCount();
 
-        sizes.push_back(images[i].size());
-        //imwrite(temp.str() + ".bmp", deRotatedImage);
-        results.push_back(deRotatedImage.clone());
-        deRotatedImage.release();
-        
         // Visualization
-        cv::Rect MaskRect = SelectMaskRect(results[i], 10);
-        //cout << MaskRect << endl;
-        selectedResults.push_back(results[i](MaskRect).clone());
-        //imwrite(temp.str()+"SelectedROI.bmp", selectedResults[i]);
+        cv::Rect MaskRect = SelectMaskRect(deRotatedImage, 10);
+        selectedResults[t + n0].push_back(deRotatedImage(MaskRect).clone());
 
         // Put results
         pair<float, Point2i> score, colorScore;
-        score = CompareImages(patterns[i], results[i], 0);
-        colorScore = CompareImages(patterns[i], results[i], 1);
+        score = CompareImages(patterns[i], deRotatedImage, 0);
+        colorScore = CompareImages(patterns[i], deRotatedImage, 1);
+
         cout << temp.str() << ": score = " << score.first /*<< ", shift = " << score.second*/;
-        cout << ", colorScore = " << colorScore.first << ", ResultSize = "  << selectedResults[i].size() << /*", shift =" << colorScore.second <<*/ ", time = " << t1 - t0 << endl;
+        cout << ", colorScore = " << colorScore.first << ", ResultSize = "  << selectedResults[t + n0][i].size() << /*", shift =" << colorScore.second <<*/ ", time = " << t1 - t0 << endl;
+        deRotatedImage.release();
         temp.clear();
       }
       cout << endl;
-
-      // Visualization
-      PutImages(X, f + 2, selectedResults, max_size, borderSize, textSize, scale);
-
-      // Clear
-      for (unsigned int i = 0; i < images.size(); i++)
-      {
-        results[i].release();
-        selectedResults[i].release();
-      }
-      results.clear();
-      selectedResults.clear();
     }
 
-    cout << "Results in 'ImageRotationExperiments.bmp'" << endl << endl;
+    // Visualization
+    vector<String> RowsNames = { "Paterns", "Images" };
+    for (unsigned int t = 0; t < names.size(); t++)
+      RowsNames.push_back(names[t]);
+    X = PutImages(RowsNames,selectedResults, ImageVisualizationScale);
     imwrite("ImageRotationExperiments.bmp", X);
     X.release();
 
+    cout << "Results in 'ImageRotationExperiments.bmp'" << endl << endl;
+    // Clear     
+    for (unsigned int t = 0; t < selectedResults.size(); t++)
+      for (unsigned int i = 0; i < selectedResults[t].size(); i++)
+      {
+        selectedResults[t][i].release();
+        selectedResults[t].clear();
+      }
+    selectedResults.clear();
     
     // Clear
     for (unsigned int i = 0; i < images.size(); i++)
     {
       images[i].release();
       patterns[i].release();
-      results[i].release();
-      selectedResults[i].release();
     }
     images.clear();
     patterns.clear();
-    results.clear();
-    Rects.clear();
-    selectedResults.clear();
   }
+
 
 TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   {
@@ -1109,119 +1158,107 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
     // Read images
     vector<Mat> images;
     vector<Mat> patterns;
-    vector<Mat> results;
-    vector<Mat> selectedImages;
-    vector<Mat> selectedResults;
-    vector<long int> time;
-    vector<cv::Size> sizes;
-    vector<POSERECT <Point2f>> Rects;
+    vector<vector<Point2f>> ROIPolygons;
 
-    int samplesCount = 4;
+    int samplesCount = 12;
 
     for (int i = 1; i <= samplesCount; i++)
     {
       stringstream temp;
       temp << i;
-      images.push_back(imread(Path + "Q" + temp.str() + ".jpg"));
+      images.push_back(imread(Path + "Q" + temp.str() + ".bmp"));
       patterns.push_back(imread(Path + "Pattern" + temp.str() + ".bmp"));
       temp.clear();
     }
-    
-    
+        
     // Create ROI polygon
-    float angle = 45; // the rotation angle
-    float x1 = 9.0, x2 = 39.0, y1 = 19.0, y2 = 59.0; // the rectangle vertices
+    float angle = 45; // the rotation angle for samples 1..8
+    float x1 = 9.0f, x2 = 39.0f, y1 = 19.0f, y2 = 59.0f; // the rectangle vertices
     POSERECT <Point2f> rect = CreateRect1(x1, x2, y1, y2);
     POSERECT <Point2f> RotatedRect = RotateRect1(rect, angle);
-    for (int i = 0; i < images.size(); i++)
-      Rects.push_back(RotatedRect);
+    for (int i = 0; i < 8; i++)
+      ROIPolygons.push_back(RotatedRect.asVector());
+    angle = 15; // the rotation angle  for samples 9..12 
+    RotatedRect = RotateRect1(rect, angle);
+    for (int i = 8; i < 12; i++)
+      ROIPolygons.push_back(RotatedRect.asVector());
 
     // Functions
     vector<Mat(*)(const cv::Mat &, std::vector<cv::Point2f> &, float)> functions = {RotateImageToDefault, 
         DeRotate_0, DeRotate_7, DeRotate_7_1, DeRotate_2_visualization, DeRotate_3_visualization, DeRotate_4_visualization,
         DeRotate_5, DeRotate_5_1, DeRotate_withScale, DeRotate_8, DeRotate_8_1, DeRotate_8_2 };
     vector<String> names = { "RotateImageToDefault", 
-        "DeRotate_0", "DeRotate_7", "DeRotate_7_1", "DeRotate_2_visualisation", "DeRotate_3_visualisation", "DeRotate_4_visualisation",
+        "DeRotate_0", "DeRotate_7", "DeRotate_7_1", "DeRotate_2_visualization", "DeRotate_3_visualization", "DeRotate_4_visualization",
          "DeRotate_5", "DeRotate_5_1", "DeRotate_withScale","DeRotate_8", "DeRotate_8_1" ,"DeRotate_8_2" };
 
     // Prepare visualization
-    Size max_size = MaxSize(images);
-    max_size = MaxSize(images, max_size);
- 
-    Size borderSize(0, 0);
+    int n0 = 2;
+    vector<vector<Mat>> selectedResults(functions.size() + n0);
+    selectedResults[0] = patterns;
+    selectedResults[1] = images;
+    float ImageVisualizationScale = 2.0f;
 
-    int fontFace = 5;
-    double fontScale = 0.65;
-    int *text_y = new int;
-
-    Size textSize = maxTextSize(names, fontFace, fontScale, text_y);
-    float scale = 2.0f;
-    int columns = images.size();
-    Mat X = X0(columns, max_size, borderSize, textSize, names, scale);
-    
-    PutImages(X, 0, patterns, max_size, borderSize, textSize, scale);
-    PutImages(X, 1, images, max_size, borderSize, textSize, scale);
-    
     // Call all rotation functions
-    for (unsigned int f = 0; f < functions.size(); f++)
+    for (unsigned int t = 0; t < functions.size(); t++)
     {
-      long int t0, t1;
+      long t0, t1;
       for (unsigned int i = 0; i < images.size(); i++)
       {
-        Mat deRotatedImage;
-        vector<Point2f> StandledROI;
-        StandledROI = ExtendSlantedROI(Rects[i].asVector(), 2, 2);
-        t0 = clock();
-        deRotatedImage = functions[f](images[i], StandledROI, 11.0f);
-        t1 = clock();
+        stringstream temp;
+        temp << names[t] + "(image" << i << ")";
 
-        sizes.push_back(images[i].size());
-        results.push_back(deRotatedImage.clone());
-        deRotatedImage.release();
+        vector<Point2f> StandledROI;
+        StandledROI = ExtendSlantedROI(ROIPolygons[i], 2, 2);
         
+        // Run rotation
+        Mat deRotatedImage;
+        t0 = clock();// GetTickCount();
+        deRotatedImage = functions[t](images[i], StandledROI, 11.0f);
+        t1 = clock();// GetTickCount();
+       
         // Visualization
-        cv::Rect MaskRect = SelectMaskRect(results[i], 10);
-        selectedResults.push_back(results[i](MaskRect).clone());
+        cv::Rect MaskRect = SelectMaskRect(deRotatedImage, 10);
+        selectedResults[t + n0].push_back(deRotatedImage(MaskRect).clone());
 
         // Put results
         pair<float, Point2i> score, colorScore;
-        score = CompareImages(patterns[i], results[i], 0);
-        colorScore = CompareImages(patterns[i], results[i], 1);
-        cout << names[f] + "(image" << i << ")" << ": score = " << score.first << ", shift = " << score.second;
-        cout << ";   colorScore = " << colorScore.first << ", shift =" << colorScore.second << ";   ResultSize = " << selectedResults[i].size() << ";   time = " << t1 - t0 << endl;
+        score = CompareImages(patterns[i], deRotatedImage, 0);
+        colorScore = CompareImages(patterns[i], deRotatedImage, 1);
+        cout << temp.str() << ": score = " << score.first /*<< ", shift = " << score.second*/;
+        cout << ", colorScore = " << colorScore.first << ", ResultSize = "  << selectedResults[t + n0][i].size() << /*", shift =" << colorScore.second <<*/ ", time = " << t1 - t0 << endl;
+        deRotatedImage.release();
+        temp.clear();
       }
       cout << endl;
-
-      // Visualization
-      PutImages(X, f + 2, selectedResults, max_size, borderSize, textSize, scale);
-
-      // Clear
-      for (unsigned int i = 0; i < images.size(); i++)
-      {
-        results[i].release();
-        selectedResults[i].release();
-      }
-      results.clear();
-      selectedResults.clear();
     }
 
-    cout << "Results in 'ImageRotationExperiments-ExtendedROI.bmp'" << endl << endl;
-    imwrite("ImageRotationExperiments-ExtendedROI.bmp", X);
+    // Visualization
+    vector<String> RowsNames = { "Paterns", "Images" };
+    for (unsigned int t = 0; t < names.size(); t++)
+      RowsNames.push_back(names[t]);
+    Mat X = PutImages(RowsNames,selectedResults, ImageVisualizationScale);
+    imwrite("ImageRotationExperiments-extendedROI.bmp", X);
     X.release();
 
+    cout << "Results in 'ImageRotationExperiments-extendedROI.bmp'" << endl << endl;
+
+    // Clear     
+    for (unsigned int t = 0; t < selectedResults.size(); t++)
+      for (unsigned int i = 0; i < selectedResults[t].size(); i++)
+      {
+        selectedResults[t][i].release();
+        selectedResults[t].clear();
+      }
+    selectedResults.clear();
+    
     // Clear
     for (unsigned int i = 0; i < images.size(); i++)
     {
       images[i].release();
       patterns[i].release();
-      results[i].release();
-      selectedResults[i].release();
     }
     images.clear();
     patterns.clear();
-    results.clear();
-    Rects.clear();
-    selectedResults.clear();
   }
 
   class ImageRotationExperiments_F : public ::testing::Test
@@ -1261,7 +1298,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
       }
     }
 
-    const int samplesCount = 4;
+    const int samplesCount = 8;
     String Path;
     vector<Point2f> rect;
     vector<Mat> images;
@@ -1310,7 +1347,7 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_2_visualization)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.8f, 0.91f, 0.92f, 0.94f };
+    vector<float> minScores = { 0.8f, 0.91f, 0.92f, 0.94f, 0.3f, 0.3f, 0.3f, 0.3f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
