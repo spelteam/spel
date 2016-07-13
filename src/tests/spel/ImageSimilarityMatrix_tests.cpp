@@ -488,8 +488,8 @@ namespace SPEL
 
     Mat Image = Mat::zeros(rows, cols, CV_8UC3);
     Mat ShiftedImage = Mat::zeros(rows, cols, CV_8UC3);
-    Mat Mask = Mat(rows, cols, CV_8UC1, 0);
-    Mat ShiftedMask = Mat(rows, cols, CV_8UC1, 0);
+    Mat Mask = Mat::zeros(rows, cols, CV_8UC1);
+    Mat ShiftedMask = Mat::zeros(rows, cols, CV_8UC1);
     for (int x = 0; x < cols; x++)
       for (int y = 0; y < rows; y++)
         if(pointPolygonTest(rect, Point2f(x, y), false) > 0)
