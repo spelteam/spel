@@ -793,7 +793,7 @@ namespace SPEL
 
     // Create image
     cellSize = Size(cellSize.width + borderSize.width, cellSize.height + borderSize.height);
-    Mat X(names.size()*cellSize.height, textSize.width + maxImageCount*cellSize.width, CV_8UC3, Scalar(0, 0, 0));
+    Mat X = Mat::zeros(names.size()*cellSize.height, textSize.width + maxImageCount*cellSize.width, CV_8UC3);
 
     // Put lines
     for(int i = 0; i < maxImageCount; i++)
@@ -1103,6 +1103,7 @@ namespace SPEL
 
         cout << temp.str() << ": score = " << score.first /*<< ", shift = " << score.second*/;
         cout << ", colorScore = " << colorScore.first << ", ResultSize = "  << selectedResults[t + n0][i].size() << /*", shift =" << colorScore.second <<*/ ", time = " << t1 - t0 << endl;
+
         deRotatedImage.release();
         temp.clear();
       }
@@ -1278,15 +1279,20 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
 #else
     Path = "speltests_TestData/ImageRotationTestData/";
 #endif 
+      rect45 = { Point2f(48.748737, 35.464466), Point2f(20.464466, 63.748737), Point2f(-0.74873734, 42.535534), Point2f(27.535534, 14.251263) };
+      rect15 = { Point2f(43.665268, 23.56377), Point2f(33.312508, 62.200802),  Point2f(4.3347321, 54.43623), Point2f(14.687494, 15.799198) };
       for (int i = 1; i <= samplesCount; i++)
       {
         stringstream temp;
         temp << i;
-        images.push_back(imread(Path + "Q" + temp.str()+".jpg"));
+        images.push_back(imread(Path + "Q" + temp.str()+".bmp"));
         patterns.push_back(imread(Path + "Pattern" + temp.str() + ".bmp"));
+        if (i < 9)
+          Polygons.push_back(rect45);
+        else
+          Polygons.push_back(rect15);
         temp.clear();
       }
-      rect = { Point2f(48.748737, 35.464466), Point2f(20.464466, 63.748737), Point2f(-0.74873734, 42.535534), Point2f(27.535534, 14.251263) };
     }
 
     virtual void TearDown()
@@ -1298,9 +1304,10 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
       }
     }
 
-    const int samplesCount = 8;
+    const int samplesCount = 12;
     String Path;
-    vector<Point2f> rect;
+    vector<Point2f> rect15, rect45;
+    vector<vector<Point2f>> Polygons;
     vector<Mat> images;
     vector<Mat> patterns;
   };
@@ -1308,12 +1315,12 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_0)
   {
     vector<Mat> results;
-    vector<float> minScores = {0.90f, 0.93f, 0.95f, 0.96f};
+    vector<float> minScores = { 0.80f, 0.90f, 0.90f, 0.90f, 0.70f, 0.80f, 0.90f, 0.90f, 0.60f, 0.80f, 0.80f, 0.80f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();	  
-      results.push_back(DeRotate_0(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_0(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
       temp.release();
     }
   }
@@ -1321,12 +1328,12 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_7)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.90f, 0.95f, 0.97f, 0.97f };
+    vector<float> minScores = { 0.80f, 0.90f, 0.90f, 0.90f, 0.70f, 0.80f, 0.90f, 0.90f, 0.60f, 0.80f, 0.80f, 0.80f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_7(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_7(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
       temp.release();
     }
   }
@@ -1334,12 +1341,12 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_7_1)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.15f, 0.35f, 0.50f, 0.60f };
+    vector<float> minScores = { 0.80f, 0.90f, 0.90f, 0.90f, 0.70f, 0.80f, 0.80f, 0.90f, 0.60f, 0.80f, 0.80f, 0.80f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_7_1(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_7_1(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
       temp.release();
     }
   }
@@ -1347,108 +1354,108 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
   TEST_F(ImageRotationExperiments_F, DeRotate_2_visualization)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.8f, 0.91f, 0.92f, 0.94f, 0.3f, 0.3f, 0.3f, 0.3f };
+    vector<float> minScores = { 0.90f, 0.90f, 0.90f, 0.90f, 0.50f, 0.70f, 0.80f, 0.80f, 0.40f, 0.60f, 0.70f, 0.80f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_2_visualization(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_2_visualization(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_3_visualization)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.8f, 0.91f, 0.92f, 0.93f };
+    vector<float> minScores = { 0.80f, 0.90f, 0.90f, 0.90f, 0.5f, 0.7f, 0.70f, 0.7f, 0.60f, 0.80f, 0.80f, 0.80f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_3_visualization(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_3_visualization(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_4_visualization)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.8f, 0.91f, 0.93f, 0.94f };
+    vector<float> minScores = { 0.90f, 0.90f, 0.90f, 0.90f, 0.5f, 0.70f, 0.70f, 0.80f, 0.60f, 0.80f, 0.70f, 0.80f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_4_visualization(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_4_visualization(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_5)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.015f, 0.28f, 0.51f, 0.63f };
+    vector<float> minScores = { 0.015f, 0.20f, 0.40f, 0.60f, 0.15f, 0.10f, 0.30f, 0.40f, 0.15f, 0.20f, 0.40f, 0.50f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_5(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_5(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_5_1)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.16f, 0.35f, 0.55f, 0.65f };
+    vector<float> minScores = { 0.10f, 0.30f, 0.50f, 0.60f, 0.15f, 0.20f, 0.40f, 0.50f, 0.15f, 0.20f, 0.40f, 0.50f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_5_1(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_5_1(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_withScale)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.17f, 0.35f, 0.54f, 0.67f };
+    vector<float> minScores = { 0.10f, 0.30f, 0.50f, 0.60f, 0.10f, 0.10f, 0.40f, 0.50f, 0.10f, 0.10f, 0.30f, 0.40f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_withScale(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_withScale(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_8)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.90f, 0.98f, 0.98f, 0.98f };
+    vector<float> minScores = { 0.80f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_8(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_8(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_8_1)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.89f, 0.99f, 0.99f, 0.99f };
+    vector<float> minScores = { 0.80f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.80f, 0.80f, 0.80f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_8_1(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_8_1(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
     }
   }
 
   TEST_F(ImageRotationExperiments_F, DeRotate_8_2)
   {
     vector<Mat> results;
-    vector<float> minScores = { 0.91f, 0.99f, 0.99f, 0.99f };
+    vector<float> minScores = { 0.80f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f, 0.90f };
     for (unsigned int i = 0; i < images.size(); i++)
     {
       Mat temp = images[i].clone();
-      results.push_back(DeRotate_8_2(temp, rect, 11.0f));
-      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]);
+      results.push_back(DeRotate_8_2(temp, Polygons[i], 11.0f));
+      EXPECT_GT(CompareImages(patterns[i], results[i], 1).first, minScores[i]) << " i = " << i << endl;
       temp.release();
     }
   }
