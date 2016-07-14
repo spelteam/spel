@@ -176,7 +176,7 @@ namespace SPEL
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
 
-    cv::Mat Result(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat Result = cv::Mat::zeros(n + 1, m + 1, CV_8UC3);
 
     dw = dw*(1.0f / width);
     dh = dh*(1.0f / height);
@@ -215,7 +215,7 @@ namespace SPEL
   cv::Mat DeRotate_2_visualization(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
     float s = 11.0f;
-    cv::Mat ScalledImage = cv::Mat(imgSource.size().height*s, imgSource.size().width*s,  CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat ScalledImage = cv::Mat::zeros(imgSource.size().height*s, imgSource.size().width*s,  CV_8UC3);
     for (int x = 0; x < imgSource.size().width; x++)
       for (int y = 0; y < imgSource.size().height; y++)
       {
@@ -230,7 +230,7 @@ namespace SPEL
     float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
-    cv::Mat Image(n+1, m+1, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat Image = cv::Mat::zeros(n+1, m+1, CV_8UC3);
 
 
     dw = dw*(1.0f/ round(width));
@@ -267,7 +267,7 @@ namespace SPEL
   cv::Mat DeRotate_3_visualization(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
     float s = 11.0f;
-    auto ScalledImage = cv::Mat(imgSource.size().height*s, imgSource.size().width*s, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat ScalledImage = cv::Mat::zeros(imgSource.size().height*s, imgSource.size().width*s, CV_8UC3);
     for (int x = 0; x < imgSource.size().width; x++)
       for (int y = 0; y < imgSource.size().height; y++)
         for (int i = 0; i < s; i++)
@@ -340,7 +340,7 @@ namespace SPEL
   cv::Mat DeRotate_4_visualization(const cv::Mat &imgSource, std::vector<cv::Point2f> &ROIRect, float Scale)
   {
     float s = 11.0f;
-    auto ScalledImage = cv::Mat(imgSource.size().height*s, imgSource.size().width*s,  CV_8UC3, cv::Scalar(0, 0, 0));
+    Mat ScalledImage(imgSource.size().height*s, imgSource.size().width*s,  CV_8UC3);
     for (int x = 0; x < imgSource.size().width; x++)
       for (int y = 0; y < imgSource.size().height; y++)
         for (int i = 0; i < s; i++)
@@ -522,7 +522,7 @@ namespace SPEL
       float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
       int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
-      cv::Mat Image(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
+      cv::Mat Image = cv::Mat::zeros(n + 1, m + 1, CV_8UC3);
 
       dw = dw*(1.0f / width);
       dh = dh*(1.0f / height);
