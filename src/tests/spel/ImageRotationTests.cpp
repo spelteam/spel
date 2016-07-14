@@ -92,10 +92,10 @@ namespace SPEL
     double height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = round(height), m = round(width);
-    cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat Image = cv::Mat::zeros(n + 1, m + 1, CV_8UC3);
 
-    dw = dw*(1.0 / width); //static_cast<float>(m));
-    dh = dh*(1.0 / height); //static_cast<float>(n));
+    dw = dw*(1.0 / width); //static_cast<float>(m-1));
+    dh = dh*(1.0 / height); //static_cast<float>(n-1));
 
     cv::Point2d currentPoint;
     cv::Point2d p0(ROIRect[3].x, ROIRect[3].y);
@@ -119,7 +119,7 @@ namespace SPEL
     double height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = std::round(height) , m = std::round(width) ;
-    cv::Mat Image = cv::Mat(n+1, m+1, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat Image = cv::Mat::zeros(n+1, m+1, CV_8UC3);
 
     dw = dw*(1.0 / width);  /*static_cast<double>(m));*/
     dh = dh*(1.0 / height); /*static_cast<double>(n));*/
@@ -230,7 +230,7 @@ namespace SPEL
     float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
-    cv::Mat Image = cv::Mat(n+1, m+1, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat Image(n+1, m+1, CV_8UC3, cv::Scalar(0, 0, 0));
 
 
     dw = dw*(1.0f/ round(width));
@@ -280,7 +280,7 @@ namespace SPEL
     float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
     int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
-    cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat Image(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
 
     dw = dw*(1.0f / static_cast<float>(m));
     dh = dh*(1.0f / static_cast<float>(n));
@@ -353,7 +353,7 @@ namespace SPEL
       float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
       int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
-      cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
+      cv::Mat Image(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
 
       dw = dw*(1.0f / static_cast<float>(m));
       dh = dh*(1.0f / static_cast<float>(n));
@@ -522,7 +522,7 @@ namespace SPEL
       float height = sqrt(dh.x*dh.x + dh.y*dh.y);
 
       int n = static_cast<int>(round(height)), m = static_cast<int>(round(width));
-      cv::Mat Image = cv::Mat(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
+      cv::Mat Image(n + 1, m + 1, CV_8UC3, cv::Scalar(0, 0, 0));
 
       dw = dw*(1.0f / width);
       dh = dh*(1.0f / height);
