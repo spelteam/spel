@@ -222,19 +222,22 @@ namespace SPEL
   {
       TestsMatrix X;
       bool b = X.read(FilePath + "In_Matrix.txt");
+      TestsMatrix Temp(X);
+
+      Mat X_ShiftMatrix;
+      X_ShiftMatrix = X.getImageShiftMatrix().clone();
+      int X_rows = X_ShiftMatrix.size().height;
 
       ASSERT_TRUE(b);
       TestsMatrix Y(static_cast<TestsMatrix&&>(X));
-      Mat X_ShiftMatrix = X.getImageShiftMatrix();
-      Mat Y_ShiftMatrix = Y.getImageShiftMatrix();
-      int X_rows = X_ShiftMatrix.size().height;
+      Mat Y_ShiftMatrix = Y.getImageShiftMatrix().clone();
       int Y_rows = Y_ShiftMatrix.size().height;
 
       ASSERT_EQ(X_rows, Y_rows);
       for (int i = 0; i < X_rows; i++)
-        for (int k = 0; k < Y_rows; k++)
+        for (int k = 0; k < X_rows; k++)
         {
-          EXPECT_EQ(X.at(i, k), Y.at(i, k));
+          EXPECT_EQ(Temp.at(i, k), Y.at(i, k));
           EXPECT_EQ(X_ShiftMatrix.at<Point2f>(i, k), Y_ShiftMatrix.at<Point2f>(i, k));
         }
       X_ShiftMatrix.release();
