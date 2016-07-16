@@ -82,11 +82,14 @@ namespace SPEL
     bool b = X.read(FilePath + "In_Matrix.txt");
     ASSERT_TRUE(b);
 
+    ImageMaskSimilarityMatrix Temp(X);
+    Mat X_ShiftMatrix;
+    X_ShiftMatrix = X.imageShiftMatrix.clone();
+    int X_rows = X_ShiftMatrix.size().height;
+    
     //Create actual value
     ImageMaskSimilarityMatrix Y(static_cast<ImageMaskSimilarityMatrix&&>(X));
-    Mat X_ShiftMatrix = X.imageShiftMatrix;
     Mat Y_ShiftMatrix = Y.imageShiftMatrix;
-    int X_rows = X_ShiftMatrix.size().height;
     int Y_rows = Y_ShiftMatrix.size().height;
 
     //Compare
@@ -94,10 +97,9 @@ namespace SPEL
     for (int i = 0; i < X_rows; i++)
       for (int k = 0; k < Y_rows; k++)
       {
-        EXPECT_EQ(X.at(i, k), Y.at(i, k));
+        EXPECT_EQ(Temp.at(i, k), Y.at(i, k));
         EXPECT_EQ(X_ShiftMatrix.at<Point2f>(i, k), Y_ShiftMatrix.at<Point2f>(i, k));
       }
-
     X_ShiftMatrix.release();
     Y_ShiftMatrix.release();
   }
