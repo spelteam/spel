@@ -56,10 +56,8 @@ namespace SPEL
       std::vector <LimbLabel>> &limbLabels) const;
     std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) 
       const noexcept;
-
     cv::Size getCellSize(void) const noexcept;
     uint8_t getnbins(void) const noexcept;
-
     static std::vector <std::vector <std::vector <float>>> calculateHog(
       const cv::Mat &image, std::vector <float> &descriptors, 
       const cv::Size &wndSize, const cv::Size &blockSize, 
