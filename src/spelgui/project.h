@@ -10,9 +10,7 @@
 #include <frame.hpp>
 #include <solvlet.hpp>
 
-#if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/imgcodecs/imgcodecs_c.h>
-#endif
 
 #include <memory>
 #include <vector>

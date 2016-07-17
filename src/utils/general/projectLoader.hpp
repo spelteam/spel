@@ -6,10 +6,8 @@
 #include <list>
 
 #include <opencv2/opencv.hpp>
-#if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #include <opencv2/imgproc/imgproc_c.h>
-#endif
 
 #include <tinyxml2.h>
 #include <tree_util.hh>

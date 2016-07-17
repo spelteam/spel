@@ -16,7 +16,7 @@
 #include "TestsFunctions.hpp"
 
 using namespace std;
-#if OpenCV_VERSION_MAJOR == 3 && defined (HAVE_OPENCV_XFEATURES2D)
+#if defined (HAVE_OPENCV_XFEATURES2D)
 using namespace xfeatures2d;
 #endif
 
@@ -83,25 +83,15 @@ namespace SPEL
     POSERECT <Point2f> rect = bodyPart.getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
     //Frame keypoints
     vector <KeyPoint> expected_FrameKeyPoints;
-#if OpenCV_VERSION_MAJOR == 3
     Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
     D1->detect(image, expected_FrameKeyPoints);
-#else
-    SurfFeatureDetector D1(minHessian);
-    D1.detect(image, expected_FrameKeyPoints);
-#endif
     //Part keypoints
     vector <KeyPoint> expected_PartKeyPoints = SelectKeypoints(expected_FrameKeyPoints, rect);
 
     //Part descriptors
     Mat expected_PartDescriptors;
-#if OpenCV_VERSION_MAJOR == 3
     Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
     extractor->compute(image, expected_PartKeyPoints, expected_PartDescriptors);
-#else
-    SurfDescriptorExtractor extractor;
-    extractor.compute(image, expected_PartKeyPoints, expected_PartDescriptors);
-#endif
     //Compare
 
     //Compare part rect
@@ -177,13 +167,8 @@ namespace SPEL
 
     //Calculate expected value
     vector <KeyPoint> keyPoints;
-#if OpenCV_VERSION_MAJOR == 3
     Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
     D1->detect(image, keyPoints);
-#else
-    SurfFeatureDetector D1(minHessian);
-    D1.detect(image, keyPoints);
-#endif    
     map<uint32_t, Mat> expected_descriptors;
     map<uint32_t, vector<Point2f>> expected_rects;
     map<uint32_t, vector<KeyPoint>> expected_Keypoints;
@@ -207,13 +192,8 @@ namespace SPEL
       expected_Keypoints.emplace(pair<uint32_t, vector<KeyPoint>>(partID, temp));
 
       Mat temp_descriptors;
-#if OpenCV_VERSION_MAJOR == 3
       Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
       extractor->compute(image, expected_Keypoints[partID], temp_descriptors);
-#else
-      SurfDescriptorExtractor extractor;
-      extractor.compute(image, expected_Keypoints[partID], temp_descriptors);
-#endif
       expected_descriptors.emplace(pair<uint32_t, Mat>(partID, temp_descriptors.clone()));
       temp_descriptors.release();
       temp.clear();
@@ -291,13 +271,8 @@ namespace SPEL
 
     //Create a bad part models for selected body part
     vector <KeyPoint> _keyPoints;
-#if OpenCV_VERSION_MAJOR == 3
     Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
     D1->detect(image, _keyPoints);
-#else
-    SurfFeatureDetector D1(minHessian);
-    D1.detect(image, _keyPoints);
-#endif
 
     const float knnMatchKoeff = 0.8f;
 
@@ -315,15 +290,9 @@ namespace SPEL
       if (partModel2.partModelRect.containsPoint(_keyPoints[i].pt) > 0)
         partModel2.keyPoints.push_back(_keyPoints[i]);
     }
-#if OpenCV_VERSION_MAJOR == 3
     Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
     extractor->compute(image, partModel1.keyPoints, partModel1.descriptors);
     extractor->compute(image, partModel2.keyPoints, partModel2.descriptors);
-#else
-    SurfDescriptorExtractor extractor;
-    extractor.compute(image, partModel1.keyPoints, partModel1.descriptors);
-    extractor.compute(image, partModel2.keyPoints, partModel2.descriptors);
-#endif
     //Put expected and actual polygons and keypoints into image file
     Mat KeyPoints_image, PartKeyPoints;
 
@@ -398,13 +367,8 @@ namespace SPEL
 
     //Create part model for selected LimbLabel {p0, p1}
     vector <KeyPoint> _keyPoints;
-#if OpenCV_VERSION_MAJOR == 3
-     Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
-     D1->detect(image, _keyPoints);
-#else
-     SurfFeatureDetector D1(minHessian);
-     D1.detect(image, _keyPoints);
-#endif
+    Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
+    D1->detect(image, _keyPoints);
     float boneLength = BodyPart::getBoneLength(p0, p1);
     float boneWidth = bodyPart.getBoneWidth(boneLength);
     SurfDetector::PartModel partModel1;
@@ -414,13 +378,8 @@ namespace SPEL
      if (partModel1.partModelRect.containsPoint(_keyPoints[i].pt) > 0)
        partModel1.keyPoints.push_back(_keyPoints[i]);
     }
-#if OpenCV_VERSION_MAJOR == 3
      Ptr <SurfDescriptorExtractor> extractor = SurfDescriptorExtractor::create();
      extractor->compute(image, partModel1.keyPoints, partModel1.descriptors);
-#else
-    SurfDescriptorExtractor extractor;
-    extractor.compute(image, partModel1.keyPoints, partModel1.descriptors);
-#endif
 
     vector<Score> scores;
     Score score(D.compare(bodyPart, partModel1, p0, p1, knnMatchCoeff), std::to_string(D.getID()));

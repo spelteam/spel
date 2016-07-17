@@ -10,19 +10,12 @@
 // OpenCV
 #include <opencv2/opencv.hpp>
 #include <opencv2/opencv_modules.hpp>
-#if OpenCV_VERSION_MAJOR == 3 && defined (HAVE_OPENCV_XFEATURES2D)
+#if defined (HAVE_OPENCV_XFEATURES2D)
 #include "opencv2/features2d.hpp"
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/features2d/features2d.hpp>
-#elif defined (HAVE_OPENCV_FEATURES2D)
-#if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
-#include <opencv2/nonfree/nonfree.hpp>
 #else
-#warning "Unsupported version of OpenCV"
-#include <opencv2/features2d/features2d.hpp>
-#endif
-#else
-#error "Unsupported version of OpenCV"
+#error "Unsupported version of OpenCV. XFeatures2D are not installed."
 #endif
 
 #include "detector.hpp"

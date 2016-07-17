@@ -10,9 +10,6 @@ namespace SPEL
   SurfDetector::SurfDetector(void) noexcept
   {
     m_id = 0x53440000;
-#if OpenCV_VERSION_MAJOR == 2 && OpenCV_VERSION_MINOR == 4 && OpenCV_VERSION_PATCH >= 9
-    cv::initModule_nonfree();
-#endif
   }
 
   SurfDetector::~SurfDetector(void) noexcept
@@ -94,17 +91,12 @@ namespace SPEL
     imgMat = workFrame->getImage();
     // - all coordinates of key points must have identical scale with the skeleton
 
-#if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
     auto detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
 #else
-    auto detector = cv::SurfFeatureDetector::create(minHessian);
+#error "Unsupported version of OpenCV. XFeatures2D are not installed."
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
     detector->detect(imgMat, detectorHelper->keyPoints);
-#else
-    cv::SurfFeatureDetector detector(minHessian);
-    detector.detect(imgMat, detectorHelper->keyPoints);
-#endif // OpenCV_VERSION_MAJOR == 3
     if (detectorHelper->keyPoints.empty())
     {
       workFrame->UnloadAll(); // added 02.07.16		
@@ -134,17 +126,12 @@ namespace SPEL
     auto imgMat = frame->getImage();
     std::vector <cv::KeyPoint> keyPoints;
 
-#if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
     auto detector = cv::xfeatures2d::SurfFeatureDetector::create(minHessian);
 #else
-    auto detector = cv::SurfFeatureDetector::create(minHessian);
+#error "Unsupported version of OpenCV. XFeatures2D are not installed."
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
     detector->detect(imgMat, keyPoints);
-#else
-    cv::SurfFeatureDetector detector(minHessian);
-    detector.detect(imgMat, keyPoints);
-#endif // OpenCV_VERSION_MAJOR == 3
     if (keyPoints.empty())
     {
       std::stringstream ss;
@@ -211,17 +198,12 @@ namespace SPEL
     }
     else
     {
-#if OpenCV_VERSION_MAJOR == 3
 #if defined (HAVE_OPENCV_XFEATURES2D)
       auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
 #else
-      auto extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
+#error "Unsupported version of OpenCV. XFeatures2D are not installed."
 #endif // defined (HAVE_OPENCV_XFEATURES2D)
       extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
-#else
-      cv::SurfDescriptorExtractor extractor;
-      extractor.compute(imgMat, partModel.keyPoints, partModel.descriptors);
-#endif // OpenCV_VERSION_MAJOR == 3
       if (partModel.descriptors.empty())
       {
         std::stringstream ss;

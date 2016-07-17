@@ -69,15 +69,7 @@ namespace SPEL
       cv::Scalar(255, 255, 255));
     resize(partImage, partImageResized, wndSize);
     if (m_bGrayImages)
-    {
-#if OpenCV_VERSION_MAJOR == 2
-      cvtColor(partImageResized, partModel.partImage, CV_BGR2GRAY);
-#elif OpenCV_VERSION_MAJOR >= 3
       cvtColor(partImageResized, partModel.partImage, cv::COLOR_BGR2GRAY);
-#else
-#error "Unsupported version of OpenCV"
-#endif
-    }
     else
       partModel.partImage = partImageResized.clone();
 

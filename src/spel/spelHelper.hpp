@@ -13,9 +13,7 @@
 
 // OpenCV
 #include <opencv2/opencv.hpp>
-#if OpenCV_VERSION_MAJOR >= 3
 #include <opencv2/core/types_c.h>
-#endif
 
 // tree.hh
 #include <tree.hh>
