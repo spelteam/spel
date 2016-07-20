@@ -33,6 +33,7 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
         auto pos = strstr(argv[i], "=");
         ++pos;
         debugLevel = atoi(pos);
+        SpelObject::setDebugLevel(debugLevel);
       }
     }
   }
