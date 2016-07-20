@@ -17,10 +17,10 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
 #endif  // MEMORY_DEBUG && UNIX
   if (argc < 3)
   {
-    cout << "Usage:\t" << argv[0] << " [project.xml] [out directory] [--no-draw]" << endl;
+    cout << "Usage:\t" << argv[0] << " [project.xml] [out directory] [--no-draw] [--debug-level=N]" << endl;
     return -1;
   }
-
+  auto debugLevel = 3;
   bool bDraw = true;
   if (argc > 3)
   {
@@ -28,6 +28,12 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
     {
       if (strcmp(argv[i], "--no-draw") == 0)
         bDraw = false;
+      if (strstr(argv[i], "--debug-level=") != 0)
+      {
+        auto pos = strstr(argv[i], "=");
+        ++pos;
+        debugLevel = atoi(pos);
+      }
     }
   }
 
@@ -52,7 +58,7 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
     return -1;
   }
   map <string, float> params;
-  params.emplace("debugLevel", 3);
+  params.emplace("debugLevel", debugLevel);
 
   vector <Frame*> allFrames = projectLoader.getFrames();
   vector <Frame*> trainFrames;
@@ -113,7 +119,6 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
 
     cout << "Training complete" << endl;
     vector <Frame*>::iterator i;
-    map <string, float> detectParams;
     cout << "Detecting..." << endl;
     for (i = trainFrames.begin(); i != trainFrames.end(); ++i)
     {
@@ -182,7 +187,7 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
         try
         {
           cout << "Detecting frame " << f->getID() << "..." << endl;
-          labels = detect(f, detectParams, labels);
+          labels = detect(f, params, labels);
           if (limbLabels != 0)
           {
             try
