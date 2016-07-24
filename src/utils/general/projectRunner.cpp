@@ -3,6 +3,7 @@
 
 #include "projectRunner.hpp"
 #include <sequence.hpp>
+#include <chrono>
 
 ProjectRunner::ProjectRunner(string _testName)
 {
@@ -110,7 +111,10 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
     cout << "Training..." << endl;
     try
     {
+      auto start = chrono::system_clock::now();
       train(trainFrames, params);
+      auto diff = chrono::system_clock::now() - start;
+      cout << "Completed: " << chrono::duration_cast<chrono::seconds>(diff).count() << " seconds";
     }
     catch (exception &e)
     {
@@ -188,7 +192,10 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
         try
         {
           cout << "Detecting frame " << f->getID() << "..." << endl;
+          auto start = chrono::system_clock::now();
           labels = detect(f, params, labels);
+          auto diff = chrono::system_clock::now() - start;
+          cout << "Completed: " << chrono::duration_cast<chrono::seconds>(diff).count() << " seconds";          
           if (limbLabels != 0)
           {
             try
