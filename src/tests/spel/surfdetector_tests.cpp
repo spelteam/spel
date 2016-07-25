@@ -45,7 +45,7 @@ namespace SPEL
   TEST(surfDetectorTests, computeDescriptors)
   {
     //Load the input data
-    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
     vector<Frame*> SFrames = project.getFrames();
 
     //Counting a keyframes
@@ -144,7 +144,7 @@ namespace SPEL
   TEST(surfDetectorTests, train)
   {
     //Load the input data
-    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
     vector<Frame*> SFrames = project.getFrames();
 
     //Counting a keyframes
@@ -239,7 +239,7 @@ namespace SPEL
   TEST(surfDetectorTests, compare)
   {
     //Load the input data
-    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
     vector<Frame*> SFrames = project.getFrames();
 
     //Copy image and skeleton from first keyframe
@@ -337,7 +337,7 @@ namespace SPEL
   TEST(surfDetectorTests, generateLabel)
   {
     //Load the input data
-    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
     vector<Frame*> SFrames = project.getFrames();
 
     //Copy image and skeleton from first keyframe
@@ -420,11 +420,15 @@ namespace SPEL
     SFrames.clear();
   }
 
-  TEST(surfDetectorTests, detect)
+TEST(surfDetectorTests, detect)
   {   
     //Load the input data
-    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    //TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
     vector<Frame*> SFrames = project.getFrames();
+
+    TestProjectLoader project_pattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Frames = project_pattern.getFrames();
 
     //Copy image and skeleton from first keyframe
     int FirstKeyframe = 0;
@@ -435,7 +439,8 @@ namespace SPEL
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
 
     // Copy skeleton from keyframe to frames[1] 
-    SFrames[1]->setSkeleton(SFrames[0]->getSkeleton());
+    SFrames[1]->setSkeleton(Frames[1]->getSkeleton());
+    
 
     // Run "detect"
     SurfDetector D;
@@ -443,6 +448,8 @@ namespace SPEL
     D.train(SFrames, params);
     ASSERT_GT(D.getPartModels().size(), 0);
     map<uint32_t, vector<LimbLabel>> limbLabels;
+
+    params.emplace(pair<string, float>("knnMathCoeff", 0.7f));
     limbLabels = D.detect(SFrames[1], params, limbLabels);
     ASSERT_GT(limbLabels.size(), 0);
 
@@ -467,18 +474,19 @@ namespace SPEL
     }
 
     // Resize skeleton and copy coordinates of BodyParts
-    Frame * workFrame = new Keyframe();
-    workFrame = SFrames[0]->clone(workFrame);
-    const int maxFrameHeight = 720;
-    float resizeFactor = workFrame->Resize(maxFrameHeight);
-    Skeleton ResizedSkeleton = workFrame->getSkeleton();
-    imwrite("surfDetector_detect_test-TEMP.BMP", workFrame->getImage());
-    imwrite("surfDetector_detect_test-keyframe-image.BMP", SFrames[0]->getImage());
-    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(ResizedSkeleton);
-    delete workFrame;
+    //Frame * workFrame = new Keyframe();
+    //workFrame = Frames[1]->clone(Frames[1]);
+    //const int maxFrameHeight = 720;
+    //float resizeFactor = workFrame->Resize(maxFrameHeight);
+    Skeleton SkeletonPattern = Frames[1]->getSkeleton();
+    //imwrite("surfDetector_detect_test-TEMP.BMP", workFrame->getImage());
+    //imwrite("surfDetector_detect_test-keyframe-image.BMP", SFrames[1]->getImage());
+    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(SkeletonPattern);
+    //delete workFrame;
 
     // Compare labels with ideal bodyparts from keyframe, and output debug information 
-    float TolerableCoordinateError = 7; // Linear error in pixels
+    float TolerableCoordinateError = 30; // Linear error in pixels
+    cout << "TolerableCoordinateError = " << TolerableCoordinateError << endl;
     int TopListLabelsCount = 4; // Size of "labels top list"
     map<int, vector<LimbLabel>> effectiveLabels;
     vector<int> WithoutGoodLabelInTop;
@@ -556,10 +564,11 @@ namespace SPEL
     }
     if (!EffectiveLabbelsInTop) cout << endl;
 
-    image.release();
-    mask.release();
+    //image.release();
+    //mask.release();
     //project.TestProjectLoader::~TestProjectLoader();
     SFrames.clear();
+    Frames.clear();
   }
 
   TEST(surfDetectorTests, PartModel)

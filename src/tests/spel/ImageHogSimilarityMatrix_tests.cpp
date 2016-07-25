@@ -59,7 +59,7 @@ namespace SPEL
 
   TEST(ImageHogSimilarityMatrix, Constructor)
   {
-    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/", "trijumpSD_shortcut.xml");
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
     vector<Frame*> frames = project.getFrames();
     ASSERT_GT(frames.size(), 0);
 
