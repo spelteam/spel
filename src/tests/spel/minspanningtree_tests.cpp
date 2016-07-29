@@ -192,7 +192,7 @@ namespace SPEL
     if (IsDebuggerPresent())
       FilePath = "Debug/" + FilePath;
 #endif
-    b = ISM.read(FilePath + "ISM.txt");
+    b = ISM.read(FilePath + "ISM1.txt");
     ASSERT_TRUE(b);
 
     //Build expected minspanningtree
