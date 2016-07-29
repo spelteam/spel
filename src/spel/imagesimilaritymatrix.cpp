@@ -101,7 +101,7 @@ namespace SPEL
     //compute mask centroid offsets
 
     //store the futures
-    std::vector<std::future<void> > futures;
+    //std::vector<std::future<void> > futures; // Disabled  30.07.16
 
     for (auto i = 0; i < frames.size(); ++i)
     {
@@ -109,13 +109,14 @@ namespace SPEL
       {
         auto left = frames[i];
         auto right = frames[j];
-        futures.push_back(std::async(&ImageSimilarityMatrix::computeISMcell, this, left, right, maxFrameHeight));
+        //futures.push_back(std::async(&ImageSimilarityMatrix::computeISMcell, this, left, right, maxFrameHeight)); // Disabled 30.07.16
+        computeISMcell( left, right, maxFrameHeight); // Added 30.07.16 
       }
     }
     //get all futures
 
-    for (auto &e : futures)
-      e.get();
+    //for (auto &e : futures) // Disabled 30.07.16
+    //  e.get();              
 
     return;
   }
