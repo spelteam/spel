@@ -153,8 +153,8 @@ namespace SPEL
 
     try
     {
-      imgMatNewOne = imgMatOne(cv::Rect(topLeftOne.y, topLeftOne.x, bottomRightOne.y - topLeftOne.y, bottomRightOne.x - topLeftOne.x)).clone();
-      imgMatNewTwo = imgMatTwo(cv::Rect(topLeftTwo.y, topLeftTwo.x, bottomRightTwo.y - topLeftTwo.y, bottomRightTwo.x - topLeftTwo.x)).clone();
+      imgMatNewOne = imgMatOne(cv::Rect(topLeftOne.x, topLeftOne.y, bottomRightOne.x - topLeftOne.x, bottomRightOne.y - topLeftOne.y )).clone(); // Repalaced x and y 30.07.16
+      imgMatNewTwo = imgMatTwo(cv::Rect(topLeftTwo.x, topLeftTwo.y, bottomRightTwo.x - topLeftTwo.x, bottomRightTwo.y - topLeftTwo.y)).clone(); // Repalaced x and y 30.07.16
     }
     catch (std::exception ex)
     {

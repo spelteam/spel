@@ -174,9 +174,13 @@ namespace SPEL
 
     cv::ellipse(Image0, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 0.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
     cv::ellipse(Image1, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 180.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
+    //Image0.at<uchar>(0, 0) = 255;
+    //Image1.at<uchar>(rows - 1, cols - 1) = 255;
       
-    cvtColor(Image0, Image0, CV_RGB2GRAY);
-    cvtColor(Image1, Image1, CV_RGB2GRAY);
+    Mat Mask0, Mask1;
+
+    cvtColor(Image0, Mask0, CV_RGB2GRAY);
+    cvtColor(Image1, Mask1, CV_RGB2GRAY);
     imwrite("hogISM_Image0.jpg", Image0);
     imwrite("hogISM_Image1.jpg", Image1);
 
