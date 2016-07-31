@@ -169,7 +169,7 @@ namespace SPEL
           NewImage.at<cv::Vec3b>(y0 + y - p0.y, x0 + x - p0.x) = image.at<cv::Vec3b>(y, x);
     }
     else
-      NewImage = image(ROI).clone();
+    NewImage = image(ROI).clone();
 
     return NewImage;
   }
@@ -215,11 +215,10 @@ namespace SPEL
     }*/
 
     // Added 31.07.16: begin
-    cv::Rect ROI1(topLeftOne, bottomRightOne - topLeftOne + cv::Point2i(1, 1));
-    cv::Rect ROI2(topLeftTwo, bottomRightTwo - topLeftTwo + cv::Point2i(1, 1));
+    cv::Rect ROI1(topLeftOne, bottomRightOne);
+    cv::Rect ROI2(topLeftTwo, bottomRightTwo);
 
     cv::Size CombinedROI_size(std::max(ROI1.width, ROI2.width), std::max(ROI1.height, ROI2.height));
-    std::cout << CombinedROI_size << std::endl;
 
     ROI1 = resizeROI(ROI1, CombinedROI_size);
     ROI2 = resizeROI(ROI2, CombinedROI_size);
