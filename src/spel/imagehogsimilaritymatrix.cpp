@@ -118,6 +118,61 @@ namespace SPEL
       return -1;
     }
   }
+
+  // Added 31.07.16
+  // Expand the ROI to new size 
+  cv::Rect resizeROI(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize = cv::Size(0,0))
+  {
+    cv::Point2f p0 = cv::Point2f(ROI.x, ROI.y) - 0.5f*cv::Point2f(NewROISize.width - ROI.width, NewROISize.height - ROI.height);
+
+    if (p0.x < 0) DebugMessage("ROI.x0 < 0", 5);
+    if (p0.y < 0) DebugMessage("ROI.y0 < 0", 5);
+
+    if (ImageSize != cv::Size(0, 0))
+    {
+      if (p0.x + ROI.width > ImageSize.width)  DebugMessage("ROI.x1 > Image cols", 5);
+      if (p0.y + ROI.height > ImageSize.height) DebugMessage("ROI.y1 > Image rows", 5);
+    }
+
+    return cv::Rect(p0, NewROISize);
+  }
+
+  // Added 31.07.16
+  // Aligning the ROI to the HOGDetector blockSize
+  cv::Rect extendROI(cv::Rect ROI, cv::Size blockSize)
+  {
+    int width = blockSize.width  * ceil(static_cast<float>(ROI.width) / static_cast<float>(blockSize.width));
+    int height = blockSize.height  * ceil(static_cast<float>(ROI.height) / static_cast<float>(blockSize.height));
+
+    cv::Point2f p0 = cv::Point2f(ROI.x, ROI.y) - 0.5f*cv::Point2f(width - ROI.width, height - ROI.height);
+    return cv::Rect(p0, cv::Size(width, height));
+  }
+
+  // Added 31.07.16
+  // Copying image from normal or bad ROI to new image
+  cv::Mat copyROI(cv::Mat image, cv::Rect ROI)
+  {
+    cv::Mat NewImage;
+    cv::Size size = image.size();
+    if (ROI.x < 0 || ROI.y < 0 || ROI.x + ROI.width > size.width || ROI.y + ROI.height > size.height)
+    {
+      cv::Point2i p0(std::max(0, ROI.x), std::max(0, ROI.y));
+      cv::Point2i p1 = cv::Point2i(std::min(size.width, ROI.x + ROI.width), std::min(size.height, ROI.y + ROI.height)) - cv::Point2i(1, 1);
+      NewImage = cv::Mat::zeros(ROI.height, ROI.width, CV_8UC3);
+
+      int x0 = 0, y0 = 0;
+      if (ROI.x < 0) x0 = -ROI.x;
+      if (ROI.y < 0) y0 = -ROI.y;
+
+      for (int y = p0.y; y < p1.y; y++)
+        for (int x = p0.x; x < p1.x; x++)
+          NewImage.at<cv::Vec3b>(y0 + y - p0.y, x0 + x - p0.x) = image.at<cv::Vec3b>(y, x);
+    }
+    else
+    NewImage = image(ROI).clone();
+
+    return NewImage;
+  }
   void ImageHogSimilarityMatrix::computeISMcell(Frame * left, Frame * right, const int maxFrameHeight)
   {
     auto i = left->getID(), j = right->getID();
@@ -139,6 +194,10 @@ namespace SPEL
     calculateROI(left, topLeftOne, bottomRightOne);
     calculateROI(right, topLeftTwo, bottomRightTwo);
 
+    cv::Mat imgMatNewOne, imgMatNewTwo;
+
+    // Disabled 31.07.16
+    /*
     if (bottomRightOne.x - topLeftOne.x > bottomRightTwo.x - topLeftTwo.x)
       extendSize(topLeftTwo.x, topLeftOne.x, bottomRightTwo.x, bottomRightOne.x, imgMatTwo.rows, blockSize.height);
     else if (bottomRightOne.x - topLeftOne.x < bottomRightTwo.x - topLeftTwo.x)
@@ -149,13 +208,30 @@ namespace SPEL
     else if (bottomRightOne.y - topLeftOne.y < bottomRightTwo.y - topLeftTwo.y)
       extendSize(topLeftOne.y, topLeftTwo.y, bottomRightOne.y, bottomRightTwo.y, imgMatOne.cols, blockSize.width);
 
-    cv::Mat imgMatNewOne, imgMatNewTwo;
+    try
+    {
+      imgMatNewOne = imgMatOne(cv::Rect(topLeftOne.x, topLeftOne.y, bottomRightOne.x - topLeftOne.x, bottomRightOne.y - topLeftOne.y )).clone(); // Repalaced x and y 30.07.16
+      imgMatNewTwo = imgMatTwo(cv::Rect(topLeftTwo.x, topLeftTwo.y, bottomRightTwo.x - topLeftTwo.x, bottomRightTwo.y - topLeftTwo.y)).clone(); // Repalaced x and y 30.07.16
+    }*/
+
+    // Added 31.07.16: begin
+    cv::Rect ROI1(topLeftOne, bottomRightOne);
+    cv::Rect ROI2(topLeftTwo, bottomRightTwo);
+
+    cv::Size CombinedROI_size(std::max(ROI1.width, ROI2.width), std::max(ROI1.height, ROI2.height));
+
+    ROI1 = resizeROI(ROI1, CombinedROI_size);
+    ROI2 = resizeROI(ROI2, CombinedROI_size);
+
+    ROI1 = extendROI(ROI1, blockSize);
+    ROI2 = extendROI(ROI2, blockSize);
 
     try
     {
-      imgMatNewOne = imgMatOne(cv::Rect(topLeftOne.y, topLeftOne.x, bottomRightOne.y - topLeftOne.y, bottomRightOne.x - topLeftOne.x)).clone();
-      imgMatNewTwo = imgMatTwo(cv::Rect(topLeftTwo.y, topLeftTwo.x, bottomRightTwo.y - topLeftTwo.y, bottomRightTwo.x - topLeftTwo.x)).clone();
+      imgMatNewOne = copyROI( imgMatOne, ROI1);
+      imgMatNewTwo = copyROI(imgMatTwo, ROI2);
     }
+    // end
     catch (std::exception ex)
     {
       left->UnloadAll();

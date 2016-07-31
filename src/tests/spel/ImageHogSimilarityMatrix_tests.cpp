@@ -167,18 +167,20 @@ namespace SPEL
     Mat Image0(rows, cols, CV_8UC3, Scalar(0, 0, 0));
     Mat Image1(rows, cols, CV_8UC3, Scalar(0, 0, 0));
 
-    Image0.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
+    /*Image0.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
     Image1.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
     Image0.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
-    Image1.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
+    Image1.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);*/
 
     cv::ellipse(Image0, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 0.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
     cv::ellipse(Image1, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 180.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
       
-    cvtColor(Image0, Image0, CV_RGB2GRAY);
-    cvtColor(Image1, Image1, CV_RGB2GRAY);
-    imwrite("hogISM_Image0.jpg", Image0);
-    imwrite("hogISM_Image1.jpg", Image1);
+    Mat Mask0, Mask1;
+
+    cvtColor(Image0, Mask0, CV_RGB2GRAY);
+    cvtColor(Image1, Mask1, CV_RGB2GRAY);
+    //imwrite("hogISM_Image0.jpg", Image0);
+    //imwrite("hogISM_Image1.jpg", Image1);
 
     vector<Frame*> frames;
     for (int i = 0; i < 2; i++)
@@ -187,9 +189,9 @@ namespace SPEL
       frames[i]->setID(i);
     }
     frames[0]->setImage(Image0);
-    frames[0]->setMask(Image0);
+    frames[0]->setMask(Mask0);
     frames[1]->setImage(Image1);
-    frames[1]->setMask(Image1);
+    frames[1]->setMask(Mask0);
 
     //Create expected value
     Size winSize(128, 64); Size(0,1);
@@ -233,6 +235,8 @@ namespace SPEL
     // Clear
     Image0.release();
     Image1.release();
+    Mask0.release();
+    Mask1.release();
     for (unsigned int i = 0; i < frames.size(); i++)
       delete frames[i];  
     frames.clear();
