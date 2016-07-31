@@ -43,9 +43,13 @@ namespace SPEL
   public:
     SurfDetector(void) noexcept;
     virtual ~SurfDetector(void) noexcept;
-    virtual void train(const std::vector <Frame*> &_frames, std::map <std::string, float>);
-    virtual std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, std::map <std::string, float> params, const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
-    virtual std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) const noexcept;
+    void train(const std::vector <Frame*> &_frames, 
+      std::map <std::string, float>);
+    std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, 
+      std::map <std::string, float> params, 
+      const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
+    std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) 
+      const noexcept;
 
   private:
 #ifdef DEBUG
@@ -60,10 +64,19 @@ namespace SPEL
   protected:
     std::map <uint32_t, std::map <uint32_t, PartModel>> partModels;
 
-    virtual std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, const uint32_t minHessian) const;
-    virtual PartModel computeDescriptors(const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, const uint32_t minHessian, const std::vector <cv::KeyPoint> &keyPoints) const;
-    virtual LimbLabel generateLabel(const BodyPart &bodyPart, Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, DetectorHelper *detectorHelper, std::map <std::string, float> params) const;
-    virtual float compare(const BodyPart &bodyPart, const PartModel &model, const cv::Point2f &j0, const cv::Point2f &j1, const float knnMatchCoeff) const;
+    std::map <uint32_t, PartModel> computeDescriptors(Frame *frame, 
+      const uint32_t minHessian) const;
+    PartModel computeDescriptors(const BodyPart &bodyPart, 
+      const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, 
+      const uint32_t minHessian, const std::vector <cv::KeyPoint> &keyPoints) 
+      const;
+    LimbLabel generateLabel(const BodyPart &bodyPart, Frame *frame, 
+      const cv::Point2f &j0, const cv::Point2f &j1, 
+      DetectorHelper *detectorHelper, std::map <std::string, float> params) 
+      const;
+    float compare(const BodyPart &bodyPart, const PartModel &model, 
+      const cv::Point2f &j0, const cv::Point2f &j1, const float knnMatchCoeff) 
+      const;
   };
 }
 
