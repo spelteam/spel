@@ -207,9 +207,8 @@ namespace SPEL
     }
     catch (...)
     {
-      std::stringstream ss;
-      ss << "Wrong type: detectorHelper is not SurfDetectorHelper";
-      throw std::logic_error(ss.str());
+      const auto &ss = "Wrong type: detectorHelper is not SurfDetectorHelper";
+      throw std::logic_error(ss);
     }
 
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
