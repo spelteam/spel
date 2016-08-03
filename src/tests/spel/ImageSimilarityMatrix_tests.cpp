@@ -508,4 +508,33 @@ namespace SPEL
     EXPECT_EQ(shift, actual_shift);
   }
 
+  TEST(ImageSimilarityMatrixTests_, Time)
+  {
+    TestProjectLoader project("speltests_TestData/testdata1/", "trijumpSD_new.xml");
+    vector<Frame*> frames = project.getFrames();
+
+    ASSERT_TRUE(frames.size() > 0);
+    int n = frames.size();
+
+    int t0 = clock();
+    ImagePixelSimilarityMatrix X0(frames, 0, 0, true);
+    int t1 = clock();
+    ASSERT_EQ(n, X0.size());
+    X0.write("AlternativeISM.txt");
+    cout << "Alternative ISM calculation time: " << t1 - t0 << "ms" << endl;
+
+    t0 = clock();
+    ImagePixelSimilarityMatrix X1(frames);
+    t1 = clock();
+    ASSERT_EQ(n, X1.size());
+    X1.write("DefaultISM.txt");
+    cout << "Default ISM calculation time: " << t1 - t0 << "ms" << endl;
+
+    cout << "Results in:" << endl;
+    cout << "AlternativeISM.txt" << endl;
+    cout << "DefaultISM.txt" << endl;
+
+    // Clear
+    frames.clear();
+  }
 }

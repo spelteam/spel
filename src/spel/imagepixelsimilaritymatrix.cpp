@@ -82,7 +82,7 @@ namespace SPEL
         if (!darkPixel)
         {
           mOne = 1;
-          const auto &intensityOne = imgMatOne.at<cv::Vec4b>(y, x); // 14.04.16  Replaced x and y
+          const auto &intensityOne = imgMatOne.at<cv::Vec3b>(y, x); // 14.04.16  Replaced x and y
           blueOne = intensityOne.val[0];
           greenOne = intensityOne.val[1];
           redOne = intensityOne.val[2];
@@ -95,7 +95,7 @@ namespace SPEL
           if (!blackPixel)
           {
             mTwo = 1;
-            const auto &intensityTwo = imgMatTwo.at<cv::Vec4b>(yTwo, xTwo); // 14.04.16  Replaced x and y
+            const auto &intensityTwo = imgMatTwo.at<cv::Vec3b>(yTwo, xTwo); // 14.04.16  Replaced x and y
             blueTwo = intensityTwo.val[0];
             greenTwo = intensityTwo.val[1];
             redTwo = intensityTwo.val[2];

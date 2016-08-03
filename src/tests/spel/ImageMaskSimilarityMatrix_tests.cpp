@@ -246,4 +246,34 @@ namespace SPEL
     frames.clear();
   }
 
+  // 
+  TEST(MaskSimilarityMatrixTests, Time)
+  {
+    TestProjectLoader project("speltests_TestData/testdata1/", "trijumpSD_new.xml");
+    vector<Frame*> frames = project.getFrames();
+
+    ASSERT_TRUE(frames.size() > 0);
+    int n = frames.size();
+
+    int t0 = clock();
+    ImageMaskSimilarityMatrix X0(frames, 0, 0);
+    int t1 = clock();
+    ASSERT_EQ(n, X0.size());
+    X0.write("AlternativeMSM.txt");
+    cout << "Alternative MSM calculation time: " << t1 - t0 << "ms" << endl;
+
+    t0 = clock();
+    ImageMaskSimilarityMatrix X1(frames);
+    t1 = clock();
+    ASSERT_EQ(n, X1.size());
+    X1.write("DefaultMSM.txt");
+    cout << "Default MSM calculation time: " << t1 - t0 << "ms" << endl;
+
+    cout << "Results in:" << endl;
+    cout << "AlternativeMSM.txt" << endl;
+    cout << "DefaultMSM.txt" << endl;
+
+    // Clear
+    frames.clear();
+  }
 }
