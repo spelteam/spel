@@ -167,10 +167,10 @@ namespace SPEL
     Mat Image0(rows, cols, CV_8UC3, Scalar(0, 0, 0));
     Mat Image1(rows, cols, CV_8UC3, Scalar(0, 0, 0));
 
-    /*Image0.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
+    Image0.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
     Image1.at<Vec3b>(0, 0) = Vec3b(255, 255, 255);
     Image0.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
-    Image1.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);*/
+    Image1.at<Vec3b>(rows - 1, cols - 1) = Vec3b(255, 255, 255);
 
     cv::ellipse(Image0, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 0.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
     cv::ellipse(Image1, Point(0.5f*cols, 0.5f*rows), Size(0.375f*cols, 0.375f*rows), 0.0, 180.0, 360.0, Scalar(255, 255, 255), 1, 0, 0);
@@ -191,7 +191,7 @@ namespace SPEL
     frames[0]->setImage(Image0);
     frames[0]->setMask(Mask0);
     frames[1]->setImage(Image1);
-    frames[1]->setMask(Mask0);
+    frames[1]->setMask(Mask1);
 
     //Create expected value
     Size winSize(128, 64); Size(0,1);
