@@ -139,7 +139,15 @@ namespace SPEL
         parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(), 
           computeDescriptors(part, j0, j1, imgMat, minHessian, keyPoints)));
       }
-      catch (...) {}
+      catch (std::logic_error err)
+      {
+        std::stringstream ss;
+        ss << "Can't compute descriptors for the frame " << frame->getID() << 
+          " for the part " << part.getPartID() << std::endl;
+        ss << "\t" << err.what();
+        DebugMessage(ss.str(), 1);
+        throw std::logic_error(ss.str());
+      }
     }
     frame->UnloadAll();
     return parts;
@@ -169,7 +177,6 @@ namespace SPEL
       std::stringstream ss;
       ss << "Couldn't detect keypoints of body part " << bodyPart.getPartID();
       DebugMessage(ss.str(), 2);
-      throw std::logic_error(ss.str());
     }
     else
     {
@@ -181,7 +188,6 @@ namespace SPEL
         ss << "Couldn't compute descriptors of body part " << 
           bodyPart.getPartID();
         DebugMessage(ss.str(), 2);
-        throw std::logic_error(ss.str());
       }
     }
     return partModel;
@@ -216,24 +222,16 @@ namespace SPEL
     const auto knnMatchCoeff = params.at(
       COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT().first);
 
-    try
-    {
-      const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1,
-        frame->getImage(), minHessian, helper->keyPoints);
+    const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1, 
+      frame->getImage(), minHessian, helper->keyPoints);
 
-      const auto &comparer = [&]()
-      {
-        return compare(bodyPart, generatedPartModel, j0, j1, knnMatchCoeff);
-      };
-
-      return Detector::generateLabel(bodyPart, j0, j1, detectorName.str(),
-        useSURFdet, comparer);
-    }
-    catch (...)
+    const auto &comparer = [&]()
     {
-      return Detector::generateLabel(bodyPart, j0, j1, detectorName.str(),
-        useSURFdet, []() { return -1.0f; });
-    }
+      return compare(bodyPart, generatedPartModel, j0, j1, knnMatchCoeff);
+    };
+
+    return Detector::generateLabel(bodyPart, j0, j1, detectorName.str(), 
+      useSURFdet, comparer);
   }
 
   float SurfDetector::compare(const BodyPart &bodyPart, const PartModel &model, 
