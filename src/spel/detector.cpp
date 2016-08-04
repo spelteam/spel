@@ -239,15 +239,15 @@ namespace SPEL
 
   LimbLabel Detector::generateLabel(const BodyPart &bodyPart, 
     const cv::Point2f &parent, const cv::Point2f &child, const 
-    std::string &detectorName, const float coeff, std::function<float()> compare) 
+    std::string &detectorName, const float coeff, const std::function<float()> &compare) 
     const
   {
-    auto boxCenter = parent * 0.5 + child * 0.5;
-    auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, 
+    const auto &boxCenter = parent * 0.5 + child * 0.5;
+    const auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, 
       child.x - parent.x, child.y - parent.y) * (180.0 / M_PI));
-    auto rect = bodyPart.getBodyPartRect(parent, child);
+    const auto &rect = bodyPart.getBodyPartRect(parent, child);
 
-    auto score = compare();
+    const auto score = compare();
     std::vector <Score> s;
     s.push_back(Score(score, detectorName, coeff));
     return LimbLabel(bodyPart.getPartID(), boxCenter, rot, rect.asVector(), s, 

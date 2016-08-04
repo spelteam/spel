@@ -286,7 +286,7 @@ namespace SPEL
     const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1, 
       frame->getImage(), size);
 
-    auto comparer = [&]() -> float
+    const auto &comparer = [&]() -> float
     {
       return compare(bodyPart, generatedPartModel, m_nbins);
     };

@@ -1080,7 +1080,7 @@ namespace SPEL
       throw std::invalid_argument(str);
     }
 
-    auto comparer = [&]() -> float 
+    const auto &comparer = [&]() -> float 
     {
       return compare(bodyPart, frame, helper->pixelLabels, j0, j1);
     };

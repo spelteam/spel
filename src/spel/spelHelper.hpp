@@ -199,7 +199,7 @@ namespace SPEL
       return (int8_t)pointPolygonTest(contour, point, false);
     }
     ///convert rectangle to vector of points
-    std::vector <T> asVector(void)
+    std::vector <T> asVector(void) const
     {
       std::vector <T> contour;
       contour.push_back(point1);
