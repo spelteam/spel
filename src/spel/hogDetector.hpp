@@ -101,7 +101,7 @@ namespace SPEL
     /// <param name="frame">The frame.</param>
     /// <param name="params">The parameters.</param>
     /// <param name="limbLabels">The limb labels.</param>
-    /// <returns>THe map of detected limb labels.</returns>
+    /// <returns>The map of detected limb labels.</returns>
     std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, 
       std::map <std::string, float> params, const std::map <uint32_t, 
       std::vector <LimbLabel>> &limbLabels) const;

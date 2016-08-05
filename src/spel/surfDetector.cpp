@@ -6,7 +6,6 @@
 
 namespace SPEL
 {
-
   SurfDetector::SurfDetector(void) noexcept
   {
     m_id = 0x53440000;
@@ -20,7 +19,7 @@ namespace SPEL
 
   }
 
-  void SurfDetector::train(const std::vector <Frame*> &_frames, 
+  void SurfDetector::train(const std::vector <Frame*> &_frames,
     std::map <std::string, float> params)
   {
     frames = _frames;
@@ -95,7 +94,7 @@ namespace SPEL
     return result;
   }
 
-  std::map <uint32_t, SurfDetector::PartModel> 
+  std::map <uint32_t, SurfDetector::PartModel>
     SurfDetector::computeDescriptors(Frame *frame, 
       const uint32_t minHessian) const
   {
@@ -193,7 +192,7 @@ namespace SPEL
     return partModel;
   }
 
-  LimbLabel SurfDetector::generateLabel(const BodyPart &bodyPart, 
+  LimbLabel SurfDetector::generateLabel(const BodyPart &bodyPart,
     Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, 
     DetectorHelper *detectorHelper, std::map <std::string, float> params) const
   {
@@ -234,7 +233,7 @@ namespace SPEL
       useSURFdet, comparer);
   }
 
-  float SurfDetector::compare(const BodyPart &bodyPart, const PartModel &model, 
+  float SurfDetector::compare(const BodyPart &bodyPart, const PartModel &model,
     const cv::Point2f &j0, const cv::Point2f &j1, const float knnMatchCoeff) 
     const
   {
@@ -318,7 +317,7 @@ namespace SPEL
     return (score / static_cast<float>(count));
   }
 
-  std::map <uint32_t, std::map <uint32_t, SurfDetector::PartModel>> 
+  std::map <uint32_t, std::map <uint32_t, SurfDetector::PartModel>>
     SurfDetector::getPartModels(void) const noexcept
   {
     return partModels;
