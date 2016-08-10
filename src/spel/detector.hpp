@@ -103,7 +103,7 @@ namespace SPEL
     FRIEND_TEST(DetectorTests, FilterLimbLabels_B);
 #endif  // DEBUG    
     /// <summary>The frames.</summary>
-    std::vector <Frame*> frames;    
+    std::vector <Frame*> m_frames;    
     /// <summary>
     /// The maximum frame height.
     /// </summary>
@@ -161,7 +161,14 @@ namespace SPEL
     static std::vector <LimbLabel> filterLimbLabels(
       const std::vector <LimbLabel> &sortedLabels,
       const float uniqueLocationCandidates, 
-      const float uniqueAngleCandidates);
+      const float uniqueAngleCandidates);    
+    /// <summary>Trains the specified frames.</summary>
+    /// <param name="frames">The frames.</param>
+    /// <param name="params">The parameters.</param>
+    /// <param name="handler">The handler.</param>
+    void train(const std::vector <Frame*> &frames,
+      std::map <std::string, float> params, 
+      const std::function<void(Frame*, float)> &handler);
   };
 }
 #endif  // _LIBPOSE_DETECTOR_HPP_

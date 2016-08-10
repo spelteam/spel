@@ -73,7 +73,7 @@ namespace SPEL
     uint32_t minHessian = 500;
     SurfDetector D;
     map <uint32_t, SurfDetector::PartModel> actual_PartModels = D.computeDescriptors(SFrames[FirstKeyframe], minHessian);
-    SurfDetector::PartModel actual_PartModel = D.computeDescriptors(bodyPart, p0, p1, image, minHessian, actual_PartModels[partID].keyPoints);
+    SurfDetector::PartModel actual_PartModel = D.computeDescriptors(bodyPart, p0, p1, image, actual_PartModels[partID].keyPoints);
 
     //Calculate expected values
 

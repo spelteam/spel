@@ -444,18 +444,18 @@ namespace SPEL
     //Load the input data
     ColorHistDetector CHD;
     TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
-    CHD.frames = project.getFrames();
+    CHD.m_frames = project.getFrames();
 
     //Create actual value
     Frame* frame = CHD.getFrame(0);
 
     //Compare
-    EXPECT_EQ(CHD.frames[0]->getFrametype(), frame->getFrametype());
-    EXPECT_EQ(CHD.frames[0]->getID(), frame->getID());
-    EXPECT_EQ(CHD.frames[0]->getFrameSize(), frame->getFrameSize());
-    EXPECT_EQ(CHD.frames[0]->getSkeleton(), frame->getSkeleton());
-    EXPECT_EQ(CHD.frames[0]->getImageSize(), frame->getImageSize());
-    EXPECT_EQ(CHD.frames[0]->getMaskSize(), frame->getMaskSize());
+    EXPECT_EQ(CHD.m_frames[0]->getFrametype(), frame->getFrametype());
+    EXPECT_EQ(CHD.m_frames[0]->getID(), frame->getID());
+    EXPECT_EQ(CHD.m_frames[0]->getFrameSize(), frame->getFrameSize());
+    EXPECT_EQ(CHD.m_frames[0]->getSkeleton(), frame->getSkeleton());
+    EXPECT_EQ(CHD.m_frames[0]->getImageSize(), frame->getImageSize());
+    EXPECT_EQ(CHD.m_frames[0]->getMaskSize(), frame->getMaskSize());
 
     // Clear
     //project.TestProjectLoader::~TestProjectLoader();

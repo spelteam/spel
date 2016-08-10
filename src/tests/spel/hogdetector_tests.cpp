@@ -204,7 +204,7 @@ namespace SPEL
 
     //Calculate actual value
     HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
-    D.frames = HFrames;
+    D.m_frames = HFrames;
     D.m_partSize = D.getMaxBodyPartHeightWidth(blockSize, 1.0f);
     map <uint32_t, HogDetector::PartModel> partModels;
     partModels = D.computeDescriptors(HFrames[FirstKeyframe]);
@@ -298,7 +298,7 @@ namespace SPEL
 
     //Calculate actual parts size
     HogDetector D(nbins, wndSize, padding, blockSize, blockStride, cellSize, wndSigma, thresholdL2hys, gammaCorrection, nlevels, derivAperture, histogramNormType);
-    D.frames = HFrames;
+    D.m_frames = HFrames;
     map <uint32_t, Size> partsSize_actual = D.getMaxBodyPartHeightWidth(blockSize, 1.0f);
     EXPECT_EQ(partsSize, partsSize_actual);
 

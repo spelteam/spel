@@ -75,7 +75,7 @@ namespace SPEL
     /// <summary>Trains the specified frames.</summary>
     /// <param name="_frames">The frames.</param>
     /// <param name="">The parameters.</param>
-    void train(const std::vector <Frame*> &_frames, 
+    void train(const std::vector <Frame*> &frames, 
       std::map <std::string, float> params);
     /// <summary>Detects the specified frame.</summary>
     /// <param name="frame">The frame.</param>
@@ -115,13 +115,11 @@ namespace SPEL
     /// <param name="j0">The parent joint.</param>
     /// <param name="j1">The child joint.</param>
     /// <param name="imgMat">The image.</param>
-    /// <param name="minHessian">The minimum hessian.</param>
     /// <param name="keyPoints">The key points.</param>
     /// <returns>The part model with computed desciptors.</returns>
     PartModel computeDescriptors(const BodyPart &bodyPart, 
       const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, 
-      const uint32_t minHessian, const std::vector <cv::KeyPoint> &keyPoints) 
-      const;
+      const std::vector <cv::KeyPoint> &keyPoints) const;
     /// <summary>Generates the label.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="frame">The frame.</param>

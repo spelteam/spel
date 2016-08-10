@@ -78,10 +78,10 @@ namespace SPEL
       /// <summary>Copy operator.</summary>
       /// <param name="model">The model.</param>
       /// <returns></returns>
-      virtual PartModel &operator=(const PartModel &model) noexcept;
+      PartModel &operator=(const PartModel &model) noexcept;
       /// <summary>Calculates the factor.</summary>
       /// <returns>The factor.</returns>
-      virtual uint8_t calculateFactor(void) const;
+      uint8_t calculateFactor(void) const;
       /// <summary>Computes the pixel belonging likelihood.</summary>
       /// <param name="r">The r value.</param>
       /// <param name="g">The g value.</param>
@@ -89,35 +89,35 @@ namespace SPEL
       /// <returns>
       /// The relative frequency of the RGB-color reiteration.
       /// </returns>
-      virtual float computePixelBelongingLikelihood(const uint8_t r, 
+      float computePixelBelongingLikelihood(const uint8_t r, 
         const uint8_t g, const uint8_t b) const;
       /// <summary>Sets the part histogram.</summary>
       /// <param name="partColors">The part colors.</param>
-      virtual void setPartHistogram(
+      void setPartHistogram(
         const std::vector <cv::Point3i> &partColors);
       /// <summary>Adds the part histogram.</summary>
       /// <param name="partColors">The part colors.</param>
       /// <param name="nBlankPixels">The blank pixel count.</param>
-      virtual void addPartHistogram(
+      void addPartHistogram(
         const std::vector <cv::Point3i> &partColors, 
         const uint32_t nBlankPixels);
       /// <summary>Gets the foreground average sample size.</summary>
       /// <returns>The foreground average sample size.</returns>
-      virtual float getAvgSampleSizeFg(void) const;
+      float getAvgSampleSizeFg(void) const;
       /// <summary>Gets the foreground average sample size between two samples.</summary>
       /// <param name="s1">The first sample.</param>
       /// <param name="s2">The second sample.</param>
       /// <returns>The foreground average sample size.</returns>
-      virtual float getAvgSampleSizeFgBetween(const uint32_t s1,
+      float getAvgSampleSizeFgBetween(const uint32_t s1,
         const uint32_t s2) const;
       /// <summary>Matches the part histograms.</summary>
       /// <param name="partModelPrev">The previous part model.</param>
       /// <returns>The euclidian distance between two histograms.</returns>
-      virtual float matchPartHistogramsED(
+      float matchPartHistogramsED(
         const PartModel &partModelPrev) const;
       /// <summary>Adds the background histogram.</summary>
       /// <param name="bgColors">The background colors.</param>
-      virtual void addBackgroundHistogram(
+      void addBackgroundHistogram(
         const std::vector <cv::Point3i> &bgColors);
     };
   public:
@@ -136,7 +136,7 @@ namespace SPEL
     /// <summary>Trains the specified frames.</summary>
     /// <param name="_frames">The frames.</param>
     /// <param name="params">The parameters.</param>
-    void train(const std::vector <Frame*> &_frames, 
+    void train(const std::vector <Frame*> &frames, 
       std::map <std::string, float> params);
     /// <summary>Detects the specified frame.</summary>
     /// <param name="frame">The frame.</param>
@@ -214,7 +214,10 @@ namespace SPEL
     /// <returns>The comparison coefficient.</returns>
     float compare(const BodyPart &bodyPart, Frame *frame, 
       const std::map <int32_t, cv::Mat> &pixelLabels, const cv::Point2f &j0, 
-      const cv::Point2f &j1) const;
+      const cv::Point2f &j1) const;    
+    /// <summary>Trains the specified frame.</summary>
+    /// <param name="frame">The frame.</param>
+    void train(Frame* frame);
   };
 }
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

@@ -19,43 +19,25 @@ namespace SPEL
 
   }
 
-  void SurfDetector::train(const std::vector <Frame*> &_frames,
+  void SurfDetector::train(const std::vector <Frame*> &frames,
     std::map <std::string, float> params)
   {
-    frames = _frames;
-
     partModels.clear();
 
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
-    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first,
-      frames.at(0)->getFrameSize().height);
-
     auto minHessian = static_cast<uint32_t> (params.at(
       COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
-    maxFrameHeight = params.at(
-      COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first);
 
-    for (auto &workFrame : frames)
+    const auto &handler = [&](Frame* frame, float)
     {
-      if (workFrame->getFrametype() != KEYFRAME && 
-        workFrame->getFrametype() != LOCKFRAME)
-        continue;
-
-      workFrame->Resize(maxFrameHeight);
-
-      if (SpelObject::getDebugLevel() >= 2)
-        std::cout << "Training on frame " << workFrame->getID() << std::endl;
-
       try
       {
         partModels.insert(std::pair <uint32_t, std::map <uint32_t, PartModel>>(
-          workFrame->getID(), computeDescriptors(workFrame, minHessian)));
+          frame->getID(), computeDescriptors(frame, minHessian)));
       }
-      catch (...)
-      {
-        break;
-      }
-    }
+      catch (...) {}
+    };
+    Detector::train(frames, params, handler);
   }
 
   std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(
@@ -136,7 +118,7 @@ namespace SPEL
       try
       {
         parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(), 
-          computeDescriptors(part, j0, j1, imgMat, minHessian, keyPoints)));
+          computeDescriptors(part, j0, j1, imgMat, keyPoints)));
       }
       catch (std::logic_error err)
       {
@@ -154,8 +136,7 @@ namespace SPEL
 
   SurfDetector::PartModel SurfDetector::computeDescriptors(
     const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1, 
-    const cv::Mat &imgMat, const uint32_t minHessian, 
-    const std::vector <cv::KeyPoint> &keyPoints) const
+    const cv::Mat &imgMat, const std::vector <cv::KeyPoint> &keyPoints) const
   {
     const auto boneLength = BodyPart::getBoneLength(j0, j1);
     const auto boneWidth = bodyPart.getBoneWidth(boneLength);
@@ -210,19 +191,16 @@ namespace SPEL
       throw std::logic_error(ss);
     }
 
-    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
     params.emplace(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR());
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT());
 
-    const auto minHessian = static_cast<uint32_t> (params.at(
-      COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
     const auto useSURFdet = params.at(
       COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().first);
     const auto knnMatchCoeff = params.at(
       COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT().first);
 
     const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1, 
-      frame->getImage(), minHessian, helper->keyPoints);
+      frame->getImage(), helper->keyPoints);
 
     const auto &comparer = [&]()
     {

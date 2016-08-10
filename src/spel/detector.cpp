@@ -256,7 +256,7 @@ namespace SPEL
 
   Frame *Detector::getFrame(const int32_t frameId) const noexcept
   {
-    for (auto f : frames)
+    for (auto f : m_frames)
       if (f->getID() == frameId)
         return f;
 
@@ -300,20 +300,7 @@ namespace SPEL
     auto searchStepCoeff = params.at(
       DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().first);
 
-    Frame *workFrame = nullptr;
-    if (frame->getFrametype() == KEYFRAME)
-      workFrame = new Keyframe();
-    else if (frame->getFrametype() == LOCKFRAME)
-      workFrame = new Lockframe();
-    else if (frame->getFrametype() == INTERPOLATIONFRAME)
-      workFrame = new Interpolation();
-
-    if (workFrame == nullptr)
-    {
-      const std::string str = "Unknown frame found";
-      DebugMessage(str, 1);
-      throw std::logic_error(str);
-    }
+    Frame *workFrame = new Interpolation();
 
     workFrame = frame->clone(workFrame);
 
@@ -572,6 +559,41 @@ namespace SPEL
       labels.push_back(copyLabels.at(index));
 
     return labels;
+  }
+
+  void Detector::train(const std::vector<Frame*>& frames, 
+    std::map<std::string, float> params, 
+    const std::function<void(Frame*, float)>& handler)
+  {
+    if (frames.size() == 0)
+    {
+      const std::string str = "No input frames";
+      DebugMessage(str, 1);
+      throw std::logic_error(str); // the sequence of frames is empty
+    }
+
+    // vector of pointers - presents a sequence of frames
+    m_frames = frames;
+    // sorting frames by id
+    sort(m_frames.begin(), m_frames.end(), Frame::FramePointerComparer);
+
+    params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first,
+      m_frames.front()->getFrameSize().height);
+    maxFrameHeight = static_cast<uint32_t>(params.at(
+      COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first));
+
+    // Handling all frames
+    for (auto &frame : m_frames)
+    {
+      auto scale = frame->Resize(maxFrameHeight);
+
+      if (SpelObject::getDebugLevel() >= 2)
+        std::cout << "Training on frame " << frame->getID() << std::endl;
+
+      handler(frame, scale);
+
+      frame->UnloadAll();
+    }
   }
 
   DetectorHelper::DetectorHelper(void) noexcept

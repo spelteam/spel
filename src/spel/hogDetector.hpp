@@ -95,7 +95,7 @@ namespace SPEL
     /// <summary>Trains the specified frames.</summary>
     /// <param name="_frames">The frames.</param>
     /// <param name="params">The parameters.</param>
-    void train(const std::vector <Frame*> &_frames, 
+    void train(const std::vector <Frame*> &frames, 
       std::map <std::string, float> params);
     /// <summary>Detects the specified frame.</summary>
     /// <param name="frame">The frame.</param>
