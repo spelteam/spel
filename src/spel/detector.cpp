@@ -585,6 +585,10 @@ namespace SPEL
     // Handling all frames
     for (auto &frame : m_frames)
     {
+      if (frame->getFrametype() != KEYFRAME &&
+        frame->getFrametype() != LOCKFRAME)
+        continue;
+
       auto scale = frame->Resize(maxFrameHeight);
 
       if (SpelObject::getDebugLevel() >= 2)

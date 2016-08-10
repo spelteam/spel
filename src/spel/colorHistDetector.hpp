@@ -134,7 +134,7 @@ namespace SPEL
     /// <returns></returns>
     virtual ~ColorHistDetector(void) noexcept;
     /// <summary>Trains the specified frames.</summary>
-    /// <param name="_frames">The frames.</param>
+    /// <param name="frames">The frames.</param>
     /// <param name="params">The parameters.</param>
     void train(const std::vector <Frame*> &frames, 
       std::map <std::string, float> params);
