@@ -3,179 +3,190 @@
 namespace SPEL
 {
   //default constructor
-  Skeleton::Skeleton(void)
+  Skeleton::Skeleton(void) noexcept
   {
     /// name of the specific instance of
-    name = "uninitialised";
+    m_name = "Uninitialized";
     /// tree of bodyparts is component of the body model
     /// scale factor, used for scaling
-    scale = 0;
+    m_scale = 1.0f;
   }
 
-  Skeleton::Skeleton(const Skeleton &s)
+  Skeleton::Skeleton(const Skeleton &skeleton) noexcept
+    : m_name(skeleton.m_name),
+    m_partTree(skeleton.m_partTree),
+    m_jointTree(skeleton.m_jointTree),
+    m_scale(skeleton.m_scale)
   {
-    this->setName(s.getName());
-    this->setPartTree(s.getPartTree());
-    this->setJointTree(s.getJointTree());
-    this->setScale(s.getScale());
   }
 
-  Skeleton::~Skeleton(void)
+  Skeleton::Skeleton(Skeleton && skeleton) noexcept
+    : m_name(std::move(skeleton.m_name)),
+    m_partTree(std::move(skeleton.m_partTree)),
+    m_jointTree(std::move(skeleton.m_jointTree)),
+    m_scale(std::move(skeleton.m_scale))
+  {
+  }
+
+  Skeleton::~Skeleton(void) noexcept
   {
   }
 
   // constructor with params
-  Skeleton &Skeleton::operator=(const Skeleton &s)
+  Skeleton &Skeleton::operator=(const Skeleton &skeleton) noexcept
   {
-    if (this == &s)
-    {
+    if (this == &skeleton)
       return *this;
-    }
-    this->setName(s.getName());
-    this->setPartTree(s.getPartTree());
-    this->setJointTree(s.getJointTree());
-    this->setScale(s.getScale());
+
+    m_name = skeleton.m_name;
+    m_partTree = skeleton.m_partTree;
+    m_jointTree = skeleton.m_jointTree;
+    m_scale = skeleton.m_scale;
     return *this;
   }
 
-  bool Skeleton::operator==(const Skeleton &s) const
+  Skeleton & Skeleton::operator=(Skeleton && skeleton) noexcept
   {
-    tree <BodyPart> src1 = this->getPartTree();
-    tree <BodyPart> src2 = s.getPartTree();
-    return std::equal(src1.begin(), src1.end(), src2.begin());
+    std::swap(m_name, skeleton.m_name);
+    std::swap(m_partTree, skeleton.m_partTree);
+    std::swap(m_jointTree, skeleton.m_jointTree);
+    m_scale = std::move(skeleton.m_scale);
+
+    return *this;
   }
 
-  bool Skeleton::operator!=(const Skeleton &s) const
+  bool Skeleton::operator==(const Skeleton &skeleton) const noexcept
   {
-    return !(*this == s);
+    return std::equal(m_partTree.begin(), m_partTree.end(), 
+      skeleton.m_partTree.begin());
   }
 
-  std::string Skeleton::getName(void) const
+  bool Skeleton::operator!=(const Skeleton &skeleton) const noexcept
   {
-    return name;
+    return !(*this == skeleton);
   }
 
-  void Skeleton::setName(std::string _name)
+  std::string Skeleton::getName(void) const noexcept
   {
-    name = _name;
+    return m_name;
   }
 
-  tree <BodyPart> Skeleton::getPartTree(void) const
+  void Skeleton::setName(const std::string &name) noexcept
   {
-    return partTree;
+    m_name = name;
   }
 
-  tree<BodyPart>* Skeleton::getPartTreePtr(){
-    return &partTree;
-  }
-
-  void Skeleton::setPartTree(tree <BodyPart> _partTree)
+  tree <BodyPart> Skeleton::getPartTree(void) const noexcept
   {
-    partTree = _partTree;
+    return m_partTree;
   }
 
-  tree <BodyJoint> Skeleton::getJointTree(void) const
+  tree<BodyPart>* Skeleton::getPartTreePtr(void) noexcept
   {
-    return jointTree;
+    return &m_partTree;
   }
 
-  tree<BodyJoint>* Skeleton::getJointTreePtr(){
-    return &jointTree;
-  }
-
-  void Skeleton::setJointTree(tree <BodyJoint> _jointTree)
+  void Skeleton::setPartTree(const tree <BodyPart> &partTree) noexcept
   {
-    jointTree = _jointTree;
+    m_partTree = partTree;
   }
 
-  float Skeleton::getScale(void) const
+  tree <BodyJoint> Skeleton::getJointTree(void) const noexcept
   {
-    return scale;
+    return m_jointTree;
   }
 
-  void Skeleton::setScale(float _scale)
+  tree<BodyJoint>* Skeleton::getJointTreePtr(void) noexcept
   {
-    scale = _scale;
+    return &m_jointTree;
   }
 
-  uint32_t Skeleton::getPartTreeCount(void) const
+  void Skeleton::setJointTree(const tree <BodyJoint> &jointTree) noexcept
   {
-    return (uint32_t)partTree.size();
+    m_jointTree = jointTree;
   }
 
-  //void Skeleton::shift(Point2f point) //shift in 2D and recompute 3D?
-  //{
-  //    for(tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
-  //    {
-  //        //add point to every joint
-  //        Point2f prevLoc = i->getImageLocation();
-  //        Point2f nextLoc = prevLoc+point;
-  //        i->setImageLocation(nextLoc);
-  //    }
-  //}
-
-  BodyJoint *Skeleton::getBodyJoint(int jointID) const
+  float Skeleton::getScale(void) const noexcept
   {
-    BodyJoint *joint = 0;
-    for (tree <BodyJoint>::iterator i = jointTree.begin(); i != jointTree.end(); ++i)
-    {
-      if (i->getLimbID() == jointID)
-      {
-        joint = &*i;
-      }
-    }
-    return joint;
+    return m_scale;
   }
 
-  BodyPart* Skeleton::getBodyPart(int partID) const
+  void Skeleton::setScale(const float scale) noexcept
   {
-    auto it = partTree.begin();
-    while (it != partTree.end()){
-      if (it->getPartID() == partID){
-        return &(*it);
-      }
-      ++it;
-    }
+    m_scale = scale;
+  }
+
+  uint32_t Skeleton::getPartTreeCount(void) const noexcept
+  {
+    return static_cast<uint32_t>(m_partTree.size());
+  }
+
+  BodyJoint *Skeleton::getBodyJoint(const int jointID) const noexcept
+  {
+    for (auto &joint : m_jointTree)
+      if (joint.getLimbID() == jointID)
+        return &joint;
+
     return nullptr;
   }
 
-  void Skeleton::infer2D(void)
+  BodyPart* Skeleton::getBodyPart(const int partID) const noexcept
   {
-    for (tree <BodyJoint>::iterator tree = jointTree.begin(); tree != jointTree.end(); ++tree)
-    {
-      tree->setImageLocation(cv::Point2f(tree->getSpaceLocation().x*scale, tree->getSpaceLocation().y*scale));
-    }
+    for (auto &part : m_partTree)
+      if (part.getPartID() == partID)
+        return &part;
+
+    return nullptr;
+  }
+
+  void Skeleton::infer2D(void) noexcept
+  {
+    for (auto &joint : m_jointTree)
+      joint.setImageLocation(joint.getImageLocation() * m_scale);
   }
 
   void Skeleton::infer3D(void)
   {
+    if (m_scale == 0.0f)
+    {
+      const auto &str = "Scale shouldn't be equal zero.";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
+
     std::map <uint32_t, float> dz;
 
-    assert(scale != 0);
-
-    for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
+    for (const auto& tree : m_partTree)
     {
-      float len3d = tree->getRelativeLength();
-      float len2d = sqrt(spelHelper::distSquared(getBodyJoint(tree->getParentJoint())->getImageLocation(), getBodyJoint(tree->getChildJoint())->getImageLocation()));
-      float diff = pow(len3d, 2) - pow(len2d / scale, 2); //compute the difference, this must be the depth
+      const auto len3d = tree.getRelativeLength();
+      const auto len2d = sqrt(spelHelper::distSquared(
+        getBodyJoint(tree.getParentJoint())->getImageLocation(), 
+        getBodyJoint(tree.getChildJoint())->getImageLocation()));
+      //compute the difference, this must be the depth
+      const auto diff = pow(len3d, 2) - pow(len2d / m_scale, 2);
       if (diff < 0)
-        dz[tree->getPartID()] = 0;
+        dz[tree.getPartID()] = 0;
+      else if (sqrt(diff) > len3d)
+        dz[tree.getPartID()] = len3d;
       else
-        dz[tree->getPartID()] = sqrt(diff);
-
-      if (sqrt(diff) > len3d) dz[tree->getPartID()] = len3d;
+        dz[tree.getPartID()] = sqrt(diff);
     }
-    for (tree <BodyPart>::iterator tree = partTree.begin(); tree != partTree.end(); ++tree)
+
+    for (auto &tree : m_partTree)
     {
-      BodyJoint *child = getBodyJoint(tree->getChildJoint());
-      BodyJoint *parent = getBodyJoint(tree->getParentJoint());
-      if (tree->getPartID() == 0) //if zero partID, we are on the root part
+      const auto child = getBodyJoint(tree.getChildJoint());
+      const auto parent = getBodyJoint(tree.getParentJoint());
+      if (tree.getPartID() == 0) //if zero partID, we are on the root part
       {
-        parent->setSpaceLocation(cv::Point3f(parent->getImageLocation().x / scale, parent->getImageLocation().y / scale, 0));
+        parent->setSpaceLocation(cv::Point3f(parent->getImageLocation().x / 
+          m_scale, parent->getImageLocation().y / m_scale, 0));
       }
-      float sign = child->getDepthSign() == 0 ? -1.0 : 1.0;
-      float z = tree == partTree.begin() ? 0.0 : parent->getSpaceLocation().z;
-      child->setSpaceLocation(cv::Point3f(child->getImageLocation().x / scale, child->getImageLocation().y / scale, sign * dz.at(tree->getPartID()) + z));
+      const auto sign = child->getDepthSign() == 0 ? -1.0f : 1.0f;
+      const auto z = tree == *(m_partTree.begin()) ? 0.0f : 
+        parent->getSpaceLocation().z;
+      child->setSpaceLocation(cv::Point3f(child->getImageLocation().x / 
+        m_scale, child->getImageLocation().y / m_scale, sign * 
+        dz.at(tree.getPartID()) + z));
     }
   }
 

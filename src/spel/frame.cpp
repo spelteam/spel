@@ -68,6 +68,7 @@ namespace SPEL
         newImageSize.height <<
         "] can not be loaded because mask with different size [" <<
         maskSize.width << "][" << maskSize.height << "] was loaded";
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     m_image.release();
@@ -105,6 +106,7 @@ namespace SPEL
         newMaskSize.height <<
         "] can not be loaded because image with different size [" <<
         imageSize.width << "][" << imageSize.height << "] was loaded";
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     m_mask.release();
@@ -129,7 +131,7 @@ namespace SPEL
     return m_skeleton;
   }
 
-  Skeleton* Frame::getSkeletonPtr() noexcept
+  Skeleton* Frame::getSkeletonPtr(void) noexcept
   {
     return &m_skeleton;
   }
@@ -198,6 +200,7 @@ namespace SPEL
         m_image.cols <<
         "] can not be resized because mask with different size [" <<
         m_mask.rows << "][" << m_mask.cols << "] was loaded";
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     if (m_image.rows == static_cast<int>(maxHeight))
@@ -372,6 +375,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Could not load image " << path;
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     if (path == m_imagePath)
@@ -392,6 +396,7 @@ namespace SPEL
     {
       std::stringstream ss;
       ss << "Could not load mask " << path;
+      DebugMessage(ss.str(), 1);
       throw std::logic_error(ss.str());
     }
     if (path == m_maskPath)

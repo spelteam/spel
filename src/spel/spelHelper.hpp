@@ -35,15 +35,15 @@ namespace SPEL
     ///Result:
     ///squared distance between one and two
     template <typename T>
-    static double distSquared(T one, T two)
+    static float distSquared(T one, T two)
     {
-      return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0);
+      return pow(one.x - two.x, 2.0f) + pow(one.y - two.y, 2.0f);
     }
 
     template <typename T>
-    static double distSquared3d(T one, T two)
+    static float distSquared3d(T one, T two)
     {
-      return pow(one.x - two.x, 2.0) + pow(one.y - two.y, 2.0) + pow(one.z - two.z, 2.0);
+      return pow(one.x - two.x, 2.0f) + pow(one.y - two.y, 2.0f) + pow(one.z - two.z, 2.0f);
     }
 
     ///find angle between two vectors on a plane
