@@ -154,9 +154,12 @@ namespace SPEL
 
     if (partModel.keyPoints.empty())
     {
-      std::stringstream ss;
-      ss << "Couldn't detect keypoints of body part " << bodyPart.getPartID();
-      DebugMessage(ss.str(), 2);
+      if (SpelObject::getDebugLevel() >= 2)
+      {
+        std::stringstream ss;
+        ss << "Couldn't detect keypoints of body part " << bodyPart.getPartID();
+        DebugMessage(ss.str(), 2);
+      }
     }
     else
     {
@@ -164,10 +167,13 @@ namespace SPEL
       extractor->compute(imgMat, partModel.keyPoints, partModel.descriptors);
       if (partModel.descriptors.empty())
       {
-        std::stringstream ss;
-        ss << "Couldn't compute descriptors of body part " << 
-          bodyPart.getPartID();
-        DebugMessage(ss.str(), 2);
+        if (SpelObject::getDebugLevel() >= 2)
+        {
+          std::stringstream ss;
+          ss << "Couldn't compute descriptors of body part " <<
+            bodyPart.getPartID();
+          DebugMessage(ss.str(), 2);
+        }
       }
     }
     return partModel;
@@ -217,8 +223,11 @@ namespace SPEL
   {
     if (model.descriptors.empty())
     {
-      const auto &str = "Model descriptors are empty";
-      DebugMessage(str, 2);
+      if (SpelObject::getDebugLevel() >= 2)
+      {
+        const auto &str = "Model descriptors are empty";
+        DebugMessage(str, 2);
+      }
       return -1.0f;
     }
 
@@ -248,10 +257,13 @@ namespace SPEL
 
       if (partModel.descriptors.empty())
       {
-        std::stringstream ss;       
-        ss << "PartModel descriptors of body part [" << 
-          bodyPart.getPartID() << "] are empty";
-        DebugMessage(ss.str(), 2);
+        if (SpelObject::getDebugLevel() >= 2)
+        {
+          std::stringstream ss;
+          ss << "PartModel descriptors of body part [" <<
+            bodyPart.getPartID() << "] are empty";
+          DebugMessage(ss.str(), 2);
+        }
       }
       else
       {
@@ -275,18 +287,24 @@ namespace SPEL
           }
           else
           {
-            std::stringstream ss;
-            ss << "Can't match descriptors of body part [" << 
-              bodyPart.getPartID() << "]: Not enough descriptors";
-            DebugMessage(ss.str(), 1);
+            if (SpelObject::getDebugLevel() >= 1)
+            {
+              std::stringstream ss;
+              ss << "Can't match descriptors of body part [" <<
+                bodyPart.getPartID() << "]: Not enough descriptors";
+              DebugMessage(ss.str(), 1);
+            }
           }
         }
         catch (...)
         {
-          std::stringstream ss;
-          ss << "Can't match descriptors of body part [" << 
-            bodyPart.getPartID() << "]";
-          DebugMessage(ss.str(), 1);
+          if (SpelObject::getDebugLevel() >= 1)
+          {
+            std::stringstream ss;
+            ss << "Can't match descriptors of body part [" <<
+              bodyPart.getPartID() << "]";
+            DebugMessage(ss.str(), 1);
+          }
         }
       }
     }
