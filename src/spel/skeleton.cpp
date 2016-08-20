@@ -32,7 +32,6 @@ namespace SPEL
   {
   }
 
-  // constructor with params
   Skeleton &Skeleton::operator=(const Skeleton &skeleton) noexcept
   {
     if (this == &skeleton)
