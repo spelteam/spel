@@ -345,7 +345,7 @@ namespace SPEL
         (static_cast<int>(boxWidth) % blockSize.height);
     }
     auto angle = spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) *
-      (180.0 / M_PI);
+      (180.0f / static_cast<float>(M_PI));
     auto c1 = cv::Point2f(0.f, 0.5f * boxWidth);
     auto c2 = cv::Point2f(boneLength, 0.5f * boxWidth);
     auto c3 = cv::Point2f(boneLength, -0.5f * boxWidth);

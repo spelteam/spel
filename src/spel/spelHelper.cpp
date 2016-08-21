@@ -67,7 +67,7 @@ namespace SPEL
     const POSERECT <cv::Point2f> &initialRect, const float angle, 
     const cv::Size &size)
   {
-    auto &partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
+    auto partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
     const auto &center = initialRect.GetCenter<cv::Point2f>();
     const auto &newCenter = cv::Point2f(0.5f * size.width, 0.5f * size.height);
     const auto width = imgSource.size().width; // !!! For testing
@@ -76,7 +76,7 @@ namespace SPEL
     {
       for (auto y = 0; y < size.height; ++y)
       {
-        auto &p = cv::Point2f(static_cast<float>(x), static_cast<float>(y));
+        auto p = cv::Point2f(static_cast<float>(x), static_cast<float>(y));
         p = spelHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
         try
         {

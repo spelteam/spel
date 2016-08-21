@@ -110,8 +110,8 @@ namespace SPEL
       auto cnt = pivot;
       auto pt = point - cnt;
       T result;
-      result.x = pt.x * cosf(radians) - pt.y * sinf(radians);
-      result.y = pt.x * sinf(radians) + pt.y * cosf(radians);
+      result.x = pt.x * cos(radians) - pt.y * sin(radians);
+      result.y = pt.x * sin(radians) + pt.y * cos(radians);
       result = result + cnt;
       return result;
     }
