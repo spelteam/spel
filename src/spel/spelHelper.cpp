@@ -16,80 +16,83 @@
 
 namespace SPEL
 {
-  void spelHelper::RecalculateScoreIsWeak(std::vector <LimbLabel> &labels, std::string detectorName, float standardDiviationTreshold)
+  void spelHelper::RecalculateScoreIsWeak(std::vector <LimbLabel> &labels,
+    const std::string &detectorName, const float standardDiviationTreshold)
+    noexcept
   {
     //@TODO: Ignore this function for now, will be modified before release
     std::vector <float> scoreValues;
-    float min = 1.0f;
-    const uint32_t minCount = 600;
-    float sum = 0;
-    for (std::vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
+    auto min = 1.0f;
+    const auto minCount = 600;
+    auto sum = 0.0f;
+    for (const auto &i : labels)
     {
-      std::vector <Score> scores = i->getScores();
-      for (std::vector <Score>::iterator j = scores.begin(); j != scores.end(); ++j)
+      const auto &scores = i.getScores();
+      for (const auto &j : scores)
       {
-        if (j->getDetName() == detectorName && j->getScore() > 0)
+        const auto val = j.getScore();
+        if (j.getDetName() == detectorName && val > 0.0f)
         {
-          min = min > j->getScore() ? j->getScore() : min;
-          scoreValues.push_back(j->getScore());
-          sum += j->getScore();
+          if (min > val)
+            min = val;
+          scoreValues.push_back(val);
+          sum += val;
         }
       }
     }
-    bool isWeak = true;
+    auto isWeak = true;
     if (scoreValues.size() > 0)
     {
-      float mean = (float)sum / (float)scoreValues.size();
-      float sqrSum = 0;
-      for (std::vector <float>::iterator i = scoreValues.begin(); i != scoreValues.end(); ++i)
-      {
-        sqrSum += pow((*i) - mean, 2);
-      }
-      float variance = (float)sqrSum / (float)(scoreValues.size());
-      float standardDeviation = sqrt(variance);
-      float variationCoeff = standardDeviation / (mean - min);
-      float dispersionIndex = variance / (mean - min);
+      const auto mean = sum / static_cast<float>(scoreValues.size());
+      auto sqrSum = 0.0f;
+      for (const auto &i : scoreValues)
+        sqrSum += pow(i - mean, 2);
+      const auto variance = sqrSum / static_cast<float>(scoreValues.size());
+      auto variationCoeff = sqrt(variance) / (mean - min);
       if (scoreValues.size() < minCount)
-        variationCoeff = variationCoeff * (1 + 1 / (4 * scoreValues.size()));
-      isWeak = dispersionIndex < standardDiviationTreshold;
+        variationCoeff *= (1 + 1 / (4 * scoreValues.size()));
+      isWeak = (variance / (mean - min)) < standardDiviationTreshold;
     }
-    for (std::vector <LimbLabel>::iterator i = labels.begin(); i != labels.end(); ++i)
+    for (auto &i : labels)
     {
-      std::vector <Score> scores = i->getScores();
-      for (std::vector <Score>::iterator j = scores.begin(); j != scores.end(); ++j)
-      {
-        if (j->getDetName() == detectorName)
-        {
-          j->setIsWeak(isWeak);
-        }
-      }
-      i->setScores(scores);
+      auto scores = i.getScores();
+      for (auto &j : scores)
+        if (j.getDetName() == detectorName)
+          j.setIsWeak(isWeak);
+      i.setScores(scores);
     }
   }
 
-  cv::Mat spelHelper::rotateImageToDefault(const cv::Mat &imgSource, const POSERECT <cv::Point2f> &initialRect, const float angle, const cv::Size &size)
+  cv::Mat spelHelper::rotateImageToDefault(const cv::Mat &imgSource,
+    const POSERECT <cv::Point2f> &initialRect, const float angle, 
+    const cv::Size &size)
   {
-    auto partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
-    auto center = initialRect.GetCenter<cv::Point2f>();
-    auto newCenter = cv::Point2f(0.5f * size.width, 0.5f * size.height);
-    auto width = imgSource.size().width; // !!! For testing
-    auto height = imgSource.size().height; // !!! For testing
-    for (auto x = 0; x < size.width; x++)
+    auto &partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
+    const auto &center = initialRect.GetCenter<cv::Point2f>();
+    const auto &newCenter = cv::Point2f(0.5f * size.width, 0.5f * size.height);
+    const auto width = imgSource.size().width; // !!! For testing
+    const auto height = imgSource.size().height; // !!! For testing
+    for (auto x = 0; x < size.width; ++x)
     {
-      for (auto y = 0; y < size.height; y++)
+      for (auto y = 0; y < size.height; ++y)
       {
-        auto p = cv::Point2f(static_cast<float>(x), static_cast<float>(y));
+        auto &p = cv::Point2f(static_cast<float>(x), static_cast<float>(y));
         p = spelHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
         try
         {
-          if (0 <= p.x && 0 <= p.y && p.x < width - 1 && p.y < height - 1) // !!! For testing
-            if (0 <= x && x < size.width - 1 && 0 <= y && y < size.height - 1) // !!! For testing
-              partImage.at<cv::Vec3b>(y, x) = imgSource.at<cv::Vec3b>(static_cast<int>(std::roundf(p.y)), static_cast<int>(std::roundf(p.x)));
+          if (0.0f <= p.x && 0.0f <= p.y && p.x < width - 1.0f && 
+            p.y < height - 1.0f) // !!! For testing
+            if (0.0f <= x && x < size.width - 1.0f && 0.0f <= y && 
+              y < size.height - 1.0f) // !!! For testing
+              partImage.at<cv::Vec3b>(y, x) = imgSource.at<cv::Vec3b>(
+                static_cast<int>(std::round(p.y)), 
+                static_cast<int>(std::round(p.x)));
         }
         catch (...)
         {
           std::stringstream ss;
-          ss << "Couldn't get value of indeces " << "[" << x << "][" << y << "] from indeces [" << p.x << "][" << p.y << "]";
+          ss << "Couldn't get value of indeces " << "[" << x << "][" << y << 
+            "] from indeces [" << p.x << "][" << p.y << "]";
           DebugMessage(ss.str(), 1);
           throw std::out_of_range(ss.str());
         }
@@ -98,12 +101,13 @@ namespace SPEL
     return partImage;
   }
 
-  cv::Point2f spelHelper::round(const cv::Point2f& pt)
+  cv::Point2f spelHelper::round(const cv::Point2f& pt) noexcept
   {
-    return cv::Point2f(std::roundf(pt.x), std::roundf(pt.y));
+    return cv::Point2f(std::round(pt.x), std::round(pt.y));
   }
 
   POSERECT<cv::Point2f> spelHelper::round(const POSERECT<cv::Point2f>& rect)
+    noexcept
   {
     return POSERECT<cv::Point2f>(round(rect.point1), round(rect.point2),
       round(rect.point3), round(rect.point4));
@@ -111,24 +115,24 @@ namespace SPEL
 
   std::string spelHelper::getRandomStr(void) noexcept
   {
-    static std::default_random_engine dre((unsigned int)time(0));
+    static std::default_random_engine dre(static_cast<unsigned int>(time(0)));
     static std::uniform_int_distribution<int> di(0, std::numeric_limits<int>::max());
     return std::to_string(di(dre));
   }
 
-  std::string spelHelper::getTempFileName(std::string ext)
+  std::string spelHelper::getTempFileName(const std::string &extension)
   {
+    auto ext = extension;
     if (ext.find('.') == std::string::npos)
       ext.insert(0, 1, '.');
 #ifdef WINDOWS
     char buf[MAX_PATH];
-    auto ret = GetTempPath(MAX_PATH, buf);
+    const auto ret = GetTempPath(MAX_PATH, buf);
     if (ret > MAX_PATH || ret == 0)
     {
-      std::stringstream ss;
-      ss << "Can't get temporary directory";
-      DebugMessage(ss.str(), 1);
-      throw std::runtime_error(ss.str());
+      const auto &str = std::string("Can't get temporary directory");
+      DebugMessage(str, 1);
+      throw std::runtime_error(str);
     }
     while (true)
     {
@@ -163,20 +167,21 @@ namespace SPEL
 #endif
   }
   
-  bool spelHelper::checkFileExists(std::string file) noexcept
+  bool spelHelper::checkFileExists(const std::string &file) noexcept
   {
     std::ifstream f(file);
     return f.good();
   }
 
-  void spelHelper::copyFile(std::string dst, std::string src)
+  void spelHelper::copyFile(const std::string &dst, const std::string &src)
   {
     std::ifstream ifs(src, std::ios::binary);
     std::ofstream ofs(dst, std::ios::binary);
     if (ifs.bad() || ofs.bad())
     {
       std::stringstream ss;
-      ss << "Can't copy the content of the file '" << src << "' to the file '" << dst << "'";
+      ss << "Can't copy the content of the file '" << src << 
+        "' to the file '" << dst << "'";
       DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
     }
@@ -189,7 +194,7 @@ namespace SPEL
   {
     std::string guid;
 #ifdef WINDOWS
-    UUID uuid = { 0 };
+    UUID uuid = { };
     UuidCreate(&uuid);
     RPC_CSTR str = NULL;
     if (UuidToString(&uuid, &str) == RPC_S_OK)

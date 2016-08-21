@@ -347,9 +347,9 @@ namespace SPEL
           cv::Point3f prevRootLoc = prevRootJoint->getSpaceLocation();
           cv::Point3f futureRootLoc = futureRootJoint->getSpaceLocation();
 
-          float X = spelHelper::interpolateFloat(prevRootLoc.x, futureRootLoc.x, i, slice.size() - 1);
-          float Y = spelHelper::interpolateFloat(prevRootLoc.y, futureRootLoc.y, i, slice.size() - 1);
-          float Z = spelHelper::interpolateFloat(prevRootLoc.z, futureRootLoc.z, i, slice.size() - 1);
+          float X = spelHelper::interpolateValue(prevRootLoc.x, futureRootLoc.x, i, slice.size() - 1);
+          float Y = spelHelper::interpolateValue(prevRootLoc.y, futureRootLoc.y, i, slice.size() - 1);
+          float Z = spelHelper::interpolateValue(prevRootLoc.z, futureRootLoc.z, i, slice.size() - 1);
 
           BodyJoint* currentRootJoint = interpolatedSkeleton.getBodyJoint(partIter->getParentJoint()); //this should be the future root joint
           currentRootJoint->setSpaceLocation(cv::Point3f(X, Y, Z));

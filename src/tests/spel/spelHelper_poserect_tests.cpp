@@ -305,14 +305,14 @@ namespace SPEL
     int numSteps = 5;
     for (int step = 0; step < numSteps+1; step++)
     {
-      EXPECT_DOUBLE_EQ(1.0*double(step) / numSteps, spelHelper::interpolateFloat(prevAngle, nextAngle, step, numSteps));
-      cout << step << ": " << 1.0*double(step) / numSteps << " ~ " << spelHelper::interpolateFloat(prevAngle, nextAngle, step, numSteps) << endl;
+      EXPECT_DOUBLE_EQ(1.0*double(step) / numSteps, spelHelper::interpolateValue(prevAngle, nextAngle, step, numSteps));
+      cout << step << ": " << 1.0*double(step) / numSteps << " ~ " << spelHelper::interpolateValue(prevAngle, nextAngle, step, numSteps) << endl;
     }
 
     prevAngle = 1;
     nextAngle = 2;
     for (int step = 0; step < numSteps+1; step++)
-      EXPECT_DOUBLE_EQ(1.0 + 1.0*double(step)/double(numSteps), spelHelper::interpolateFloat(prevAngle, nextAngle, step, numSteps));
+      EXPECT_DOUBLE_EQ(1.0 + 1.0*double(step)/double(numSteps), spelHelper::interpolateValue(prevAngle, nextAngle, step, numSteps));
   }
 
   TEST(spelHelperTests_, getRandomStr)
