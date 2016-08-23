@@ -87,7 +87,41 @@ namespace SPEL
     //cv::Mat BackgroundDescriptors;
   };
 
-  void SingleFrameTrain(Frame* frame, SkeletonModel &X, Parameters P, bool UseOnlyMaskKeypoints = true)
+  // Sorting parts by the polygons area, not optimal, for testing only
+  vector<int> PolygonsPriority(map<int, POSERECT<Point2f>> PartRects)
+  {
+    vector<float> PolygonsArea(PartRects.size());
+    for (int i = 0; i < PartRects.size(); i++)
+    {
+      vector<Point2f> temp = PartRects[i].asVector();
+      float PartLenght = BodyPart::getBoneLength(Point2f(0, 0), temp[1] - temp[0]);
+      float PartWidth = BodyPart::getBoneLength(Point2f(0, 0), temp[3] - temp[0]);
+      PolygonsArea[i] = PartLenght*PartWidth;
+      temp.clear();
+    }
+
+    vector<int> SortedIndexes;
+    const float imageArea = FLT_MAX;
+    for (int i = 0; i < PolygonsArea.size(); i++)
+    {
+      int t = -1;
+      float minArea = imageArea;
+      for (int k = 0; k < PolygonsArea.size(); k++)
+        if(PolygonsArea[k] < minArea)
+        {
+          minArea = PolygonsArea[k];
+          t = k;
+        }
+
+      PolygonsArea[t] = imageArea;
+      SortedIndexes.push_back(t);
+    }
+
+    PolygonsArea.clear();
+    return SortedIndexes;
+  }
+
+  void SingleFrameTrain(Frame* frame, SkeletonModel &X, Parameters P, bool UseOnlyMaskKeypoints = true, bool usePartAreaPriority = true)
   {
     cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SurfFeatureDetector::create(P.minHessian);
 
@@ -126,19 +160,33 @@ namespace SPEL
     Skeleton skeleton = frame->getSkeleton();
     map<int, POSERECT<Point2f>> PartRects = SkeletonRects(skeleton);
 
+    // Sorting polygons by area
+    vector<int> SortedIndexes;
+    if(usePartAreaPriority)
+      SortedIndexes = PolygonsPriority(PartRects);
+    else
+    {
+      for (int i = 0; i < PartRects.size(); i++)
+        SortedIndexes.push_back(i);
+    }
+
+    // Create part models
     if(X.PartsKeypointsCount.size() == 0)
       for (unsigned int k = 0; k < PartRects.size(); k++)
         X.PartsKeypointsCount.emplace(std::pair<int, int>(k, 0));
 
     for (unsigned int p = 0; p < MaskKeypoins.size(); p++)
       if(MaskKeypoins[p].class_id !=-1)
-        for (unsigned int k = 0; k < PartRects.size(); k++)
-          if (pointPolygonTest(PartRects[k].asVector(), MaskKeypoins[p].pt, false) > 0)
+        for (unsigned int k = 0; k < SortedIndexes.size(); k++)
+        {
+          vector<Point2f> PartPolygon = PartRects[SortedIndexes[k]].asVector();
+          if (pointPolygonTest(PartPolygon, MaskKeypoins[p].pt, false) > 0)
           {
-            MaskKeypoins[p].class_id = k;
-            X.PartsKeypointsCount.at(k)++;
+            MaskKeypoins[p].class_id = SortedIndexes[k];
+            X.PartsKeypointsCount.at(SortedIndexes[k])++;
             X.SkeletonKeypoints.push_back(MaskKeypoins[p]);
           }
+        }
 
     cv::Mat FrameDescriptors;
     cv::Ptr<cv::xfeatures2d::SURF> extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
@@ -146,6 +194,7 @@ namespace SPEL
 
     detector->clear();
     extractor->clear();
+    SortedIndexes.clear();
   }
 
   void Train(vector<Frame*> frames, SkeletonModel &X, Parameters P, bool putMessages = true)
@@ -193,7 +242,7 @@ namespace SPEL
     }
   };
 
-  map<uint32_t, vector<LimbLabel>> Detect(Frame* frame, SkeletonModel &Trained, Parameters P, bool PutMessages = false, bool UseOnlyMaskKeypoints = true, bool useMulct = false)
+  map<uint32_t, vector<LimbLabel>> Detect(Frame* frame, SkeletonModel &Trained, Parameters P, bool PutMessages = false, bool UseOnlyMaskKeypoints = true, bool CheckMatches = false, bool useMulct = false)
   {
     if (PutMessages) DebugMessage(" SURFDetector experiments Detect started", 2);
     cv::Mat image = frame->getImage();
@@ -240,22 +289,24 @@ namespace SPEL
     Local.SkeletonDescriptors = FrameDescriptors;
 
     // Create matches
+    int n = 1; // Trained.SkeletonKeypoints.size();
+    if (CheckMatches) n = 2;
     cv::FlannBasedMatcher matcher;
     vector<vector<DMatch>> matches;
-    matcher.knnMatch(FrameDescriptors, Trained.SkeletonDescriptors, matches, 2);
-    if (PutMessages) DebugMessage(" Matches was created", 2);
+    matcher.knnMatch(FrameDescriptors, Trained.SkeletonDescriptors, matches, n);
+    if (PutMessages) DebugMessage(" Matches was created", n);
 
     // Search maximal matches distance
     float maxDist = 0.0f;
     for(int i = 0; i < matches.size(); i++)
-      //for(int k = 0; k < matches[i].size(); k++)
-        if (matches[i][0].distance > maxDist)
-          maxDist = matches[i][0].distance;
+      for(int k = 0; k < n; k++)
+        if (matches[i][k].distance > maxDist)
+          maxDist = matches[i][k].distance;
 
     // Normalize and inverse matches distances
     for(int i = 0; i < matches.size(); i++)
-      //for(int k = 0; k < matches[i].size(); k++)
-         matches[i][0].distance = 1.0f - matches[i][0].distance/maxDist;
+      for(int k = 0; k < n; k++)
+        matches[i][k].distance = 1.0f - matches[i][k].distance/maxDist;
     if (PutMessages) DebugMessage(" Matches was normalized", 2);
 
     Skeleton skeleton = frame->getSkeleton();
@@ -318,7 +369,8 @@ namespace SPEL
               for (unsigned int p = 0; p < MaskKeypoins.size(); p++)
                 if (pointPolygonTest(LabelPolygon, MaskKeypoins[p].pt, false) > 0)
                 {
-                  if(Trained.SkeletonKeypoints[matches[p][0].trainIdx].class_id == id) // && 0.8*matches[p][0].distance > matches[p][1].distance
+                  bool b = 0.8*matches[p][0].distance > matches[p][1].distance || !CheckMatches;
+                  if(Trained.SkeletonKeypoints[matches[p][0].trainIdx].class_id == id && b)
                   {
                     N++;
                     LabelScore = LabelScore + matches[p][0].distance;
