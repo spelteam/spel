@@ -54,13 +54,13 @@ namespace SPEL
     ///inherited virtual
     virtual ~NSKPSolver(void);
     ///inherited virtual
-    virtual std::vector<Solvlet> solve(Sequence& frames);
+    std::vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual
-    virtual std::vector<Solvlet> solve(Sequence &frames, std::map<std::string, float>  params);
+    std::vector<Solvlet> solve(Sequence &frames, std::map<std::string, float>  params);
     ///inherited virtual
-    virtual std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float>  params, const ImageSimilarityMatrix& ISM);
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float>  params, const ImageSimilarityMatrix& ISM);
 
-    virtual std::vector<cv::Point2i> suggestKeyframes(const ImageSimilarityMatrix& ism, std::map<std::string, float> params);
+    std::vector<cv::Point2i> suggestKeyframes(const ImageSimilarityMatrix& ism, std::map<std::string, float> params);
   private:
 #ifdef DEBUG
     FRIEND_TEST(nskpsolverTests, findFrameIndexById);
@@ -73,23 +73,22 @@ namespace SPEL
     FRIEND_TEST(nskpsolverTests, suggestKeyframes_A);
     FRIEND_TEST(nskpsolverTests, suggestKeyframes_B);
 #endif  // DEBUG
-  protected:
-    virtual std::vector<Solvlet> propagateKeyframes(std::vector<Frame*>& frames, std::map<std::string, float>  params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);
-    virtual std::vector<MinSpanningTree > buildFrameMSTs(const ImageSimilarityMatrix &ism, std::map<std::string, float> params);
+    std::vector<Solvlet> propagateKeyframes(std::vector<Frame*>& frames, std::map<std::string, float>  params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);
+    std::vector<MinSpanningTree > buildFrameMSTs(const ImageSimilarityMatrix &ism, std::map<std::string, float> params);
 
-    virtual float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params);
+    float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params);
 
-    virtual uint32_t findFrameIndexById(int id, std::vector<Frame*> frames);
-    virtual float computeScoreCost(const LimbLabel& label, std::map<std::string, float> params);
+    uint32_t findFrameIndexById(int id, std::vector<Frame*> frames);
+    float computeScoreCost(const LimbLabel& label, std::map<std::string, float> params);
 
-    virtual float computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild);
-    virtual float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float max, bool toChild);
+    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild);
+    float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float max, bool toChild);
 
-    virtual float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params);
-    virtual float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float min, float max);
+    float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params);
+    float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float min, float max);
 
-    virtual std::vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const std::vector<Frame *> &frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);
-    virtual int test(int frameId, const std::vector<Frame*>& frames, std::map<std::string, float> params, const ImageSimilarityMatrix &ism, const std::vector<MinSpanningTree> &trees, std::vector<int>& ignore);
+    std::vector<NSKPSolver::SolvletScore> propagateFrame(int frameId, const std::vector<Frame *> &frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);
+    int test(int frameId, const std::vector<Frame*>& frames, std::map<std::string, float> params, const ImageSimilarityMatrix &ism, const std::vector<MinSpanningTree> &trees, std::vector<int>& ignore);
   };
 
 }

@@ -32,21 +32,20 @@ namespace SPEL
     ///constructor
     Sequence(int idx, std::string seqName, std::vector<Frame*> seq);
     virtual ~Sequence(void);
-    virtual std::string getName(void) const;
-    virtual void setName(const std::string& _name);
-    virtual int getID(void) const;
-    virtual void setID(const int& _id);
-    virtual std::vector<Frame*> getFrames(void) const;
-    virtual Frame* getFrame(uint32_t id) const;
-    virtual void setFrames(const std::vector<Frame*> &_frames);
+    std::string getName(void) const;
+    void setName(const std::string& _name);
+    int getID(void) const;
+    void setID(const int& _id);
+    std::vector<Frame*> getFrames(void) const;
+    Frame* getFrame(uint32_t id) const;
+    void setFrames(const std::vector<Frame*> &_frames);
     ///compute (or re-compute) interpolation for all frames which are not a keyframe or a lockframe
-    virtual void computeInterpolation(std::map<std::string, float> &params);
-    virtual void estimateUniformScale(std::map<std::string, float> &params);
+    void computeInterpolation(std::map<std::string, float> &params);
+    void estimateUniformScale(std::map<std::string, float> &params);
 
-  protected:
-    virtual std::vector<Frame*> interpolateSlice(std::vector<Frame*> slice, std::map<std::string, float> params);
-    virtual std::vector<Frame*> interpolateSlice2D(std::vector<Frame*> slice, std::map<std::string, float> params);
   private:
+    std::vector<Frame*> interpolateSlice(std::vector<Frame*> slice, std::map<std::string, float> params);
+    std::vector<Frame*> interpolateSlice2D(std::vector<Frame*> slice, std::map<std::string, float> params);
 #ifdef DEBUG
     FRIEND_TEST(SequenceTests, CopyConstructor);
     FRIEND_TEST(SequenceTests, interpolateSlice2D);

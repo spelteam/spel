@@ -8,16 +8,16 @@
 #include <gtest/gtest.h>
 #include <tree_util.hh>
 
-#include "solver.hpp"
+#include "nskpsolver.hpp"
 #include "TestsFunctions.hpp"
 
 namespace SPEL
 {
   TEST(Solver, Constructor)
   {
-    Solver solver;
-    EXPECT_EQ(-1, solver.getId());
-    EXPECT_EQ("BaseClass", solver.getName());
+    Solver *solver = new NSKPSolver();
+    EXPECT_NE(-1, solver->getId());
+    EXPECT_NE("BaseClass", solver->getName());
   }
 
 

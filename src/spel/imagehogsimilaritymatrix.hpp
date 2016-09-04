@@ -22,8 +22,8 @@ namespace SPEL
     ///destructor
     virtual ~ImageHogSimilarityMatrix(void) noexcept;
 
-    virtual ImageHogSimilarityMatrix & operator=(const ImageHogSimilarityMatrix &s) noexcept;
-  protected:
+    ImageHogSimilarityMatrix & operator=(const ImageHogSimilarityMatrix &s) noexcept;
+  private:
 #ifdef DEBUG
     FRIEND_TEST(ImageHogSimilarityMatrix, defaultConstructor);
     FRIEND_TEST(ImageHogSimilarityMatrix, MoveConstructor);
@@ -46,11 +46,11 @@ namespace SPEL
     int derivAperture = 1;
     int histogramNormType = cv::HOGDescriptor::L2Hys;
 
-    virtual void calculateROI(Frame *frame, cv::Point2i &topLeft, cv::Point2i &bottomRight) const noexcept;
-    virtual int8_t extendSize(int &topLeftMin, int &topLeftMax, int &bottomRightMin, int &bottomRightMax, const int maxsize, const int add) const;
+    void calculateROI(Frame *frame, cv::Point2i &topLeft, cv::Point2i &bottomRight) const noexcept;
+    int8_t extendSize(int &topLeftMin, int &topLeftMax, int &bottomRightMin, int &bottomRightMax, const int maxsize, const int add) const;
 
     // Inherited via ImageSimilarityMatrix
-    virtual void computeISMcell(Frame * left, Frame * right, const int maxFrameHeight);
+    void computeISMcell(Frame * left, Frame * right, const int maxFrameHeight);
   };
 }
 

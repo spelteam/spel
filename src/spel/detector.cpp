@@ -239,8 +239,8 @@ namespace SPEL
 
   LimbLabel Detector::generateLabel(const BodyPart &bodyPart, 
     const cv::Point2f &parent, const cv::Point2f &child, const 
-    std::string &detectorName, const float coeff, const std::function<float()> &compare) 
-    const
+    std::string &detectorName, const float coeff, 
+    const std::function<float()> &compare) const
   {
     const auto &boxCenter = parent * 0.5 + child * 0.5;
     const auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, 
@@ -307,7 +307,8 @@ namespace SPEL
     auto resizeFactor = workFrame->Resize(maxFrameHeight);
 
     std::map <uint32_t, std::vector <LimbLabel> > tempLabelVector;
-    const auto &skeleton = workFrame->getSkeleton(); // copy skeleton from the frame
+    // copy skeleton from the frame
+    const auto &skeleton = workFrame->getSkeleton(); 
     // copy tree of bodypart from the skeleton
     const auto &partTree = skeleton.getPartTree(); 
 

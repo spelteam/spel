@@ -30,14 +30,14 @@ namespace SPEL
     MinSpanningTree(const MinSpanningTree& mst);
     virtual ~MinSpanningTree(void);
     ///build the MST
-    virtual void build(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
+    void build(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
 
-    virtual MinSpanningTree& operator=(const MinSpanningTree& _MST);
+    MinSpanningTree& operator=(const MinSpanningTree& _MST);
 
-    virtual tree<int> getMST(void) const;
+    tree<int> getMST(void) const;
 
     ///get size
-    virtual uint32_t size(void) const;
+    uint32_t size(void) const;
 
   private:
 #ifdef DEBUG

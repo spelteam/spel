@@ -20,7 +20,7 @@ namespace SPEL
   {
   public:
     Mat getImageShiftMatrix();
-    float ISMCell(Frame* left, Frame* right, int maxFrameHeight);
+    //float ISMCell(Frame* left, Frame* right, int maxFrameHeight);
   };
 
   Mat TestsMatrix::getImageShiftMatrix()
@@ -28,11 +28,11 @@ namespace SPEL
     return imageShiftMatrix;
   }
 
-  float TestsMatrix::ISMCell(Frame* left, Frame* right, int maxFrameHeight)
+  /*float TestsMatrix::ISMCell(Frame* left, Frame* right, int maxFrameHeight)
   {
     computeISMcell(left, right, maxFrameHeight);
     return imageSimilarityMatrix.at<float>(left->getID(), right->getID());
-  }
+  }*/
 
   class ImageSimilarityMatrixTests : public testing::Test
   {

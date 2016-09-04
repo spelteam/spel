@@ -28,13 +28,13 @@ namespace SPEL
     ///destructor
     virtual ~ImagePixelSimilarityMatrix(void) noexcept;
 
-    virtual ImagePixelSimilarityMatrix & operator=(const ImagePixelSimilarityMatrix &s) noexcept;
-  protected:
+    ImagePixelSimilarityMatrix & operator=(const ImagePixelSimilarityMatrix &s) noexcept;
+  private:
 #ifdef DEBUG
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeISMcell);
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeMSMcell);
 #endif  // DEBUG
-    virtual void computeISMcell(Frame* left, Frame* right, const int maxFrameHeight);
+    void computeISMcell(Frame* left, Frame* right, const int maxFrameHeight);
   };
 }
 

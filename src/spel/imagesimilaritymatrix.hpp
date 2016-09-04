@@ -35,17 +35,17 @@ namespace SPEL
     ///destructor
     virtual ~ImageSimilarityMatrix(void) noexcept;
     ///operators
-    virtual bool operator==(const ImageSimilarityMatrix &s) const noexcept;
-    virtual bool operator!=(const ImageSimilarityMatrix &s) const noexcept;
-    virtual ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s) noexcept;
-    virtual ImageSimilarityMatrix & operator=(ImageSimilarityMatrix &&s) noexcept;
+    bool operator==(const ImageSimilarityMatrix &s) const noexcept;
+    bool operator!=(const ImageSimilarityMatrix &s) const noexcept;
+    ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s) noexcept;
+    ImageSimilarityMatrix & operator=(ImageSimilarityMatrix &&s) noexcept;
 
-    virtual uint32_t getID(void);
-    virtual void setID(uint32_t _id);
+    uint32_t getID(void);
+    void setID(uint32_t _id);
 
-    virtual uint32_t size() const noexcept;
+    uint32_t size() const noexcept;
 
-    virtual void buildImageSimilarityMatrix(const std::vector<Frame*>& frames, const int maxFrameHeight = 0);
+    void buildImageSimilarityMatrix(const std::vector<Frame*>& frames, const int maxFrameHeight = 0);
 
     // Alternative buildMSM function
     // Test version
@@ -53,25 +53,33 @@ namespace SPEL
     // "UseRGBScore" - must be "false" for build MSM, must be "true" for build ISM
     // "inverseScore" = "false": value Score = 1  correspond to 100% masks overlap, "inverseScore" = "true": value Score = 0  correspond to 100% masks overlap.
     //  Diagonal elements always be set to bad score
-    virtual void buildImageSimilarityMatrix(const std::vector<Frame*>& frames,  int Erode, int Dilate, bool UseRGBScore = false, bool inverseScore = false);
-    virtual void buildMSM_OnMaskArea(const std::vector<Frame*>& frames, bool UseRGBScore, bool inverseScore);
+    void buildImageSimilarityMatrix(const std::vector<Frame*>& frames,  int Erode, int Dilate, bool UseRGBScore = false, bool inverseScore = false);
+    void buildMSM_OnMaskArea(const std::vector<Frame*>& frames, bool UseRGBScore, bool inverseScore);
     //- alternative MSM
 
-    virtual bool read(const std::string &filename) noexcept;
-    virtual bool write(const std::string &filename) const noexcept;
+    bool read(const std::string &filename) noexcept;
+    bool write(const std::string &filename) const noexcept;
 
-    virtual float min() const noexcept;
-    virtual float mean() const;
-    virtual float max() const noexcept;
-    virtual float stddev() const;
+    float min() const noexcept;
+    float mean() const;
+    float max() const noexcept;
+    float stddev() const;
 
-    virtual float at(const int row, const int col) const;
-    virtual cv::Point2f getShift(const int row, const int col) const;
+    float at(const int row, const int col) const;
+    cv::Point2f getShift(const int row, const int col) const;
     ///get cost for path through ISM
-    virtual float getPathCost(const std::vector<int> &path) const;
+    float getPathCost(const std::vector<int> &path) const;
 
-    virtual cv::Mat clone() const noexcept; //return a Mat clone of ISM
+    cv::Mat clone() const noexcept; //return a Mat clone of ISM
   protected:
+    uint32_t id;
+    ///the image similarity matrix
+    cv::Mat imageSimilarityMatrix;
+    cv::Mat imageShiftMatrix;
+
+    cv::Point2f calculateDistance(const cv::Mat &imgMatOne, const cv::Mat &imgMatTwo) const noexcept;
+    virtual void computeISMcell(Frame* left, Frame* right, const int maxFrameHeight) = 0;
+  private:
 #ifdef DEBUG
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeISMcell);
     FRIEND_TEST(ImageSimilarityMatrixTests_, computeMSMcell);
@@ -81,15 +89,7 @@ namespace SPEL
     FRIEND_TEST(MaskSimilarityMatrixTests, MoveConstructor);
     FRIEND_TEST(ImageSimilarityMatrixTests_, CalculateConstructor);
     FRIEND_TEST(ImageHogSimilarityMatrix, frames_ISM);
-#endif  // DEBUG
-    uint32_t id;
-
-    ///the image similarity matrix
-    cv::Mat imageSimilarityMatrix;
-    cv::Mat imageShiftMatrix;
-
-    virtual cv::Point2f calculateDistance(const cv::Mat &imgMatOne, const cv::Mat &imgMatTwo) const noexcept;
-    virtual void computeISMcell(Frame* left, Frame* right, const int maxFrameHeight) = 0;
+#endif  // DEBUG    
   };
 }
 #endif  // _IMAGESIMILARITYMATRIX_HPP_

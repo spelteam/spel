@@ -16,14 +16,14 @@ namespace SPEL
   class Solver
   {
   public:
-    Solver(void);
-    virtual ~Solver(void);
-    virtual std::vector<Solvlet> solve(const Sequence& v);
-    virtual std::vector<Solvlet> solve(const Sequence& v, std::map<std::string, float> params);
+    Solver(void) noexcept;
+    virtual ~Solver(void) noexcept;
+    virtual std::vector<Solvlet> solve(Sequence& v) = 0;
+    virtual std::vector<Solvlet> solve(Sequence& v, std::map<std::string, float> params) = 0;
     ///get the solver name. Every class inheriting solver has its own Name
-    virtual std::string getName(void);
+    std::string getName(void) const noexcept;
     ///get the solver Id. Every class inheriting solver has its own ID
-    virtual int getId(void);
+    int getId(void) const noexcept;
   protected:
     int id;
     std::string name;

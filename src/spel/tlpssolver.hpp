@@ -44,11 +44,11 @@ namespace SPEL
     ///inherited virtual
     virtual ~TLPSSolver(void);
     ///inherited virtual
-    virtual std::vector<Solvlet> solve(Sequence& frames);
+    std::vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual
-    virtual std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params);
-    virtual std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets);
-  protected:
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params);
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets);
+  private:
 #ifdef DEBUG
     FRIEND_TEST(tlpssolverTests, solve_3);
     FRIEND_TEST(tlpssolverTests, evaluateSolution);
@@ -57,27 +57,27 @@ namespace SPEL
     FRIEND_TEST(tlpssolver_Tests, slice_);
 #endif  // DEBUG
       
-    virtual std::vector<Solvlet> solveWindowed(Sequence &sequence, std::map<std::string, float> params); //inherited virtual
-    virtual std::vector<Solvlet> solveGlobal(Sequence &sequence, std::map<std::string, float> params); //inherited virtual
+    std::vector<Solvlet> solveWindowed(Sequence &sequence, std::map<std::string, float> params); //inherited virtual
+    std::vector<Solvlet> solveGlobal(Sequence &sequence, std::map<std::string, float> params); //inherited virtual
 
-    virtual float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params);
+    float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params);
 
-    virtual int findFrameIndexById(int id, std::vector<Frame*> frames);
-    virtual float computeScoreCost(const LimbLabel& label, std::map<std::string, float> params);
-    virtual float computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild);
-    virtual float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float jointMax, bool toChild);
-    virtual float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params);
-    virtual float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float max);
+    int findFrameIndexById(int id, std::vector<Frame*> frames);
+    float computeScoreCost(const LimbLabel& label, std::map<std::string, float> params);
+    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild);
+    float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float jointMax, bool toChild);
+    float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params);
+    float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float max);
 
-    virtual float computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params);
-    virtual float computeNormPastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params, float jointMax);
-    virtual float computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params);
-    virtual float computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params, float max);
-    virtual float computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params);
-    virtual float computeNormAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params, float jointMax);
+    float computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params);
+    float computeNormPastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params, float jointMax);
+    float computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params);
+    float computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params, float max);
+    float computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params);
+    float computeNormAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params, float jointMax);
 
     ///separate the sequence into slices, for temporal solve
-    virtual std::vector<std::vector<Frame*> > slice(const std::vector<Frame*>& frames);
+    std::vector<std::vector<Frame*> > slice(const std::vector<Frame*>& frames);
   };
 
 }
