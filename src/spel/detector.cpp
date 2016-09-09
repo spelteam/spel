@@ -579,7 +579,7 @@ namespace SPEL
     sort(m_frames.begin(), m_frames.end(), Frame::FramePointerComparer);
 
     params.emplace(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first,
-      m_frames.front()->getFrameSize().height);
+      static_cast<float>(m_frames.front()->getFrameSize().height));
     maxFrameHeight = static_cast<uint32_t>(params.at(
       COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first));
 

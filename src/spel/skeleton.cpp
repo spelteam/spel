@@ -56,6 +56,9 @@ namespace SPEL
 
   bool Skeleton::operator==(const Skeleton &skeleton) const noexcept
   {
+    auto count = m_partTree.size();
+    if (count != skeleton.m_partTree.size())
+      return false;
     return std::equal(m_partTree.begin(), m_partTree.end(), 
       skeleton.m_partTree.begin());
   }

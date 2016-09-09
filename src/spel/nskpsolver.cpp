@@ -1,5 +1,11 @@
 #include "nskpsolver.hpp"
 
+#include "lockframe.hpp"
+#include "colorHistDetector.hpp"
+#include "hogDetector.hpp"
+#include "surfDetector.hpp"
+#include "tlpssolver.hpp"
+
 namespace SPEL
 {
   NSKPSolver::NSKPSolver()

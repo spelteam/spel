@@ -12,20 +12,41 @@
 #include "sequence.hpp"
 
 namespace SPEL
-{
+{  
+  /// <summary>
+  /// Base Solver class.
+  /// </summary>
   class Solver
   {
   public:
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Solver"/> class.
+    /// </summary>
     Solver(void) noexcept;
-    virtual ~Solver(void) noexcept;
-    virtual std::vector<Solvlet> solve(Sequence& v) = 0;
-    virtual std::vector<Solvlet> solve(Sequence& v, std::map<std::string, float> params) = 0;
-    ///get the solver name. Every class inheriting solver has its own Name
+    /// <summary>
+    /// Finalizes an instance of the <see cref="Solver"/> class.
+    /// </summary>
+    virtual ~Solver(void) noexcept;    
+    /// <summary>Solves the specified <see cref="Sequence"/>.</summary>
+    /// <param name="sequence">The <see cref="Sequence"/>.</param>
+    /// <returns>Array of <see cref="Solvlet"/>.</returns>
+    virtual std::vector<Solvlet> solve(Sequence& sequence) = 0;    
+    /// <summary>Solves the specified sequence.</summary>
+    /// <param name="sequence">The <see cref="Sequence"/>.</param>
+    /// <param name="params">The parameters.</param>
+    /// <returns>Array of <see cref="Solvlet"/>.</returns>
+    virtual std::vector<Solvlet> solve(Sequence& sequence,
+      std::map<std::string, float> params) = 0;
+    /// <summary>Gets the solver name.</summary>
+    /// <returns>The solver name.</returns>
     std::string getName(void) const noexcept;
-    ///get the solver Id. Every class inheriting solver has its own ID
+    /// <summary>Gets the solver identifier.</summary>
+    /// <returns>The solver identifier.</returns>  
     int getId(void) const noexcept;
-  protected:
-    int id;
+  protected:    
+    /// <summary>The identifier.</summary>
+    int id;    
+    /// <summary>The name.</summary>
     std::string name;
   };
 

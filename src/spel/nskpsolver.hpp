@@ -8,28 +8,6 @@
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG
 
-// STL
-#include <vector>
-#include <limits>
-#include <opencv2/opencv.hpp>
-#include <tree.hh>
-#include <algorithm>
-#include <chrono>
-#include <future>
-
-// OpenGM
-#include <opengm/graphicalmodel/graphicalmodel.hxx>
-#include <opengm/graphicalmodel/space/discretespace.hxx>
-#include <opengm/operations/adder.hxx>
-#include <opengm/functions/explicit_function.hxx>
-#include <opengm/inference/messagepassing/messagepassing.hxx>
-#include <opengm/operations/minimizer.hxx>
-
-#include "lockframe.hpp"
-#include "colorHistDetector.hpp"
-#include "hogDetector.hpp"
-#include "surfDetector.hpp"
-#include "tlpssolver.hpp"
 #include "solver.hpp"
 #include "frame.hpp"
 #include "imagepixelsimilaritymatrix.hpp"
@@ -41,13 +19,13 @@ namespace SPEL
 
   class NSKPSolver : public Solver
   {
-  protected:
-    typedef struct SolvletScore
+  private:
+    struct SolvletScore
     {
       Solvlet solvlet;
       float score;
       int parentFrame;
-    } SolvletScore;
+    };
 
   public:
     NSKPSolver(void);

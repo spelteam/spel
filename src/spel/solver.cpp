@@ -2,7 +2,6 @@
 
 namespace SPEL
 {
-
   Solver::Solver(void) noexcept
   {
     id = -1;
@@ -13,7 +12,7 @@ namespace SPEL
   {
   }
 
-  std::string Solver::getName(void) const noexcept//get the solver name. Every class inheriting solver has its own Name
+  std::string Solver::getName(void) const noexcept
   {
     return name;
   }
