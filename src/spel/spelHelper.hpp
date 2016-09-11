@@ -22,7 +22,7 @@
 
 namespace SPEL
 {
-  template <class T> class POSERECT;
+  template <class T> class spelRECT;
 
   /// <summary>
   /// Class with common functions.
@@ -157,7 +157,7 @@ namespace SPEL
     /// <param name="size">The size.</param>
     /// <returns>The rotated image.</returns>
     static cv::Mat rotateImageToDefault(const cv::Mat &imgSource,
-      const POSERECT <cv::Point2f> &initialRect, const float angle,
+      const spelRECT <cv::Point2f> &initialRect, const float angle,
       const cv::Size &size);
     /// <summary>Rounds the specified point.</summary>
     /// <param name="pt">The point.</param>
@@ -166,7 +166,7 @@ namespace SPEL
     /// <summary>Rounds the specified rect.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>The rounded rect.</returns>
-    static POSERECT<cv::Point2f> round(const POSERECT <cv::Point2f> &rect) 
+    static spelRECT<cv::Point2f> round(const spelRECT <cv::Point2f> &rect) 
       noexcept;
     /// <summary>Gets the unique identifier.</summary>
     /// <returns>The unique identifier.</returns>
@@ -207,45 +207,45 @@ namespace SPEL
   /// Represents rectangle.
   /// </summary>  
   template <class T>
-  class POSERECT
+  class spelRECT
   {
   public:    
     /// <summary>
-    /// Initializes a new instance of the <see cref="POSERECT"/> class.
+    /// Initializes a new instance of the <see cref="spelRECT"/> class.
     /// </summary>
-    POSERECT(void) noexcept
+    spelRECT(void) noexcept
       : point1(),
       point2(),
       point3(),
       point4() {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="POSERECT"/> class.
+    /// Initializes a new instance of the <see cref="spelRECT"/> class.
     /// COpy constructor.
     /// </summary>
     /// <param name="poserect">The poserect.</param>
-    POSERECT(const POSERECT<T>& poserect) noexcept
+    spelRECT(const spelRECT<T>& poserect) noexcept
       : point1(poserect.point1),
       point2(poserect.point2),
       point3(poserect.point3),
       point4(poserect.point4) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="POSERECT"/> class.
+    /// Initializes a new instance of the <see cref="spelRECT"/> class.
     /// Move constructor.
     /// </summary>
     /// <param name="poserect">The poserect.</param>
-    POSERECT(POSERECT<T>&& poserect) noexcept
+    spelRECT(spelRECT<T>&& poserect) noexcept
       : point1(std::move(poserect.point1)),
       point2(std::move(poserect.point2)),
       point3(std::move(poserect.point3)),
       point4(std::move(poserect.point4)) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="POSERECT"/> class.
+    /// Initializes a new instance of the <see cref="spelRECT"/> class.
     /// </summary>
     /// <param name="p1">The first point.</param>
     /// <param name="p2">The second point.</param>
     /// <param name="p3">The third point.</param>
     /// <param name="p4">The fourth point.</param>
-    POSERECT(const T &p1, const T &p2, const T &p3, const T &p4) noexcept
+    spelRECT(const T &p1, const T &p2, const T &p3, const T &p4) noexcept
       : point1(p1),
       point2(p2),
       point3(p3),
@@ -314,7 +314,7 @@ namespace SPEL
     /// <summary>Assignment operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>The rect.</returns>
-    POSERECT<T>& operator=(const POSERECT<T>& rect) noexcept
+    spelRECT<T>& operator=(const spelRECT<T>& rect) noexcept
     {
       if (&rect == this) return *this;
 
@@ -328,7 +328,7 @@ namespace SPEL
     /// <summary>Move operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>The rect</returns>
-    POSERECT<T>& operator=(POSERECT<T>&& rect) noexcept
+    spelRECT<T>& operator=(spelRECT<T>&& rect) noexcept
     {
       std::swap(point1, rect.point1);
       std::swap(point2, rect.point2);
@@ -340,7 +340,7 @@ namespace SPEL
     /// <summary>Comparison operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>Result of the comparison.</returns>
-    bool operator==(const POSERECT <T> &rect) const noexcept
+    bool operator==(const spelRECT <T> &rect) const noexcept
     {
       return (this->point1 == rect.point1 && this->point2 == rect.point2 && 
         this->point3 == rect.point3 && this->point4 == rect.point4);
@@ -348,7 +348,7 @@ namespace SPEL
     /// <summary>Comparison operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>Result of the comparison.</returns>
-    bool operator!=(const POSERECT <T> &rect) const noexcept
+    bool operator!=(const spelRECT <T> &rect) const noexcept
     {
       return !(*this == rect);
     }
@@ -366,48 +366,48 @@ namespace SPEL
   /// Represents the OpenCV Point class with the comparer
   /// </summary>
   template <typename T>
-  class PHPoint : public cv::Point_ < T >
+  class spelPoint : public cv::Point_ < T >
   {
   public:    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
-    PHPoint() noexcept : cv::Point_<T>() {}    
+    spelPoint() noexcept : cv::Point_<T>() {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="_x">The x.</param>
     /// <param name="_y">The y.</param>
-    PHPoint(T _x, T _y) noexcept : cv::Point_<T>(_x, _y) {}    
+    spelPoint(T _x, T _y) noexcept : cv::Point_<T>(_x, _y) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    PHPoint(const cv::Point_<T>& pt) noexcept : cv::Point_<T>(pt) {}    
+    spelPoint(const cv::Point_<T>& pt) noexcept : cv::Point_<T>(pt) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    PHPoint(const CvPoint& pt) noexcept : cv::Point_<T>(pt) {}    
+    spelPoint(const CvPoint& pt) noexcept : cv::Point_<T>(pt) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    PHPoint(const CvPoint2D32f& pt) noexcept : cv::Point_<T>(pt) {}    
+    spelPoint(const CvPoint2D32f& pt) noexcept : cv::Point_<T>(pt) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="sz">The size.</param>
-    PHPoint(const cv::Size_<T>& sz) noexcept : cv::Point_<T>(sz) {}    
+    spelPoint(const cv::Size_<T>& sz) noexcept : cv::Point_<T>(sz) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="v">The vector.</param>
-    PHPoint(const cv::Vec<T, 2>& v) noexcept : cv::Point_<T>(v) {}
+    spelPoint(const cv::Vec<T, 2>& v) noexcept : cv::Point_<T>(v) {}
     /// <summary>Comparison operator.</summary>
     /// <param name="pt">The point.</param>
     /// <returns>The result of the comparison.</returns>
-    bool operator < (const PHPoint& pt) const noexcept
+    bool operator < (const spelPoint& pt) const noexcept
     {
       return (this->x < pt.x || (this->x == pt.x && this->y < pt.y));
     }
@@ -417,44 +417,44 @@ namespace SPEL
   /// Represents the OpenCV Point3 class with the comparer
   /// </summary>
   template <typename T>
-  class PHPoint3 : public cv::Point3_ < T >
+  class spelPoint3 : public cv::Point3_ < T >
   {
   public:    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint3"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
-    PHPoint3() noexcept : cv::Point3_<T>() {}    
+    spelPoint3() noexcept : cv::Point3_<T>() {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint3"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="_x">The x.</param>
     /// <param name="_y">The y.</param>
     /// <param name="_z">The z.</param>
-    PHPoint3(T _x, T _y, T _z) noexcept : cv::Point3_<T>(_x, _y, _z) {}    
+    spelPoint3(T _x, T _y, T _z) noexcept : cv::Point3_<T>(_x, _y, _z) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint3"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    PHPoint3(const cv::Point3_<T>& pt) noexcept : cv::Point3_<T>(pt) {}    
+    spelPoint3(const cv::Point3_<T>& pt) noexcept : cv::Point3_<T>(pt) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint3"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    explicit PHPoint3(const cv::Point_<T>& pt) noexcept : cv::Point3_<T>(pt) {}    
+    explicit spelPoint3(const cv::Point_<T>& pt) noexcept : cv::Point3_<T>(pt) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint3"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    PHPoint3(const CvPoint3D32f& pt) noexcept : cv::Point3_<T>(pt) {}    
+    spelPoint3(const CvPoint3D32f& pt) noexcept : cv::Point3_<T>(pt) {}    
     /// <summary>
-    /// Initializes a new instance of the <see cref="PHPoint3"/> class.
+    /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="v">The vector.</param>
-    PHPoint3(const cv::Vec<T, 3>& v) noexcept : cv::Point3_<T>(v) {}    
+    spelPoint3(const cv::Vec<T, 3>& v) noexcept : cv::Point3_<T>(v) {}    
     /// <summary>Comparison operator.</summary>
     /// <param name="pt">The point.</param>
     /// <returns>The comparison result.</returns>
-    bool operator < (const PHPoint3& pt) const noexcept
+    bool operator < (const spelPoint3& pt) const noexcept
     {
       return (this->x < pt.x || (this->x == pt.x && this->y < pt.y) || 
         (this->x == pt.x && this->y == pt.y && this->z < pt.z));

@@ -20,7 +20,7 @@ namespace SPEL
     float spaceLength = 1.343f;
 
     float expectedDistance = 3.4f;
-    POSERECT <Point2f> partPolygon(Point2f(0.0, 0.0), Point2f(1.0, 1.0), Point2f(2.0, 2.0), Point2f(3.0, 3.0));
+    spelRECT <Point2f> partPolygon(Point2f(0.0, 0.0), Point2f(1.0, 1.0), Point2f(2.0, 2.0), Point2f(3.0, 3.0));
     float lwRatio = 1.8f;
     float relativeLength = 0.6f;
     float searchRadius = 0.5f;
@@ -63,7 +63,7 @@ namespace SPEL
     float spaceLength = 1.343f;
 
     float expectedDistance = 3.4f;
-    POSERECT <Point2f> partPolygon(Point2f(0.0, 0.0), Point2f(1.0, 1.0), Point2f(2.0, 2.0), Point2f(3.0, 3.0));
+    spelRECT <Point2f> partPolygon(Point2f(0.0, 0.0), Point2f(1.0, 1.0), Point2f(2.0, 2.0), Point2f(3.0, 3.0));
     float lwRatio = 1.8f;
     float relativeLength = 0.6f;
     float searchRadius = 0.5f;

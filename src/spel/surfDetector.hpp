@@ -57,7 +57,7 @@ namespace SPEL
       /// </summary>
       ~PartModel(void);      
       /// <summary>The part model rect.</summary>
-      POSERECT <cv::Point2f> partModelRect;      
+      spelRECT <cv::Point2f> partModelRect;      
       /// <summary>The key points.</summary>
       std::vector <cv::KeyPoint> keyPoints;      
       /// <summary>The descriptors.</summary>

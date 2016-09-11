@@ -14,13 +14,13 @@ namespace SPEL
   const uint8_t Factor = static_cast<uint8_t> (ceil(pow(2, 8) / NBins)); // Colorspace scaling coefficient Model.nBins
 
   void PutPartRect(Mat &Image, vector<Point2f> polygon, Scalar color); // Drawing the part polygon
-  map<int, POSERECT<Point2f>> SkeletonRects(Skeleton skeleton); // Build the rectangles for all of bodyparts
-  POSERECT<Point2f> BuildPartRect(BodyJoint *j0, BodyJoint *j1, float LWRatio); // Build rectangle on bodypart joints
+  map<int, spelRECT<Point2f>> SkeletonRects(Skeleton skeleton); // Build the rectangles for all of bodyparts
+  spelRECT<Point2f> BuildPartRect(BodyJoint *j0, BodyJoint *j1, float LWRatio); // Build rectangle on bodypart joints
   map<int, pair<Point2f, Point2f>> getPartLocations(Skeleton skeleton); // Selecting locations of all body part from skeleton																		
-  bool IsCrossed(vector<Point2f> PolygonPoints, POSERECT<Point2f> rect); // Returns "true" if polygon is crossed (occluded) by "rect"
-  bool IsCrossed(POSERECT<Point2f> rect1, POSERECT<Point2f> rect2); // Returns "true" if "rect1" is crossed (occluded) by "rect2"
-  vector<vector<pair<int, int>>> CrossingsList(map<int, POSERECT<Point2f>> Rects, map<int, int> depth); // For the each polygon select all polygons, which crossed it 
-  vector <Point3i> GetPartColors(Mat image, Mat mask, POSERECT < Point2f > rect); // Build set of the rect pixels colours 
+  bool IsCrossed(vector<Point2f> PolygonPoints, spelRECT<Point2f> rect); // Returns "true" if polygon is crossed (occluded) by "rect"
+  bool IsCrossed(spelRECT<Point2f> rect1, spelRECT<Point2f> rect2); // Returns "true" if "rect1" is crossed (occluded) by "rect2"
+  vector<vector<pair<int, int>>> CrossingsList(map<int, spelRECT<Point2f>> Rects, map<int, int> depth); // For the each polygon select all polygons, which crossed it 
+  vector <Point3i> GetPartColors(Mat image, Mat mask, spelRECT < Point2f > rect); // Build set of the rect pixels colours 
   void  Normalize(vector <vector <vector <float>>> &Histogramm, int nBins, int pixelsCount); // Normalization of the  histogram
   void PutHistogram(ofstream &fout, vector <vector <vector <float>>> &Histogramm, int sizeFG); // Output histogram into text file
   

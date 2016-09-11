@@ -88,7 +88,7 @@ namespace SPEL
   };
 
   // Sorting parts by the polygons area, not optimal, for testing only
-  vector<int> PolygonsPriority(map<int, POSERECT<Point2f>> PartRects)
+  vector<int> PolygonsPriority(map<int, spelRECT<Point2f>> PartRects)
   {
     vector<float> PolygonsArea(PartRects.size());
     for (int i = 0; i < PartRects.size(); i++)
@@ -158,7 +158,7 @@ namespace SPEL
     //cout << "FrameKeypoints size = " << FrameKeypoints.size() << endl;
 
     Skeleton skeleton = frame->getSkeleton();
-    map<int, POSERECT<Point2f>> PartRects = SkeletonRects(skeleton);
+    map<int, spelRECT<Point2f>> PartRects = SkeletonRects(skeleton);
 
     // Sorting polygons by area
     vector<int> SortedIndexes;
@@ -310,7 +310,7 @@ namespace SPEL
     if (PutMessages) DebugMessage(" Matches was normalized", 2);
 
     Skeleton skeleton = frame->getSkeleton();
-    map<int, POSERECT<Point2f>> PartRects = SkeletonRects(skeleton);
+    map<int, spelRECT<Point2f>> PartRects = SkeletonRects(skeleton);
 
     map<uint32_t, vector<LimbLabel>> Labels;
 

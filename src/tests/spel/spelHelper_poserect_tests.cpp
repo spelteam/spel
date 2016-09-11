@@ -9,7 +9,7 @@
 
 namespace SPEL
 {
-  class PoseRectTest : public testing::Test{
+  class spelRectTest : public testing::Test{
   protected:
     //init
     virtual void SetUp(){
@@ -31,13 +31,13 @@ namespace SPEL
       p[13] = Point2f(-20.0f, 9.28f);
       p[14] = Point2f(-15.0, 10.0);
       //first rectangle
-      rect1 = POSERECT<Point2f>(p[0], p[1], p[2], p[3]);
-      rect3 = POSERECT<Point2f>(p[0], p[1], p[2], p[3]);
+      rect1 = spelRECT<Point2f>(p[0], p[1], p[2], p[3]);
+      rect3 = spelRECT<Point2f>(p[0], p[1], p[2], p[3]);
       //second rectangle
-      rect2 = POSERECT<Point2f>(p[4], p[5], p[6], p[7]);
-      rect4 = POSERECT<Point2f>(p[4], p[5], p[6], p[7]);
+      rect2 = spelRECT<Point2f>(p[4], p[5], p[6], p[7]);
+      rect4 = spelRECT<Point2f>(p[4], p[5], p[6], p[7]);
       //third rectangle
-      rect5 = POSERECT<Point2f>(p[6], p[7], p[9], p[8]);
+      rect5 = spelRECT<Point2f>(p[6], p[7], p[9], p[8]);
 
     }
 
@@ -46,37 +46,37 @@ namespace SPEL
     //virtual void TearDown(){}
   protected:
     Point2f p[15];
-    POSERECT<Point2f> rect1, rect2, rect3, rect4, rect5;
+    spelRECT<Point2f> rect1, rect2, rect3, rect4, rect5;
   };
 
-  TEST_F(PoseRectTest, Costructor)
+  TEST_F(spelRectTest, Costructor)
   {
-    POSERECT<Point2f> rect(p[0], p[1], p[2], p[3]);
+    spelRECT<Point2f> rect(p[0], p[1], p[2], p[3]);
     EXPECT_EQ(p[0], rect.point1);
     EXPECT_EQ(p[1], rect.point2);
     EXPECT_EQ(p[2], rect.point3);
     EXPECT_EQ(p[3], rect.point4);
   }
 
-  TEST_F(PoseRectTest, CopyCostructor)
+  TEST_F(spelRectTest, CopyCostructor)
   {
-    POSERECT<Point2f> rect(rect1);
+    spelRECT<Point2f> rect(rect1);
     EXPECT_EQ(rect1.point1, rect.point1);
     EXPECT_EQ(rect1.point2, rect.point2);
     EXPECT_EQ(rect1.point3, rect.point3);
     EXPECT_EQ(rect1.point4, rect.point4);
   }
 
-  TEST_F(PoseRectTest, MoveCostructor)
+  TEST_F(spelRectTest, MoveCostructor)
   {
-    POSERECT<Point2f> rect(static_cast<POSERECT<Point2f>&&>(rect1));
+    spelRECT<Point2f> rect(static_cast<spelRECT<Point2f>&&>(rect1));
     EXPECT_EQ(rect1.point1, rect.point1);
     EXPECT_EQ(rect1.point2, rect.point2);
     EXPECT_EQ(rect1.point3, rect.point3);
     EXPECT_EQ(rect1.point4, rect.point4);
   }
 
-  TEST_F(PoseRectTest, ContainsPoint){
+  TEST_F(spelRectTest, ContainsPoint){
     EXPECT_EQ(1, rect1.containsPoint(p[10]));
     EXPECT_EQ(0, rect2.containsPoint(p[11]));
     EXPECT_EQ(-1, rect3.containsPoint(p[12]));
@@ -87,7 +87,7 @@ namespace SPEL
     EXPECT_EQ(-1, rect3.containsPoint(p[14]));
   }
 
-  TEST_F(PoseRectTest, AsVector){
+  TEST_F(spelRectTest, AsVector){
     std::vector<Point2f> temp = { p[0], p[1], p[2], p[3] };
     EXPECT_EQ(temp, rect1.asVector());
     EXPECT_EQ(4, rect1.asVector().size());
@@ -98,7 +98,7 @@ namespace SPEL
     EXPECT_EQ(4, rect5.asVector().size());
   }
 
-  TEST_F(PoseRectTest, Equality){
+  TEST_F(spelRectTest, Equality){
     //between rectangles
     EXPECT_TRUE(rect1 == rect3);
     EXPECT_TRUE(rect2 == rect4);
@@ -135,14 +135,14 @@ namespace SPEL
     EXPECT_EQ(p[8], rect5.point4);
   }
 
-  TEST_F(PoseRectTest, assignmentOperator)
+  TEST_F(spelRectTest, assignmentOperator)
   {
-    POSERECT<Point2f> rect;
+    spelRECT<Point2f> rect;
     rect = rect1;
     EXPECT_EQ(rect1, rect);
   }
 
-  TEST_F(PoseRectTest, GetMinMaxXY)
+  TEST_F(spelRectTest, GetMinMaxXY)
   {
     float Xmin, Xmax, Ymin, Ymax;
     rect5.GetMinMaxXY(Xmin, Ymin, Xmax, Ymax);
@@ -152,58 +152,58 @@ namespace SPEL
     EXPECT_EQ(p[6].y, Ymax);
   }
 
-  TEST_F(PoseRectTest, GetCenter)
+  TEST_F(spelRectTest, GetCenter)
   {
     Point2f center = rect1.GetCenter<Point2f>();
     EXPECT_EQ(center, 0.25*(p[0] + p[1] + p[2] + p[3]));
   }
 
-  TEST_F(PoseRectTest, AssignmentOperator)
+  TEST_F(spelRectTest, AssignmentOperator)
   {
-    POSERECT<Point2f> rect = rect1;
+    spelRECT<Point2f> rect = rect1;
     EXPECT_EQ(rect1, rect);
   }
 
-  TEST_F(PoseRectTest, RectSize)
+  TEST_F(spelRectTest, RectSize)
   {
     Point2f rectSize = rect1.RectSize<Point2f>();
     EXPECT_EQ(Point2f(1.0, 1.0), rectSize);
   }
 
-  TEST(spelHelperTests_, PHPoint)
+  TEST(spelHelperTests_, spelPoint)
   {
     float x = 0.5f, y = 0.8f;
     int x_int = static_cast<int>(x), y_int = static_cast<int>(y);
-    PHPoint<float> X(x, y);
+    spelPoint<float> X(x, y);
     EXPECT_EQ(x, X.x);
     EXPECT_EQ(y, X.y);
 
-    PHPoint<float> Y(X);
+    spelPoint<float> Y(X);
     EXPECT_EQ(x, Y.x);
     EXPECT_EQ(y, Y.y);
 
     CvPoint P_int = cvPoint(x_int, y_int);
-    PHPoint<int> Z(P_int);
+    spelPoint<int> Z(P_int);
     EXPECT_EQ(x_int, Z.x);
     EXPECT_EQ(y_int, Z.y);
 
     CvPoint2D32f P_float = cvPoint2D32f(x, y);
-    PHPoint<float> Q(P_float);
+    spelPoint<float> Q(P_float);
     EXPECT_EQ(x, Q.x);
     EXPECT_EQ(y, Q.y);
 
-    PHPoint<float> E(cv::Size(x_int, y_int));
+    spelPoint<float> E(cv::Size(x_int, y_int));
     EXPECT_EQ(x_int, E.x);
     EXPECT_EQ(y_int, E.y);
 
     Vec<float, 2> v = { x, y };
-    PHPoint<float> D(v);
+    spelPoint<float> D(v);
     EXPECT_EQ(x, D.x);
     EXPECT_EQ(y, D.y);
 
     //Operator "<"
-    PHPoint<float> W(x - 1.0f, y);
-    PHPoint<float> H(x, y - 1.0f);
+    spelPoint<float> W(x - 1.0f, y);
+    spelPoint<float> H(x, y - 1.0f);
     EXPECT_TRUE(W < Y);
     EXPECT_TRUE(H < Y);
     EXPECT_FALSE(X < Y);
@@ -211,49 +211,49 @@ namespace SPEL
     EXPECT_FALSE(Y < W);
   }
 
-  TEST(spelHelperTests_, PHPoint3)
+  TEST(spelHelperTests_, spelPoint3)
   {
     float x = 5.0f, y = 8.0f, z = 7.0f;
     int x_int = static_cast<int>(x), y_int = static_cast<int>(y), z_int = static_cast<int>(z);
-    PHPoint<float> P_2d(x, y);
+    spelPoint<float> P_2d(x, y);
 
-    PHPoint3<float> X(x, y, z);
+    spelPoint3<float> X(x, y, z);
     EXPECT_EQ(x, X.x);
     EXPECT_EQ(y, X.y);
     EXPECT_EQ(z, X.z);
 
-    PHPoint3<float> Y(X);
+    spelPoint3<float> Y(X);
     EXPECT_EQ(x, Y.x);
     EXPECT_EQ(y, Y.y);
     EXPECT_EQ(z, Y.z);
 
     cv::Point3_<float> P(x, y, z);
-    PHPoint3<float> Z(P);
+    spelPoint3<float> Z(P);
     EXPECT_EQ(x, Z.x);
     EXPECT_EQ(y, Z.y);
     EXPECT_EQ(z, Z.z);
 
-    PHPoint3<float> C(P_2d);
+    spelPoint3<float> C(P_2d);
     EXPECT_EQ(x, C.x);
     EXPECT_EQ(y, C.y);
     EXPECT_EQ(0.0f, C.z);
 
     CvPoint3D32f P_float = cvPoint3D32f(x, y,z);
-    PHPoint3<float> Q(P_float);
+    spelPoint3<float> Q(P_float);
     EXPECT_EQ(x, Q.x);
     EXPECT_EQ(y, Q.y);
     EXPECT_EQ(z, Q.z);
 
     Vec<float, 3> v = { x, y, z };
-    PHPoint3<float> D(v);
+    spelPoint3<float> D(v);
     EXPECT_EQ(x, D.x);
     EXPECT_EQ(y, D.y);
     EXPECT_EQ(z, D.z);
 
     //Operator "<"
-    PHPoint3<float> W(x - 1.0f, y, z);
-    PHPoint3<float> H(x, y - 1.0f, z);
-    PHPoint3<float> F(x, y, z - 1.0f);
+    spelPoint3<float> W(x - 1.0f, y, z);
+    spelPoint3<float> H(x, y - 1.0f, z);
+    spelPoint3<float> F(x, y, z - 1.0f);
     EXPECT_TRUE(W < Y);
     EXPECT_TRUE(H < Y);
     EXPECT_TRUE(F < Y);

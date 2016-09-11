@@ -876,7 +876,7 @@ bool ProjectLoader::Draw(map <uint32_t, vector <LimbLabel>> labels, Frame *frame
     c2 = spelHelper::rotatePoint2D(c2, polyCenter, angle) + boxCenter - polyCenter;
     c3 = spelHelper::rotatePoint2D(c3, polyCenter, angle) + boxCenter - polyCenter;
     c4 = spelHelper::rotatePoint2D(c4, polyCenter, angle) + boxCenter - polyCenter;
-    POSERECT <Point2f> rect = POSERECT <Point2f>(c1, c2, c3, c4);
+    spelRECT <Point2f> rect = spelRECT <Point2f>(c1, c2, c3, c4);
 
     line(temp, rect.point1, rect.point2, Scalar(255, 0, 0), lineWidth, CV_AA);
     line(temp, rect.point2, rect.point3, Scalar(0, 255, 0), lineWidth, CV_AA);

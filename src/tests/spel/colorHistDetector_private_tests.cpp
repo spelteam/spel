@@ -46,7 +46,7 @@ namespace SPEL
   BodyPart bodyPart;
   BodyJoint* j0;
   BodyJoint* j1;
-  POSERECT<Point2f> rect;
+  spelRECT<Point2f> rect;
   vector <Point3i> Colors;
   ColorHistDetector detector;
   map <int32_t, Mat> pixelDistributions;

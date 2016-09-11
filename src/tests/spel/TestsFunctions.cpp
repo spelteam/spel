@@ -19,7 +19,7 @@ namespace SPEL
   }
 
   //Build bodypart rectangle on bodypart joints
-  POSERECT<Point2f> BuildPartRect(BodyJoint *j0, BodyJoint *j1, float LWRatio)
+  spelRECT<Point2f> BuildPartRect(BodyJoint *j0, BodyJoint *j1, float LWRatio)
   {
     Point2f p0 = j0->getImageLocation(), p1 = j1->getImageLocation();
     float boneLength = (float)sqrt(spelHelper::distSquared(p0, p1)); // distance between nodes
@@ -38,21 +38,21 @@ namespace SPEL
     c2 = spelHelper::rotatePoint2D(c2, polyCenter, rotationAngle) + boxCenter - polyCenter;
     c3 = spelHelper::rotatePoint2D(c3, polyCenter, rotationAngle) + boxCenter - polyCenter;
     c4 = spelHelper::rotatePoint2D(c4, polyCenter, rotationAngle) + boxCenter - polyCenter;
-    POSERECT <Point2f> poserect(c1, c2, c3, c4);
+    spelRECT <Point2f> poserect(c1, c2, c3, c4);
     return poserect;
   }
 
   //Build the rectangles for all of bodyparts
-  map<int, POSERECT<Point2f>> SkeletonRects(Skeleton skeleton)
+  map<int, spelRECT<Point2f>> SkeletonRects(Skeleton skeleton)
   {
-    map<int, POSERECT<Point2f>> Rects;
+    map<int, spelRECT<Point2f>> Rects;
     tree<BodyPart> PartTree = skeleton.getPartTree();
     for (tree<BodyPart>::iterator BP_iterator = PartTree.begin(); BP_iterator != PartTree.end(); BP_iterator++)
     {
       BodyJoint *j0 = skeleton.getBodyJoint(BP_iterator->getParentJoint());
       BodyJoint *j1 = skeleton.getBodyJoint(BP_iterator->getChildJoint());
-      POSERECT<Point2f> Rect = BuildPartRect(j0, j1, BP_iterator->getLWRatio());
-      Rects.emplace(pair<int, POSERECT<Point2f>>((*BP_iterator).getPartID(), Rect));
+      spelRECT<Point2f> Rect = BuildPartRect(j0, j1, BP_iterator->getLWRatio());
+      Rects.emplace(pair<int, spelRECT<Point2f>>((*BP_iterator).getPartID(), Rect));
     }
     return Rects;
   }
@@ -76,7 +76,7 @@ namespace SPEL
   }
 
   //Returns "true" if polygon is crossed (occluded) by "rect"
-  bool IsCrossed(vector<Point2f> PolygonPoints, POSERECT<Point2f> rect)
+  bool IsCrossed(vector<Point2f> PolygonPoints, spelRECT<Point2f> rect)
   {
     bool Crossed = 0;
     for (unsigned int i = 0; i < PolygonPoints.size() - 1; i++)
@@ -100,7 +100,7 @@ namespace SPEL
   }
 
   //Returns "true" if "rect1" is crossed (occluded) by "rect2"
-  bool IsCrossed(POSERECT<Point2f> rect1, POSERECT<Point2f> rect2)
+  bool IsCrossed(spelRECT<Point2f> rect1, spelRECT<Point2f> rect2)
   {
     vector<Point2f> Polygon = rect1.asVector();
     bool Crossed = IsCrossed(Polygon, rect2);
@@ -119,7 +119,7 @@ namespace SPEL
   };
 
   //For the each polygon select all polygons, which crossed it 
-  vector<vector<pair<int, int>>> CrossingsList(map<int, POSERECT<Point2f>> Rects, map<int, int> depth)
+  vector<vector<pair<int, int>>> CrossingsList(map<int, spelRECT<Point2f>> Rects, map<int, int> depth)
   {
     vector<vector<pair<int, int>>> Crosses;
     for (unsigned int i = 0; i < Rects.size(); i++)
@@ -141,7 +141,7 @@ namespace SPEL
   }
 
   //Build set of the rect pixels colours 
-  vector <Point3i> GetPartColors(Mat image, Mat mask, POSERECT < Point2f > rect)
+  vector <Point3i> GetPartColors(Mat image, Mat mask, spelRECT < Point2f > rect)
   {
     vector <Point3i> PartColors;
     int xmin, ymin, xmax, ymax;

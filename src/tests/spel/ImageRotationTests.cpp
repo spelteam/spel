@@ -78,7 +78,7 @@ namespace SPEL
     float height = static_cast<float>(sqrt(l.x*l.x + l.y*l.y));
     Size size(round(width), round(height));
 
-    POSERECT<Point2f> rect(ROIRect[0], ROIRect[1], ROIRect[2], ROIRect[3]);
+    spelRECT<Point2f> rect(ROIRect[0], ROIRect[1], ROIRect[2], ROIRect[3]);
 
     return spelHelper::rotateImageToDefault(imgSource, rect, angle, size);
   }
@@ -645,17 +645,17 @@ namespace SPEL
 
      return Result;
  }
-  POSERECT<Point2f> CreateRect1(float x1, float x2, float y1, float y2)
+  spelRECT<Point2f> CreateRect1(float x1, float x2, float y1, float y2)
   {
       Point2f a(x2, y1), b(x2, y2), c(x1, y2), d(x1, y1);
-      POSERECT <Point2f> rect(a, b, c, d);
+      spelRECT <Point2f> rect(a, b, c, d);
       return rect;
   }
 
   // Rotation of the rectangle around center 
-  POSERECT<Point2f> RotateRect1(POSERECT<Point2f> &rect, float angle)
+  spelRECT<Point2f> RotateRect1(spelRECT<Point2f> &rect, float angle)
   {
-      POSERECT<Point2f> RotatedRect;
+      spelRECT<Point2f> RotatedRect;
       Point2f center = rect.GetCenter<Point2f>();
       RotatedRect.point1 = spelHelper::rotatePoint2D(rect.point1, center, angle);
       RotatedRect.point2 = spelHelper::rotatePoint2D(rect.point2, center, angle);
@@ -1068,8 +1068,8 @@ namespace SPEL
     // Create ROI polygon
     float angle = 45; // the rotation angle for samples 1..8
     float x1 = 9.0f, x2 = 39.0f, y1 = 19.0f, y2 = 59.0f; // the rectangle vertices
-    POSERECT <Point2f> rect = CreateRect1(x1, x2, y1, y2);
-    POSERECT <Point2f> RotatedRect = RotateRect1(rect, angle);
+    spelRECT <Point2f> rect = CreateRect1(x1, x2, y1, y2);
+    spelRECT <Point2f> RotatedRect = RotateRect1(rect, angle);
     for (int i = 0; i < 8; i++)
       ROIPolygons.push_back(RotatedRect.asVector());
     angle = 15; // the rotation angle  for samples 9..12 
@@ -1194,8 +1194,8 @@ TEST(ImageRotationExperiments, DeRotate_All_extendedROI)
     // Create ROI polygon
     float angle = 45; // the rotation angle for samples 1..8
     float x1 = 9.0f, x2 = 39.0f, y1 = 19.0f, y2 = 59.0f; // the rectangle vertices
-    POSERECT <Point2f> rect = CreateRect1(x1, x2, y1, y2);
-    POSERECT <Point2f> RotatedRect = RotateRect1(rect, angle);
+    spelRECT <Point2f> rect = CreateRect1(x1, x2, y1, y2);
+    spelRECT <Point2f> RotatedRect = RotateRect1(rect, angle);
     for (int i = 0; i < 8; i++)
       ROIPolygons.push_back(RotatedRect.asVector());
     angle = 15; // the rotation angle  for samples 9..12 

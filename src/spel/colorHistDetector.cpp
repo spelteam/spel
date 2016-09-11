@@ -836,7 +836,7 @@ namespace SPEL
     // copy marking from current frame
     auto skeleton = frame->getSkeleton();
     // polygons for this frame
-    std::multimap <int32_t, POSERECT <cv::Point2f>> polygons;
+    std::multimap <int32_t, spelRECT <cv::Point2f>> polygons;
     // used for evaluation of overlapped polygons
     std::multimap <int32_t, float> polyDepth;
     // the skeleton body parts
@@ -887,7 +887,7 @@ namespace SPEL
         0.0f, direction.x, direction.y) * (180.0f / M_PI));
       bodyPart.setRotationSearchRange(rotationAngle);
       auto poserect = bodyPart.getBodyPartRect(j0, j1);
-      polygons.insert(std::pair <int32_t, POSERECT <cv::Point2f>>(
+      polygons.insert(std::pair <int32_t, spelRECT <cv::Point2f>>(
         bodyPart.getPartID(), poserect));
       polyDepth.insert(std::pair <int32_t, float>(bodyPart.getPartID(),
         skeleton.getBodyJoint(
@@ -948,7 +948,7 @@ namespace SPEL
         {
           auto partNumber = bodyPart.getPartID();
           auto bContainsPoint = false;
-          std::vector <POSERECT <cv::Point2f>> partPolygons;
+          std::vector <spelRECT <cv::Point2f>> partPolygons;
           // Copy polygons to "PartPolygons"
           transform(polygons.lower_bound(partNumber),
             polygons.upper_bound(partNumber), back_inserter(partPolygons),

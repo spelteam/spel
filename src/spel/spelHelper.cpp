@@ -64,7 +64,7 @@ namespace SPEL
   }
 
   cv::Mat spelHelper::rotateImageToDefault(const cv::Mat &imgSource,
-    const POSERECT <cv::Point2f> &initialRect, const float angle, 
+    const spelRECT <cv::Point2f> &initialRect, const float angle, 
     const cv::Size &size)
   {
     auto partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
@@ -106,10 +106,10 @@ namespace SPEL
     return cv::Point2f(std::round(pt.x), std::round(pt.y));
   }
 
-  POSERECT<cv::Point2f> spelHelper::round(const POSERECT<cv::Point2f>& rect)
+  spelRECT<cv::Point2f> spelHelper::round(const spelRECT<cv::Point2f>& rect)
     noexcept
   {
-    return POSERECT<cv::Point2f>(round(rect.point1), round(rect.point2),
+    return spelRECT<cv::Point2f>(round(rect.point1), round(rect.point2),
       round(rect.point3), round(rect.point4));
   }
 

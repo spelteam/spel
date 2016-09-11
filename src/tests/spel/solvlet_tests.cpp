@@ -116,7 +116,7 @@ namespace SPEL
     
     // Build Labels from skeleton
     vector<LimbLabel> Labels;
-    map<int, POSERECT<Point2f>> PartRects = SkeletonRects(skeleton);
+    map<int, spelRECT<Point2f>> PartRects = SkeletonRects(skeleton);
     map<int, pair<Point2f, Point2f>> PartsLocations = getPartLocations(skeleton);
 
     for (unsigned int i = 0; i < PartRects.size(); i++)

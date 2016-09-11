@@ -382,7 +382,7 @@ namespace SPEL
     //Create expected LimbLabel value
     Point2f center = 0.5*(p0 + p1);
     float angle = bodyPart.getRotationSearchRange();
-    POSERECT<Point2f> rect = bodyPart.getBodyPartRect(p0, p1);
+    spelRECT<Point2f> rect = bodyPart.getBodyPartRect(p0, p1);
     vector<Point2f> polygon = rect.asVector();
     Score score;
     vector<Score> scores;
@@ -708,7 +708,7 @@ namespace SPEL
       for (uint32_t p = 0; p < P; p++)
       {
         HogDetector::PartModel X_temp;
-        X_temp.partModelRect = POSERECT<Point2f>(Point2f(float(f), float(f)), Point2f(float(p), float(p)), Point2f(0.0f, 0.0f), Point2f(0.0f, 0.0f));
+        X_temp.partModelRect = spelRECT<Point2f>(Point2f(float(f), float(f)), Point2f(float(p), float(p)), Point2f(0.0f, 0.0f), Point2f(0.0f, 0.0f));
         X_temp.partImage = Mat(imageSize, CV_8UC3, Scalar(f, p, 0));
         for (int i = 0; i < I; i++)
         {

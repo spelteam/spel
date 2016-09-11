@@ -61,7 +61,7 @@ namespace SPEL
     m_childJoint = childJoint;
     m_isOccluded = isOccluded;
     m_expectedDistance = spaceLength;
-    m_partPolygon = POSERECT<cv::Point2f>();
+    m_partPolygon = spelRECT<cv::Point2f>();
     m_lwRatio = 0;
     m_relativeLength = 0;
     m_searchRadius = 0;
@@ -193,12 +193,12 @@ namespace SPEL
     return stream << std::to_string(bodyPart.getPartID());
   }
 
-  POSERECT <cv::Point2f> BodyPart::getPartPolygon(void) const noexcept
+  spelRECT <cv::Point2f> BodyPart::getPartPolygon(void) const noexcept
   {
     return m_partPolygon;
   }
 
-  void BodyPart::setPartPolygon(const POSERECT <cv::Point2f> &partPolygon) 
+  void BodyPart::setPartPolygon(const spelRECT <cv::Point2f> &partPolygon) 
     noexcept
   {
     m_partPolygon = partPolygon;
@@ -294,32 +294,32 @@ namespace SPEL
     return getBoneWidth(parent.getImageLocation(), child.getImageLocation());
   }
 
-  POSERECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
+  spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
     const cv::Point2f & parent, const cv::Point2f & child) noexcept
   {
     return bodyPart.getBodyPartRect(bodyPart, parent, child, cv::Size(0, 0));
   }
 
-  POSERECT<cv::Point2f> BodyPart::getBodyPartRect(const cv::Point2f & parent,
+  spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const cv::Point2f & parent,
     const cv::Point2f & child) const noexcept
   {
     return BodyPart::getBodyPartRect(*this, parent, child);
   }
 
-  POSERECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
+  spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
     const BodyJoint & parent, const BodyJoint & child) noexcept
   {
     return bodyPart.getBodyPartRect(parent, child);
   }
 
-  POSERECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyJoint & parent,
+  spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyJoint & parent,
     const BodyJoint & child) const noexcept
   {
     return getBodyPartRect(parent.getImageLocation(), 
       child.getImageLocation());
   }
 
-  POSERECT <cv::Point2f> BodyPart::getBodyPartRect(const BodyPart &bodyPart,
+  spelRECT <cv::Point2f> BodyPart::getBodyPartRect(const BodyPart &bodyPart,
     const cv::Point2f &j0, const cv::Point2f &j1, const cv::Size &blockSize)
     noexcept
   {
@@ -363,23 +363,23 @@ namespace SPEL
     c3 = c3 - polyCenter + boxCenter;
     c4 = c4 - polyCenter + boxCenter;
 
-    return POSERECT <cv::Point2f>(c1, c2, c3, c4);
+    return spelRECT <cv::Point2f>(c1, c2, c3, c4);
   }
 
-  POSERECT<cv::Point2f> BodyPart::getBodyPartRect(const cv::Point2f & parent,
+  spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const cv::Point2f & parent,
     const cv::Point2f & child, const cv::Size & blockSize) const noexcept
   {
     return BodyPart::getBodyPartRect(*this, parent, child, blockSize);
   }
 
-  POSERECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
+  spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
     const BodyJoint & parent, BodyJoint & child, const cv::Size & blockSize) 
     noexcept
   {
     return bodyPart.getBodyPartRect(parent, child, blockSize);
   }
 
-  POSERECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyJoint & parent,
+  spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyJoint & parent,
     const BodyJoint & child, const cv::Size & blockSize) const noexcept
   {
     return getBodyPartRect(parent.getImageLocation(), child.getImageLocation(), blockSize);

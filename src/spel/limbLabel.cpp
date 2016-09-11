@@ -168,7 +168,7 @@ namespace SPEL
       else
         throw std::logic_error(err);
     }
-    POSERECT <cv::Point2f> poserect(m_polygon.at(0), m_polygon.at(1), 
+    spelRECT <cv::Point2f> poserect(m_polygon.at(0), m_polygon.at(1), 
       m_polygon.at(2), m_polygon.at(3));
 
     return (poserect.containsPoint(pt) != -1);

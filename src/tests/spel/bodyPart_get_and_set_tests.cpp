@@ -18,7 +18,7 @@ namespace SPEL
     int childJoint = 0;
     bool isOccluded = false;
     float expectedDistance = 1.343f;
-    POSERECT <Point2f> polygon(Point2f(1.0f, 2.0f), Point2f(2.0f, 3.0f), Point2f(3.0f, 4.0f), Point2f(4.0f, 5.0f));
+    spelRECT <Point2f> polygon(Point2f(1.0f, 2.0f), Point2f(2.0f, 3.0f), Point2f(3.0f, 4.0f), Point2f(4.0f, 5.0f));
     float lwRatio = 1.3f;
     float relativeLength = 0.6f;
 

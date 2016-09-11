@@ -52,7 +52,7 @@ namespace SPEL
       frames[i]->setSkeleton(skeleton);
 
     //Build the rectangles for all of bodyparts
-    map<int, POSERECT<Point2f>> Rects = SkeletonRects(skeleton);
+    map<int, spelRECT<Point2f>> Rects = SkeletonRects(skeleton);
 
     //Run "Train()"
     ColorHistDetector detector;

@@ -20,12 +20,12 @@ namespace SPEL
   class TestingDetector : public ColorHistDetector
   {
   public:
-    Mat DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size);
+    Mat DeRotate(Mat imgSource, spelRECT <Point2f> &initialRect, float angle, Size size);
     float GetBoneLength(Point2f begin, Point2f end);
     float GetBoneWidth(float length, BodyPart bodyPart);
   };
 
-  Mat TestingDetector::DeRotate(Mat imgSource, POSERECT <Point2f> &initialRect, float angle, Size size)
+  Mat TestingDetector::DeRotate(Mat imgSource, spelRECT <Point2f> &initialRect, float angle, Size size)
   {
     return  spelHelper::rotateImageToDefault(imgSource, initialRect, angle, size);
   }
@@ -40,17 +40,17 @@ namespace SPEL
     return  BodyPart::getBoneWidth(length, bodyPart);
   }
 
-  POSERECT<Point2f> CreateRect(float x1, float x2, float y1, float y2)
+  spelRECT<Point2f> CreateRect(float x1, float x2, float y1, float y2)
   {
     Point2f a(x1, y1), b(x2, y1), c(x2, y2), d(x1, y2), E(0, 0);
-    POSERECT <Point2f> rect(a, b, c, d);
+    spelRECT <Point2f> rect(a, b, c, d);
     return rect;
   }
 
   // Rotation of the rectangle around center 
-  POSERECT<Point2f> RotateRect(POSERECT<Point2f> &rect, float angle)
+  spelRECT<Point2f> RotateRect(spelRECT<Point2f> &rect, float angle)
   {
-    POSERECT<Point2f> RotatedRect;
+    spelRECT<Point2f> RotatedRect;
     Point2f center = rect.GetCenter<Point2f>();
     RotatedRect.point1 = spelHelper::rotatePoint2D(rect.point1, center, angle);
     RotatedRect.point2 = spelHelper::rotatePoint2D(rect.point2, center, angle);
@@ -60,7 +60,7 @@ namespace SPEL
   }
 
   // Filling the rectangle
-  void FillRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
+  void FillRect(Mat &Img, spelRECT<Point2f> &rect, Vec3b colour)
   {
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
@@ -69,7 +69,7 @@ namespace SPEL
         Img.at<Vec3b>(j, i) = colour;
   }
 
-  void FillRotatedRect(Mat &Img, POSERECT<Point2f> &rect, Vec3b colour)
+  void FillRotatedRect(Mat &Img, spelRECT<Point2f> &rect, Vec3b colour)
   {
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
@@ -79,7 +79,7 @@ namespace SPEL
           Img.at<Vec3b>(j, i) = colour;
   }
 
-  void FillRectRand(Mat &Img, POSERECT<Point2f> &rect)
+  void FillRectRand(Mat &Img, spelRECT<Point2f> &rect)
   {
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
@@ -94,7 +94,7 @@ namespace SPEL
   }
 
   // Rotation the rectangle image
-  Mat RotateImage(Mat Img, POSERECT<Point2f> &rect, float angle)
+  Mat RotateImage(Mat Img, spelRECT<Point2f> &rect, float angle)
   {
     Size size = Img.size();
     Mat img2 = Mat(size, CV_8UC3, Scalar(0, 0, 0));
@@ -157,8 +157,8 @@ namespace SPEL
     int rows = 200, cols = 200; // image size
     float angle = 45; // the rotation angle
     float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
-    POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
-    POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
+    spelRECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
+    spelRECT <Point2f> RotatedRect = RotateRect(rect, angle);
     Point2f center = rect.GetCenter<Point2f >();
     Point2f center2 = RotatedRect.GetCenter<Point2f >();
 
@@ -221,8 +221,8 @@ namespace SPEL
     int rows = 200, cols = 200; // image size
     float angle = 45; // the rotetion angle
     float x1 = 10.0, x2 = 40.0, y1 = 20.0, y2 = 60.0; // the rectangle vertices
-    POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
-    POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
+    spelRECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
+    spelRECT <Point2f> RotatedRect = RotateRect(rect, angle);
     Point2f center = rect.GetCenter<Point2f >();
     Point2f center2 = RotatedRect.GetCenter<Point2f >();
 
@@ -240,7 +240,7 @@ namespace SPEL
     TestingDetector chd;
     Size size((int)(xmax - xmin + 1), (int)(ymax - ymin + 1));
 
-    POSERECT <Point2f> RotatedRectCopy = RotatedRect;
+    spelRECT <Point2f> RotatedRectCopy = RotatedRect;
 
     Mat  X = chd.DeRotate(img2, RotatedRect, angle, size);
 
@@ -335,8 +335,8 @@ namespace SPEL
 
     float angle = 45; // the rotetion angle
     float x1 = 10.0, x2 = 39.0, y1 = 20.0, y2 = 59.0; // the rectangle vertices
-    POSERECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
-    POSERECT <Point2f> RotatedRect = RotateRect(rect, angle);
+    spelRECT <Point2f> rect = CreateRect(x1, x2, y1, y2);
+    spelRECT <Point2f> RotatedRect = RotateRect(rect, angle);
     Point2f center = rect.GetCenter<Point2f >();
 
     float xmax, ymax, xmin, ymin;
@@ -893,7 +893,7 @@ namespace SPEL
       //joint0.setSpaceLocation(Point3f(p0[i]));
       //joint1.setImageLocation(p1[i]);
       //joint1.setSpaceLocation(Point3f(p1[i]));
-      POSERECT<cv::Point2f> partRect = part.getBodyPartRect(p0[i], p1[i]);
+      spelRECT<cv::Point2f> partRect = part.getBodyPartRect(p0[i], p1[i]);
       partsRects_actual.push_back(partRect.asVector());
     }
 
@@ -952,7 +952,7 @@ namespace SPEL
     line(img1, p0, p1, Scalar(255, 0, 0), 1, 1);
     imwrite("detector_getBodyPartRect.jpg", img1);
 
-    //POSERECT<cv::Point2f> partRect = D.getBodyPartRect(part, p0, p1);
+    //spelRECT<cv::Point2f> partRect = D.getBodyPartRect(part, p0, p1);
     //vector<Point2f> partRect_actual = partRect.asVector();
     cout << "Expected part rect:" << endl << partRect_expected << endl;
     cout << "Actual part rect:"<< endl << partRect_actual << endl;

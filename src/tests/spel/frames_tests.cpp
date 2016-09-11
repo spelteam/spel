@@ -88,7 +88,7 @@ namespace SPEL
 
     Point2f p0(10, 2), p1(10, 18);
     float LimbLength = p1.y - p0.y;
-    POSERECT<Point2f> partPolygon(Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2));
+    spelRECT<Point2f> partPolygon(Point2f(6, 2), Point2f(6, 18), Point2f(14, 18), Point2f(14, 2));
 
     //Create body joints
     BodyJoint j0(0, "", p0, { 0, 0, 0 }, false);

@@ -24,7 +24,7 @@ namespace SPEL
 {
   //vector<Frame*> SFrames;
 
-  vector <KeyPoint> SelectKeypoints(vector <KeyPoint> FrameKeypoints, POSERECT<Point2f> rect)
+  vector <KeyPoint> SelectKeypoints(vector <KeyPoint> FrameKeypoints, spelRECT<Point2f> rect)
   {
     vector <KeyPoint> keyPoints;
     for (unsigned int i = 0; i < FrameKeypoints.size(); i++)
@@ -80,7 +80,7 @@ namespace SPEL
     // Part rect
     float boneLength = BodyPart::getBoneLength(p0, p1);
     float boneWidth = bodyPart.getBoneWidth(boneLength);
-    POSERECT <Point2f> rect = bodyPart.getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
+    spelRECT <Point2f> rect = bodyPart.getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
     //Frame keypoints
     vector <KeyPoint> expected_FrameKeyPoints;
     Ptr <SurfFeatureDetector> D1 = SurfFeatureDetector::create(minHessian);
@@ -183,7 +183,7 @@ namespace SPEL
       Point2f p1 = j1->getImageLocation();
       float boneLength = BodyPart::getBoneLength(p0, p1);
       float boneWidth = (*part).getBoneWidth(boneLength);
-      POSERECT<Point2f>  rect = (*part).getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
+      spelRECT<Point2f>  rect = (*part).getBodyPartRect(p0, p1, Size(static_cast <int> (boneLength), static_cast <int> (boneWidth)));
       expected_rects[partID] = rect.asVector();
 
       for (unsigned int i = 0; i < keyPoints.size(); i++)
@@ -579,11 +579,11 @@ TEST(surfDetectorTests, detect)
     EXPECT_EQ(0, static_cast<int>(partModel.keyPoints.size()));
     EXPECT_EQ(Size(0, 0), partModel.descriptors.size());
     Point2f X(0.0f, 0.0f);
-    EXPECT_EQ(POSERECT<cv::Point2f>(X, X, X, X), partModel.partModelRect);
+    EXPECT_EQ(spelRECT<cv::Point2f>(X, X, X, X), partModel.partModelRect);
 
     // Assigned partModel
     Point2f z(1.0f, 2.0f);
-    POSERECT<cv::Point2f> rect(X, X, X, X);
+    spelRECT<cv::Point2f> rect(X, X, X, X);
 
     vector <cv::KeyPoint> KeyPoints;
     cv::KeyPoint abstract_keypoint;
@@ -639,7 +639,7 @@ TEST(surfDetectorTests, detect)
         // Assigned partModel
         SurfDetector::PartModel partModel;
         Point2f X(k, k);
-        POSERECT<cv::Point2f> rect(X, X, X, X);
+        spelRECT<cv::Point2f> rect(X, X, X, X);
 
         vector <cv::KeyPoint> KeyPoints;
         cv::KeyPoint abstract_keypoint;
@@ -670,7 +670,7 @@ TEST(surfDetectorTests, detect)
         // Assigned partModel
         SurfDetector::PartModel partModel;
         Point2f X(k, k);
-        POSERECT<cv::Point2f> rect(X, X, X, X);
+        spelRECT<cv::Point2f> rect(X, X, X, X);
 
         vector <cv::KeyPoint> KeyPoints;
         cv::KeyPoint abstract_keypoint;

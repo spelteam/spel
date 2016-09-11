@@ -45,7 +45,7 @@ namespace SPEL
     struct PartModel
     {      
       /// <summary>The part model rect.</summary>
-      POSERECT <cv::Point2f> partModelRect;      
+      spelRECT <cv::Point2f> partModelRect;      
       /// <summary>The gradient strengths.</summary>
       std::vector <std::vector <std::vector <float>>> gradientStrengths;      
       /// <summary>The part image.</summary>

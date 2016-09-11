@@ -141,12 +141,12 @@ namespace SPEL
     void setExpectedDistance(const float expectedDistance) noexcept;
     /// <summary>Gets the part polygon.</summary>
     /// <returns>The part polygon.</returns>
-    POSERECT <cv::Point2f> getPartPolygon(void) const noexcept;
+    spelRECT <cv::Point2f> getPartPolygon(void) const noexcept;
     /// <summary>Sets the part polygon.</summary>
     /// <param name="partPolygon">The part polygon.</param>
     /// <returns></returns>
     void setPartPolygon(
-      const POSERECT <cv::Point2f> &partPolygon) noexcept;
+      const spelRECT <cv::Point2f> &partPolygon) noexcept;
     /// <summary>Gets the length/width ratio.</summary>
     /// <returns>The length/width ratio.</returns>
     float getLWRatio(void) const noexcept;
@@ -228,26 +228,26 @@ namespace SPEL
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
-    static POSERECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
+    static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
       const cv::Point2f &parent, const cv::Point2f &child) noexcept;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
-    POSERECT <cv::Point2f> getBodyPartRect(const cv::Point2f &parent, 
+    spelRECT <cv::Point2f> getBodyPartRect(const cv::Point2f &parent, 
       const cv::Point2f &child) const noexcept;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
-    static POSERECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
+    static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
       const BodyJoint &parent, const BodyJoint &child) noexcept;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
-    POSERECT <cv::Point2f> getBodyPartRect(const BodyJoint &parent, 
+    spelRECT <cv::Point2f> getBodyPartRect(const BodyJoint &parent, 
       const BodyJoint &child) const noexcept;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="bodyPart">The body part.</param>
@@ -255,7 +255,7 @@ namespace SPEL
     /// <param name="child">The child joint.</param>
     /// <param name="blockSize">Size of the block.</param>
     /// <returns>The body part rect.</returns>
-    static POSERECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
+    static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
       const cv::Point2f &parent, const cv::Point2f &child, 
       const cv::Size &blockSize) noexcept;
     /// <summary>Gets the body part rect.</summary>
@@ -263,7 +263,7 @@ namespace SPEL
     /// <param name="child">The child joint.</param>
     /// <param name="blockSize">Size of the block.</param>
     /// <returns>The body part rect.</returns>
-    POSERECT <cv::Point2f> getBodyPartRect(const cv::Point2f &parent, 
+    spelRECT <cv::Point2f> getBodyPartRect(const cv::Point2f &parent, 
       const cv::Point2f &child, const cv::Size &blockSize) const noexcept;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="bodyPart">The body part.</param>
@@ -271,7 +271,7 @@ namespace SPEL
     /// <param name="child">The child joint.</param>
     /// <param name="blockSize">Size of the block.</param>
     /// <returns>The body part rect.</returns>
-    static POSERECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
+    static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
       const BodyJoint &parent, BodyJoint &child,
       const cv::Size &blockSize) noexcept;
     /// <summary>Gets the body part rect.</summary>
@@ -279,7 +279,7 @@ namespace SPEL
     /// <param name="child">The child joint.</param>
     /// <param name="blockSize">Size of the block.</param>
     /// <returns>The body part rect.</returns>
-    POSERECT <cv::Point2f> getBodyPartRect(const BodyJoint &parent,
+    spelRECT <cv::Point2f> getBodyPartRect(const BodyJoint &parent,
       const BodyJoint &child, const cv::Size &blockSize) const noexcept;
   private:
     /// <summary>
@@ -315,7 +315,7 @@ namespace SPEL
     /// The part polygon rectangle is used as simplified 
     /// representation of body part.
     /// </summary>
-    POSERECT <cv::Point2f> m_partPolygon;
+    spelRECT <cv::Point2f> m_partPolygon;
     /// <summary>
     /// The length/width ratio coefficient of proportionality 
     /// is used for scaling.
