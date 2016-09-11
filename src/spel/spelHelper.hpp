@@ -186,6 +186,21 @@ namespace SPEL
     /// <param name="dst">The destination.</param>
     /// <param name="src">The source.</param>
     static void copyFile(const std::string &dst, const std::string &src);
+    /// <summary>Compares two float numbers.</summary>
+    /// <param name="one">The first number.</param>
+    /// <param name="two">The second number.</param>
+    /// <returns>
+    /// -1 if one < two
+    /// 0 if one == two
+    /// 1 if one > two
+    /// </returns>
+    template <typename T>
+    static int compareFloat(const T one, const T two)
+    {
+      if (std::fabs(one - two) <= std::numeric_limits<T>::epsilon())
+        return 0;
+      return (one < two ? -1 : 1);
+    }
   };
 
   /// <summary>

@@ -374,4 +374,13 @@ namespace SPEL
     EXPECT_EQ(remove(src.c_str()), 0);
     EXPECT_EQ(remove(dst.c_str()), 0);
   }
+
+  TEST(spelHelperTests_, compareFloat)
+  {
+    float f1 = 1.0f;
+    float f2 = 0.0f;
+    EXPECT_EQ(spelHelper::compareFloat(f1, f2), 1);
+    EXPECT_EQ(spelHelper::compareFloat(f1, f1), 0);
+    EXPECT_EQ(spelHelper::compareFloat(f2, f1), -1);
+  }
 }
