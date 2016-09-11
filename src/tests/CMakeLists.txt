@@ -84,6 +84,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC spel/tlpssolver_tests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/solvlet_tests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/ImageRotationTests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/SURFDetectorExperiments.cpp )
+LIST ( APPEND ${TESTS_MODULE}_SRC spel/SURFDetectorExperiments_B.cpp )
 
 LIST ( APPEND ${TESTS_MODULE}_HDR spel/TestsFunctions.hpp )
 LIST ( APPEND ${TESTS_MODULE}_HDR ${${PROJECT_NAME}_SOURCE_DIR}/utils/general/projectLoader.hpp )

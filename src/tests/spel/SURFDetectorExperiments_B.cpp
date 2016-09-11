@@ -121,7 +121,7 @@ namespace SPEL
     return SortedIndexes;
   }
 
-  class CompareLabels
+  class CompareLabels_
   {
   public:
     bool operator () (LimbLabel X, LimbLabel Y)
@@ -372,7 +372,7 @@ namespace SPEL
               //cout << ", " << LabelScore << endl;
             }
         }
-        sort(PartLabels.begin(), PartLabels.end(), CompareLabels());
+        sort(PartLabels.begin(), PartLabels.end(), CompareLabels_());
         Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
         PartLabels.clear();
       
