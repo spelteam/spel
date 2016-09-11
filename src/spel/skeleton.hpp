@@ -39,7 +39,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="Skeleton"/> class.
     /// </summary>
-    virtual ~Skeleton(void) noexcept;
+    ~Skeleton(void) noexcept;
     /// <summary>
     /// Recalculates the 2D coordinates of each <see cref="BodyJoint"/>.
     /// </summary>

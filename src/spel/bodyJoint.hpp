@@ -71,7 +71,7 @@ namespace SPEL
     /// Finalizes an instance of the <see cref="BodyJoint"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~BodyJoint(void) noexcept;
+    ~BodyJoint(void) noexcept;
 
     /// <summary>
     /// Copy operator.

@@ -32,7 +32,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="Lockframe"/> class.
     /// </summary>
-    virtual ~Lockframe(void) noexcept;
+    ~Lockframe(void) noexcept;
   };
 }
 

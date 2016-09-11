@@ -33,7 +33,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="Keyframe"/> class.
     /// </summary>
-    virtual ~Keyframe(void) noexcept;
+    ~Keyframe(void) noexcept;
   };
 
 }

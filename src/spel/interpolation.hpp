@@ -31,7 +31,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="Interpolation"/> class.
     /// </summary>
-    virtual ~Interpolation(void) noexcept;
+    ~Interpolation(void) noexcept;
   };
 }
 #endif  // _INTERPOLATION_HPP_

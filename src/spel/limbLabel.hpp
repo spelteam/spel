@@ -63,7 +63,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="LimbLabel"/> class.
     /// </summary>
-    virtual ~LimbLabel(void) noexcept;
+    ~LimbLabel(void) noexcept;
     /// <summary>Output limb label as printable string.</summary>
     /// <returns>String representation of the limb label.</returns>
     std::string toString() const noexcept;

@@ -31,7 +31,7 @@ namespace SPEL
     Sequence(const Sequence& seq);
     ///constructor
     Sequence(int idx, std::string seqName, std::vector<Frame*> seq);
-    virtual ~Sequence(void);
+    ~Sequence(void);
     std::string getName(void) const;
     void setName(const std::string& _name);
     int getID(void) const;

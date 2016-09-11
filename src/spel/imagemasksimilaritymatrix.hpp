@@ -22,7 +22,7 @@ namespace SPEL
     //
 
     ///destructor
-    virtual ~ImageMaskSimilarityMatrix(void) noexcept;
+    ~ImageMaskSimilarityMatrix(void) noexcept;
 
     ImageMaskSimilarityMatrix & operator=(const ImageMaskSimilarityMatrix &s) noexcept;
   private:

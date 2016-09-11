@@ -30,7 +30,7 @@ namespace SPEL
   public:
     NSKPSolver(void);
     ///inherited virtual
-    virtual ~NSKPSolver(void);
+    ~NSKPSolver(void);
     ///inherited virtual
     std::vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual

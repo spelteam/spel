@@ -26,7 +26,7 @@ namespace SPEL
     //
 
     ///destructor
-    virtual ~ImagePixelSimilarityMatrix(void) noexcept;
+    ~ImagePixelSimilarityMatrix(void) noexcept;
 
     ImagePixelSimilarityMatrix & operator=(const ImagePixelSimilarityMatrix &s) noexcept;
   private:

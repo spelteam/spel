@@ -36,7 +36,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="SurfDetectorHelper"/> class.
     /// </summary>
-    virtual ~SurfDetectorHelper(void) noexcept;    
+    ~SurfDetectorHelper(void) noexcept;    
     /// <summary>The key points.</summary>
     std::vector <cv::KeyPoint> keyPoints;
   };  
@@ -55,7 +55,7 @@ namespace SPEL
       /// <summary>
       /// Finalizes an instance of the <see cref="PartModel"/> class.
       /// </summary>
-      virtual ~PartModel(void);      
+      ~PartModel(void);      
       /// <summary>The part model rect.</summary>
       POSERECT <cv::Point2f> partModelRect;      
       /// <summary>The key points.</summary>
@@ -71,7 +71,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="SurfDetector"/> class.
     /// </summary>
-    virtual ~SurfDetector(void) noexcept;
+    ~SurfDetector(void) noexcept;
     /// <summary>Trains the specified frames.</summary>
     /// <param name="frames">The frames.</param>
     /// <param name="params">The parameters.</param>

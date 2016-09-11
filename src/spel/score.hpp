@@ -57,7 +57,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="Score"/> class.
     /// </summary>
-    virtual ~Score(void) noexcept;
+    ~Score(void) noexcept;
     /// <summary>Assignment operator.</summary>
     /// <param name="score">The score.</param>
     /// <returns>New score.</returns>

@@ -72,7 +72,7 @@ namespace SPEL
     /// Finalizes an instance of the <see cref="BodyPart"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~BodyPart(void) noexcept;
+    ~BodyPart(void) noexcept;
 
     /// <summary>Copy operator.</summary>
     /// <param name="bodyPart">The body part.</param>

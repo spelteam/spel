@@ -30,7 +30,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="HogDetectorHelper"/> class.
     /// </summary>
-    virtual ~HogDetectorHelper(void) noexcept;
+    ~HogDetectorHelper(void) noexcept;
   };  
   /// <summary>
   /// Implementation of the HoG method of detection.
@@ -91,7 +91,7 @@ namespace SPEL
     /// <summary>
     /// Finalizes an instance of the <see cref="HogDetector"/> class.
     /// </summary>
-    virtual ~HogDetector(void) noexcept;
+    ~HogDetector(void) noexcept;
     /// <summary>Trains the specified frames.</summary>
     /// <param name="frames">The frames.</param>
     /// <param name="params">The parameters.</param>

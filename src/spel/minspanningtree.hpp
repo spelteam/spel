@@ -28,7 +28,7 @@ namespace SPEL
     MinSpanningTree(void);
     MinSpanningTree(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
     MinSpanningTree(const MinSpanningTree& mst);
-    virtual ~MinSpanningTree(void);
+    ~MinSpanningTree(void);
     ///build the MST
     void build(const ImageSimilarityMatrix& ism, int rootNode, int treeSize, float threshold);
 

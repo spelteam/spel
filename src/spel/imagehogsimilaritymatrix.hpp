@@ -20,7 +20,7 @@ namespace SPEL
     ImageHogSimilarityMatrix(ImageHogSimilarityMatrix &&m) noexcept;
 
     ///destructor
-    virtual ~ImageHogSimilarityMatrix(void) noexcept;
+    ~ImageHogSimilarityMatrix(void) noexcept;
 
     ImageHogSimilarityMatrix & operator=(const ImageHogSimilarityMatrix &s) noexcept;
   private:

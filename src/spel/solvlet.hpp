@@ -19,7 +19,7 @@ namespace SPEL
   public:
     Solvlet(void);
     Solvlet(int id, std::vector<LimbLabel> labels);
-    virtual ~Solvlet(void);
+    ~Solvlet(void);
 
     Solvlet &operator=(const Solvlet &s);
     bool operator<(const Solvlet &s) const;

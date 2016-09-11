@@ -30,7 +30,7 @@ namespace SPEL
     /// Finalizes an instance of the <see cref="ColorHistDetectorHelper"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~ColorHistDetectorHelper(void) noexcept;
+    ~ColorHistDetectorHelper(void) noexcept;
     /// <summary>The pixel labels.</summary>
     std::map <int32_t, cv::Mat> pixelLabels;
   };
@@ -54,7 +54,7 @@ namespace SPEL
       /// <summary>
       /// Finalizes an instance of the <see cref="PartModel"/> class.
       /// </summary>
-      virtual ~PartModel(void);
+      ~PartModel(void);
       /// <summary>The nbins parameter.</summary>
       uint8_t nBins;
       /// <summary>The part histogram.</summary>
@@ -132,7 +132,7 @@ namespace SPEL
     /// Finalizes an instance of the <see cref="ColorHistDetector"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~ColorHistDetector(void) noexcept;
+    ~ColorHistDetector(void) noexcept;
     /// <summary>Trains the specified frames.</summary>
     /// <param name="frames">The frames.</param>
     /// <param name="params">The parameters.</param>
