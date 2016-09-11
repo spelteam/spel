@@ -490,7 +490,7 @@ namespace SPEL
     map<uint32_t, vector<LimbLabel>> limbLabels = Detect(SFrames[1], X, P);
 
     // Create output file
-    string OutputFileName = "Output_SurfExperiments_detect.txt";
+    string OutputFileName = "SurfDetectorExperiments.txt";
     ofstream fout(OutputFileName);
 
     // Output top of "limbLabels" into text file
