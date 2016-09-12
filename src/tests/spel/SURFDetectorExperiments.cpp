@@ -293,6 +293,7 @@ namespace SPEL
     if (CheckMatches) n = 2;
     if (useBadMatches)
     {
+      useMulct = false;
       CheckMatches = false;
       n = Trained.SkeletonKeypoints.size();
     }
@@ -388,7 +389,7 @@ namespace SPEL
                       NoMatches = false;
                     }
                   }
-                  if (CheckMatches && useMulct && NoMatches) LabelMulct = LabelMulct + matches[p][0].distance;
+                  if (useMulct && NoMatches) LabelMulct = LabelMulct + matches[p][0].distance;
                 }
 
               if (PutMessages && N == 0)
