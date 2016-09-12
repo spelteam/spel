@@ -387,9 +387,8 @@ namespace SPEL
                       LabelScore = LabelScore + pow(10.0f, -m)*matches[p][m].distance;
                       NoMatches = false;
                     }
-                    else
-                      if (useMulct && NoMatches) LabelMulct = LabelMulct + matches[p][0].distance;
                   }
+                  if (CheckMatches && useMulct && NoMatches) LabelMulct = LabelMulct + matches[p][0].distance;
                 }
 
               if (PutMessages && N == 0)
