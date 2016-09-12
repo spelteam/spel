@@ -242,7 +242,7 @@ namespace SPEL
     }
   };
 
-  map<uint32_t, vector<LimbLabel>> Detect(Frame* frame, SkeletonModel &Trained, Parameters P, bool PutMessages = false, bool UseOnlyMaskKeypoints = true, bool CheckMatches = false, bool useMulct = false)
+  map<uint32_t, vector<LimbLabel>> Detect(Frame* frame, SkeletonModel &Trained, Parameters P, bool PutMessages = false, bool UseOnlyMaskKeypoints = true, bool CheckMatches = false, int useBadMatches = false, bool useMulct = false)
   {
     if (PutMessages) DebugMessage(" SURFDetector experiments Detect started", 2);
     cv::Mat image = frame->getImage();
@@ -291,6 +291,12 @@ namespace SPEL
     // Create matches
     int n = 1; // Trained.SkeletonKeypoints.size();
     if (CheckMatches) n = 2;
+    if (useBadMatches)
+    {
+      CheckMatches = false;
+      n = Trained.SkeletonKeypoints.size();
+    }
+
     cv::FlannBasedMatcher matcher;
     vector<vector<DMatch>> matches;
     matcher.knnMatch(FrameDescriptors, Trained.SkeletonDescriptors, matches, n);
@@ -369,15 +375,21 @@ namespace SPEL
               for (unsigned int p = 0; p < MaskKeypoins.size(); p++)
                 if (pointPolygonTest(LabelPolygon, MaskKeypoins[p].pt, false) > 0)
                 {
-                  bool b = 0.8*matches[p][0].distance > matches[p][1].distance || !CheckMatches;
-                  if(Trained.SkeletonKeypoints[matches[p][0].trainIdx].class_id == id && b)
+                  bool b = true;
+                  if(CheckMatches)
+                    b = 0.8*matches[p][0].distance > matches[p][1].distance;			
+                  bool NoMatches = true;
+                  for (int m = 0; m < n; m++)
                   {
-                    N++;
-                    LabelScore = LabelScore + matches[p][0].distance;
+                    if (Trained.SkeletonKeypoints[matches[p][m].trainIdx].class_id == id && b)
+                    {
+                      N++;
+                      LabelScore = LabelScore + pow(10.0f, -m)*matches[p][m].distance;
+                      NoMatches = false;
+                    }
+                    else
+                      if (useMulct && NoMatches) LabelMulct = LabelMulct + matches[p][0].distance;
                   }
-                  else
-                    if(useMulct)
-                      LabelMulct = LabelMulct + matches[p][0].distance;
                 }
 
               if (PutMessages && N == 0)
