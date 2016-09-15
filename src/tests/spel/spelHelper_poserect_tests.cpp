@@ -170,6 +170,27 @@ namespace SPEL
     EXPECT_EQ(Point2f(1.0, 1.0), rectSize);
   }
 
+  TEST_F(spelRectTest, Geometry)
+  {
+    float LWRatio = 3.0f/2.0f  ;
+    Point2f A(20.0f, 10.0f), B(20.0f, 40.0f);
+    float expected_angle = -90.0f;
+    vector<Point2f> expected_rect = { Point2f(10.0f, 10.0f), Point2f(10.0f, 40.0f), Point2f(30.0f, 40.0f), Point2f(30.0f, 10.0f) };
+
+    BodyPart part(0, "part", 0, 1);
+    part.setLWRatio(LWRatio);
+    float angle = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, A.x - B.x, A.y - B.y) * (180.0 / M_PI)); // detector.cpp, line 247
+    vector<Point2f> rect = part.getBodyPartRect(A, B).asVector();
+ 
+    EXPECT_FLOAT_EQ(expected_angle, angle);
+    ASSERT_EQ(expected_rect.size(), rect.size());
+    for (int k = 0; k < expected_rect.size(); k++)
+    {
+      EXPECT_FLOAT_EQ(expected_rect[k].x, rect[k].x);
+      EXPECT_FLOAT_EQ(expected_rect[k].y, rect[k].y);
+    }
+  }
+
   TEST(spelHelperTests_, spelPoint)
   {
     float x = 0.5f, y = 0.8f;
@@ -383,4 +404,5 @@ namespace SPEL
     EXPECT_EQ(spelHelper::compareFloat(f1, f1), 0);
     EXPECT_EQ(spelHelper::compareFloat(f2, f1), -1);
   }
+  
 }
