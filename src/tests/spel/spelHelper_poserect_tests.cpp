@@ -175,20 +175,28 @@ namespace SPEL
     float LWRatio = 3.0f/2.0f  ;
     Point2f A(20.0f, 10.0f), B(20.0f, 40.0f);
     float expected_angle = -90.0f;
-    vector<Point2f> expected_rect = { Point2f(10.0f, 10.0f), Point2f(10.0f, 40.0f), Point2f(30.0f, 40.0f), Point2f(30.0f, 10.0f) };
-
+    vector<Point2f> expected_rect_A = { Point2f(10.0f, 10.0f), Point2f(10.0f, 40.0f), Point2f(30.0f, 40.0f), Point2f(30.0f, 10.0f) };
+    vector<Point2f> expected_rect_B = { Point2f(30.0f, 40.0f), Point2f(30.0f, 10.0f), Point2f(10.0f, 10.0f), Point2f(10.0f, 40.0f) };
     BodyPart part(0, "part", 0, 1);
     part.setLWRatio(LWRatio);
+
+    // angle = -90
     float angle = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, A.x - B.x, A.y - B.y) * (180.0 / M_PI)); // detector.cpp, line 247
     vector<Point2f> rect = part.getBodyPartRect(A, B).asVector();
  
     EXPECT_FLOAT_EQ(expected_angle, angle);
-    ASSERT_EQ(expected_rect.size(), rect.size());
-    for (int k = 0; k < expected_rect.size(); k++)
-    {
-      EXPECT_FLOAT_EQ(expected_rect[k].x, rect[k].x);
-      EXPECT_FLOAT_EQ(expected_rect[k].y, rect[k].y);
-    }
+    ASSERT_EQ(expected_rect_A.size(), rect.size());
+    for (int k = 0; k < expected_rect_A.size(); k++)
+      EXPECT_EQ(static_cast<Point2i>(expected_rect_A[k]), static_cast<Point2i>(rect[k]));
+
+    // angle = 90
+    angle = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, B.x - A.x, B.y - A.y) * (180.0 / M_PI)); // detector.cpp, line 247
+    rect = part.getBodyPartRect(B, A).asVector();
+
+    EXPECT_FLOAT_EQ(-expected_angle, angle);
+    ASSERT_EQ(expected_rect_B.size(), rect.size());
+    for (int k = 0; k < expected_rect_B.size(); k++)
+      EXPECT_EQ(static_cast<Point2i>(expected_rect_B[k]), static_cast<Point2i>(rect[k]));
   }
 
   TEST(spelHelperTests_, spelPoint)
