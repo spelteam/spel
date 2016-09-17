@@ -398,7 +398,7 @@ namespace SPEL
     delete detectorHelper;
 
     //Compare
-    EXPECT_EQ(expected_Label.getAngle(), actual_Label.getAngle());
+    EXPECT_FLOAT_EQ(expected_Label.getAngle(), actual_Label.getAngle());
     EXPECT_EQ(expected_Label.getCenter(), actual_Label.getCenter());
     EXPECT_EQ(expected_Label.getLimbID(), actual_Label.getLimbID());
     EXPECT_EQ(expected_Label.getScores(), actual_Label.getScores());
@@ -605,12 +605,12 @@ TEST(surfDetectorTests, detect)
     EXPECT_EQ(KeyPoints.size(), partModel.keyPoints.size());
     EXPECT_EQ(abstract_keypoint.pt, partModel.keyPoints[0].pt);
     EXPECT_EQ(abstract_keypoint.size, partModel.keyPoints[0].size);
-    EXPECT_EQ(abstract_keypoint.angle, partModel.keyPoints[0].angle);
-    EXPECT_EQ(abstract_keypoint.response, partModel.keyPoints[0].response);
+    EXPECT_FLOAT_EQ(abstract_keypoint.angle, partModel.keyPoints[0].angle);
+    EXPECT_FLOAT_EQ(abstract_keypoint.response, partModel.keyPoints[0].response);
     EXPECT_EQ(abstract_keypoint.octave, partModel.keyPoints[0].octave);
     EXPECT_EQ(abstract_keypoint.class_id, partModel.keyPoints[0].class_id);
     EXPECT_EQ(abstract_descriptors.size(), partModel.descriptors.size());
-    EXPECT_EQ(abstract_descriptors.at<float>(0, 0), partModel.descriptors.at<float>(0,0));
+    EXPECT_FLOAT_EQ(abstract_descriptors.at<float>(0, 0), partModel.descriptors.at<float>(0,0));
     
     // Copyed partModel
     SurfDetector::PartModel partModel1 = partModel;	
@@ -619,12 +619,12 @@ TEST(surfDetectorTests, detect)
     EXPECT_EQ(KeyPoints.size(), partModel1.keyPoints.size());
     EXPECT_EQ(abstract_keypoint.pt, partModel1.keyPoints[0].pt);
     EXPECT_EQ(abstract_keypoint.size, partModel1.keyPoints[0].size);
-    EXPECT_EQ(abstract_keypoint.angle, partModel1.keyPoints[0].angle);
-    EXPECT_EQ(abstract_keypoint.response, partModel1.keyPoints[0].response);
+    EXPECT_FLOAT_EQ(abstract_keypoint.angle, partModel1.keyPoints[0].angle);
+    EXPECT_FLOAT_EQ(abstract_keypoint.response, partModel1.keyPoints[0].response);
     EXPECT_EQ(abstract_keypoint.octave, partModel1.keyPoints[0].octave);
     EXPECT_EQ(abstract_keypoint.class_id, partModel1.keyPoints[0].class_id);
     EXPECT_EQ(abstract_descriptors.size(), partModel1.descriptors.size());
-    EXPECT_EQ(abstract_descriptors.at<float>(0, 0), partModel1.descriptors.at<float>(0, 0));
+    EXPECT_FLOAT_EQ(abstract_descriptors.at<float>(0, 0), partModel1.descriptors.at<float>(0, 0));
   }
 
   TEST(surfDetectorTests, getPartModels)
@@ -688,12 +688,12 @@ TEST(surfDetectorTests, detect)
         EXPECT_EQ(KeyPoints.size(), detector.partModels[i][k].keyPoints.size());
         EXPECT_EQ(abstract_keypoint.pt, detector.partModels[i][k].keyPoints[0].pt);
         EXPECT_EQ(abstract_keypoint.size, detector.partModels[i][k].keyPoints[0].size);
-        EXPECT_EQ(abstract_keypoint.angle, detector.partModels[i][k].keyPoints[0].angle);
-        EXPECT_EQ(abstract_keypoint.response, detector.partModels[i][k].keyPoints[0].response);
+        EXPECT_FLOAT_EQ(abstract_keypoint.angle, detector.partModels[i][k].keyPoints[0].angle);
+        EXPECT_FLOAT_EQ(abstract_keypoint.response, detector.partModels[i][k].keyPoints[0].response);
         EXPECT_EQ(abstract_keypoint.octave, detector.partModels[i][k].keyPoints[0].octave);
         EXPECT_EQ(abstract_keypoint.class_id, detector.partModels[i][k].keyPoints[0].class_id);
         EXPECT_EQ(abstract_descriptors.size(), detector.partModels[i][k].descriptors.size());
-        EXPECT_EQ(abstract_descriptors.at<float>(0, 0), detector.partModels[i][k].descriptors.at<float>(0, 0));
+        EXPECT_FLOAT_EQ(abstract_descriptors.at<float>(0, 0), detector.partModels[i][k].descriptors.at<float>(0, 0));
       }
       detector.partModels[i].clear();
     }
