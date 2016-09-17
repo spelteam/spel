@@ -4,8 +4,8 @@ namespace SPEL
 {
   TLPSSolver::TLPSSolver(void)
   {
-    id = 0;
-    name = "TLPS";
+    m_id = 0;
+    m_name = "TLPS";
   }
 
   TLPSSolver::~TLPSSolver(void)

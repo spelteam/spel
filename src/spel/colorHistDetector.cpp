@@ -883,8 +883,7 @@ namespace SPEL
       // used as estimation of the vector's direction
       auto direction = j1 - j0;
       //bodypart tilt angle 
-      auto rotationAngle = static_cast<float>(spelHelper::angle2D(1.0f,
-        0.0f, direction.x, direction.y) * (180.0f / M_PI));
+      auto rotationAngle = spelHelper::getAngle(direction);
       bodyPart.setRotationSearchRange(rotationAngle);
       auto poserect = bodyPart.getBodyPartRect(j0, j1);
       polygons.insert(std::pair <int32_t, spelRECT <cv::Point2f>>(

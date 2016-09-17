@@ -45,9 +45,9 @@ namespace SPEL
     int getId(void) const noexcept;
   protected:    
     /// <summary>The identifier.</summary>
-    int id;    
+    int m_id;    
     /// <summary>The name.</summary>
-    std::string name;
+    std::string m_name;
   };
 
 }

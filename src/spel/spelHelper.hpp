@@ -19,6 +19,7 @@
 #include <tree.hh>
 
 #include "limbLabel.hpp"
+#include "bodyJoint.hpp"
 
 namespace SPEL
 {
@@ -195,12 +196,27 @@ namespace SPEL
     /// 1 if one > two
     /// </returns>
     template <typename T>
-    static int compareFloat(const T one, const T two)
+    static int compareFloat(const T one, const T two) noexcept
     {
       if (std::fabs(one - two) <= std::numeric_limits<T>::epsilon())
         return 0;
       return (one < two ? -1 : 1);
     }
+    /// <summary>Gets the angle between two points.</summary>
+    /// <param name="j0">The first point.</param>
+    /// <param name="j1">The second point.</param>
+    /// <returns>The angle.</returns>
+    static float getAngle(const cv::Point2f &j0, const cv::Point2f &j1)
+      noexcept;    
+    /// <summary>Gets the angle.</summary>
+    /// <param name="point">The point.</param>
+    /// <returns>The angle.</returns>
+    static float getAngle(const cv::Point2f &point) noexcept;
+    /// <summary>Gets the angle between two <see cref="BodyJoint" />.</summary>
+    /// <param name="j0">The first joint.</param>
+    /// <param name="j1">The second joint.</param>
+    /// <returns>The angle.</returns>
+    static float getAngle(const BodyJoint &j0, const BodyJoint &j1) noexcept;
   };
 
   /// <summary>

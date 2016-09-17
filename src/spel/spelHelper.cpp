@@ -190,6 +190,25 @@ namespace SPEL
     ofs.close();
   }
 
+  float spelHelper::getAngle(const cv::Point2f & j0, const cv::Point2f & j1) 
+    noexcept
+  {
+    return spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) *
+      (180.0f / static_cast<float>(M_PI));
+  }
+
+  float spelHelper::getAngle(const cv::Point2f & point) noexcept
+  {
+    return spelHelper::angle2D(1.0f, 0.0f, point.x, point.y) *
+      (180.0f / static_cast<float>(M_PI));
+  }
+
+  float spelHelper::getAngle(const BodyJoint & j0, const BodyJoint & j1) 
+    noexcept
+  {
+    return spelHelper::getAngle(j0.getImageLocation(), j1.getImageLocation());
+  }
+
   std::string spelHelper::getGUID(void) noexcept
   {
     std::string guid;

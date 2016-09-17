@@ -243,8 +243,7 @@ namespace SPEL
     const std::function<float()> &compare) const
   {
     const auto &boxCenter = parent * 0.5 + child * 0.5;
-    const auto rot = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, 
-      child.x - parent.x, child.y - parent.y) * (180.0 / M_PI));
+    const auto rot = spelHelper::getAngle(parent, child);
     const auto &rect = bodyPart.getBodyPartRect(parent, child);
 
     const auto score = compare();
@@ -344,8 +343,7 @@ namespace SPEL
       // current body part polygon width
       auto boxWidth = iteratorBodyPart.getBoneWidth(boneLength);
       auto direction = j1 - j0; // direction of bodypart vector
-      auto theta = static_cast<float>(spelHelper::angle2D(1.0f, 0.0f, 
-        direction.x, direction.y) * (180.0 / M_PI));  // bodypart tilt angle 
+      auto theta = spelHelper::getAngle(direction);  // bodypart tilt angle 
       auto minDist = boxWidth * searchStepCoeff; // linear step of searching
       if (minDist < 2) 
         minDist = 2; // the minimal linear step

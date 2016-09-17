@@ -10,8 +10,8 @@ namespace SPEL
 {
   NSKPSolver::NSKPSolver()
   {
-    id = 1; //this should be unique
-    name = "NSKP"; //this should be unique
+    m_id = 1; //this should be unique
+    m_name = "NSKP"; //this should be unique
   }
 
   NSKPSolver::~NSKPSolver() //inherited virtual

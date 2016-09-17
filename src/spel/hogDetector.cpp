@@ -59,8 +59,7 @@ namespace SPEL
     float xmax, ymax, xmin, ymin;
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
     const auto &direction = j1 - j0;
-    const auto rotationAngle = static_cast<float>(spelHelper::angle2D(
-      1.0f, 0.0f, direction.x, direction.y) * (180.0 / M_PI));
+    const auto rotationAngle = spelHelper::getAngle(direction);
     PartModel partModel;
     partModel.partModelRect = rect;
     auto partImage = spelHelper::rotateImageToDefault(imgMat,
