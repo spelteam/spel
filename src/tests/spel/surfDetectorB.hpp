@@ -74,7 +74,7 @@ namespace SPEL
 
   private:
     void setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError);
-    void SURFDetector::setFixedCellsCount(cv::Size partCellsCount = cv::Size(3, 3));
+    void SURFDetector::setFixedCellsCount(cv::Size partCellsCount);
     void SURFDetector::setDefaultCellsCount(void);
     mutable Parameters parameters;
     mutable SkeletonModel Trained;

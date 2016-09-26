@@ -216,11 +216,11 @@ namespace SPEL
     for (unsigned int k = 0; k < Trained.PartCellsCount.size(); k++)
     {
       cv::Size temp = Trained.PartCellsCount[k];
-      if (parameters.FixedWidthCells >= 0)
-        temp = cv::Size(parameters.FixedWidthCells, partCellsCount.height);
-      if (parameters.FixedLenghtCells >= 0)
-        temp = cv::Size(partCellsCount.width, parameters.FixedLenghtCells);
-      Trained.PartCellsCount.emplace(std::pair<int, cv::Size>(k, partCellsCount));
+      if (partCellsCount.width >= 0)
+        temp = cv::Size(partCellsCount.width, temp.height);
+      if (partCellsCount.height >= 0)
+        temp = cv::Size(temp.width, partCellsCount.height);
+      Trained.PartCellsCount[k] = partCellsCount;
     }
   }
 
@@ -473,7 +473,7 @@ namespace SPEL
     changeParameters(params);
     std::map<uint32_t, std::vector<LimbLabel>> NewLabels;
     NewLabels = SURFDetector::Detect(frame);
-	// Need labels merging
+    // Need labels merging
     //FilterLimbLabels(...)
     return NewLabels;
   }
