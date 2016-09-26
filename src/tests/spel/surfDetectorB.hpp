@@ -51,8 +51,8 @@ namespace SPEL
       float searchStepCoeff = 0.2f;
 
       float markingLinearError = 10.0f;
-      float FixedWidthCells = 0.0f; // if FixedWidthCells >=1 && FixedLenghtCells >=1 then used equal cellsCount for all BodyParts 
-      float FixedLenghtCells = 0.0f; //
+      float FixedWidthCells = 0.0f; // if >=1 then used equal cellsCount for all BodyParts 
+      float FixedLenghtCells = 0.0f; // if >=1 then used equal cellsCount for all BodyParts 
       float useDefaultCellsCount = 1.0f; // bool
     };
 

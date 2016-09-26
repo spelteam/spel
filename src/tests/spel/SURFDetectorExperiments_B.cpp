@@ -534,8 +534,8 @@ namespace SPEL
     SFrames.clear();
     Frames.clear();
   }
-  //========================================================================
-  /*TEST(SURFDetectorExperiments_B, SURFDetector)
+  
+  TEST(SURFDetectorExperiments_B, SURFDetector)
   {
     //Load the input data
     //TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
@@ -674,5 +674,5 @@ namespace SPEL
 
     SFrames.clear();
     Frames.clear();
-  }*/
+  }
 }
