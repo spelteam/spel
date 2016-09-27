@@ -74,7 +74,7 @@ namespace SPEL
 
   private:
     void setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError);
-    void setFixedCellsCount(cv::Size partCellsCount = cv::Size(3, 3));
+    void setFixedCellsCount(cv::Size partCellsCount);
     void setDefaultCellsCount(void);
     mutable Parameters parameters;
     mutable SkeletonModel Trained;
