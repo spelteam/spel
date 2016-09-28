@@ -16,6 +16,7 @@
 #include "limbLabel.hpp"
 #include "spelParameters.hpp"
 #include "TestsFunctions.hpp"
+#include "spelHelper.hpp"
 
 using namespace std;
 #if defined (HAVE_OPENCV_XFEATURES2D)
@@ -706,4 +707,28 @@ namespace SPEL
     SFrames.clear();
     Frames.clear();
   }
+
+  TEST(SURFDetectorExperiments, getPartPolygon)
+  {
+    Point2f p0(0.0f, 0.0f), p1(10.0f, 0.0f);
+    float LWRatio = 1.3f;
+    SURFDetector D;
+    for (float angle = 0.0f; angle < 360.0f; angle++)
+    {
+      Point2f p0_ = spelHelper::rotatePoint2D(p0, Point2f(0.0f, 0.0f), angle);
+      Point2f p1_ = spelHelper::rotatePoint2D(p1, Point2f(0.0f, 0.0f), angle);
+      BodyJoint j0(0, "0", p0), j1(0, "1", p1);
+      BodyPart bodyPart(0, "", 0, 1);
+
+      vector<Point2f> polygon = D.getPartPolygon(LWRatio, p0, p1);
+      vector<Point2f> rect = bodyPart.getBodyPartRect(p0, p1).asVector();
+      
+      for (int i = 0; i < polygon.size(); i++)
+      {
+        EXPECT_NEAR(rect[i].x, polygon[i].x, 0.5f) << " angle = " << angle; 
+        EXPECT_NEAR(rect[i].x, polygon[i].x, 0.5f) << " angle = " << angle;
+      }
+    }
+  }
+
 }

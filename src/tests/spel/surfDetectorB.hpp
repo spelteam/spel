@@ -26,9 +26,9 @@ namespace SPEL
 
   class SURFDetector: public Detector
   {
-  protected:
     FRIEND_TEST(SURFDetectorExperiments_B, SURFDetector);
-
+    FRIEND_TEST(SURFDetectorExperiments, getPartPolygon);
+  protected:
     struct SkeletonModel
     {
       void clear(void);

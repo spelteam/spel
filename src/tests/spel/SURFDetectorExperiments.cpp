@@ -511,7 +511,7 @@ namespace SPEL
     cout << "uniqueAngleCandidates = " << P.uniqueAngleCandidates << endl;
 
     cout << "isWeakThreshold = " << P.isWeakThreshold << endl;
-    cout << "searchStepCoeff" << P.searchStepCoeff << endl;
+    cout << "searchStepCoeff = " << P.searchStepCoeff << endl;
 
     // Run experimental train
     SkeletonModel X;
@@ -629,7 +629,5 @@ namespace SPEL
     SFrames.clear();
     Frames.clear();
   }
-
-
 
 }
