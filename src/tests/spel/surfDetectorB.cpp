@@ -3,7 +3,7 @@
 #include "keyframe.hpp"
 #include "lockframe.hpp"
 #include "interpolation.hpp"
-#include "spelParameters.hpp"
+
 
 namespace SPEL
 {
@@ -43,13 +43,13 @@ namespace SPEL
       parameters.markingLinearError = params.at("markingLinearError");
 
       params.emplace(SPEL_SET_PARAMETER("FixedWidthCells", 0.0f));
-      parameters.FixedWidthCells = params.at("FixedWidthCells");
+      parameters.FixedWidthCells = static_cast<int>(params.at("FixedWidthCells"));
 
       params.emplace(SPEL_SET_PARAMETER("FixedLenghtCells", 0.0f));
-      parameters.FixedLenghtCells = params.at("FixedLenghtCells");
+      parameters.FixedLenghtCells = static_cast<int>(params.at("FixedLenghtCells"));
 
       params.emplace(SPEL_SET_PARAMETER("useDefaultCellsCount", 1.0f));
-      parameters.useDefaultCellsCount = params.at("useDefaultCellsCount");
+      parameters.useDefaultCellsCount = static_cast<bool>(params.at("useDefaultCellsCount"));
     }
     changeParameters(params);
   }
@@ -71,7 +71,6 @@ namespace SPEL
 
     params.emplace(DETECTOR_DETECT_PARAMETERS::ROTATION_THRESHOLD());
     params.emplace(DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD());
-    params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT());
     params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT());
 
     parameters.searchDistCoeff = params.at(
@@ -257,7 +256,7 @@ namespace SPEL
     if (Trained.PartCellsCount.size() == 0)
     {
       float e = parameters.markingLinearError;
-      if(parameters.useDefaultCellsCount >= 1)
+      if(parameters.useDefaultCellsCount)
         setDefaultCellsCount();
       else
         setCellsCount(partRects, e);

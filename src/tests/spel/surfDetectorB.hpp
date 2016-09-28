@@ -15,6 +15,7 @@
 #include <opencv2/features2d/features2d.hpp>
 
 #include "detector.hpp"
+#include "spelParameters.hpp"
 
 namespace SPEL
 {
@@ -39,21 +40,21 @@ namespace SPEL
 
     struct Parameters
     {
-      float minHessian = 300;
-      float searchDistCoeff = 0.5f;
-      float minTheta = 90.0f;
-      float maxTheta = 100.0f;
-      float stepTheta = 10.0f;
-      float uniqueLocationCandidates = 0.1f;
-      float uniqueAngleCandidates = 0.1f;
+      float minHessian = COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().second;
+      float searchDistCoeff = DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT().second;
+      float minTheta = DETECTOR_DETECT_PARAMETERS::MIN_THETA().second;
+      float maxTheta = DETECTOR_DETECT_PARAMETERS::MAX_THETA().second;
+      float stepTheta = DETECTOR_DETECT_PARAMETERS::STEP_THETA().second;
+      float uniqueLocationCandidates = DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT().second;
+      float uniqueAngleCandidates = DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT().second;
 
-      float isWeakThreshold = 0.1f;
-      float searchStepCoeff = 0.2f;
+      float isWeakThreshold = DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD().second;
+      float searchStepCoeff = DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().second;
 
       float markingLinearError = 10.0f;
-      float FixedWidthCells = 0.0f; // if >=1 then used equal cellsCount for all BodyParts 
-      float FixedLenghtCells = 0.0f; // if >=1 then used equal cellsCount for all BodyParts 
-      float useDefaultCellsCount = 1.0f; // bool
+      int FixedWidthCells = 0; // if >=1 then used equal cellsCount for all BodyParts 
+      int FixedLenghtCells = 0; // if >=1 then used equal cellsCount for all BodyParts 
+      bool useDefaultCellsCount = true;
     };
 
   public:
