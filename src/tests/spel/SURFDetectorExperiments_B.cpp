@@ -418,6 +418,19 @@ namespace SPEL
     map<string, float> params;
     Parameters_ P = SetDetectParameters_(params);
 
+    cout << endl << "Parameters: " << endl;
+
+    cout << "minHessian = " << P.minHessian << endl;
+    cout << "searchDistCoeff = " << P.searchDistCoeff << endl;
+    cout << "minTheta = " << P.minTheta << endl;
+    cout << "maxTheta = " << P.maxTheta << endl;
+    cout << "stepTheta = " << P.stepTheta << endl;
+    cout << "uniqueLocationCandidates = " << P.uniqueLocationCandidates << endl;
+    cout << "uniqueAngleCandidates = " << P.uniqueAngleCandidates << endl;
+
+    cout << "isWeakThreshold = " << P.isWeakThreshold << endl;
+    cout << "searchStepCoeff" << P.searchStepCoeff << endl;
+
     // Run experimental train
     SkeletonModel_ X;
     Train_(SFrames, X, P, CellsCount);
@@ -556,16 +569,34 @@ namespace SPEL
 
     // Create parameters
     map<string, float> params;
-	params.emplace(std::pair<std::string, float>("markingLinearError", 10.0f));
+    params.emplace(std::pair<std::string, float>("markingLinearError", 10.0f));
 
     // Run experimental train
-	SURFDetector D;
+    SURFDetector D;
     D.train(SFrames, params);
+
+    cout << endl << "Parameters: " << endl;
+
+    cout << "minHessian = " << D.parameters.minHessian << endl;
+    cout << "searchDistCoeff = " << D.parameters.searchDistCoeff << endl;
+    cout << "minTheta = " << D.parameters.minTheta << endl;
+    cout << "maxTheta = " << D.parameters.maxTheta << endl;
+    cout << "stepTheta = " << D.parameters.stepTheta << endl;
+    cout << "uniqueLocationCandidates = " << D.parameters.uniqueLocationCandidates << endl;
+    cout << "uniqueAngleCandidates = " << D.parameters.uniqueAngleCandidates << endl;
+
+    cout << "isWeakThreshold = " << D.parameters.isWeakThreshold << endl;
+    cout << "searchStepCoeff" << D.parameters.searchStepCoeff << endl;
+
+    cout << "markingLinearError = " << D.parameters.markingLinearError << endl;
+    cout << "FixedWidthCells = " << D.parameters.FixedWidthCells << endl;
+    cout << "FixedLenghtCells = " << D.parameters.FixedLenghtCells << endl;
+    cout << "useDefaultCellsCount = " << D.parameters.useDefaultCellsCount << endl << endl;
 
     // Run experimental detect
     SFrames[1]->setSkeleton(Pattern->getSkeleton()); // Copy skeleton from keyframe to frames[1]
-	map<uint32_t, vector<LimbLabel>> limbLabels;
-	limbLabels = D.detect(SFrames[1], params, limbLabels);
+    map<uint32_t, vector<LimbLabel>> limbLabels;
+    limbLabels = D.detect(SFrames[1], params, limbLabels);
 
     // Create output file
     string OutputFileName = "SurDetectorfB.txt";

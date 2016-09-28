@@ -17,6 +17,8 @@
 #include "detector.hpp"
 #include "spelParameters.hpp"
 
+#include <gtest/gtest.h>
+
 namespace SPEL
 {
   class SURFDetectorHelper: public DetectorHelper // It is gag
@@ -25,7 +27,8 @@ namespace SPEL
   class SURFDetector: public Detector
   {
   protected:
-    
+    FRIEND_TEST(SURFDetectorExperiments_B, SURFDetector);
+
     struct SkeletonModel
     {
       void clear(void);

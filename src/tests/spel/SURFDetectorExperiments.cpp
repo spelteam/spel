@@ -298,6 +298,13 @@ namespace SPEL
       n = Trained.SkeletonKeypoints.size();
     }
 
+    // Put debug info
+    cout << "UseOnlyMaskKeypoints = " << UseOnlyMaskKeypoints << endl;
+    cout << endl << "CheckMatches = " << UseOnlyMaskKeypoints << endl;
+    cout << "useBadMatches = " << useBadMatches << endl;
+    cout << "useMulct = " << useMulct << endl;
+    cout << "MatchesCount = " << n << endl << endl;
+
     cv::FlannBasedMatcher matcher;
     vector<vector<DMatch>> matches;
     matcher.knnMatch(FrameDescriptors, Trained.SkeletonDescriptors, matches, n);
@@ -493,6 +500,19 @@ namespace SPEL
     map<string, float> params;
     Parameters P = SetDetectParameters(params);
 
+    cout << endl << "Parameters: " << endl;
+
+    cout << "minHessian = " << P.minHessian << endl;
+    cout << "searchDistCoeff = " << P.searchDistCoeff << endl;
+    cout << "minTheta = " << P.minTheta << endl;
+    cout << "maxTheta = " << P.maxTheta << endl;
+    cout << "stepTheta = " << P.stepTheta << endl;
+    cout << "uniqueLocationCandidates = " << P.uniqueLocationCandidates << endl;
+    cout << "uniqueAngleCandidates = " << P.uniqueAngleCandidates << endl;
+
+    cout << "isWeakThreshold = " << P.isWeakThreshold << endl;
+    cout << "searchStepCoeff" << P.searchStepCoeff << endl;
+
     // Run experimental train
     SkeletonModel X;
     Train(SFrames, X, P);
@@ -609,5 +629,7 @@ namespace SPEL
     SFrames.clear();
     Frames.clear();
   }
+
+
 
 }
