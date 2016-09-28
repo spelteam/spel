@@ -300,7 +300,7 @@ namespace SPEL
 
     // Put debug info
     cout << "UseOnlyMaskKeypoints = " << UseOnlyMaskKeypoints << endl;
-    cout << endl << "CheckMatches = " << UseOnlyMaskKeypoints << endl;
+    cout << endl << "CheckMatches = " << CheckMatches << endl;
     cout << "useBadMatches = " << useBadMatches << endl;
     cout << "useMulct = " << useMulct << endl;
     cout << "MatchesCount = " << n << endl << endl;
