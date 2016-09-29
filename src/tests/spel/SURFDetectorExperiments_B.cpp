@@ -587,7 +587,7 @@ namespace SPEL
     cout << "uniqueAngleCandidates = " << D.parameters.uniqueAngleCandidates << endl;
 
     cout << "isWeakThreshold = " << D.parameters.isWeakThreshold << endl;
-    cout << "searchStepCoeff" << D.parameters.searchStepCoeff << endl;
+    cout << "searchStepCoeff = " << D.parameters.searchStepCoeff << endl;
 
     cout << "markingLinearError = " << D.parameters.markingLinearError << endl;
     cout << "FixedWidthCells = " << D.parameters.FixedWidthCells << endl;
@@ -600,7 +600,7 @@ namespace SPEL
     limbLabels = D.detect(SFrames[1], params, limbLabels);
 
     // Create output file
-    string OutputFileName = "SurDetectorfB.txt";
+    string OutputFileName = "SURFDetectorfB.txt";
     ofstream fout(OutputFileName);
 
     // Output top of "limbLabels" into text file
@@ -717,9 +717,8 @@ namespace SPEL
     {
       Point2f p0_ = spelHelper::rotatePoint2D(p0, Point2f(0.0f, 0.0f), angle);
       Point2f p1_ = spelHelper::rotatePoint2D(p1, Point2f(0.0f, 0.0f), angle);
-      BodyJoint j0(0, "0", p0_), j1(1, "1", p1_);
       BodyPart bodyPart(0, "", 0, 1);
-	  bodyPart.setLWRatio(LWRatio);
+      bodyPart.setLWRatio(LWRatio);
 
       vector<Point2f> polygon = D.getPartPolygon(LWRatio, p0_, p1_);
       vector<Point2f> rect = bodyPart.getBodyPartRect(p0_, p1_).asVector();

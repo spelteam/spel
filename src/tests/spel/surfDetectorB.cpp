@@ -219,7 +219,7 @@ namespace SPEL
         temp = cv::Size(partCellsCount.width, temp.height);
       if (partCellsCount.height >= 0)
         temp = cv::Size(temp.width, partCellsCount.height);
-      Trained.PartCellsCount[k] = partCellsCount;
+      Trained.PartCellsCount[k] = temp;
     }
   }
 
@@ -228,7 +228,7 @@ namespace SPEL
     std::vector<cv::Size> Default = {cv::Size(3, 3), cv::Size(1, 3), cv::Size(1, 3), cv::Size(1, 2), cv::Size(1, 5),
                                      cv::Size(1, 5), cv::Size(2, 5), cv::Size(2, 5), cv::Size(5, 5), cv::Size(2, 4),
                                      cv::Size(2, 4), cv::Size(2, 4), cv::Size(2, 4), cv::Size(2, 4), cv::Size(2, 4),
-                                     cv::Size(1, 3), cv::Size(1, 3), cv::Size(1, 4), cv::Size(1, 4) };
+                                     cv::Size(1, 3), cv::Size(1, 3), cv::Size(2, 3), cv::Size(2, 3) };
     for (unsigned int k = 0; k < Default.size(); k++)
       Trained.PartCellsCount.emplace(std::pair<int, cv::Size>(k, Default[k]));
   }
@@ -323,7 +323,7 @@ namespace SPEL
   public:
     bool operator () (LimbLabel X, LimbLabel Y)
     {
-      return (X.getAvgScore() > Y.getAvgScore());
+      return (X.getAvgScore() < Y.getAvgScore());
     }
   };
 
@@ -354,10 +354,14 @@ namespace SPEL
     cv::Ptr<cv::xfeatures2d::SURF> extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
     extractor->compute(image, MaskKeypoins, FrameDescriptors);
 
-    // Create skeleton model foe the current frame
+    // Create skeleton model for the current frame
     SkeletonModel Local;
     Local.Keypoints = MaskKeypoins;
     Local.Descriptors = FrameDescriptors;
+    Skeleton skeleton = frame->getSkeleton();
+    std::map<int, std::vector<cv::Point2f>> PartRects = getAllPolygons(skeleton);
+    for (int i = 0; i < PartRects.size(); i++)
+      Local.PartKeypointsCount.emplace(i, 0);
 
     // Create matches
     int n = 2; //matches per keypoint
@@ -379,9 +383,6 @@ namespace SPEL
         matches[i][k].distance = 1.0f - matches[i][k].distance/maxDist;
     DebugMessage(" Matches was normalized", 2);
 
-    Skeleton skeleton = frame->getSkeleton();
-    std::map<int, std::vector<cv::Point2f>> PartRects = getAllPolygons(skeleton);
-
     std::map<uint32_t, std::vector<LimbLabel>> Labels;
 
     for (int id = 0; id < PartRects.size(); id++)
@@ -395,8 +396,6 @@ namespace SPEL
       }
       if(Trained.PartKeypointsCount.at(id) > 0) // or " > threshold"
       {
-        std::vector<LimbLabel> PartLabels;
-
         std::vector<cv::Point2f> partPolygon = PartRects[id]; 	  
         float partLenght = getLenght(partPolygon);
         float partWidth = getWidth(partPolygon);
@@ -406,8 +405,11 @@ namespace SPEL
         float SearchDist = parameters.searchDistCoeff*partLenght;
         float minStep = abs(parameters.searchStepCoeff*partWidth);
         minStep = std::max(minStep, 2.0f);
-        
+
+        cv::Size CellsCount = Trained.PartCellsCount[id];
+
         int LabelsPerPart = 0;
+        std::vector<LimbLabel> PartLabels;
 
         float PartAngle = static_cast<float>(spelHelper::getAngle(partPolygon[0], partPolygon[1]));
         for (float angleShift = - parameters.minTheta; angleShift < parameters.maxTheta; angleShift += parameters.stepTheta)
@@ -429,19 +431,27 @@ namespace SPEL
               cv::Point2f LabelCenter = PartCenter + cv::Point2f(x, y);
 
               // Calculate score for current label
-              float LabelScore = 0.0f;
+              double LabelScore = 0;
 
-              for (unsigned int p = 0; p < MaskKeypoins.size(); p++)
-                if (pointPolygonTest(LabelPolygon, MaskKeypoins[p].pt, false) > 0)
+              for(unsigned int p = 0; p < MaskKeypoins.size(); p++)
+                if(pointPolygonTest(LabelPolygon, MaskKeypoins[p].pt, false) > 0)
                 {
-                  cv::Size CellsCount = Trained.PartCellsCount[id];
                   int partCellID = PartCellIndex(id, MaskKeypoins[p].pt, LabelPolygon, CellsCount);
                   if(Trained.Keypoints[matches[p][0].trainIdx].class_id == partCellID)
+                  {
                     LabelScore = LabelScore + matches[p][0].distance;
+                    Local.PartKeypointsCount[id]++;
+                  }
                 }
 
+              // Normalize and inverse score
+              if(Local.PartKeypointsCount[id] > 0)
+                LabelScore = 1.0 - LabelScore / static_cast<double>(Trained.PartKeypointsCount[id]);
+              else
+                LabelScore = INFINITY;
+
               // Create LimbLabel
-              Score score(LabelScore, "");
+              Score score(static_cast<float>(LabelScore), "");
               std::vector<Score> scores;
               scores.push_back(score);
               LimbLabel Label(id, LabelCenter, LabelAngle, LabelPolygon, scores);
