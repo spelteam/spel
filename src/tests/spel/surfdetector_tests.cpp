@@ -493,7 +493,6 @@ TEST(surfDetectorTests, detect)
 
     //project.TestProjectLoader::~TestProjectLoader();
     SFrames.clear();
-    Frames.clear();
   }
 
   TEST(surfDetectorTests, PartModel)
