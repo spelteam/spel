@@ -149,9 +149,8 @@ namespace SPEL
     std::sort(PolygonsArea.begin(), PolygonsArea.end(), ComparePartsArea());
     std::vector<int> temp(partRects.size());
     for (int i = 0; i < partRects.size(); i++)
-    {
       temp[i] = PolygonsArea[i].first;
-    }
+
     PolygonsArea.clear();
 
     return temp;

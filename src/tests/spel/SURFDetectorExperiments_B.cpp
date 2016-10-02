@@ -36,8 +36,28 @@ namespace SPEL
     float uniqueAngleCandidates = 0.1f;
 
     float isWeakThreshold = 0.1f;
-    float searchStepCoeff = 0.2f;    
+    float searchStepCoeff = 0.2f;
+
+    Size CellsCount = Size(4, 6);
   };
+
+ ostream& operator<<(ostream& os, Parameters_ &P)
+ {
+   os << "minHessian = " << P.minHessian << endl;
+   os << "searchDistCoeff = " << P.searchDistCoeff << endl;
+   os << "minTheta = " << P.minTheta << endl;
+   os << "maxTheta = " << P.maxTheta << endl;
+   os << "stepTheta = " << P.stepTheta << endl;
+   os << "uniqueLocationCandidates = " << P.uniqueLocationCandidates << endl;
+   os << "uniqueAngleCandidates = " << P.uniqueAngleCandidates << endl;
+   os << "isWeakThreshold = " << P.isWeakThreshold << endl;
+   os << "searchStepCoeff = " << P.searchStepCoeff << endl;
+
+   os << "partCellsCount = " << P.CellsCount << endl;
+
+   return os;
+ }
+
 
   Parameters_ SetDetectParameters_(map<string, float> params)
   {
@@ -153,7 +173,7 @@ namespace SPEL
     return id;
   }
 
-  void SingleFrameTrain_(Frame* frame, SkeletonModel_ &X, Parameters_ P, Size CellsCount)
+  void SingleFrameTrain_(Frame* frame, SkeletonModel_ &X, Parameters_ P)
   {
     // Create frame keypoints
     cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SurfFeatureDetector::create(P.minHessian);
@@ -195,7 +215,7 @@ namespace SPEL
           if (pointPolygonTest(PartPolygon, MaskKeypoins[p].pt, false) > 0)
           {
             Point2f pt = MaskKeypoins[p].pt;
-            MaskKeypoins[p].class_id = PartCellIndex(pt, PartID, PartPolygon, CellsCount);
+            MaskKeypoins[p].class_id = PartCellIndex(pt, PartID, PartPolygon, P.CellsCount);
             X.PartsKeypointsCount.at(SortedIndexes[k])++;
             X.SkeletonKeypoints.push_back(MaskKeypoins[p]);
           }
@@ -210,19 +230,19 @@ namespace SPEL
     SortedIndexes.clear();
   }
 
-  void Train_(vector<Frame*> frames, SkeletonModel_ &X, Parameters_ P, Size CellsCount = Size(10, 10))
+  void Train_(vector<Frame*> frames, SkeletonModel_ &X, Parameters_ P)
   {
     DebugMessage(" SURFDetector experiments Train_2 started", 2);
 
     // Training on all keyframes
     for(int i = 0; i < frames.size(); i++)
       if (frames[i]->getFrametype() == KEYFRAME)
-        SingleFrameTrain_(frames[i], X, P, CellsCount);
+        SingleFrameTrain_(frames[i], X, P);
  
     DebugMessage(" SURFDetector experiments Train_2 completed", 2);
   }
 
-  map<uint32_t, vector<LimbLabel>> Detect_(Frame* frame, SkeletonModel_ &Trained, Parameters_ P, Size CellsCount = Size(10, 10))
+  map<uint32_t, vector<LimbLabel>> Detect_(Frame* frame, SkeletonModel_ &Trained, Parameters_ P)
   {
     bool useMulct = false;
     bool CheckMatches = false;
@@ -318,7 +338,7 @@ namespace SPEL
         //uint8_t b = 0, g = 0; // visualization color coefficients
         //cout << endl << "PartID = " << id << ": Center = " << PartCenter << ", Width = " << PartWidth <<", Lenght = " << PartLenght << ", 
 
-        float PartAngle = static_cast<float>(90.0 - 180.0*atan2(dL.y, dL.x)/M_PI);
+        float PartAngle = spelHelper::getAngle(PartPolygon[0], PartPolygon[1]);
         for (float angle = - P.minTheta; angle < P.maxTheta; angle += P.stepTheta)
         { 
           // Rotation of the part polygon
@@ -347,7 +367,7 @@ namespace SPEL
                   bool b = 0.8*matches[p][0].distance > matches[p][1].distance || !CheckMatches;
                   if(b)
                   {
-                    int partCellID = PartCellIndex(MaskKeypoins[p].pt, id, LabelPolygon, CellsCount);
+                    int partCellID = PartCellIndex(MaskKeypoins[p].pt, id, LabelPolygon, P.CellsCount);
                     if(Trained.SkeletonKeypoints[matches[p][0].trainIdx].class_id == partCellID)
                       LabelScore = LabelScore + matches[p][0].distance;
                     /*if (n > 1)
@@ -391,159 +411,83 @@ namespace SPEL
     DebugMessage(" SURFDetector experiments Detect_2 completed", 2);
     return Labels;
   }
-
+  
   TEST(SURFDetectorExperiments_B, Detect)
   {
-    Size CellsCount(4, 6);
     //Load the input data
     //TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
     TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
     vector<Frame*> SFrames = project.getFrames();
-    /*for (int i = 0; i < SFrames.size(); i++)
-      SFrames[i]->Resize(1024);
-    Frame* Pattern = SFrames[1];*/
+    //for (int i = 0; i < SFrames.size(); i++)
+    //  SFrames[i]->Resize(1024);
+    //Frame* Pattern = SFrames[1];
 
     TestProjectLoader project_pattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
     vector<Frame*> Frames = project_pattern.getFrames();
     Frame* Pattern = Frames[1];
-
-    //Copy image and skeleton from first keyframe
-    int FirstKeyframe = 0;
-    Mat image = SFrames[FirstKeyframe]->getImage();
-    Mat mask = SFrames[FirstKeyframe]->getMask();
-    Skeleton skeleton = SFrames[FirstKeyframe]->getSkeleton();
-    tree <BodyPart> partTree = skeleton.getPartTree();
-    tree <BodyJoint> jointsTree = skeleton.getJointTree();
+    Skeleton SkeletonPattern = Pattern->getSkeleton(); //Copying the manually marked skeleton
 
     // Create parameters
     map<string, float> params;
     Parameters_ P = SetDetectParameters_(params);
-
-    cout << endl << "Parameters: " << endl;
-
-    cout << "minHessian = " << P.minHessian << endl;
-    cout << "searchDistCoeff = " << P.searchDistCoeff << endl;
-    cout << "minTheta = " << P.minTheta << endl;
-    cout << "maxTheta = " << P.maxTheta << endl;
-    cout << "stepTheta = " << P.stepTheta << endl;
-    cout << "uniqueLocationCandidates = " << P.uniqueLocationCandidates << endl;
-    cout << "uniqueAngleCandidates = " << P.uniqueAngleCandidates << endl;
-
-    cout << "isWeakThreshold = " << P.isWeakThreshold << endl;
-    cout << "searchStepCoeff" << P.searchStepCoeff << endl;
-
-    // Run experimental train
+    
+    // Create actual values
     SkeletonModel_ X;
-    Train_(SFrames, X, P, CellsCount);
+    long train_t0 = clock();
+    Train_(SFrames, X, P); //Run train  
+    long train_t1 = clock();
 
-    // Run experimental detect
-    SFrames[1]->setSkeleton(Pattern->getSkeleton()); // Copy skeleton from keyframe to frames[1]
-    map<uint32_t, vector<LimbLabel>> limbLabels = Detect_(SFrames[1], X, P, CellsCount);
+    SFrames[1]->setSkeleton(SkeletonPattern); //Copy skeleton from pattern keyframe to current lockframe
+    long detect_t0 = clock();
+    map<uint32_t, vector<LimbLabel>> Labels = Detect_(SFrames[1], X, P); //Run detect
+    long detect_t1 = clock();
 
-    // Create output file
-    string OutputFileName = "SurDetectorfExperiments_B.txt";
+    // Set test parameters
+    int TopLabelsCount = 4; //Size of "labels top list"
+    float TolerableLinearError = 30; //Linear error in pixels
+
+    // Compare limb labels with ideal bodyparts from keyframe 
+    map<int, vector<float>> LinearErrors = LabelsLinearErrors(Labels, SkeletonPattern);
+    map<int, vector<float>> AngleErrors = LabelsAngleErrors(Labels, SkeletonPattern);
+
+    // Write debug information into text file
+    string OutputFileName = "DetectTest_SURFExperiments_B.txt";
     ofstream fout(OutputFileName);
-
-    // Output top of "limbLabels" into text file
-    fout << "\nTop Labels, sorted by part id:\n\n";
-    for (unsigned int i = 0; i < limbLabels.size(); i++) // For all body parts
-    {
-      for (unsigned int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
-      {
-        Point2f p0, p1;
-        limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
-        fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
-        vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
-        for (unsigned int t = 0; t < scores.size(); t++)
-          fout << scores[t].getScore() << ", "; // Put all scores of the Label
-        fout << "}\n";
-      }
-      fout << endl;
-    }
-
-    // Copy coordinates of BodyParts
-    Skeleton SkeletonPattern = Pattern->getSkeleton();
-    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(SkeletonPattern);
-
-    // Compare labels with ideal bodyparts from keyframe, and output debug information 
-    float TolerableCoordinateError = 30; // Linear error in pixels
-    cout << "TolerableCoordinateError = " << TolerableCoordinateError << endl;
-    int TopListLabelsCount = 4; // Size of "labels top list"
-    map<int, vector<LimbLabel>> effectiveLabels;
-    vector<int> WithoutGoodLabelInTop;
-    bool EffectiveLabbelsInTop = true;
-
-    fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
-
-    for (unsigned int id = 0; id < limbLabels.size(); id++)
-    {
-      fout << "\nPartID = " << id << ":\n";
-      Point2f l0, l1, p0, p1, delta0, delta1;
-      vector<LimbLabel> temp;
-      p0 = PartLocation[id].first; // Ideal boby part point
-      p1 = PartLocation[id].second; // Ideal boby part point
-      for (int k = 0; k < static_cast<int>(limbLabels[id].size()); k++)
-      {
-        limbLabels[id][k].getEndpoints(l0, l1); // Label points
-        delta0 = l0 - p0;
-        delta1 = l1 - p1;
-        float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
-        delta0 = l0 - p1;
-        delta1 = l1 - p0;
-        float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
-        float error = min(error_A, error_B); // Distance between ideal body part and label
-        if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >= 0) // Label is "effective" if it has small error and not less than zero  Score  value
-          temp.push_back(limbLabels[id][k]); // Copy effective labels
-        // Put linear errors for all Lalbels into text file, copy indexes of a "badly processed parts"
-        fout << "    PartID = " << id << ", LabelIndex = " << k << ":    AvgScore = " << limbLabels[id][k].getAvgScore() << ", LinearError = " << error << endl;
-        if (k == TopListLabelsCount - 1)
-        {
-          fout << "    //End of part[" << id << "] top labels list\n";
-          if (!(skeleton.getBodyPart(id)->getIsOccluded()))
-            if (temp.size() < 1)
-            {
-              EffectiveLabbelsInTop = false; // false == Present not Occluded bodyparts, but no nave "effective labels" in the top of list
-              WithoutGoodLabelInTop.push_back(id); // Copy index of not Occluded parts, wich no have "effective labels" in the top of labels list
-            }
-        }
-      }
-      effectiveLabels.emplace(pair<int, vector<LimbLabel>>(id, temp));
-    }
-
-    //Output top of "effectiveLabels" into text file
-    fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
-    for (unsigned int i = 0; i < effectiveLabels.size(); i++)
-    {
-      for (unsigned int k = 0; k < effectiveLabels[i].size(); k++)
-      {
-        Point2f p0, p1;
-        limbLabels[i][k].getEndpoints(p0, p1);
-        fout << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
-        vector<Score> scores = effectiveLabels[i][k].getScores();
-        for (unsigned int t = 0; t < scores.size(); t++)
-          fout << scores[t].getScore() << ", ";
-        fout << "}\n";
-      }
-      fout << endl;
-    }
-
+    fout << "\n\ DETECT PARAMETERS\n\n";
+    fout << P;
+    fout << "\n  DETECT RESULTS\n\n";
+    PutSigificantErrors(fout, LinearErrors, AngleErrors, TopLabelsCount);
+    PutLabels(fout, "", Labels, LinearErrors, AngleErrors, TopLabelsCount);
+    PutLabels(fout, "", Labels, LinearErrors, AngleErrors, 0);
     fout.close();
-    cout << "\nLimbLabels saved in file:" << OutputFileName << endl;
 
-    // Output messages 
-    if (!EffectiveLabbelsInTop) cout << endl << " SurfDetector_Tests.detect:" << endl;
-    EXPECT_TRUE(EffectiveLabbelsInTop);
-    if (!EffectiveLabbelsInTop)
+    // Cheking the values and put test result
+    vector<int> notFoundedParts = selectNotFoundedParts(SkeletonPattern, LinearErrors, Labels, TolerableLinearError, TopLabelsCount);
+    cout << "\n EXECUTION TIME\n" << "\nTrain: " << train_t1 - train_t0 << " ms\n";
+    cout << "Detect: " << detect_t1 - detect_t0 << " ms\n";
+
+    cout << "\n\ DETECT PARAMETERS\n\n";
+    cout << P;
+    cout << "\n TEST PARAMETERS\n\n";
+    cout << "Image size = " << Pattern->getMask().size() << endl;
+    cout << "TolerableLinearError = " << TolerableLinearError << endl;
+    cout << "TopLabelsCount = " << TopLabelsCount << endl;
+
+    cout << "\n DETECT RESULTS\n\n";
+    PutSigificantErrors(cout, LinearErrors, AngleErrors, TopLabelsCount);
+
+    int FoundedPartsCount = Labels.size() - notFoundedParts.size();
+    int PartsCount = SkeletonPattern.getPartTree().size();
+    EXPECT_EQ(PartsCount, FoundedPartsCount);
+
+    if (notFoundedParts.size() > 0)
     {
-      cout << "Body parts with id: ";
-        for (unsigned int i = 0; i < WithoutGoodLabelInTop.size(); i++)
-        {
-          cout << WithoutGoodLabelInTop[i];
-          if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";
-        }
+      cout << "Body parts with id: " << notFoundedParts[0];
+      for (unsigned int i = 1; i < notFoundedParts.size(); i++)
+        cout << ", " << notFoundedParts[i];
       cout << " - does not have effective labels in the top of labels list." << endl;
     }
-    if (!EffectiveLabbelsInTop) cout << endl;
+    cout << "\nLimbLabels saved in file: " << OutputFileName << endl << endl;
 
     SFrames.clear();
     Frames.clear();
@@ -556,27 +500,29 @@ namespace SPEL
     TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
     vector<Frame*> SFrames = project.getFrames();
 
-    TestProjectLoader project_pattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
-    vector<Frame*> Frames = project_pattern.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Frames = projectPattern.getFrames();
     Frame* Pattern = Frames[1];
-
-    //Copy image and skeleton from first keyframe
-    int FirstKeyframe = 0;
-    Mat image = SFrames[FirstKeyframe]->getImage();
-    Mat mask = SFrames[FirstKeyframe]->getMask();
-    Skeleton skeleton = SFrames[FirstKeyframe]->getSkeleton();
-    tree <BodyPart> partTree = skeleton.getPartTree();
-    tree <BodyJoint> jointsTree = skeleton.getJointTree();
+    Skeleton SkeletonPattern = Pattern->getSkeleton(); //Copying the manually marked skeleton
 
     // Create parameters
     map<string, float> params;
     params.emplace(std::pair<std::string, float>("markingLinearError", 10.0f));
 
-    // Run experimental train
+    // Run train
     SURFDetector D;
+    long train_t0 = clock();
     D.train(SFrames, params);
+    long train_t1 = clock();
 
-    cout << endl << "Parameters: " << endl;
+    // Run detect
+    SFrames[1]->setSkeleton(SkeletonPattern); //Copy skeleton from keyframe to frames[1]
+    map<uint32_t, vector<LimbLabel>> Labels;
+    long detect_t0 = clock();
+    Labels = D.detect(SFrames[1], params, Labels);
+    long detect_t1 = clock();
+
+    cout << endl << " DETECTOR PARAMETERS\n\n";
 
     cout << "minHessian = " << D.parameters.minHessian << endl;
     cout << "searchDistCoeff = " << D.parameters.searchDistCoeff << endl;
@@ -592,117 +538,50 @@ namespace SPEL
     cout << "markingLinearError = " << D.parameters.markingLinearError << endl;
     cout << "FixedWidthCells = " << D.parameters.FixedWidthCells << endl;
     cout << "FixedLenghtCells = " << D.parameters.FixedLenghtCells << endl;
-    cout << "useDefaultCellsCount = " << D.parameters.useDefaultCellsCount << endl << endl;
+    cout << "useDefaultCellsCount = " << D.parameters.useDefaultCellsCount << endl;
 
-    // Run experimental detect
-    SFrames[1]->setSkeleton(Pattern->getSkeleton()); // Copy skeleton from keyframe to frames[1]
-    map<uint32_t, vector<LimbLabel>> limbLabels;
-    limbLabels = D.detect(SFrames[1], params, limbLabels);
+    // Set test parameters
+    int TopLabelsCount = 4; //Size of "labels top list"
+    float TolerableLinearError = 30; //Linear error in pixels
+                                                                                     
+    // Compare limb labels with ideal bodyparts from keyframe 
+    map<int, vector<float>> LinearErrors = LabelsLinearErrors(Labels, SkeletonPattern);
+    map<int, vector<float>> AngleErrors = LabelsAngleErrors(Labels, SkeletonPattern);
 
-    // Create output file
-    string OutputFileName = "SURFDetectorfB.txt";
+    // Write debug information into text file
+    string OutputFileName = "DetectTest_SURF_B.txt";
     ofstream fout(OutputFileName);
-
-    // Output top of "limbLabels" into text file
-    fout << "\nTop Labels, sorted by part id:\n\n";
-    for (unsigned int i = 0; i < limbLabels.size(); i++) // For all body parts
-    {
-      for (unsigned int k = 0; (k < limbLabels[i].size()) && (k < 4); k++) // For all scores of this bodypart
-      {
-        Point2f p0, p1;
-        limbLabels[i][k].getEndpoints(p0, p1); // Copy the Limblabel points
-        fout << "  " << i << ":" << " limbID = " << limbLabels[i][k].getLimbID() << ", Angle = " << limbLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << limbLabels[i][k].getAvgScore() << ", Scores = {";
-        vector<Score> scores = limbLabels[i][k].getScores(); // Copy the Label scores
-        for (unsigned int t = 0; t < scores.size(); t++)
-          fout << scores[t].getScore() << ", "; // Put all scores of the Label
-        fout << "}\n";
-      }
-      fout << endl;
-    }
-
-    // Copy coordinates of BodyParts
-    Skeleton SkeletonPattern = Pattern->getSkeleton();
-    map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(SkeletonPattern);
-
-    // Compare labels with ideal bodyparts from keyframe, and output debug information 
-    float TolerableCoordinateError = 30; // Linear error in pixels
-    cout << "TolerableCoordinateError = " << TolerableCoordinateError << endl;
-    int TopListLabelsCount = 4; // Size of "labels top list"
-    map<int, vector<LimbLabel>> effectiveLabels;
-    vector<int> WithoutGoodLabelInTop;
-    bool EffectiveLabbelsInTop = true;
-
-    fout << "-------------------------------------\nAll labels, with distance from the ideal body part: \n";
-
-    for (unsigned int id = 0; id < limbLabels.size(); id++)
-    {
-      fout << "\nPartID = " << id << ":\n";
-      Point2f l0, l1, p0, p1, delta0, delta1;
-      vector<LimbLabel> temp;
-      p0 = PartLocation[id].first; // Ideal boby part point
-      p1 = PartLocation[id].second; // Ideal boby part point
-      for (int k = 0; k < static_cast<int>(limbLabels[id].size()); k++)
-      {
-        limbLabels[id][k].getEndpoints(l0, l1); // Label points
-        delta0 = l0 - p0;
-        delta1 = l1 - p1;
-        float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
-        delta0 = l0 - p1;
-        delta1 = l1 - p0;
-        float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
-        float error = min(error_A, error_B); // Distance between ideal body part and label
-        if (error <= TolerableCoordinateError && limbLabels[id][k].getAvgScore() >= 0) // Label is "effective" if it has small error and not less than zero  Score  value
-          temp.push_back(limbLabels[id][k]); // Copy effective labels
-        // Put linear errors for all Lalbels into text file, copy indexes of a "badly processed parts"
-        fout << "    PartID = " << id << ", LabelIndex = " << k << ":    AvgScore = " << limbLabels[id][k].getAvgScore() << ", LinearError = " << error << endl;
-        if (k == TopListLabelsCount - 1)
-        {
-          fout << "    //End of part[" << id << "] top labels list\n";
-          if (!(skeleton.getBodyPart(id)->getIsOccluded()))
-            if (temp.size() < 1)
-            {
-              EffectiveLabbelsInTop = false; // false == Present not Occluded bodyparts, but no nave "effective labels" in the top of list
-              WithoutGoodLabelInTop.push_back(id); // Copy index of not Occluded parts, wich no have "effective labels" in the top of labels list
-            }
-        }
-      }
-      effectiveLabels.emplace(pair<int, vector<LimbLabel>>(id, temp));
-    }
-
-    //Output top of "effectiveLabels" into text file
-    fout << "\n-------------------------------------\n\nTrue Labels:\n\n";
-    for (unsigned int i = 0; i < effectiveLabels.size(); i++)
-    {
-      for (unsigned int k = 0; k < effectiveLabels[i].size(); k++)
-      {
-        Point2f p0, p1;
-        limbLabels[i][k].getEndpoints(p0, p1);
-        fout << "  limbID = " << effectiveLabels[i][k].getLimbID() << ", Angle = " << effectiveLabels[i][k].getAngle() << ", Points = {" << p0 << ", " << p1 << "}, AvgScore = " << effectiveLabels[i][k].getAvgScore() << ", Scores = {";
-        vector<Score> scores = effectiveLabels[i][k].getScores();
-        for (unsigned int t = 0; t < scores.size(); t++)
-          fout << scores[t].getScore() << ", ";
-        fout << "}\n";
-      }
-      fout << endl;
-    }
-
+    fout << "\n  DETECT RESULTS\n\n";
+    PutSigificantErrors(fout, LinearErrors, AngleErrors, TopLabelsCount);
+    PutLabels(fout, "", Labels, LinearErrors, AngleErrors, TopLabelsCount);
+    PutLabels(fout, "", Labels, LinearErrors, AngleErrors, 0);
     fout.close();
-    cout << "\nLimbLabels saved in file:" << OutputFileName << endl;
 
-    // Output messages 
-    if (!EffectiveLabbelsInTop) cout << endl << " SurfDetector_Tests.detect:" << endl;
-    EXPECT_TRUE(EffectiveLabbelsInTop);
-    if (!EffectiveLabbelsInTop)
+    // Cheking the values and put test result
+    vector<int> notFoundedParts = selectNotFoundedParts(SkeletonPattern, LinearErrors, Labels, TolerableLinearError, TopLabelsCount);
+    cout << "\n EXECUTION TIME\n" << "\nTrain: " << train_t1 - train_t0 << " ms\n";
+    cout << "Detect: " << detect_t1 - detect_t0 << " ms\n";
+
+    cout << "\n TEST PARAMETERS\n\n";
+    cout << "Image size = " << Pattern->getMask().size() << endl;
+    cout << "TolerableLinearError = " << TolerableLinearError << endl;
+    cout << "TopLabelsCount = " << TopLabelsCount << endl;
+
+    cout << "\n DETECT RESULTS\n\n";
+    PutSigificantErrors(cout, LinearErrors, AngleErrors, TopLabelsCount);
+
+    int FoundedPartsCount = Labels.size() - notFoundedParts.size();
+    int PartsCount = SkeletonPattern.getPartTree().size();
+    EXPECT_EQ(PartsCount, FoundedPartsCount);
+
+    if (notFoundedParts.size() > 0)
     {
-      cout << "Body parts with id: ";
-        for (unsigned int i = 0; i < WithoutGoodLabelInTop.size(); i++)
-        {
-          cout << WithoutGoodLabelInTop[i];
-          if (i != WithoutGoodLabelInTop.size() - 1) cout << ", ";
-        }
+      cout << "Body parts with id: " << notFoundedParts[0];
+      for (unsigned int i = 1; i < notFoundedParts.size(); i++)
+        cout << ", " << notFoundedParts[i];
       cout << " - does not have effective labels in the top of labels list." << endl;
     }
-    if (!EffectiveLabbelsInTop) cout << endl;
+    cout << "\nLimbLabels saved in file: " << OutputFileName << endl << endl;
 
     SFrames.clear();
     Frames.clear();

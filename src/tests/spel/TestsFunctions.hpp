@@ -23,7 +23,32 @@ namespace SPEL
   vector <Point3i> GetPartColors(Mat image, Mat mask, spelRECT < Point2f > rect); // Build set of the rect pixels colours 
   void  Normalize(vector <vector <vector <float>>> &Histogramm, int nBins, int pixelsCount); // Normalization of the  histogram
   void PutHistogram(ofstream &fout, vector <vector <vector <float>>> &Histogramm, int sizeFG); // Output histogram into text file
-  
+ 
+  ostream& operator<<(ostream& fout, vector<float> x);
+
+  // Write formatted limbLabel into text file. FieldsString - set of fields, that will be writed
+  // For writing all fields 'FieldsString' must bee: "PartID, LabelID, Angle, Joints, Center, Polygon, AvgScore, Scores, linearError, angleError" 
+  void PutFormattedLabel(ostream &fout, LimbLabel label, string FieldsString = "", int LabelID = 0, float linearError = INFINITY, float angleError = INFINITY);
+
+  // Put all labels
+  void PutLabels(ostream &fout, string fields, map<uint32_t, vector<LimbLabel>> &Labels, map<int, vector<float>> &LinearErrors, map<int, vector<float>> &AngleErrors, int TopLabelsCount);
+
+  //Put Detect Results
+  void PutSigificantErrors(ostream &fout, map<int, vector<float>>LinearErrors, map<int, vector<float>>AngleErrors, int TopLabelsCount);
+
+  // Calculation maximum distance between the label and real body part
+  float getLinearError(pair<Point2f, Point2f> PartJoints, LimbLabel label, bool considerAngle = true);
+  float getAngleError(pair<Point2f, Point2f> PartJoints, LimbLabel label);
+
+  // Calculation distances from all labels to real skeleton
+  // map<int, vector<Point2f>> getLabelsErrors(map<uint32_t, vector<LimbLabel>> &Labels, Skeleton &pattern); // Point2f(linearError, angleError)
+  map<int, vector<float>> LabelsLinearErrors(map<uint32_t, vector<LimbLabel>> &Labels, Skeleton &pattern);
+  map<int, vector<float>> LabelsAngleErrors(map<uint32_t, vector<LimbLabel>> &Labels, Skeleton &pattern);
+  map<int, map<int, LimbLabel>> selectEffectiveLabels(map<uint32_t, vector<LimbLabel>> &Labels, map<int, vector<Point2f>> &Errors, float TolerableLinearError);
+  vector<float> MinLabelsError(map<int, vector<float>> Errors, int TopLabelsCount);
+
+  vector<int> selectNotFoundedParts(Skeleton &skeleton, map<int, vector<float>> &Errors, map<uint32_t, vector<LimbLabel>> &Labels, int TolerableLinearError, int TopLabelsCount = 0);
+
   class TestProjectLoader : public ProjectLoader
   {
   public:

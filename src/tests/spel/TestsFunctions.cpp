@@ -587,5 +587,252 @@ void TestISM::computeISMcell(Frame* left, Frame* right, const int maxFrameHeight
 
  }  
 
+ ostream& operator<<(ostream& fout, vector<float> x)
+ {
+   if (x.size() >0)
+   {
+     fout << "{" << "0:" << x[0];
+     for (int i = 1; i < x.size(); i++)
+       fout << ", " << i << ":" << x[i];
+     fout << "}";
+   }
+
+   return fout;
+ }
+
+ void PutFormattedLabel(ostream &fout, LimbLabel label, string FieldsString, int LabelID, float linearError, float angleError)
+ {
+   if (FieldsString == "")
+     FieldsString = {"PartID LabelID Angle Joints AvgScore "};
+
+   vector<string> FieldsSet = { "PartID", "LabelID", "Angle", "Joints", "Center", "Polygon", "AvgScore", "Scores", "linearError", "angleError", ""};
+   map<string, int> Fields;
+   for (int i = 0; i < FieldsSet.size(); i++)
+     Fields.emplace(pair<string, int>(FieldsSet[i], i));
+
+   vector<int> FieldNum;
+   string temp = "";
+   for(int i = 0; i < FieldsString.size(); i++)
+   {
+     if(FieldsString[i] == ',' || FieldsString[i] == ' ' || FieldsString[i] == ';')
+     {
+       if(Fields.find(temp) != Fields.end())
+         FieldNum.push_back(Fields.at(temp));
+       temp.clear();
+     }
+     else
+       temp = temp + FieldsString[i];
+   }
+   if(temp != "")
+     FieldNum.push_back(Fields.at(temp));
+
+   Point2f p0, p1;
+   vector<Score> scores;
+   vector<Point2f> P;
+   label.getEndpoints(p0, p1);
+   p0 = static_cast<Point2i>(p0);
+   p1 = static_cast<Point2i>(p1);
+   scores = label.getScores();
+   P = label.getPolygon();
+
+   fout << "  ";
+   for(int i = 0; i < FieldNum.size(); i++)
+   {
+     int t = FieldNum[i];
+     if (FieldNum[i] != 10) 
+       fout << FieldsSet[t] << " = ";
+     switch (t)
+     {
+       case 0: fout << label.getLimbID(); break;
+       case 1: fout << LabelID; break;
+       case 2: fout << label.getAngle(); break;
+       case 3: fout << "{" << p0 << ", " << p1 << "}"; break;
+       case 4: fout << label.getCenter(); break;
+       case 5: fout << "{" << P[0] << ", " << P[1] << ", " << P[2] << ", " << P[3] << "}"; break;
+       case 6: fout << label.getAvgScore(); break;
+       case 7: 
+               fout << "{";
+               for(int k = 0; k < scores.size(); k++)
+                 fout << scores[k].getScore() << ", ";
+               fout << "}";
+               break;
+       case 8: fout << linearError; break;
+       case 9: fout << angleError; break;
+       case 10: break;
+       
+     }
+     if (i != FieldNum.size() - 1)
+     {
+       if (FieldNum[i] != 10)
+         fout << ", ";
+     }
+     else 
+       fout << endl;
+   }
+
+   FieldsSet.clear();
+   Fields.clear();
+   FieldNum.clear();
+   temp.clear();
+   scores.clear();
+   P.clear();
+ }
+
+ void PutLabels(ostream &fout, string fields, map<uint32_t, vector<LimbLabel>> &Labels, map<int, vector<float>> &LinearErrors, map<int, vector<float>> &AngleErrors, int TopLabelsCount)
+ {
+   if(TopLabelsCount != 0)
+   {
+     if(fields == "") fields = "PartID, Angle, Joints, Scores, linearError";
+     fout << "\n=======================================================\n\n";
+     fout <<"Top labels, grouped by part id:\n\n";
+     for (unsigned int i = 0; i < Labels.size(); i++)
+     {
+       for (unsigned int k = 0; (k < Labels[i].size()) && (k < TopLabelsCount); k++)
+         PutFormattedLabel(fout, Labels[i][k], fields, k, LinearErrors[i][k]);
+       fout << endl;
+     }
+   }
+   else
+   {
+     if (fields == "") fields = "PartID, LabelID, Angle, angleError, AvgScore, linearError";
+     for (unsigned int i = 0; i < Labels.size(); i++)
+     {
+       fout << "\n=======================================================\n\n";
+       fout << "All labels for BodyPart(" << i << "):\n\n";
+       for (unsigned int k = 0; k < Labels[i].size(); k++)
+         PutFormattedLabel(fout, Labels[i][k], fields, k, LinearErrors[i][k], AngleErrors[i][k]);
+     }
+   }
+
+ }
+
+ void PutSigificantErrors(ostream &fout, map<int, vector<float>>LinearErrors, map<int, vector<float>>AngleErrors, int TopLabelsCount)
+ {
+   vector<float> significantLinearErrors = MinLabelsError(LinearErrors, TopLabelsCount);
+   vector<float> significantAngleErrors = MinLabelsError(AngleErrors, TopLabelsCount);
+   float significantLinearError = *std::max_element(significantLinearErrors.begin(), significantLinearErrors.end());
+   float significantAngleError = *std::max_element(significantAngleErrors.begin(), significantAngleErrors.end());
+   fout << "Parts significant linear errors sorted by PartID, (pixels): " << significantLinearErrors << endl;
+   fout << "Parts significant angle errors sorted by PartID, (pixels): " << significantAngleErrors << endl;
+   fout << "The maximum linear error, (pixels): " << significantLinearError << endl;
+   fout << "The maximum angle error, (degrees): " << significantAngleError << endl;   
+ }
+
+ // Return distance between ideal body part and label
+ float getLinearError(pair<Point2f, Point2f> PartJoints, LimbLabel label, bool considerAngle)
+ {
+   Point2f l0, l1, p0, p1, delta0, delta1;
+   p0 = PartJoints.first; // Ideal boby part point
+   p1 = PartJoints.second; // Ideal boby part point
+   label.getEndpoints(l0, l1); // Label points
+   delta0 = l0 - p0;
+   delta1 = l1 - p1;
+   float error = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+   if (!considerAngle)
+   {
+     delta0 = l0 - p1;
+     delta1 = l1 - p0;
+     float mirroredPart_error = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
+     error = min(error, mirroredPart_error);
+   }
+
+   return error;
+ }
+
+ vector<float> MinLabelsError(map<int, vector<float>> Errors, int TopLabelsCount)
+ {
+   vector<float> partsErrors; 
+   for (int i = 0; i < Errors.size(); i++)
+   {
+     float error = 10000;
+     for(int k = 0; k < Errors[i].size() && k < TopLabelsCount; k++)
+       if(abs(Errors[i][k]) < error)
+         error = abs(Errors[i][k]);
+     partsErrors.push_back(error);
+   }
+
+   return partsErrors;
+ }
+
+ float getAngleError(pair<Point2f, Point2f> PartJoints, LimbLabel label)
+ {
+   float partAngle = spelHelper::getAngle(PartJoints.first, PartJoints.second);
+   float labelAngle = label.getAngle();
+   float error = partAngle - labelAngle;
+
+   return error;
+ }
+
+ map<int, vector<float>> LabelsLinearErrors(map<uint32_t, vector<LimbLabel>> &Labels, Skeleton &pattern)
+ {
+   map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(pattern);
+   map<int, vector<float>> Errors;
+   for (unsigned int id = 0; id < Labels.size(); id++)
+   {
+     vector<float> partErrors;
+     for (int k = 0; k < static_cast<int>(Labels[id].size()); k++)
+     {
+       float linearError = getLinearError(PartLocation[id], Labels[id][k]); // Distance between ideal body part and label
+       partErrors.push_back(linearError);
+     }
+     Errors.emplace(pair<int, vector<float>>(id, partErrors));
+   }
+
+   return Errors;
+ }
+
+ map<int, vector<float>> LabelsAngleErrors(map<uint32_t, vector<LimbLabel>> &Labels, Skeleton &pattern)
+ {
+   map<int, pair<Point2f, Point2f>> PartLocation = getPartLocations(pattern);
+   map<int, vector<float>> Errors;
+   for (unsigned int id = 0; id < Labels.size(); id++)
+   {
+     vector<float> partErrors;
+     for (int k = 0; k < static_cast<int>(Labels[id].size()); k++)
+     {
+       float angleError = getAngleError(PartLocation[id], Labels[id][k]); // Distance between ideal body part and label
+       partErrors.push_back(angleError);
+     }
+     Errors.emplace(pair<int, vector<float>>(id, partErrors));
+   }
+
+   return Errors;
+ }
+
+
+ map<int, map<int,LimbLabel>> selectEffectiveLabels(map<uint32_t, vector<LimbLabel>> &Labels, map<int, vector<Point2f>> &Errors, float TolerableLinearError)
+ {
+   map<int, map<int, LimbLabel>> effectiveLabels;
+   for (unsigned int id = 0; id < Labels.size(); id++)
+   {
+     map<int, LimbLabel> partEffectiveLabels;
+     for (int k = 0; k < static_cast<int>(Labels[id].size()); k++)
+     {
+       if (Errors[id][k].x <= TolerableLinearError && Labels[id][k].getAvgScore() >= 0)
+         partEffectiveLabels.emplace(pair<int, LimbLabel>(k, Labels[id][k]));
+     }
+     effectiveLabels.emplace(pair<int, map<int, LimbLabel>>(id, partEffectiveLabels));
+   }
+
+   return effectiveLabels;
+ }
+
+ vector<int> selectNotFoundedParts(Skeleton &skeleton, map<int, vector<float>> &Errors, map<uint32_t,vector<LimbLabel>> &Labels, int TolerableError, int TopLabelsCount)
+ {
+   vector<int> notFoundedParts;
+   int n = (TopLabelsCount == 0) ? Errors.size() : TopLabelsCount;
+   for (int i = 0; i < Errors.size(); i++)
+   {
+     bool partFound = false;
+     for (int k = 0; k < TopLabelsCount && k < Errors[i].size(); k++)
+       if (Errors[i][k] < TolerableError && Labels[i][k].getAvgScore() >=  0.0f)
+         partFound = true;
+     BodyPart *bodyPart = skeleton.getBodyPart(i);
+     if (!partFound && !bodyPart->getIsOccluded())
+       notFoundedParts.push_back(i);
+   }
+
+   return notFoundedParts;
+ }
 
 }
