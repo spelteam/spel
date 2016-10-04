@@ -467,8 +467,8 @@ TEST(surfDetectorTests, detect)
 
     // Cheking the values and put test result
     vector<int> notFoundedParts = selectNotFoundedParts(SkeletonPattern, LinearErrors, Labels, TolerableLinearError, TopLabelsCount);
-    cout << "\n EXECUTION TIME\n" << "\nTrain: " << train_t1 - train_t0 << " ms\n";
-    cout << "Detect: " << decect_t1 - decect_t0 << " ms\n";
+    cout << "\n EXECUTION TIME\n" << "\nTrain: " << clock_to_ms(train_t1 - train_t0) << " ms\n";
+    cout << "Detect: " << clock_to_ms(decect_t1 - decect_t0) << " ms\n";
 
     cout << "\n TEST PARAMETERS\n\n";
     cout << "Image size = " << Pattern[0]->getMask().size() << endl;

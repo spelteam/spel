@@ -618,7 +618,7 @@ namespace SPEL
 
     // Cheking the values and put test result
     vector<int> notFoundedParts = selectNotFoundedParts(SkeletonPattern, LinearErrors, Labels, TolerableLinearError, TopLabelsCount);
-    cout << "\n EXECUTION TIME\n" << "\nDetect : " << detect_t1 - detect_t0 << " ms\n";
+    cout << "\n EXECUTION TIME\n" << "\nDetect : " << clock_to_ms(detect_t1 - detect_t0) << " ms\n";
     cout << "\n TEST PARAMETERS\n\n";
     cout << "Image size = " << vFrames[0]->getMask().size() << endl;
     cout << "TolerableLinearError = " << TolerableLinearError << endl;

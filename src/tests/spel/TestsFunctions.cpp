@@ -835,4 +835,9 @@ void TestISM::computeISMcell(Frame* left, Frame* right, const int maxFrameHeight
    return notFoundedParts;
  }
 
+ long clock_to_ms(long ExecTime)
+ {
+   return ExecTime*1000 / CLOCKS_PER_SEC;
+ }
+
 }
