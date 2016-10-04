@@ -68,8 +68,12 @@ void SolveBoxWidget::interpolatorClicked(){
 
 void SolveBoxWidget::solverClicked(){
   SolverParametersDialog paramsDialog(this);
-  paramsDialog.exec();
-  /*QFuture<void> some = QtConcurrent::run(&Project::getInstance(),&Project::solveFrames);
-  Project::getInstance().futureWatcher.setFuture(some);
-  solver->setEnabled(false);*/
+  bool b = paramsDialog.exec();
+  if (b)
+  {
+    solver->setEnabled(false);
+    QFuture<void> some = QtConcurrent::run(&Project::getInstance(),&Project::solveFrames);
+    Project::getInstance().futureWatcher.setFuture(some);
+  }
 }
+
