@@ -50,7 +50,7 @@ namespace SPEL
     std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets);
   private:
 #ifdef DEBUG
-    FRIEND_TEST(tlpssolverTests, solve_3);
+    FRIEND_TEST(tlpssolverTests, solveGlobal);
     FRIEND_TEST(tlpssolverTests, evaluateSolution);
     FRIEND_TEST(tlpssolverTests, findFrameIndexById);
     FRIEND_TEST(tlpssolverTests, ScoreCostAndJointCost);

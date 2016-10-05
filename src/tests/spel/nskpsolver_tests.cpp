@@ -13,6 +13,7 @@
 #include "spelHelper.hpp"
 #include "TestsFunctions.hpp"
 #include "imagesimilaritymatrix.hpp"
+#include <ImageMaskSimilarityMatrix.hpp>
 
 
 #include <iostream>
@@ -332,25 +333,79 @@ namespace SPEL
   TEST(nskpsolverTests, solve_0)
   {
     //Load the input data
-    std::map<std::string, float>  params;
+    /*std::map<std::string, float>  params;
     TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
-    vector<Frame*> Frames = sequence.getFrames();
+    vector<Frame*> Frames = sequence.getFrames();*/
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
+    vector<Frame*> Frames = project.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
 
-    TestISM testISM;
-    testISM.build(Frames, false);
+
+    Frames[1]->setSkeleton(Patterns[1]->getSkeleton());//interpolation
+    /*
+    // Creating the joints 3D location
+    for (int i = 0; i < Frames.size(); i++)
+    {
+      Skeleton temp = Frames[i]->getSkeleton();
+      tree<BodyJoint> PartJoints = temp.getJointTree();
+      vector<float> z = { 2.0f, 2.0f, 1.0f, 3.0f, 2.0f, 0.0f, 4.0f, 0.0f, 3.0f, 2.0f, 0.0f, 4.0f, 1.0f, 3.0f, 0.0f, 4.0f, 1.0f, 3.0f };
+      for (tree<BodyJoint>::iterator i = PartJoints.begin(); i != PartJoints.end(); i++)
+      {
+        int id = i->getLimbID();
+        Point2f P = i->getImageLocation();
+        i->setSpaceLocation(Point3f(P.x, P.y, z[id]));
+      }
+      temp.setJointTree(PartJoints);
+      Frames[i]->setSkeleton(temp);
+    }*/
+    Sequence sequence(0, "", Frames);
+    //sequence.computeInterpolation(params);
+    //sequence.estimateUniformScale(params);
+
+    // Set Solver parameters
+    std::map<std::string, float>  params;
+    params.emplace("debugLevel", 1);
+    params.emplace("useCSdet", 1.0f); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.0f); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0f); //determine whether SURF detector is used and with what coefficient
+    params.emplace("temporalWindowSize", 0.0f);
+    params.emplace("maxPartCandidates", 4.0f);
+
+    params.emplace("baseRotationRange", 40.0f); //search angle range of +/- 60 degrees
+    float baseRotationRange = params.at("baseRotationRange");
+    params.emplace("baseRotationStep", baseRotationRange / 4.0f); //search with angle step of 10 degrees
+
+    params.emplace("baseSearchRadius", Frames[0]->getImageSize().height / 30.0f); //search a radius of 100 pixels
+    int baseSearchRadius = params.at("baseSearchRadius");
+    params.emplace("baseSearchStep", baseSearchRadius / 10.0f); //search in a grid every 10 pixels
+
+    params.emplace("partShiftCoeff", 1.5f); //search radius multiplier of distance between part in current and prev frames
+    params.emplace("partRotationCoeff", 1.5f); //rotation radius multiplier of distance between part in current and prev frames
+
+    params.emplace("scoreIndex", 0);											  //solver sensitivity parameters
+    params.emplace("imageCoeff", 1.0f); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 0.5f); //set solver body part connectivity sensitivity
+    params.emplace("jointLeeway", 0.05f); //set solver lenience for body part disconnectedness, as a percentage of part length
+    params.emplace("tempCoeff", 0.1f); //set the temporal link coefficient
+    params.emplace("tlpsLockframeThreshold", 0.52f); //set up the lockframe accept threshold by mask coverage
+    params.emplace("tlpsLockframeThreshold", 0.52f);
+
+    params.emplace("partDepthRotationCoeff", 1.0f);
+    params.emplace("withTLPS", 0.0f);
+    params.emplace("nskpLockframeThreshold", 0.0f);
+
 
     // Run "solve"
     NSKPSolver solver;
     std::vector<Solvlet> Solves;
-    Solves = solver.solve(sequence, params, testISM);
+    ImageMaskSimilarityMatrix ISM(Frames);
+    Solves = solver.solve(sequence, params, ISM);
 
     // Compute expected value and compare
-    CompareSolves(Solves, Frames, testISM); 
+    CompareSolves(Solves, Frames, ISM); 
 
     // Clear
-    //sequence.TestSequence::~TestSequence();
-    for (unsigned int i = 0; i < Frames.size(); i++)
-      delete Frames[i];
     Frames.clear();
   }
 

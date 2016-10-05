@@ -26,7 +26,7 @@ namespace SPEL
     EXPECT_EQ("TLPS", solver.getName());
   }
 
-  TEST(tlpssolverTests, solve_0)
+  TEST(tlpssolverTests, DISABLED_solve_0)
   {
     //Load the input data
     TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
@@ -48,7 +48,7 @@ namespace SPEL
     Frames.clear();
   }
 
-  TEST(tlpssolverTests, solve_1)
+  TEST(tlpssolverTests, DISABLED_solve_1)
   {
     //Load the input data
     TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
@@ -74,7 +74,7 @@ namespace SPEL
     Frames.clear();
   }
 
-  TEST(tlpssolverTests, solve_2)
+  TEST(tlpssolverTests, DISABLED_solve_2)
   {
     //Load the input data
     std::map<std::string, float>  params;
@@ -97,27 +97,81 @@ namespace SPEL
     Frames.clear();
   }
 
-  TEST(tlpssolverTests, solve_3)
-  {
+  TEST(tlpssolverTests, solveGlobal)
+  { 
     //Load the input data
-    std::map<std::string, float>  params;
+    /*std::map<std::string, float>  params;
     TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     vector<Frame*> Frames = project.getFrames();
-    Sequence sequence(0, "colorHistDetector", Frames);
+    Sequence sequence(0, "colorHistDetector", Frames);*/
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
+    vector<Frame*> Frames = project.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
+    
+    Frames[1]->setSkeleton(Patterns[1]->getSkeleton()); //interoilation
+    /*
+    // Creating the joints 3D location
+    for (int i = 0; i < Frames.size(); i++)
+    {
+      Skeleton temp = Frames[i]->getSkeleton();
+      tree<BodyJoint> PartJoints = temp.getJointTree();
+      vector<float> z = { 2.0f, 2.0f, 1.0f, 3.0f, 2.0f, 0.0f, 4.0f, 0.0f, 3.0f, 2.0f, 0.0f, 4.0f, 1.0f, 3.0f, 0.0f, 4.0f, 1.0f, 3.0f };
+      for (tree<BodyJoint>::iterator i = PartJoints.begin(); i != PartJoints.end(); i++)
+      {
+        int id = i->getLimbID();
+        Point2f P = i->getImageLocation();
+        i->setSpaceLocation(Point3f(P.x, P.y, z[id]));
+      }
+      temp.setJointTree(PartJoints);
+      Frames[i]->setSkeleton(temp);
+    }*/
+
+    Sequence sequence(0, "", Frames);
+
+    // Set Solver parameters
+    std::map<std::string, float>  params;
+    params.emplace("debugLevel", 1);
+    params.emplace("useCSdet", 1.0f); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 0.0f); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0f); //determine whether SURF detector is used and with what coefficient
+    params.emplace("temporalWindowSize", 0.0f);
+    params.emplace("maxPartCandidates", 4.0f);
+
+    params.emplace("baseRotationRange", 40.0f); //search angle range of +/- 60 degrees
+    float baseRotationRange = params.at("baseRotationRange");
+    params.emplace("baseRotationStep", baseRotationRange / 4.0f); //search with angle step of 10 degrees
+
+    params.emplace("baseSearchRadius", Frames[0]->getImageSize().height / 30.0f); //search a radius of 100 pixels
+    int baseSearchRadius = params.at("baseSearchRadius");
+    params.emplace("baseSearchStep", baseSearchRadius / 10.0f); //search in a grid every 10 pixels
+
+    params.emplace("partShiftCoeff", 1.5f); //search radius multiplier of distance between part in current and prev frames
+    params.emplace("partRotationCoeff", 1.5f); //rotation radius multiplier of distance between part in current and prev frames
+
+    params.emplace("scoreIndex", 0); //solver sensitivity parameters
+    params.emplace("imageCoeff", 1.0f); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 0.5f); //set solver body part connectivity sensitivity
+    params.emplace("jointLeeway", 0.05f); //set solver lenience for body part disconnectedness, as a percentage of part length
+    params.emplace("tempCoeff", 0.1f); //set the temporal link coefficient
+    params.emplace("tlpsLockframeThreshold", 0.52f); //set up the lockframe accept threshold by mask coverage
+
+    params.emplace("partDepthRotationCoeff", 1.0f);
+    sequence.estimateUniformScale(params);
 
     // Run "solveGlobal"
     TLPSSolver solver;
     std::vector<Solvlet> Solves;
     Solves = solver.solveGlobal(sequence, params);
-
+/*
     // Compute expected value and compare
     TestISM testISM;
     testISM.build(Frames, false);
-    CompareSolves(Solves, Frames, testISM);
+    CompareSolves(Solves, Frames, testISM);*/
 
     // Clear
     //project.TestProjectLoader::~TestProjectLoader();
-    Frames.clear();
+    Frames.clear();    
   }
 
   TEST(tlpssolverTests, DISABLED_solveWindowed)
