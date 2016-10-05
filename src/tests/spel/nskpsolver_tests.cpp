@@ -13,7 +13,7 @@
 #include "spelHelper.hpp"
 #include "TestsFunctions.hpp"
 #include "imagesimilaritymatrix.hpp"
-#include <ImageMaskSimilarityMatrix.hpp>
+#include <imagemasksimilaritymatrix.hpp>
 
 
 #include <iostream>
@@ -383,7 +383,7 @@ namespace SPEL
     params.emplace("partShiftCoeff", 1.5f); //search radius multiplier of distance between part in current and prev frames
     params.emplace("partRotationCoeff", 1.5f); //rotation radius multiplier of distance between part in current and prev frames
 
-    params.emplace("scoreIndex", 0);											  //solver sensitivity parameters
+    params.emplace("scoreIndex", 0); //solver sensitivity parameters
     params.emplace("imageCoeff", 1.0f); //set solver detector infromation sensitivity
     params.emplace("jointCoeff", 0.5f); //set solver body part connectivity sensitivity
     params.emplace("jointLeeway", 0.05f); //set solver lenience for body part disconnectedness, as a percentage of part length
@@ -394,7 +394,6 @@ namespace SPEL
     params.emplace("partDepthRotationCoeff", 1.0f);
     params.emplace("withTLPS", 0.0f);
     params.emplace("nskpLockframeThreshold", 0.0f);
-
 
     // Run "solve"
     NSKPSolver solver;
