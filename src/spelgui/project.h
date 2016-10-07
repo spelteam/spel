@@ -94,8 +94,13 @@ namespace posegui {
 
     void interpolateFrames();
     void solveFrames();
+
     void setProjectParameters(std::map<std::string, float> params);
+    void saveProgectParameters();
+    void Project::loadProgectParameters();
     std::map<std::string, float> getProjectParameters();
+
+
   private:
     //open project helpers
     void setProjectFolder(const QString &filename);

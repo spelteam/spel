@@ -22,7 +22,7 @@
 #include "project.h"
 
 #include <QDebug>
-
+#include <iostream>
 
 namespace posegui {
 
@@ -90,6 +90,9 @@ namespace posegui {
     }
     //mark as opened
     currState = ProjectState::OPENED;
+
+    //paremeters
+    loadProgectParameters();
   }
 
   void Project::save(const QString &filename, QFutureWatcher<void> *watcher){
@@ -121,6 +124,9 @@ namespace posegui {
     ProjectDocument document;
     document.setDocument(doc);
     document.write(projectPaths.projectFolder + filename + ".xml");
+
+    //paremeters
+    saveProgectParameters();
   }
 
   void Project::save(QFutureWatcher<void> *watcher){
@@ -240,7 +246,7 @@ namespace posegui {
 */  
     Sequence seq(0, "test", getFrames());
     setFrames(seq.getFrames());
-	params = parameters;
+    params = parameters;
     if(params.size() == 0)
     {
       params.emplace("debugLevel", 1);
@@ -295,7 +301,7 @@ namespace posegui {
       return;
     }
     QTextStream out(&file);
-	out << "params size = " << getProjectParameters().size() << endl;
+    out << "params size = " << getProjectParameters().size() << endl;
     out << "Solve size = " << solve_.size() << endl;
     for(int i = 0; i < solve_.size(); i++)
     out << "Solve[" << i << "] size = " << solve_[i].getLabels().size() << endl;
@@ -402,6 +408,47 @@ namespace posegui {
   void Project::updateParameters(std::map<std::string, float> params)
   {
     setProjectParameters(params);
+    saveProgectParameters();
+  }
+
+  void  Project::saveProgectParameters()
+  {
+    string FileName = projectPaths.projectFilename.toStdString();
+    string ProgectName = projectPaths.projectFolder.toStdString();
+
+    ProgectName.append("/");
+    FileName.append(".dat");
+    ProgectName.append(FileName);
+
+    ofstream file(ProgectName);
+    for(auto p = parameters.begin(); p != parameters.end(); p++)
+      file << p->first << " " << p->second << endl;
+    file.close();
+  }
+
+  void  Project::loadProgectParameters()
+  {
+    string FileName = projectPaths.projectFilename.toStdString();
+    string ProgectName = projectPaths.projectFolder.toStdString();
+
+    ProgectName.append("/");
+    FileName.append(".dat");
+    ProgectName.append(FileName);
+
+	ofstream out("temp.txt");
+
+    ifstream file(ProgectName);
+    string name;
+    float value;
+    while(!file.eof())
+    {
+      file >> name;
+      file >> value;
+	  out << name << " ~ " << value << endl;
+      parameters.emplace(pair<std::string, float>(name, value));
+    }
+    file.close();
+	out.close();
   }
 
   std::map<std::string, float> Project::getProjectParameters()

@@ -7,6 +7,6 @@
 
 namespace posegui 
 {
-  std::map<std::string, std::map<std::string, float>> setDefaultParameters(std::vector<std::string> groupsNames);
+  std::map<std::string, std::map<std::string, float>> DefaultParameters(std::vector<std::string> groupsNames);
 }
 

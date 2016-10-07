@@ -20,12 +20,14 @@ public:
   ~SolverParametersDialog();
   void removeEmptyCells();
   void addParameter(std::pair<std::string, float> parameter);
-  void addParameters(std::map<std::string, float> parameter);
-  void setDefaultGUIParameters();
+  void addParameters(std::map<std::string, float> parameters);
+  void setDefaultParameters();
+  void setParameters(std::map<std::string, float> parameters);
+  void clearParameters();
   std::map<std::string, float> ExtractParameters(std::string TabName, std::map<std::string, float> parameters);
   std::map<std::string, float> getAllParameters();
   void copyTableCells(std::string group);
-  std::map<std::string, std::map<std::string, float>> GroupedParameters;
+
 signals:
   void tabBarClicked_(QWidget *, int );
   void ParametersUpdated(std::map<std::string, float>);
@@ -49,7 +51,7 @@ private:
   std::map<std::string, float> CHDetectorParameters;
   std::map<std::string, float> nskpParameters;
   std::map<std::string, float> tlpsParameters;*/
- 
+  std::map<std::string, std::map<std::string, float>> GroupedParameters;
   std::vector<std::string> GroupsNames;
   std::string previousGroup;
   std::string currentGroup;

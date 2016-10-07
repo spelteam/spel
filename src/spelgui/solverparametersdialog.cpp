@@ -52,11 +52,9 @@ ui(new Ui::SolverParametersDialog)
   QObject::connect(ui->tabWidget_2, &QTabWidget::tabBarClicked, this, &SolverParametersDialog::tabWidget2_Clicked);
   QObject::connect(ui->tabWidget_3, &QTabWidget::tabBarClicked, this, &SolverParametersDialog::tabWidget3_Clicked);
 
-  //QObject::connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &SolverParametersDialog::DialogAccepted);
-
-  setDefaultGUIParameters();
-  /*if(ui->tableWidget->rowCount() > 0)*/
-  removeEmptyCells();
+  setDefaultParameters();
+  if(ui->tableWidget->rowCount() > 0)
+    removeEmptyCells();
   emit tabBarClicked_(ui->tabWidget, 0);
 
   //init solver tab with NSKP params
@@ -64,7 +62,7 @@ ui(new Ui::SolverParametersDialog)
   //this->setStyleSheet( posegui::Utility::fileToString(":/root/resources/stylesheets/GroupBox2.qss") );
 }
 
-void SolverParametersDialog::setDefaultGUIParameters()
+void SolverParametersDialog::setDefaultParameters()
 {
   std::map<std::string, float> temp;
   /*std::vector<QWidget*> TabBars= { ui->tab_3, ui->tab_2, ui->tab, ui->tab_4, ui->tab_5, ui->tab_6, ui->tab_7, ui->tab_8 };
@@ -75,13 +73,53 @@ void SolverParametersDialog::setDefaultGUIParameters()
     groupsNames.push_back(GroupName);
   }*/
 
-  GroupedParameters = setDefaultParameters(GroupsNames);
+  GroupedParameters = DefaultParameters(GroupsNames);
 
   //Disabling the SURF detector
   if (GroupedParameters.find("Global") != GroupedParameters.end())
     if (GroupedParameters["Global"].find("useSURFdet") != GroupedParameters["Global"].end())
       GroupedParameters["Global"]["useSURFdet"] = 0.0f;
 
+}
+
+void SolverParametersDialog::setParameters(std::map<std::string, float> params)
+{
+  std::map<std::string, float> P = params;
+  if (P.size() > 0)
+  {
+    clearParameters();
+    for (int i = ui->tableWidget->rowCount() - 1; i > -1; i--)
+      ui->tableWidget->removeRow(i);
+    setDefaultParameters();
+    std::map<std::string, std::map<std::string, float>> temp;
+    for (unsigned int i = 0; i < GroupsNames.size(); i++)
+    {
+      std::string group = GroupsNames[i];
+      temp.emplace(std::pair<std::string, std::map<std::string, float>>(group, std::map<std::string, float>()));
+      for (auto p = P.begin(); p != P.end(); p++)
+      {
+        std::string parameter = p->first;
+        if (GroupedParameters[group].find(parameter) != GroupedParameters[group].end())
+        {
+          temp[group].emplace(*p);
+          P.erase(parameter);
+        }
+      }
+    }
+    for (auto p = P.begin(); p != P.end(); p++)
+    temp["Global"].emplace(*p);
+
+    GroupedParameters = temp;
+    emit tabBarClicked_(ui->tabWidget, 0);
+  }
+}
+
+void SolverParametersDialog::clearParameters()
+{ 
+  //std::map<std::string, std::map<std::string, float>>::iterator p;
+  for(auto p = GroupedParameters.begin(); p != GroupedParameters.end(); p++)
+    p->second.clear();
+  GroupedParameters.clear();
 }
 
 std::map<std::string, float> SolverParametersDialog::ExtractParameters(std::string TabName, std::map<std::string, float> parameters)
@@ -91,11 +129,12 @@ std::map<std::string, float> SolverParametersDialog::ExtractParameters(std::stri
   {
     std::map<std::string, float>::iterator p;
     for (p = GroupedParameters[TabName].begin(); p != GroupedParameters[TabName].end(); p++)
-        parameters.emplace(*p);
+      parameters.emplace(*p);
   }
 
   return parameters;
 }
+
 
 void SolverParametersDialog::removeEmptyCells()
 {
@@ -252,7 +291,7 @@ void SolverParametersDialog::OnTabBarClicked(QWidget* p, int n)
 
 std::map<std::string, float> SolverParametersDialog::getAllParameters()
 {
-	//copyTableCells(previousGroup);
+    //copyTableCells(previousGroup);
   std::map<std::string, float> parameters;
   for (int i = GroupsNames.size() - 1; i > -1; i--)
     parameters = ExtractParameters(GroupsNames[i], parameters);

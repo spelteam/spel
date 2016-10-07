@@ -68,7 +68,10 @@ void SolveBoxWidget::interpolatorClicked(){
 }
 
 void SolveBoxWidget::solverClicked(){
+
   SolverParametersDialog paramsDialog(this);
+  auto P = Project::getInstance().getProjectParameters();
+  paramsDialog.setParameters(P);
 
   bool b = paramsDialog.exec();
   if (b)
@@ -77,6 +80,7 @@ void SolveBoxWidget::solverClicked(){
     {
       std::map<std::string, float> params = paramsDialog.getAllParameters();
       Project::getInstance().setProjectParameters(params);
+      Project::getInstance().saveProgectParameters();
       solver->setEnabled(false);
       emit startSolve();
       QFuture<void> some = QtConcurrent::run(&Project::getInstance(), &Project::solveFrames);
