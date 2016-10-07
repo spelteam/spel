@@ -435,8 +435,6 @@ namespace posegui {
     FileName.append(".dat");
     ProgectName.append(FileName);
 
-	ofstream out("temp.txt");
-
     ifstream file(ProgectName);
     string name;
     float value;
@@ -444,11 +442,9 @@ namespace posegui {
     {
       file >> name;
       file >> value;
-	  out << name << " ~ " << value << endl;
       parameters.emplace(pair<std::string, float>(name, value));
     }
     file.close();
-	out.close();
   }
 
   std::map<std::string, float> Project::getProjectParameters()

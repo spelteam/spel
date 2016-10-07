@@ -97,7 +97,7 @@ namespace posegui {
 
     void setProjectParameters(std::map<std::string, float> params);
     void saveProgectParameters();
-    void Project::loadProgectParameters();
+    void loadProgectParameters();
     std::map<std::string, float> getProjectParameters();
 
 
