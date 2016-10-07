@@ -18,7 +18,7 @@ ui(new Ui::SolverParametersDialog)
   ui->tableWidget->horizontalHeader()->resizeSection(0, 180);
   ui->tableWidget->horizontalHeader()->setMaximumSectionSize(220);
   ui->tableWidget->horizontalHeader()->setSortIndicator(0, Qt::SortOrder::AscendingOrder);
-  ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+  ui->tableWidget->setSelectionMode(QAbstractItemView::NoSelection);
   ui->tableWidget->setCurrentCell(0, 0);
 
   ui->tabWidget->setCurrentWidget(ui->tab_3);
