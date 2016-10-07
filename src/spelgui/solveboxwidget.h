@@ -16,12 +16,14 @@ public:
   explicit SolveBoxWidget(QWidget *parent = 0);
   virtual ~SolveBoxWidget();
 signals:
+  void startSolve();
 
-  public slots :
+  public slots:
     void loadProjectEvent();
-  void closeProjectEvent();
-  void keyframeUpdatedEvent();
-  void solveFinishedEvent();
+
+    void closeProjectEvent();
+    void keyframeUpdatedEvent();
+    void solveFinishedEvent();
   private slots:
   void interpolatorClicked();
   void solverClicked();

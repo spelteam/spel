@@ -30,6 +30,7 @@ class MainWindow : public QMainWindow
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
+
 protected:
   void closeEvent(QCloseEvent *) override;
   private slots:
@@ -39,6 +40,11 @@ protected:
   void on_actionSave_triggered();
 
   void on_actionSave_as_triggered();
+
+  void showSolveFinished();
+  void showSolveProcessing();
+  void showBuildISM();
+  void showISMBuilded();
 
 private:
   //layouts

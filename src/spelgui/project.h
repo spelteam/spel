@@ -16,6 +16,7 @@
 #include <vector>
 #include "filepathstorage.h"
 #include "projectattrstorage.h"
+#include <imagemasksimilaritymatrix.hpp>
 
 using namespace SPEL;
 using namespace std;
@@ -54,10 +55,16 @@ namespace posegui {
     void create();
     void load();
     void close();
+    void startSolve();
+    void solveFinished();
+    void BuildISM();
+    void ISMBuilded();
 
     void keyframeUpdated();
     public slots:
-    //void interpolateFramesEvent();
+      //void interpolateFramesEvent();
+      void updateParameters(std::map<std::string, float>);
+
     private slots :
       void loadProjectEvent();
     void closeProjectEvent();
@@ -87,6 +94,8 @@ namespace posegui {
 
     void interpolateFrames();
     void solveFrames();
+    void setProjectParameters(std::map<std::string, float> params);
+    std::map<std::string, float> getProjectParameters();
   private:
     //open project helpers
     void setProjectFolder(const QString &filename);
@@ -101,6 +110,7 @@ namespace posegui {
     FilePathStorage projectPaths;
     ProjectAttrStorage settings;
     ProjectState currState = ProjectState::CLOSED;
+    std::map<std::string, float> parameters;
   };
 
 }

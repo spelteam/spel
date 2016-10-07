@@ -94,6 +94,8 @@ LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodypartsheaderhandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodyjointshandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/bodypartshandler.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_SRC model_handlers/frameshandler.cpp)
+#Other
+LIST(APPEND ${SPELGUI_MODULE}_SRC GUISolveParameters.cpp)
 LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/modelhandler.h)
 LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodyjointhandler.h)
 LIST(APPEND ${SPELGUI_MODULE}_HDR model_handlers/bodyparthandler.h)
@@ -131,6 +133,8 @@ LIST(APPEND ${SPELGUI_MODULE}_HDR solverparametersdialog.h)
 LIST(APPEND ${SPELGUI_MODULE}_HDR toolboxwidget.h)
 LIST(APPEND ${SPELGUI_MODULE}_HDR utility.h)
 LIST(APPEND ${SPELGUI_MODULE}_HDR xmlmessagehandler.h)
+#Other
+LIST(APPEND ${SPELGUI_MODULE}_HDR GUISolveParameters.h)
 
 
 #Add forms

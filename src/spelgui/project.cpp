@@ -211,10 +211,10 @@ namespace posegui {
     QTime timer;
     timer.start();
     //run solver
-    std::vector<Solvlet> solve;
+    std::vector<Solvlet> solve_;
     NSKPSolver solver;
     map <string, float> params; //use the default params
-
+/*
     params.emplace("debugLevel", 3); //set the debug setting to highest (0,1,2,3)
     Sequence seq(0, "test", getFrames());
     seq.estimateUniformScale(params);
@@ -237,14 +237,57 @@ namespace posegui {
     params.emplace("acceptLockframeThreshold", 0.52); //set the threshold for NSKP and TLPSSolvers, forcing TLPS to reject some solutions
     params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
     params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
-    //nskp solver solve
-    ImagePixelSimilarityMatrix ism;
-    if (!ism.read("testISM.ism"))
+*/  
+    Sequence seq(0, "test", getFrames());
+    setFrames(seq.getFrames());
+	params = parameters;
+    if(params.size() == 0)
     {
-      ism.buildImageSimilarityMatrix(getFrames());
-      ism.write(("testISM.ism"));
+      params.emplace("debugLevel", 1);
+      params.emplace("useCSdet", 1.0f); //determine if ColHist detector is used and with what coefficient
+      params.emplace("useHoGdet", 1.0f); //determine if HoG descriptor is used and with what coefficient
+      params.emplace("useSURFdet", 0.0f); //determine whether SURF detector is used and with what coefficient
+      params.emplace("temporalWindowSize", 0.0f);
+      params.emplace("maxPartCandidates", 10.0f);
+
+      params.emplace("baseRotationRange", 40.0f); //search angle range of +/- 60 degrees
+      float baseRotationRange = params.at("baseRotationRange");
+      params.emplace("baseRotationStep", baseRotationRange / 4.0f); //search with angle step of 10 degrees
+
+      params.emplace("baseSearchRadius", seq.getFrames()[0]->getImageSize().height / 30.0f); //search a radius of 100 pixels
+      int baseSearchRadius = params.at("baseSearchRadius");
+      params.emplace("baseSearchStep", baseSearchRadius / 10.0f); //search in a grid every 10 pixels
+
+      params.emplace("partShiftCoeff", 1.5f); //search radius multiplier of distance between part in current and prev frames
+      params.emplace("partRotationCoeff", 1.5f); //rotation radius multiplier of distance between part in current and prev frames
+
+      params.emplace("scoreIndex", 0); //solver sensitivity parameters
+      params.emplace("imageCoeff", 1.0f); //set solver detector infromation sensitivity
+      params.emplace("jointCoeff", 0.5f); //set solver body part connectivity sensitivity
+      params.emplace("jointLeeway", 0.05f); //set solver lenience for body part disconnectedness, as a percentage of part length
+      params.emplace("tempCoeff", 0.1f); //set the temporal link coefficient
+      params.emplace("tlpsLockframeThreshold", 0.52f); //set up the lockframe accept threshold by mask coverage
+      params.emplace("tlpsLockframeThreshold", 0.52f);
+
+      params.emplace("partDepthRotationCoeff", 1.0f);
+      params.emplace("withTLPS", 0.0f);
+      params.emplace("nskpLockframeThreshold", 0.0f);
     }
-    solve = solver.solve(seq, params, ism);
+    //nskp solver solve
+    emit BuildISM();
+    ImageMaskSimilarityMatrix ism;
+    /*if (!ism.read("testISM.ism"))
+    {*/
+      ism.buildImageSimilarityMatrix(getFrames());
+      emit ISMBuilded();
+      ism.write(("CurrentProjectISM.ism"));
+      emit ISMBuilded();
+    //}
+    emit startSolve();
+    solve_ = solver.solve(seq, params, ism);
+    emit solveFinished();
+
+    //ofstream out( "solve.txt");
     //draw solution
     QFile file("solve.txt");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
@@ -252,10 +295,15 @@ namespace posegui {
       return;
     }
     QTextStream out(&file);
-    for (const Solvlet& solvlet : solve){
+	out << "params size = " << getProjectParameters().size() << endl;
+    out << "Solve size = " << solve_.size() << endl;
+    for(int i = 0; i < solve_.size(); i++)
+    out << "Solve[" << i << "] size = " << solve_[i].getLabels().size() << endl;
+
+    for (Solvlet& solvlet : solve_){
       out << "Solvlet|Frame Id: " << solvlet.getFrameID() << endl;
       vector<LimbLabel> labels = solvlet.getLabels();
-      for (const LimbLabel& label : labels){
+      for (LimbLabel& label : labels){
         out << "Limb|Id: " << label.getLimbID() << endl;
         out << "Limb|Is occluded: " << label.getIsOccluded() << endl;
         //out << "Limb|Is weak: " << label.getIsWeak() << endl;
@@ -274,6 +322,7 @@ namespace posegui {
       out << "\n\n\n";
     }
     file.close();
+    //out.close();
     /*for( const Solvlet& solvlet : solve ){
         qDebug() << "Solvlet Frame id: " << solvlet.getFrameID() << endl;
         auto frameIterator = std::find_if(frames.begin(), frames.end(),
@@ -287,11 +336,11 @@ namespace posegui {
         }
 
         }*/
-    this->solve = solve;
+    this->solve = solve_;
+    emit solveFinished();
     int elapsed = timer.elapsed();
     qDebug() << "Solve is finished: " + QString::number(elapsed) << endl;
   }
-
 
 
   //PRIVATE
@@ -343,6 +392,21 @@ namespace posegui {
   void Project::setProjectFilename(const QString &filename){
     QString name = QFileInfo(filename).baseName();
     projectPaths.projectFilename = name;
+  }
+  
+  void  Project::setProjectParameters(std::map<std::string, float> params)
+  {
+    parameters = params;
+  }
+
+  void Project::updateParameters(std::map<std::string, float> params)
+  {
+    setProjectParameters(params);
+  }
+
+  std::map<std::string, float> Project::getProjectParameters()
+  {
+    return parameters;
   }
 
 }

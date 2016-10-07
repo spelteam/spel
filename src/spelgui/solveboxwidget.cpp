@@ -6,6 +6,7 @@
 #include "solverparametersdialog.h"
 #include "project.h"
 #include <QtConcurrent/QtConcurrent>
+#include <QErrorMessage>
 
 using posegui::Project;
 //PUBLIC
@@ -68,12 +69,21 @@ void SolveBoxWidget::interpolatorClicked(){
 
 void SolveBoxWidget::solverClicked(){
   SolverParametersDialog paramsDialog(this);
+  std::map<std::string, float> params = paramsDialog.getAllParameters();
+  Project::getInstance().setProjectParameters(params);
   bool b = paramsDialog.exec();
   if (b)
   {
-    solver->setEnabled(false);
-    QFuture<void> some = QtConcurrent::run(&Project::getInstance(),&Project::solveFrames);
-    Project::getInstance().futureWatcher.setFuture(some);
+    if (Project::getInstance().getFrames().size() > 0)
+    {
+      emit startSolve();
+      solver->setEnabled(false);
+      QFuture<void> some = QtConcurrent::run(&Project::getInstance(), &Project::solveFrames);
+      Project::getInstance().futureWatcher.setFuture(some);
+      //Project::getInstance().solveFrames();
+    }
+    else
+      (new QErrorMessage(this))->showMessage("Solve error: Project not loaded");
   }
 }
 

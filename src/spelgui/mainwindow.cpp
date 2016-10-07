@@ -96,6 +96,14 @@ ui(new Ui::MainWindow)
   QObject::connect(&watcher, &QFutureWatcher<void>::progressTextChanged,
     progressBar, &QProgressBar::setFormat);
 
+  QObject::connect(&Project::getInstance(), &Project::startSolve, this, &MainWindow::showSolveProcessing);
+  QObject::connect(&Project::getInstance(), &Project::solveFinished, this, &MainWindow::showSolveFinished);
+  QObject::connect(solveTools, &SolveBoxWidget::startSolve, this, &MainWindow::showSolveProcessing);
+  QObject::connect(&Project::getInstance(), &Project::solveFinished, solveTools, &SolveBoxWidget::solveFinishedEvent);
+
+  QObject::connect(&Project::getInstance(), &Project::BuildISM, this, &MainWindow::showBuildISM);
+  QObject::connect(&Project::getInstance(), &Project::ISMBuilded, this, &MainWindow::showISMBuilded);
+
 }
 
 MainWindow::~MainWindow()
@@ -107,6 +115,31 @@ MainWindow::~MainWindow()
   delete frameTools;
   delete  currFrame;
 }
+
+void MainWindow::showBuildISM()
+{
+  setCursor(Qt::WaitCursor);
+  ui->statusBar->showMessage("Building ISM...");
+}
+
+void MainWindow::showISMBuilded()
+{
+  setCursor(Qt::ArrowCursor);
+  ui->statusBar->showMessage("ISM builded", 3000);
+}
+
+void MainWindow::showSolveProcessing()
+{
+  setCursor(Qt::WaitCursor);
+  ui->statusBar->showMessage("Solving the project...");
+}
+
+void MainWindow::showSolveFinished()
+{
+  setCursor(Qt::ArrowCursor);
+  ui->statusBar->showMessage("Solved", 3000);
+}
+
 
 //PROTECTED
 
