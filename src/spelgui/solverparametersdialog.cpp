@@ -186,7 +186,7 @@ void SolverParametersDialog::AddButton_Clicked()
   ui->tableWidget->setRowCount(n + 1); 
   QTableWidgetItem* temp = new QTableWidgetItem(QString::fromStdString(""));
   ui->tableWidget->setItem(n, 0, temp);
-  temp->setSelected(true);
+  ui->tableWidget->setCurrentCell(n,0);
   ui->tableWidget->editItem(temp);
   //ui->tableWidget->setSortingEnabled(true);
   getAllParameters();
