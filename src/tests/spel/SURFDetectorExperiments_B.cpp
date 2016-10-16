@@ -508,6 +508,9 @@ namespace SPEL
     // Create parameters
     map<string, float> params;
     params.emplace(std::pair<std::string, float>("markingLinearError", 10.0f));
+    params.emplace(std::pair<std::string, float>("minHessian", 300.0f));
+    //params.emplace(std::pair<std::string, float>("FixedWidthCells", 3.0f));
+    //params.emplace(std::pair<std::string, float>("FixedLenghtCells", 5.0f));
 
     // Run train
     SURFDetector D;

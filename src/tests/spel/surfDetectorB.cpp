@@ -1,5 +1,5 @@
 #include "surfDetectorB.hpp"
-#include "surfDetector.hpp"
+//#include "surfDetector.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
 #include "interpolation.hpp"
@@ -42,10 +42,10 @@ namespace SPEL
       params.emplace(SPEL_SET_PARAMETER("markingLinearError", 10.0f));
       parameters.markingLinearError = params.at("markingLinearError");
 
-      params.emplace(SPEL_SET_PARAMETER("FixedWidthCells", 0.0f));
+      params.emplace(SPEL_SET_PARAMETER("FixedWidthCells", 3.0f));
       parameters.FixedWidthCells = static_cast<int>(params.at("FixedWidthCells"));
 
-      params.emplace(SPEL_SET_PARAMETER("FixedLenghtCells", 0.0f));
+      params.emplace(SPEL_SET_PARAMETER("FixedLenghtCells", 5.0f));
       parameters.FixedLenghtCells = static_cast<int>(params.at("FixedLenghtCells"));
 
       params.emplace(SPEL_SET_PARAMETER("useDefaultCellsCount", 1.0f));
@@ -183,11 +183,11 @@ namespace SPEL
     d = pt - polygon[3];
     float c = sqrt(d.x*d.x + d.y*d.y);
     float p = 0.5*(a + b + c);
-    float dw = 2 * sqrt(p*(p - a)*(p - b)*(p - c)) / a;
-    float dl = sqrt(c*c - dw*dw);
+    float dl = 2 * sqrt(p*(p - a)*(p - b)*(p - c)) / a;
+    float dw = sqrt(b*b - dl*dl);
     int nw = trunc(dw / w);
     int nl = trunc(dl / l);
-    int id  = PartID * CellsCount.width*CellsCount.height + CellsCount.width*nl + nw;
+    int id  = PartID *100000 + /*CellsCount.width*CellsCount.height + */CellsCount.width*nl + nw;
     return id;
   }
 
@@ -261,6 +261,7 @@ namespace SPEL
         setCellsCount(partRects, e);
       if (parameters.FixedWidthCells >= 1 || parameters.FixedLenghtCells >= 1)
         setFixedCellsCount(cv::Size(parameters.FixedWidthCells, parameters.FixedLenghtCells));
+      //VerifyCellsCount(partRects, MaskKeypoins);
     }
     if (Trained.PartKeypointsCount.size() == 0)
       for (unsigned int k = 0; k < partRects.size(); k++)
