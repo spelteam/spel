@@ -744,7 +744,7 @@ void TestISM::computeISMcell(Frame* left, Frame* right, const int maxFrameHeight
    vector<float> partsErrors; 
    for (int i = 0; i < Errors.size(); i++)
    {
-     float error = 10000;
+     float error = INFINITY;
      for(int k = 0; k < Errors[i].size() && k < TopLabelsCount; k++)
        if(abs(Errors[i][k]) < error)
          error = abs(Errors[i][k]);

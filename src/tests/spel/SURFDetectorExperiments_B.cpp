@@ -496,7 +496,12 @@ namespace SPEL
   TEST(SURFDetectorExperiments_B, SURFDetector)
   {
     //Load the input data
-    //TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
+    /*TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = project.getFrames();
+    for(int i = 0; i < SFrames.size(); i++) SFrames[i]->Resize(720);
+    Frame* Pattern = SFrames[0];
+    Skeleton SkeletonPattern = Pattern->getSkeleton();*/
+
     TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
     vector<Frame*> SFrames = project.getFrames();
 
@@ -504,7 +509,7 @@ namespace SPEL
     vector<Frame*> Frames = projectPattern.getFrames();
     Frame* Pattern = Frames[1];
     Skeleton SkeletonPattern = Pattern->getSkeleton(); //Copying the manually marked skeleton
-
+    
     // Create parameters
     map<string, float> params;
     params.emplace(std::pair<std::string, float>("markingLinearError", 10.0f));
@@ -528,7 +533,7 @@ namespace SPEL
 
     /*cout << "Keypoints:" << endl;	
     for (int i = 0; i < D.Trained.PartKeypoints.size(); i++)
-      cout << "Part[" i << "]: " << D.Trained.PartKeypoints[i].size() << endl;*/
+      cout << "Part[" << i << "]: " << D.Trained.PartKeypoints[i].size() << endl;*/
 
     cout << endl << " DETECTOR PARAMETERS\n\n";
 
@@ -592,7 +597,7 @@ namespace SPEL
     cout << "\nLimbLabels saved in file: " << OutputFileName << endl << endl;
 
     SFrames.clear();
-    Frames.clear();
+    //Frames.clear();
   }
 
   TEST(SURFDetectorExperiments, getPartPolygon)
