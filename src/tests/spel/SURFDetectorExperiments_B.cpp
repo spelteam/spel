@@ -509,8 +509,9 @@ namespace SPEL
     map<string, float> params;
     params.emplace(std::pair<std::string, float>("markingLinearError", 10.0f));
     params.emplace(std::pair<std::string, float>("minHessian", 300.0f));
-    //params.emplace(std::pair<std::string, float>("FixedWidthCells", 3.0f));
-    //params.emplace(std::pair<std::string, float>("FixedLenghtCells", 5.0f));
+    //params.emplace(std::pair<std::string, float>("FixedWidthCells", 10.0f));
+    //params.emplace(std::pair<std::string, float>("FixedLenghtCells", 10.0f));
+    //params.emplace(std::pair<std::string, float>("useMask", 0.0f));
 
     // Run train
     SURFDetector D;
@@ -524,6 +525,10 @@ namespace SPEL
     long detect_t0 = clock();
     Labels = D.detect(SFrames[1], params, Labels);
     long detect_t1 = clock();
+
+    /*cout << "Keypoints:" << endl;	
+    for (int i = 0; i < D.Trained.PartKeypoints.size(); i++)
+      cout << "Part[" i << "]: " << D.Trained.PartKeypoints[i].size() << endl;*/
 
     cout << endl << " DETECTOR PARAMETERS\n\n";
 
