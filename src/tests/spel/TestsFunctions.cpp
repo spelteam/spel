@@ -713,7 +713,7 @@ void TestISM::computeISMcell(Frame* left, Frame* right, const int maxFrameHeight
    float significantLinearError = *std::max_element(significantLinearErrors.begin(), significantLinearErrors.end());
    float significantAngleError = *std::max_element(significantAngleErrors.begin(), significantAngleErrors.end());
    fout << "Parts significant linear errors sorted by PartID, (pixels): " << significantLinearErrors << endl;
-   fout << "Parts significant angle errors sorted by PartID, (pixels): " << significantAngleErrors << endl;
+   fout << "Parts significant angle errors sorted by PartID, (degrees): " << significantAngleErrors << endl;
    fout << "The maximum linear error, (pixels): " << significantLinearError << endl;
    fout << "The maximum angle error, (degrees): " << significantAngleError << endl;   
  }
@@ -744,7 +744,7 @@ void TestISM::computeISMcell(Frame* left, Frame* right, const int maxFrameHeight
    vector<float> partsErrors; 
    for (int i = 0; i < Errors.size(); i++)
    {
-     float error = 10000;
+     float error = INFINITY;
      for(int k = 0; k < Errors[i].size() && k < TopLabelsCount; k++)
        if(abs(Errors[i][k]) < error)
          error = abs(Errors[i][k]);

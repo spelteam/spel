@@ -400,6 +400,12 @@ namespace SPEL
     std::vector<Solvlet> Solves;
     ImageMaskSimilarityMatrix ISM(Frames);
     Solves = solver.solve(sequence, params, ISM);
+    cout << "Solves size = " << Solves.size() << endl;
+    for (int i = 0; i < Solves.size(); i++)
+    {
+      Skeleton x = Solves[i].toSkeleton(Patterns[1]->getSkeleton());
+      cout << "PartTree[" << i << "] size = " << x.getPartTree().size() << endl;
+    }
 
     // Compute expected value and compare
     CompareSolves(Solves, Frames, ISM); 

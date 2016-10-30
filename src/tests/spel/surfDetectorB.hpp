@@ -28,6 +28,7 @@ namespace SPEL
   {
     FRIEND_TEST(SURFDetectorExperiments_B, SURFDetector);
     FRIEND_TEST(SURFDetectorExperiments, getPartPolygon);
+    //FRIEND_TEST(SURFDetectorExperiments, PartCellIndex);
   protected:
     struct SkeletonModel
     {
@@ -37,7 +38,7 @@ namespace SPEL
       cv::Mat Descriptors; // All descriptors from the studied skeletons
 
       std::map<int, cv::Size> PartCellsCount;
-      std::map<int, int> PartKeypointsCount;
+      std::map<int, std::vector<int>> PartKeypoints;
       std::vector<int> StudiedFramesID;
     }; 
 
@@ -55,9 +56,12 @@ namespace SPEL
       float searchStepCoeff = DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().second;
 
       float markingLinearError = 10.0f;
+      float minCellSize = 2.0f;
       int FixedWidthCells = 0; // if >=1 then used equal cellsCount for all BodyParts 
       int FixedLenghtCells = 0; // if >=1 then used equal cellsCount for all BodyParts 
       bool useDefaultCellsCount = true;
+
+      bool useMask = true;
     };
 
   public:
@@ -80,6 +84,7 @@ namespace SPEL
     void setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError);
     void setFixedCellsCount(cv::Size partCellsCount);
     void setDefaultCellsCount(void);
+    void correctingCellsSize(std::map<int, std::vector<cv::Point2f>> &partPolygons);
     mutable Parameters parameters;
     mutable SkeletonModel Trained;
 
@@ -90,7 +95,7 @@ namespace SPEL
     std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton &skeleton) const;
     std::vector<int> PolygonsPriority(std::map<int, std::vector<cv::Point2f>> partRects) const;
     std::vector<cv::KeyPoint> SelectMaskKeypoints(cv::Mat &mask, std::vector<cv::KeyPoint> FrameKeypoints) const;
-    int PartCellIndex(int PartID, cv::Point2f pt, std::vector<cv::Point2f> polygon, cv::Size CellsCount = cv::Size(1, 1)) const;
+    int PartCellIndex(int PartID, cv::Point2f pt, std::vector<cv::Point2f> polygon, cv::Size CellsCount = cv::Size(0, 0)) const;
  
     LimbLabel generateLabel(const BodyPart &bodyPart,
         Frame *workFrame, const cv::Point2f &parent, const cv::Point2f &child,

@@ -496,7 +496,12 @@ namespace SPEL
   TEST(SURFDetectorExperiments_B, SURFDetector)
   {
     //Load the input data
-    //TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
+    /*TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
+    vector<Frame*> SFrames = project.getFrames();
+    for(int i = 0; i < SFrames.size(); i++) SFrames[i]->Resize(720);
+    Frame* Pattern = SFrames[0];
+    Skeleton SkeletonPattern = Pattern->getSkeleton();*/
+
     TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
     vector<Frame*> SFrames = project.getFrames();
 
@@ -504,13 +509,14 @@ namespace SPEL
     vector<Frame*> Frames = projectPattern.getFrames();
     Frame* Pattern = Frames[1];
     Skeleton SkeletonPattern = Pattern->getSkeleton(); //Copying the manually marked skeleton
-
+    
     // Create parameters
     map<string, float> params;
     params.emplace(std::pair<std::string, float>("markingLinearError", 10.0f));
     params.emplace(std::pair<std::string, float>("minHessian", 300.0f));
-    //params.emplace(std::pair<std::string, float>("FixedWidthCells", 3.0f));
-    //params.emplace(std::pair<std::string, float>("FixedLenghtCells", 5.0f));
+    //params.emplace(std::pair<std::string, float>("FixedWidthCells", 10.0f));
+    //params.emplace(std::pair<std::string, float>("FixedLenghtCells", 10.0f));
+    //params.emplace(std::pair<std::string, float>("useMask", 0.0f));
 
     // Run train
     SURFDetector D;
@@ -524,6 +530,10 @@ namespace SPEL
     long detect_t0 = clock();
     Labels = D.detect(SFrames[1], params, Labels);
     long detect_t1 = clock();
+
+    /*cout << "Keypoints:" << endl;	
+    for (int i = 0; i < D.Trained.PartKeypoints.size(); i++)
+      cout << "Part[" << i << "]: " << D.Trained.PartKeypoints[i].size() << endl;*/
 
     cout << endl << " DETECTOR PARAMETERS\n\n";
 
@@ -587,7 +597,7 @@ namespace SPEL
     cout << "\nLimbLabels saved in file: " << OutputFileName << endl << endl;
 
     SFrames.clear();
-    Frames.clear();
+    //Frames.clear();
   }
 
   TEST(SURFDetectorExperiments, getPartPolygon)
