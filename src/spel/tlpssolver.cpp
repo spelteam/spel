@@ -70,32 +70,39 @@ namespace SPEL
 
   std::vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
-    float baseRotationStep = params.at("baseRotationStep");
+    emplaceDefaultParameters(params);
 
-    float partShiftCoeff = params.at("partShiftCoeff");
-    float partRotationCoeff = params.at("partRotationCoeff");
+    auto partShiftCoeff = params.at(
+      COMMON_TLPS_SOLVER_PARAMETERS::PART_SHIFT_COEFFICIENT().name());
+    auto partRotationCoeff = params.at(
+      COMMON_TLPS_SOLVER_PARAMETERS::PART_ROTATION_COEFFICIENT().name());
 
-    float depthRotationCoeff = params.at("partDepthRotationCoeff");
-    float baseRotationRange = params.at("baseRotationRange");
-    float baseSearchRadius = params.at("baseSearchRadius");
+    auto depthRotationCoeff = params.at(
+      COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFF().name());
+    auto baseRotationRange = params.at(
+      COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().name());
+    auto baseSearchRadius = params.at(
+      COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name());
 
-    float useHoG = params.at("useHoGdet");
-    float useCS = params.at("useCSdet");
-    float useSURF = params.at("useSURFdet");
-    uint32_t debugLevel = params.at("debugLevel");
+    auto useHoG = 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
+    auto useCS = 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
+    auto useSURF = 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
     //first slice up the sequences
-    if (debugLevel >= 1)
+    if (SpelObject::getDebugLevel() >= 1)
       std::cout << "TLPSSolver started, slicing sequence..." << std::endl;
 
     std::vector<Frame*> origFrames = sequence.getFrames();
     std::vector<std::vector<Frame*> > slices = slice(origFrames);
 
-    if (debugLevel >= 1)
+    if (SpelObject::getDebugLevel() >= 1)
       std::cout << slices.size() << " sequence slices created." << std::endl;
 
     std::vector<std::vector<Solvlet> > sequenceSolvlets; //one vector of solvlets per slice
 
-    if (debugLevel >= 1)
+    if (SpelObject::getDebugLevel() >= 1)
       std::cout << "Solving slices..." << std::endl;
 
     for (uint32_t sliceNumber = 0; sliceNumber < slices.size(); ++sliceNumber)
@@ -111,7 +118,7 @@ namespace SPEL
       typedef opengm::MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
       //for every slice, build a factor grph
-      if (debugLevel >= 1)
+      if (SpelObject::getDebugLevel() >= 1)
         std::cout << "Interpolating slice " << sliceNumber << std::endl;
       std::vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
 
@@ -194,7 +201,8 @@ namespace SPEL
         for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
           labels = detectors[i]->detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
 
-        float maxPartCandidates = params.at("maxPartCandidates");
+        auto maxPartCandidates = params.at(
+          COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES().name());
         //now take the top percentage of all labels
         for (uint32_t i = 0; i < labels.size(); ++i) //for each part
         {
@@ -450,7 +458,7 @@ namespace SPEL
         }
       }
 
-      if (debugLevel > 0)
+      if (SpelObject::getDebugLevel() > 0)
       {
         float n, k;
         n = seqSlice.size() - 2; //num non-anchor frames
@@ -470,7 +478,7 @@ namespace SPEL
 
       //now solve the slice
 
-      if (debugLevel >= 2)
+      if (SpelObject::getDebugLevel() >= 2)
         opengm::hdf5::save(gm, "gm.h5", "tlps-gm");
 
       const size_t maxNumberOfIterations = 100;
@@ -520,7 +528,7 @@ namespace SPEL
     }
     //    slices.clear();
 
-    if (debugLevel >= 1)
+    if (SpelObject::getDebugLevel() >= 1)
       std::cout << sequenceSolvlets.size() << " slices solved." << std::endl;
     //sequence solvlets now contain all the solvlets for the entire sequence
 
@@ -532,7 +540,8 @@ namespace SPEL
 
     std::vector<Frame*> frames = sequence.getFrames();
 
-    float acceptLockframeThreshold = params.at("tlpsLockframeThreshold");
+    auto acceptLockframeThreshold = params.at(
+      COMMON_TLPS_SOLVER_PARAMETERS::LOCKFRAME_THRESHOLD().name());
     if (acceptLockframeThreshold > 0) //if it's greater than zero, we want to evaluate solves before returning them
     {
       std::vector<Solvlet> passedSolves;
@@ -582,57 +591,20 @@ namespace SPEL
 
   std::vector<Solvlet> TLPSSolver::solveWindowed(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
-    ///define the space
-    typedef opengm::DiscreteSpace<> Space;
-    ///define the model
-    typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
-
-    ///define the update rules
-    typedef opengm::BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
-    ///define the inference algorithm
-    typedef opengm::MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
-
-    int tempWindowSize = params.at("temporalWindowSize");
-    float baseRotationStep = params.at("baseRotationStep");
-
-    float partShiftCoeff = params.at("partShiftCoeff");
-    float partRotationCoeff = params.at("partRotationCoeff");
-
-    float useHoG = params.at("useHoGdet");
-    float useCS = params.at("useCSdet");
-    float useSURF = params.at("useSURFdet");
-    uint32_t debugLevel = params.at("debugLevel");
-    //first slice up the sequences
-
-    std::vector<Solvlet> solution;
-
-    //set solution
-
-    return solution;
+#ifndef _MSC_VER
+#warning "TLPSSolver::solveWindowed is not implemented"
+#else
+#pragma message ("TLPSSolver::solveWindowed is not implemented")
+#endif
+    throw std::logic_error("TLPSSolver::solveWindowed is not implemented");
   }
 
   float TLPSSolver::evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params)
   {
-    // /*
-    //   There should clearly be several factors that affect the outcome of an evaluation:
-    //   1) Mask coverage
-    //   2) Parts falling outside mask range
-    //   3) ?
+    emplaceDefaultParameters(params);
 
-    //   */
-
-    //engaged pixles - the total number of pixels that are either within a limb label of within the mask
-    //correct pixels - those pixles that are black and outside a label, and white and inside a label
-    //incorrect pixels - those pixels that are black and inside a label, and white and outside a label
-    //score = correct/(correct+incorrect)
-
-    //emplace defaults
-    params.emplace("badLabelThresh", 0.52); //if less than 52% of the pixels are in the mask, label this label bad
-    params.emplace("debugLevel", 1);
-    params.emplace("maxFrameHeight", 288);  //emplace if not defined
-
-    int maxFrameHeight = params.at("maxFrameHeight");
-    int debugLevel = params.at("debugLevel");
+    auto maxFrameHeight = params.at(
+      COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name());
 
     cv::Mat mask = frame->getMask().clone();
 
@@ -701,7 +673,8 @@ namespace SPEL
     //now check for critical part failures - label mostly outside of mask
 
     std::vector<cv::Point2f> badLabelScores;
-    float badLabelThresh = params.at("badLabelThresh");
+    auto badLabelThresh = params.at(
+      COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH().name());
 
     for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
     {
@@ -740,7 +713,7 @@ namespace SPEL
         badLabelScores.push_back(cv::Point2f(label->getLimbID(), labelRatio));
     }
 
-    if (debugLevel >= 1)
+    if (SpelObject::getDebugLevel() >= 1)
     {
       for (std::vector<cv::Point2f>::iterator badL = badLabelScores.begin(); badL != badLabelScores.end(); ++badL)
       {
@@ -751,7 +724,7 @@ namespace SPEL
     if (badLabelScores.size() != 0) //make the solution eval fail if a part is badly localised
       solutionEval = solutionEval - 1.0;
 
-    if (debugLevel >= 1)
+    if (SpelObject::getDebugLevel() >= 1)
       std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << std::endl;
 
     frame->UnloadAll();
@@ -770,21 +743,19 @@ namespace SPEL
   //compute label score
   float TLPSSolver::computeScoreCost(const LimbLabel& label, std::map<std::string, float> params)
   {
+    emplaceDefaultParameters(params);
+
     std::string hogName = "18500";
     std::string csName = "4409412";
     std::string surfName = "21316";
 
-    params.emplace("imageCoeff", 1.0);
-    params.emplace("useCSdet", 1.0);
-    params.emplace("useHoGdet", 0.0);
-    params.emplace("useSURFdet", 0.0);
-
-    float lambda = params.at("imageCoeff");
-
     //@FIX
-    float useHoG = params.at("useHoGdet");
-    float useCS = params.at("useCSdet");
-    float useSURF = params.at("useSURFdet");
+    auto useHoG = 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
+    auto useCS = 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
+    auto useSURF = 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
 
     //TODO: Fix score combinations
     std::vector<Score> scores = label.getScores();
@@ -827,6 +798,7 @@ namespace SPEL
   //compute distance to parent limb label
   float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild)
   {
+    emplaceDefaultParameters(params);
     //emplace default
     //params.emplace("jointCoeff", 0.5);
     //float lambda = params.at("jointCoeff");
@@ -847,14 +819,9 @@ namespace SPEL
 
   float TLPSSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float max, bool toChild)
   {
-    //emplace default
-    params.emplace("jointCoeff", 0.5);
-    params.emplace("jointLeeway", 0.05);
-    params.emplace("debugLevel", 1);
-
+    emplaceDefaultParameters(params);
     //read params
-    float lambda = params.at("jointCoeff");
-    int debugLevel = params.at("debugLevel");
+    float lambda = params.at(COMMON_SOLVER_PARAMETERS::JOINT_COEFF().name());
 
     //float leeway = params.at("jointLeeway");
     cv::Point2f p0, p1, c0, c1;
@@ -873,7 +840,7 @@ namespace SPEL
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
 
     //output a sentence about who connected to whom and what the score was
-    if (debugLevel >= 1 && (child.getLimbID() == 7 || child.getLimbID() == 6) && !toChild)
+    if (SpelObject::getDebugLevel() >= 1 && (child.getLimbID() == 7 || child.getLimbID() == 6) && !toChild)
       std::cerr << "Part " << child.getLimbID() << " is connecting to part " << parent.getLimbID() << " PARENT joint" << std::endl;
 
     return lambda*score;
@@ -881,6 +848,7 @@ namespace SPEL
 
   float TLPSSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params)
   {
+    emplaceDefaultParameters(params);
     //  params.emplace("priorCoeff", 0.0);
     //	float lambda = params.at("priorCoeff");
     cv::Point2f p0, p1, pp0, pp1;
@@ -896,8 +864,9 @@ namespace SPEL
 
   float TLPSSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float max)
   {
-    params.emplace("priorCoeff", 0.0);
-    float lambda = params.at("priorCoeff");
+    emplaceDefaultParameters(params);
+
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFF().name());
     cv::Point2f p0, p1, pp0, pp1;
     label.getEndpoints(p0, p1);
     pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
@@ -911,9 +880,7 @@ namespace SPEL
 
   float TLPSSolver::computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params)
   {
-    //emplace default
-    params.emplace("tempCoeff", 0.5);
-    float lambda = params.at("tempCoeff");
+    emplaceDefaultParameters(params);
     //compute the temporal connection cost to label in the past
 
     //@PARAM there should be a parameter that sets the temporal cost constant (beta)
@@ -930,9 +897,10 @@ namespace SPEL
 
   float TLPSSolver::computeNormPastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params, float max)
   {
+    emplaceDefaultParameters(params);
     //emplace default
-    params.emplace("tempCoeff", 0.5);
-    float lambda = params.at("tempCoeff");
+    auto lambda = params.at(
+      COMMON_TLPS_SOLVER_PARAMETERS::TEMPORAL_LINK_COEFFICIENT().name());
     //compute the temporal connection cost to label in the past
 
     //@PARAM there should be a parameter that sets the temporal cost constant (beta)
@@ -949,9 +917,7 @@ namespace SPEL
 
   float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params)
   {
-    //emplace default
-    params.emplace("tempCoeff", 0.5);
-    float lambda = params.at("tempCoeff");
+    emplaceDefaultParameters(params);
     //compute temporal connection cost to label in the future
     //@PARAM there needs to be a beta param here as well
     cv::Point2f p0, p1, c0, c1;
@@ -966,9 +932,10 @@ namespace SPEL
 
   float TLPSSolver::computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params, float max)
   {
+    emplaceDefaultParameters(params);
     //emplace default
-    params.emplace("tempCoeff", 0.5);
-    float lambda = params.at("tempCoeff");
+    float lambda = params.at(
+      COMMON_TLPS_SOLVER_PARAMETERS::TEMPORAL_LINK_COEFFICIENT().name());
     //compute temporal connection cost to label in the future
     //@PARAM there needs to be a beta param here as well
     cv::Point2f p0, p1, c0, c1;
@@ -985,9 +952,8 @@ namespace SPEL
 
   float TLPSSolver::computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params)
   {
+    emplaceDefaultParameters(params);
     //emploace default
-    params.emplace("anchorCoeff", 1.0);
-    float lambda = params.at("anchorCoeff");
 
     int limbId = thisLabel.getLimbID();
 
@@ -1007,9 +973,10 @@ namespace SPEL
 
   float TLPSSolver::computeNormAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params, float max)
   {
+    emplaceDefaultParameters(params);
     //emploace default
-    params.emplace("anchorCoeff", 1.0);
-    float lambda = params.at("anchorCoeff");
+    auto lambda =
+      params.at(COMMON_TLPS_SOLVER_PARAMETERS::ANCHOR_COEFICIENT().name());
 
     int limbId = thisLabel.getLimbID();
 

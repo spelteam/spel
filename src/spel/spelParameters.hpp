@@ -378,12 +378,17 @@ namespace SPEL
 
     static auto TEMPORAL_LINK_COEFFICIENT(void)
     {
-      return SPEL_SET_PARAMETER("tempCoeff", 0.1f);
+      return SPEL_SET_PARAMETER("tempCoeff", 0.5f);
     }
 
     static auto LOCKFRAME_THRESHOLD(void)
     {
       return SPEL_SET_PARAMETER("tlpsLockframeThreshold", 0.52f);
+    }
+
+    static auto ANCHOR_COEFICIENT(void)
+    {
+      return SPEL_SET_PARAMETER("anchorCoeff", 1.0f);
     }
 
     static auto getParameters(void)
@@ -396,6 +401,7 @@ namespace SPEL
       map.emplace(COMMON_TLPS_SOLVER_PARAMETERS::PART_ROTATION_COEFFICIENT());
       map.emplace(COMMON_TLPS_SOLVER_PARAMETERS::TEMPORAL_LINK_COEFFICIENT());
       map.emplace(COMMON_TLPS_SOLVER_PARAMETERS::LOCKFRAME_THRESHOLD());
+      map.emplace(COMMON_TLPS_SOLVER_PARAMETERS::ANCHOR_COEFICIENT());
 
       return map;
     }
