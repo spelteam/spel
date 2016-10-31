@@ -53,7 +53,7 @@ namespace SPEL
   Parameters SetDetectParameters(map<string, float> params)
   {
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
-    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFF());
+    params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT());
     params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT());
     params.emplace(DETECTOR_DETECT_PARAMETERS::MIN_THETA());
     params.emplace(DETECTOR_DETECT_PARAMETERS::MAX_THETA());

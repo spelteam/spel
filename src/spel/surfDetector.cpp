@@ -200,7 +200,7 @@ namespace SPEL
     const auto useSURFdet = params.at(
       COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
     const auto knnMatchCoeff = params.at(
-      COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFF().name());
+      COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT().name());
 
     const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1, 
       frame->getImage(), helper->keyPoints);

@@ -196,7 +196,7 @@ namespace SPEL
       return SPEL_SET_PARAMETER("minHessian", 500.0f);
     }
 
-    static auto KNN_MATCH_COEFF(void)
+    static auto KNN_MATCH_COEFFICIENT(void)
     {
       return SPEL_SET_PARAMETER("knnMathCoeff", 0.8f);
     }
@@ -206,7 +206,7 @@ namespace SPEL
       std::map<std::string, float> map;
 
       map.emplace(COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN());
-      map.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFF());
+      map.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT());
 
       return map;
     }
@@ -220,7 +220,7 @@ namespace SPEL
       return SPEL_SET_PARAMETER("maxPartCandidates", 40.0f);
     }
 
-    static auto PART_DEPTH_ROTATION_COEFF(void)
+    static auto PART_DEPTH_ROTATION_COEFFICIENT(void)
     {
       return SPEL_SET_PARAMETER("partDepthRotationCoeff", 1.2f);
     }
@@ -248,12 +248,12 @@ namespace SPEL
         COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().second / 10.0f);
     }
 
-    static auto IMAGE_COEFF(void)
+    static auto IMAGE_COEFFICIENT(void)
     {
       return SPEL_SET_PARAMETER("imageCoeff", 1.0f);
     }
 
-    static auto JOINT_COEFF(void)
+    static auto JOINT_COEFFICIENT(void)
     {
       return SPEL_SET_PARAMETER("jointCoeff", 0.5f);
     }
@@ -263,7 +263,7 @@ namespace SPEL
       return SPEL_SET_PARAMETER("jointLeeway", 0.05f);
     }
 
-    static auto PRIOR_COEFF(void)
+    static auto PRIOR_COEFFICIENT(void)
     {
       return SPEL_SET_PARAMETER("priorCoeff", 0.0f);
     }
@@ -278,15 +278,15 @@ namespace SPEL
       std::map<std::string, float> map;
 
       map.emplace(COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES());
-      map.emplace(COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFF());
+      map.emplace(COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFFICIENT());
       map.emplace(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE());
       map.emplace(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP());
       map.emplace(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS());
       map.emplace(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP());
-      map.emplace(COMMON_SOLVER_PARAMETERS::IMAGE_COEFF());
-      map.emplace(COMMON_SOLVER_PARAMETERS::JOINT_COEFF());
+      map.emplace(COMMON_SOLVER_PARAMETERS::IMAGE_COEFFICIENT());
+      map.emplace(COMMON_SOLVER_PARAMETERS::JOINT_COEFFICIENT());
       map.emplace(COMMON_SOLVER_PARAMETERS::JOINT_LEEWAY());
-      map.emplace(COMMON_SOLVER_PARAMETERS::PRIOR_COEFF());
+      map.emplace(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT());
       map.emplace(COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH());
 
       return map;
@@ -316,7 +316,7 @@ namespace SPEL
       return SPEL_SET_PARAMETER("anchorBindDistance", 0.0f);
     }
 
-    static auto ANCHOR_BIND_COEFF(void)
+    static auto ANCHOR_BIND_COEFFICIENT(void)
     {
       return SPEL_SET_PARAMETER("anchorBindCoeff", 0.0f);
     }
@@ -344,7 +344,7 @@ namespace SPEL
       map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::USE_TLPS());
       map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::PROPAGATE_FROM_LOCKFRAMES());
       map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::ANCHOR_BIND_DISTANCE());
-      map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::ANCHOR_BIND_COEFF());
+      map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::ANCHOR_BIND_COEFFICIENT());
       map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::LOCKFRAME_THRESHOLD());
       map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::BIND_TO_LOCKFRAMES());
       map.emplace(COMMON_NSKP_SOLVER_PARAMETERS::MIN_KEY_FRAME_DISTANCE());

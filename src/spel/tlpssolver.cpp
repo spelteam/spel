@@ -78,7 +78,7 @@ namespace SPEL
       COMMON_TLPS_SOLVER_PARAMETERS::PART_ROTATION_COEFFICIENT().name());
 
     auto depthRotationCoeff = params.at(
-      COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFF().name());
+      COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFFICIENT().name());
     auto baseRotationRange = params.at(
       COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().name());
     auto baseSearchRadius = params.at(
@@ -821,7 +821,7 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
     //read params
-    float lambda = params.at(COMMON_SOLVER_PARAMETERS::JOINT_COEFF().name());
+    float lambda = params.at(COMMON_SOLVER_PARAMETERS::JOINT_COEFFICIENT().name());
 
     //float leeway = params.at("jointLeeway");
     cv::Point2f p0, p1, c0, c1;
@@ -866,7 +866,7 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFF().name());
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());
     cv::Point2f p0, p1, pp0, pp1;
     label.getEndpoints(p0, p1);
     pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();

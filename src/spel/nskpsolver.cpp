@@ -132,7 +132,7 @@ namespace SPEL
       baseSearchRadius / 10.0f;
 
     const auto depthRotationCoeff = 
-      params.at(COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFF().name());
+      params.at(COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFFICIENT().name());
 
     const auto baseRotationStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().name());
     const auto baseSearchStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().name());
@@ -663,7 +663,7 @@ namespace SPEL
 
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFF().name());
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFFICIENT().name());
 
     //@FIX
     auto useHoG = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
@@ -735,7 +735,7 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     //read params
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFF().name());
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFFICIENT().name());
 
     //float leeway = params.at("jointLeeway");
     cv::Point2f p0, p1, c0, c1;
@@ -785,7 +785,7 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFF().name());
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());
     cv::Point2f p0, p1, pp0, pp1;
     label.getEndpoints(p0, p1);
     pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
