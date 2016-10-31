@@ -1064,7 +1064,7 @@ namespace SPEL
     };
 
     auto label = Detector::generateLabel(bodyPart, j0, j1, detectorName.str(),
-      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first),
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name()),
       comparer);
 
     return label;

@@ -208,7 +208,7 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     m_bGrayImages = spelHelper::compareFloat(params.at(
-      COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().first), 0.0f) == 0;
+      COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().name()), 0.0f) == 0;
 
     auto bFirstConversion = true;
     const auto &handler = [&](Frame *frame, float scale)
@@ -250,7 +250,7 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     const auto useHoGdet = params.at(
-      COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().first);
+      COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
 
     cv::Size size;
     try

@@ -43,7 +43,7 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     const auto nskpIters = static_cast<uint32_t>(params.at(
-      COMMON_NSKP_SOLVER_PARAMETERS::ITERATIONS().first));
+      COMMON_NSKP_SOLVER_PARAMETERS::ITERATIONS().name()));
 
     std::vector<Solvlet> solvlets;
     sequence.computeInterpolation(params); //interpolate the sequence first
@@ -86,7 +86,7 @@ namespace SPEL
     for (auto p : propagatedFrames) //delete the frame vector as it is no longer being used
       delete p;
 
-    if (params.at(COMMON_NSKP_SOLVER_PARAMETERS::USE_TLPS().first))
+    if (params.at(COMMON_NSKP_SOLVER_PARAMETERS::USE_TLPS().name()))
     {
       //create tlps solver
       TLPSSolver tlps;
@@ -110,40 +110,40 @@ namespace SPEL
 
     emplaceDefaultParameters(params);
 
-    params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first) =
+    params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()) =
       std::min(static_cast<int>(params.at(
-        COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first)),
+        COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name())),
         frames.front()->getFrameSize().height);
 
     std::vector<NSKPSolver::SolvletScore> allSolves;
     const auto imageHeight = 
-      params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first);
+      params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name());
 
     //detector search parameters
     const auto baseRotationRange = 
-      params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().first);
-    params.at(DETECTOR_DETECT_PARAMETERS::STEP_THETA().first) =
+      params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().name());
+    params.at(DETECTOR_DETECT_PARAMETERS::STEP_THETA().name()) =
       baseRotationRange / 4.0f;
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().first) =
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name()) =
       imageHeight / 30.0f;
     const auto baseSearchRadius = static_cast<uint32_t>(params.at(
-      COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().first));
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().first) =
+      COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name()));
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().name()) =
       baseSearchRadius / 10.0f;
 
     const auto depthRotationCoeff = 
-      params.at(COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFF().first);
+      params.at(COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFF().name());
 
-    const auto baseRotationStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().first);
-    const auto baseSearchStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().first);
+    const auto baseRotationStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().name());
+    const auto baseSearchStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().name());
 
-    const auto useHoG = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().first);
-    const auto useCS = params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first);
-    const auto useSURF = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().first);
+    const auto useHoG = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
+    const auto useCS = params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
+    const auto useSURF = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
 
     const auto propagateFromLockframes = 
       spelHelper::compareFloat(params.at(
-        COMMON_NSKP_SOLVER_PARAMETERS::PROPAGATE_FROM_LOCKFRAMES().first), 
+        COMMON_NSKP_SOLVER_PARAMETERS::PROPAGATE_FROM_LOCKFRAMES().name()), 
         1.0f) == 0;
 
     bool isIgnored = false;
@@ -287,7 +287,7 @@ namespace SPEL
         for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
           labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
 
-        auto maxPartCandidates = params.at(COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES().first);
+        auto maxPartCandidates = params.at(COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES().name());
 
         for (uint32_t i = 0; i < labels.size(); ++i) //for each part
         {
@@ -580,7 +580,7 @@ namespace SPEL
     //now extract the best solves
     std::map<uint32_t, SolvletScore> bestSolves;
 
-    auto acceptLockframeThreshold = params.at(COMMON_NSKP_SOLVER_PARAMETERS::LOCKFRAME_THRESHOLD().first);
+    auto acceptLockframeThreshold = params.at(COMMON_NSKP_SOLVER_PARAMETERS::LOCKFRAME_THRESHOLD().name());
 
     for (const auto &frameSolves : allSolves)
     {
@@ -663,12 +663,12 @@ namespace SPEL
 
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFF().first);
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFF().name());
 
     //@FIX
-    auto useHoG = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().first);
-    auto useCS = params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().first);
-    auto useSURF = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().first);
+    auto useHoG = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
+    auto useCS = params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
+    auto useSURF = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
 
     //TODO: Fix score combinations
     std::vector<Score> scores = label.getScores();
@@ -735,7 +735,7 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     //read params
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFF().first);
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFF().name());
 
     //float leeway = params.at("jointLeeway");
     cv::Point2f p0, p1, c0, c1;
@@ -785,7 +785,7 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFF().first);
+    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFF().name());
     cv::Point2f p0, p1, pp0, pp1;
     label.getEndpoints(p0, p1);
     pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
@@ -831,7 +831,7 @@ namespace SPEL
     //if(debugLevel>=1)
     std::cerr << "Finished building MSTs" << std::endl;
     auto minKeyframeDist = static_cast<uint32_t>(params.at(
-      COMMON_NSKP_SOLVER_PARAMETERS::MIN_KEY_FRAME_DISTANCE().first));
+      COMMON_NSKP_SOLVER_PARAMETERS::MIN_KEY_FRAME_DISTANCE().name()));
     std::vector<std::vector<uint32_t> > orderedList;
     for (uint32_t i = 0; i < mstVec.size(); ++i)
     {
@@ -922,7 +922,7 @@ namespace SPEL
     //score = correct/(correct+incorrect)
 
     auto maxFrameHeight = static_cast<uint32_t>(
-      params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first));
+      params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()));
 
     cv::Mat mask = frame->getMask().clone();
 
@@ -992,7 +992,7 @@ namespace SPEL
     //now check for critical part failures - label mostly outside of mask
 
     std::vector<cv::Point2f> badLabelScores;
-    float badLabelThresh = params.at(COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH().first);
+    float badLabelThresh = params.at(COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH().name());
 
     for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
     {

@@ -272,18 +272,18 @@ namespace SPEL
 
     //now set actual param values
     auto searchDistCoeff = params.at(
-      DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT().first);
-    auto minTheta = params.at(DETECTOR_DETECT_PARAMETERS::MIN_THETA().first);
-    auto maxTheta = params.at(DETECTOR_DETECT_PARAMETERS::MAX_THETA().first);
-    auto stepTheta = params.at(DETECTOR_DETECT_PARAMETERS::STEP_THETA().first);
+      DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT().name());
+    auto minTheta = params.at(DETECTOR_DETECT_PARAMETERS::MIN_THETA().name());
+    auto maxTheta = params.at(DETECTOR_DETECT_PARAMETERS::MAX_THETA().name());
+    auto stepTheta = params.at(DETECTOR_DETECT_PARAMETERS::STEP_THETA().name());
     auto uniqueLocationCandidates = params.at(
-      DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT().first);
+      DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT().name());
     auto uniqueAngleCandidates = params.at(
-      DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT().first);
+      DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT().name());
     auto isWeakThreshold = params.at(
-      DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD().first);
+      DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD().name());
     auto searchStepCoeff = params.at(
-      DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().first);
+      DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().name());
 
     Frame *workFrame = new Interpolation();
 
@@ -564,9 +564,9 @@ namespace SPEL
     // sorting frames by id
     sort(m_frames.begin(), m_frames.end(), Frame::FramePointerComparer);
 
-    params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first) =
+    params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()) =
       std::min(static_cast<int>(params.at(
-        COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().first)),
+        COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name())),
         m_frames.front()->getFrameSize().height);
 
     // Handling all frames

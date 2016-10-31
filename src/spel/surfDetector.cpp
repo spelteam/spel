@@ -27,7 +27,7 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     auto minHessian = static_cast<uint32_t> (params.at(
-      COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first));
+      COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().name()));
 
     const auto &handler = [&](Frame* frame, float)
     {
@@ -49,7 +49,7 @@ namespace SPEL
 
     //now set actual param values
     const auto minHessian = params.at(
-      COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().first);
+      COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().name());
     auto detectorHelper = new SurfDetectorHelper();
     const auto &imgMat = frame->getImage();
     // - all coordinates of key points must have identical scale 
@@ -198,9 +198,9 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     const auto useSURFdet = params.at(
-      COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().first);
+      COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
     const auto knnMatchCoeff = params.at(
-      COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFF().first);
+      COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFF().name());
 
     const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1, 
       frame->getImage(), helper->keyPoints);

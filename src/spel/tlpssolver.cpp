@@ -46,13 +46,13 @@ namespace SPEL
 
     //detector search parameters
     auto baseRotationRange = 
-      params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().first);
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().first) = 
+      params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().name());
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().name()) = 
       baseRotationRange / 4.0f;
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().first) = 
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name()) = 
       frames.front()->getImageSize().height / 30.0f;
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().first) = 
-      params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().first) / 10.0f;
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().name()) = 
+      params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name()) / 10.0f;
 
     sequence.estimateUniformScale(params);
     sequence.computeInterpolation(params);
@@ -62,7 +62,7 @@ namespace SPEL
 
     //call the new function
     if (spelHelper::compareFloat(params.at(
-      COMMON_TLPS_SOLVER_PARAMETERS::TEMPORAL_WINDOW_SIZE().first), 0.0f) == 0)
+      COMMON_TLPS_SOLVER_PARAMETERS::TEMPORAL_WINDOW_SIZE().name()), 0.0f) == 0)
       return solveGlobal(sequence, params);
     else
       return solveWindowed(sequence, params);

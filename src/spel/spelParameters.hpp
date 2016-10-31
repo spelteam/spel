@@ -6,10 +6,25 @@
 
 namespace SPEL
 {
+  struct SPEL_PARAMETER : public std::pair<std::string, float>
+  {
+    typedef std::pair<std::string, float> T;
+    SPEL_PARAMETER() : T() {}
+    SPEL_PARAMETER(const SPEL_PARAMETER &param) : T(param) {}
+    SPEL_PARAMETER(const std::string &name, const float value) : 
+      T(name, value) {}
+
+    std::string &name() { return first; }
+    const std::string &name() const { return first; }
+
+    float &value() { return second; }
+    const float &value() const { return second; }
+  };
+
   inline auto SPEL_SET_PARAMETER(const std::string &name,
     const float &value)
   {
-    return std::make_pair(name, value);
+    return SPEL_PARAMETER(name, value);
   }
 
   class COMMON_SPEL_PARAMETERS
