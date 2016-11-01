@@ -565,9 +565,12 @@ namespace SPEL
     sort(m_frames.begin(), m_frames.end(), Frame::FramePointerComparer);
 
     params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()) =
-      std::min(static_cast<int>(params.at(
-        COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name())),
-        m_frames.front()->getFrameSize().height);
+      std::min(params.at(
+        COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()),
+        static_cast<float>(m_frames.front()->getFrameSize().height));
+
+    maxFrameHeight = static_cast<uint32_t>(
+      params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()));
 
     // Handling all frames
     for (auto &frame : m_frames)
