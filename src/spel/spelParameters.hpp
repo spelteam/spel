@@ -3,6 +3,7 @@
 #include <utility>
 #include <string>
 #include <map>
+#include <limits>
 
 namespace SPEL
 {
