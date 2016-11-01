@@ -155,7 +155,7 @@ namespace posegui
     groupName = groupsNames[3]; //"NSKP"
     if (GroupedParameters.find(groupName) != GroupedParameters.end())
     {
-    parameter = COMMON_NSKP_SOLVER_PARAMETERS::KNN_MATCH_COEFFICIENT(); //"nskpLockframeThreshold"
+    parameter = COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT(); //"nskpLockframeThreshold"
     GroupedParameters[groupName].emplace(parameter);
     }
     return GroupedParameters;
