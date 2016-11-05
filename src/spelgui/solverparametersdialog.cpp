@@ -189,7 +189,6 @@ void SolverParametersDialog::AddButton_Clicked()
   ui->tableWidget->setCurrentCell(n,0);
   ui->tableWidget->editItem(temp);
   //ui->tableWidget->setSortingEnabled(true);
-  getAllParameters();
 }
 
 void SolverParametersDialog::deleteButton_Clicked()
@@ -291,7 +290,7 @@ void SolverParametersDialog::OnTabBarClicked(QWidget* p, int n)
 
 std::map<std::string, float> SolverParametersDialog::getAllParameters()
 {
-    //copyTableCells(previousGroup);
+  copyTableCells(currentGroup);
   std::map<std::string, float> parameters;
   for (int i = GroupsNames.size() - 1; i > -1; i--)
     parameters = ExtractParameters(GroupsNames[i], parameters);

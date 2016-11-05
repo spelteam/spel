@@ -438,13 +438,16 @@ namespace posegui {
     ifstream file(ProgectName);
     string name;
     float value;
-    while(!file.eof())
+    if (file.is_open())
     {
-      file >> name;
-      file >> value;
-      parameters.emplace(pair<std::string, float>(name, value));
+      while(!file.eof())
+      {
+        file >> name;
+        file >> value;
+        parameters.emplace(pair<std::string, float>(name, value));
+      }
+      file.close();
     }
-    file.close();
   }
 
   std::map<std::string, float> Project::getProjectParameters()
