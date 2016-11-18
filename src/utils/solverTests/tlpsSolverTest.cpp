@@ -51,7 +51,7 @@ int main (int argc, char **argv)
 
   //detector settings
   params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
-  params.emplace("useHoGdet", 9.0); //determine if HoG descriptor is used and with what coefficient
+  params.emplace("useHoGdet", 0.9); //determine if HoG descriptor is used and with what coefficient
   params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
 
   params.emplace("grayImages", 1); // use grayscale images for HoG?

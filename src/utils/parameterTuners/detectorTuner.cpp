@@ -276,11 +276,233 @@ void addKeyframeNoise(vector<Frame*>& frames, float mean, float sd, float max)
     }
 }
 
+std::string base_name(std::string const & path)
+{
+    return path.substr(path.find_last_of("/\\") + 1);
+}
+
+/*Add noise to background masks used for detection to a single frame, and replace that frame's mask loader to the distorted mask*/
+void addGaussianMaskNoise(Frame* frame, double mean=0, double standard_deviation=10.0, string tempPath="_tempMasks/")
+{
+
+    //Needed paramaters:
+    //Percent of mask to add noise to
+    //random generator of coordinates to add noise to?
+    Mat image, distorted_image;
+    image = imread(frame->GetMaskPath());
+
+    string imgName = base_name(frame->GetMaskPath()); //extract image name here
+
+    // We need to work with signed images (as noise can be
+    // negative as well as positive). We use 16 bit signed
+    // images as otherwise we would lose precision.
+
+    if(image.empty())
+    {
+        cout<<"[Error]! Input Image Empty!";
+        return;
+    }
+
+    Mat mSrc_16SC;
+    Mat mGaussian_noise = Mat(image.size(),CV_16SC3);
+    randn(mGaussian_noise,Scalar::all(mean), Scalar::all(standard_deviation));
+
+    image.convertTo(mSrc_16SC,CV_16SC3);
+    addWeighted(mSrc_16SC, 1.0, mGaussian_noise, 1.0, 0.0, mSrc_16SC); //add noise
+    mSrc_16SC.convertTo(distorted_image, image.type()); //convert back
+
+    threshold(distorted_image, distorted_image, 125, 255, 0); //now threshold the image - all values about 125 should go to 255, all below should go to zero
+    //    image.convertTo(distorted_image,image.type());
+
+    //    addWeighted(distorted_image, 1.0, noise_image, 1.0, 0.0, distorted_image);
+    //distorted_image.convertTo(image,image.type());
+
+    //save the distorted image
+    string writePath = tempPath+"/"+imgName;
+    imwrite(tempPath, distorted_image);
+    //now update the frame to point to this image
+    frame->SetMaskFromPath(writePath);
+}
+
+
+/* Construct a deep copy test sequence on the basis of a ground-truth sequence
+ *
+ * Input: Accepts GT sequnce (gtFrames), container for the newly generated sequence (vFrames), and
+ * suggestions for what keyframes should be picked (requestedKeyframes). The size of the vector determines the number of keyframes
+ * the values of the elements dicated which frames should be selected as keyframes (if possible), and -1 means
+ * that selection of keyframe should be automatic.
+ *
+ * Output: Fills vFrames with the constructed sequence and returns by reference
+ */
+void createTestSequence(const vector<Frame*>& gtFrames, vector<Frame*>& vFrames, ImageSimilarityMatrix& ism, vector<int> requestedKeyframes, map<string,float>&  defaultParams)
+{
+    cout << "Creating test sequence..." << endl;
+
+    bool requireSuggestions=false;
+    for(auto i=0; i<requestedKeyframes.size(); ++i)
+        if(requestedKeyframes[i]==-1)
+            requireSuggestions=true;
+
+    vector<Point2i> suggestedKeyframes;
+
+    if(requireSuggestions)
+        suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
+
+    vector<int> actualKeyframes;
+    //build the sequence based on
+    //vector <Frame*> vFrames;
+
+    for(uint32_t i=0; i<gtFrames.size(); ++i) //init
+    {
+        Frame * fp = new Interpolation();
+        vFrames.push_back(fp);
+    }
+
+    //insert any specified keyframes
+    for(uint32_t i=0; i<requestedKeyframes.size();++i)
+    {
+        if(requestedKeyframes[i]!=-1) //if it's not an automatic one
+        {
+            int frameID=requestedKeyframes[i];
+            //delete vFrames[requestedKeyframes[i]]; //free memory
+            vFrames[frameID] = new Keyframe(); //assign new keyframe
+            //copy all the data
+            \
+            vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+            vFrames[frameID]->setID(gtFrames[frameID]->getID());
+            vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+            vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
+
+            actualKeyframes.push_back(frameID);
+        }
+    }
+
+    //insert the automatically suggested keyframes, if any
+    for(uint32_t i=0; i<requestedKeyframes.size();++i)
+    {
+        if(requestedKeyframes[i]==-1) //if it's not an automatic one
+        {
+            //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
+            for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+            {
+                int frameID=fi->x;
+                bool alreadyPresent=false;
+                for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
+                {
+                    if(*ak==fi->x)
+                    {
+                        alreadyPresent=true;
+                        break;
+                    }
+                }
+                if(alreadyPresent==false) //not present yet
+                {
+                    //add it
+
+                    //delete vFrames[requestedKeyframes[i]]; //free memory
+                    vFrames[frameID] = new Keyframe(); //assign new keyframe
+                    //copy all the data
+                    \
+                    vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
+                    vFrames[frameID]->setID(gtFrames[frameID]->getID());
+                    vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
+                    vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
+
+                    actualKeyframes.push_back(frameID);
+
+                    //break
+                    break;
+                }
+            }
+        }
+    }
+
+    //fill in the rest with interpolation frames
+    for(uint32_t i=0; i<vFrames.size(); ++i)
+    {
+        if(vFrames[i]->getFrametype()!=KEYFRAME) //if not keyframes
+        {
+            int frameID=i;
+            //delete vFrames[requestedKeyframes[i]]; //free memory
+            vFrames[frameID] = new Interpolation(); //assign new keyframe
+            //copy all the data
+            \
+            vFrames[frameID]->setID(gtFrames[frameID]->getID());
+            vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath()); //deep copy image
+            vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath()); //deep copy mask
+
+            //actualKeyframes.push_back(frameID);
+        }
+    }
+
+    //the new frame set has been generated, and can be used for solving
+
+    cout << "Keyframes: " << " ";
+
+    for(uint32_t i=0; i<actualKeyframes.size();++i)
+    {
+        cout << actualKeyframes[i] << " ";
+    }
+    cout << endl;
+
+    return;
+}
+/* Loads configurations from a file for running the experiment. The file format is fixed to:
+ *
+ * ----------------------------------------------------------------
+ * Project: ../../../src/utils/general/testdata1/trijumpSDGT.xml
+ *
+ * OutDir: solverTuner_out
+ *
+ * SolverName: NSKPSolver
+ *
+ * NumKeyframes: 3
+ * KeyframeNumbers: -1 -1 -1
+ *
+ * TestParameter: jointCoeff
+ * ParameterMin: 0.0
+ * ParameterMax: 1.0
+ * ParameterStep: 0.1
+ *
+ * BalanceParameter: imageCoeff
+ *
+ * NumOtherParams: 3
+ * useCSdet 0.1
+ * useHoGdet 1.0
+ * num_trials 100
+ *
+ * ----------------------------------------------------------------
+ *
+ * Project: - path to the project to load (relative or absolute)
+ * OutDir: - path to output director
+ * SolverName: - name of the solver to run experiments on
+ * NumKeyframes: - number of keyframes to use
+ * KeyframeNumbers: - which frames should be keyframes, -1 for automatic selection based on MST
+ * TestParameter: - the parameter to test ()
+ * ParameterMin: - starting parameter value
+ * ParameterMax: - end parameter value
+ * ParameterStep: - parameter step size
+ * BalanceParameter: - parameter to balance the test parameter with, such that if testing between 0 and 1 with step 0.1
+ * then the balance parameter coefficient will be 1.0-param value at every step.
+ * NumOtherParams: - the number of other parameters/settings to pass to the tuner. The parameters themselves are
+ * found below, one per line, in the format:
+ * [PARAM NAME] [PARAM VALUE]
+ * Acceptable parameters to pass include any SPEL detector/solver parameters, as well as num_trials
+ *
+ * num_trials is a special parameter that indicates the number of trials that the results should be averaged over. This is
+ * most useful when running tests that have an element of randomness (e.g. random input/mask noise).
+ *
+ * Input: path to configuration file (configFilePath)
+ *
+ * Output: default configs (map<string,float>)
+ */
+
+
 int main (int argc, char **argv)
 {
 #if defined(MEMORY_DEBUG) && defined(UNIX)
-  Debug(libcw_do.on());
-  Debug(dc::malloc.on());
+    Debug(libcw_do.on());
+    Debug(dc::malloc.on());
 #endif  // MEMORY_DEBUG && UNIX
     if (argc != 2)
     {
@@ -288,40 +510,26 @@ int main (int argc, char **argv)
         return -1;
     }
 
+    // ///////////////////////////////////////////SET-UP BLOCK//////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////START//////////////////////////////////////////////////////////////////////////////////////////
+
+    SpelObject::setDebugLevel(0);
+
+    map<string,float> defaultParams;
+    //readFile
     auto startSetup = chrono::steady_clock::now();
 
+    string configFilePath = argv[1];
     //do file parsing
-    ifstream in(argv[1]);
+    ifstream in(configFilePath);
 
     string gtProj, outFold, paramName, balanceParamName, detectorName;
     float param_min, param_max, param_step;
     int numParams, numKeyframes; //number of extra params to include
-    map<string,float> defaultParams;
     vector<int> requestedKeyframes;
 
     try
     {
-        //File format:
-        //Project: ../../../src/utils/general/testdata1/trijumpSDGT.xml
-
-        //OutDir: solverTuner_out
-
-        //SolverName: NSKPSolver
-
-        //NumKeyframes: 3
-        //KeyframeNumbers: -1 -1 -1
-
-        //TestParameter: jointCoeff
-        //ParameterMin: 0.0
-        //ParameterMax: 1.0
-        //ParameterStep: 0.1
-
-        //BalanceParameter: imageCoeff
-
-        //NumOtherParams: 2
-        //useCSdet 0.1
-        //useHoGdet 1.0
-
         string temp;
         in >> temp >> gtProj >> temp >> outFold >> temp >> detectorName >> temp >> numKeyframes >> temp;
 
@@ -348,7 +556,7 @@ int main (int argc, char **argv)
     }
     catch (int e)
     {
-        cerr << "Something is wrong in the input file " << argv[1] << " please check format. Exception " << e << endl;
+        cerr << "Something is wrong in the input file " << configFilePath << " please check format. Exception " << e << endl;
         return 0; //return
     }
     //set up the params
@@ -396,25 +604,25 @@ int main (int argc, char **argv)
 
     ofstream out(baseOutFolder+"/"+paramName+"_"+detectorName+"_"+gtLoader.getProjectTitle()+".err");
 
-//    Project: ../../../src/utils/general/testdata1/trijumpSDGT.xml
+    //    Project: ../../../src/utils/general/testdata1/trijumpSDGT.xml
 
-//    OutDir: solverTuner_out
+    //    OutDir: solverTuner_out
 
-//    SolverName: NSKPSolver
+    //    SolverName: NSKPSolver
 
-//    NumKeyframes: 3
-//    KeyframeNumbers: -1 -1 -1
+    //    NumKeyframes: 3
+    //    KeyframeNumbers: -1 -1 -1
 
-//    TestParameter: jointCoeff
-//    ParameterMin: 0.0
-//    ParameterMax: 1.0
-//    ParameterStep: 0.1
+    //    TestParameter: jointCoeff
+    //    ParameterMin: 0.0
+    //    ParameterMax: 1.0
+    //    ParameterStep: 0.1
 
-//    BalanceParameter: imageCoeff
+    //    BalanceParameter: imageCoeff
 
-//    NumOtherParams: 2
-//    useCSdet 0.1
-//    useHoGdet 1.0
+    //    NumOtherParams: 2
+    //    useCSdet 0.1
+    //    useHoGdet 1.0
 
     //write file header, containing config file data (could be read for another experiment if needed
     out << "Project: " << argv[1] << endl; //settings file
@@ -437,13 +645,6 @@ int main (int argc, char **argv)
 
     float mean=param_min, max=param_max, sd=param_step;
 
-    if(paramName=="gaussianNoise") //will always do 100 trials
-    {
-        param_min=0;
-        param_max=100;
-        param_step=1;
-    }
-
     //now print this matrix to file
     //paralellize this
 
@@ -463,407 +664,332 @@ int main (int argc, char **argv)
 
     cout << "Set-up finished in " << chrono::duration <double, milli> (diffSetup).count()  << " ms" << endl;
 
-
     defaultParams.emplace("useCSdetMult", 1.0);
     defaultParams.emplace("useHoGdetMult", 1.0);
     defaultParams.emplace("useSURFdetMult", 1.0);
+    defaultParams.emplace("num_trials", 1); //set the default number of trials to run to 1
+
+    //    float param_min, param_max, param_step;
+
+    //    param_min = defaultParams.at("param_min");
+    //    param_max = defaultParams.at("param_max");
+    //    param_step = defaultParams.at("param_step");
+
+    int num_trials = defaultParams.at("num_trials"); //num_trials defines how many independent trials should be done and results averaged over.
+
+    // ///////////////////////////////////////////SET-UP BLOCK//////////////////////////////////////////////////////////////////////////////////////
+    // ///////////////////////////////////////////////END///////////////////////////////////////////////////////////////////////////////////////////
 
     for(float param = param_min; param<param_max+param_step; param+=param_step) //do 100 trials for gaussian noise
     {
         cout << paramName << " at " << param << " started..." << endl;
         auto start = chrono::steady_clock::now();
 
-        map <string, float> params=defaultParams; //transfer the default params
-
-        float simThreshD = 1.0+3.0*ismSd/ismMin;
-
-        params.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
-
-        cout << "Creating test sequence..." << endl;
-
-        bool requireSuggestions=false;
-        for(auto i=0; i<requestedKeyframes.size(); ++i)
-            if(requestedKeyframes[i]==-1)
-                requireSuggestions=true;
-
-        vector<Point2i> suggestedKeyframes;
-
-        if(requireSuggestions)
-             suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
-
-        vector<int> actualKeyframes;
-        //build the sequence based on
-        vector <Frame*> vFrames;
-
-        for(uint32_t i=0; i<gtFrames.size(); ++i) //init
+        //vector<vector<float> > frameErrorsTrial; //frame errors across the whole trial
+        for(int trial=0; trial<num_trials; ++trial)
         {
-            Frame * fp = new Interpolation();
-            vFrames.push_back(fp);
-        }
 
-        //insert any specified keyframes
-        for(uint32_t i=0; i<requestedKeyframes.size();++i)
-        {
-            if(requestedKeyframes[i]!=-1) //if it's not an automatic one
+            vector<Frame*> vFrames;
+
+            //create the test sequence for this set
+            createTestSequence(gtFrames, vFrames, ism, requestedKeyframes, defaultParams);
+
+            map <string, float> params=defaultParams; //transfer the default params
+
+            float simThreshD = 1.0+3.0*ismSd/ismMin;
+
+            params.emplace("mstThresh", simThreshD); //set similarity as multiple of minimum, MUST be >=1
+
+            //test sequence creation block start
+
+            //test sequence creation block end
+            if(paramName=="keyframeNoise") //if we're testing gaussian noise
             {
-                int frameID=requestedKeyframes[i];
-                //delete vFrames[requestedKeyframes[i]]; //free memory
-                vFrames[frameID] = new Keyframe(); //assign new keyframe
-                //copy all the data
-\
-                vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
-                vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
-                vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
-
-                actualKeyframes.push_back(frameID);
+                addKeyframeNoise(vFrames, 0, param, 1000); //mean = min, sd = step, max = max
             }
-        }
 
-        //insert the automatically suggested keyframes, if any
-        for(uint32_t i=0; i<requestedKeyframes.size();++i)
-        {
-            if(requestedKeyframes[i]==-1) //if it's not an automatic one
+            //emplace general defaults
+            params.emplace(paramName, param); //emplace the param we're testing
+            if(balanceParamName!="none") //if there is a balance param, emplace it too
+                params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
+
+            params.emplace("grayImages", 1); // use grayscale images for HoG?
+            params.emplace("searchDistCoeff", 1.5); //use a larger default search radius
+            params.emplace("searchStepCoeff", 0.5); //use a smaller search step
+            params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
+            params.emplace("baseRotationRange", 40); //use base 90 degrees rotation range
+
+            params.emplace("maxTheta", params.at("baseRotationRange"));
+            params.emplace("minTheta", params.at("baseRotationRange"));
+            params.emplace("stepTheta", params.at("baseRotationStep"));
+
+            params.emplace("useSURFdet", 0.0);
+            params.emplace("useCSdet", 0.0);
+            params.emplace("useHoGdet", 0.0);
+
+            //now apply the multipliers, they are 1.0 by default
+            params.at("useSURFdet") = params.at("useSURFdet")*params.at("useSURFdetMult");
+            params.at("useCSdet") = params.at("useCSdet")* params.at("useCSdetMult");
+            params.at("useHoGdet") = params.at("useHoGdet")*params.at("useHoGdetMult");
+
+            params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+            params.emplace("uniqueLocationCandidates", 360); //no max on location candidates
+
+            //params.emplace("searchDistCoeff", 3); //set search region to huge
+
+            //params.emplace("mstThresh", 3.5); //set the max number of part candidates to allow into the solver
+
+            Sequence seq(0, "test", vFrames);
+
+            seq.estimateUniformScale(params);
+            seq.computeInterpolation(params);
+
+            for (auto f : vFrames)
+                delete f;
+            vFrames.clear();
+            vFrames = seq.getFrames();
+
+            //        float lineWidth = (float)vFrames[0]->getImage().rows/210.0;
+
+            //        if(param==param_min || paramName=="numKeyframes") //only draw once, unless we're testing number of keyframes
+            //        {
+            //            for(uint32_t i=0; i<vFrames.size(); ++i)
+            //                gtLoader.drawSkeleton(vFrames[i], baseOutFolder+"/", Scalar(0,0,255), lineWidth);
+            //        }
+
+            vector<map<uint32_t, vector<LimbLabel> > > labels; //used for detetor tuning
+            vector<Frame*> trimmed; //trim the sequence by removing starting and trailing non-keyframes
+
+
+            vector<Detector*> detectors;
+            if(params.at("useCSdet")!=0)
             {
-                //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
-                for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+                Detector * d = new ColorHistDetector();
+                detectors.push_back(d);
+            }
+            if(params.at("useHoGdet")!=0)
+            {
+                Detector * d = new HogDetector();
+                detectors.push_back(d);
+            }
+            if(params.at("useSURFdet")!=0)
+            {
+                Detector * d = new SurfDetector();
+                detectors.push_back(d);
+            }
+
+            bool firstKeyframeSeen = false;
+
+            vector<Frame*> temp;
+            for(uint32_t i=0; i<vFrames.size(); ++i)
+            {
+                if(vFrames[i]->getFrametype()==KEYFRAME)
                 {
-                    int frameID=fi->x;
-                    bool alreadyPresent=false;
-                    for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
-                    {
-                        if(*ak==fi->x)
-                        {
-                            alreadyPresent=true;
-                            break;
-                        }
-                    }
-                    if(alreadyPresent==false) //not present yet
-                    {
-                        //add it
+                    //set the flag to true
+                    firstKeyframeSeen=true;
 
-                        //delete vFrames[requestedKeyframes[i]]; //free memory
-                        vFrames[frameID] = new Keyframe(); //assign new keyframe
-                        //copy all the data
-        \
-                        vFrames[frameID]->setSkeleton(gtFrames[frameID]->getSkeleton());
-                        vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                        vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath());
-                        vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath());
+                    //push back this keyframe at the end
+                    temp.push_back(vFrames[i]);
 
-                        actualKeyframes.push_back(frameID);
-
-                        //break
-                        break;
-                    }
+                    //go through all temp and push them back
+                    for(uint32_t j=0; j<temp.size(); ++j)
+                        trimmed.push_back(temp[j]);
+                    //clear out temp
+                    temp.clear();
+                }
+                else if(firstKeyframeSeen) //if not keyframe, just push to temp vector
+                {
+                    temp.push_back(vFrames[i]);
                 }
             }
-        }
+            //trimmed.push_back(temp[0]);
 
-        //fill in the rest with interpolation frames
-        for(uint32_t i=0; i<vFrames.size(); ++i)
-        {
-            if(vFrames[i]->getFrametype()!=KEYFRAME) //if not keyframes
+            //finally, generate new masks and replace path to them in trimmed sequence if needed
+            if(paramName=="maskNoise")
             {
-                int frameID=i;
-                //delete vFrames[requestedKeyframes[i]]; //free memory
-                vFrames[frameID] = new Interpolation(); //assign new keyframe
-                //copy all the data
-\
-                vFrames[frameID]->setID(gtFrames[frameID]->getID());
-                vFrames[frameID]->SetImageFromPath(gtFrames[frameID]->GetImagePath()); //deep copy image
-                vFrames[frameID]->SetMaskFromPath(gtFrames[frameID]->GetMaskPath()); //deep copy mask
-
-                //actualKeyframes.push_back(frameID);
-            }
-        }
-
-        //the new frame set has been generated, and can be used for solving
-
-        if(param==param_min)
-        {
-            cout << "Keyframes: " << " ";
-
-            for(uint32_t i=0; i<actualKeyframes.size();++i)
-            {
-                cout << actualKeyframes[i] << " ";
-            }
-            cout << endl;
-        }
-
-        if(paramName=="gaussianNoise") //if we're testing gaussian noise
-        {
-            addKeyframeNoise(vFrames, mean, sd, max); //mean = min, sd = step, max = max
-        }
-
-        //emplace general defaults
-        params.emplace(paramName, param); //emplace the param we're testing
-        if(balanceParamName!="none") //if there is a balance param, emplace it too
-            params.emplace(balanceParamName, 1.0-param); //it will be 1.0-paramValue
-
-        params.emplace("grayImages", 1); // use grayscale images for HoG?
-        params.emplace("searchDistCoeff", 1.5); //use a larger default search radius
-        params.emplace("searchStepCoeff", 0.5); //use a smaller search step
-        params.emplace("baseRotationStep", 10); //use base 10 degrees rotation step
-        params.emplace("baseRotationRange", 40); //use base 90 degrees rotation range
-
-        params.emplace("maxTheta", params.at("baseRotationRange"));
-        params.emplace("minTheta", params.at("baseRotationRange"));
-        params.emplace("stepTheta", params.at("baseRotationStep"));
-
-        params.emplace("useSURFdet", 0.0);
-        params.emplace("useCSdet", 0.0);
-        params.emplace("useHoGdet", 0.0);
-
-        //now apply the multipliers, they are 1.0 by default
-        params.at("useSURFdet") = params.at("useSURFdet")*params.at("useSURFdetMult");
-        params.at("useCSdet") = params.at("useCSdet")* params.at("useCSdetMult");
-        params.at("useHoGdet") = params.at("useHoGdet")*params.at("useHoGdetMult");
-
-        params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
-        params.emplace("uniqueLocationCandidates", 360); //no max on location candidates
-
-        //params.emplace("searchDistCoeff", 3); //set search region to huge
-
-        //params.emplace("mstThresh", 3.5); //set the max number of part candidates to allow into the solver
-
-        Sequence seq(0, "test", vFrames);
-
-        seq.estimateUniformScale(params);
-        seq.computeInterpolation(params);
-
-        for (auto f : vFrames)
-          delete f;
-        vFrames.clear();
-        vFrames = seq.getFrames();
-
-//        float lineWidth = (float)vFrames[0]->getImage().rows/210.0;
-
-//        if(param==param_min || paramName=="numKeyframes") //only draw once, unless we're testing number of keyframes
-//        {
-//            for(uint32_t i=0; i<vFrames.size(); ++i)
-//                gtLoader.drawSkeleton(vFrames[i], baseOutFolder+"/", Scalar(0,0,255), lineWidth);
-//        }
-
-        vector<map<uint32_t, vector<LimbLabel> > > labels; //used for detetor tuning
-        vector<Frame*> trimmed; //trim the sequence by removing starting and trailing non-keyframes
-
-
-        vector<Detector*> detectors;
-        if(params.at("useCSdet")!=0)
-        {
-            Detector * d = new ColorHistDetector();
-            detectors.push_back(d);
-        }
-        if(params.at("useHoGdet")!=0)
-        {
-            Detector * d = new HogDetector();
-            detectors.push_back(d);
-        }
-        if(params.at("useSURFdet")!=0)
-        {
-            Detector * d = new SurfDetector();
-            detectors.push_back(d);
-        }
-
-        bool firstKeyframeSeen = false;
-
-        vector<Frame*> temp;
-        for(uint32_t i=0; i<vFrames.size(); ++i)
-        {
-            if(vFrames[i]->getFrametype()==KEYFRAME)
-            {
-                //set the flag to true
-                firstKeyframeSeen=true;
-
-                //push back this keyframe at the end
-                temp.push_back(vFrames[i]);
-
-                //go through all temp and push them back
-                for(uint32_t j=0; j<temp.size(); ++j)
-                    trimmed.push_back(temp[j]);
-                //clear out temp
-                temp.clear();
-            }
-            else if(firstKeyframeSeen) //if not keyframe, just push to temp vector
-            {
-                temp.push_back(vFrames[i]);
-            }
-        }
-        //trimmed.push_back(temp[0]);
-
-        auto endSeqBuild = chrono::steady_clock::now();
-
-        // Store the time difference between start and end
-        auto diffSeqBuild = endSeqBuild - start;
-
-        cout << "\tSequence built in " << chrono::duration <double, milli> (diffSeqBuild).count()  << " ms" << endl;
-
-        cout << "\tTraining detector..." <<endl;
-
-        if(detectorName=="interpolationDetect") //then we are just doing a detector test!
-        {
-            vector<Frame*> trainingFrames;
-            trainingFrames.push_back(trimmed[0]);
-            trainingFrames.push_back(trimmed[trimmed.size()-1]);
-            //train detectors
-            for(uint32_t i=0; i<detectors.size(); ++i)
-                detectors[i]->train(trainingFrames, params);
-
-            auto endTrain = chrono::steady_clock::now();
-
-            // Store the time difference between start and end
-            auto diffTrain = endTrain - endSeqBuild;
-
-            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffTrain).count()  << " ms" << endl;
-
-            cout << "\tDetecting..." << endl;
-            labels = doInterpolationDetect(detectors, trimmed, params);
-
-            auto endDetect = chrono::steady_clock::now();
-
-            // Store the time difference between start and end
-            auto diffDetect = endDetect - endTrain;
-
-            cout << "\tDetections completed in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
-        }
-
-        else if(detectorName=="propagationDetect")
-        {
-            //train detectors
-            vector<Frame*> trainingFrames;
-            trainingFrames.push_back(trimmed[0]);
-            trainingFrames.push_back(trimmed[trimmed.size()-1]);
-            //train detectors
-            for(uint32_t i=0; i<detectors.size(); ++i)
-                detectors[i]->train(trainingFrames, params);
-
-            auto endTrain = chrono::steady_clock::now();
-
-            // Store the time difference between start and end
-            auto diffTrain = endTrain - endSeqBuild;
-
-            cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffTrain).count()  << " ms" << endl;
-
-            cout << "\tDetecting..." << endl;
-            labels = doPropagationDetect(detectors,trimmed, ism, params);
-
-            auto endDetect = chrono::steady_clock::now();
-
-            // Store the time difference between start and end
-            auto diffDetect = endDetect - endTrain;
-
-            cout << "\tDetections completed in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
-        }
-
-        out << param << endl;
-        out << "{" << endl;
-        for(uint32_t l=0; l< labels.size(); ++l)
-        {
-            out << "\t" << trimmed[l]->getID() << endl;
-            out << "\t[" << endl;
-            //for every frame
-            auto frameLabels = labels[l]; //frame labels
-            vector<vector<float> > frameErrors; //frame errors
-            frameErrors = computeLabelErrorStatToGT(frameLabels, gtFrames[l]);
-
-            for(uint32_t row=0; row<frameErrors.size(); ++row)
-            {
-                vector<LimbLabel> partLabels = frameLabels[row];
-                if(partLabels.size()>0)
+                for(auto i=0; i<trimmed.size(); ++i)
                 {
-                    out << "\t\t" << partLabels[0].getLimbID() << endl;
-                    out << "\t\t(" << endl;
-                    vector<float> partErrors = frameErrors[row]; //errors for a part
+                    //for each frame in the trimmed sequence
+                    addGaussianMaskNoise(trimmed.at(i));
+                }
+            }
 
-                    BodyPart * bp = vFrames[l]->getSkeleton().getBodyPart(partLabels[0].getLimbID());
-                    float partWidth = bp->getRelativeLength()/bp->getLWRatio()*vFrames[l]->getSkeleton().getScale();
-                    float acceptThresh=025;
+            auto endSeqBuild = chrono::steady_clock::now();
 
-                    for(uint32_t e=0; e<partErrors.size(); ++e)
+            // Store the time difference between start and end
+            auto diffSeqBuild = endSeqBuild - start;
+
+            cout << "\tSequence built in " << chrono::duration <double, milli> (diffSeqBuild).count()  << " ms" << endl;
+
+            cout << "\tTraining detector..." <<endl;
+
+            if(detectorName=="interpolationDetect") //then we are just doing a detector test!
+            {
+                vector<Frame*> trainingFrames;
+                trainingFrames.push_back(trimmed[0]);
+                trainingFrames.push_back(trimmed[trimmed.size()-1]);
+                //train detectors
+                for(uint32_t i=0; i<detectors.size(); ++i)
+                    detectors[i]->train(trainingFrames, params);
+
+                auto endTrain = chrono::steady_clock::now();
+
+                // Store the time difference between start and end
+                auto diffTrain = endTrain - endSeqBuild;
+
+                cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffTrain).count()  << " ms" << endl;
+
+                cout << "\tDetecting..." << endl;
+                labels = doInterpolationDetect(detectors, trimmed, params);
+
+                auto endDetect = chrono::steady_clock::now();
+
+                // Store the time difference between start and end
+                auto diffDetect = endDetect - endTrain;
+
+                cout << "\tDetections completed in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
+            }
+
+            else if(detectorName=="propagationDetect")
+            {
+                //train detectors
+                vector<Frame*> trainingFrames;
+                trainingFrames.push_back(trimmed[0]);
+                trainingFrames.push_back(trimmed[trimmed.size()-1]);
+                //train detectors
+                for(uint32_t i=0; i<detectors.size(); ++i)
+                    detectors[i]->train(trainingFrames, params);
+
+                auto endTrain = chrono::steady_clock::now();
+
+                // Store the time difference between start and end
+                auto diffTrain = endTrain - endSeqBuild;
+
+                cout << "\tDetectors trained in " << chrono::duration <double, milli> (diffTrain).count()  << " ms" << endl;
+
+                cout << "\tDetecting..." << endl;
+                labels = doPropagationDetect(detectors,trimmed, ism, params);
+
+                auto endDetect = chrono::steady_clock::now();
+
+                // Store the time difference between start and end
+                auto diffDetect = endDetect - endTrain;
+
+                cout << "\tDetections completed in " << chrono::duration <double, milli> (diffDetect).count()  << " ms" << endl;
+            }
+
+            //begin writing to file block - DO THIS ONLY IF WE ARE DOING A SINGLE CYCLE
+            if(num_trials==1)
+            {
+                out << param << endl;
+                out << "{" << endl;
+                for(uint32_t l=0; l< labels.size(); ++l)
+                {
+                    out << "\t" << trimmed[l]->getID() << endl;
+                    out << "\t[" << endl;
+                    //for every frame
+                    auto frameLabels = labels[l]; //frame labels
+                    vector<vector<float> > frameErrors; //frame errors (at this particular frame)
+                    frameErrors = computeLabelErrorStatToGT(frameLabels, gtFrames[l]);
+
+                    for(uint32_t row=0; row<frameErrors.size(); ++row)
                     {
-                        //this is a row in the output file
-                        //rank labelScore labelError
-
-
-
-                        string hogName = "18500";
-                        string csName = "4409412";
-                        string surfName = "21316";
-
-                        vector<Score> scores = partLabels[e].getScores();
-
-                        float useHoG = params.at("useHoGdet");
-                        float useCS = params.at("useCSdet");
-                        float useSURF = params.at("useSURFdet");
-
-                        //compute the weighted sum of scores
-                        float finalScore=0;
-                        bool hogFound=false;
-                        bool csFound=false;
-                        bool surfFound=false;
-                        float csScore, hogScore, surfScore;
-                        for(uint32_t i=0; i<scores.size(); ++i)
+                        vector<LimbLabel> partLabels = frameLabels[row];
+                        if(partLabels.size()>0)
                         {
-                            float score = scores[i].getScore();
-                            if(scores[i].getScore()==-1)//if score is -1, set it to 1
+                            out << "\t\t" << partLabels[0].getLimbID() << endl;
+                            out << "\t\t(" << endl;
+                            vector<float> partErrors = frameErrors[row]; //errors for a part
+
+                            BodyPart * bp = vFrames[l]->getSkeleton().getBodyPart(partLabels[0].getLimbID());
+                            float partWidth = bp->getRelativeLength()/bp->getLWRatio()*vFrames[l]->getSkeleton().getScale();
+                            float acceptThresh=025;
+
+                            for(uint32_t e=0; e<partErrors.size(); ++e)
                             {
-                                score=1.0; //set a high cost for invalid scores
+                                //this is a row in the output file
+                                //rank labelScore labelError
+
+                                string hogName = "18500";
+                                string csName = "4409412";
+                                string surfName = "21316";
+
+                                vector<Score> scores = partLabels[e].getScores();
+
+                                float useHoG = params.at("useHoGdet");
+                                float useCS = params.at("useCSdet");
+                                float useSURF = params.at("useSURFdet");
+
+                                //compute the weighted sum of scores
+                                float finalScore=0;
+                                bool hogFound=false;
+                                bool csFound=false;
+                                bool surfFound=false;
+                                float csScore, hogScore, surfScore;
+                                for(uint32_t i=0; i<scores.size(); ++i)
+                                {
+                                    float score = scores[i].getScore();
+                                    if(scores[i].getScore()==-1)//if score is -1, set it to 1
+                                    {
+                                        score=1.0; //set a high cost for invalid scores
+                                    }
+                                    if(scores[i].getDetName()==hogName)
+                                    {
+                                        hogScore = score;
+                                        hogFound=true;
+                                    }
+                                    else if(scores[i].getDetName()==csName)
+                                    {
+                                        csScore = score;
+                                        csFound=true;
+                                    }
+                                    else if(scores[i].getDetName()==surfName)
+                                    {
+                                        surfScore=score;
+                                        surfFound=true;
+                                    }
+                                }
+                                if(!csFound && useCS)
+                                    csScore=1.0;
+                                if(!hogFound && useHoG)
+                                    hogScore=1.0;
+                                if(!surfFound && useSURF)
+                                    surfScore=1.0;
+
+                                finalScore=csScore*useCS+hogScore*useHoG+surfScore*useSURF;
+                                //float avgScore = partLabels[e].getAvgScore();
+
+                                //                        if(row==15)
+                                //                            partLabels[0] > partLabels[1];
+
+
+                                //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
+                                //finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);
+
+                                vector<Point2f> poly = partLabels[e].getPolygon();
+                                bool isAccepted = false;
+                                if(e <= partWidth*acceptThresh)
+                                    isAccepted = true;
+
+                                out << "\t\t\t" << e << " " << finalScore << " " << partErrors[e] << " " << isAccepted << " " << csScore*useCS << " " <<  hogScore*useHoG << " " << surfScore*useSURF << " ";
+
+                                for(auto i=0; i<poly.size();++i)
+                                    out << poly[i].x << " " << poly[i].y << " ";
+                                out << endl;
                             }
-                            if(scores[i].getDetName()==hogName)
-                            {
-                                hogScore = score;
-                                hogFound=true;
-                            }
-                            else if(scores[i].getDetName()==csName)
-                            {
-                                csScore = score;
-                                csFound=true;
-                            }
-                            else if(scores[i].getDetName()==surfName)
-                            {
-                                surfScore=score;
-                                surfFound=true;
-                            }
+
+                            out << "\t\t)" << endl;
                         }
-                        if(!csFound && useCS)
-                            csScore=1.0;
-                        if(!hogFound && useHoG)
-                            hogScore=1.0;
-                        if(!surfFound && useSURF)
-                            surfScore=1.0;
 
-                        finalScore=csScore*useCS+hogScore*useHoG+surfScore*useSURF;
-                        //float avgScore = partLabels[e].getAvgScore();
-
-//                        if(row==15)
-//                            partLabels[0] > partLabels[1];
-
-
-                        //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
-                        //finalScore+=1.0*useHoG*(!hogFound)+1.0*useCS*(!csFound)+1.0*useSURF*(!surfFound);
-
-                        vector<Point2f> poly = partLabels[e].getPolygon();
-                        bool isAccepted = false;
-                        if(e <= partWidth*acceptThresh)
-                            isAccepted = true;
-
-                        out << "\t\t\t" << e << " " << finalScore << " " << partErrors[e] << " " << isAccepted << " " << csScore*useCS << " " <<  hogScore*useHoG << " " << surfScore*useSURF << " ";
-
-                        for(auto i=0; i<poly.size();++i)
-                            out << poly[i].x << " " << poly[i].y << " ";
-                        out << endl;
                     }
 
-                    out << "\t\t)" << endl;
+                    out << "\t]" << endl;
                 }
-
+                out << "}" << endl;
             }
-
-            out << "\t]" << endl;
+             //end of a trial solve
         }
-        out << "}" << endl;
-
+        //end of a param solve
         //draw interpolation
 
         auto end = chrono::steady_clock::now();
@@ -875,13 +1001,13 @@ int main (int argc, char **argv)
     }
     out.close();
 
-    for(auto i=0; i<gtFrames.size(); ++i)
-        delete gtFrames[i];
-    gtFrames.clear();
+//        for(auto i=0; i<gtFrames.size(); ++i)
+//            delete gtFrames[i];
+        gtFrames.clear();
 
-    cout << "Tuning finished, terminating. " << endl;
+        cout << "Tuning finished, terminating. " << endl;
 #if defined(MEMORY_DEBUG) && defined(UNIX)
-    Debug(list_allocations_on(libcw_do));
+        Debug(list_allocations_on(libcw_do));
 #endif  // MEMORY_DEBUG && UNIX
-    return 0;
-}
+        return 0;
+    }
