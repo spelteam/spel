@@ -23,7 +23,19 @@ namespace SPEL
     return m_id;
   }
 
-  void Solver::emplaceDefaultParameters(std::map<std::string, float>& params) 
+  uint32_t Solver::findFrameIndexById(int id, std::vector<Frame*> frames) const
+  {
+    for (auto i = 0U; i < frames.size(); ++i)
+    {
+      if (frames.at(i)->getID() == id)
+        return i;
+    }
+    std::stringstream ss;
+    ss << "There is no frame with id: " << id;
+    throw std::logic_error(ss.str());
+  }
+
+  void Solver::emplaceDefaultParameters(std::map<std::string, float>& params)
     const noexcept
   {
     spelHelper::mergeParameters(

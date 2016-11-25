@@ -99,8 +99,8 @@ namespace SPEL
     EXPECT_EQ(1.0f, S.computeScoreCost(label2, params));	// scores is empty
 
     //Testing function "computeJointCost"
-    EXPECT_EQ(0, S.computeJointCost(label1, label1, params, false));
-    EXPECT_EQ(LimbLength, S.computeJointCost(label1, label1, params, true));
+    EXPECT_EQ(0, S.computeJointCost(label1, label1, false));
+    EXPECT_EQ(LimbLength, S.computeJointCost(label1, label1, true));
 
     //Testing function "computeNormJointCost"
     float max = 1;
@@ -128,11 +128,11 @@ namespace SPEL
     skeleton.setJointTree(jointsTree);
     skeleton.setPartTree(partsTree);
 
-    EXPECT_EQ(0, S.computePriorCost(label1, bodyPart, skeleton, params));
+    EXPECT_EQ(0, S.computePriorCost(label1, bodyPart, skeleton));
 
     //Testing function "computeNormPriorCost"
     params.emplace("priorCoeff", 1.0);
-    EXPECT_EQ(0, S.computeNormPriorCost(label1, bodyPart, skeleton, params, max, max));
+    EXPECT_EQ(0, S.computeNormPriorCost(label1, bodyPart, skeleton, params, max));
   }
 
   vector<Point2f> shiftPolygon(vector<Point2f> polygon, float dx, float dy)
@@ -629,7 +629,7 @@ namespace SPEL
     ASSERT_TRUE(b);
 
     //Create expected value
-    vector<cv::Point2i> Expected = { Point2i(0, 7) };
+    vector<std::pair<int, int>> Expected = { std::make_pair(0, 7) };
 
     // Create actual value
     std::map<std::string, float> params;
@@ -637,7 +637,7 @@ namespace SPEL
     //params.emplace("treeSize", ISM.size());
     
     NSKPSolver s;
-    vector<cv::Point2i> Actual;
+    vector<std::pair<int, int>> Actual;
     try
     {
       Actual = s.suggestKeyframes(ISM, params);
@@ -667,7 +667,7 @@ namespace SPEL
     ASSERT_TRUE(b);
 
     //Create expected value
-    vector<cv::Point2i> Expected = { Point2i(0, 4), Point2i(2, 2) };
+    vector<std::pair<int, int>> Expected = { std::make_pair(0, 4), std::make_pair(2, 2) };
 
     // Create actual value
     std::map<std::string, float> params;
@@ -675,7 +675,7 @@ namespace SPEL
     //params.emplace("treeSize", ISM.size());
     
     NSKPSolver s;
-    vector<cv::Point2i> Actual;
+    vector<std::pair<int, int>> Actual;
     try
     {
       Actual = s.suggestKeyframes(ISM, params);

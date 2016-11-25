@@ -86,7 +86,7 @@ namespace SPEL
     for (auto p : propagatedFrames) //delete the frame vector as it is no longer being used
       delete p;
 
-    if (params.at(COMMON_NSKP_SOLVER_PARAMETERS::USE_TLPS().name()))
+    if (spelHelper::compareFloat(params.at(COMMON_NSKP_SOLVER_PARAMETERS::USE_TLPS().name()), 0.0f) > 0)
     {
       //create tlps solver
       TLPSSolver tlps;
@@ -111,9 +111,8 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()) =
-      std::min(static_cast<int>(params.at(
-        COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name())),
-        frames.front()->getFrameSize().height);
+      std::min(params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()),
+        static_cast<float>(frames.front()->getFrameSize().height));
 
     std::vector<NSKPSolver::SolvletScore> allSolves;
     const auto imageHeight = 
@@ -137,33 +136,25 @@ namespace SPEL
     const auto baseRotationStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().name());
     const auto baseSearchStep = params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().name());
 
-    const auto useHoG = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
-    const auto useCS = params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
-    const auto useSURF = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
+    const auto useHoG = spelHelper::compareFloat(params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name()), 0.0f) > 0;
+    const auto useCS = spelHelper::compareFloat(params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name()), 0.0f) > 0;
+    const auto useSURF = spelHelper::compareFloat(params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name()), 0.0f) > 0;
 
     const auto propagateFromLockframes = 
       spelHelper::compareFloat(params.at(
         COMMON_NSKP_SOLVER_PARAMETERS::PROPAGATE_FROM_LOCKFRAMES().name()), 
         1.0f) == 0;
 
-    bool isIgnored = false;
-    for (uint32_t i = 0; i < ignore.size(); ++i)
+    const auto currentFrame = frames.at(frameId);
+    const auto currentFrameId = currentFrame->getID();
+    const auto isIgnored = 
+      std::binary_search(ignore.begin(), ignore.end(), currentFrameId);
+    const auto mst = trees.at(currentFrameId).getMST(); //get the MST, by ID, as in ISM
+    const auto currentFrameType = currentFrame->getFrametype();
+
+    if (currentFrameType != INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
+      && (currentFrameType != LOCKFRAME || propagateFromLockframes) && mst.size() > 1) //and, if it's a lockframe, and solving from lockframes is allowed
     {
-      if (ignore[i] == frames[frameId]->getID())
-      {
-        isIgnored = true;
-        break;
-      }
-    }
-
-    tree<int> mst = trees[frames[frameId]->getID()].getMST(); //get the MST, by ID, as in ISM
-    if (frames[frameId]->getFrametype() != INTERPOLATIONFRAME && !isIgnored //as long as it's not an interpolated frame, and not on the ignore list
-      && (frames[frameId]->getFrametype() != LOCKFRAME || propagateFromLockframes) && mst.size()>1) //and, if it's a lockframe, and solving from lockframes is allowed
-    {
-
-      tree<int>::iterator mstIter;
-      //do OpenGM solve for single factor graph
-
       std::vector<Detector*> detectors;
       if (useCS)
         detectors.push_back(new ColorHistDetector());
@@ -172,103 +163,74 @@ namespace SPEL
       if (useSURF)
         detectors.push_back(new SurfDetector());
 
-      std::vector<Frame*> trainingFrames;
-      trainingFrames.push_back(frames[frameId]); //set training frame by index
-      
-      for (uint32_t i = 0; i < detectors.size(); ++i)
-      {
-      //  detectors[i]->setDebugLevel(0);
-        detectors[i]->train(trainingFrames, params);
-      }
+      std::vector<Frame*> trainingFrames(1, currentFrame);
+
+      for (auto &detector : detectors)
+        detector->train(trainingFrames, params);
 
       //@TODO: This may need to be modified to propagate not from root frame, but from parent frame
       //but only if the solve was successful, otherwise propagate from the root frame
-      for (mstIter = mst.begin(); mstIter != mst.end(); ++mstIter) //for each frame in the MST
+      for (auto mstIter = mst.begin(); mstIter != mst.end(); ++mstIter) //for each frame in the MST
       {
         ///define the space
         typedef opengm::DiscreteSpace<> Space;
         ///define the model
         typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
-
         ///define the update rules
         typedef opengm::BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
         ///define the inference algorithm
         typedef opengm::MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
-        //t1 = high_resolution_clock::now();
+        const auto mstIterFrame = frames.at(*mstIter);
+        const auto mstIterFrameType = mstIterFrame->getFrametype();
 
-        if (frames[*mstIter]->getFrametype() == KEYFRAME || frames[*mstIter]->getFrametype() == LOCKFRAME || *mstIter == frameId) //don't push to existing keyframes and lockframes
+        if (mstIterFrameType == KEYFRAME || mstIterFrameType == LOCKFRAME || *mstIter == frameId) //don't push to existing keyframes and lockframes
           continue; //also ignore mst frame if it's this frame
       //map<int, vector<LimbLabel> > labels;
-        std::map<uint32_t, std::vector<LimbLabel> > labels;
-        std::map<uint32_t, std::vector<LimbLabel> >::iterator labelPartsIter;
 
         //check whether parent is a lockframe
-        bool parentIsLockframe = false;
-        int parentIsSolved = -1;
+        auto parentIsLockframe = false;
+        SolvletScore *parentIsSolved = nullptr;
+        const auto parentFrameIdx = *mst.parent(mstIter);
+        auto parentFrame = frames.at(parentFrameIdx);
         if (mstIter != mst.begin())
         {
-          if (frames[*mst.parent(mstIter)]->getFrametype() == LOCKFRAME || frames[*mst.parent(mstIter)]->getFrametype() == KEYFRAME)
+          const auto parentFrameType = parentFrame->getFrametype();
+
+          if (parentFrameType == LOCKFRAME || parentFrameType == KEYFRAME)
             parentIsLockframe = true;
-          for (uint32_t i = 0; i < allSolves.size(); ++i) //check among accepted solutions
-            if (allSolves[i].solvlet.getFrameID() == *mst.parent(mstIter)) //if one fits, use it as prior
-              parentIsSolved = i;
+          for (const auto &i : allSolves) //check among accepted solutions
+            if (i.solvlet.getFrameID() == parentFrameIdx) //if one fits, use it as prior
+              parentIsSolved = const_cast<SolvletScore*>(&i);
         }
 
-        parentIsSolved = -1;
+        auto lockframe = new Lockframe();
 
-        Frame * lockframe = new Lockframe();
-
-        if (parentIsSolved != -1) //if solved, set the prior to the solve
-          lockframe->setSkeleton(allSolves.at(parentIsSolved).solvlet.toSkeleton(frames[frameId]->getSkeleton()));
+        if (parentIsSolved != nullptr) //if solved, set the prior to the solve
+          lockframe->setSkeleton(parentIsSolved->solvlet.toSkeleton(currentFrame->getSkeleton()));
         else if (parentIsLockframe) //if the parent of this node is a lockframe, use it as a prior
-          lockframe->setSkeleton(frames[*mst.parent(mstIter)]->getSkeleton());
+          lockframe->setSkeleton(parentFrame->getSkeleton());
         else //otherwise use the root frame as a prior
-          lockframe->setSkeleton(frames[frameId]->getSkeleton());
+          lockframe->setSkeleton(currentFrame->getSkeleton());
 
+        const auto mstIterFrameId = mstIterFrame->getID();
+        lockframe->setID(mstIterFrameId);
+        lockframe->SetImageFromPath(mstIterFrame->GetImagePath());
+        lockframe->SetMaskFromPath(mstIterFrame->GetMaskPath());
 
-        lockframe->setID(frames[*mstIter]->getID());
-        lockframe->SetImageFromPath(frames[*mstIter]->GetImagePath());
-        lockframe->SetMaskFromPath(frames[*mstIter]->GetMaskPath());
+        auto skeleton = lockframe->getSkeleton();
 
-        //compute the shift between the frame we are propagating from and the current frame
-        cv::Point2f shift;
-        if (parentIsSolved != -1)
-          shift = ism.getShift(allSolves.at(parentIsSolved).solvlet.getFrameID(), frames[*mstIter]->getID());
-        else if (parentIsLockframe)
-          shift = ism.getShift(frames[*mst.parent(mstIter)]->getID(), frames[*mstIter]->getID());
-        else
-          shift = ism.getShift(frames[frameId]->getID(), frames[*mstIter]->getID());
+        const auto &partTree = skeleton.getPartTree();
 
-        Skeleton skeleton = lockframe->getSkeleton();
-
-        //now set up skeleton params, such as search radius and angle search radius for every part
-        //this should very depending on relative distance between frames
-        //for each body part
-        tree<BodyPart> partTree = skeleton.getPartTree();
-        tree<BodyPart>::iterator partIter, parentPartIter;
-
-        //TODO: add check for keyframe or lockframe proximity to angular search radius estimator
-        //            bool isBound=false;
-        //            //if the frame we are projecting from is close to the frame we are projecting to => restrict angle search distance
-        //            //and is the frame we are propagating from, a keyframe? (check only if we disallow bind to lockframes
-        //            if(std::abs(frames[*mstIter]->getID()-frames[frameId]->getID())<=anchorBindDistance &&  //check to see whether we are close to a bind frame
-        //                    (bindToLockframes || (frames[frameId]->getFrametype()==KEYFRAME))) //and whether we are actually allowed to bind
-        //                isBound=true;
-
-        //if so, set bool to true, and get the frame ID that we are close to
-
-        for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
+        for (auto partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
         {
-          int depth = partTree.depth(partIter);
-
-          float rotationRange = baseRotationRange;//*pow(depthRotationCoeff, depth);
-          float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
+          auto rotationRange = baseRotationRange;
+          auto searchRange = baseSearchRadius * pow(depthRotationCoeff, partTree.depth(partIter));
 
           if (partTree.number_of_children(partIter) == 0)
           {
             searchRange = searchRange * 2;
-            rotationRange = rotationRange*depthRotationCoeff;
+            rotationRange = rotationRange * depthRotationCoeff;
           }
 
           partIter->setRotationSearchRange(rotationRange);
@@ -278,226 +240,137 @@ namespace SPEL
         lockframe->setSkeleton(skeleton);
 
         if (parentIsLockframe)
-          frames[*mst.parent(mstIter)]->setSkeleton(skeleton);
+          parentFrame->setSkeleton(skeleton);
         else
-          frames[frameId]->setSkeleton(skeleton);
+          currentFrame->setSkeleton(skeleton);
+
+        //compute the shift between the frame we are propagating from and the current frame
+        auto parentFrameId = parentFrame->getID();
+        cv::Point2f shift;
+        if (parentIsSolved != nullptr)
+          shift = ism.getShift(parentIsSolved->solvlet.getFrameID(), mstIterFrameId);
+        else if (parentIsLockframe)
+          shift = ism.getShift(parentFrameId, mstIterFrameId);
+        else
+          shift = ism.getShift(currentFrameId, mstIterFrameId);
 
         lockframe->shiftSkeleton2D(shift); //shift the skeleton by the correct amount
 
-        for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
-          labels = detectors[i]->detect(lockframe, params, labels); //detect labels based on keyframe training
+        std::map<uint32_t, std::vector<LimbLabel> > labels;
+        for (const auto detector : detectors) //for every detector
+          labels = detector->detect(lockframe, params, labels); //detect labels based on keyframe training
 
-        auto maxPartCandidates = params.at(COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES().name());
+        auto maxPartCandidates = static_cast<int>(params.at(COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES().name()));
 
-        for (uint32_t i = 0; i < labels.size(); ++i) //for each part
+        for (auto &label : labels) //for each part
         {
-          std::vector<Score> scores = labels[i].at(0).getScores();
-
-          uint32_t isWeak = 0;
-          for (uint32_t j = 0; j < scores.size(); ++j)
-            if (scores[j].getIsWeak())
-              isWeak++;
           std::vector<LimbLabel> tmp;
-          for (uint32_t j = 0; j < labels[i].size()*maxPartCandidates; ++j) //for each label that is within the threshold
-            tmp.push_back(labels[i].at(j)); //push back the label
-          labels[i] = tmp; //set this part's candidates to the new trimmed vector
+          for (auto j = 0; j < label.second.size() * maxPartCandidates; ++j) //for each label that is within the threshold
+            tmp.push_back(label.second.at(j)); //push back the label
+          label.second = tmp; //set this part's candidates to the new trimmed vector
         }
 
         std::vector<size_t> numbersOfLabels; //numbers of labels per part
 
-        for (uint32_t i = 0; i < labels.size(); ++i)
-          numbersOfLabels.push_back(labels[i].size()); //numbers of labels now contains the numbers
+        for (const auto &label : labels)
+          numbersOfLabels.push_back(label.second.size()); //numbers of labels now contains the numbers
 
         Space space(numbersOfLabels.begin(), numbersOfLabels.end());
         Model gm(space);
 
-        uint32_t jointFactors = 0, suppFactors = 0, priorFactors = 0;
+        auto jointFactors = 0U;
         //label score cost
-        for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter) //for each of the detected parts
+        for (auto partIter = partTree.begin(); partIter != partTree.end(); ++partIter) //for each of the detected parts
         {
-          std::vector<Score> scores = labels[partIter->getPartID()].at(0).getScores();
-          uint32_t isWeakCount = 0;
-          for (uint32_t j = 0; j < scores.size(); ++j)
-            if (scores[j].getIsWeak())
-              isWeakCount++;
+          const auto currentPartId = partIter->getPartID();
+          const auto &currentLabel = labels.at(currentPartId);
 
-          std::vector<int> varIndices; //create vector of indices of variables
-          varIndices.push_back(partIter->getPartID()); //push first value in
+          std::vector<int> varIndices (1, currentPartId); //create vector of indices of variables
 
-          size_t scoreCostShape[] = { numbersOfLabels[partIter->getPartID()] }; //number of labels
+          size_t scoreCostShape[] = { numbersOfLabels.at(currentPartId) }; //number of labels
           opengm::ExplicitFunction<float> scoreCostFunc(scoreCostShape, scoreCostShape + 1); //explicit function declare
 
-          for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-          {
-            scoreCostFunc(i) = computeScoreCost(labels[partIter->getPartID()].at(i), params); //compute the label score cost
-          }
+          auto i = 0;
+          for (const auto &c : currentLabel) //for each label in for this part
+            scoreCostFunc(i++) = computeScoreCost(c, params); //compute the label score cost
 
-          Model::FunctionIdentifier scoreFid = gm.addFunction(scoreCostFunc); //explicit function add to graphical model
-          gm.addFactor(scoreFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-          suppFactors++;
-
-                          //Comment out prior cost factors for the moment
-                          //                    ExplicitFunction<float> priorCostFunc(scoreCostShape, scoreCostShape+1); //explicit function declare
-
-                          //                    //precompute the maxium and minimum for normalisation
-                          //                    float priorMin=FLT_MAX, priorMax=0;
-                          //                    vector<LimbLabel>::iterator lbl;
-                          //                    //vector<float> priorCostFuncValues;
-                          //                    for(lbl=labels[partIter->getPartID()].begin(); lbl!=labels[partIter->getPartID()].end(); ++lbl) //for each label in for this part
-                          //                    {
-                          //                        float val = computePriorCost(*lbl, *partIter, skeleton, params);
-
-                          //                        if(val<priorMin)
-                          //                            priorMin = val;
-                          //                        if(val>priorMax && val!=FLT_MAX)
-                          //                            priorMax = val;
-
-                          //                        //priorCostFuncValues.push_back(val);
-                          //                    }
-
-                          //                    //now set up the solutions
-                          //                    for(uint32_t i=0; i<labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-                          //                    {
-                          //                        priorCostFunc(i) = computeNormPriorCost(labels[partIter->getPartID()].at(i), *partIter, skeleton, params, priorMin, priorMax);
-                          //                    }
-
-                          //                    Model::FunctionIdentifier priorFid = gm.addFunction(priorCostFunc); //explicit function add to graphical model
-                          //                    gm.addFactor(priorFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
-                          //                    priorFactors++;
+          gm.addFactor(gm.addFunction(scoreCostFunc), varIndices.begin(), varIndices.end()); //bind to factor and variables
 
           if (partIter != partTree.begin()) //if iterator is not on root node, there is always a parent body part
           {
             varIndices.clear();
-            parentPartIter = partTree.parent(partIter); //find the parent of this part
-            varIndices.push_back(parentPartIter->getPartID()); //push back parent partID as the second variable index
-            varIndices.push_back(partIter->getPartID()); //push first value in (parent, this)
+            auto parentPartIter = partTree.parent(partIter); //find the parent of this part
+            const auto parentPartId = parentPartIter->getPartID();
+            const auto &parentLabel = labels.at(parentPartId);
+            varIndices.push_back(parentPartId); //push back parent partID as the second variable index
+            varIndices.push_back(currentPartId); //push first value in (parent, this)
 
-            size_t jointCostShape[] = { numbersOfLabels[parentPartIter->getPartID()], numbersOfLabels[partIter->getPartID()] }; //number of labels
+            size_t jointCostShape[] = { numbersOfLabels.at(parentPartId), numbersOfLabels.at(currentPartId) }; //number of labels
             opengm::ExplicitFunction<float> jointCostFunc(jointCostShape, jointCostShape + 2); //explicit function declare
 
             //first figure out which of the current body part's joints should be in common with the parent body part
+            auto toChild = parentPartIter->getChildJoint() == partIter->getParentJoint() ? true : false;
 
-            bool toChild = false;
-            int pj = parentPartIter->getChildJoint();
-            int cj = partIter->getParentJoint();
-            if (pj == cj)
+            auto jointMax = 0.0f;
+            for (const auto &c : currentLabel) //for each label in for this part
             {
-              //then current parent is connected to paren
-              toChild = true;
-            }
-
-            float jointMin = FLT_MAX, jointMax = 0;
-            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-            {
-              for (uint32_t j = 0; j < labels[parentPartIter->getPartID()].size(); ++j)
+              for (const auto &p: parentLabel)
               {
-                float val = computeJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, toChild);
+                const auto val = computeJointCost(c, p, toChild);
 
-                if (val < jointMin)
-                  jointMin = val;
-                if (val > jointMax && val != FLT_MAX)
+                if (val > jointMax && val != std::numeric_limits<float>::max())
                   jointMax = val;
               }
             }
 
-            for (uint32_t i = 0; i < labels[partIter->getPartID()].size(); ++i) //for each label in for this part
-            {
-              for (uint32_t j = 0; j < labels[parentPartIter->getPartID()].size(); ++j)
-              {
-                //for every child/parent pair, compute score
-                jointCostFunc(j, i) = computeNormJointCost(labels[partIter->getPartID()].at(i), labels[parentPartIter->getPartID()].at(j), params, jointMax, toChild);
-              }
-            }
+            for (auto c = 0U; c < currentLabel.size(); ++c)
+              for (auto p = 0U; p < parentLabel.size(); ++p)
+                jointCostFunc(p, c) = computeNormJointCost(currentLabel.at(c), parentLabel.at(p), params, jointMax, toChild);
 
-            Model::FunctionIdentifier jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
+            const auto jointFid = gm.addFunction(jointCostFunc); //explicit function add to graphical model
             gm.addFactor(jointFid, varIndices.begin(), varIndices.end()); //bind to factor and variables
             jointFactors++;
           }
         }
 
-        if (SpelObject::getDebugLevel() >= 1)
-        {
-          float k;
-          k = skeleton.getPartTree().size(); //number of bones
-          //float expectedSuppFactors=k; //n*k
-          //float expectedPriorFactors=k; //n*k
-          float expectedJointFactors = (k - 1); //n*(k-1)
-
-          //assert(expectedSuppFactors==suppFactors);
-          assert(expectedJointFactors == jointFactors);
-          //assert(priorFactors==expectedPriorFactors);
-        }
-        //            t2 = high_resolution_clock::now();
-        //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-
-        //            cerr << "Factor Graph building time "  << duration << endl;
-
-        // set up the optimizer (loopy belief propagation)
-
-        //t1 = high_resolution_clock::now();
-        const size_t maxNumberOfIterations = 100;
-        const double convergenceBound = 1e-7;
-        const double damping = 0.5;
-        BeliefPropagation::Parameter parameter(maxNumberOfIterations, convergenceBound, damping);
-        BeliefPropagation bp(gm, parameter);
-
-        // optimize (approximately)
-        BeliefPropagation::VerboseVisitorType visitor;
-        //bp.infer(visitor);
+        BeliefPropagation bp(gm, BeliefPropagation::Parameter (100, 1e-7f, 0.5f));
         bp.infer();
 
+        const auto labelsCount = labels.size();
         // obtain the (approximate) argmin
-        std::vector<size_t> labeling(labels.size());
+        std::vector<size_t> labeling(labelsCount);
         bp.arg(labeling);
 
-        std::vector<LimbLabel> solutionLabels;
-        for (uint32_t i = 0; i < labels.size(); ++i)
-        {
-          solutionLabels.push_back(labels[i][labeling[i]]); //pupulate solution vector
-        }
-        //t2 = high_resolution_clock::now();
-
-        //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-        //            cerr << "Factor Graph solving time "  << duration << endl;
-
-        //            t1 = high_resolution_clock::now();
+        std::vector<LimbLabel> solutionLabels(labelsCount);
+        for (auto i = 0; i < labelsCount; ++i)
+          solutionLabels.push_back(labels.at(i).at(labeling.at(i))); //pupulate solution vector
 
         //labeling now contains the approximately optimal labels for this problem
         Solvlet solvlet(*mstIter, solutionLabels);
         SolvletScore ss;
         ss.solvlet = solvlet;
-        if (parentIsSolved != -1)
-          ss.parentFrame = allSolves.at(parentIsSolved).solvlet.getFrameID();
+        if (parentIsSolved != nullptr)
+          ss.parentFrame = parentIsSolved->solvlet.getFrameID();
         else if (parentIsLockframe)
-          ss.parentFrame = frames[*mst.parent(mstIter)]->getID();
+          ss.parentFrame = frames.at(parentFrameIdx)->getID();
         else
-          ss.parentFrame = frames[frameId]->getID();
-        std::cerr << "done solving!" << std::endl;
-        ss.score = evaluateSolution(frames[solvlet.getFrameID()],
+          ss.parentFrame = currentFrameId;
+        ss.score = evaluateSolution(frames.at(solvlet.getFrameID()),
           solvlet.getLabels(), params);
         allSolves.push_back(ss);
-
-        //            t2 = high_resolution_clock::now();
-
-        //            duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-        //            cerr << "Solve evaluation time "  << duration << endl;
 
         delete lockframe; //delete the unused pointer now
       }
 
       //do detector cleanup
-      for (auto i = 0; i < detectors.size(); ++i)
-        delete detectors[i];
+      for (auto detector : detectors)
+        delete detector;
       detectors.clear();
-      ignore.push_back(frames[frameId]->getID()); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
+
+      ignore.push_back(currentFrameId); //add this frame to the ignore list for future iteration, so that we don't propagate from it twice
     }
     
     return allSolves;
-  }
-
-  int NSKPSolver::test(int frameId, const std::vector<Frame *> &frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree>& trees, std::vector<int> &ignore)
-  {
-    return 0;
   }
 
   void NSKPSolver::emplaceDefaultParameters(std::map<std::string, float>& params) const noexcept
@@ -510,210 +383,124 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-
     if (frames.size() == 0)
       return std::vector<Solvlet>();
 
     std::vector<std::vector<SolvletScore> > allSolves;
-
-    for (uint32_t i = 0; i < frames.size(); ++i)
-      allSolves.push_back(std::vector<SolvletScore>()); //empty vector to every frame slot
-
-    std::vector<Lockframe*> lockframes;
-
-    //build frame MSTs by ID's as in ISM
-    //vector<MinSpanningTree> trees = buildFrameMSTs(ism, params);
-    //now add variables to the space, with number of detections
-
-    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-
-    //    vector<future<vector<NSKPSolver::SolvletScore> > > futures;
-
-    std::cerr << "Set-up time " << duration << std::endl;
-
-    // //THIS IS THE ASYNC VERSION, THAT NEEDS DEBUGGING  -------------------------------------------------------------
-//    vector<future<vector<SolvletScore> > > futures;
-//    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
-//    {
-//        int captureIndex = frameId;
-//        //[&] { a.foo(100); }
-//        //futures.push_back(std::async([&] {this->test(frameId, frames, params, ism, trees, ignore);}));
-//        futures.push_back(async(std::launch::async | std::launch::deferred,[=, &ignore]()->vector < NSKPSolver::SolvletScore >
-//        {return propagateFrame(captureIndex, frames, params, ism, trees, ignore); }));
-//    }
-
-//    cerr << "Launched " << futures.size() << " threads." << endl;
-
-//    vector<vector<SolvletScore> > temp;
-//    for (auto &e : futures) {
-//        ;
-//        try {
-//            //e.wait();
-//            temp.push_back(e.get());
-//            //std::cout << "You entered: " << x << '\n';
-//        }
-//        catch (std::exception&) {
-//            std::cout << "[exception caught]";
-//        }
-//        //         if(solves.size()>0)
-//        //             allSolves[solves[0].solvlet.getFrameID()]=solves;
-//    }
-    // //END -----------------------------------------------------------------------------
-
-    //THE SINGLE-THREAD VERSION ----------------------------------------------------------
-    std::vector<std::vector<SolvletScore> > temp;
-    for (uint32_t frameId = 0; frameId < frames.size(); ++frameId)
-    {
-      temp.push_back(propagateFrame(frameId, frames, params, ism, trees, ignore));
-    }
-
-    for (uint32_t i = 0; i < temp.size(); ++i)
-    {
-      if (temp[i].size()>0)
-        allSolves[temp[i].at(0).solvlet.getFrameID()] = temp[i];
-    }
-    //END --------------------------------------------------------------------------------
+    for (auto frameId = 0U; frameId < frames.size(); ++frameId)
+      allSolves.push_back(propagateFrame(frameId, frames, params, ism, trees, ignore));
 
     //now extract the best solves
-    std::map<uint32_t, SolvletScore> bestSolves;
-
     auto acceptLockframeThreshold = params.at(COMMON_NSKP_SOLVER_PARAMETERS::LOCKFRAME_THRESHOLD().name());
 
+    std::map<uint32_t, SolvletScore> bestSolves;
     for (const auto &frameSolves : allSolves)
     {
       for (const auto &solve : frameSolves)
       {
         if (solve.score >= acceptLockframeThreshold)
         {
-          bestSolves.emplace(solve.solvlet.getFrameID(), solve); //emplace this solve if one isn't in there yet
-
-          if (solve.score > bestSolves.at(solve.solvlet.getFrameID()).score) //now compare to solve in the map
-            bestSolves.at(solve.solvlet.getFrameID()) = solve; //replace with this one if it's better
+          const auto id = solve.solvlet.getFrameID();
+          if (bestSolves.find(id) == bestSolves.cend())
+            bestSolves.emplace(id, solve); //emplace this solve if one isn't in there yet
+          else if (solve.score > bestSolves.at(id).score) //now compare to solve in the map
+            bestSolves.at(id) = solve; //replace with this one if it's better
         }
       }
     }
 
     //now create skeletons for these solves
-
+    std::vector<Lockframe*> lockframes;
     for (const auto &bs : bestSolves)
     {
-      SolvletScore ss = bs.second;
-      int thisFrameID = ss.solvlet.getFrameID();
-      int parentFrameID = ss.parentFrame;//the ID of the frame the solve prior came from
+      const auto &ss = bs.second;
+      const auto thisFrameID = ss.solvlet.getFrameID();
       
-      Lockframe * lockframe = new Lockframe();
-      lockframe->SetImageFromPath(frames[thisFrameID]->GetImagePath());
-      lockframe->SetMaskFromPath(frames[thisFrameID]->GetMaskPath());
+      auto lockframe = new Lockframe();
+      const auto currentFrame = frames.at(thisFrameID);
+      lockframe->SetImageFromPath(currentFrame->GetImagePath());
+      lockframe->SetMaskFromPath(currentFrame->GetMaskPath());
       lockframe->setID(thisFrameID);
-      Skeleton parentSkel = frames[parentFrameID]->getSkeleton();
-      Skeleton skel = ss.solvlet.toSkeleton(parentSkel);
       //parent skeleton is the basis, this will copy scale and other params, but have different locations
-      lockframe->setSkeleton(skel);
-      lockframe->setParentFrameID(parentFrameID);
+      lockframe->setSkeleton(ss.solvlet.toSkeleton(currentFrame->getSkeleton()));
+      lockframe->setParentFrameID(ss.parentFrame);
 
       lockframes.push_back(lockframe);
     }
 
     std::vector<Solvlet> solvlets;
 
-    for (uint32_t i = 0; i < lockframes.size(); ++i)
+    for (auto lockframe : lockframes)
     {
-      if (frames[lockframes[i]->getID()]->getFrametype() != LOCKFRAME
-        && frames[lockframes[i]->getID()]->getFrametype() != KEYFRAME) //never replace keyframes and existing lockframes
+      const auto lockframeId = lockframe->getID();
+      Frame *frame = nullptr;
+      for (auto f : frames)
       {
-        delete frames[lockframes[i]->getID()]; //delete the frame currently there, and replace with lockframe
-        frames[lockframes[i]->getID()] = lockframes.at(i); //make pointers point to the correct objects
-        solvlets.push_back(bestSolves.at(lockframes.at(i)->getID()).solvlet);
+        if (f->getID() == lockframeId)
+        {
+          frame = f;
+          break;
+        }
+      }
+      const auto frameType = frame->getFrametype();
+      if (frameType != LOCKFRAME && frameType != KEYFRAME) //never replace keyframes and existing lockframes
+      {
+        delete frame; //delete the frame currently there, and replace with lockframe
+        *frame = *lockframe; //make pointers point to the correct objects
+        solvlets.push_back(bestSolves.at(lockframeId).solvlet);
       } //unless this lockframe replaced something in the original vector, delte it
       else
-      {
-        delete lockframes[i];
-      }
+        delete lockframe;
     }
 
-    std::cerr << "Generated " << lockframes.size() << " lockframes!" << std::endl;
+    if (SpelObject::getDebugLevel() >= 5)
+    {
+      std::stringstream ss;
+      ss << "Generated " << lockframes.size() << " lockframes!";
+      DebugMessage(ss.str(), 5);      
+    }
 
     return solvlets;
-  }
-
-  //return the index of the first instance of frame with matching id
-  //if no matching id in vector, return -1
-  uint32_t NSKPSolver::findFrameIndexById(int id, std::vector<Frame*> frames)
-  {
-    for (uint32_t i = 0; i < frames.size(); ++i)
-    {
-      if (frames[i]->getID() == id)
-        return i;
-    }
-    return -1;
   }
 
   //compute label score
   float NSKPSolver::computeScoreCost(const LimbLabel& label, std::map<std::string, float> params)
   {
-    //    if(label.getIsOccluded() )// || label.getIsWeak()) //if it's occluded, return zero
-    //        return 0;
-
-    std::string hogName = "18500";
-    std::string csName = "4409412";
-    std::string surfName = "21316";
-
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFFICIENT().name());
+    auto sumcoeff = 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name()) + 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name()) +
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
 
-    //@FIX
-    auto useHoG = params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
-    auto useCS = params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
-    auto useSURF = params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
-
-    //TODO: Fix score combinations
-    std::vector<Score> scores = label.getScores();
+    const auto scores = label.getScores();
 
     //compute the weighted sum of scores
-    float finalScore = 0;
-    bool hogFound = false;
-    bool csFound = false;
-    bool surfFound = false;
-    for (uint32_t i = 0; i < scores.size(); ++i)
+    auto finalScore = 0.0f;
+    std::set<std::string> usedCoeffs;
+    for (const auto &s : scores)
     {
-      float score = scores[i].getScore();
-      if (scores[i].getScore() == -1.0)//if score is -1, set it to 1
+      auto score = s.getScore();
+      if (spelHelper::compareFloat(score, -1.0f) == 0)
+        score = 1.0f;
+      const auto detector = s.getDetName();
+      const auto coeff = s.getCoeff();
+      if (usedCoeffs.count(detector) == 0)
       {
-        score = 1.0; //set a high cost for invalid scores
+        usedCoeffs.insert(detector);
+        sumcoeff -= coeff;
       }
-      if (scores[i].getDetName() == hogName)
-      {
-        finalScore = finalScore + score*useHoG;
-        hogFound = true;
-      }
-      else if (scores[i].getDetName() == csName)
-      {
-        finalScore = finalScore + score*useCS;
-        csFound = true;
-      }
-      else if (scores[i].getDetName() == surfName)
-      {
-        finalScore = finalScore + score*useSURF;
-        surfFound = true;
-      }
+      finalScore += (score * coeff);
     }
-
-    //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
-    finalScore += 1.0*useHoG*(!hogFound) + 1.0*useCS*(!csFound) + 1.0*useSURF*(!surfFound);
+    if (spelHelper::compareFloat(sumcoeff, 0.0f) > 1)
+      finalScore += sumcoeff;
 
     return finalScore;
   }
 
   //compute distance to parent limb label
-  float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild)
+  float NSKPSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, bool toChild)
   {
-    //emplace default
-    //params.emplace("jointCoeff", 0.5);
-    //float lambda = params.at("jointCoeff");
     cv::Point2f p0, p1, c0, c1;
 
     //@FIX this is really too simplistic, connecting these points
@@ -734,46 +521,25 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    //read params
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFFICIENT().name());
-
-    //float leeway = params.at("jointLeeway");
-    cv::Point2f p0, p1, c0, c1;
-
-    //@FIX this is really too simplistic, connecting these points
-    child.getEndpoints(c0, c1);
-    parent.getEndpoints(p0, p1);
-
-    //child length
-    //float clen = sqrt(pow(c0.x-c1.x, 2)+pow(c0.y-c1.y, 2));
-
-    //normalise this?
-    //give some leeway
-    float score = 0;
-    if (toChild) //connected to parent's child joint
-      score = sqrt(pow(c0.x - p1.x, 2) + pow(c0.y - p1.y, 2)) / max;
-    else //else connected to parent's parent joint
-      score = sqrt(pow(c0.x - p0.x, 2) + pow(c0.y - p0.y, 2)) / max;
-    //    if(score<(clen*leeway)/max) //any distnace below leeway is zero
-    //        score=0;
-    //return the squared distance from the lower parent joint p1, to the upper child joint c0
-
     //output a sentence about who connected to whom and what the score was
     if (SpelObject::getDebugLevel() >= 1 && (child.getLimbID() == 7 || child.getLimbID() == 6) && !toChild)
-      std::cerr << "Part " << child.getLimbID() << " is connecting to part " << parent.getLimbID() << " PARENT joint" << std::endl;
+    {
+      std::stringstream ss;
+      ss << "Part " << child.getLimbID() << " is connecting to part " << parent.getLimbID() << " PARENT joint";
+      DebugMessage(ss.str(), 1);
+    }
 
-    return lambda*score;
+    const auto lambda = params.at(COMMON_SOLVER_PARAMETERS::IMAGE_COEFFICIENT().name());
+    return computeJointCost(child, parent, toChild) / max * lambda;
   }
 
   //compute distance to the body part prior
-  float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params)
+  float NSKPSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton)
   {
-    //  params.emplace("priorCoeff", 0.0);
-    //	float lambda = params.at("priorCoeff");
-    cv::Point2f p0, p1, pp0, pp1;
+    cv::Point2f p0, p1;
     label.getEndpoints(p0, p1);
-    pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
-    pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
+    const auto pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
+    const auto pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
 
     //normalise this cost?
 
@@ -781,20 +547,14 @@ namespace SPEL
     return pow((p0.x - pp0.x), 2) + pow((p0.y - pp0.y), 2) + pow((p1.x - pp1.x), 2) + pow((p1.y - pp1.y), 2);
   }
 
-  float NSKPSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float min, float max)
+  float NSKPSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float max)
   {
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());
-    cv::Point2f p0, p1, pp0, pp1;
-    label.getEndpoints(p0, p1);
-    pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
-    pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
-
-    //normalise this cost?
+    const auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());
 
     //return the sum of squared distances between the corresponding joints, prior to label
-    return lambda*((pow((p0.x - pp0.x), 2) + pow((p0.y - pp0.y), 2) + pow((p1.x - pp1.x), 2) + pow((p1.y - pp1.y), 2)) / max);
+    return lambda * computePriorCost(label, prior, skeleton) / max;
   }
 
   //build an MST for every frame and return the vector
@@ -813,7 +573,12 @@ namespace SPEL
       //for each frame, build an MST
       //and add to vector
       frameMST.push_back(MinSpanningTree(ism, i, treeSize, simThresh));
-      std::cout << i << " MST built" << std::endl;
+      if (SpelObject::getDebugLevel() >= 5)
+      {
+        std::stringstream ss;
+        ss << i << " MST built";
+        DebugMessage(ss.str(), 5);
+      }
     }
 
     return frameMST;
@@ -821,74 +586,71 @@ namespace SPEL
 
   //suggest maximum number of keyframes
   //function should return vector with suggested keyframe numbers
-  std::vector<cv::Point2i> NSKPSolver::suggestKeyframes(const ImageSimilarityMatrix& ism, std::map<std::string, float> params)
+  std::vector<std::pair<int, int>> NSKPSolver::suggestKeyframes(const ImageSimilarityMatrix& ism, std::map<std::string, float> params)
   {
     emplaceDefaultParameters(params);
 
-    //if(params.at("debugLevel")>=1)
-    std::cerr << "Building all MSTs..." << std::endl;
-    std::vector<MinSpanningTree> mstVec = buildFrameMSTs(ism, params);
-    //if(debugLevel>=1)
-    std::cerr << "Finished building MSTs" << std::endl;
-    auto minKeyframeDist = static_cast<uint32_t>(params.at(
+    if (SpelObject::getDebugLevel() >= 5)
+    { 
+      const std::string s = "Building all MSTs...";
+      DebugMessage(s, 5);
+    }
+
+    const auto mstVec = buildFrameMSTs(ism, params);
+
+    if (SpelObject::getDebugLevel() >= 5)
+    {
+      const std::string s = "Finished building MSTs";
+      DebugMessage(s, 5);
+    }
+
+    auto minKeyframeDist = static_cast<int32_t>(params.at(
       COMMON_NSKP_SOLVER_PARAMETERS::MIN_KEY_FRAME_DISTANCE().name()));
     std::vector<std::vector<uint32_t> > orderedList;
-    for (uint32_t i = 0; i < mstVec.size(); ++i)
+    for (const auto &i : mstVec)
     {
-      tree<int>::iterator iter;
-      tree<int> MST = mstVec[i].getMST();
-
+      const auto MST = i.getMST();
       std::vector<uint32_t> frames;
-
-      for (iter = MST.begin(); iter != MST.end(); ++iter)
-        frames.push_back(*iter); //create a vector of vectors
+      frames.reserve(MST.size());
+      std::copy(MST.begin(), MST.end(), frames.begin());
       orderedList.push_back(frames);
     }
     //this is the simple way of counting the number of frames that made it in
     //alternatively we could come up with a more complex scheme for determining keyframe optimality
-    std::vector<cv::Point2i> frameOrder;
+    std::vector<std::pair<int, int>> frameOrder;
+    frameOrder.reserve(orderedList.size());
+    std::sort(orderedList.begin(), orderedList.end(), [&](const auto &one, const auto &two)
+    {
+      return one.size() < two.size();
+    });
     while (orderedList.size() != 0)
     {
-      //find the largest frame MST:
-      uint32_t maxSize = 0;
-      int idx = -1;
-      for (uint32_t i = 0; i < orderedList.size(); ++i)
-      {
-        if (orderedList[i].size() > maxSize)
-        {
-          idx = i;
-          maxSize = orderedList[i].size();
-        }
-      }
+      const auto curItem = orderedList.back();
+      const auto curItemSize = curItem.size();
       //if there largest vector remaining is of legnth zero, stop
-      if (maxSize <= 1)
+      if (curItemSize <= 1)
         break;
 
-
-      //store it as the best candidate
-      std::vector<uint32_t> erasedVector = orderedList[idx];
-
-      frameOrder.push_back(cv::Point2i(erasedVector[0], maxSize));
-
-      orderedList.erase(orderedList.begin() + idx);
+      frameOrder.push_back(std::make_pair(curItem.front(), static_cast<int>(curItemSize)));
 
       //remove all values in that vector from all others
-      for (uint32_t i = 0; i < orderedList.size(); ++i)
+      for (auto &i : orderedList)
         //for each element in erasedVector
-        for (uint32_t j = 0; j < erasedVector.size(); ++j)
-          orderedList[i].erase(std::remove(orderedList[i].begin(), orderedList[i].end(), erasedVector[j]), orderedList[i].end());
+        for (const auto &j : curItem)
+          i.erase(std::remove(i.begin(), i.end(), j), i.end());
+
+      orderedList.pop_back();
     }
     //now tidy up the frame order by forcing minimum keyframe distance
-    std::vector<cv::Point2i> aux;
-    aux.push_back(frameOrder[0]);
-    for (std::vector<cv::Point2i>::iterator i = frameOrder.begin(); i != frameOrder.end(); ++i)
+    std::vector<std::pair<int, int>> aux;
+    aux.push_back(frameOrder.front());
+    for (const auto &i : frameOrder)
     {
-      int isOk = true;
-      int thisFrame = i->x;
-      for (std::vector<cv::Point2i>::iterator j = aux.begin(); j != aux.end(); ++j)
+      auto isOk = true;
+      const auto thisFrame = i.first;
+      for (const auto &j : aux)
       {
-        int thatFrame = j->x;
-
+        const auto thatFrame = j.first;
         if (std::abs(thisFrame - thatFrame) < minKeyframeDist)
         {
           isOk = false;
@@ -897,7 +659,7 @@ namespace SPEL
       }
 
       if (isOk) //if it's ok so far, add it to final
-        aux.push_back(*i);
+        aux.push_back(i);
     }
     //return the resulting vector
     
@@ -913,7 +675,6 @@ namespace SPEL
     //   1) Mask coverage
     //   2) Parts falling outside mask range
     //   3) ?
-
     //   */
 
     //engaged pixles - the total number of pixels that are either within a limb label of within the mask
@@ -921,126 +682,103 @@ namespace SPEL
     //incorrect pixels - those pixels that are black and inside a label, and white and outside a label
     //score = correct/(correct+incorrect)
 
-    auto maxFrameHeight = static_cast<uint32_t>(
+    const auto maxFrameHeight = static_cast<uint32_t>(
       params.at(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name()));
 
-    cv::Mat mask = frame->getMask().clone();
+    auto mask = frame->getMask().clone();
 
-    float factor = 1;
     //compute the scaling factor
     if (maxFrameHeight != 0)
     {
-      factor = (float)maxFrameHeight / (float)mask.rows;
-
-      resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
+      const auto factor = static_cast<float>(maxFrameHeight) / static_cast<float>(mask.rows);
+      resize(mask, mask, cvSize(static_cast<int>(mask.cols * factor), static_cast<int>(mask.rows * factor)));
+      for (auto &label : labels)
+        label.Resize(factor);
     }
-    for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
-      label->Resize(factor);
 
-    int correctPixels = 0, incorrectPixels = 0;
-    int pixelsInMask = 0;
-    int coveredPixelsInMask = 0;
-    int incorrectlyCoveredPixels = 0;
-    int missedPixels = 0;
+    auto correctPixels = 0U, incorrectPixels = 0U;
 
-    for (int i = 0; i < mask.cols; ++i) //at every col - x
+    for (auto i = 0; i < mask.cols; ++i) //at every col - x
     {
-      for (int j = 0; j < mask.rows; ++j) //and every row - y
+      for (auto j = 0; j < mask.rows; ++j) //and every row - y
       {
-        //int test = labels[0].containsPoint(Point2f(480,100));
         //check whether pixel hit a label from solution
-        bool labelHit = false;
-        for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+        auto labelHit = false;
+        const auto point = cv::Point2f(static_cast<float>(i), static_cast<float>(j));
+        for (const auto &label : labels)
         {
-          if (label->containsPoint(cv::Point2f(i, j))) //this is done in x,y coords
+          if (label.containsPoint(point)) //this is done in x,y coords
           {
             labelHit = true;
-            //break;
+            break;
           }
         }
 
         //check pixel colour
-        int intensity = mask.at<uchar>(j, i); //this is done with reve
-        bool blackPixel = (intensity < 10);
-
-        if (!blackPixel)
-          pixelsInMask++;
+        const auto intensity = mask.at<uchar>(j, i); //this is done with reve
+        const auto blackPixel = (intensity < 10);
 
         if (blackPixel && labelHit) //if black in label, incorrect
-        {
           incorrectPixels++;
-          incorrectlyCoveredPixels++;
-        }
-        else if (!blackPixel && !labelHit) //if white not in label, incorret
+        else if (!blackPixel)
         {
-          incorrectPixels++;
-          missedPixels++;
+          if (!labelHit) //if white not in label, incorret
+            incorrectPixels++;
+          else if (labelHit)//otherwise correct
+            correctPixels++;
         }
-        else if (!blackPixel && labelHit)//otherwise correct
-        {
-          correctPixels++;
-          coveredPixelsInMask++;
-        }
-        //            else //black pixel and not label hit
-        //                correctPixels++; //don't count these at all?
       }
     }
 
-
-    double solutionEval = (float)correctPixels / ((float)correctPixels + (float)incorrectPixels);
-
     //now check for critical part failures - label mostly outside of mask
 
-    std::vector<cv::Point2f> badLabelScores;
-    float badLabelThresh = params.at(COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH().name());
+    auto badLabelScore = 0U;
+    const auto badLabelThresh = params.at(COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH().name());
 
-    for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+    for (const auto &label : labels)
     {
-      std::vector<cv::Point2f> poly = label->getPolygon(); //get the label polygon
-      //compute min and max x and y
-      //float xMin, xMax, yMin, yMax;
-      std::vector<float> xS = { poly[0].x, poly[1].x, poly[2].x, poly[3].x };
-      std::vector<float> yS = { poly[0].y, poly[1].y, poly[2].y, poly[3].y };
-      auto xMin = min_element(xS.begin(), xS.end());
-      auto xMax = max_element(xS.begin(), xS.end());
+      const auto poly = label.getPolygon(); //get the label polygon
+      const std::vector<float> xS = { poly[0].x, poly[1].x, poly[2].x, poly[3].x };
+      const std::vector<float> yS = { poly[0].y, poly[1].y, poly[2].y, poly[3].y };
+      const auto xMin = min_element(xS.begin(), xS.end());
+      const auto xMax = max_element(xS.begin(), xS.end());
+      const auto yMin = min_element(yS.begin(), yS.end());
+      const auto yMax = max_element(yS.begin(), yS.end());
 
-      auto yMin = min_element(yS.begin(), yS.end());
-      auto yMax = max_element(yS.begin(), yS.end());
+      auto labelPixels = 0;
+      auto badLabelPixels = 0;
 
-      int labelPixels = 0;
-      int badLabelPixels = 0;
-
-      for (int x = *xMin; x < *xMax; ++x)
+      for (auto x = *xMin; x < *xMax; ++x)
       {
-        for (int y = *yMin; y < *yMax; ++y)
+        for (auto y = *yMin; y < *yMax; ++y)
         {
-          if (label->containsPoint(cv::Point2f(x, y)))
+          if (label.containsPoint(cv::Point2f(x, y)))
           {
-            int intensity = mask.at<uchar>(y, x); //this is done with reverse y,x
-            bool blackPixel = (intensity < 10);
+            const auto intensity = mask.at<uchar>(static_cast<int>(y), static_cast<int>(x)); //this is done with reverse y,x
             labelPixels++;
-            if (blackPixel)
+            if (intensity < 10)
               ++badLabelPixels;
           }
         }
       }
 
-      float labelRatio = 1.0 - (float)badLabelPixels / (float)labelPixels; //high is good
+      const auto labelRatio = 1.0f - static_cast<float>(badLabelPixels) / static_cast<float>(labelPixels); //high is good
 
-      if (labelRatio < badLabelThresh /*&& !label->getIsWeak()*/ && !label->getIsOccluded()) //not weak, not occluded, badly localised
-        badLabelScores.push_back(cv::Point2f(label->getLimbID(), labelRatio));
+      if (labelRatio < badLabelThresh && !label.getIsOccluded()) //not weak, not occluded, badly localised
+        ++badLabelScore;
     }
 
-    if (SpelObject::getDebugLevel() >= 1)
-      for (std::vector<cv::Point2f>::iterator badL = badLabelScores.begin(); badL != badLabelScores.end(); ++badL)
-        std::cerr << "Part " << badL->x << " is badly localised, with score " << badL->y << std::endl;
+    auto solutionEval = static_cast<float>(correctPixels) / static_cast<float>(correctPixels + incorrectPixels);
 
-    if (badLabelScores.size() != 0) //make the solution eval fail if a part is badly localised
-      solutionEval = solutionEval - 1.0;
+    if (badLabelScore != 0) //make the solution eval fail if a part is badly localised
+      solutionEval -= 1.0f;
 
     if (SpelObject::getDebugLevel() >= 1)
-      std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << std::endl;
-    
+    {
+      std::stringstream ss;
+      std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID();
+      DebugMessage(ss.str(), 1);
+    }
     frame->UnloadAll();
 
     return solutionEval;

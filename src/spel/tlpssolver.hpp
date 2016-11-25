@@ -62,7 +62,6 @@ namespace SPEL
 
     float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params);
 
-    int findFrameIndexById(int id, std::vector<Frame*> frames);
     float computeScoreCost(const LimbLabel& label, std::map<std::string, float> params);
     float computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild);
     float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float jointMax, bool toChild);

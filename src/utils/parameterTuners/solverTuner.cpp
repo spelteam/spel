@@ -113,7 +113,7 @@ void addKeyframeNoise(vector<Frame*>& frames, float mean, float sd, float max)
     }
 }
 
-vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,float> params, vector<Point2i> suggestedKeyframes, vector<int> requestedKeyframes, int maxKeyframes)
+vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,float> params, vector<std::pair<int, int>> suggestedKeyframes, vector<int> requestedKeyframes, int maxKeyframes)
 {
 
     vector<int> actualKeyframes;
@@ -159,13 +159,13 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
         if(requestedKeyframes[i]==-1) //if it's not an automatic one
         {
             //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
-            for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+            for(auto fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
             {
-                int frameID=fi->x;
+                int frameID=fi->first;
                 bool alreadyPresent=false;
                 for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
                 {
-                    if(*ak==fi->x)
+                    if(*ak==fi->first)
                     {
                         alreadyPresent=true;
                         break;
@@ -214,7 +214,7 @@ vector<Frame*> generateTestFramesPrecise(vector<Frame*> gtFrames, map<string,flo
     }
     return vFrames;
 }
-vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,float> params, vector<Point2i> suggestedKeyframes)
+vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,float> params, vector<std::pair<int, int>> suggestedKeyframes)
 {
 
     vector<int> actualKeyframes;
@@ -232,9 +232,9 @@ vector<Frame*> generateTestFramesPercent(vector<Frame*> gtFrames, map<string,flo
     if(params.at("useOptimalKeyframes")) //use the predictive keyframes
     {
         //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
-        for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+        for(auto fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
         {
-            int frameID=fi->x;
+            int frameID=fi->first;
 
             if(frameID<vFrames.size())
             {
@@ -483,7 +483,7 @@ void createTestSequence(const vector<Frame*>& gtFrames, vector<Frame*>& vFrames,
         if(requestedKeyframes[i]==-1)
             requireSuggestions=true;
 
-    vector<Point2i> suggestedKeyframes;
+    vector<std::pair<int, int>> suggestedKeyframes;
 
     if(requireSuggestions)
         suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
@@ -523,13 +523,13 @@ void createTestSequence(const vector<Frame*>& gtFrames, vector<Frame*>& vFrames,
         if(requestedKeyframes[i]==-1) //if it's not an automatic one
         {
             //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
-            for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+            for(auto fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
             {
-                int frameID=fi->x;
+                int frameID=fi->first;
                 bool alreadyPresent=false;
                 for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
                 {
-                    if(*ak==fi->x)
+                    if(*ak==fi->first)
                     {
                         alreadyPresent=true;
                         break;
@@ -883,7 +883,7 @@ int main (int argc, char **argv)
         //generate keyframe suggestions
         auto startSuggestions = chrono::steady_clock::now();
         cout << "Generating keyframe suggestions... "  << endl;
-        vector<Point2i> suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, params);
+        auto suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, params);
         auto start = chrono::steady_clock::now();
 
         auto diffSuggestions = start-startSuggestions;

@@ -32,7 +32,7 @@ namespace SPEL
     const std::vector<LimbLabel>* getLabelsPtr(void) const;
     void setLabels(std::vector<LimbLabel> _labels);
 
-    Skeleton toSkeleton(const Skeleton &example);
+    Skeleton toSkeleton(const Skeleton &example) const;
     float evaluateSolution(Frame* frame, std::map<std::string, float> params);
 
   private:

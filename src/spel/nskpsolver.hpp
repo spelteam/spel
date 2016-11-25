@@ -38,7 +38,7 @@ namespace SPEL
     ///inherited virtual
     std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float>  params, const ImageSimilarityMatrix& ISM);
 
-    std::vector<cv::Point2i> suggestKeyframes(const ImageSimilarityMatrix& ism, std::map<std::string, float> params);
+    std::vector<std::pair<int, int>> suggestKeyframes(const ImageSimilarityMatrix& ism, std::map<std::string, float> params);
   private:
 #ifdef DEBUG
     FRIEND_TEST(nskpsolverTests, findFrameIndexById);
@@ -56,17 +56,15 @@ namespace SPEL
 
     float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params);
 
-    uint32_t findFrameIndexById(int id, std::vector<Frame*> frames);
     float computeScoreCost(const LimbLabel& label, std::map<std::string, float> params);
 
-    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild);
+    float computeJointCost(const LimbLabel& child, const LimbLabel& parent, bool toChild);
     float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float max, bool toChild);
 
-    float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params);
-    float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float min, float max);
+    float computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton);
+    float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float max);
 
     std::vector<NSKPSolver::SolvletScore> propagateFrame(const int frameId, const std::vector<Frame *> &frames, std::map<std::string, float> params, const ImageSimilarityMatrix& ism, const std::vector<MinSpanningTree> &trees, std::vector<int> &ignore);
-    int test(int frameId, const std::vector<Frame*>& frames, std::map<std::string, float> params, const ImageSimilarityMatrix &ism, const std::vector<MinSpanningTree> &trees, std::vector<int>& ignore);    
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(

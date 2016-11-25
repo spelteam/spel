@@ -42,7 +42,12 @@ namespace SPEL
     std::string getName(void) const noexcept;
     /// <summary>Gets the solver identifier.</summary>
     /// <returns>The solver identifier.</returns>  
-    int getId(void) const noexcept;
+    int getId(void) const noexcept;    
+    /// <summary>Finds the frame index by identifier.</summary>
+    /// <param name="id">The identifier.</param>
+    /// <param name="frames">The frames.</param>
+    /// <returns>The index.</returns>
+    uint32_t findFrameIndexById(int id, std::vector<Frame*> frames) const;
   protected:    
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
