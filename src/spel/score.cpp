@@ -2,7 +2,7 @@
 // See Score.hpp for more info
 namespace SPEL
 {
-  Score::Score(void) noexcept
+  Score::Score(void) 
   {
     m_score = 0;
     m_detName = "";
@@ -10,7 +10,7 @@ namespace SPEL
     m_isWeak = false;
   }
 
-  Score::Score(const float score, const std::string & name) noexcept
+  Score::Score(const float score, const std::string & name) 
   {
     m_score = score;
     m_detName = name;
@@ -19,7 +19,7 @@ namespace SPEL
   }
 
   Score::Score(const float score, const std::string &name, const float coeff)
-    noexcept
+    
   {
     m_score = score;
     m_detName = name;
@@ -28,7 +28,7 @@ namespace SPEL
   }
 
   Score::Score(const float score, const std::string & name, const float coeff,
-    const bool isWeak) noexcept
+    const bool isWeak) 
   {
     m_score = score;
     m_detName = name;
@@ -36,7 +36,7 @@ namespace SPEL
     m_isWeak = isWeak;
   }
 
-  Score::Score(const Score & score) noexcept
+  Score::Score(const Score & score) 
     : m_score(score.m_score),
     m_detName(score.m_detName),
     m_coeff(score.m_coeff),
@@ -44,7 +44,7 @@ namespace SPEL
   {
   }
 
-  Score::Score(Score && score) noexcept
+  Score::Score(Score && score) 
     : m_score(std::move(score.m_score)),
     m_detName(std::move(score.m_detName)),
     m_coeff(std::move(score.m_coeff)),
@@ -52,11 +52,11 @@ namespace SPEL
   {
   }
 
-  Score::~Score(void) noexcept
+  Score::~Score(void) 
   {
   }
 
-  Score &Score::operator=(const Score &score) noexcept
+  Score &Score::operator=(const Score &score) 
   {
     if (this == &score)
       return *this;
@@ -67,48 +67,48 @@ namespace SPEL
     return *this;
   }
 
-  float Score::getScore(void) const noexcept
+  float Score::getScore(void) const 
   {
     return m_score;
   }
 
-  void Score::setScore(const float score) noexcept
+  void Score::setScore(const float score) 
   {
     m_score = score;
   }
 
-  std::string Score::getDetName(void) const noexcept
+  std::string Score::getDetName(void) const 
   {
     return m_detName;
   }
 
-  void Score::setDetName(const std::string &detName) noexcept
+  void Score::setDetName(const std::string &detName) 
   {
     m_detName = detName;
   }
 
-  bool Score::operator<(const Score &score) const noexcept
+  bool Score::operator<(const Score &score) const 
   {
     return (m_score * m_coeff < score.m_score * score.m_coeff);
   }
 
-  bool Score::operator>(const Score &score) const noexcept
+  bool Score::operator>(const Score &score) const 
   {
     return (m_score * m_coeff > score.m_score * score.m_coeff);
   }
 
-  bool Score::operator==(const Score &score) const noexcept
+  bool Score::operator==(const Score &score) const 
   {
     return (m_score * m_coeff == score.m_score * score.m_coeff && 
       m_detName == score.m_detName);
   }
 
-  bool Score::operator!=(const Score &score) const noexcept
+  bool Score::operator!=(const Score &score) const 
   {
     return !(*this == score);
   }
 
-  Score & Score::operator=(Score && score) noexcept
+  Score & Score::operator=(Score && score) 
   {
     m_score = std::move(score.m_score);
     std::swap(m_detName, score.m_detName);
@@ -118,22 +118,22 @@ namespace SPEL
     return *this;
   }
 
-  float Score::getCoeff(void) const noexcept
+  float Score::getCoeff(void) const 
   {
     return m_coeff;
   }
 
-  void Score::setCoeff(const float coeff) noexcept
+  void Score::setCoeff(const float coeff) 
   {
     m_coeff = coeff;
   }
 
-  bool Score::getIsWeak(void) const noexcept
+  bool Score::getIsWeak(void) const 
   {
     return m_isWeak;
   }
 
-  void Score::setIsWeak(const bool isWeak) noexcept
+  void Score::setIsWeak(const bool isWeak) 
   {
     m_isWeak = isWeak;
   }

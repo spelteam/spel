@@ -2,29 +2,29 @@
 
 namespace SPEL
 {
-  ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(void) noexcept : ImageSimilarityMatrix()
+  ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(void)  : ImageSimilarityMatrix()
   {
     id = 0x4948534D;
   }
-  ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(const ImageHogSimilarityMatrix & m) noexcept : ImageSimilarityMatrix(m)
+  ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(const ImageHogSimilarityMatrix & m)  : ImageSimilarityMatrix(m)
   {
   }
   ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(const std::vector<Frame*>& frames) : ImageHogSimilarityMatrix()
   {
     buildImageSimilarityMatrix(frames);
   }
-  ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(ImageHogSimilarityMatrix && m) noexcept : ImageSimilarityMatrix(std::move(m))
+  ImageHogSimilarityMatrix::ImageHogSimilarityMatrix(ImageHogSimilarityMatrix && m)  : ImageSimilarityMatrix(std::move(m))
   {
   }
-  ImageHogSimilarityMatrix::~ImageHogSimilarityMatrix(void) noexcept
+  ImageHogSimilarityMatrix::~ImageHogSimilarityMatrix(void) 
   {
   }
-  ImageHogSimilarityMatrix & ImageHogSimilarityMatrix::operator=(const ImageHogSimilarityMatrix & s) noexcept
+  ImageHogSimilarityMatrix & ImageHogSimilarityMatrix::operator=(const ImageHogSimilarityMatrix & s) 
   {
     ImageSimilarityMatrix::operator=(s);
     return *this;
   }
-  void ImageHogSimilarityMatrix::calculateROI(Frame * frame, cv::Point2i & topLeft, cv::Point2i & bottomRight) const noexcept
+  void ImageHogSimilarityMatrix::calculateROI(Frame * frame, cv::Point2i & topLeft, cv::Point2i & bottomRight) const 
   {
     auto image = frame->getMask();
 

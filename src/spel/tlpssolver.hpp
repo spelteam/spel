@@ -44,10 +44,10 @@ namespace SPEL
     ///inherited virtual
     ~TLPSSolver(void);
     ///inherited virtual
-    std::vector<Solvlet> solve(Sequence& frames);
+    std::vector<Solvlet> solve(Sequence& frames) ;
     ///inherited virtual
-    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params);
-    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets);
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params) ;
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets) ;
   private:
 #ifdef DEBUG
     FRIEND_TEST(tlpssolverTests, solveGlobal);
@@ -80,7 +80,7 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
   };
 
 }

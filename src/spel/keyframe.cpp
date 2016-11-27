@@ -2,21 +2,21 @@
 
 namespace SPEL
 {
-  Keyframe::Keyframe(void) noexcept : Frame(KEYFRAME)
+  Keyframe::Keyframe(void)  : Frame(KEYFRAME)
   {
   }
   
-  Keyframe::Keyframe(const Keyframe & frame) noexcept : Frame(frame)
+  Keyframe::Keyframe(const Keyframe & frame)  : Frame(frame)
   {
   }
     
-  Keyframe & Keyframe::operator=(const Keyframe & frame) noexcept
+  Keyframe & Keyframe::operator=(const Keyframe & frame) 
   {
     Frame::operator=(frame);
     return *this;
   }
 
-  Keyframe::~Keyframe(void) noexcept
+  Keyframe::~Keyframe(void) 
   {
   }
 }

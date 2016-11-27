@@ -28,22 +28,22 @@ namespace SPEL
     };
 
   public:
-    NSKPSolver(void) noexcept;
+    NSKPSolver(void) ;
     ///inherited virtual
-    ~NSKPSolver(void) noexcept;
+    ~NSKPSolver(void) ;
     ///inherited virtual
-    std::vector<Solvlet> solve(Sequence& frames) const noexcept;
+    std::vector<Solvlet> solve(Sequence& frames) ;
     ///inherited virtual
     std::vector<Solvlet> solve(Sequence &frames, 
-      std::map<std::string, float>  params) const noexcept;
+      std::map<std::string, float>  params) ;
     ///inherited virtual
     std::vector<Solvlet> solve(Sequence& frames, 
       std::map<std::string, float>  params, 
-      const ImageSimilarityMatrix& ISM) const noexcept;
+      const ImageSimilarityMatrix& ISM) ;
 
     std::vector<std::pair<int, int>> suggestKeyframes(
       const ImageSimilarityMatrix& ism, 
-      std::map<std::string, float> params) const;
+      std::map<std::string, float> params) const ;
   private:
 #ifdef DEBUG
     FRIEND_TEST(nskpsolverTests, findFrameIndexById);
@@ -56,40 +56,41 @@ namespace SPEL
     FRIEND_TEST(nskpsolverTests, suggestKeyframes_A);
     FRIEND_TEST(nskpsolverTests, suggestKeyframes_B);
 #endif  // DEBUG
-    std::vector<Solvlet> propagateKeyframes(std::vector<Frame*>& frames, 
+    std::vector<Solvlet> propagateKeyframes(const std::vector<Frame*>& frames, 
       std::map<std::string, float>  params, const ImageSimilarityMatrix& ism, 
       const std::vector<MinSpanningTree> &trees, 
-      std::vector<int> &ignore) const;
+      std::vector<int> &ignore) const ;
     std::vector<MinSpanningTree > buildFrameMSTs(
       const ImageSimilarityMatrix &ism, 
-      std::map<std::string, float> params) const;
+      std::map<std::string, float> params) const ;
 
     float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, 
-      std::map<std::string, float> params) const;
+      std::map<std::string, float> params) const ;
 
     float computeScoreCost(const LimbLabel& label, 
-      std::map<std::string, float> params) const;
+      std::map<std::string, float> params) const ;
 
     float computeJointCost(const LimbLabel& child, const LimbLabel& parent, 
-      bool toChild) const;
+      bool toChild) const ;
     float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent,
-      std::map<std::string, float> params, float max, bool toChild) const;
+      std::map<std::string, float> params, float max, 
+      bool toChild) const ;
 
     float computePriorCost(const LimbLabel& label, const BodyPart& prior, 
-      const Skeleton& skeleton) const;
+      const Skeleton& skeleton) const ;
     float computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, 
       const Skeleton& skeleton, std::map<std::string, float> params, 
-      float max) const;
+      float max) const ;
 
     std::vector<NSKPSolver::SolvletScore> propagateFrame(const int frameId, 
       const std::vector<Frame *> &frames, std::map<std::string, float> params, 
       const ImageSimilarityMatrix& ism, 
       const std::vector<MinSpanningTree> &trees, 
-      std::vector<int> &ignore) const;
+      std::vector<int> &ignore) const ;
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
   };
 
 }

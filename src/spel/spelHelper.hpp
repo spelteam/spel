@@ -36,7 +36,7 @@ namespace SPEL
     /// <param name="two">The second point.</param>
     /// <returns>Squared distance between one and two.</returns>
     template <typename T>
-    static float distSquared(const T &one, const T &two) noexcept
+    static float distSquared(const T &one, const T &two) 
     {
       return pow(one.x - two.x, 2.0f) + pow(one.y - two.y, 2.0f);
     }
@@ -45,7 +45,7 @@ namespace SPEL
     /// <param name="two">The second point.</param>
     /// <returns>Squared distance between one and two.</returns>
     template <typename T>
-    static float distSquared3d(const T &one, const T &two) noexcept
+    static float distSquared3d(const T &one, const T &two) 
     {
       return pow(one.x - two.x, 2.0f) + pow(one.y - two.y, 2.0f) + 
         pow(one.z - two.z, 2.0f);
@@ -60,7 +60,7 @@ namespace SPEL
     /// angle is in the range [-PI; PI]
     /// </returns>   
     template <typename T>
-    static T angle2D(const T x1, const T y1, const T x2, const T y2) noexcept
+    static T angle2D(const T x1, const T y1, const T x2, const T y2) 
     {
       const auto zero = static_cast<T> (0.0f);
       //input has a zero vector
@@ -91,7 +91,7 @@ namespace SPEL
     template <typename T, typename D, typename E>
     static T interpolateValue(const T prevAngle, const T nextAngle, 
       const D step, const E numSteps) 
-      noexcept
+      
     {
       auto t = static_cast<T> (0.0f);
       if (numSteps != 0)
@@ -105,7 +105,7 @@ namespace SPEL
     /// <returns>The rotated point.</returns>
     template <typename T, typename D>
     static T rotatePoint2D(const T &point, const T &pivot, const D degrees) 
-      noexcept
+      
     {
       auto radians = static_cast<D>(degrees * M_PI / static_cast<D> (180.0f));
       auto cnt = pivot;
@@ -121,7 +121,7 @@ namespace SPEL
     /// <param name="src">The source.</param>
     template <class T, class tree_node_allocator>
     static void copyTree(tree <T, tree_node_allocator> &dst, 
-      const tree <T, tree_node_allocator> &src) noexcept
+      const tree <T, tree_node_allocator> &src) 
     {
       dst.clear();
       auto it = src.begin(), to = dst.begin();
@@ -150,7 +150,7 @@ namespace SPEL
     /// </param>
     static void RecalculateScoreIsWeak(std::vector <LimbLabel> &labels, 
       const std::string &detectorName, 
-      const float standardDiviationTreshold) noexcept;
+      const float standardDiviationTreshold) ;
     /// <summary>Rotates the image to default.</summary>
     /// <param name="imgSource">The image source.</param>
     /// <param name="initialRect">The initial rect.</param>
@@ -163,18 +163,18 @@ namespace SPEL
     /// <summary>Rounds the specified point.</summary>
     /// <param name="pt">The point.</param>
     /// <returns>The rounded point.</returns>
-    static cv::Point2f round(const cv::Point2f& pt) noexcept;
+    static cv::Point2f round(const cv::Point2f& pt) ;
     /// <summary>Rounds the specified rect.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>The rounded rect.</returns>
     static spelRECT<cv::Point2f> round(const spelRECT <cv::Point2f> &rect) 
-      noexcept;
+      ;
     /// <summary>Gets the unique identifier.</summary>
     /// <returns>The unique identifier.</returns>
-    static std::string getGUID(void) noexcept;
+    static std::string getGUID(void) ;
     /// <summary>Gets the random string.</summary>
     /// <returns>The random string.</returns>
-    static std::string getRandomStr(void) noexcept;
+    static std::string getRandomStr(void) ;
     /// <summary>Gets the name of the temporary file.</summary>
     /// <param name="extension">The file extension.</param>
     /// <returns>The name of the temporary file.</returns>
@@ -182,7 +182,7 @@ namespace SPEL
     /// <summary>Checks if the file exists.</summary>
     /// <param name="file">The file.</param>
     /// <returns>Existance of the file.</returns>
-    static bool checkFileExists(const std::string &file) noexcept;
+    static bool checkFileExists(const std::string &file) ;
     /// <summary>Copies the file.</summary>
     /// <param name="dst">The destination.</param>
     /// <param name="src">The source.</param>
@@ -196,7 +196,7 @@ namespace SPEL
     /// 1 if one > two
     /// </returns>
     template <typename T>
-    static int compareFloat(const T one, const T two) noexcept
+    static int compareFloat(const T one, const T two) 
     {
       if (std::fabs(one - two) <= std::numeric_limits<T>::epsilon())
         return 0;
@@ -207,16 +207,16 @@ namespace SPEL
     /// <param name="j1">The second point.</param>
     /// <returns>The angle.</returns>
     static float getAngle(const cv::Point2f &j0, const cv::Point2f &j1)
-      noexcept;    
+      ;    
     /// <summary>Gets the angle.</summary>
     /// <param name="point">The point.</param>
     /// <returns>The angle.</returns>
-    static float getAngle(const cv::Point2f &point) noexcept;
+    static float getAngle(const cv::Point2f &point) ;
     /// <summary>Gets the angle between two <see cref="BodyJoint" />.</summary>
     /// <param name="j0">The first joint.</param>
     /// <param name="j1">The second joint.</param>
     /// <returns>The angle.</returns>
-    static float getAngle(const BodyJoint &j0, const BodyJoint &j1) noexcept;    
+    static float getAngle(const BodyJoint &j0, const BodyJoint &j1) ;    
     /// <summary>Merges the parameters.</summary>
     /// <param name="dst">The destination.</param>
     /// <param name="src">The source.</param>
@@ -233,7 +233,7 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="spelRECT"/> class.
     /// </summary>
-    spelRECT(void) noexcept
+    spelRECT(void) 
       : point1(),
       point2(),
       point3(),
@@ -243,7 +243,7 @@ namespace SPEL
     /// COpy constructor.
     /// </summary>
     /// <param name="poserect">The poserect.</param>
-    spelRECT(const spelRECT<T>& poserect) noexcept
+    spelRECT(const spelRECT<T>& poserect) 
       : point1(poserect.point1),
       point2(poserect.point2),
       point3(poserect.point3),
@@ -253,7 +253,7 @@ namespace SPEL
     /// Move constructor.
     /// </summary>
     /// <param name="poserect">The poserect.</param>
-    spelRECT(spelRECT<T>&& poserect) noexcept
+    spelRECT(spelRECT<T>&& poserect) 
       : point1(std::move(poserect.point1)),
       point2(std::move(poserect.point2)),
       point3(std::move(poserect.point3)),
@@ -265,7 +265,7 @@ namespace SPEL
     /// <param name="p2">The second point.</param>
     /// <param name="p3">The third point.</param>
     /// <param name="p4">The fourth point.</param>
-    spelRECT(const T &p1, const T &p2, const T &p3, const T &p4) noexcept
+    spelRECT(const T &p1, const T &p2, const T &p3, const T &p4) 
       : point1(p1),
       point2(p2),
       point3(p3),
@@ -281,7 +281,7 @@ namespace SPEL
     /// -1 - point doesn't lies in rectangle
     /// 0 - point lies on the edge(vertex)
     /// </returns>   
-    int8_t containsPoint(const T &point) const noexcept
+    int8_t containsPoint(const T &point) const 
     {
       std::vector <T> contour;
       contour.push_back(point1);
@@ -293,7 +293,7 @@ namespace SPEL
     }
     /// <summary>Convert rectangle to vector of points.</summary>
     /// <returns>The vector of points.</returns>
-    std::vector <T> asVector(void) const noexcept
+    std::vector <T> asVector(void) const 
     {
       std::vector <T> contour;
       contour.push_back(point1);
@@ -308,7 +308,7 @@ namespace SPEL
     /// <param name="maxx">The maximum x.</param>
     /// <param name="maxy">The maximum y.</param>
     template <typename D>
-    void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy) const noexcept
+    void GetMinMaxXY(D &minx, D &miny, D &maxx, D &maxy) const 
     {
       minx = std::min(std::min(point1.x, point2.x), 
         std::min(point3.x, point4.x));
@@ -334,7 +334,7 @@ namespace SPEL
     /// <summary>Assignment operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>The rect.</returns>
-    spelRECT<T>& operator=(const spelRECT<T>& rect) noexcept
+    spelRECT<T>& operator=(const spelRECT<T>& rect) 
     {
       if (&rect == this) return *this;
 
@@ -348,7 +348,7 @@ namespace SPEL
     /// <summary>Move operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>The rect</returns>
-    spelRECT<T>& operator=(spelRECT<T>&& rect) noexcept
+    spelRECT<T>& operator=(spelRECT<T>&& rect) 
     {
       std::swap(point1, rect.point1);
       std::swap(point2, rect.point2);
@@ -360,7 +360,7 @@ namespace SPEL
     /// <summary>Comparison operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>Result of the comparison.</returns>
-    bool operator==(const spelRECT <T> &rect) const noexcept
+    bool operator==(const spelRECT <T> &rect) const 
     {
       return (this->point1 == rect.point1 && this->point2 == rect.point2 && 
         this->point3 == rect.point3 && this->point4 == rect.point4);
@@ -368,14 +368,14 @@ namespace SPEL
     /// <summary>Comparison operator.</summary>
     /// <param name="rect">The rect.</param>
     /// <returns>Result of the comparison.</returns>
-    bool operator!=(const spelRECT <T> &rect) const noexcept
+    bool operator!=(const spelRECT <T> &rect) const 
     {
       return !(*this == rect);
     }
     /// <summary>Gets the size of the rect.</summary>
     /// <returns>The size of the rect</returns>
     template <typename D>
-    D RectSize(void) const noexcept
+    D RectSize(void) const 
     {
       return (D(sqrt(spelHelper::distSquared(point2, point3)), 
         sqrt(spelHelper::distSquared(point1, point2))));
@@ -392,42 +392,42 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
-    spelPoint() noexcept : cv::Point_<T>() {}    
+    spelPoint()  : cv::Point_<T>() {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="_x">The x.</param>
     /// <param name="_y">The y.</param>
-    spelPoint(T _x, T _y) noexcept : cv::Point_<T>(_x, _y) {}    
+    spelPoint(T _x, T _y)  : cv::Point_<T>(_x, _y) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    spelPoint(const cv::Point_<T>& pt) noexcept : cv::Point_<T>(pt) {}    
+    spelPoint(const cv::Point_<T>& pt)  : cv::Point_<T>(pt) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    spelPoint(const CvPoint& pt) noexcept : cv::Point_<T>(pt) {}    
+    spelPoint(const CvPoint& pt)  : cv::Point_<T>(pt) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    spelPoint(const CvPoint2D32f& pt) noexcept : cv::Point_<T>(pt) {}    
+    spelPoint(const CvPoint2D32f& pt)  : cv::Point_<T>(pt) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="sz">The size.</param>
-    spelPoint(const cv::Size_<T>& sz) noexcept : cv::Point_<T>(sz) {}    
+    spelPoint(const cv::Size_<T>& sz)  : cv::Point_<T>(sz) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint"/> class.
     /// </summary>
     /// <param name="v">The vector.</param>
-    spelPoint(const cv::Vec<T, 2>& v) noexcept : cv::Point_<T>(v) {}
+    spelPoint(const cv::Vec<T, 2>& v)  : cv::Point_<T>(v) {}
     /// <summary>Comparison operator.</summary>
     /// <param name="pt">The point.</param>
     /// <returns>The result of the comparison.</returns>
-    bool operator < (const spelPoint& pt) const noexcept
+    bool operator < (const spelPoint& pt) const 
     {
       return (this->x < pt.x || (this->x == pt.x && this->y < pt.y));
     }
@@ -443,38 +443,38 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
-    spelPoint3() noexcept : cv::Point3_<T>() {}    
+    spelPoint3()  : cv::Point3_<T>() {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="_x">The x.</param>
     /// <param name="_y">The y.</param>
     /// <param name="_z">The z.</param>
-    spelPoint3(T _x, T _y, T _z) noexcept : cv::Point3_<T>(_x, _y, _z) {}    
+    spelPoint3(T _x, T _y, T _z)  : cv::Point3_<T>(_x, _y, _z) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    spelPoint3(const cv::Point3_<T>& pt) noexcept : cv::Point3_<T>(pt) {}    
+    spelPoint3(const cv::Point3_<T>& pt)  : cv::Point3_<T>(pt) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    explicit spelPoint3(const cv::Point_<T>& pt) noexcept : cv::Point3_<T>(pt) {}    
+    explicit spelPoint3(const cv::Point_<T>& pt)  : cv::Point3_<T>(pt) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="pt">The point.</param>
-    spelPoint3(const CvPoint3D32f& pt) noexcept : cv::Point3_<T>(pt) {}    
+    spelPoint3(const CvPoint3D32f& pt)  : cv::Point3_<T>(pt) {}    
     /// <summary>
     /// Initializes a new instance of the <see cref="spelPoint3"/> class.
     /// </summary>
     /// <param name="v">The vector.</param>
-    spelPoint3(const cv::Vec<T, 3>& v) noexcept : cv::Point3_<T>(v) {}    
+    spelPoint3(const cv::Vec<T, 3>& v)  : cv::Point3_<T>(v) {}    
     /// <summary>Comparison operator.</summary>
     /// <param name="pt">The point.</param>
     /// <returns>The comparison result.</returns>
-    bool operator < (const spelPoint3& pt) const noexcept
+    bool operator < (const spelPoint3& pt) const 
     {
       return (this->x < pt.x || (this->x == pt.x && this->y < pt.y) || 
         (this->x == pt.x && this->y == pt.y && this->z < pt.z));

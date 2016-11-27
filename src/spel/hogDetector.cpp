@@ -10,7 +10,7 @@ namespace SPEL
     cv::Size padding, cv::Size blockSize, cv::Size blockStride,
     cv::Size cellSize, double wndSigma, double thresholdL2hys,
     bool gammaCorrection, int nlevels, int derivAperture,
-    int histogramNormType) noexcept :
+    int histogramNormType)  :
   m_nbins(nbins),
     m_wndStride(wndStride),
     m_padding(padding),
@@ -27,7 +27,7 @@ namespace SPEL
     m_id = 0x48440000;
   }
 
-  HogDetector::~HogDetector(void) noexcept
+  HogDetector::~HogDetector(void) 
   {
     for (auto &p : m_partModels)
       for (auto &pp : p.second)
@@ -343,17 +343,17 @@ namespace SPEL
   }
 
   std::map <uint32_t, std::map <uint32_t, HogDetector::PartModel>>
-    HogDetector::getPartModels(void) const noexcept
+    HogDetector::getPartModels(void) const 
   {
     return m_partModels;
   }
 
-  cv::Size HogDetector::getCellSize(void) const noexcept
+  cv::Size HogDetector::getCellSize(void) const 
   {
     return m_cellSize;
   }
 
-  uint8_t HogDetector::getnbins(void) const noexcept
+  uint8_t HogDetector::getnbins(void) const 
   {
     return m_nbins;
   }
@@ -477,17 +477,17 @@ namespace SPEL
     return gradientStrengths;
   }
 
-  void HogDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const noexcept
+  void HogDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const 
   {
     Detector::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, COMMON_HOG_DETECTOR_PARAMETERS::getParameters());
   }
 
-  HogDetectorHelper::HogDetectorHelper(void) noexcept
+  HogDetectorHelper::HogDetectorHelper(void) 
   {
   }
 
-  HogDetectorHelper::~HogDetectorHelper(void) noexcept
+  HogDetectorHelper::~HogDetectorHelper(void) 
   {
   }
 

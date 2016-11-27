@@ -9,18 +9,18 @@
 
 namespace SPEL
 {
-  NSKPSolver::NSKPSolver() noexcept
+  NSKPSolver::NSKPSolver() 
   {
     m_id = 1; //this should be unique
     m_name = "NSKP"; //this should be unique
   }
 
-  NSKPSolver::~NSKPSolver() noexcept //inherited virtual
+  NSKPSolver::~NSKPSolver()  //inherited virtual
   {
 
   }
 
-  std::vector<Solvlet> NSKPSolver::solve(Sequence& sequence) const noexcept
+  std::vector<Solvlet> NSKPSolver::solve(Sequence& sequence) 
   {
     std::map<std::string, float> params; //set the default parameters vector
     emplaceDefaultParameters(params);
@@ -30,7 +30,7 @@ namespace SPEL
   }
 
   std::vector<Solvlet> NSKPSolver::solve(Sequence& sequence, 
-    std::map<std::string, float> params) const noexcept
+    std::map<std::string, float> params) 
   {
     //compute the ISM here
     ImagePixelSimilarityMatrix ISM(sequence.getFrames());
@@ -41,7 +41,7 @@ namespace SPEL
 
   std::vector<Solvlet> NSKPSolver::solve(Sequence& sequence, 
     std::map<std::string, float>  params, 
-    const ImageSimilarityMatrix& ism) const noexcept
+    const ImageSimilarityMatrix& ism) 
   {
     emplaceDefaultParameters(params);
 
@@ -104,7 +104,7 @@ namespace SPEL
     const int frameId, const std::vector<Frame*> &frames, 
     std::map<std::string, float> params, const ImageSimilarityMatrix& ism, 
     const std::vector<MinSpanningTree>& trees, 
-    std::vector<int>& ignore) const
+    std::vector<int>& ignore) const 
   {
     if (frames.size() == 0)
     {
@@ -422,7 +422,7 @@ namespace SPEL
   }
 
   void NSKPSolver::emplaceDefaultParameters(
-    std::map<std::string, float>& params) const noexcept
+    std::map<std::string, float>& params) const 
   {
     Solver::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, 
@@ -430,10 +430,10 @@ namespace SPEL
   }
 
   std::vector<Solvlet> NSKPSolver::propagateKeyframes(
-    std::vector<Frame*>& frames, std::map<std::string, float> params, 
+    const std::vector<Frame*>& frames, std::map<std::string, float> params, 
     const ImageSimilarityMatrix& ism, 
     const std::vector<MinSpanningTree>& trees, 
-    std::vector<int>& ignore) const
+    std::vector<int>& ignore) const 
   {
     emplaceDefaultParameters(params);
 
@@ -529,7 +529,7 @@ namespace SPEL
 
   //compute label score
   float NSKPSolver::computeScoreCost(const LimbLabel& label, 
-    std::map<std::string, float> params) const
+    std::map<std::string, float> params) const 
   {
     emplaceDefaultParameters(params);
 
@@ -557,7 +557,7 @@ namespace SPEL
       }
       finalScore += (score * coeff);
     }
-    if (spelHelper::compareFloat(sumcoeff, 0.0f) > 1)
+    if (spelHelper::compareFloat(sumcoeff, 0.0f) > 0)
       finalScore += sumcoeff;
 
     return finalScore;
@@ -565,7 +565,7 @@ namespace SPEL
 
   //compute distance to parent limb label
   float NSKPSolver::computeJointCost(const LimbLabel& child, 
-    const LimbLabel& parent, bool toChild) const
+    const LimbLabel& parent, bool toChild) const 
   {
     cv::Point2f p0, p1, c0, c1;
 
@@ -586,7 +586,7 @@ namespace SPEL
   //compute distance to parent limb label
   float NSKPSolver::computeNormJointCost(const LimbLabel& child, 
     const LimbLabel& parent, std::map<std::string, float> params, 
-    float max, bool toChild) const
+    float max, bool toChild) const 
   {
     emplaceDefaultParameters(params);
 
@@ -607,7 +607,7 @@ namespace SPEL
 
   //compute distance to the body part prior
   float NSKPSolver::computePriorCost(const LimbLabel& label, 
-    const BodyPart& prior, const Skeleton& skeleton) const
+    const BodyPart& prior, const Skeleton& skeleton) const 
   {
     cv::Point2f p0, p1;
     label.getEndpoints(p0, p1);
@@ -626,7 +626,7 @@ namespace SPEL
 
   float NSKPSolver::computeNormPriorCost(const LimbLabel& label, 
     const BodyPart& prior, const Skeleton& skeleton, 
-    std::map<std::string, float> params, float max) const
+    std::map<std::string, float> params, float max) const 
   {
     emplaceDefaultParameters(params);
 
@@ -641,7 +641,7 @@ namespace SPEL
   //build an MST for every frame and return the vector
   std::vector<MinSpanningTree > NSKPSolver::buildFrameMSTs(
     const ImageSimilarityMatrix &ism, 
-    std::map<std::string, float> params) const
+    std::map<std::string, float> params) const 
   {
     const auto simThresh = 1.0f + 3.5f * ism.stddev() / ism.min();
 
@@ -671,7 +671,7 @@ namespace SPEL
   //function should return vector with suggested keyframe numbers
   std::vector<std::pair<int, int>> NSKPSolver::suggestKeyframes(
     const ImageSimilarityMatrix& ism, 
-    std::map<std::string, float> params) const
+    std::map<std::string, float> params) const 
   {
     emplaceDefaultParameters(params);
 
@@ -756,7 +756,7 @@ namespace SPEL
 
   float NSKPSolver::evaluateSolution(Frame* frame, 
     std::vector<LimbLabel> labels, 
-    std::map<std::string, float> params) const
+    std::map<std::string, float> params) const 
   {
     emplaceDefaultParameters(params);
 

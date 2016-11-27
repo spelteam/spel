@@ -26,11 +26,11 @@ namespace SPEL
     /// Initializes a new instance of the <see cref="HogDetectorHelper"/> 
     /// class.
     /// </summary>
-    HogDetectorHelper(void) noexcept;
+    HogDetectorHelper(void) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="HogDetectorHelper"/> class.
     /// </summary>
-    ~HogDetectorHelper(void) noexcept;
+    ~HogDetectorHelper(void) ;
   };  
   /// <summary>
   /// Implementation of the HoG method of detection.
@@ -87,11 +87,11 @@ namespace SPEL
       bool gammaCorrection = true,
       int nlevels = 64, 
       int derivAperture = 1,
-      int histogramNormType = cv::HOGDescriptor::L2Hys) noexcept;
+      int histogramNormType = cv::HOGDescriptor::L2Hys) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="HogDetector"/> class.
     /// </summary>
-    ~HogDetector(void) noexcept;
+    ~HogDetector(void) ;
     /// <summary>Trains the specified frames.</summary>
     /// <param name="frames">The frames.</param>
     /// <param name="params">The parameters.</param>
@@ -108,13 +108,13 @@ namespace SPEL
     /// <summary>Gets the part models.</summary>
     /// <returns>The part models.</returns>
     std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) 
-      const noexcept;
+      const ;
     /// <summary>Gets the size of the cell.</summary>
     /// <returns>The size of the cell.</returns>
-    cv::Size getCellSize(void) const noexcept;
+    cv::Size getCellSize(void) const ;
     /// <summary>Get the nbins.</summary>
     /// <returns>The nbins.</returns>
-    uint8_t getnbins(void) const noexcept;
+    uint8_t getnbins(void) const ;
     /// <summary>Calculates the hog.</summary>
     /// <param name="image">The image.</param>
     /// <param name="descriptors">The descriptors.</param>
@@ -223,7 +223,7 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
   };
 }
 #endif  // _LIBPOSE_HOGDETECTOR_HPP_

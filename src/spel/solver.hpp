@@ -22,27 +22,27 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="Solver"/> class.
     /// </summary>
-    Solver(void) noexcept;
+    Solver(void) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="Solver"/> class.
     /// </summary>
-    virtual ~Solver(void) noexcept;    
+    virtual ~Solver(void) ;    
     /// <summary>Solves the specified <see cref="Sequence"/>.</summary>
     /// <param name="sequence">The <see cref="Sequence"/>.</param>
     /// <returns>Array of <see cref="Solvlet"/>.</returns>
-    virtual std::vector<Solvlet> solve(Sequence& sequence) = 0;    
+    virtual std::vector<Solvlet> solve(Sequence& sequence)  = 0;    
     /// <summary>Solves the specified sequence.</summary>
     /// <param name="sequence">The <see cref="Sequence"/>.</param>
     /// <param name="params">The parameters.</param>
     /// <returns>Array of <see cref="Solvlet"/>.</returns>
     virtual std::vector<Solvlet> solve(Sequence& sequence,
-      std::map<std::string, float> params) = 0;
+      std::map<std::string, float> params)  = 0;
     /// <summary>Gets the solver name.</summary>
     /// <returns>The solver name.</returns>
-    std::string getName(void) const noexcept;
+    std::string getName(void) const ;
     /// <summary>Gets the solver identifier.</summary>
     /// <returns>The solver identifier.</returns>  
-    int getId(void) const noexcept;    
+    int getId(void) const ;    
     /// <summary>Finds the frame index by identifier.</summary>
     /// <param name="id">The identifier.</param>
     /// <param name="frames">The frames.</param>
@@ -52,7 +52,7 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     virtual void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
     /// <summary>The identifier.</summary>
     int m_id;    
     /// <summary>The name.</summary>

@@ -25,12 +25,12 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="ColorHistDetectorHelper"/> class.
     /// </summary>
-    ColorHistDetectorHelper(void) noexcept;
+    ColorHistDetectorHelper(void) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="ColorHistDetectorHelper"/> class.
     /// </summary>
     /// <returns></returns>
-    ~ColorHistDetectorHelper(void) noexcept;
+    ~ColorHistDetectorHelper(void) ;
     /// <summary>The pixel labels.</summary>
     std::map <int32_t, cv::Mat> pixelLabels;
   };
@@ -78,7 +78,7 @@ namespace SPEL
       /// <summary>Copy operator.</summary>
       /// <param name="model">The model.</param>
       /// <returns></returns>
-      PartModel &operator=(const PartModel &model) noexcept;
+      PartModel &operator=(const PartModel &model) ;
       /// <summary>Calculates the factor.</summary>
       /// <returns>The factor.</returns>
       uint8_t calculateFactor(void) const;
@@ -132,7 +132,7 @@ namespace SPEL
     /// Finalizes an instance of the <see cref="ColorHistDetector"/> class.
     /// </summary>
     /// <returns></returns>
-    ~ColorHistDetector(void) noexcept;
+    ~ColorHistDetector(void) ;
     /// <summary>Trains the specified frames.</summary>
     /// <param name="frames">The frames.</param>
     /// <param name="params">The parameters.</param>
@@ -148,14 +148,14 @@ namespace SPEL
       const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
     /// <summary>Gets the nbins.</summary>
     /// <returns>The nbins.</returns>
-    uint8_t getNBins(void) const noexcept;
+    uint8_t getNBins(void) const ;
     /// <summary>Gets the frames.</summary>
     /// <returns>The frames.</returns>
-    std::vector <Frame*> getFrames(void) const noexcept;
+    std::vector <Frame*> getFrames(void) const ;
     /// <summary>Copy operator.</summary>
     /// <param name="c">The <see cref="ColorHistDetector" /> class instance.</param>
     /// <returns>The <see cref="ColorHistDetector" /> class instance.</returns>
-    ColorHistDetector &operator=(const ColorHistDetector &c) noexcept;    
+    ColorHistDetector &operator=(const ColorHistDetector &c) ;    
   private:
 #ifdef DEBUG
     FRIEND_TEST(colorHistDetectorTest, Constructors);
@@ -221,7 +221,7 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
   };
 }
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_

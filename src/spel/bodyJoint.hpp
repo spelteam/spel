@@ -23,19 +23,19 @@ namespace SPEL
     /// Initializes a new instance of the <see cref="BodyJoint"/> class.
     /// Default constructor
     /// </summary>
-    BodyJoint(void) noexcept; 
+    BodyJoint(void) ; 
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyJoint"/> class.
     /// copy constructor
     /// </summary>
     /// <param name="bodyJoint">The body joint.</param>
-    BodyJoint(const BodyJoint& bodyJoint) noexcept;
+    BodyJoint(const BodyJoint& bodyJoint) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyJoint"/> class.
     /// Move constructor
     /// </summary>
     /// <param name="bodyJoint">The body joint.</param>
-    BodyJoint(BodyJoint&& bodyJoint) noexcept;
+    BodyJoint(BodyJoint&& bodyJoint) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyJoint"/> class.
     /// </summary> 
@@ -43,7 +43,7 @@ namespace SPEL
     /// <param name="name">The name.</param>
     /// <param name="imageLocation">The image location.</param>
     BodyJoint(const int id, const std::string &name, 
-      const cv::Point2f &imageLocation) noexcept;
+      const cv::Point2f &imageLocation) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyJoint"/> class.
     /// </summary>
@@ -53,7 +53,7 @@ namespace SPEL
     /// <param name="spaceLoc">The space location.</param>
     BodyJoint(const int id, const std::string &name, 
       const cv::Point2f &imagLocation,
-      const cv::Point3f &spaceLocation) noexcept;
+      const cv::Point3f &spaceLocation) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyJoint"/> class.
     /// Constructor with params
@@ -65,78 +65,78 @@ namespace SPEL
     /// <param name="depth">The depth.</param>
     BodyJoint(const int id, const std::string &name, 
       const cv::Point2f &imageLocation, const cv::Point3f &spaceLocation, 
-      const bool depth) noexcept;
+      const bool depth) ;
 
     /// <summary>
     /// Finalizes an instance of the <see cref="BodyJoint"/> class.
     /// </summary>
     /// <returns></returns>
-    ~BodyJoint(void) noexcept;
+    ~BodyJoint(void) ;
 
     /// <summary>
     /// Copy operator.
     /// </summary>
     /// <param name="bodyJoint">The body joint.</param>
     /// <returns>The body joint copy.</returns>
-    BodyJoint& operator=(const BodyJoint& bodyJoint) noexcept;
+    BodyJoint& operator=(const BodyJoint& bodyJoint) ;
     /// <summary>
      /// Move operator.
      /// </summary>
      /// <param name="bodyJoint">The body joint.</param>
      /// <returns>The body joint.</returns>
-    BodyJoint& operator=(BodyJoint&& bodyJoint) noexcept;
+    BodyJoint& operator=(BodyJoint&& bodyJoint) ;
     /// <summary>
     /// Comparison operator.
     /// Comparsion by unique index
     /// </summary>
     /// <param name="bodyJoint">The bodyJoint.</param>
     /// <returns>The comparison result.</returns>
-    bool operator==(const BodyJoint &bodyJoint) const noexcept;
+    bool operator==(const BodyJoint &bodyJoint) const ;
     /// <summary>
     /// Comparison operator.
     /// Comparsion by unique index 
     /// </summary>
     /// <param name="bodyJoint">The bodyJoint.</param>
     /// <returns>The comparison result</returns>
-    bool operator!=(const BodyJoint &bodyJoint) const noexcept;
+    bool operator!=(const BodyJoint &bodyJoint) const ;
 
     /// <summary>
     /// Gets the limb identifier.
     /// </summary>
     /// <returns>Limb identifier.</returns>
-    int getLimbID(void) const noexcept;
+    int getLimbID(void) const ;
     /// <summary>Sets the limb identifier.</summary>
     /// <param name="limbID">The limb identifier.</param>
     /// <returns></returns>
-    void setLimbID(const int limbID) noexcept;
+    void setLimbID(const int limbID) ;
     /// <summary>Gets the name of the joint.</summary>
     /// <returns>The joint name.</returns>
-    std::string getJointName(void) const noexcept;
+    std::string getJointName(void) const ;
     /// <summary>Sets the name of the joint.</summary>
     /// <param name="jointName">Name of the joint.</param>
     /// <returns></returns>
-    void setJointName(const std::string &jointName) noexcept;
+    void setJointName(const std::string &jointName) ;
     /// <summary>Gets the image location.</summary>
     /// <returns>The image location.</returns>
-    cv::Point2f getImageLocation(void) const noexcept;
+    cv::Point2f getImageLocation(void) const ;
     /// <summary>Sets the image location.</summary>
     /// <param name="imageLocation">The image location.</param>
     /// <returns></returns>
-    void setImageLocation(const cv::Point2f &imageLocation) noexcept;
+    void setImageLocation(const cv::Point2f &imageLocation) ;
     /// <summary>Gets the space location.</summary>
     /// <returns>The space location.</returns>
-    cv::Point3f getSpaceLocation(void) const noexcept;
+    cv::Point3f getSpaceLocation(void) const ;
     /// <summary>Sets the space location.</summary>
     /// <param name="spaceLocation">The space location.</param>
     /// <returns></returns>
-    void setSpaceLocation(const cv::Point3f &spaceLocation) noexcept;
+    void setSpaceLocation(const cv::Point3f &spaceLocation) ;
     /// <summary>Gets the depth sign.</summary>
     /// <returns>The depth sign.</returns>
-    bool getDepthSign(void) const noexcept;
+    bool getDepthSign(void) const ;
     /// <summary>Sets the depth sign.</summary>
     /// <param name="depthSign">The depth sign.</param>
     /// <returns></returns>
-    void setDepthSign(const bool depthSign) noexcept;
+    void setDepthSign(const bool depthSign) ;
   private:
     /// <summary>
     /// The identifier, must be unique within the limits of class.

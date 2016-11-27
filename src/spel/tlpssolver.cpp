@@ -1024,7 +1024,7 @@ namespace SPEL
     return slices;
   }
 
-  void TLPSSolver::emplaceDefaultParameters(std::map<std::string, float>& params) const noexcept
+  void TLPSSolver::emplaceDefaultParameters(std::map<std::string, float>& params) const 
   {
     Solver::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, COMMON_TLPS_SOLVER_PARAMETERS::getParameters());

@@ -29,21 +29,21 @@ namespace SPEL
   public:
 
     ///constructors
-    ImageSimilarityMatrix(void) noexcept;
-    ImageSimilarityMatrix(const ImageSimilarityMatrix &m) noexcept;
-    ImageSimilarityMatrix(ImageSimilarityMatrix &&m) noexcept;
+    ImageSimilarityMatrix(void) ;
+    ImageSimilarityMatrix(const ImageSimilarityMatrix &m) ;
+    ImageSimilarityMatrix(ImageSimilarityMatrix &&m) ;
     ///destructor
-    virtual ~ImageSimilarityMatrix(void) noexcept;
+    virtual ~ImageSimilarityMatrix(void) ;
     ///operators
-    bool operator==(const ImageSimilarityMatrix &s) const noexcept;
-    bool operator!=(const ImageSimilarityMatrix &s) const noexcept;
-    ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s) noexcept;
-    ImageSimilarityMatrix & operator=(ImageSimilarityMatrix &&s) noexcept;
+    bool operator==(const ImageSimilarityMatrix &s) const ;
+    bool operator!=(const ImageSimilarityMatrix &s) const ;
+    ImageSimilarityMatrix & operator=(const ImageSimilarityMatrix &s) ;
+    ImageSimilarityMatrix & operator=(ImageSimilarityMatrix &&s) ;
 
     uint32_t getID(void);
     void setID(uint32_t _id);
 
-    uint32_t size() const noexcept;
+    uint32_t size() const ;
 
     void buildImageSimilarityMatrix(const std::vector<Frame*>& frames, const int maxFrameHeight = 0);
 
@@ -57,12 +57,12 @@ namespace SPEL
     void buildMSM_OnMaskArea(const std::vector<Frame*>& frames, bool UseRGBScore, bool inverseScore);
     //- alternative MSM
 
-    bool read(const std::string &filename) noexcept;
-    bool write(const std::string &filename) const noexcept;
+    bool read(const std::string &filename) ;
+    bool write(const std::string &filename) const ;
 
-    float min() const noexcept;
+    float min() const ;
     float mean() const;
-    float max() const noexcept;
+    float max() const ;
     float stddev() const;
 
     float at(const int row, const int col) const;
@@ -70,14 +70,14 @@ namespace SPEL
     ///get cost for path through ISM
     float getPathCost(const std::vector<int> &path) const;
 
-    cv::Mat clone() const noexcept; //return a Mat clone of ISM
+    cv::Mat clone() const ; //return a Mat clone of ISM
   protected:
     uint32_t id;
     ///the image similarity matrix
     cv::Mat imageSimilarityMatrix;
     cv::Mat imageShiftMatrix;
 
-    cv::Point2f calculateDistance(const cv::Mat &imgMatOne, const cv::Mat &imgMatTwo) const noexcept;
+    cv::Point2f calculateDistance(const cv::Mat &imgMatOne, const cv::Mat &imgMatTwo) const ;
     virtual void computeISMcell(Frame* left, Frame* right, const int maxFrameHeight) = 0;
   private:
 #ifdef DEBUG

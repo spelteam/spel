@@ -28,12 +28,12 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="DetectorHelper"/> class.
     /// </summary>
-    DetectorHelper(void) noexcept;
+    DetectorHelper(void) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="DetectorHelper"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~DetectorHelper(void) noexcept;
+    virtual ~DetectorHelper(void) ;
   };  
   /// <summary>
   /// Base Detector class with common functions
@@ -44,15 +44,15 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="Detector"/> class.
     /// </summary>
-    Detector(void) noexcept;
+    Detector(void) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="Detector"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~Detector(void) noexcept;
+    virtual ~Detector(void) ;
     /// <summary>Gets the identifier.</summary>
     /// <returns>The identifier.</returns>
-    int getID(void) const noexcept;
+    int getID(void) const ;
     /// <summary>Sets the identifier.</summary>
     /// <param name="id">The identifier.</param>
     void setID(const int id);    
@@ -113,7 +113,7 @@ namespace SPEL
     /// <summary>Gets the frame.</summary>
     /// <param name="frameId">The frame identifier.</param>
     /// <returns>The frame.</returns>
-    Frame *getFrame(const int32_t frameId) const noexcept;
+    Frame *getFrame(const int32_t frameId) const ;
     /// <summary>Generates the label.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="parent">The parent joint.</param>
@@ -172,7 +172,7 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     virtual void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
   };
 }
 #endif  // _LIBPOSE_DETECTOR_HPP_

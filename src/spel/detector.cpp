@@ -16,16 +16,16 @@
 
 namespace SPEL
 {
-  Detector::Detector(void) noexcept
+  Detector::Detector(void) 
   {
     m_id = 0x00000000;
   }
 
-  Detector::~Detector(void) noexcept
+  Detector::~Detector(void) 
   {
   }
 
-  int Detector::getID(void) const noexcept
+  int Detector::getID(void) const 
   {
     return m_id;
   }
@@ -253,7 +253,7 @@ namespace SPEL
       score == -1.0f);
   }
 
-  Frame *Detector::getFrame(const int32_t frameId) const noexcept
+  Frame *Detector::getFrame(const int32_t frameId) const 
   {
     for (auto f : m_frames)
       if (f->getID() == frameId)
@@ -591,7 +591,7 @@ namespace SPEL
   }
 
   void Detector::emplaceDefaultParameters(
-    std::map<std::string, float>& params) const noexcept
+    std::map<std::string, float>& params) const 
   {
     spelHelper::mergeParameters(params, 
       COMMON_SPEL_PARAMETERS::getParameters());
@@ -601,11 +601,11 @@ namespace SPEL
       DETECTOR_DETECT_PARAMETERS::getParameters());
   }
 
-  DetectorHelper::DetectorHelper(void) noexcept
+  DetectorHelper::DetectorHelper(void) 
   {
   }
 
-  DetectorHelper::~DetectorHelper(void) noexcept
+  DetectorHelper::~DetectorHelper(void) 
   {
   }
 

@@ -23,19 +23,19 @@ namespace SPEL
     /// Initializes a new instance of the <see cref="BodyPart"/> class.
     /// Default constructor.
     /// </summary>
-    BodyPart(void) noexcept;
+    BodyPart(void) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyPart"/> class.
     /// Copy constructor.
     /// </summary>
     /// <param name="bodyPart">The body part.</param>
-    BodyPart(const BodyPart& bodyPart) noexcept;
+    BodyPart(const BodyPart& bodyPart) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyPart"/> class.
     /// Move constructor.
     /// </summary>
     /// <param name="bodyPart">The body part.</param>
-    BodyPart(BodyPart&& bodyPart) noexcept;
+    BodyPart(BodyPart&& bodyPart) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyPart"/> class.
     /// </summary>
@@ -44,7 +44,7 @@ namespace SPEL
     /// <param name="parentJoint">The parent joint.</param>
     /// <param name="childJoint">The child joint.</param>
     BodyPart(const int id, const std::string &name, const int parentJoint, 
-      const int childJoint) noexcept;
+      const int childJoint) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyPart"/> class.
     /// </summary>
@@ -54,7 +54,7 @@ namespace SPEL
     /// <param name="childJoint">The child joint.</param>
     /// <param name="isOccluded">Is occluded?</param>
     BodyPart(const int id, const std::string &name, const int parentJoint, 
-      const int childJoint, const bool isOccluded) noexcept;
+      const int childJoint, const bool isOccluded) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="BodyPart"/> class.
     /// </summary>
@@ -66,189 +66,189 @@ namespace SPEL
     /// <param name="spaceLength">Length of the space.</param>
     BodyPart(const int id, const std::string &name, const int parentJoint, 
       const int childJoint, const bool isOccluded, 
-      const float spaceLength) noexcept;
+      const float spaceLength) ;
 
     /// <summary>
     /// Finalizes an instance of the <see cref="BodyPart"/> class.
     /// </summary>
     /// <returns></returns>
-    ~BodyPart(void) noexcept;
+    ~BodyPart(void) ;
 
     /// <summary>Copy operator.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <returns>The body part.</returns>
-    BodyPart& operator=(const BodyPart& bodyPart) noexcept;
+    BodyPart& operator=(const BodyPart& bodyPart) ;
     /// <summary>Move operator.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <returns>The body part.</returns>
-    BodyPart& operator=(BodyPart&& bodyPart) noexcept;
+    BodyPart& operator=(BodyPart&& bodyPart) ;
     /// <summary>
     /// Comparison operator.
     /// Comparison by unique index.
     /// </summary>
     /// <param name="bodyPart">The body part.</param>
     /// <returns>The comparison result.</returns>
-    bool operator==(const BodyPart &bodyPart) const noexcept;
+    bool operator==(const BodyPart &bodyPart) const ;
     /// <summary>
     /// Comparison operator.
     /// Comparison by unique index.
     /// </summary>
     /// <param name="bodyPart">The body part.</param>
     /// <returns>The comparison result.</returns>
-    bool operator!=(const BodyPart &bodyPart) const noexcept;
+    bool operator!=(const BodyPart &bodyPart) const ;
 
     /// <summary>Gets the part identifier.</summary>
     /// <returns>THe part identifier.</returns>
-    int getPartID(void) const noexcept;
+    int getPartID(void) const ;
     /// <summary>Sets the part identifier.</summary>
     /// <param name="partID">The part identifier.</param>
     /// <returns></returns>
-    void setPartID(const int partID) noexcept;
+    void setPartID(const int partID) ;
     /// <summary>Gets the name of the part.</summary>
     /// <returns>The name of the part.</returns>
-    std::string getPartName(void) const noexcept;
+    std::string getPartName(void) const ;
     /// <summary>Sets the name of the part.</summary>
     /// <param name="partName">Name of the part.</param>
     /// <returns></returns>    
-    void setPartName(const std::string &partName) noexcept;
+    void setPartName(const std::string &partName) ;
     /// <summary>Gets the parent joint.</summary>
     /// <returns>The parent joint identifier.</returns>
-    int getParentJoint(void) const noexcept;
+    int getParentJoint(void) const ;
     /// <summary>Sets the parent joint.</summary>
     /// <param name="parentJoint">The parent joint.</param>
     /// <returns></returns>
-    void setParentJoint(const int parentJoint) noexcept;
+    void setParentJoint(const int parentJoint) ;
     /// <summary>Gets the child joint.</summary>
     /// <returns>The child joint identifier.</returns>
-    int getChildJoint(void) const noexcept;
+    int getChildJoint(void) const ;
     /// <summary>Sets the child joint.</summary>
     /// <param name="childJoint">The child joint.</param>
     /// <returns></returns>
-    void setChildJoint(const int childJoint) noexcept;
+    void setChildJoint(const int childJoint) ;
     /// <summary>Gets the occluded parameter.</summary>
     /// <returns>The occluded parameter.</returns>
-    bool getIsOccluded(void) const noexcept;
+    bool getIsOccluded(void) const ;
     /// <summary>Sets the occluded parameter.</summary>
     /// <param name="isOccluded">The occluded parameter.</param>
     /// <returns></returns>
-    void setIsOccluded(const bool isOccluded) noexcept;
+    void setIsOccluded(const bool isOccluded) ;
     /// <summary>Gets the expected distance.</summary>
     /// <returns>The expected distance.</returns>
-    float getExpectedDistance(void) const noexcept;
+    float getExpectedDistance(void) const ;
     /// <summary>Sets the expected distance.</summary>
     /// <param name="expectedDistance">The expected distance.</param>
     /// <returns></returns>
-    void setExpectedDistance(const float expectedDistance) noexcept;
+    void setExpectedDistance(const float expectedDistance) ;
     /// <summary>Gets the part polygon.</summary>
     /// <returns>The part polygon.</returns>
-    spelRECT <cv::Point2f> getPartPolygon(void) const noexcept;
+    spelRECT <cv::Point2f> getPartPolygon(void) const ;
     /// <summary>Sets the part polygon.</summary>
     /// <param name="partPolygon">The part polygon.</param>
     /// <returns></returns>
     void setPartPolygon(
-      const spelRECT <cv::Point2f> &partPolygon) noexcept;
+      const spelRECT <cv::Point2f> &partPolygon) ;
     /// <summary>Gets the length/width ratio.</summary>
     /// <returns>The length/width ratio.</returns>
-    float getLWRatio(void) const noexcept;
+    float getLWRatio(void) const ;
     /// <summary>Sets the length/width ratio.</summary>
     /// <param name="lwRatio">The length/width ratio.</param>
     /// <returns></returns>
-    void setLWRatio(const float lwRatio) noexcept;
+    void setLWRatio(const float lwRatio) ;
     /// <summary>Gets the relative length.</summary>
     /// <returns>The relative length.</returns>
-    float getRelativeLength(void) const noexcept;
+    float getRelativeLength(void) const ;
     /// <summary>Sets the relative length.</summary>
     /// <param name="relativeLength">The relative length.</param>
     /// <returns></returns>
-    void setRelativeLength(const float relativeLength) noexcept;
+    void setRelativeLength(const float relativeLength) ;
     /// <summary>Gets the search radius.</summary>
     /// <returns>The search radius.</returns>
-    float getSearchRadius(void) const noexcept;
+    float getSearchRadius(void) const ;
     /// <summary>Sets the search radius.</summary>
     /// <param name="searchRadius">The search radius.</param>
     /// <returns></returns>
-    void setSearchRadius(const float searchRadius) noexcept;
+    void setSearchRadius(const float searchRadius) ;
     /// <summary>Gets the rotation search range.</summary>
     /// <returns>The rotation search range.</returns>
-    float getRotationSearchRange(void) const noexcept;
+    float getRotationSearchRange(void) const ;
     /// <summary>Sets the rotation search range.</summary>
     /// <param name="rotationAngle">The rotation angle.</param>
     /// <returns></returns>
-    void setRotationSearchRange(const float rotationAngle) noexcept;
+    void setRotationSearchRange(const float rotationAngle) ;
     /// <summary>Gets the length of the bone.</summary>
     /// <param name="begin">The begin of the bone.</param>
     /// <param name="end">The end of the bone.</param>
     /// <returns>The length of the bone.</returns>
     static float getBoneLength(const cv::Point2f &begin,
-      const cv::Point2f &end) noexcept;
+      const cv::Point2f &end) ;
     /// <summary>Gets the length of the bone.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The length of the bone.</returns>
     static float getBoneLength(const BodyJoint &parent,
-      const BodyJoint &child) noexcept;
+      const BodyJoint &child) ;
     /// <summary>Gets the width of the bone.</summary>
     /// <param name="length">The length of the bone.</param>
     /// <param name="bodyPart">The body part.</param>
     /// <returns>The width of the bone.</returns>
     static float getBoneWidth(const float length,
-      const BodyPart &bodyPart) noexcept;    
+      const BodyPart &bodyPart) ;    
     /// <summary>Gets the width of the bone.</summary>
     /// <param name="length">The length of the bone.</param>
     /// <returns>The width of the bone.</returns>
-    float getBoneWidth(const float length) const noexcept;    
+    float getBoneWidth(const float length) const ;    
     /// <summary>Gets the width of the bone.</summary>
     /// <param name="begin">The begin of the bone.</param>
     /// <param name="end">The end of the bone.</param>
     /// <param name="bodyPart">The body part.</param>
     /// <returns>The width of the bone.</returns>
     static float getBoneWidth(const cv::Point2f &begin,
-      const cv::Point2f &end, const BodyPart &bodyPart) noexcept;
+      const cv::Point2f &end, const BodyPart &bodyPart) ;
     /// <summary>Gets the width of the bone.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <param name="bodyPart">The body part.</param>
     /// <returns>The width of the bone.</returns>
     static float getBoneWidth(const BodyJoint &parent,
-      const BodyJoint &child, const BodyPart &bodyPart) noexcept;
+      const BodyJoint &child, const BodyPart &bodyPart) ;
     /// <summary>Gets the width of the bone.</summary>
     /// <param name="begin">The begin of the bone.</param>
     /// <param name="end">The end of the bone.</param>
     /// <returns>The width of the bone.</returns>
     float getBoneWidth(const cv::Point2f &begin,
-      const cv::Point2f &end) const noexcept;    
+      const cv::Point2f &end) const ;    
     /// <summary>Gets the width of the bone.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The width of the bone.</returns>
     float getBoneWidth(const BodyJoint &parent,
-      const BodyJoint &child) const noexcept;
+      const BodyJoint &child) const ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
     static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
-      const cv::Point2f &parent, const cv::Point2f &child) noexcept;
+      const cv::Point2f &parent, const cv::Point2f &child) ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
     spelRECT <cv::Point2f> getBodyPartRect(const cv::Point2f &parent, 
-      const cv::Point2f &child) const noexcept;
+      const cv::Point2f &child) const ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
     static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
-      const BodyJoint &parent, const BodyJoint &child) noexcept;
+      const BodyJoint &parent, const BodyJoint &child) ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <returns>The body part rect.</returns>
     spelRECT <cv::Point2f> getBodyPartRect(const BodyJoint &parent, 
-      const BodyJoint &child) const noexcept;
+      const BodyJoint &child) const ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="parent">The parent joint.</param>
@@ -257,14 +257,14 @@ namespace SPEL
     /// <returns>The body part rect.</returns>
     static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
       const cv::Point2f &parent, const cv::Point2f &child, 
-      const cv::Size &blockSize) noexcept;
+      const cv::Size &blockSize) ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <param name="blockSize">Size of the block.</param>
     /// <returns>The body part rect.</returns>
     spelRECT <cv::Point2f> getBodyPartRect(const cv::Point2f &parent, 
-      const cv::Point2f &child, const cv::Size &blockSize) const noexcept;
+      const cv::Point2f &child, const cv::Size &blockSize) const ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="parent">The parent joint.</param>
@@ -273,14 +273,14 @@ namespace SPEL
     /// <returns>The body part rect.</returns>
     static spelRECT <cv::Point2f> getBodyPartRect(const BodyPart &bodyPart,
       const BodyJoint &parent, BodyJoint &child,
-      const cv::Size &blockSize) noexcept;
+      const cv::Size &blockSize) ;
     /// <summary>Gets the body part rect.</summary>
     /// <param name="parent">The parent joint.</param>
     /// <param name="child">The child joint.</param>
     /// <param name="blockSize">Size of the block.</param>
     /// <returns>The body part rect.</returns>
     spelRECT <cv::Point2f> getBodyPartRect(const BodyJoint &parent,
-      const BodyJoint &child, const cv::Size &blockSize) const noexcept;
+      const BodyJoint &child, const cv::Size &blockSize) const ;
   private:
     /// <summary>
     /// The part identifier must be unique within the limits of class.
@@ -336,6 +336,6 @@ namespace SPEL
   };
   
   std::ostream& operator<<(std::ostream& stream, 
-    const BodyPart &bodyPart) noexcept;
+    const BodyPart &bodyPart) ;
 }
 #endif  // _BODYPART_HPP_

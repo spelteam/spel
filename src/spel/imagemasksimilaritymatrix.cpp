@@ -2,11 +2,11 @@
 
 namespace SPEL
 {
-  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(void) noexcept : ImageSimilarityMatrix()
+  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(void)  : ImageSimilarityMatrix()
   {
   }
 
-  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(const ImageMaskSimilarityMatrix & m) noexcept : ImageSimilarityMatrix(m)
+  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(const ImageMaskSimilarityMatrix & m)  : ImageSimilarityMatrix(m)
   {
   }
 
@@ -15,15 +15,15 @@ namespace SPEL
     buildImageSimilarityMatrix(frames);
   }
 
-  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(ImageMaskSimilarityMatrix && m) noexcept : ImageSimilarityMatrix(std::move(m))
+  ImageMaskSimilarityMatrix::ImageMaskSimilarityMatrix(ImageMaskSimilarityMatrix && m)  : ImageSimilarityMatrix(std::move(m))
   {
   }
 
-  ImageMaskSimilarityMatrix::~ImageMaskSimilarityMatrix(void) noexcept
+  ImageMaskSimilarityMatrix::~ImageMaskSimilarityMatrix(void) 
   {
   }
 
-  ImageMaskSimilarityMatrix & ImageMaskSimilarityMatrix::operator=(const ImageMaskSimilarityMatrix & s) noexcept
+  ImageMaskSimilarityMatrix & ImageMaskSimilarityMatrix::operator=(const ImageMaskSimilarityMatrix & s) 
   {
     ImageSimilarityMatrix::operator=(s);
     return *this;

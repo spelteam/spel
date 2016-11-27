@@ -3,22 +3,22 @@
 
 namespace SPEL
 {
-  Solver::Solver(void) noexcept
+  Solver::Solver(void) 
   {
     m_id = -1;
     m_name = "BaseClass";
   }
 
-  Solver::~Solver(void) noexcept
+  Solver::~Solver(void) 
   {
   }
 
-  std::string Solver::getName(void) const noexcept
+  std::string Solver::getName(void) const 
   {
     return m_name;
   }
 
-  int Solver::getId(void) const noexcept
+  int Solver::getId(void) const 
   {
     return m_id;
   }
@@ -36,7 +36,7 @@ namespace SPEL
   }
 
   void Solver::emplaceDefaultParameters(std::map<std::string, float>& params)
-    const noexcept
+    const 
   {
     spelHelper::mergeParameters(
       params, COMMON_SOLVER_PARAMETERS::getParameters());

@@ -35,17 +35,17 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="LimbLabel"/> class.
     /// </summary>
-    LimbLabel(void) noexcept;
+    LimbLabel(void) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="LimbLabel"/> class.
     /// </summary>
     /// <param name="limbLabel">The limb label.</param>
-    LimbLabel(const LimbLabel &limbLabel) noexcept;
+    LimbLabel(const LimbLabel &limbLabel) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="LimbLabel"/> class.
     /// </summary>
     /// <param name="limbLabel">The limb label.</param>
-    LimbLabel(LimbLabel &&limbLabel) noexcept;
+    LimbLabel(LimbLabel &&limbLabel) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="LimbLabel"/> class.
     /// </summary>
@@ -59,38 +59,38 @@ namespace SPEL
     /// </param>
     LimbLabel(int id, cv::Point2f center, float angle, 
       std::vector<cv::Point2f> polygon, std::vector<Score> scores, 
-      bool isOccluded = false) noexcept;
+      bool isOccluded = false) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="LimbLabel"/> class.
     /// </summary>
-    ~LimbLabel(void) noexcept;
+    ~LimbLabel(void) ;
     /// <summary>Output limb label as printable string.</summary>
     /// <returns>String representation of the limb label.</returns>
-    std::string toString() const noexcept;
+    std::string toString() const ;
     /// <summary>Copies the specified limb label.</summary>
     /// <param name="limbLabel">The limb label.</param>
     /// <returns>New limb label.</returns>
-    LimbLabel & operator = (const LimbLabel &limbLabel) noexcept;
+    LimbLabel & operator = (const LimbLabel &limbLabel) ;
     /// <summary>Moves the specified limb label.</summary>
     /// <param name="limbLabel">The limb label.</param>
     /// <returns>New limb label.</returns>
-    LimbLabel & operator = (LimbLabel &&limbLabel) noexcept;
+    LimbLabel & operator = (LimbLabel &&limbLabel) ;
     /// <summary>Comparison operator.</summary>
     /// <param name="limbLabel">The limb label.</param>
     /// <returns>The result of the comparison.</returns>
-    bool operator == (const LimbLabel &limbLabel) const noexcept;
+    bool operator == (const LimbLabel &limbLabel) const ;
     /// <summary>Comparison operator.</summary>
     /// <param name="limbLabel">The limb label.</param>
     /// <returns>The result of the comparison.</returns>
-    bool operator != (const LimbLabel &limbLabel) const noexcept;
+    bool operator != (const LimbLabel &limbLabel) const ;
     /// <summary>Comparison operator.</summary>
     /// <param name="limbLabel">The limb label.</param>
     /// <returns>The result of the comparison.</returns>
-    bool operator < (const LimbLabel &limbLabel) const noexcept;
+    bool operator < (const LimbLabel &limbLabel) const ;
     /// <summary>Comparison operator.</summary>
     /// <param name="limbLabel">The limb label.</param>
     /// <returns>The result of the comparison.</returns>
-    bool operator > (const LimbLabel &limbLabel) const noexcept;
+    bool operator > (const LimbLabel &limbLabel) const ;
     /// <summary>
     /// Compute the endpoints of the limb that this label would produce.
     /// </summary>
@@ -99,25 +99,25 @@ namespace SPEL
     void getEndpoints(cv::Point2f &p0, cv::Point2f &p1) const;
     /// <summary>Adds the score.</summary>
     /// <param name="detectionScore">The detection score.</param>
-    void addScore(Score detectionScore) noexcept;
+    void addScore(Score detectionScore) ;
     /// <summary>Gets the center of the polygon.</summary>
     /// <returns>The center of the polygon.</returns>
-    cv::Point2f getCenter(void) const noexcept;
+    cv::Point2f getCenter(void) const ;
     /// <summary>Gets the label scores.</summary>
     /// <returns>The label scores.</returns>
-    std::vector<Score> getScores(void) const noexcept;
+    std::vector<Score> getScores(void) const ;
     /// <summary>Sets the label scores.</summary>
     /// <param name="scores">The label scores.</param>
-    void setScores(std::vector <Score> scores) noexcept;
+    void setScores(std::vector <Score> scores) ;
     /// <summary>Gets the limb label identifier.</summary>
     /// <returns>The limb label.</returns>
-    int getLimbID(void) const noexcept;
+    int getLimbID(void) const ;
     /// <summary>Gets the limb label angle.</summary>
     /// <returns>The limb label angle.</returns>
-    float getAngle(void) const noexcept;
+    float getAngle(void) const ;
     /// <summary>Gets the limb label polygon.</summary>
     /// <returns>The limb label polygon.</returns>
-    std::vector <cv::Point2f> getPolygon(void) const noexcept;
+    std::vector <cv::Point2f> getPolygon(void) const ;
     /// <summary>
     /// Returns <c>true</c> if limb label is occluded. 
     /// Otherwise returns <c>false</c>.
@@ -126,22 +126,22 @@ namespace SPEL
     /// Returns <c>true</c> if limb label is occluded. 
     /// Otherwise returns <c>false</c>.
     /// </returns>
-    bool getIsOccluded(void) const noexcept;
+    bool getIsOccluded(void) const ;
     /// <summary>Gets the average score.</summary>
     /// <param name="bNegativeToPositive">
     /// If set to <c>true</c> all negative scores are used as positive.
     /// </param>
     /// <returns>The average score.</returns>
-    float getAvgScore(bool bNegativeToPositive = false) const noexcept;    
+    float getAvgScore(bool bNegativeToPositive = false) const ;    
     /// <summary>Gets the sum score.</summary>
     /// <param name="bNegativeToPositive">
     /// If set to <c>true</c> all negative scores are used as positive.
     /// </param>
     /// <returns>The sum score.</returns>
-    float getSumScore(bool bNegativeToPositive = false) const noexcept;
+    float getSumScore(bool bNegativeToPositive = false) const ;
     /// <summary>Resizes the limb label using specified factor.</summary>
     /// <param name="factor">The factor.</param>
-    void Resize(float factor) noexcept;
+    void Resize(float factor) ;
     /// <summary>Determines whether the limb label contains specified point.</summary>
     /// <param name="pt">The point.</param>
     /// <returns>

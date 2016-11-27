@@ -31,7 +31,7 @@ namespace SPEL
   }
 
   ColorHistDetector::PartModel &ColorHistDetector::PartModel::operator=(
-    const PartModel &model) noexcept
+    const PartModel &model) 
   {
     this->nBins = model.nBins;
     this->partHistogram = model.partHistogram;
@@ -458,7 +458,7 @@ namespace SPEL
     m_id = 0x43484400;
   }
 
-  ColorHistDetector::~ColorHistDetector(void) noexcept
+  ColorHistDetector::~ColorHistDetector(void) 
   {
   }
 
@@ -501,7 +501,7 @@ namespace SPEL
   }
 
   // Return nBins
-  uint8_t ColorHistDetector::getNBins(void) const noexcept
+  uint8_t ColorHistDetector::getNBins(void) const 
   {
     return nBins;
   }
@@ -1071,30 +1071,30 @@ namespace SPEL
   }
 
   //Used only as prevent a warning for "const uint8_t nBins";
-  std::vector <Frame*> ColorHistDetector::getFrames() const noexcept
+  std::vector <Frame*> ColorHistDetector::getFrames() const 
   {
     return m_frames;
   }
 
   //Used only as prevent a warning for "const uint8_t nBins";
   ColorHistDetector &ColorHistDetector::operator=(
-    const ColorHistDetector &c) noexcept
+    const ColorHistDetector &c) 
   {
     m_frames = c.getFrames();
     return *this;
   }
 
-  void ColorHistDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const noexcept
+  void ColorHistDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const 
   {
     Detector::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, COMMON_CH_DETECTOR_PARAMETERS::getParameters());
   }
 
-  ColorHistDetectorHelper::ColorHistDetectorHelper() noexcept
+  ColorHistDetectorHelper::ColorHistDetectorHelper() 
   {
   }
 
-  ColorHistDetectorHelper::~ColorHistDetectorHelper(void) noexcept
+  ColorHistDetectorHelper::~ColorHistDetectorHelper(void) 
   {
     for (auto &p : pixelLabels)
       p.second.release();
