@@ -294,7 +294,9 @@ namespace SPEL
         for (auto &label : labels) //for each part
         {
           std::vector<LimbLabel> tmp;
-          for (auto j = 0; j < label.second.size() * maxPartCandidates; ++j)
+          const auto limit = static_cast<uint32_t>(label.second.size() < maxPartCandidates ? 
+            label.second.size() : maxPartCandidates);
+          for (auto j = 0U; j < limit; ++j)
             tmp.push_back(label.second.at(j));
           //set this part's candidates to the new trimmed vector
           label.second = tmp;

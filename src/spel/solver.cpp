@@ -38,6 +38,12 @@ namespace SPEL
   void Solver::emplaceDefaultParameters(std::map<std::string, float>& params)
     const 
   {
+    spelHelper::mergeParameters(params,
+      COMMON_SPEL_PARAMETERS::getParameters());
+    spelHelper::mergeParameters(params,
+      COMMON_DETECTOR_PARAMETERS::getParameters());
+    spelHelper::mergeParameters(params,
+      DETECTOR_DETECT_PARAMETERS::getParameters());
     spelHelper::mergeParameters(
       params, COMMON_SOLVER_PARAMETERS::getParameters());
   }
