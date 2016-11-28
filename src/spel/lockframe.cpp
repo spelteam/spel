@@ -2,21 +2,21 @@
 
 namespace SPEL
 {
-  Lockframe::Lockframe(void) noexcept : Frame(LOCKFRAME)
+  Lockframe::Lockframe(void)  : Frame(LOCKFRAME)
   {
   }
 
-  Lockframe::Lockframe(const Lockframe & frame) noexcept : Frame(frame)
+  Lockframe::Lockframe(const Lockframe & frame)  : Frame(frame)
   {
   }
 
-  Lockframe & Lockframe::operator=(const Lockframe & frame) noexcept
+  Lockframe & Lockframe::operator=(const Lockframe & frame) 
   {
     Frame::operator=(frame);
     return *this;
   }
 
-  Lockframe::~Lockframe(void) noexcept
+  Lockframe::~Lockframe(void) 
   {
   }
 }

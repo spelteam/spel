@@ -62,7 +62,7 @@ namespace SPEL
     labels = _labels;
   }
 
-  Skeleton Solvlet::toSkeleton(const Skeleton &example)
+  Skeleton Solvlet::toSkeleton(const Skeleton &example) const
   {
     Skeleton retSkel = example;
 

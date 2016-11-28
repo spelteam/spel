@@ -184,6 +184,8 @@ if (WIN32)
   endif()
 endif()
 
+STRING ( REPLACE "-std=gnu++11" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
+
 IF ( UNIX )
 	INSTALL (
 		TARGETS ${SPELGUI_MODULE}

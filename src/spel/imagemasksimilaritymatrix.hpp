@@ -12,19 +12,19 @@ namespace SPEL
   {
   public:
     ///constructors
-    ImageMaskSimilarityMatrix(void) noexcept;
-    ImageMaskSimilarityMatrix(const ImageMaskSimilarityMatrix &m) noexcept;
+    ImageMaskSimilarityMatrix(void) ;
+    ImageMaskSimilarityMatrix(const ImageMaskSimilarityMatrix &m) ;
     ImageMaskSimilarityMatrix(const std::vector<Frame*> &frames);
-    ImageMaskSimilarityMatrix(ImageMaskSimilarityMatrix &&m) noexcept;
+    ImageMaskSimilarityMatrix(ImageMaskSimilarityMatrix &&m) ;
 
     // Alternative MSM
     ImageMaskSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate, bool UseRGBScore = false, bool inverseScore = false);
     //
 
     ///destructor
-    ~ImageMaskSimilarityMatrix(void) noexcept;
+    ~ImageMaskSimilarityMatrix(void) ;
 
-    ImageMaskSimilarityMatrix & operator=(const ImageMaskSimilarityMatrix &s) noexcept;
+    ImageMaskSimilarityMatrix & operator=(const ImageMaskSimilarityMatrix &s) ;
   private:
 #ifdef DEBUG
     FRIEND_TEST(MaskSimilarityMatrixTests, computeISMCell);

@@ -343,7 +343,7 @@ void createTestSequence(const vector<Frame*>& gtFrames, vector<Frame*>& vFrames,
         if(requestedKeyframes[i]==-1)
             requireSuggestions=true;
 
-    vector<Point2i> suggestedKeyframes;
+    vector<std::pair<int, int>> suggestedKeyframes;
 
     if(requireSuggestions)
         suggestedKeyframes = NSKPSolver().suggestKeyframes(ism, defaultParams);
@@ -383,13 +383,13 @@ void createTestSequence(const vector<Frame*>& gtFrames, vector<Frame*>& vFrames,
         if(requestedKeyframes[i]==-1) //if it's not an automatic one
         {
             //for each suggested keyframe, find the first one that isn't yet in the list of keyframes
-            for(vector<Point2i>::iterator fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
+            for(auto fi=suggestedKeyframes.begin(); fi!=suggestedKeyframes.end(); ++fi)
             {
-                int frameID=fi->x;
+                int frameID=fi->first;
                 bool alreadyPresent=false;
                 for(vector<int>::iterator ak=actualKeyframes.begin(); ak!=actualKeyframes.end(); ++ak)
                 {
-                    if(*ak==fi->x)
+                    if(*ak==fi->first)
                     {
                         alreadyPresent=true;
                         break;

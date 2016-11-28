@@ -732,14 +732,6 @@ namespace SPEL
     return solutionEval;
   }
 
-  int TLPSSolver::findFrameIndexById(int id, std::vector<Frame*> frames)
-  {
-    for (uint32_t i = 0; i < frames.size(); ++i)
-      if (frames[i]->getID() == id)
-        return i;
-    return -1;
-  }
-
   //compute label score
   float TLPSSolver::computeScoreCost(const LimbLabel& label, std::map<std::string, float> params)
   {
@@ -1032,7 +1024,7 @@ namespace SPEL
     return slices;
   }
 
-  void TLPSSolver::emplaceDefaultParameters(std::map<std::string, float>& params) const noexcept
+  void TLPSSolver::emplaceDefaultParameters(std::map<std::string, float>& params) const 
   {
     Solver::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, COMMON_TLPS_SOLVER_PARAMETERS::getParameters());

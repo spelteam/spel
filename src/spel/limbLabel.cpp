@@ -3,7 +3,7 @@
 
 namespace SPEL
 {
-  LimbLabel::LimbLabel(void) noexcept
+  LimbLabel::LimbLabel(void) 
   {
     m_limbID = -1;
     m_center = cv::Point2f(0, 0);
@@ -16,7 +16,7 @@ namespace SPEL
     m_isOccluded = true;
   }
 
-  LimbLabel::LimbLabel(const LimbLabel& limbLabel) noexcept
+  LimbLabel::LimbLabel(const LimbLabel& limbLabel) 
     : m_limbID(limbLabel.getLimbID()),
     m_center(limbLabel.getCenter()),
     m_angle(limbLabel.getAngle()),
@@ -26,7 +26,7 @@ namespace SPEL
   {
   }
 
-  LimbLabel::LimbLabel(LimbLabel && limbLabel) noexcept
+  LimbLabel::LimbLabel(LimbLabel && limbLabel) 
     : m_limbID(std::move(limbLabel.getLimbID())),
     m_center(std::move(limbLabel.getCenter())),
     m_angle(std::move(limbLabel.getAngle())),
@@ -38,7 +38,7 @@ namespace SPEL
 
   LimbLabel::LimbLabel(int id, cv::Point2f center, float angle,
     std::vector<cv::Point2f> polygon, std::vector<Score> scores,
-    bool isOccluded) noexcept
+    bool isOccluded) 
   {
     m_limbID = id;
     m_center = center;
@@ -48,11 +48,11 @@ namespace SPEL
     m_isOccluded = isOccluded;
   }
 
-  LimbLabel::~LimbLabel(void) noexcept
+  LimbLabel::~LimbLabel(void) 
   {
   }
 
-  LimbLabel &LimbLabel::operator=(const LimbLabel &limbLabel) noexcept
+  LimbLabel &LimbLabel::operator=(const LimbLabel &limbLabel) 
   {
     if (this == &limbLabel)
       return *this;
@@ -65,7 +65,7 @@ namespace SPEL
     return *this;
   }
 
-  LimbLabel & LimbLabel::operator=(LimbLabel && limbLabel) noexcept
+  LimbLabel & LimbLabel::operator=(LimbLabel && limbLabel) 
   {
     m_limbID = std::move(limbLabel.getLimbID());
     m_center = std::move(limbLabel.getCenter());
@@ -77,63 +77,63 @@ namespace SPEL
     return *this;
   }
 
-  bool LimbLabel::operator==(const LimbLabel &limbLabel) const noexcept
+  bool LimbLabel::operator==(const LimbLabel &limbLabel) const 
   {
     return (m_limbID == limbLabel.getLimbID() && 
       m_center == limbLabel.getCenter() && m_angle == limbLabel.getAngle());
   }
 
-  bool LimbLabel::operator!=(const LimbLabel &limbLabel) const noexcept
+  bool LimbLabel::operator!=(const LimbLabel &limbLabel) const 
   {
     return !(*this == limbLabel);
   }
 
-  cv::Point2f LimbLabel::getCenter(void) const noexcept
+  cv::Point2f LimbLabel::getCenter(void) const 
   {
     return m_center;
   }
 
-  std::vector<Score> LimbLabel::getScores(void) const noexcept
+  std::vector<Score> LimbLabel::getScores(void) const 
   {
     return m_scores;
   }
 
-  void LimbLabel::setScores(std::vector <Score> scores) noexcept
+  void LimbLabel::setScores(std::vector <Score> scores) 
   {
     m_scores = scores;
   }
 
-  int LimbLabel::getLimbID(void) const noexcept
+  int LimbLabel::getLimbID(void) const 
   {
     return m_limbID;
   }
 
-  float LimbLabel::getAngle(void) const noexcept
+  float LimbLabel::getAngle(void) const 
   {
     return m_angle;
   }
 
-  std::vector <cv::Point2f> LimbLabel::getPolygon(void) const noexcept
+  std::vector <cv::Point2f> LimbLabel::getPolygon(void) const 
   {
     return m_polygon;
   }
 
-  bool LimbLabel::getIsOccluded(void) const noexcept
+  bool LimbLabel::getIsOccluded(void) const 
   {
     return m_isOccluded;
   }
 
-  bool LimbLabel::operator < (const LimbLabel &limbLabel) const noexcept
+  bool LimbLabel::operator < (const LimbLabel &limbLabel) const 
   {
     return getAvgScore(true) < limbLabel.getAvgScore(true); //true?
   }
 
-  bool LimbLabel::operator > (const LimbLabel &limbLabel) const noexcept
+  bool LimbLabel::operator > (const LimbLabel &limbLabel) const 
   {
     return getAvgScore(true) > limbLabel.getAvgScore(true); //true?
   }
 
-  float LimbLabel::getAvgScore(bool bNegativeToPositive) const noexcept
+  float LimbLabel::getAvgScore(bool bNegativeToPositive) const 
   {
     return getSumScore(bNegativeToPositive);
   }
@@ -174,12 +174,12 @@ namespace SPEL
     return (poserect.containsPoint(pt) != -1);
   }
 
-  void LimbLabel::addScore(Score detectionScore) noexcept
+  void LimbLabel::addScore(Score detectionScore) 
   {
     m_scores.push_back(detectionScore);
   }
 
-  std::string LimbLabel::toString() const noexcept
+  std::string LimbLabel::toString() const 
   {
     auto retString = std::string("");
     retString += std::to_string(m_limbID) + " ";
@@ -199,7 +199,7 @@ namespace SPEL
     return retString;
   }
 
-  float LimbLabel::getSumScore(bool bNegativeToPositive) const noexcept
+  float LimbLabel::getSumScore(bool bNegativeToPositive) const 
   {
     //@TODO: fix if multiple scores are added
     auto sum = 0.0f;
@@ -210,7 +210,7 @@ namespace SPEL
     return sum;
   }
 
-  void LimbLabel::Resize(float factor) noexcept
+  void LimbLabel::Resize(float factor) 
   {
     m_center.x *= factor;
     m_center.y *= factor;

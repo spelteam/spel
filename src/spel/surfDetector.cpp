@@ -6,12 +6,12 @@
 
 namespace SPEL
 {
-  SurfDetector::SurfDetector(void) noexcept
+  SurfDetector::SurfDetector(void) 
   {
     m_id = 0x53440000;
   }
 
-  SurfDetector::~SurfDetector(void) noexcept
+  SurfDetector::~SurfDetector(void) 
   {
     for (auto &i : partModels)
       for (auto &j : i.second)
@@ -311,26 +311,26 @@ namespace SPEL
   }
 
   std::map <uint32_t, std::map <uint32_t, SurfDetector::PartModel>>
-    SurfDetector::getPartModels(void) const noexcept
+    SurfDetector::getPartModels(void) const 
   {
     return partModels;
   }
 
-  void SurfDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const noexcept
+  void SurfDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const 
   {
     Detector::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, COMMON_SURF_DETECTOR_PARAMETERS::getParameters());
   }
 
-  SurfDetectorHelper::SurfDetectorHelper(void) noexcept
+  SurfDetectorHelper::SurfDetectorHelper(void) 
   {
   }
 
-  SurfDetectorHelper::~SurfDetectorHelper(void) noexcept
+  SurfDetectorHelper::~SurfDetectorHelper(void) 
   {
   }
 
-  SurfDetector::PartModel::~PartModel(void) noexcept
+  SurfDetector::PartModel::~PartModel(void) 
   {
     descriptors.release();
   }

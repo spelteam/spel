@@ -2,31 +2,31 @@
 
 namespace SPEL
 {
-  ImageSimilarityMatrix::ImageSimilarityMatrix(void) noexcept
+  ImageSimilarityMatrix::ImageSimilarityMatrix(void) 
   {
     id = 0x00000000;
   }
 
-  ImageSimilarityMatrix::ImageSimilarityMatrix(const ImageSimilarityMatrix & m) noexcept
+  ImageSimilarityMatrix::ImageSimilarityMatrix(const ImageSimilarityMatrix & m) 
   {
     //by default use colour
     imageSimilarityMatrix = m.imageSimilarityMatrix;
     imageShiftMatrix = m.imageShiftMatrix;
   }
 
-  ImageSimilarityMatrix::ImageSimilarityMatrix(ImageSimilarityMatrix && m) noexcept
+  ImageSimilarityMatrix::ImageSimilarityMatrix(ImageSimilarityMatrix && m) 
     : imageSimilarityMatrix(std::move(m.imageSimilarityMatrix)),
     imageShiftMatrix(std::move(m.imageShiftMatrix))
   {
   }
 
-  ImageSimilarityMatrix::~ImageSimilarityMatrix(void) noexcept
+  ImageSimilarityMatrix::~ImageSimilarityMatrix(void) 
   {
     imageSimilarityMatrix.release();
     imageShiftMatrix.release();
   }
 
-  bool ImageSimilarityMatrix::operator==(const ImageSimilarityMatrix & s) const noexcept
+  bool ImageSimilarityMatrix::operator==(const ImageSimilarityMatrix & s) const 
   {
     if (imageSimilarityMatrix.rows != s.imageSimilarityMatrix.rows || imageSimilarityMatrix.cols != s.imageSimilarityMatrix.cols)
       return false;
@@ -39,12 +39,12 @@ namespace SPEL
     return true;
   }
 
-  bool ImageSimilarityMatrix::operator!=(const ImageSimilarityMatrix & s) const noexcept
+  bool ImageSimilarityMatrix::operator!=(const ImageSimilarityMatrix & s) const 
   {
     return !(*this == s);
   }
 
-  ImageSimilarityMatrix & ImageSimilarityMatrix::operator=(const ImageSimilarityMatrix & s) noexcept
+  ImageSimilarityMatrix & ImageSimilarityMatrix::operator=(const ImageSimilarityMatrix & s) 
   {
     if (&s == this)
       return *this;
@@ -55,7 +55,7 @@ namespace SPEL
     return *this;
   }
 
-  ImageSimilarityMatrix & ImageSimilarityMatrix::operator=(ImageSimilarityMatrix && s) noexcept
+  ImageSimilarityMatrix & ImageSimilarityMatrix::operator=(ImageSimilarityMatrix && s) 
   {
     imageSimilarityMatrix = std::move(s.imageSimilarityMatrix);
     imageShiftMatrix = std::move(s.imageShiftMatrix);
@@ -73,7 +73,7 @@ namespace SPEL
   }
 
   //return the size of the ISM
-  uint32_t ImageSimilarityMatrix::size() const noexcept
+  uint32_t ImageSimilarityMatrix::size() const 
   {
     return imageSimilarityMatrix.rows;
   }
@@ -121,7 +121,7 @@ namespace SPEL
     return;
   }
 
-  bool ImageSimilarityMatrix::read(const std::string & filename) noexcept
+  bool ImageSimilarityMatrix::read(const std::string & filename) 
   {
     std::ifstream in(filename.c_str());
     if (in.is_open())
@@ -167,7 +167,7 @@ namespace SPEL
     }
   }
 
-  bool ImageSimilarityMatrix::write(const std::string & filename) const noexcept
+  bool ImageSimilarityMatrix::write(const std::string & filename) const 
   {
     std::ofstream out(filename.c_str());
     if (out.is_open())
@@ -202,7 +202,7 @@ namespace SPEL
   }
 
   //find the non-zero minimum in the image similarity matrix
-  float ImageSimilarityMatrix::min() const noexcept
+  float ImageSimilarityMatrix::min() const 
   {
     auto min = FLT_MAX;
     for (auto i = 0; i < imageSimilarityMatrix.rows; ++i)
@@ -246,7 +246,7 @@ namespace SPEL
   }
 
   //find the non-zero minimum in the image similarity matrix
-  float ImageSimilarityMatrix::max() const noexcept
+  float ImageSimilarityMatrix::max() const 
   {
     auto max = FLT_MIN;
     for (auto i = 0; i < imageSimilarityMatrix.rows; ++i)
@@ -348,7 +348,7 @@ namespace SPEL
     return cost;
   }
 
-  cv::Point2f ImageSimilarityMatrix::calculateDistance(const cv::Mat & imgMatOne, const cv::Mat & imgMatTwo) const noexcept
+  cv::Point2f ImageSimilarityMatrix::calculateDistance(const cv::Mat & imgMatOne, const cv::Mat & imgMatTwo) const 
   {
     cv::Point2f cOne(0.0f, 0.0f), cTwo(0.0f, 0.0f); // 14.06.16 Added "(0.0f, 0.0f)"
     auto mSizeOne = 0.0f, mSizeTwo = 0.0f;
@@ -383,7 +383,7 @@ namespace SPEL
     return cTwo - cOne;
   }
 
-  cv::Mat ImageSimilarityMatrix::clone() const noexcept
+  cv::Mat ImageSimilarityMatrix::clone() const 
   {
     return imageSimilarityMatrix.clone();
   }

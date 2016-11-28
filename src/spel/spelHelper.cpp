@@ -18,7 +18,7 @@ namespace SPEL
 {
   void spelHelper::RecalculateScoreIsWeak(std::vector <LimbLabel> &labels,
     const std::string &detectorName, const float standardDiviationTreshold)
-    noexcept
+    
   {
     //@TODO: Ignore this function for now, will be modified before release
     std::vector <float> scoreValues;
@@ -101,19 +101,19 @@ namespace SPEL
     return partImage;
   }
 
-  cv::Point2f spelHelper::round(const cv::Point2f& pt) noexcept
+  cv::Point2f spelHelper::round(const cv::Point2f& pt) 
   {
     return cv::Point2f(std::round(pt.x), std::round(pt.y));
   }
 
   spelRECT<cv::Point2f> spelHelper::round(const spelRECT<cv::Point2f>& rect)
-    noexcept
+    
   {
     return spelRECT<cv::Point2f>(round(rect.point1), round(rect.point2),
       round(rect.point3), round(rect.point4));
   }
 
-  std::string spelHelper::getRandomStr(void) noexcept
+  std::string spelHelper::getRandomStr(void) 
   {
     static std::default_random_engine dre(static_cast<unsigned int>(time(0)));
     static std::uniform_int_distribution<int> di(0, std::numeric_limits<int>::max());
@@ -167,7 +167,7 @@ namespace SPEL
 #endif
   }
   
-  bool spelHelper::checkFileExists(const std::string &file) noexcept
+  bool spelHelper::checkFileExists(const std::string &file) 
   {
     std::ifstream f(file);
     return f.good();
@@ -191,20 +191,20 @@ namespace SPEL
   }
 
   float spelHelper::getAngle(const cv::Point2f & j0, const cv::Point2f & j1) 
-    noexcept
+    
   {
     return spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) *
       (180.0f / static_cast<float>(M_PI));
   }
 
-  float spelHelper::getAngle(const cv::Point2f & point) noexcept
+  float spelHelper::getAngle(const cv::Point2f & point) 
   {
     return spelHelper::angle2D(1.0f, 0.0f, point.x, point.y) *
       (180.0f / static_cast<float>(M_PI));
   }
 
   float spelHelper::getAngle(const BodyJoint & j0, const BodyJoint & j1) 
-    noexcept
+    
   {
     return spelHelper::getAngle(j0.getImageLocation(), j1.getImageLocation());
   }
@@ -215,7 +215,7 @@ namespace SPEL
       dst.insert(src.begin(), src.end());
   }
 
-  std::string spelHelper::getGUID(void) noexcept
+  std::string spelHelper::getGUID(void) 
   {
     std::string guid;
 #ifdef WINDOWS

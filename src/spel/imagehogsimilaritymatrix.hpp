@@ -14,15 +14,15 @@ namespace SPEL
   {
   public:
     ///constructors
-    ImageHogSimilarityMatrix(void) noexcept;
-    ImageHogSimilarityMatrix(const ImageHogSimilarityMatrix &m) noexcept;
+    ImageHogSimilarityMatrix(void) ;
+    ImageHogSimilarityMatrix(const ImageHogSimilarityMatrix &m) ;
     ImageHogSimilarityMatrix(const std::vector<Frame*> &frames);
-    ImageHogSimilarityMatrix(ImageHogSimilarityMatrix &&m) noexcept;
+    ImageHogSimilarityMatrix(ImageHogSimilarityMatrix &&m) ;
 
     ///destructor
-    ~ImageHogSimilarityMatrix(void) noexcept;
+    ~ImageHogSimilarityMatrix(void) ;
 
-    ImageHogSimilarityMatrix & operator=(const ImageHogSimilarityMatrix &s) noexcept;
+    ImageHogSimilarityMatrix & operator=(const ImageHogSimilarityMatrix &s) ;
   private:
 #ifdef DEBUG
     FRIEND_TEST(ImageHogSimilarityMatrix, defaultConstructor);
@@ -46,7 +46,7 @@ namespace SPEL
     int derivAperture = 1;
     int histogramNormType = cv::HOGDescriptor::L2Hys;
 
-    void calculateROI(Frame *frame, cv::Point2i &topLeft, cv::Point2i &bottomRight) const noexcept;
+    void calculateROI(Frame *frame, cv::Point2i &topLeft, cv::Point2i &bottomRight) const ;
     int8_t extendSize(int &topLeftMin, int &topLeftMax, int &bottomRightMin, int &bottomRightMax, const int maxsize, const int add) const;
 
     // Inherited via ImageSimilarityMatrix

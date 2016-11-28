@@ -2,12 +2,12 @@
 
 namespace SPEL
 {
-  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(void) noexcept : ImageSimilarityMatrix()
+  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(void)  : ImageSimilarityMatrix()
   {
     id = 0x4950534D;
   }
 
-  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(const ImagePixelSimilarityMatrix & m) noexcept : ImageSimilarityMatrix(m)
+  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(const ImagePixelSimilarityMatrix & m)  : ImageSimilarityMatrix(m)
   {    
   }
 
@@ -17,15 +17,15 @@ namespace SPEL
     buildImageSimilarityMatrix(frames);
   }
 
-  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(ImagePixelSimilarityMatrix && m) noexcept : ImageSimilarityMatrix(std::move(m))
+  ImagePixelSimilarityMatrix::ImagePixelSimilarityMatrix(ImagePixelSimilarityMatrix && m)  : ImageSimilarityMatrix(std::move(m))
   {
   }
 
-  ImagePixelSimilarityMatrix::~ImagePixelSimilarityMatrix(void) noexcept
+  ImagePixelSimilarityMatrix::~ImagePixelSimilarityMatrix(void) 
   {    
   }
 
-  ImagePixelSimilarityMatrix & ImagePixelSimilarityMatrix::operator=(const ImagePixelSimilarityMatrix & s) noexcept
+  ImagePixelSimilarityMatrix & ImagePixelSimilarityMatrix::operator=(const ImagePixelSimilarityMatrix & s) 
   {
     ImageSimilarityMatrix::operator=(s);
     return *this;

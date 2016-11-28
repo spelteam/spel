@@ -32,11 +32,11 @@ namespace SPEL
     /// Initializes a new instance of the 
     /// <see cref="SurfDetectorHelper"/> class.
     /// </summary>
-    SurfDetectorHelper(void) noexcept;
+    SurfDetectorHelper(void) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="SurfDetectorHelper"/> class.
     /// </summary>
-    ~SurfDetectorHelper(void) noexcept;    
+    ~SurfDetectorHelper(void) ;    
     /// <summary>The key points.</summary>
     std::vector <cv::KeyPoint> keyPoints;
   };  
@@ -67,11 +67,11 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="SurfDetector"/> class.
     /// </summary>
-    SurfDetector(void) noexcept;
+    SurfDetector(void) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="SurfDetector"/> class.
     /// </summary>
-    ~SurfDetector(void) noexcept;
+    ~SurfDetector(void) ;
     /// <summary>Trains the specified frames.</summary>
     /// <param name="frames">The frames.</param>
     /// <param name="params">The parameters.</param>
@@ -88,7 +88,7 @@ namespace SPEL
     /// <summary>Gets the part models.</summary>
     /// <returns>The part models.</returns>
     std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) 
-      const noexcept;    
+      const ;    
   private:
 #ifdef DEBUG
     FRIEND_TEST(surfDetectorTests, computeDescriptors);
@@ -145,7 +145,7 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
   };
 }
 

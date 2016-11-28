@@ -3,21 +3,21 @@
 
 namespace SPEL
 {
-  Frame::Frame(void) noexcept
+  Frame::Frame(void) 
   {
   }
 
-  Frame::Frame(FRAMETYPE frametype) noexcept : Frame()
+  Frame::Frame(FRAMETYPE frametype)  : Frame()
   {
     m_frametype = frametype;
   }
 
-  Frame::Frame(const Frame & frame) noexcept
+  Frame::Frame(const Frame & frame) 
   {
     frame.clone(this);
   }
 
-  Frame::~Frame(void) noexcept
+  Frame::~Frame(void) 
   {
     m_image.release();
     m_mask.release();
@@ -29,7 +29,7 @@ namespace SPEL
     m_maskPath.clear();
   }
 
-  Frame & Frame::operator=(const Frame & frame) noexcept
+  Frame & Frame::operator=(const Frame & frame) 
   {
     if (&frame == this)
       return *this;
@@ -38,12 +38,12 @@ namespace SPEL
     return *this;
   }
 
-  int Frame::getID(void) const noexcept
+  int Frame::getID(void) const 
   {
     return m_id;
   }
 
-  void Frame::setID(int id) noexcept
+  void Frame::setID(int id) 
   {
     m_id = id;
   }
@@ -126,32 +126,32 @@ namespace SPEL
     cv::imwrite(m_maskPath, m_mask, compression_params);
   }
 
-  Skeleton Frame::getSkeleton(void) const noexcept
+  Skeleton Frame::getSkeleton(void) const 
   {
     return m_skeleton;
   }
 
-  Skeleton* Frame::getSkeletonPtr(void) noexcept
+  Skeleton* Frame::getSkeletonPtr(void) 
   {
     return &m_skeleton;
   }
 
-  void Frame::setSkeleton(const Skeleton &skeleton) noexcept
+  void Frame::setSkeleton(const Skeleton &skeleton) 
   {
     m_skeleton = skeleton;
   }
 
-  cv::Point2f Frame::getGroundPoint(void) const noexcept
+  cv::Point2f Frame::getGroundPoint(void) const 
   {
     return m_groundPoint;
   }
 
-  void Frame::setGroundPoint(cv::Point2f groundPoint) noexcept
+  void Frame::setGroundPoint(cv::Point2f groundPoint) 
   {
     m_groundPoint = groundPoint;
   }
 
-  std::vector <cv::Point2f> Frame::getPartPolygon(int partID) const noexcept
+  std::vector <cv::Point2f> Frame::getPartPolygon(int partID) const 
   {
     auto partTree = getSkeleton().getPartTree();
     for (const auto &i : partTree)
@@ -165,7 +165,7 @@ namespace SPEL
   }
 
   //shift in 2D and recompute 3D?
-  void Frame::shiftSkeleton2D(cv::Point2f point) noexcept
+  void Frame::shiftSkeleton2D(cv::Point2f point) 
   {
     auto jointTree = m_skeleton.getJointTree();
     //add point to every joint
@@ -176,12 +176,12 @@ namespace SPEL
     m_skeleton.infer3D();
   }
 
-  int Frame::getParentFrameID(void) const noexcept
+  int Frame::getParentFrameID(void) const 
   {
     return m_parentFrameID;
   }
 
-  void Frame::setParentFrameID(int parentFrameID) noexcept
+  void Frame::setParentFrameID(int parentFrameID) 
   {
     m_parentFrameID = parentFrameID;
   }
@@ -230,7 +230,7 @@ namespace SPEL
     return factor;
   }
 
-  Frame *Frame::clone(Frame *dest) const noexcept
+  Frame *Frame::clone(Frame *dest) const 
   {
     if (dest == nullptr)
       return nullptr;
@@ -248,33 +248,33 @@ namespace SPEL
     return dest;
   }
 
-  cv::Size Frame::getFrameSize() noexcept
+  cv::Size Frame::getFrameSize() 
   {
     if (imageSize.height <= 0 || imageSize.width <= 0)
       LoadAll();
     return imageSize;
   }
 
-  cv::Size Frame::getImageSize(void) noexcept
+  cv::Size Frame::getImageSize(void) 
   {
     if (imageSize.height <= 0 || imageSize.width <= 0)
       LoadImage();
     return imageSize;
   }
 
-  cv::Size Frame::getMaskSize(void) noexcept
+  cv::Size Frame::getMaskSize(void) 
   {
     if (maskSize.height <= 0 || maskSize.width <= 0)
       LoadMask();
     return maskSize;
   }
 
-  bool Frame::FramePointerComparer(Frame *frame1, Frame *frame2) noexcept
+  bool Frame::FramePointerComparer(Frame *frame1, Frame *frame2) 
   {
     return frame1->getID() < frame2->getID();
   }
 
-  void Frame::Scale(const float factor) noexcept
+  void Frame::Scale(const float factor) 
   {
     if (m_scaleFactor != 0.0f)
       m_scaleFactor *= factor;
@@ -300,13 +300,13 @@ namespace SPEL
     m_skeleton.setPartTree(parts);
   }
 
-  void Frame::AdjustScale(void) noexcept
+  void Frame::AdjustScale(void) 
   {
     if (m_scaleFactor != 0.0f)
       Scale(1.0f / m_scaleFactor);
   }
 
-  std::string Frame::GetImagePath(void) const noexcept
+  std::string Frame::GetImagePath(void) const 
   {
     return m_imagePath;
   }
@@ -328,7 +328,7 @@ namespace SPEL
     m_imagePath = dst;
   }
 
-  std::string Frame::GetMaskPath(void) const noexcept
+  std::string Frame::GetMaskPath(void) const 
   {
     return m_maskPath;
   }
@@ -405,12 +405,12 @@ namespace SPEL
       setMask(mask, true);
   }
 
-  bool Frame::UnloadAll(const bool force) noexcept
+  bool Frame::UnloadAll(const bool force) 
   {
     return true && UnloadImage(force) && UnloadMask(force);
   }
 
-  bool Frame::UnloadImage(const bool force) noexcept
+  bool Frame::UnloadImage(const bool force) 
   {
     if (m_imagePath.empty() && !force)
       return false;
@@ -418,7 +418,7 @@ namespace SPEL
     return true;
   }
 
-  bool Frame::UnloadMask(const bool force) noexcept
+  bool Frame::UnloadMask(const bool force) 
   {
     if (m_maskPath.empty() && !force)
       return false;
@@ -426,7 +426,7 @@ namespace SPEL
     return true;
   }
 
-  FRAMETYPE Frame::getFrametype(void) const noexcept
+  FRAMETYPE Frame::getFrametype(void) const 
   {
     return m_frametype;
   }

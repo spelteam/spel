@@ -2,21 +2,21 @@
 
 namespace SPEL
 {
-  Interpolation::Interpolation(void) noexcept : Frame(INTERPOLATIONFRAME)
+  Interpolation::Interpolation(void)  : Frame(INTERPOLATIONFRAME)
   {
   }
 
-  Interpolation::Interpolation(const Interpolation & frame) noexcept : Frame(frame)
+  Interpolation::Interpolation(const Interpolation & frame)  : Frame(frame)
   {
   }
 
-  Interpolation & Interpolation::operator=(const Interpolation & frame) noexcept
+  Interpolation & Interpolation::operator=(const Interpolation & frame) 
   {
     Frame::operator=(frame);
     return *this;
   }
 
-  Interpolation::~Interpolation(void) noexcept
+  Interpolation::~Interpolation(void) 
   {
   }
 

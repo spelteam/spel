@@ -3,11 +3,11 @@
 // See bodyPart.hpp and Skeleton.hpp for more info
 namespace SPEL
 {
-  BodyPart::BodyPart(void) noexcept : BodyPart(0, "", 0, 0, false, 0.0f)
+  BodyPart::BodyPart(void)  : BodyPart(0, "", 0, 0, false, 0.0f)
   {    
   }
 
-  BodyPart::BodyPart(const BodyPart &bodyPart) noexcept
+  BodyPart::BodyPart(const BodyPart &bodyPart) 
     : m_partID(bodyPart.m_partID),
     m_partName(bodyPart.m_partName),
     m_parentJoint(bodyPart.m_parentJoint),
@@ -22,7 +22,7 @@ namespace SPEL
   {
   }
 
-  BodyPart::BodyPart(BodyPart &&bodyPart) noexcept
+  BodyPart::BodyPart(BodyPart &&bodyPart) 
     : m_partID(std::move(bodyPart.m_partID)),
     m_partName(std::move(bodyPart.m_partName)),
     m_parentJoint(std::move(bodyPart.m_parentJoint)),
@@ -39,21 +39,21 @@ namespace SPEL
   }
 
   BodyPart::BodyPart(const int id, const std::string & name, 
-    const int parentJoint, const int childJoint) noexcept : 
+    const int parentJoint, const int childJoint)  : 
   BodyPart(id, name, parentJoint, childJoint, false, 0.0f)
   {    
   }
 
   BodyPart::BodyPart(const int id, const std::string & name, 
     const int parentJoint, const int childJoint, 
-    const bool isOccluded) noexcept : 
+    const bool isOccluded)  : 
   BodyPart(id, name, parentJoint, childJoint, isOccluded, 0.0f)
   {    
   }
 
   BodyPart::BodyPart(const int id, const std::string &name, 
     const int parentJoint, const int childJoint, const bool isOccluded, 
-    const float spaceLength) noexcept
+    const float spaceLength) 
   {
     m_partID = id;
     m_partName = name;
@@ -68,81 +68,81 @@ namespace SPEL
     m_rotationSearchRange = 0;
   }
 
-  BodyPart::~BodyPart(void) noexcept
+  BodyPart::~BodyPart(void) 
   {
   }
 
-  int BodyPart::getPartID(void) const noexcept
+  int BodyPart::getPartID(void) const 
   {
     return m_partID;
   }
 
-  void BodyPart::setPartID(const int partID) noexcept
+  void BodyPart::setPartID(const int partID) 
   {
     m_partID = partID;
   }
 
-  std::string BodyPart::getPartName(void) const noexcept
+  std::string BodyPart::getPartName(void) const 
   {
     return m_partName;
   }
 
-  void BodyPart::setPartName(const std::string &partName) noexcept
+  void BodyPart::setPartName(const std::string &partName) 
   {
     m_partName = partName;
   }
 
-  int BodyPart::getParentJoint(void) const noexcept
+  int BodyPart::getParentJoint(void) const 
   {
     return m_parentJoint;
   }
 
-  void BodyPart::setParentJoint(const int parentJoint) noexcept
+  void BodyPart::setParentJoint(const int parentJoint) 
   {
     m_parentJoint = parentJoint;
   }
 
-  int BodyPart::getChildJoint(void) const noexcept
+  int BodyPart::getChildJoint(void) const 
   {
     return m_childJoint;
   }
 
-  void BodyPart::setChildJoint(const int childJoint) noexcept
+  void BodyPart::setChildJoint(const int childJoint) 
   {
     m_childJoint = childJoint;
   }
 
-  bool BodyPart::getIsOccluded(void) const noexcept
+  bool BodyPart::getIsOccluded(void) const 
   {
     return m_isOccluded;
   }
 
-  void BodyPart::setIsOccluded(const bool isOccluded) noexcept
+  void BodyPart::setIsOccluded(const bool isOccluded) 
   {
     m_isOccluded = isOccluded;
   }
 
-  float BodyPart::getSearchRadius(void) const noexcept
+  float BodyPart::getSearchRadius(void) const 
   {
     return m_searchRadius;
   }
 
-  void BodyPart::setSearchRadius(const float searchRadius) noexcept
+  void BodyPart::setSearchRadius(const float searchRadius) 
   {
     m_searchRadius = searchRadius;
   }
 
-  float BodyPart::getExpectedDistance(void) const noexcept
+  float BodyPart::getExpectedDistance(void) const 
   {
     return m_expectedDistance;
   }
 
-  void BodyPart::setExpectedDistance(const float expectedDistance) noexcept
+  void BodyPart::setExpectedDistance(const float expectedDistance) 
   {
     m_expectedDistance = expectedDistance;
   }
 
-  BodyPart& BodyPart::operator=(const BodyPart& bodyPart) noexcept
+  BodyPart& BodyPart::operator=(const BodyPart& bodyPart) 
   {
     if (&bodyPart == this) 
       return *this;
@@ -161,7 +161,7 @@ namespace SPEL
     return *this;
   }
 
-  BodyPart& BodyPart::operator=(BodyPart&& bodyPart) noexcept
+  BodyPart& BodyPart::operator=(BodyPart&& bodyPart) 
   {
     m_partID = std::move(bodyPart.m_partID);
     std::swap(m_partName, bodyPart.m_partName);
@@ -177,78 +177,78 @@ namespace SPEL
     return *this;
   }
 
-  bool BodyPart::operator==(const BodyPart &bodyPart) const noexcept
+  bool BodyPart::operator==(const BodyPart &bodyPart) const 
   {
     return this->getPartID() == bodyPart.getPartID();
   }
 
-  bool BodyPart::operator!=(const BodyPart &bodyPart) const noexcept
+  bool BodyPart::operator!=(const BodyPart &bodyPart) const 
   {
     return !(*this == bodyPart);
   }
 
   std::ostream& operator<<(std::ostream& stream, 
-    const BodyPart &bodyPart) noexcept
+    const BodyPart &bodyPart) 
   {
     return stream << std::to_string(bodyPart.getPartID());
   }
 
-  spelRECT <cv::Point2f> BodyPart::getPartPolygon(void) const noexcept
+  spelRECT <cv::Point2f> BodyPart::getPartPolygon(void) const 
   {
     return m_partPolygon;
   }
 
   void BodyPart::setPartPolygon(const spelRECT <cv::Point2f> &partPolygon) 
-    noexcept
+    
   {
     m_partPolygon = partPolygon;
   }
 
-  float BodyPart::getLWRatio(void) const noexcept
+  float BodyPart::getLWRatio(void) const 
   {
     return m_lwRatio;
   }
 
-  void BodyPart::setLWRatio(const float lwRatio) noexcept
+  void BodyPart::setLWRatio(const float lwRatio) 
   {
     m_lwRatio = lwRatio;
   }
 
-  float BodyPart::getRelativeLength(void) const noexcept
+  float BodyPart::getRelativeLength(void) const 
   {
     return m_relativeLength;
   }
 
-  void BodyPart::setRelativeLength(const float relativeLength) noexcept
+  void BodyPart::setRelativeLength(const float relativeLength) 
   {
     m_relativeLength = relativeLength;
   }
 
-  float BodyPart::getRotationSearchRange(void) const noexcept
+  float BodyPart::getRotationSearchRange(void) const 
   {
     return m_rotationSearchRange;
   }
 
-  void BodyPart::setRotationSearchRange(const float rotationAngle) noexcept
+  void BodyPart::setRotationSearchRange(const float rotationAngle) 
   {
     m_rotationSearchRange = rotationAngle;
   }
 
   float BodyPart::getBoneLength(const cv::Point2f &begin, 
-    const cv::Point2f &end) noexcept
+    const cv::Point2f &end) 
   {
     return (begin == end) ? 1.0f : 
       static_cast<float>(sqrt(spelHelper::distSquared(begin, end)));
   }
 
   float BodyPart::getBoneLength(const BodyJoint & parent, 
-    const BodyJoint & child) noexcept
+    const BodyJoint & child) 
   {
     return BodyPart::getBoneLength(parent.getImageLocation(), child.getImageLocation());
   }
 
   float BodyPart::getBoneWidth(const float length, 
-    const BodyPart &bodyPart) noexcept
+    const BodyPart &bodyPart) 
   {
     auto ratio = bodyPart.getLWRatio();
     if (ratio == 0.0f)
@@ -256,7 +256,7 @@ namespace SPEL
     return length / ratio;
   }
 
-  float BodyPart::getBoneWidth(const float length) const noexcept
+  float BodyPart::getBoneWidth(const float length) const 
   {
     auto ratio = getLWRatio();
     if (ratio == 0.0f)
@@ -265,7 +265,7 @@ namespace SPEL
   }
 
   float BodyPart::getBoneWidth(const cv::Point2f & begin, 
-    const cv::Point2f & end, const BodyPart & bodyPart) noexcept
+    const cv::Point2f & end, const BodyPart & bodyPart) 
   {
     auto ratio = bodyPart.getLWRatio();
     if (ratio == 0.0f)
@@ -274,13 +274,13 @@ namespace SPEL
   }
 
   float BodyPart::getBoneWidth(const BodyJoint & parent, 
-    const BodyJoint & child, const BodyPart & bodyPart) noexcept
+    const BodyJoint & child, const BodyPart & bodyPart) 
   {
     return bodyPart.getBoneWidth(parent, child);
   }
 
   float BodyPart::getBoneWidth(const cv::Point2f & begin,
-    const cv::Point2f & end) const noexcept
+    const cv::Point2f & end) const 
   {
     auto ratio = getLWRatio();
     if (ratio == 0.0f)
@@ -289,31 +289,31 @@ namespace SPEL
   }
 
   float BodyPart::getBoneWidth(const BodyJoint & parent, 
-    const BodyJoint & child) const noexcept
+    const BodyJoint & child) const 
   {
     return getBoneWidth(parent.getImageLocation(), child.getImageLocation());
   }
 
   spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
-    const cv::Point2f & parent, const cv::Point2f & child) noexcept
+    const cv::Point2f & parent, const cv::Point2f & child) 
   {
     return bodyPart.getBodyPartRect(bodyPart, parent, child, cv::Size(0, 0));
   }
 
   spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const cv::Point2f & parent,
-    const cv::Point2f & child) const noexcept
+    const cv::Point2f & child) const 
   {
     return BodyPart::getBodyPartRect(*this, parent, child);
   }
 
   spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
-    const BodyJoint & parent, const BodyJoint & child) noexcept
+    const BodyJoint & parent, const BodyJoint & child) 
   {
     return bodyPart.getBodyPartRect(parent, child);
   }
 
   spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyJoint & parent,
-    const BodyJoint & child) const noexcept
+    const BodyJoint & child) const 
   {
     return getBodyPartRect(parent.getImageLocation(), 
       child.getImageLocation());
@@ -321,7 +321,7 @@ namespace SPEL
 
   spelRECT <cv::Point2f> BodyPart::getBodyPartRect(const BodyPart &bodyPart,
     const cv::Point2f &j0, const cv::Point2f &j1, const cv::Size &blockSize)
-    noexcept
+    
   {
     auto boxCenter = j0 * 0.5 + j1 * 0.5;
     auto boneLength = getBoneLength(j0, j1);
@@ -366,20 +366,20 @@ namespace SPEL
   }
 
   spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const cv::Point2f & parent,
-    const cv::Point2f & child, const cv::Size & blockSize) const noexcept
+    const cv::Point2f & child, const cv::Size & blockSize) const 
   {
     return BodyPart::getBodyPartRect(*this, parent, child, blockSize);
   }
 
   spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyPart & bodyPart,
     const BodyJoint & parent, BodyJoint & child, const cv::Size & blockSize) 
-    noexcept
+    
   {
     return bodyPart.getBodyPartRect(parent, child, blockSize);
   }
 
   spelRECT<cv::Point2f> BodyPart::getBodyPartRect(const BodyJoint & parent,
-    const BodyJoint & child, const cv::Size & blockSize) const noexcept
+    const BodyJoint & child, const cv::Size & blockSize) const 
   {
     return getBodyPartRect(parent.getImageLocation(), child.getImageLocation(), blockSize);
   }

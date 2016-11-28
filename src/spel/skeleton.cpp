@@ -3,7 +3,7 @@
 namespace SPEL
 {
   //default constructor
-  Skeleton::Skeleton(void) noexcept
+  Skeleton::Skeleton(void) 
   {
     /// name of the specific instance of
     m_name = "Uninitialized";
@@ -12,7 +12,7 @@ namespace SPEL
     m_scale = 1.0f;
   }
 
-  Skeleton::Skeleton(const Skeleton &skeleton) noexcept
+  Skeleton::Skeleton(const Skeleton &skeleton) 
     : m_name(skeleton.m_name),
     m_partTree(skeleton.m_partTree),
     m_jointTree(skeleton.m_jointTree),
@@ -20,7 +20,7 @@ namespace SPEL
   {
   }
 
-  Skeleton::Skeleton(Skeleton && skeleton) noexcept
+  Skeleton::Skeleton(Skeleton && skeleton) 
     : m_name(std::move(skeleton.m_name)),
     m_partTree(std::move(skeleton.m_partTree)),
     m_jointTree(std::move(skeleton.m_jointTree)),
@@ -28,11 +28,11 @@ namespace SPEL
   {
   }
 
-  Skeleton::~Skeleton(void) noexcept
+  Skeleton::~Skeleton(void) 
   {
   }
 
-  Skeleton &Skeleton::operator=(const Skeleton &skeleton) noexcept
+  Skeleton &Skeleton::operator=(const Skeleton &skeleton) 
   {
     if (this == &skeleton)
       return *this;
@@ -44,7 +44,7 @@ namespace SPEL
     return *this;
   }
 
-  Skeleton & Skeleton::operator=(Skeleton && skeleton) noexcept
+  Skeleton & Skeleton::operator=(Skeleton && skeleton) 
   {
     std::swap(m_name, skeleton.m_name);
     std::swap(m_partTree, skeleton.m_partTree);
@@ -54,73 +54,73 @@ namespace SPEL
     return *this;
   }
 
-  bool Skeleton::operator==(const Skeleton &skeleton) const noexcept
+  bool Skeleton::operator==(const Skeleton &skeleton) const 
   {
     return std::equal(m_partTree.begin(), m_partTree.end(), 
       skeleton.m_partTree.begin(), skeleton.m_partTree.end());
   }
 
-  bool Skeleton::operator!=(const Skeleton &skeleton) const noexcept
+  bool Skeleton::operator!=(const Skeleton &skeleton) const 
   {
     return !(*this == skeleton);
   }
 
-  std::string Skeleton::getName(void) const noexcept
+  std::string Skeleton::getName(void) const 
   {
     return m_name;
   }
 
-  void Skeleton::setName(const std::string &name) noexcept
+  void Skeleton::setName(const std::string &name) 
   {
     m_name = name;
   }
 
-  tree <BodyPart> Skeleton::getPartTree(void) const noexcept
+  tree <BodyPart> Skeleton::getPartTree(void) const 
   {
     return m_partTree;
   }
 
-  tree<BodyPart>* Skeleton::getPartTreePtr(void) noexcept
+  tree<BodyPart>* Skeleton::getPartTreePtr(void) 
   {
     return &m_partTree;
   }
 
-  void Skeleton::setPartTree(const tree <BodyPart> &partTree) noexcept
+  void Skeleton::setPartTree(const tree <BodyPart> &partTree) 
   {
     m_partTree = partTree;
   }
 
-  tree <BodyJoint> Skeleton::getJointTree(void) const noexcept
+  tree <BodyJoint> Skeleton::getJointTree(void) const 
   {
     return m_jointTree;
   }
 
-  tree<BodyJoint>* Skeleton::getJointTreePtr(void) noexcept
+  tree<BodyJoint>* Skeleton::getJointTreePtr(void) 
   {
     return &m_jointTree;
   }
 
-  void Skeleton::setJointTree(const tree <BodyJoint> &jointTree) noexcept
+  void Skeleton::setJointTree(const tree <BodyJoint> &jointTree) 
   {
     m_jointTree = jointTree;
   }
 
-  float Skeleton::getScale(void) const noexcept
+  float Skeleton::getScale(void) const 
   {
     return m_scale;
   }
 
-  void Skeleton::setScale(const float scale) noexcept
+  void Skeleton::setScale(const float scale) 
   {
     m_scale = scale;
   }
 
-  uint32_t Skeleton::getPartTreeCount(void) const noexcept
+  uint32_t Skeleton::getPartTreeCount(void) const 
   {
     return static_cast<uint32_t>(m_partTree.size());
   }
 
-  BodyJoint *Skeleton::getBodyJoint(const int jointID) const noexcept
+  BodyJoint *Skeleton::getBodyJoint(const int jointID) const 
   {
     for (auto &joint : m_jointTree)
       if (joint.getLimbID() == jointID)
@@ -129,7 +129,7 @@ namespace SPEL
     return nullptr;
   }
 
-  BodyPart* Skeleton::getBodyPart(const int partID) const noexcept
+  BodyPart* Skeleton::getBodyPart(const int partID) const 
   {
     for (auto &part : m_partTree)
       if (part.getPartID() == partID)
@@ -138,7 +138,7 @@ namespace SPEL
     return nullptr;
   }
 
-  void Skeleton::infer2D(void) noexcept
+  void Skeleton::infer2D(void) 
   {
     for (auto &joint : m_jointTree)
       joint.setImageLocation(joint.getImageLocation() * m_scale);

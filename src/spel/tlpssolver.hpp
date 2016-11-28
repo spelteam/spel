@@ -44,10 +44,10 @@ namespace SPEL
     ///inherited virtual
     ~TLPSSolver(void);
     ///inherited virtual
-    std::vector<Solvlet> solve(Sequence& frames);
+    std::vector<Solvlet> solve(Sequence& frames) ;
     ///inherited virtual
-    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params);
-    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets);
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params) ;
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets) ;
   private:
 #ifdef DEBUG
     FRIEND_TEST(tlpssolverTests, solveGlobal);
@@ -62,7 +62,6 @@ namespace SPEL
 
     float evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params);
 
-    int findFrameIndexById(int id, std::vector<Frame*> frames);
     float computeScoreCost(const LimbLabel& label, std::map<std::string, float> params);
     float computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild);
     float computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float jointMax, bool toChild);
@@ -81,7 +80,7 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const noexcept;
+      std::map <std::string, float> &params) const ;
   };
 
 }

@@ -3,13 +3,13 @@
 
 namespace SPEL
 {
-  BodyJoint::BodyJoint(void) noexcept : BodyJoint(0, "", cv::Point2f(0.0f, 0.0f), cv::Point3f(0.0f, 0.0f, 0.0f), false)
+  BodyJoint::BodyJoint(void)  : BodyJoint(0, "", cv::Point2f(0.0f, 0.0f), cv::Point3f(0.0f, 0.0f, 0.0f), false)
   {    
   }
   
   BodyJoint::BodyJoint(const int id, const std::string &name,
     const cv::Point2f &imageLocation, const cv::Point3f &spaceLocation,
-    const bool depth) noexcept
+    const bool depth) 
   {
     m_limbID = id;
     m_jointName = name;
@@ -18,7 +18,7 @@ namespace SPEL
     m_depthSign = depth;
   }
 
-  BodyJoint::BodyJoint(const BodyJoint &bodyJoint) noexcept
+  BodyJoint::BodyJoint(const BodyJoint &bodyJoint) 
     : m_limbID(bodyJoint.m_limbID),
     m_jointName(bodyJoint.m_jointName),
     m_imageLocation(bodyJoint.m_imageLocation),
@@ -27,7 +27,7 @@ namespace SPEL
   {
   }
 
-  BodyJoint::BodyJoint(BodyJoint &&bodyJoint) noexcept
+  BodyJoint::BodyJoint(BodyJoint &&bodyJoint) 
     : m_limbID(std::move(bodyJoint.m_limbID)),
     m_jointName(std::move(bodyJoint.m_jointName)),
     m_imageLocation(std::move(bodyJoint.m_imageLocation)),
@@ -37,72 +37,72 @@ namespace SPEL
   }
 
   BodyJoint::BodyJoint(const int id, const std::string & name, 
-    const cv::Point2f & imageLocation) noexcept : BodyJoint(id, name, imageLocation, 
+    const cv::Point2f & imageLocation)  : BodyJoint(id, name, imageLocation, 
       cv::Point3f(0.0f, 0.0f, 0.0f), false)
   {    
   }
 
   BodyJoint::BodyJoint(const int id, const std::string & name,
-    const cv::Point2f & imageLocation, const cv::Point3f & spaceLocation) noexcept : 
+    const cv::Point2f & imageLocation, const cv::Point3f & spaceLocation)  : 
   BodyJoint(id, name, imageLocation, spaceLocation, false)
   {    
   }
 
-  BodyJoint::~BodyJoint(void) noexcept
+  BodyJoint::~BodyJoint(void) 
   {
   }
 
-  int BodyJoint::getLimbID(void) const noexcept
+  int BodyJoint::getLimbID(void) const 
   {
     return m_limbID;
   }
 
-  void BodyJoint::setLimbID(const int limbID) noexcept
+  void BodyJoint::setLimbID(const int limbID) 
   {
     m_limbID = limbID;
   }
 
-  std::string BodyJoint::getJointName(void) const noexcept
+  std::string BodyJoint::getJointName(void) const 
   {
     return m_jointName;
   }
 
-  void BodyJoint::setJointName(const std::string &jointName) noexcept
+  void BodyJoint::setJointName(const std::string &jointName) 
   {
     m_jointName = jointName;
   }
 
-  cv::Point2f BodyJoint::getImageLocation(void) const noexcept
+  cv::Point2f BodyJoint::getImageLocation(void) const 
   {
     return m_imageLocation;
   }
 
-  void BodyJoint::setImageLocation(const cv::Point2f &imageLocation) noexcept
+  void BodyJoint::setImageLocation(const cv::Point2f &imageLocation) 
   {
     m_imageLocation = imageLocation;
   }
 
-  cv::Point3f BodyJoint::getSpaceLocation(void) const noexcept
+  cv::Point3f BodyJoint::getSpaceLocation(void) const 
   {
     return m_spaceLocation;
   }
 
-  void BodyJoint::setSpaceLocation(const cv::Point3f &spaceLocation) noexcept
+  void BodyJoint::setSpaceLocation(const cv::Point3f &spaceLocation) 
   {
     m_spaceLocation = spaceLocation;
   }
 
-  bool BodyJoint::getDepthSign(void) const noexcept
+  bool BodyJoint::getDepthSign(void) const 
   {
     return m_depthSign;
   }
 
-  void BodyJoint::setDepthSign(const bool depthSign) noexcept
+  void BodyJoint::setDepthSign(const bool depthSign) 
   {
     m_depthSign = depthSign;
   }
 
-  BodyJoint& BodyJoint::operator=(const BodyJoint& bodyJoint) noexcept
+  BodyJoint& BodyJoint::operator=(const BodyJoint& bodyJoint) 
   {
     if (&bodyJoint == this) 
       return *this;
@@ -116,7 +116,7 @@ namespace SPEL
     return *this;
   }
 
-  BodyJoint& BodyJoint::operator=(BodyJoint&& bodyJoint) noexcept
+  BodyJoint& BodyJoint::operator=(BodyJoint&& bodyJoint) 
   {
     m_limbID = std::move(bodyJoint.m_limbID);
     std::swap(m_jointName, bodyJoint.m_jointName);
@@ -127,12 +127,12 @@ namespace SPEL
     return *this;
   }
 
-  bool BodyJoint::operator==(const BodyJoint &bodyJoint) const noexcept
+  bool BodyJoint::operator==(const BodyJoint &bodyJoint) const 
   {
     return m_limbID == bodyJoint.getLimbID();
   }
 
-  bool BodyJoint::operator!=(const BodyJoint &bj) const noexcept
+  bool BodyJoint::operator!=(const BodyJoint &bj) const 
   {
     return !(*this == bj);
   }

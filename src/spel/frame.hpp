@@ -33,37 +33,37 @@ namespace SPEL
     /// <summary>
     /// Initializes a new instance of the <see cref="Frame"/> class.
     /// </summary>
-    Frame(void) noexcept;
+    Frame(void) ;
     /// <summary>
     /// Initializes a new instance of the <see cref="Frame"/> class.
     /// </summary>
     /// <param name="frametype">The frametype.</param>
-    Frame(FRAMETYPE frametype) noexcept;
+    Frame(FRAMETYPE frametype) ;
     /// <summary>
     /// Copy constructor.
     /// Initializes a new instance of the <see cref="Frame"/> class.
     /// </summary>
     /// <param name="frame">The frame.</param>
-    Frame(const Frame &frame) noexcept;
+    Frame(const Frame &frame) ;
     /// <summary>
     /// Finalizes an instance of the <see cref="Frame"/> class.
     /// </summary>
     /// <returns></returns>
-    virtual ~Frame(void) noexcept;    
+    virtual ~Frame(void) ;    
     /// <summary>Assignment operator.</summary>
     /// <param name="frame">The frame.</param>
     /// <returns>The frame.</returns>
-    Frame& operator=(const Frame &frame) noexcept;
+    Frame& operator=(const Frame &frame) ;
     /// <summary>Gets the part polygon.</summary>
     /// <param name="partID">The part identifier.</param>
     /// <returns>The part polygon.</returns>
-    std::vector <cv::Point2f> getPartPolygon(int partID) const noexcept;
+    std::vector <cv::Point2f> getPartPolygon(int partID) const ;
     /// <summary>Gets the identifier.</summary>
     /// <returns>The identifier.</returns>
-    int getID(void) const noexcept;
+    int getID(void) const ;
     /// <summary>Sets the identifier.</summary>
     /// <param name="id">The identifier.</param>
-    void setID(int id) noexcept;
+    void setID(int id) ;
     /// <summary>Gets the image.</summary>
     /// <returns>The image.</returns>
     cv::Mat getImage(void);
@@ -88,33 +88,33 @@ namespace SPEL
     void cacheMask(void);
     /// <summary>Gets the skeleton.</summary>
     /// <returns>The skeleton.</returns>
-    Skeleton getSkeleton(void) const noexcept;
+    Skeleton getSkeleton(void) const ;
     //TODO: [!]Refactor getters for direct access
     /// <summary>Gets the pointer to the skeleton.</summary>
     /// <returns>The pointer to the skeleton.</returns>
-    Skeleton* getSkeletonPtr() noexcept;
+    Skeleton* getSkeletonPtr() ;
     /// <summary>Shifts the skeleton.</summary>
     /// <param name="shift">The shift.</param>
     /// <returns></returns>
-    void shiftSkeleton2D(cv::Point2f shift) noexcept;
+    void shiftSkeleton2D(cv::Point2f shift) ;
     /// <summary>Sets the skeleton.</summary>
     /// <param name="skeleton">The skeleton.</param>
-    void setSkeleton(const Skeleton &skeleton) noexcept;
+    void setSkeleton(const Skeleton &skeleton) ;
     /// <summary>Gets the ground point.</summary>
     /// <returns>The ground point.</returns>
-    cv::Point2f getGroundPoint(void) const noexcept;
+    cv::Point2f getGroundPoint(void) const ;
     /// <summary>Sets the ground point.</summary>
     /// <param name="groundPoint">The ground point.</param>
-    void setGroundPoint(cv::Point2f groundPoint) noexcept;
+    void setGroundPoint(cv::Point2f groundPoint) ;
     /// <summary>Gets the frametype.</summary>
     /// <returns>The frametype.</returns>
-    FRAMETYPE getFrametype(void) const noexcept;
+    FRAMETYPE getFrametype(void) const ;
     /// <summary>Gets the parent frame identifier.</summary>
     /// <returns>The parent frame identifier.</returns>
-    int getParentFrameID(void) const noexcept;
+    int getParentFrameID(void) const ;
     /// <summary>Sets the parent frame identifier.</summary>
     /// <param name="parentFrameID">The parent frame identifier.</param>
-    void setParentFrameID(int parentFrameID) noexcept;
+    void setParentFrameID(int parentFrameID) ;
     /// <summary>Resizes the frame.</summary>
     /// <param name="maxHeight">The maximum height.</param>
     /// <returns>Resize coefficient.</returns>
@@ -122,37 +122,37 @@ namespace SPEL
     /// <summary>Clones the frame to the destination.</summary>
     /// <param name="dest">The destination.</param>
     /// <returns>The cloned frame.</returns>
-    Frame *clone(Frame *dest) const noexcept;
+    Frame *clone(Frame *dest) const ;
     /// <summary>Gets the size of the frame.</summary>
     /// <returns>The size of the frame.</returns>
-    cv::Size getFrameSize(void) noexcept;
+    cv::Size getFrameSize(void) ;
     /// <summary>Gets the size of the image.</summary>
     /// <returns>The size of the image.</returns>
-    cv::Size getImageSize(void) noexcept;
+    cv::Size getImageSize(void) ;
     /// <summary>Gets the size of the mask.</summary>
     /// <returns>The size of the mask.</returns>
-    cv::Size getMaskSize(void) noexcept;
+    cv::Size getMaskSize(void) ;
     /// <summary>Compares the frames given by pointers.</summary>
     /// <param name="frame1">The first frame.</param>
     /// <param name="frame2">The second frame.</param>
     /// <returns>The comparison result.</returns>
-    static bool FramePointerComparer(Frame *frame1, Frame *frame2) noexcept;    
+    static bool FramePointerComparer(Frame *frame1, Frame *frame2) ;    
     /// <summary>Scales the skeleton with the specified factor.</summary>
     /// <param name="factor">The factor.</param>
-    void Scale(const float factor) noexcept;
+    void Scale(const float factor) ;
     /// <summary>Adjusts the scale.</summary>
     /// <returns></returns>
-    void AdjustScale(void) noexcept;
+    void AdjustScale(void) ;
     /// <summary>Gets the image path.</summary>
     /// <returns>The image path.</returns>
-    std::string GetImagePath(void) const noexcept;
+    std::string GetImagePath(void) const ;
     /// <summary>Sets the image path.</summary>
     /// <param name="path">The path.</param>
     /// <returns></returns>
     void SetImageFromPath(const std::string &path);
     /// <summary>Gets the mask path.</summary>
     /// <returns>The mask path.</returns>
-    std::string GetMaskPath(void) const noexcept;
+    std::string GetMaskPath(void) const ;
     /// <summary>Sets the mask path.</summary>
     /// <param name="path">The path.</param>
     /// <returns></returns>
@@ -179,19 +179,19 @@ namespace SPEL
     /// image path and mask path are empty.
     /// </param>
     /// <returns></returns>
-    bool UnloadAll(const bool force = false) noexcept;
+    bool UnloadAll(const bool force = false) ;
     /// <summary>Unloads the image.</summary>
     /// <param name="force">
     /// If true unloads image even if image path is empty.
     /// </param>
     /// <returns></returns>
-    bool UnloadImage(const bool force = false) noexcept;
+    bool UnloadImage(const bool force = false) ;
     /// <summary>Unloads the mask.</summary>
     /// <param name="force">
     /// If true unloads mask even if mask path is empty.
     /// </param>
     /// <returns></returns>
-    bool UnloadMask(const bool force = false) noexcept;
+    bool UnloadMask(const bool force = false) ;
   private:    
     /// <summary>The frame identifier.</summary>
     int m_id = -1;    
