@@ -514,14 +514,14 @@ namespace posegui {
       {
         file >> name;
         int i = 0;
-        while (name[i] == ' ' && i < name.size() - 1)
+        while (name[i] == ' ' && i != name.size() - 1)
           i++;
         name.erase(0, i);
         if (name[0] == '#')
         {
-          name.erase(0,0);
+          name.erase(0,1);
           if (group != "")
-            GroupedParameters.emplace(pair<string, map<string, float>>(name, parameters));
+            GroupedParameters.emplace(pair<string, map<string, float>>(group, parameters));
           parameters.clear();
           group = name;
         }

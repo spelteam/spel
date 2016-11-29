@@ -73,7 +73,7 @@ void SolveBoxWidget::solverClicked(){
   /*auto P = Project::getInstance().getProjectParameters();
   paramsDialog.setParameters(P);*/
   auto P = Project::getInstance().getGroupedParameters();
-  //paramsDialog.setGroupedParameters(P);
+  paramsDialog.setGroupedParameters(P);
   QObject::connect(&paramsDialog, &SolverParametersDialog::ParametersUpdated, &Project::getInstance(), &Project::onParametersUpdated);
 
   bool b = paramsDialog.exec();
