@@ -22,8 +22,11 @@ public:
   void removeEmptyCells();
   void putParameter(std::pair<std::string, float> parameter);
   void putParameters(std::map<std::string, float> parameters);
+
   void setDefaultParameters();
-  void setParameters(std::map<std::string, float> parameters);
+  //void setParameters(std::map<std::string, float> parameters);
+  std::map<std::string, std::map<std::string, float>> GroupeParameters(std::map<std::string, float> parameters);
+  std::map<std::string, std::map<std::string, float>> RegroupeParameters();
   void clearParameters();
   std::map<std::string, float> getParameters(std::string groupName, std::map<std::string, float> parameters);
   std::map<std::string, float> getUngroupedParameters();

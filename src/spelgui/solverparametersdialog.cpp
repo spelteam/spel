@@ -3,10 +3,8 @@
 
 #include "solverparametersdialog.h"
 #include "ui_solverparametersdialog.h"
-#include "spelParameters.hpp"
-#include "GUISolveParameters.h"
-#include "tree.hh"
 
+//#include "GUISolveParameters.h"
 
 using namespace posegui;
 using namespace std;
@@ -64,16 +62,21 @@ ui(new Ui::SolverParametersDialog)
 
 void SolverParametersDialog::setDefaultParameters()
 {
-  std::map<std::string, float> temp;
+  //std::map<std::string, float> temp;
 
-  GroupedParameters = DefaultParameters(GroupsNames);
+  //GroupedParameters = DefaultParameters(GroupsNames);
+  clearParameters();
+  emplaceDefaultGroupedParameters(GroupedParameters);
+  //GroupedParameters = RegroupeParameters();//; GroupeParameters(getUngroupedParameters());
 
   //Disabling the SURF detector
   if (GroupedParameters.find("Global") != GroupedParameters.end())
     if (GroupedParameters["Global"].find("useSURFdet") != GroupedParameters["Global"].end())
       GroupedParameters["Global"]["useSURFdet"] = 0.0f;
 
+  putParameters(GroupedParameters.at(currentGroup));
 }
+
 /*
 void SolverParametersDialog::setParameters(std::map<std::string, float> params)
 {
@@ -116,12 +119,75 @@ void SolverParametersDialog::setParameters(std::map<std::string, float> params)
   }
 }*/
 
+std::map<std::string, std::map<std::string, float>> SolverParametersDialog::GroupeParameters(std::map<std::string, float> parameters)
+{
+  std::pair<string, std::vector<string>> Global = std::pair<string, std::vector<string>>("Global",
+    { "badLabelThresh", "baseRotationRange", "baseRotationStep","baseSearchRadius", "baseSearchStep",
+      "imageCoeff", "isWeakThreshold", "jointCoeff", "jointLeeway","maxFrameHeight",
+      "maxPartCandidates", "maxTheta", "minTheta", "partDepthRotationCoeff", "partRotationCoeff",
+      "priorCoeff", "rotationThreshold", "scaleParam", "scoreIndex", "searchDistCoeff", "searchDistCoeffMult",
+      "searchStepCoeff", "stepTheta", "temporalWindowSize", "uniqueAngleCandidates", "uniqueLocationCandidates",
+      "useCSdet", "useHoGdet", "useSURFdet" });
+
+  std::pair<string, std::vector<string>> NSKP = std::pair<string, std::vector<string>>("NSKP",
+    { "anchorBindCoeff", "anchorBindDistance", "bindToLockframes", "minKeyframeDist",
+      "nskpIters", "nskpLockframeThreshold", "propagateFromLockframes", "withTLPS" });
+
+  std::pair<string, std::vector<string>> TLPS = std::pair<string, std::vector<string>>("TLPS",
+    { "anchorCoeff", "partRotationCoeff", "partShiftCoeff", "scoreIndex",
+      "tempCoeff", "temporalWindowSize", "tlpsLockframeThreshold" });
+
+  std::pair<string, std::vector<string>> CH = std::pair<string, std::vector<string>>("CH", {});
+
+  std::pair<string, std::vector<string>> HOG = std::pair<string, std::vector<string>>("HOG", { "grayImages" });
+
+  std::pair<string, std::vector<string>> SURF = std::pair<string, std::vector<string>>("SURF",
+    { "knnMathCoeff", "minHessian" });
+
+  std::map<string, std::vector<string>> groups = { Global, NSKP, TLPS, CH, HOG, SURF };
+
+  std::map<std::string, std::map<std::string, float>> groupedParameters = {};
+  for (auto g = groups.begin(); g != groups.end(); g++)
+  {
+    groupedParameters.emplace(std::pair<std::string, std::map<std::string, float>>(g->first, std::map<std::string, float>()));
+    /*for (unsigned int i = 0; i < g->second.size(); i++)
+    {
+      std::map<std::string, float>::iterator p = parameters.find(g->second[i]);
+      if (p != parameters.end())
+        groupedParameters[g->first].emplace(*p);
+    }*/
+    auto temp = g->second;
+    for (auto p = parameters.begin(); p != parameters.end(); p++)
+    {
+      auto n = std::find(temp.begin(), temp.end(), p->first);
+      if (n != temp.end())
+        groupedParameters[g->first].emplace(*p);
+    }
+  }
+
+  return groupedParameters;
+}
+
+std::map<std::string, std::map<std::string, float>> SolverParametersDialog::RegroupeParameters()
+{
+  for(int i = ui->tableWidget->rowCount() - 1; i > -1; i--)
+    ui->tableWidget->removeRow(i);
+  putParameters(GroupedParameters.at(currentGroup));
+  std::map<std::string, std::map<std::string, float>>  X = GroupeParameters(getUngroupedParameters());
+  for (int i = ui->tableWidget->rowCount() - 1; i > -1; i--)
+    ui->tableWidget->removeRow(i);
+  return X;
+}
+
 void SolverParametersDialog::clearParameters()
 { 
   //std::map<std::string, std::map<std::string, float>>::iterator p;
   for(auto p = GroupedParameters.begin(); p != GroupedParameters.end(); p++)
     p->second.clear();
   GroupedParameters.clear();
+
+  for (int i = ui->tableWidget->rowCount() - 1; i > -1; i--)
+    ui->tableWidget->removeRow(i);
 }
 
 std::map<std::string, float> SolverParametersDialog::getParameters(std::string groupName, std::map<std::string, float> parameters)
@@ -129,14 +195,13 @@ std::map<std::string, float> SolverParametersDialog::getParameters(std::string g
   std::map<std::string, std::map<std::string, float>>::iterator g;
   if(GroupedParameters.find(groupName) != GroupedParameters.end())
   {
-    std::map<std::string, float>::iterator p;
-    for (p = GroupedParameters[groupName].begin(); p != GroupedParameters[groupName].end(); p++)
+    //std::map<std::string, float>::iterator p;
+    for (auto p = GroupedParameters[groupName].begin(); p != GroupedParameters[groupName].end(); p++)
       parameters.emplace(*p);
   }
 
   return parameters;
 }
-
 
 void SolverParametersDialog::removeEmptyCells()
 {
@@ -308,6 +373,7 @@ void SolverParametersDialog::setGroupedParameters(std::map<std::string, std::map
       ui->tableWidget->removeRow(i);
 
     GroupedParameters = G;
+    //emplaceDefaultGroupedParameters(GroupedParameters);
 
     ui->tabWidget->setCurrentWidget(ui->tabWidget->widget(0));
     ui->groupBox->setParent(ui->tabWidget->widget(0));
@@ -315,6 +381,7 @@ void SolverParametersDialog::setGroupedParameters(std::map<std::string, std::map
 
     previousGroup = ui->tabWidget->tabText(0).toStdString();
     currentGroup = ui->tabWidget->tabText(0).toStdString();
+
     emit tabBarClicked_(ui->tabWidget, 0);
   }
   else
@@ -327,20 +394,18 @@ void SolverParametersDialog::DialogAccepted()
   emit ParametersUpdated(GroupedParameters);
 }
 
-
 void SolverParametersDialog::DefaultButton_clicked()
 {
-  clearParameters();
   setDefaultParameters();
   if (ui->tableWidget->rowCount() > 0)
     removeEmptyCells();
-  ui->tabWidget->setCurrentWidget(ui->tabWidget->widget(0));
+  /*ui->tabWidget->setCurrentWidget(ui->tabWidget->widget(0));
   ui->groupBox->setParent(ui->tabWidget->widget(0));
   putParameters(GroupedParameters.at(ui->tabWidget->tabText(0).toStdString()));
 
   previousGroup = ui->tabWidget->tabText(0).toStdString();
   currentGroup = ui->tabWidget->tabText(0).toStdString();
-  emit tabBarClicked_(ui->tabWidget, 0);
+  emit tabBarClicked_(ui->tabWidget, 0);*/
 }
 
 SolverParametersDialog::~SolverParametersDialog()

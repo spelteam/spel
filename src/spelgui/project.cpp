@@ -517,18 +517,18 @@ namespace posegui {
         while (name[i] == ' ' && i != name.size() - 1)
           i++;
         name.erase(0, i);
-        if (name[0] == '#')
+        if (name[0] != '#')
+        {
+          file >> value;
+          parameters.emplace(pair<std::string, float>(name, value));
+        }
+        if (name[0] == '#' || file.eof())
         {
           name.erase(0,1);
           if (group != "")
             GroupedParameters.emplace(pair<string, map<string, float>>(group, parameters));
           parameters.clear();
           group = name;
-        }
-        else
-        {
-          file >> value;
-          parameters.emplace(pair<std::string, float>(name, value));
         }
 
       }
@@ -542,7 +542,6 @@ namespace posegui {
   {
     return GroupedParameters;
   }
-
 
   std::map<std::string, float> Project::getUngroupedParameters()
   {
