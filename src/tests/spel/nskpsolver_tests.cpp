@@ -232,6 +232,7 @@ namespace SPEL
   // "solver.propagateFrame" - produce crash the test after "detect"
   TEST(nskpsolverTests, propagateFrame) // "nskpsolver::propagateFrame" produce error: "unknown file: error: C++ exception with description "invalid vector<T> subscript" thrown in the test body"
   {
+    SpelObject::setDebugLevel(0);
     //Load the input data
     std::map<std::string, float>  params;
     TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
@@ -330,6 +331,7 @@ namespace SPEL
 
   TEST(nskpsolverTests, propagateFrame_labelsCount)
   {
+    //SpelObject::setDebugLevel(0);
     //Load the input data
     std::map<std::string, float>  params;
     TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
@@ -506,21 +508,23 @@ namespace SPEL
   // This test crashed and don't checked 
   TEST(nskpsolverTests, propagateKeyframes)
   {
+    //SpelObject::setDebugLevel(0);
     //Load the input data
     std::map<std::string, float>  params;
     TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     vector<Frame*> Frames = sequence.getFrames();
+    int k = FirstKeyFrameNum(Frames);
+    unsigned int partsCount = Frames[k]->getSkeleton().getPartTree().size();
     //sequence.TestSequence::~TestSequence();
       
-    TestISM testISM;
-    testISM.build(Frames, false);
+    ImageMaskSimilarityMatrix MSM(Frames);
 
     // Build trees for current frames seequence
     std::vector<MinSpanningTree> trees;
     for (unsigned int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
     {
       MinSpanningTree MST;
-      MST.build(testISM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
+      MST.build(MSM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
       trees.push_back(MinSpanningTree(MST));
     }
 
@@ -528,11 +532,15 @@ namespace SPEL
     NSKPSolver solver;
     std::vector<int> ignored;
     std::vector<Solvlet> Solves;
-    Solves = solver.propagateKeyframes(Frames, params, testISM, trees, ignored);
+    Solves = solver.propagateKeyframes(Frames, params, MSM, trees, ignored);
+
+    ASSERT_GT(Solves.size(), 0);
+
+    for (unsigned int i = 0; i < Solves.size(); i++)
+      ASSERT_EQ(partsCount, Solves[i].getLabels().size());
 
     // Compute expected value and compare
-
-    CompareSolves(Solves, Frames, testISM);
+    CompareSolves(Solves, Frames, MSM);
 
     // Clear
     for (unsigned int i = 0; i < Frames.size(); i++)
