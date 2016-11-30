@@ -238,6 +238,8 @@ namespace SPEL
     //sequence.Load(params, "speltests_TestData/testdata1/", "trijumpSD_new.xml");
     //sequence.Load(params, "speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
     vector<Frame*> Frames = sequence.getFrames();
+    int k = FirstKeyFrameNum(Frames);
+    unsigned int partsCount = Frames[k]->getSkeleton().getPartTree().size();
     //sequence.TestSequence::~TestSequence();
 
     // Build frames ISM
@@ -272,10 +274,13 @@ namespace SPEL
     NSKPSolver solver;
     std::vector<int> ignored;
     std::vector<NSKPSolver::SolvletScore> allSolves;
+    //params.at("useSURFdet") = 0.0f; // Disable SURF detector
     allSolves = solver.propagateFrame(frameID, Frames, params, ISM, trees, ignored);
 
-
     ASSERT_GT( allSolves.size(), 0);
+
+    for (unsigned int i = 0; i < allSolves.size(); i++)
+      ASSERT_EQ(partsCount, allSolves[i].solvlet.getLabels().size());
 
     // Copy ID of all frames, which identical to the selected frame ("frameID")
     vector<int> IdenticalFramesID;
@@ -325,6 +330,39 @@ namespace SPEL
     for (unsigned int i = 0; i < Frames.size(); i++)
       delete Frames[i];
     Frames.clear();
+  }
+
+  TEST(nskpsolverTests, propagateFrame_labelsCount)
+  {
+    //Load the input data
+    std::map<std::string, float>  params;
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    vector<Frame*> Frames = sequence.getFrames();
+    int k = FirstKeyFrameNum(Frames);
+    unsigned int partsCount = Frames[k]->getSkeleton().getPartTree().size();
+
+    ImageMaskSimilarityMatrix MSM(Frames);
+    //MSM.write("nskpsolver_MSM.txt");
+    // Build trees for current frames seequence
+    //std::vector<MinSpanningTree> trees = solver.buildFrameMSTs(ISM, params); // it return all trees with sizes = 1
+    std::vector<MinSpanningTree> trees;
+    for (unsigned int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
+    {
+      MinSpanningTree MST;
+      MST.build(MSM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
+      trees.push_back(MinSpanningTree(MST));
+    }
+
+    // Run "propagateFrame"
+    int frameID = 0; // Select the frame as root frame for propagation
+    NSKPSolver solver;
+    std::vector<int> ignored;
+    std::vector<NSKPSolver::SolvletScore> allSolves;
+    //params.at("useSURFdet") = 0.0f; // Disable SURF detector
+    allSolves = solver.propagateFrame(frameID, Frames, params, MSM, trees, ignored);
+
+    for(unsigned int i = 0; i < allSolves.size(); i++)
+      EXPECT_EQ(partsCount, allSolves[i].solvlet.getLabels().size());
   }
 
   // "buildFrameMSTs" and "computeISMcell" don't work with current dataset

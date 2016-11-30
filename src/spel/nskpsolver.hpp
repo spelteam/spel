@@ -51,6 +51,7 @@ namespace SPEL
     FRIEND_TEST(nskpsolverTests, evaluateSolution);
     FRIEND_TEST(nskpsolverTests, findFrameIndexById);
     FRIEND_TEST(nskpsolverTests, propagateFrame);
+    FRIEND_TEST(nskpsolverTests, propagateFrame_labelsCount);
     FRIEND_TEST(nskpsolverTests, propagateKeyframes);
     FRIEND_TEST(nskpsolverTests, buildMSTs);
     FRIEND_TEST(nskpsolverTests, suggestKeyframes_A);
