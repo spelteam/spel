@@ -22,7 +22,7 @@ namespace SPEL
     ImagePixelSimilarityMatrix(ImagePixelSimilarityMatrix &&m) ;
 
     // Alternative MSM
-    ImagePixelSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate, bool UseRGBScore = false, bool inverseScore = false);
+    ImagePixelSimilarityMatrix(const std::vector<Frame*>& frames, int Erode, int Dilate, bool UseRGBScore = true, bool inverseScore = false);
     //
 
     ///destructor

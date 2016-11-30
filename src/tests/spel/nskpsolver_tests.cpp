@@ -243,14 +243,10 @@ namespace SPEL
     //sequence.TestSequence::~TestSequence();
 
     // Build frames ISM
-    TestISM testISM;
-    testISM.build(Frames, false); // alternative buildISM function
-    testISM.write("speltests_nskpsolver_ISM.txt");
+    ImageMaskSimilarityMatrix MSM(Frames);
+    //MSM.write("propagateFrame_1_MSM.txt");
 
-    ImagePixelSimilarityMatrix ISM;
-    ISM.read("speltests_nskpsolver_ISM.txt");
-
-    cout << "ISM.size = " << ISM.size() << endl;
+    cout << "MSM.size = " << MSM.size() << endl;
 
     // Build trees for current frames seequence
     //std::vector<MinSpanningTree> trees = solver.buildFrameMSTs(ISM, params); // it return all trees with sizes = 1
@@ -258,7 +254,7 @@ namespace SPEL
     for (unsigned int i = 0; i < Frames.size(); i++) // it replaces "solver.buildFrameMSTs"
     {
       MinSpanningTree MST;
-      MST.build(ISM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
+      MST.build(MSM, i, 3, 0);// it return trees with sizes = 3..4 for current dataset
       trees.push_back(MinSpanningTree(MST));
     }
 
@@ -275,7 +271,7 @@ namespace SPEL
     std::vector<int> ignored;
     std::vector<NSKPSolver::SolvletScore> allSolves;
     //params.at("useSURFdet") = 0.0f; // Disable SURF detector
-    allSolves = solver.propagateFrame(frameID, Frames, params, ISM, trees, ignored);
+    allSolves = solver.propagateFrame(frameID, Frames, params, MSM, trees, ignored);
 
     ASSERT_GT( allSolves.size(), 0);
 
@@ -284,8 +280,8 @@ namespace SPEL
 
     // Copy ID of all frames, which identical to the selected frame ("frameID")
     vector<int> IdenticalFramesID;
-    for (unsigned int i = 0; i < ISM.size(); i++)
-      if ((ISM.at(frameID, i) <= 0.05) && (Frames[i]->getFrametype() != KEYFRAME))
+    for (unsigned int i = 0; i < MSM.size(); i++)
+      if ((MSM.at(frameID, i) <= 0.05) && (Frames[i]->getFrametype() != KEYFRAME))
         IdenticalFramesID.push_back(i);
 
     ASSERT_GE(allSolves.size(), IdenticalFramesID.size());
@@ -342,7 +338,8 @@ namespace SPEL
     unsigned int partsCount = Frames[k]->getSkeleton().getPartTree().size();
 
     ImageMaskSimilarityMatrix MSM(Frames);
-    //MSM.write("nskpsolver_MSM.txt");
+    //MSM.write("propagateFrame_2_MSM.txt");
+
     // Build trees for current frames seequence
     //std::vector<MinSpanningTree> trees = solver.buildFrameMSTs(ISM, params); // it return all trees with sizes = 1
     std::vector<MinSpanningTree> trees;
