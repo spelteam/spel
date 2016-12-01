@@ -232,7 +232,10 @@ namespace SPEL
   // "solver.propagateFrame" - produce crash the test after "detect"
   TEST(nskpsolverTests, propagateFrame) // "nskpsolver::propagateFrame" produce error: "unknown file: error: C++ exception with description "invalid vector<T> subscript" thrown in the test body"
   {
-    SpelObject::setDebugLevel(0);
+    int DebugLevel = 0;
+    SpelObject::setDebugLevel(DebugLevel);
+    cout << "DebugLevel = " << DebugLevel << endl;
+
     //Load the input data
     std::map<std::string, float>  params;
     TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
@@ -271,7 +274,8 @@ namespace SPEL
     NSKPSolver solver;
     std::vector<int> ignored;
     std::vector<NSKPSolver::SolvletScore> allSolves;
-    //params.at("useSURFdet") = 0.0f; // Disable SURF detector
+    /*params.emplace(pair<string, float>("useSURFdet", 0.0f)); // Disable SURF detector
+    cout << "SURFDetector diabled" << endl;*/
     allSolves = solver.propagateFrame(frameID, Frames, params, MSM, trees, ignored);
 
     ASSERT_GT( allSolves.size(), 0);
@@ -331,7 +335,10 @@ namespace SPEL
 
   TEST(nskpsolverTests, propagateFrame_labelsCount)
   {
-    //SpelObject::setDebugLevel(0);
+    /*int DebugLevel = 0;
+    SpelObject::setDebugLevel(DebugLevel);
+    cout << "DebugLevel = " << DebugLevel << endl;*/
+
     //Load the input data
     std::map<std::string, float>  params;
     TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
@@ -357,7 +364,8 @@ namespace SPEL
     NSKPSolver solver;
     std::vector<int> ignored;
     std::vector<NSKPSolver::SolvletScore> allSolves;
-    //params.at("useSURFdet") = 0.0f; // Disable SURF detector
+    params.emplace(pair<string, float>("useSURFdet", 0.0f));  // Disable SURF detector
+    cout << "SURFDetector disabled" << endl;
     allSolves = solver.propagateFrame(frameID, Frames, params, MSM, trees, ignored);
 
     for(unsigned int i = 0; i < allSolves.size(); i++)
@@ -451,7 +459,6 @@ namespace SPEL
     Frames.clear();
   }
 
-
   // DISABLED - call of "propagateFrame" causes crash tests??
   // This test crashed and don't checked 
   TEST(nskpsolverTests, DISABLED_solve_1) 
@@ -507,8 +514,11 @@ namespace SPEL
   // DISABLED - call of "propagateFrame" causes crash tests??
   // This test crashed and don't checked 
   TEST(nskpsolverTests, propagateKeyframes)
-  {
-    //SpelObject::setDebugLevel(0);
+  {  
+    int DebugLevel = 0;
+    SpelObject::setDebugLevel(DebugLevel);
+    cout << "DebugLevel = " << DebugLevel << endl;
+
     //Load the input data
     std::map<std::string, float>  params;
     TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
@@ -532,6 +542,8 @@ namespace SPEL
     NSKPSolver solver;
     std::vector<int> ignored;
     std::vector<Solvlet> Solves;
+    params.emplace(pair<string, float>("useSURFdet", 0.0f)); // Disable SURFDetector
+    cout << "SURFDetector disabled" << endl;
     Solves = solver.propagateKeyframes(Frames, params, MSM, trees, ignored);
 
     ASSERT_GT(Solves.size(), 0);
