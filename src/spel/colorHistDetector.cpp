@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "colorHistDetector.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
@@ -293,7 +295,7 @@ namespace SPEL
       ss << "Different nBins value. Expected: " << nBins << " Actual: " <<
         partModelPrev.nBins << std::endl;
       DebugMessage(ss.str(), 1);
-      std::logic_error(ss.str());
+      throw std::logic_error(ss.str());
     }
 
     auto distance = 0.0f;
@@ -955,9 +957,9 @@ namespace SPEL
           // Checking whether a pixel belongs to the current and 
           // to another polygons            
           for (const auto &partPolygon : partPolygons)
-            if ((bContainsPoint = partPolygon.containsPoint(
+            if ((bContainsPoint = (partPolygon.containsPoint(
               cv::Point2f(static_cast<float>(i),
-                static_cast<float>(j))) > 0) == true)
+                static_cast<float>(j))) > 0)) == true)
               break; // was found polygon, which contain current pixel
 
           std::vector <float> partDepths;

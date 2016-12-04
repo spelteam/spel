@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "surfDetector.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
@@ -118,7 +120,7 @@ namespace SPEL
         parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(), 
           computeDescriptors(part, j0, j1, imgMat, keyPoints)));
       }
-      catch (std::logic_error err)
+      catch (std::logic_error &err)
       {
         std::stringstream ss;
         ss << "Can't compute descriptors for the frame " << frame->getID() << 

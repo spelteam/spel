@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "hogDetector.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
@@ -125,7 +127,7 @@ namespace SPEL
         parts.insert(std::pair <uint32_t, PartModel>(part.getPartID(),
           computeDescriptors(part, j0, j1, frame->getImage(), wndSize)));
       }
-      catch (std::exception err)
+      catch (std::exception &err)
       {
         std::stringstream ss;
         ss << "Can't compute descriptors for the frame " << frame->getID() <<
