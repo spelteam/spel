@@ -387,10 +387,12 @@ namespace SPEL
 
         const auto labelsCount = labels.size();
         // obtain the (approximate) argmin
-        std::vector<size_t> labeling(labelsCount);
+        std::vector<size_t> labeling;
+        labeling.reserve(labelsCount);
         bp.arg(labeling);
 
-        std::vector<LimbLabel> solutionLabels(labelsCount);
+        std::vector<LimbLabel> solutionLabels;
+        solutionLabels.reserve(labelsCount);
         for (auto i = 0; i < labelsCount; ++i)
           //pupulate solution vector
           solutionLabels.push_back(labels.at(i).at(labeling.at(i))); 

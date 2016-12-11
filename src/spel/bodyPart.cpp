@@ -252,16 +252,16 @@ namespace SPEL
   float BodyPart::getBoneWidth(const float length, 
     const BodyPart &bodyPart) 
   {
-    auto ratio = bodyPart.getLWRatio();
-    if (ratio == 0.0f)
+    const auto ratio = bodyPart.getLWRatio();
+    if (spelHelper::compareFloat(ratio, 0.0f) == 0)
       return 0.0f;
     return length / ratio;
   }
 
   float BodyPart::getBoneWidth(const float length) const 
   {
-    auto ratio = getLWRatio();
-    if (ratio == 0.0f)
+    const auto ratio = getLWRatio();
+    if (spelHelper::compareFloat(ratio, 0.0f) == 0)
       return 0.0f;
     return length / ratio;
   }
@@ -269,8 +269,8 @@ namespace SPEL
   float BodyPart::getBoneWidth(const cv::Point2f & begin, 
     const cv::Point2f & end, const BodyPart & bodyPart) 
   {
-    auto ratio = bodyPart.getLWRatio();
-    if (ratio == 0.0f)
+    const auto ratio = bodyPart.getLWRatio();
+    if (spelHelper::compareFloat(ratio, 0.0f) == 0)
       return 0.0f;
     return bodyPart.getBoneLength(begin, end) / ratio;
   }
@@ -284,8 +284,8 @@ namespace SPEL
   float BodyPart::getBoneWidth(const cv::Point2f & begin,
     const cv::Point2f & end) const 
   {
-    auto ratio = getLWRatio();
-    if (ratio == 0.0f)
+    const auto ratio = getLWRatio();
+    if (spelHelper::compareFloat(ratio, 0.0f) == 0)
       return 0.0f;
     return getBoneLength(begin, end) / ratio;
   }
