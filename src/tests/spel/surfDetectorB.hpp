@@ -85,6 +85,7 @@ namespace SPEL
     void setFixedCellsCount(cv::Size partCellsCount);
     void setDefaultCellsCount(void);
     void correctingCellsSize(std::map<int, std::vector<cv::Point2f>> &partPolygons);
+    std::vector<cv::KeyPoint> detectKeypoints(Frame* frame, bool useMask = true) const;
     mutable Parameters parameters;
     mutable SkeletonModel Trained;
 

@@ -182,8 +182,8 @@ namespace SPEL
       CellsCount = Trained.PartCellsCount[PartID];
     double L = getLenght(polygon);
     double W = getWidth(polygon);
-    double l = L / static_cast<float>(CellsCount.height);
-    double w = W / static_cast<float>(CellsCount.width);
+    double l = L / static_cast<double>(CellsCount.height);
+    double w = W / static_cast<double>(CellsCount.width);
     double a = W;
     cv::Point2f d = pt - polygon[0];
     double b = sqrt(d.x*d.x + d.y*d.y);
@@ -262,21 +262,138 @@ namespace SPEL
     }
   }
 
+  //========================================
+  uchar C_[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; // Matrix for search contour operation
+  cv::Point2i P_[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) }; // Matrix for search contour operation
+
+  // Search contour iteration
+  bool f_(cv::Mat mask, cv::Point2i &p0, cv::Point2i &p1, cv::Point2i p00)
+  {
+    int Q = 9;
+    cv::Size size = mask.size();
+    bool color = 0;
+    cv::Point2i d = p0 - p1, p = p0;
+    int n = C_[d.y + 1][d.x + 1];
+
+    int  k = 0;
+    while (!color)
+    { 
+      p0 = p;
+      p = p1 + P_[n];
+      if (k > 7) p = p00;
+      if((p.x >= 0) && (p.x < size.width) && (p.y >= 0) && (p.y < size.height))
+      { color = (mask.at<uchar>(p.y, p.x) > Q); }
+      else { color = 0; }
+      n++;
+      if (n > 7) n = 0;
+      k++;
+    }
+    p1 = p;
+    return (p1 == p00);
+  }
+
+   // Search all ROI on the mask and return coordinates of max ROI: {topLeft, bottomRight}
+  cv::Rect SearchROI_(cv::Mat mask)
+  {
+    cv::Size size = mask.size();
+    int cols = size.width;
+    int rows = size.height;
+
+    int Q = 10 - 1;
+    int maxArea = 0;
+    int N = -1;
+
+    std::vector<std::pair<cv::Point2i, cv::Point2i>> ROI;
+
+    for (int y = 0; y < rows; y++)
+      for (int x = 0; x < cols; x++)
+      {
+        cv::Point2i p(x, y);
+        bool b = false;
+        for (int i = 0; i < ROI.size(); i++)
+        {
+          if((p.x >= ROI[i].first.x) && (p.x <= ROI[i].second.x) && (p.y >= ROI[i].first.y) && (p.y <= ROI[i].second.y))
+          {
+            x = ROI[i].second.x;
+            b = true;
+          }
+        }
+        if ((!b) && (mask.at<uchar>(y, x) > Q))
+        {
+          cv::Point2i  p1 = p, p0 = p + cv::Point2i(-1, 0), p00 = p;
+
+          bool FindedStartPoint = false;
+          cv::Point2i A(cols, rows), B(0, 0);
+
+          while (!FindedStartPoint)
+          {
+            FindedStartPoint = f_(mask, p0, p1, p00);
+
+            if (p1.x < A.x) A.x = p1.x;
+            if (p1.x > B.x) B.x = p1.x;
+            if (p1.y < A.y) A.y = p1.y;
+            if (p1.y > B.y) B.y = p1.y;
+          }
+          ROI.push_back(std::pair<cv::Point2f, cv::Point2f>(A, B));
+          cv::Point2f P = B - A;
+          float S = P.x*P.y;
+          if ( S > maxArea)
+          {
+            maxArea = S;
+            N = ROI.size() - 1;
+          }
+        }		
+      }
+    std::vector<cv::Point2i> temp;
+    if (N > -1)
+    {
+      temp.push_back(ROI[N].first);
+      temp.push_back(ROI[N].second);
+    }
+
+    return cv::Rect(temp[0],temp[1]);
+    }
+  //======================================
+
+  std::vector<cv::KeyPoint> SURFDetector::detectKeypoints(Frame* frame, bool useMask) const
+  {
+    cv::Mat Image = frame->getImage();
+
+    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SurfFeatureDetector::create(parameters.minHessian);
+    std::vector<cv::KeyPoint> Keypoints;
+    if (useMask == true)
+    {
+      // Detect ROI keypoints
+      cv::Mat Mask = frame->getMask();
+      cv::Rect ROI = SearchROI_(Mask);
+      //Image.adjustROI(ROI.y, ROI.y+ROI.height, ROI.x, ROI.width);
+      std::vector<cv::KeyPoint> FrameKeypoints;
+      detector->detect(Image(ROI), FrameKeypoints);
+      for(unsigned int i = 0; i < FrameKeypoints.size(); i++)
+      FrameKeypoints[i].pt += cv::Point2f(ROI.x,ROI.y);	
+
+      // Select mask keypoints
+      Keypoints = SelectMaskKeypoints(Mask, FrameKeypoints);
+    }
+    else
+    {
+      detector->detect(Image, Keypoints);
+      for (unsigned int p = 0; p < Keypoints.size(); p++)
+        Keypoints[p].class_id = -2;
+    }
+    detector->clear();
+
+    return Keypoints;
+  }
+
   void SURFDetector::SingleFrameTrain(Frame* frame)
   {
     // Create frame keypoints
-    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SurfFeatureDetector::create(parameters.minHessian);
-    std::vector<cv::KeyPoint> FrameKeypoints;
+    //long t0 = clock();
     cv::Mat image = frame->getImage();
-    cv::Mat Mask = frame->getMask();
-    detector->detect(image, FrameKeypoints);
-
-    // Select mask keypoints
-    std::vector<cv::KeyPoint> MaskKeypoins;
-    if(parameters.useMask == true)
-      MaskKeypoins = SelectMaskKeypoints(Mask, FrameKeypoints);
-    else
-      MaskKeypoins = FrameKeypoints;
+    std::vector<cv::KeyPoint> Keypoints = detectKeypoints(frame, parameters.useMask);
+    //long t1 = clock();
+    //std::cout << "xfeatures::detect time = " << t1 - t0 << std::endl;
 
     // Calculate part rects
     Skeleton skeleton = frame->getSkeleton();
@@ -295,7 +412,6 @@ namespace SPEL
         setCellsCount(partRects, e);
       if (parameters.FixedWidthCells >= 1 || parameters.FixedLenghtCells >= 1)
         setFixedCellsCount(cv::Size(parameters.FixedWidthCells, parameters.FixedLenghtCells));
-      //VerifyCellsCount(partRects, MaskKeypoins);
       correctingCellsSize(partRects);
     }
     if (Trained.PartKeypoints.size() == 0)
@@ -303,18 +419,18 @@ namespace SPEL
         Trained.PartKeypoints.emplace(std::pair<int, std::vector<int>>(k, std::vector<int>()));
 
     // Create skeleton model
-    for (unsigned int p = 0; p < MaskKeypoins.size(); p++)
-      if(MaskKeypoins[p].class_id !=-1)
+    for (unsigned int p = 0; p < Keypoints.size(); p++)
+      if(Keypoints[p].class_id <-1)
         for (unsigned int k = 0; k < SortedIndexes.size(); k++)
         {
           int PartID = SortedIndexes[k];
           std::vector<cv::Point2f> partPolygon = partRects[PartID];
           cv::Size partCellsCount = Trained.PartCellsCount[PartID];
-          if (pointPolygonTest(partPolygon, MaskKeypoins[p].pt, false) > 0)
+          if (pointPolygonTest(partPolygon, Keypoints[p].pt, false) > 0)
           {
-            cv::Point2f pt = MaskKeypoins[p].pt;
-            MaskKeypoins[p].class_id = PartCellIndex(PartID, pt,  partPolygon, partCellsCount);
-            Trained.Keypoints.push_back(MaskKeypoins[p]);
+            cv::Point2f pt = Keypoints[p].pt;
+            Keypoints[p].class_id = PartCellIndex(PartID, pt,  partPolygon, partCellsCount);
+            Trained.Keypoints.push_back(Keypoints[p]);
             Trained.PartKeypoints[PartID].push_back(p);
           }
         }
@@ -324,11 +440,10 @@ namespace SPEL
     Trained.StudiedFramesID.push_back(frame->getID());
 
     // Clear
-    detector->clear();
     extractor->clear();
     SortedIndexes.clear();
   }
- 
+
   void SURFDetector::Train(std::vector<Frame*> frames)
   {
     Trained.clear();
@@ -364,38 +479,25 @@ namespace SPEL
 
   std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::Detect(Frame* frame) const
   {
-    bool useMulct = false;
-    bool CheckMatches = false;
-
     DebugMessage(" SURFDetector Detect started", 2);
     cv::Mat image = frame->getImage();
-    cv::Mat Mask = frame->getMask();
 
     // Calculate frame keypoints
-    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SurfFeatureDetector::create(parameters.minHessian);
-    std::vector<cv::KeyPoint> FrameKeypoints;
-    detector->detect(image, FrameKeypoints);
-
-    // Select mask keypoints
-    std::vector<cv::KeyPoint> MaskKeypoins;
-    if(parameters.useMask == true)
-      MaskKeypoins = SelectMaskKeypoints(Mask, FrameKeypoints);
-    else
-      MaskKeypoins = FrameKeypoints;
+    std::vector<cv::KeyPoint> Keypoints = detectKeypoints(frame, parameters.useMask);
 
     std::stringstream s1;
-    s1 << " Mask keypoints count: " << MaskKeypoins.size() << std::endl;
+    s1 << " Mask keypoints count: " << Keypoints.size() << std::endl;
     DebugMessage(s1.str(), 2);
     s1.clear();
 
     // Extract descriptors
     cv::Mat FrameDescriptors;
     cv::Ptr<cv::xfeatures2d::SURF> extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
-    extractor->compute(image, MaskKeypoins, FrameDescriptors);
+    extractor->compute(image, Keypoints, FrameDescriptors);
 
     // Create skeleton model for the current frame
     SkeletonModel Local;
-    Local.Keypoints = MaskKeypoins;
+    Local.Keypoints = Keypoints;
     Local.Descriptors = FrameDescriptors;
     Skeleton skeleton = frame->getSkeleton();
     std::map<int, std::vector<cv::Point2f>> PartRects = getAllPolygons(skeleton);
@@ -472,10 +574,10 @@ namespace SPEL
               // Calculate score for current label
               double LabelScore = 0;
 
-              for(unsigned int p = 0; p < MaskKeypoins.size(); p++)
-                if(pointPolygonTest(LabelPolygon, MaskKeypoins[p].pt, false) > 0)
+              for(unsigned int p = 0; p < Keypoints.size(); p++)
+                if(pointPolygonTest(LabelPolygon, Keypoints[p].pt, false) > 0)
                 {
-                  int partCellID = PartCellIndex(id, MaskKeypoins[p].pt, LabelPolygon, CellsCount);
+                  int partCellID = PartCellIndex(id, Keypoints[p].pt, LabelPolygon, CellsCount);
                   if(Trained.Keypoints[matches[p][0].trainIdx].class_id == partCellID)
                   {
                     LabelScore = LabelScore + matches[p][0].distance;
@@ -509,7 +611,6 @@ namespace SPEL
         s.clear();
       }
     }
-    detector->clear();
 
     DebugMessage(" SURFDetector Detect completed", 2);
     return Labels;
