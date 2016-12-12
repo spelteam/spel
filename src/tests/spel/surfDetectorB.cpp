@@ -368,10 +368,11 @@ namespace SPEL
     }
 
     cv::Rect maskROI(temp[0], temp[1]);
-    cv::Size borderSize = cv::Size(5, 5);
+    /*cv::Size borderSize = cv::Size(5, 5);
     borderSize += borderSize;
+    maskROI = resizeROI_(maskROI, maskROI.size() + borderSize, mask.size());*/
 
-    return resizeROI_(maskROI, maskROI.size() + borderSize, mask.size());
+    return maskROI;
   }
   //======================================
 
@@ -389,6 +390,7 @@ namespace SPEL
       //Image.adjustROI(ROI.y, ROI.y+ROI.height, ROI.x, ROI.width);
       std::vector<cv::KeyPoint> FrameKeypoints;
       detector->detect(Image(ROI), FrameKeypoints);
+      //cv::imwrite("zROI.jpg", Image(ROI));
       for(unsigned int i = 0; i < FrameKeypoints.size(); i++)
       FrameKeypoints[i].pt += cv::Point2f(ROI.x,ROI.y);	
 
