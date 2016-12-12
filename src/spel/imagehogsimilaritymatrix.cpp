@@ -132,8 +132,8 @@ namespace SPEL
 
     if (ImageSize != cv::Size(0, 0))
     {
-      if (p0.x + ROI.width > ImageSize.width)  DebugMessage("ROI.x1 > Image cols", 5);
-      if (p0.y + ROI.height > ImageSize.height) DebugMessage("ROI.y1 > Image rows", 5);
+      if (p0.x + NewROISize.width > ImageSize.width)  DebugMessage("ROI.x1 > Image cols", 5);
+      if (p0.y + NewROISize.height > ImageSize.height) DebugMessage("ROI.y1 > Image rows", 5);
     }
 
     return cv::Rect(p0, NewROISize);
