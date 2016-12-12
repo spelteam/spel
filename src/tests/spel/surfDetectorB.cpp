@@ -292,7 +292,23 @@ namespace SPEL
     return (p1 == p00);
   }
 
-   // Search all ROI on the mask and return coordinates of max ROI: {topLeft, bottomRight}
+  cv::Rect resizeROI_(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize)
+  {
+    cv::Point2f p0 = cv::Point2f(ROI.x, ROI.y) - 0.5f*cv::Point2f(NewROISize.width - ROI.width, NewROISize.height - ROI.height);
+
+    if (p0.x < 0) p0.x = 0;
+    if (p0.y < 0) p0.y = 0;
+
+    if (ImageSize != cv::Size(0, 0))
+    {
+      if (p0.x + NewROISize.width > ImageSize.width)  NewROISize.width = ImageSize.width - p0.x;
+      if (p0.y + NewROISize.height > ImageSize.height) NewROISize.height = ImageSize.height - p0.y;
+    }
+
+    return cv::Rect(p0, NewROISize);
+  }
+
+  // Search all ROI on the mask and return coordinates of max ROI: {topLeft, bottomRight}
   cv::Rect SearchROI_(cv::Mat mask)
   {
     cv::Size size = mask.size();
@@ -351,8 +367,12 @@ namespace SPEL
       temp.push_back(ROI[N].second);
     }
 
-    return cv::Rect(temp[0],temp[1]);
-    }
+    cv::Rect maskROI(temp[0], temp[1]);
+    cv::Size borderSize = cv::Size(5, 5);
+    borderSize += borderSize;
+
+    return resizeROI_(maskROI, maskROI.size() + borderSize, mask.size());
+  }
   //======================================
 
   std::vector<cv::KeyPoint> SURFDetector::detectKeypoints(Frame* frame, bool useMask) const

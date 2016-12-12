@@ -799,7 +799,6 @@ void TestISM::computeISMcell(Frame* left, Frame* right, const int maxFrameHeight
    return Errors;
  }
 
-
  map<int, map<int,LimbLabel>> selectEffectiveLabels(map<uint32_t, vector<LimbLabel>> &Labels, map<int, vector<Point2f>> &Errors, float TolerableLinearError)
  {
    map<int, map<int, LimbLabel>> effectiveLabels;
@@ -820,7 +819,7 @@ void TestISM::computeISMcell(Frame* left, Frame* right, const int maxFrameHeight
  vector<int> selectNotFoundedParts(Skeleton &skeleton, map<int, vector<float>> &Errors, map<uint32_t,vector<LimbLabel>> &Labels, int TolerableError, int TopLabelsCount)
  {
    vector<int> notFoundedParts;
-   int n = (TopLabelsCount == 0) ? Errors.size() : TopLabelsCount;
+   //int n = (TopLabelsCount == 0) ? Errors.size() : TopLabelsCount;
    for (int i = 0; i < Errors.size(); i++)
    {
      bool partFound = false;
