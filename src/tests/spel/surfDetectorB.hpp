@@ -81,6 +81,7 @@ namespace SPEL
          const std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const;
 
   private:
+    const int partCellsLimit = 100000;
     void setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError);
     void setFixedCellsCount(cv::Size partCellsCount);
     void setDefaultCellsCount(void);
@@ -97,7 +98,8 @@ namespace SPEL
     std::vector<int> PolygonsPriority(std::map<int, std::vector<cv::Point2f>> partRects) const;
     std::vector<cv::KeyPoint> SelectMaskKeypoints(cv::Mat &mask, std::vector<cv::KeyPoint> FrameKeypoints) const;
     int PartCellIndex(int PartID, cv::Point2f pt, std::vector<cv::Point2f> polygon, cv::Size CellsCount = cv::Size(0, 0)) const;
- 
+    int PartIndex(int CellIndex) const;
+
     LimbLabel generateLabel(const BodyPart &bodyPart,
         Frame *workFrame, const cv::Point2f &parent, const cv::Point2f &child,
         DetectorHelper *detectorHelper, std::map<std::string, float> params) const;  // It is gag

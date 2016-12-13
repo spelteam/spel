@@ -199,10 +199,15 @@ namespace SPEL
       int nl = trunc(dl / l);
       if (dl == L) dl--;
       if (dw == W) dw--;
-      id = PartID * 100000 + /*CellsCount.width*CellsCount.height + */CellsCount.width*nl + nw;
+      id = PartID * partCellsLimit + /*CellsCount.width*CellsCount.height + */CellsCount.width*nl + nw;
     }
 
     return id;
+  }
+
+  int SURFDetector::PartIndex(int CellIndex) const
+  {
+    return static_cast<int>(trunc(float(CellIndex) / float(partCellsLimit)));
   }
 
   void SURFDetector::setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError)
@@ -545,6 +550,22 @@ namespace SPEL
       for(int k = 0; k < n; k++)
         matches[i][k].distance = 1.0f - matches[i][k].distance/maxDist;
     DebugMessage(" Matches was normalized", 2);
+    
+    // select parts keypoints candidates 
+    for (unsigned int i = 0; i < matches.size(); i++)
+    {
+      int t = matches[i][0].trainIdx;
+      int c = Trained.Keypoints[t].class_id;
+      if (c >= 0)
+      {
+        int id = PartIndex(c);
+        //std::cout << i << ": " << c << "~" << id << std::endl;
+        if(id >= 0 && id < Trained.PartCellsCount.size())
+          Local.PartKeypoints[id].push_back(i);
+        else
+          DebugMessage(" Invalid part cell index", 2);
+      }
+    }
 
     std::map<uint32_t, std::vector<LimbLabel>> Labels;
 
@@ -570,6 +591,7 @@ namespace SPEL
         minStep = std::max(minStep, 2.0f);
 
         cv::Size CellsCount = Trained.PartCellsCount[id];
+        std::vector<int> keypointsCandidates = Local.PartKeypoints.at(id);
 
         int LabelsPerPart = 0;
         std::vector<LimbLabel> PartLabels;
@@ -596,23 +618,25 @@ namespace SPEL
               // Calculate score for current label
               double LabelScore = 0;
 
-              for(unsigned int p = 0; p < Keypoints.size(); p++)
-                if(pointPolygonTest(LabelPolygon, Keypoints[p].pt, false) > 0)
+              for(unsigned int p = 0; p < keypointsCandidates.size(); p++)
+              {
+                int k = keypointsCandidates[p];
+                if(pointPolygonTest(LabelPolygon, Local.Keypoints[k].pt, false) > 0)
                 {
-                  int partCellID = PartCellIndex(id, Keypoints[p].pt, LabelPolygon, CellsCount);
-                  if(Trained.Keypoints[matches[p][0].trainIdx].class_id == partCellID)
+                  int partCellID = PartCellIndex(id, Local.Keypoints[k].pt, LabelPolygon, CellsCount);
+                  if(Trained.Keypoints[matches[k][0].trainIdx].class_id == partCellID)
                   {
-                    LabelScore = LabelScore + matches[p][0].distance;
-                    Local.PartKeypoints[id].push_back(p);
+                    LabelScore = LabelScore + matches[k][0].distance;
+                    //Local.PartKeypoints[id].push_back(p);
                   }
                 }
-
+              }
               // Normalize and inverse score
-              if(Local.PartKeypoints[id].size() > 0)
+              if(LabelScore > 0)
                 LabelScore = 1.0 - LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
               else
                 LabelScore = INFINITY;
-              Local.PartKeypoints[id].clear();
+              //Local.PartKeypoints[id].clear();
 
               // Create LimbLabel
               Score score(static_cast<float>(LabelScore), "");
@@ -623,6 +647,7 @@ namespace SPEL
               scores.clear();
             }
         }
+        keypointsCandidates.clear();
         sort(PartLabels.begin(), PartLabels.end(), CompareLabels());
         Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
         PartLabels.clear();
