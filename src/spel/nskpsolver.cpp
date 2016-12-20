@@ -1,13 +1,23 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "nskpsolver.hpp"
+
+// OpenGM
+#include <opengm/graphicalmodel/space/discretespace.hxx>
+#include <opengm/graphicalmodel/graphicalmodel.hxx>
+#include <opengm/operations/minimizer.hxx>
+#include <opengm/inference/messagepassing/messagepassing.hxx>
 
 #include "lockframe.hpp"
+
 #include "colorHistDetector.hpp"
 #include "hogDetector.hpp"
 #include "surfDetector.hpp"
+
+#include "nskpsolver.hpp"
 #include "tlpssolver.hpp"
+
 #include "spelParameters.hpp"
+
 
 namespace SPEL
 {

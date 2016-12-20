@@ -10,29 +10,9 @@
 
 // STL
 #include <vector>
-#include <opencv2/opencv.hpp>
-#include <math.h>
-
-//OpenGM
-#include <opengm/graphicalmodel/graphicalmodel.hxx>
-#include <opengm/graphicalmodel/graphicalmodel_hdf5.hxx>
-#include <opengm/graphicalmodel/space/discretespace.hxx>
-#include <opengm/operations/adder.hxx>
-#include <opengm/functions/explicit_function.hxx>
-#include <opengm/inference/messagepassing/messagepassing.hxx>
-#include <opengm/operations/minimizer.hxx>
-
-// Eigen3
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 
 #include "solver.hpp"
 #include "frame.hpp"
-#include "lockframe.hpp"
-#include "colorHistDetector.hpp"
-#include "hogDetector.hpp"
-#include "surfDetector.hpp"
-#include "interpolation.hpp"
 
 namespace SPEL
 {
