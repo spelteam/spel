@@ -300,7 +300,7 @@ namespace SPEL
         for (const auto detector : detectors)
           labels = detector->detect(lockframe, params, labels);
 
-        auto maxPartCandidates = static_cast<int>(params.at(
+        const auto maxPartCandidates = static_cast<int>(params.at(
           COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES().name()));
 
         for (auto &label : labels) //for each part

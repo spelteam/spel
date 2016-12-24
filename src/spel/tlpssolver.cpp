@@ -38,12 +38,12 @@ namespace SPEL
     return solve(frames, params);
   }
 
-  std::vector<Solvlet> TLPSSolver::solve(Sequence &sequence, std::map<std::string, float> params, std::vector<Solvlet> solvlets) //inherited virtual
+  std::vector<Solvlet> TLPSSolver::solve(Sequence &sequence, std::map<std::string, float> params, const std::vector<Solvlet> &solvlets) //inherited virtual
   {
     emplaceDefaultParameters(params);
-    std::vector<Solvlet> tlpsSolvlets = solve(sequence, params); //inherited virtual
+    auto tlpsSolvlets = solve(sequence, params); //inherited virtual
 
-    for (auto&& s : solvlets)
+    for (const auto& s : solvlets)
       tlpsSolvlets.push_back(s);
 
     sort(tlpsSolvlets.begin(), tlpsSolvlets.end());
@@ -53,20 +53,20 @@ namespace SPEL
 
   std::vector<Solvlet> TLPSSolver::solve(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
-    std::vector<Frame*> frames = sequence.getFrames();
+    auto frames = sequence.getFrames();
     if (frames.size() == 0)
       return std::vector<Solvlet>();
 
     emplaceDefaultParameters(params);
 
     //detector search parameters
-    auto baseRotationRange = 
+    const auto baseRotationRange =
       params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().name());
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().name()) = 
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_ROTATION_STEP().name()) =
       baseRotationRange / 4.0f;
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name()) = 
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name()) =
       frames.front()->getImageSize().height / 30.0f;
-    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().name()) = 
+    params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_STEP().name()) =
       params.at(COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name()) / 10.0f;
 
     sequence.estimateUniformScale(params);
@@ -87,63 +87,54 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    auto partShiftCoeff = params.at(
+    const auto partShiftCoeff = params.at(
       COMMON_TLPS_SOLVER_PARAMETERS::PART_SHIFT_COEFFICIENT().name());
-    auto partRotationCoeff = params.at(
+    const auto partRotationCoeff = params.at(
       COMMON_TLPS_SOLVER_PARAMETERS::PART_ROTATION_COEFFICIENT().name());
 
-    auto depthRotationCoeff = params.at(
+    const auto depthRotationCoeff = params.at(
       COMMON_SOLVER_PARAMETERS::PART_DEPTH_ROTATION_COEFFICIENT().name());
-    auto baseRotationRange = params.at(
+    const auto baseRotationRange = params.at(
       COMMON_SOLVER_PARAMETERS::BASE_ROTATION_RANGE().name());
-    auto baseSearchRadius = params.at(
+    const auto baseSearchRadius = params.at(
       COMMON_SOLVER_PARAMETERS::BASE_SEARCH_RADIUS().name());
 
-    auto useHoG = 
-      params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
-    auto useCS = 
-      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
-    auto useSURF = 
-      params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
+    const auto useHoG = spelHelper::compareFloat(params.at(
+      COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name()), 0.0f) > 0;
+    const auto useCS = spelHelper::compareFloat(params.at(
+      COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name()), 0.0f) > 0;
+    const auto useSURF = spelHelper::compareFloat(params.at(
+      COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name()), 0.0f) > 0;
+
     //first slice up the sequences
     if (SpelObject::getDebugLevel() >= 1)
       std::cout << "TLPSSolver started, slicing sequence..." << std::endl;
 
-    std::vector<Frame*> origFrames = sequence.getFrames();
-    std::vector<std::vector<Frame*> > slices = slice(origFrames);
+    auto origFrames = sequence.getFrames();
+    auto slices = slice(origFrames);
 
     if (SpelObject::getDebugLevel() >= 1)
       std::cout << slices.size() << " sequence slices created." << std::endl;
 
-    std::vector<std::vector<Solvlet> > sequenceSolvlets; //one vector of solvlets per slice
+    std::vector<std::vector<Solvlet>> sequenceSolvlets; //one vector of solvlets per slice
 
     if (SpelObject::getDebugLevel() >= 1)
       std::cout << "Solving slices..." << std::endl;
 
-    for (uint32_t sliceNumber = 0; sliceNumber < slices.size(); ++sliceNumber)
+    for (auto &seqSlice : slices)
     {
       ///define the space
       typedef opengm::DiscreteSpace<> Space;
       ///define the model
       typedef opengm::GraphicalModel<float, opengm::Adder, opengm::ExplicitFunction<float>, Space> Model;
-
       ///define the update rules
       typedef opengm::BeliefPropagationUpdateRules<Model, opengm::Minimizer> UpdateRules;
       ///define the inference algorithm
       typedef opengm::MessagePassing<Model, opengm::Minimizer, UpdateRules, opengm::MaxDistance> BeliefPropagation;
 
-      //for every slice, build a factor grph
-      if (SpelObject::getDebugLevel() >= 1)
-        std::cout << "Interpolating slice " << sliceNumber << std::endl;
-      std::vector<Frame*> seqSlice = slices[sliceNumber]; //the slice we are working with, interpolated
-
-      int maxSeqSize = 100;
-      if(seqSlice.size()>=maxSeqSize) //change this to a parameter later
-      {
-          std::cout << "Skipping slice " << sliceNumber << " since it is of length " << seqSlice.size() << " and over the maximum of " << maxSeqSize << "." << std::endl;
-          continue;
-      }
-
+      const auto maxSeqSize = 100;
+      if (seqSlice.size() >= maxSeqSize) //change this to a parameter later
+        continue;
 
       std::vector<Detector*> detectors;
       if (useCS)
@@ -157,53 +148,42 @@ namespace SPEL
       trainingFrames.push_back(seqSlice.front()); //set training frame by index
       trainingFrames.push_back(seqSlice.back());
 
-      for (uint32_t i = 0; i < detectors.size(); ++i)
-      {
-//          detectors[i]->setDebugLevel(0);
-          detectors[i]->train(trainingFrames, params);
-      }
+      for (auto &detector : detectors)
+        detector->train(trainingFrames, params);
 
-      std::vector<std::map<uint32_t, std::vector<LimbLabel> > > detections; //numbers of labels per part, per frame, for this slice
-
-      //initialise first level
-      for (uint32_t i = 0; i < seqSlice.size(); ++i) // access by reference, the type of i is int&
-        //init detections to contain all detects for the sequence slice
-        detections.push_back(std::map<uint32_t, std::vector<LimbLabel> >());
+      std::vector<std::map<uint32_t, std::vector<LimbLabel>>> detections; //numbers of labels per part, per frame, for this slice
+      detections.reserve(seqSlice.size());
 
       //first do the detections, and store them
 
-      for (uint32_t currentFrame = 1; currentFrame < seqSlice.size() - 1; ++currentFrame) //for every frame but first and last
+      for (auto &currentFrame : seqSlice) //for every frame but first and last
       {
         //current frame represents the current frame, previous frame is currentFrame-1, next frame is currentFrame+1
-
-        std::cerr << "Detecting on frame " << seqSlice[currentFrame]->getID() << std::endl;
+        if (SpelObject::getDebugLevel() >= 1)
+          std::cerr << "Detecting on frame " << currentFrame->getID() << std::endl;
 
         std::map<uint32_t, std::vector<LimbLabel> > labels;
 
-        Skeleton skeleton = seqSlice[currentFrame]->getSkeleton();
+        auto skeleton = currentFrame->getSkeleton();
 
         //now set up skeleton params, such as search radius and angle search radius for every part
         //this should very depending on relative distance between frames
         //for each body part
-        tree<BodyPart> partTree = skeleton.getPartTree();
-        tree<BodyPart>::iterator partIter;
-
-        for (partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
+        auto partTree = skeleton.getPartTree();
+        for (auto partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
         {
           //for each bodypart, establish the angle variation and the search distance, based on distance from parent frame
           //and based on node depth (deeper nodes have a higher distance)
           //this should rely on parameters e.g.
 
-          //else
-          int depth = partTree.depth(partIter);
-
-          float rotationRange = baseRotationRange;//*pow(depthRotationCoeff, depth);
-          float searchRange = baseSearchRadius*pow(depthRotationCoeff, depth);
+          const auto depth = partTree.depth(partIter);
+          auto rotationRange = baseRotationRange;
+          auto searchRange = baseSearchRadius * pow(depthRotationCoeff, depth);
 
           if (partTree.number_of_children(partIter) == 0)
           {
-            searchRange = searchRange * 2;
-            rotationRange = rotationRange*depthRotationCoeff;
+            searchRange *= 2;
+            rotationRange *= depthRotationCoeff;
           }
 
           partIter->setRotationSearchRange(rotationRange);
@@ -211,45 +191,48 @@ namespace SPEL
         }
 
         skeleton.setPartTree(partTree);
-        seqSlice[currentFrame]->setSkeleton(skeleton);
+        currentFrame->setSkeleton(skeleton);
 
-        for (uint32_t i = 0; i < detectors.size(); ++i) //for every detector
-          labels = detectors[i]->detect(seqSlice[currentFrame], params, labels); //detect labels based on keyframe training
+        for (const auto &detector : detectors) //for every detector
+          labels = detector->detect(currentFrame, params, labels); //detect labels based on keyframe training
 
-        auto maxPartCandidates = params.at(
+        const auto maxPartCandidates = params.at(
           COMMON_SOLVER_PARAMETERS::MAX_PART_CANDIDATES().name());
         //now take the top percentage of all labels
-        for (uint32_t i = 0; i < labels.size(); ++i) //for each part
+        for (auto &label : labels) //for each part
         {
-          std::vector<Score> scores = labels[i].at(0).getScores();
+          const auto scores = label.second.at(0).getScores();
 
-          uint32_t isWeak = 0;
-          for (uint32_t j = 0; j < scores.size(); ++j)
-            if (scores[j].getIsWeak())
-              isWeak++;
+          auto isWeak = 0U;
+          for (const auto &score : scores)
+            if (score.getIsWeak())
+              ++isWeak;
 
           std::vector<LimbLabel> tmp;
-          for (uint32_t j = 0; j < labels[i].size()*maxPartCandidates; ++j) //for each label that is within the threshold
-            tmp.push_back(labels[i].at(j)); //push back the label
-          labels[i] = tmp; //set this part's candidates to the new trimmed vector
+          const auto limit = static_cast<uint32_t>(label.second.size() < maxPartCandidates ?
+            label.second.size() : maxPartCandidates);
+          for (auto j = 0U; j < limit; ++j) //for each label that is within the threshold
+            tmp.push_back(label.second.at(j)); //push back the label
+          label.second = tmp; //set this part's candidates to the new trimmed vector
         }
 
-        detections[currentFrame] = labels; //store all detections into detections
+        detections.push_back(labels); //store all detections into detections
       }
 
       std::vector<size_t> numbersOfLabels; //numbers of labels per part
 
       //the first an last frames of detections are always empty
 
-      for (uint32_t i = 0; i < detections.size(); ++i)
-        for (uint32_t j = 0; j < detections[i].size(); ++j)
-          numbersOfLabels.push_back(detections[i][j].size()); //numbers of labels now contains the numbers of labels, and their respective variations
+      for (const auto &i : detections)
+        for (const auto &j : i)
+          numbersOfLabels.push_back(j.second.size()); //numbers of labels now contains the numbers of labels, and their respective variations
 
       //use this to shape the space, this will be rather large
       Space space(numbersOfLabels.begin(), numbersOfLabels.end());
       Model gm(space);
 
-      std::cerr << "Computing slice factors..." << std::endl;
+      if (SpelObject::getDebugLevel() >= 1)
+        std::cerr << "Computing slice factors..." << std::endl;
 
       int suppFactors = 0, jointFactors = 0, anchorFactors = 0, tempFactors = 0;
       //now do the factors
@@ -607,7 +590,7 @@ namespace SPEL
   std::vector<Solvlet> TLPSSolver::solveWindowed(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
 #ifndef _MSC_VER
-#warning "TLPSSolver::solveWindowed is not implemented"
+    #warning "TLPSSolver::solveWindowed is not implemented"
 #else
 #pragma message ("TLPSSolver::solveWindowed is not implemented")
 #endif
@@ -757,11 +740,11 @@ namespace SPEL
     std::string surfName = "21316";
 
     //@FIX
-    auto useHoG = 
+    auto useHoG =
       params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
-    auto useCS = 
+    auto useCS =
       params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
-    auto useSURF = 
+    auto useSURF =
       params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
 
     //TODO: Fix score combinations
@@ -1030,7 +1013,7 @@ namespace SPEL
       {
         if (aux[i].back()->getFrametype() == LOCKFRAME || aux[i].back()->getFrametype() == KEYFRAME) //if the set ENDS with a keyframe or a lockframe
         {
-          if (aux[i].size()>2) //if size is greater than two elements
+          if (aux[i].size() > 2) //if size is greater than two elements
             slices.push_back(aux[i]); //push back slice
         }
       }
@@ -1039,10 +1022,10 @@ namespace SPEL
     return slices;
   }
 
-  void TLPSSolver::emplaceDefaultParameters(std::map<std::string, float>& params) const 
+  void TLPSSolver::emplaceDefaultParameters(std::map<std::string, float>& params) const
   {
     Solver::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, COMMON_TLPS_SOLVER_PARAMETERS::getParameters());
   }
 
-}
+  }

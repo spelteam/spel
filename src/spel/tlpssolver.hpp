@@ -27,7 +27,7 @@ namespace SPEL
     std::vector<Solvlet> solve(Sequence& frames) ;
     ///inherited virtual
     std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params) ;
-    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets) ;
+    std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, const std::vector<Solvlet> &solvlets) ;
   private:
 #ifdef DEBUG
     FRIEND_TEST(tlpssolverTests, solveGlobal);
