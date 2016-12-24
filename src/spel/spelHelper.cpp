@@ -11,10 +11,6 @@
 #include <cstdlib>
 #include <random>
 #include <ctime>
-// windows defines max so we need to undefine this here
-#ifdef max
-#undef max
-#endif
 
 namespace SPEL
 {

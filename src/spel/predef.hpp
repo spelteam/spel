@@ -14,6 +14,8 @@
 #define SPEL_VERSION \
   SPEL_MAJOR_VERSION.SPEL_MINOR_VERSION.SPEL_PATCH_LEVEL.SPEL_REVISION
 
+#define NOMINMAX
+
 #include "memoryDebug.hpp"
 
 #endif  // _PREDEF_H_
