@@ -73,7 +73,7 @@ namespace SPEL
 
       /*params.emplace("adjustSolves", false);
       parameters.adjustSolves = static_cast<bool>(params.at("adjustSolves"));
-	  */
+      */
     }
     changeParameters(params);
   }
@@ -801,9 +801,25 @@ namespace SPEL
     std::map<uint32_t, std::vector<LimbLabel>> NewLabels;
     NewLabels = SURFDetector::Detect(frame);
 
-    // Need labels merging
-    //FilterLimbLabels(...)
-    return NewLabels;
+    std::stringstream detectorName;
+    detectorName << getID();
+
+    // Apply merge and filter
+    std::map<uint32_t, std::vector<LimbLabel>> filteredLabels;
+    for (uint32_t i = 0; i < NewLabels.size(); i++)
+    {
+      std::vector<LimbLabel> partLabels = Detector::filterLimbLabels(NewLabels[i],
+          parameters.uniqueLocationCandidates, parameters.uniqueAngleCandidates);
+      spelHelper::RecalculateScoreIsWeak(partLabels, detectorName.str(),
+          parameters.isWeakThreshold);
+      filteredLabels.emplace(std::pair<uint32_t, std::vector<LimbLabel>>(i, partLabels));
+    }
+
+    detectorName.clear();
+
+    //return NewLabels;
+    return merge(limbLabels, filteredLabels, std::map<uint32_t, std::vector<LimbLabel>>());
+
   }
 
   // It is gag
