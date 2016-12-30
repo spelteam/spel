@@ -51,6 +51,10 @@ namespace SPEL
       float stepTheta = DETECTOR_DETECT_PARAMETERS::STEP_THETA().second;
       float uniqueLocationCandidates = DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT().second;
       float uniqueAngleCandidates = DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT().second;
+      int externalFrameHeight = COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().second; // detector::maxFrameHeight - external height for SURFDetectorB
+      int internalFrameHeight = 0;
+      /*bool adjustSolves = false; // if "true" then solves will be returned in "adjusted Frame" scale else in "maxFrameHeight" coordinates 
+      //needed Skeleton::getScale() for using this parameter  */
 
       float isWeakThreshold = DETECTOR_DETECT_PARAMETERS::IS_WEAK_THRESHOLD().second;
       float searchStepCoeff = DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().second;
@@ -66,16 +70,19 @@ namespace SPEL
 
   public:
       SURFDetector(void);
+      SURFDetector(std::map<std::string, float> params);
       ~SURFDetector(void);
       void setParameters(std::map<std::string, float> params);
       void changeParameters(std::map<std::string, float> params) const;
-      void SingleFrameTrain(Frame* frame);
+      Frame* preparedFrame(Frame* frame) const;
+      void setAutoInternalFrameHeight(std::vector<Frame*> frames);
+      void SingleFrameTrain(Frame* frame_);
       std::vector<int> getStudiedFramesID(void) const;
 
       void Train(std::vector<Frame*> frames);
       void train(const std::vector<Frame*> &frames, std::map<std::string, float> params);
 
-      std::map<uint32_t, std::vector<LimbLabel>> Detect(Frame* frame) const;
+      std::map<uint32_t, std::vector<LimbLabel>> Detect(Frame* frame_) const;
       std::map<uint32_t, std::vector<LimbLabel>> detect(Frame* frame,
           std::map<std::string, float> params,
          const std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const;

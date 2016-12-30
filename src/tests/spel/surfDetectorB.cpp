@@ -26,11 +26,18 @@ namespace SPEL
     m_id = 0x53440000;
   }
 
+  SURFDetector::SURFDetector(std::map<std::string, float> params)
+  {
+    m_id = 0x53440000;
+    setParameters(params);
+  }
+
   SURFDetector::~SURFDetector(void)
   {
     Trained.clear();
   }
 
+  // The set of parameters which can be changed only before training
   void SURFDetector::setParameters(std::map<std::string, float> params)
   {
     if(Trained.StudiedFramesID.size() == 0)
@@ -56,10 +63,22 @@ namespace SPEL
 
       params.emplace(SPEL_SET_PARAMETER("useMask", 1.0f));
       parameters.useMask = static_cast<bool>(params.at("useMask"));
+
+      params.emplace("maxFrameHeight", 0.0f);
+      params.emplace("externalFrameHeight", params.at("maxFrameHeight"));
+      parameters.externalFrameHeight = static_cast<int>(params.at("externalFrameHeight"));
+
+      params.emplace("internalFrameHeight", 0.0f);
+      parameters.internalFrameHeight = static_cast<int>(params.at("internalFrameHeight"));
+
+      /*params.emplace("adjustSolves", false);
+      parameters.adjustSolves = static_cast<bool>(params.at("adjustSolves"));
+	  */
     }
     changeParameters(params);
   }
 
+  // The set of parameters which can be changed after training
   void SURFDetector::changeParameters(std::map<std::string, float> params) const
   {
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT());
@@ -94,6 +113,72 @@ namespace SPEL
        DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().first);
   }
 
+  Frame* SURFDetector::preparedFrame(Frame* frame) const
+  {
+    cv::Mat mask = frame->getMask();
+    cv::Mat image = frame->getImage();
+    Frame * temp;
+    int frametype = frame->getFrametype();
+    switch (frametype)
+    {
+      case UNDEFINED: temp = new Interpolation(); break;
+      case KEYFRAME: temp = new Keyframe(); break;
+      case LOCKFRAME: temp = new Lockframe(); break;
+      case INTERPOLATIONFRAME: temp = new Interpolation(); break;
+      default: new Interpolation(); break;
+    }
+    temp->setID(frame->getID());
+    temp->setGroundPoint(frame->getGroundPoint());
+    temp->setParentFrameID(frame->getParentFrameID());
+    temp->setSkeleton(frame->getSkeleton());
+
+    int height = image.size().height;
+    int width = image.size().width;
+    if (height != 0 && parameters.internalFrameHeight != 0 && parameters.internalFrameHeight != height)
+    {
+      float scale = static_cast<float>(parameters.internalFrameHeight) /
+        static_cast<float>(height);
+      temp->Scale(scale);
+      cv::Mat scaledImage;
+      cv::Mat scaledMask;
+      cv::Size frameSize = cv::Size(static_cast<int>(width*scale), static_cast<int>(height*scale));
+      cv::resize(image, scaledImage, frameSize);
+      cv::resize(mask, scaledMask, frameSize);
+      bool cacheFile = false;
+      temp->setImage(scaledImage, cacheFile);
+      temp->setMask(scaledMask, cacheFile);
+      scaledImage.release();
+      scaledMask.release();
+    }
+    else
+    {
+      temp->setImage(image.clone());
+      temp->setMask(mask.clone());
+    }
+
+    if (frame->GetImagePath().empty()) frame->cacheImage(); // !??????
+    frame->UnloadImage();
+    if (frame->GetImagePath().empty()) frame->cacheMask(); // !??????
+    frame->UnloadMask();
+
+    std::cout << "PrepareFrame - Ok\n";
+
+    return temp;
+  }
+
+  void SURFDetector::setAutoInternalFrameHeight(std::vector<Frame*> frames)
+  {
+    int maxFrameHeight = 0;
+    for (uint32_t i = 0; i < frames.size(); i++)
+    {
+      int height = frames[i]->getImageSize().height;
+      if(height > maxFrameHeight) // !??????
+        maxFrameHeight = height;
+      if (frames[i]->GetImagePath().empty()) frames[i]->cacheImage(); // !??????
+      frames[i]->UnloadImage();      
+    }
+    parameters.internalFrameHeight = maxFrameHeight;
+  }
   std::vector<cv::Point2f> SURFDetector::getPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1) const
   {
     std::vector<cv::Point2f> partRect;
@@ -413,8 +498,12 @@ namespace SPEL
     return Keypoints;
   }
 
-  void SURFDetector::SingleFrameTrain(Frame* frame)
+  void SURFDetector::SingleFrameTrain(Frame* frame_)
   {
+    /*if (parameters.externalFrameHeight == 0)
+      parameters.externalFrameHeight = frame_->getImageSize().height; // !??????*/
+
+    Frame* frame = preparedFrame(frame_);
     // Create frame keypoints
     //long t0 = clock();
     cv::Mat image = frame->getImage();
@@ -469,6 +558,8 @@ namespace SPEL
     // Clear
     extractor->clear();
     SortedIndexes.clear();
+
+    delete frame;
   }
 
   void SURFDetector::Train(std::vector<Frame*> frames)
@@ -487,6 +578,11 @@ namespace SPEL
   void SURFDetector::train(const std::vector<Frame*> &frames, std::map<std::string, float> params)
   {
     setParameters(params);
+    /*if(parameters.externalFrameHeight == 0)
+    {
+      parameters.externalFrameHeight = frames[0]->getImageSize().height; // !??????
+      params.at("externalFrameHeight") = parameters.externalFrameHeight; // !??????
+    }*/
     Train(frames);
   }
 
@@ -504,10 +600,25 @@ namespace SPEL
     }
   };
 
-  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::Detect(Frame* frame) const
+  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::Detect(Frame* frame_) const
   {
+    int inputFrameHeight = frame_->getImageSize().height;
+
+    Frame* frame = preparedFrame(frame_);
+
     DebugMessage(" SURFDetector Detect started", 2);
     cv::Mat image = frame->getImage();
+
+    float reverseScale = 1.0f;
+    if (parameters.externalFrameHeight == 0 && parameters.internalFrameHeight > 0) // !??????
+      reverseScale = static_cast<float>(inputFrameHeight) / static_cast<float>(parameters.internalFrameHeight);
+
+    if (parameters.internalFrameHeight > 0 && parameters.externalFrameHeight > 0)
+      reverseScale = static_cast<float>(parameters.externalFrameHeight) / static_cast<float>(parameters.internalFrameHeight);
+
+    float adjustScale = 1.0f; 
+    /*if(parameters.adjustSolves)
+      adjustScale = 1.0f / frame->getScale(); // ! */
 
     // Calculate frame keypoints
     std::vector<cv::KeyPoint> Keypoints = detectKeypoints(frame, parameters.useMask);
@@ -638,10 +749,27 @@ namespace SPEL
                 LabelScore = INFINITY;
               //Local.PartKeypoints[id].clear();
 
-              // Create LimbLabel
+              // Create scores
               Score score(static_cast<float>(LabelScore), "");
               std::vector<Score> scores;
               scores.push_back(score);
+
+              // Rescale polygon points
+              /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
+              {
+                for (int t = 0; t < LabelPolygon.size(); t++)
+                  LabelPolygon[t] *= adjustScale;
+                LabelCenter *= adjustScale;
+              }
+              else*/
+                if(reverseScale > 0 && reverseScale != 1.0f)
+                {
+                  for (int t = 0; t < LabelPolygon.size(); t++)
+                    LabelPolygon[t] *= reverseScale;
+                  LabelCenter *= reverseScale;
+                }
+              
+              // Create LimbLabel
               LimbLabel Label(id, LabelCenter, LabelAngle, LabelPolygon, scores);
               PartLabels.push_back(Label);
               scores.clear();
@@ -658,6 +786,8 @@ namespace SPEL
         s.clear();
       }
     }
+
+    delete frame;
 
     DebugMessage(" SURFDetector Detect completed", 2);
     return Labels;

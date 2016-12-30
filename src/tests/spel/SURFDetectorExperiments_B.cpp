@@ -517,6 +517,7 @@ namespace SPEL
     //params.emplace(std::pair<std::string, float>("FixedWidthCells", 10.0f));
     //params.emplace(std::pair<std::string, float>("FixedLenghtCells", 10.0f));
     //params.emplace(std::pair<std::string, float>("useMask", 0.0f));
+    //params.emplace("internalFrameHeight", 1000);
 
     // Run train
     SURFDetector D;
