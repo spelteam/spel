@@ -622,6 +622,8 @@ namespace SPEL
   std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::Detect(Frame* frame_) const
   {
     uint8_t debugLevel = 2;
+    std::stringstream detectorName;
+    detectorName << getID();
 
     Frame* frame = frame_;
     bool scalingFrame = (parameters.internalFrameHeight != 0);
@@ -736,6 +738,7 @@ namespace SPEL
         cv::Size CellsCount = Trained.PartCellsCount[id];
         std::vector<int> keypointsCandidates = Local.PartKeypoints.at(id);
 
+        bool negativeScore = false;
         int LabelsPerPart = 0;
         std::vector<LimbLabel> PartLabels;
 
@@ -775,17 +778,19 @@ namespace SPEL
                 }
               }
               // Normalize and inverse score
+              float K = static_cast<float>(Trained.StudiedFramesID.size()); // insurance, temporary fix
               if(LabelScore > 0)
-                LabelScore = 1.0 - LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
+                LabelScore = 1.0 - K*LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
               else
                 LabelScore = INFINITY;
               //Local.PartKeypoints[id].clear();
+              if(LabelScore < 0.0f)
+                negativeScore = true; 
 
               // Create scores
-              Score score(static_cast<float>(LabelScore), "");
+              Score score(static_cast<float>(LabelScore), detectorName.str());
               std::vector<Score> scores;
               scores.push_back(score);
-
               // Rescale polygon points
               /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
               {
@@ -809,6 +814,37 @@ namespace SPEL
         }
         keypointsCandidates.clear();
         sort(PartLabels.begin(), PartLabels.end(), CompareLabels());
+
+        // Renormalize scores
+        // Insurance, temporary fix: score can be less then 0.0f if keyframes has too different keypoints combination
+        if (negativeScore)
+        {
+          std::stringstream s;
+          s << "Renormalize scores for part " << id << std::endl;
+          DebugMessage(s.str(), debugLevel);
+          s.clear();
+
+          float scoreValue = 0.0f;
+          float minScore = 0.0f;
+          for (int l = 0; l < PartLabels.size(); l++)
+          {
+            scoreValue = PartLabels[l].getAvgScore();
+            if(scoreValue < minScore)
+              minScore = scoreValue;
+          }
+          if(minScore < 0.0f)
+            for (int l = 0; l < PartLabels.size(); l++)
+            {
+              scoreValue = (PartLabels[l].getAvgScore() - minScore)/(1.0f - minScore);
+              Score score(scoreValue, detectorName.str());
+              std::vector<Score> scores;
+              scores.push_back(score);
+              LimbLabel Label(id, PartLabels[l].getCenter(), PartLabels[l].getAngle(), PartLabels[l].getPolygon(), scores);
+              PartLabels[l] = Label;
+            }
+        }
+    
+        // Save part labels
         Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
         PartLabels.clear();
       
@@ -828,6 +864,7 @@ namespace SPEL
       if (frame->GetImagePath().empty()) frame->cacheMask(); // !??????
       frame->UnloadMask();	  
     }
+    detectorName.clear();
 
     DebugMessage(" SURFDetector Detect completed", debugLevel);
     return Labels;
