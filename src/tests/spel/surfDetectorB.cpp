@@ -844,6 +844,17 @@ namespace SPEL
             }
         }
     
+        // Adding one bad label if trained partModel is empty
+        if (PartLabels.size() == 0)
+        {
+          float scoreValue = 1.0f; // {-1.0f, INFINITY} !??????
+          Score score(scoreValue, detectorName.str());
+          std::vector<Score> scores;
+          scores.push_back(score);
+          LimbLabel Label(id, PartCenter, PartAngle, partPolygon, scores); // !?????? 
+          PartLabels.push_back(Label);
+        }
+
         // Save part labels
         Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
         PartLabels.clear();
