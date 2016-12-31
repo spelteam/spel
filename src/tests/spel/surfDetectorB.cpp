@@ -161,8 +161,6 @@ namespace SPEL
     if (frame->GetImagePath().empty()) frame->cacheMask(); // !??????
     frame->UnloadMask();
 
-    std::cout << "PrepareFrame - Ok\n";
-
     return temp;
   }
 
@@ -503,7 +501,12 @@ namespace SPEL
     /*if (parameters.externalFrameHeight == 0)
       parameters.externalFrameHeight = frame_->getImageSize().height; // !??????*/
 
-    Frame* frame = preparedFrame(frame_);
+    Frame* frame = frame_;
+    bool scalingFrame = (parameters.internalFrameHeight != 0);
+    scalingFrame = (scalingFrame && parameters.internalFrameHeight != frame_->getImageSize().height);
+    if(scalingFrame)
+      frame = preparedFrame(frame_);
+
     // Create frame keypoints
     //long t0 = clock();
     cv::Mat image = frame->getImage();
@@ -559,7 +562,15 @@ namespace SPEL
     extractor->clear();
     SortedIndexes.clear();
 
-    delete frame;
+    if (scalingFrame)
+      delete frame;
+    else
+    {
+      if (frame->GetImagePath().empty()) frame->cacheImage(); // !??????
+      frame->UnloadImage();
+      if (frame->GetImagePath().empty()) frame->cacheMask(); // !??????
+      frame->UnloadMask();	  
+    }
   }
 
   void SURFDetector::Train(std::vector<Frame*> frames)
@@ -602,22 +613,27 @@ namespace SPEL
 
   std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::Detect(Frame* frame_) const
   {
-    int inputFrameHeight = frame_->getImageSize().height;
-
-    Frame* frame = preparedFrame(frame_);
+    Frame* frame = frame_;
+    bool scalingFrame = (parameters.internalFrameHeight != 0);
+    scalingFrame = (scalingFrame && parameters.internalFrameHeight != frame_->getImageSize().height);
+    if(scalingFrame)
+      frame = preparedFrame(frame_);
 
     DebugMessage(" SURFDetector Detect started", 2);
     cv::Mat image = frame->getImage();
 
     float reverseScale = 1.0f;
     if (parameters.externalFrameHeight == 0 && parameters.internalFrameHeight > 0) // !??????
+    {	
+      int inputFrameHeight = frame_->getImageSize().height;
       reverseScale = static_cast<float>(inputFrameHeight) / static_cast<float>(parameters.internalFrameHeight);
-
+    }
+      
     if (parameters.internalFrameHeight > 0 && parameters.externalFrameHeight > 0)
       reverseScale = static_cast<float>(parameters.externalFrameHeight) / static_cast<float>(parameters.internalFrameHeight);
 
-    float adjustScale = 1.0f; 
-    /*if(parameters.adjustSolves)
+    /*float adjustScale = 1.0f; 
+    if(parameters.adjustSolves)
       adjustScale = 1.0f / frame->getScale(); // ! */
 
     // Calculate frame keypoints
@@ -787,7 +803,15 @@ namespace SPEL
       }
     }
 
-    delete frame;
+    if (scalingFrame)
+      delete frame;
+    else
+    {
+      if (frame->GetImagePath().empty()) frame->cacheImage(); // !??????
+      frame->UnloadImage();
+      if (frame->GetImagePath().empty()) frame->cacheMask(); // !??????
+      frame->UnloadMask();	  
+    }
 
     DebugMessage(" SURFDetector Detect completed", 2);
     return Labels;
