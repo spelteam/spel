@@ -59,10 +59,10 @@ namespace SPEL
       parameters.FixedLenghtCells = static_cast<int>(params.at("FixedLenghtCells"));
 
       params.emplace(SPEL_SET_PARAMETER("useDefaultCellsCount", 1.0f));
-      parameters.useDefaultCellsCount = static_cast<bool>(params.at("useDefaultCellsCount"));
+      parameters.useDefaultCellsCount = (params.at("useDefaultCellsCount") >= 0.5f); // float to bool
 
       params.emplace(SPEL_SET_PARAMETER("useMask", 1.0f));
-      parameters.useMask = static_cast<bool>(params.at("useMask"));
+      parameters.useMask = (params.at("useMask") >= 0.5f); // float to bool
 
       params.emplace("maxFrameHeight", 0.0f);
       params.emplace("externalFrameHeight", params.at("maxFrameHeight"));
@@ -117,7 +117,7 @@ namespace SPEL
   {
     cv::Mat mask = frame->getMask();
     cv::Mat image = frame->getImage();
-    Frame * temp;
+    Frame * temp = 0;
     int frametype = frame->getFrametype();
     switch (frametype)
     {
@@ -166,17 +166,18 @@ namespace SPEL
 
   void SURFDetector::setAutoInternalFrameHeight(std::vector<Frame*> frames)
   {
-    int maxFrameHeight = 0;
+    int maxHeight = 0;
     for (uint32_t i = 0; i < frames.size(); i++)
     {
       int height = frames[i]->getImageSize().height;
-      if(height > maxFrameHeight) // !??????
-        maxFrameHeight = height;
+      if(height > maxHeight) // !??????
+        maxHeight = height;
       if (frames[i]->GetImagePath().empty()) frames[i]->cacheImage(); // !??????
       frames[i]->UnloadImage();      
     }
-    parameters.internalFrameHeight = maxFrameHeight;
+    parameters.internalFrameHeight = maxHeight;
   }
+
   std::vector<cv::Point2f> SURFDetector::getPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1) const
   {
     std::vector<cv::Point2f> partRect;
@@ -278,8 +279,8 @@ namespace SPEL
     int id = -2;
     if ((dl <= L) && (dw <= W))
     {
-      int nw = trunc(dw / w);
-      int nl = trunc(dl / l);
+      int nw = static_cast<int>(trunc(dw / w));
+      int nl = static_cast<int>(trunc(dl / l));
       if (dl == L) dl--;
       if (dw == W) dw--;
       id = PartID * partCellsLimit + /*CellsCount.width*CellsCount.height + */CellsCount.width*nl + nw;
@@ -301,8 +302,8 @@ namespace SPEL
       if ( abs(markingError) > 1.0f)
       {
         float e = abs(ceil(markingError));
-        int lenghtCells = trunc(getLenght(partPolygons[k]) / e);
-        int widthCells = trunc(getWidth(partPolygons[k]) / e);
+        int lenghtCells = static_cast<int>(trunc(getLenght(partPolygons[k]) / e));
+        int widthCells = static_cast<int>(trunc(getWidth(partPolygons[k]) / e));
         if (widthCells < 1) widthCells = 1;
         if (lenghtCells < 1) lenghtCells = 1;
         cellsCount = cv::Size(widthCells, lenghtCells);
@@ -346,7 +347,7 @@ namespace SPEL
         nl = trunc(lenght / parameters.minCellSize);
       if (widht /nw < parameters.minCellSize)
         nl = trunc(widht / parameters.minCellSize);
-      Trained.PartCellsCount[i] = cv::Size(nw, nl);
+      Trained.PartCellsCount[i] = cv::Size(static_cast<int>(nw), static_cast<int>(nl));
     }
   }
 
@@ -382,15 +383,22 @@ namespace SPEL
 
   cv::Rect resizeROI_(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize)
   {
-    cv::Point2f p0 = cv::Point2f(ROI.x, ROI.y) - 0.5f*cv::Point2f(NewROISize.width - ROI.width, NewROISize.height - ROI.height);
+    float dx = static_cast<float>(NewROISize.width - ROI.width);
+    float dy = static_cast<float>(NewROISize.height - ROI.height);
+    float x = static_cast<float>(ROI.x);
+    float y = static_cast<float>(ROI.y);
+
+    cv::Point2f p0 = cv::Point2f(x, y) - 0.5f*cv::Point2f(dx, dy);
 
     if (p0.x < 0) p0.x = 0;
     if (p0.y < 0) p0.y = 0;
 
     if (ImageSize != cv::Size(0, 0))
     {
-      if (p0.x + NewROISize.width > ImageSize.width)  NewROISize.width = ImageSize.width - p0.x;
-      if (p0.y + NewROISize.height > ImageSize.height) NewROISize.height = ImageSize.height - p0.y;
+      if (static_cast<int>(p0.x) + NewROISize.width > ImageSize.width)
+        NewROISize.width = ImageSize.width - static_cast<int>(p0.x);
+      if (static_cast<int>(p0.y) + NewROISize.height > ImageSize.height)
+        NewROISize.height = ImageSize.height - static_cast<int>(p0.y);
     }
 
     return cv::Rect(p0, NewROISize);
@@ -443,8 +451,8 @@ namespace SPEL
           float S = P.x*P.y;
           if ( S > maxArea)
           {
-            maxArea = S;
-            N = ROI.size() - 1;
+            maxArea = static_cast<int>(S);
+            N = static_cast<int>(ROI.size()) - 1;
           }
         }		
       }
@@ -480,7 +488,7 @@ namespace SPEL
       detector->detect(Image(ROI), FrameKeypoints);
       //cv::imwrite("zROI.jpg", Image(ROI));
       for(unsigned int i = 0; i < FrameKeypoints.size(); i++)
-      FrameKeypoints[i].pt += cv::Point2f(ROI.x,ROI.y);	
+      FrameKeypoints[i].pt += cv::Point2f(static_cast<float>(ROI.x), static_cast<float>(ROI.y));
 
       // Select mask keypoints
       Keypoints = SelectMaskKeypoints(Mask, FrameKeypoints);
@@ -613,13 +621,21 @@ namespace SPEL
 
   std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::Detect(Frame* frame_) const
   {
+    uint8_t debugLevel = 2;
+
     Frame* frame = frame_;
     bool scalingFrame = (parameters.internalFrameHeight != 0);
     scalingFrame = (scalingFrame && parameters.internalFrameHeight != frame_->getImageSize().height);
-    if(scalingFrame)
+    if (scalingFrame)
+    {
       frame = preparedFrame(frame_);
+      std::stringstream s;
+      s << " Scaling frame " << frame_->getID() << std::endl;
+      DebugMessage(s.str(), debugLevel);
+      s.clear();
+    }
 
-    DebugMessage(" SURFDetector Detect started", 2);
+    DebugMessage(" SURFDetector Detect started", debugLevel);
     cv::Mat image = frame->getImage();
 
     float reverseScale = 1.0f;
@@ -641,7 +657,7 @@ namespace SPEL
 
     std::stringstream s1;
     s1 << " Mask keypoints count: " << Keypoints.size() << std::endl;
-    DebugMessage(s1.str(), 2);
+    DebugMessage(s1.str(), debugLevel);
     s1.clear();
 
     // Extract descriptors
@@ -663,7 +679,7 @@ namespace SPEL
     cv::FlannBasedMatcher matcher;
     std::vector<std::vector<cv::DMatch>> matches;
     matcher.knnMatch(FrameDescriptors, Trained.Descriptors, matches, n);
-    DebugMessage(" Matches was created", n);
+    DebugMessage(" Matches was created", debugLevel);
 
     // Search maximal matches distance
     float maxDist = 0.0f;
@@ -676,7 +692,7 @@ namespace SPEL
     for(int i = 0; i < matches.size(); i++)
       for(int k = 0; k < n; k++)
         matches[i][k].distance = 1.0f - matches[i][k].distance/maxDist;
-    DebugMessage(" Matches was normalized", 2);
+    DebugMessage(" Matches was normalized", debugLevel);
     
     // select parts keypoints candidates 
     for (unsigned int i = 0; i < matches.size(); i++)
@@ -690,7 +706,7 @@ namespace SPEL
         if(id >= 0 && id < Trained.PartCellsCount.size())
           Local.PartKeypoints[id].push_back(i);
         else
-          DebugMessage(" Invalid part cell index", 2);
+          DebugMessage(" Invalid part cell index", debugLevel);
       }
     }
 
@@ -702,7 +718,7 @@ namespace SPEL
       {
         std::stringstream s;
         s << " Body Part " << id << " model is empty" << std::endl;
-        DebugMessage(s.str(), 2);
+        DebugMessage(s.str(), debugLevel);
         s.clear();
       }
       if(Trained.PartKeypoints.at(id).size() > 0) // or " > threshold"
@@ -798,7 +814,7 @@ namespace SPEL
       
         std::stringstream s;
         s << " Limb Labels count per Body Part " << id <<": " << LabelsPerPart << std::endl;
-        DebugMessage(s.str(), 2);
+        DebugMessage(s.str(), debugLevel);
         s.clear();
       }
     }
@@ -813,7 +829,7 @@ namespace SPEL
       frame->UnloadMask();	  
     }
 
-    DebugMessage(" SURFDetector Detect completed", 2);
+    DebugMessage(" SURFDetector Detect completed", debugLevel);
     return Labels;
   }
 

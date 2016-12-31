@@ -51,7 +51,7 @@ namespace SPEL
       float stepTheta = DETECTOR_DETECT_PARAMETERS::STEP_THETA().second;
       float uniqueLocationCandidates = DETECTOR_DETECT_PARAMETERS::UNIQUE_LOCATION_CANDIDATES_COEFFICIENT().second;
       float uniqueAngleCandidates = DETECTOR_DETECT_PARAMETERS::UNIQUE_ANGLE_CANDIDATES_COEFFICIENT().second;
-      int externalFrameHeight = COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().second; // detector::maxFrameHeight - external height for SURFDetectorB
+      int externalFrameHeight = static_cast<int>(COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().second); // detector::maxFrameHeight is external height for SURFDetectorB
       int internalFrameHeight = 0;
       /*bool adjustSolves = false; // if "true" then solves will be returned in "adjusted Frame" scale else in "maxFrameHeight" coordinates 
       //needed Skeleton::getScale() for using this parameter  */
