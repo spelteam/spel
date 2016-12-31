@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 #include <detector.hpp>
 #include <surfDetector.hpp>
-#include "surfDetectorB.hpp"
+#include "surfDetector2.hpp"
 #include "limbLabel.hpp"
 #include "spelParameters.hpp"
 #include "TestsFunctions.hpp"
@@ -493,7 +493,7 @@ namespace SPEL
     Frames.clear();
   }
   
-  TEST(SURFDetectorExperiments_B, SURFDetector)
+  TEST(SURFDetectorExperiments_B, SURFDetector2)
   {
     //Load the input data
     /*TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/A/", "trijumpSD_shortcut.xml");
@@ -520,7 +520,7 @@ namespace SPEL
     //params.emplace("internalFrameHeight", 1000);
 
     // Run train
-    SURFDetector D;
+    SURFDetector2 D;
     long train_t0 = clock();
     D.train(SFrames, params);
     long train_t1 = clock();
@@ -605,7 +605,7 @@ namespace SPEL
   {
     Point2f p0(0.0f, 0.0f), p1(10.0f, 0.0f);
     float LWRatio = 1.3f;
-    SURFDetector D;
+    SURFDetector2 D;
     for (float angle = 0.0f; angle < 360.0f; angle++)
     {
       Point2f p0_ = spelHelper::rotatePoint2D(p0, Point2f(0.0f, 0.0f), angle);

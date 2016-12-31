@@ -41,7 +41,6 @@ LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/utils/general/pr
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${TINYXML2_PATH}/tinyxml2.cpp )
 
 # libpose tests
-LIST ( APPEND ${TESTS_MODULE}_SRC spel/surfDetectorB.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/TestsFunctions.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/bodyJoint_get_and_set_tests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/bodyJoint_constructor_tests.cpp )
@@ -87,7 +86,6 @@ LIST ( APPEND ${TESTS_MODULE}_SRC spel/ImageRotationTests.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/SURFDetectorExperiments.cpp )
 LIST ( APPEND ${TESTS_MODULE}_SRC spel/SURFDetectorExperiments_B.cpp )
 
-LIST ( APPEND ${TESTS_MODULE}_HDR spel/surfDetectorB.hpp )
 LIST ( APPEND ${TESTS_MODULE}_HDR spel/TestsFunctions.hpp )
 LIST ( APPEND ${TESTS_MODULE}_HDR ${${PROJECT_NAME}_SOURCE_DIR}/utils/general/projectLoader.hpp )
 
