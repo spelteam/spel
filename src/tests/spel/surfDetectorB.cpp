@@ -782,7 +782,7 @@ namespace SPEL
               if(LabelScore > 0)
                 LabelScore = 1.0 - K*LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
               else
-                LabelScore = INFINITY;
+                LabelScore = 1.1f; // {-1.0f, INFINITY} !??????
               //Local.PartKeypoints[id].clear();
               if(LabelScore < 0.0f)
                 negativeScore = true; 
