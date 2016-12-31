@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 #include <detector.hpp>
 #include <surfDetector.hpp>
-#include "surfDetector2.hpp"
+#include "SURFDetector2.hpp"
 #include "limbLabel.hpp"
 #include "spelParameters.hpp"
 #include "TestsFunctions.hpp"

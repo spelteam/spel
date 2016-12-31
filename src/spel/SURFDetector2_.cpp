@@ -1,13 +1,11 @@
-#include "surfDetectorB.hpp"
-//#include "surfDetector.hpp"
+#include "SURFDetector2.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
 #include "interpolation.hpp"
 
-
 namespace SPEL
 {
-  void SURFDetector::SkeletonModel::clear(void)
+  void SURFDetector2::SkeletonModel::clear(void)
   {
     PartCellsCount.clear();
     PartKeypoints.clear();
@@ -16,29 +14,29 @@ namespace SPEL
     Descriptors.release();
   }
 
-  SURFDetector::SkeletonModel::~SkeletonModel(void)
+  SURFDetector2::SkeletonModel::~SkeletonModel(void)
   {
     clear();
   }
 
-  SURFDetector::SURFDetector(void)
+  SURFDetector2::SURFDetector2(void)
   {
     m_id = 0x53440000;
   }
 
-  SURFDetector::SURFDetector(std::map<std::string, float> params)
+  SURFDetector2::SURFDetector2(std::map<std::string, float> params)
   {
     m_id = 0x53440000;
     setParameters(params);
   }
 
-  SURFDetector::~SURFDetector(void)
+  SURFDetector2::~SURFDetector2(void)
   {
     Trained.clear();
   }
 
   // The set of parameters which can be changed only before training
-  void SURFDetector::setParameters(std::map<std::string, float> params)
+  void SURFDetector2::setParameters(std::map<std::string, float> params)
   {
     if(Trained.StudiedFramesID.size() == 0)
     {
@@ -79,7 +77,7 @@ namespace SPEL
   }
 
   // The set of parameters which can be changed after training
-  void SURFDetector::changeParameters(std::map<std::string, float> params) const
+  void SURFDetector2::changeParameters(std::map<std::string, float> params) const
   {
     params.emplace(COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT());
     params.emplace(DETECTOR_DETECT_PARAMETERS::SEARCH_DISTANCE_COEFFICIENT());
@@ -113,7 +111,7 @@ namespace SPEL
        DETECTOR_DETECT_PARAMETERS::SEARCH_STEP_COEFFICIENT().first);
   }
 
-  Frame* SURFDetector::preparedFrame(Frame* frame) const
+  Frame* SURFDetector2::preparedFrame(Frame* frame) const
   {
     cv::Mat mask = frame->getMask();
     cv::Mat image = frame->getImage();
@@ -164,7 +162,7 @@ namespace SPEL
     return temp;
   }
 
-  void SURFDetector::setAutoInternalFrameHeight(std::vector<Frame*> frames)
+  void SURFDetector2::setAutoInternalFrameHeight(std::vector<Frame*> frames)
   {
     int maxHeight = 0;
     for (uint32_t i = 0; i < frames.size(); i++)
@@ -178,7 +176,7 @@ namespace SPEL
     parameters.internalFrameHeight = maxHeight;
   }
 
-  std::vector<cv::Point2f> SURFDetector::getPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1) const
+  std::vector<cv::Point2f> SURFDetector2::getPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1) const
   {
     std::vector<cv::Point2f> partRect;
     cv::Point2f d = p0 - p1;
@@ -194,19 +192,19 @@ namespace SPEL
     return partRect;
   }
 
-  float SURFDetector::getLenght(std::vector<cv::Point2f> polygon) const
+  float SURFDetector2::getLenght(std::vector<cv::Point2f> polygon) const
   {
     cv::Point2f d = polygon[1] - polygon[0];
     return sqrt(d.x*d.x + d.y*d.y);
   }
 
-  float SURFDetector::getWidth(std::vector<cv::Point2f> polygon) const
+  float SURFDetector2::getWidth(std::vector<cv::Point2f> polygon) const
   {
     cv::Point2f d = polygon[3] - polygon[0];
     return sqrt(d.x*d.x + d.y*d.y);
   }
 
-  std::map<int, std::vector<cv::Point2f>> SURFDetector::getAllPolygons(Skeleton &skeleton) const
+  std::map<int, std::vector<cv::Point2f>> SURFDetector2::getAllPolygons(Skeleton &skeleton) const
   {
     std::map<int, std::vector<cv::Point2f>> Rects;
     tree<BodyPart> PartTree = skeleton.getPartTree();
@@ -220,7 +218,7 @@ namespace SPEL
     return Rects;
   }
 
-  std::vector<int> SURFDetector::PolygonsPriority(std::map<int, std::vector<cv::Point2f>> partRects) const
+  std::vector<int> SURFDetector2::PolygonsPriority(std::map<int, std::vector<cv::Point2f>> partRects) const
   {
     typedef std::pair<int, float> PartArea;
     class ComparePartsArea
@@ -246,7 +244,7 @@ namespace SPEL
     return temp;
   }
 
-  std::vector<cv::KeyPoint> SURFDetector::SelectMaskKeypoints(cv::Mat &mask, std::vector<cv::KeyPoint> FrameKeypoints) const
+  std::vector<cv::KeyPoint> SURFDetector2::SelectMaskKeypoints(cv::Mat &mask, std::vector<cv::KeyPoint> FrameKeypoints) const
   {
     std::vector<cv::KeyPoint> MaskKeypoins;
     for (unsigned int p = 0; p < FrameKeypoints.size(); p++)
@@ -260,7 +258,7 @@ namespace SPEL
     return MaskKeypoins;
   }
 
-  int SURFDetector::PartCellIndex(int PartID, cv::Point2f pt, std::vector<cv::Point2f> polygon, cv::Size CellsCount) const
+  int SURFDetector2::PartCellIndex(int PartID, cv::Point2f pt, std::vector<cv::Point2f> polygon, cv::Size CellsCount) const
   {
     if(CellsCount == cv::Size(0,0))
       CellsCount = Trained.PartCellsCount[PartID];
@@ -289,12 +287,12 @@ namespace SPEL
     return id;
   }
 
-  int SURFDetector::PartIndex(int CellIndex) const
+  int SURFDetector2::PartIndex(int CellIndex) const
   {
     return static_cast<int>(trunc(float(CellIndex) / float(partCellsLimit)));
   }
 
-  void SURFDetector::setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError)
+  void SURFDetector2::setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError)
   {
     for (unsigned int k = 0; k < partPolygons.size(); k++)
     {
@@ -312,7 +310,7 @@ namespace SPEL
     }
   }
 
-  void SURFDetector::setFixedCellsCount(cv::Size partCellsCount)
+  void SURFDetector2::setFixedCellsCount(cv::Size partCellsCount)
   {
     for (unsigned int k = 0; k < Trained.PartCellsCount.size(); k++)
     {
@@ -325,7 +323,7 @@ namespace SPEL
     }
   }
 
-  void SURFDetector::setDefaultCellsCount(void)
+  void SURFDetector2::setDefaultCellsCount(void)
   {
     std::vector<cv::Size> Default = {cv::Size(3, 3), cv::Size(1, 3), cv::Size(1, 3), cv::Size(1, 2), cv::Size(1, 5),
                                      cv::Size(1, 5), cv::Size(2, 5), cv::Size(2, 5), cv::Size(5, 5), cv::Size(2, 4),
@@ -335,7 +333,7 @@ namespace SPEL
       Trained.PartCellsCount.emplace(std::pair<int, cv::Size>(k, Default[k]));
   }
 
-  void SURFDetector::correctingCellsSize(std::map<int, std::vector<cv::Point2f>> &partPolygons)
+  void SURFDetector2::correctingCellsSize(std::map<int, std::vector<cv::Point2f>> &partPolygons)
   {
     for (unsigned int i = 0; i < partPolygons.size(); i++)
     {
@@ -472,7 +470,7 @@ namespace SPEL
   }
   //======================================
 
-  std::vector<cv::KeyPoint> SURFDetector::detectKeypoints(Frame* frame, bool useMask) const
+  std::vector<cv::KeyPoint> SURFDetector2::detectKeypoints(Frame* frame, bool useMask) const
   {
     cv::Mat Image = frame->getImage();
 
@@ -504,7 +502,7 @@ namespace SPEL
     return Keypoints;
   }
 
-  void SURFDetector::SingleFrameTrain(Frame* frame_)
+  void SURFDetector2::SingleFrameTrain(Frame* frame_)
   {
     /*if (parameters.externalFrameHeight == 0)
       parameters.externalFrameHeight = frame_->getImageSize().height; // !??????*/
@@ -581,7 +579,7 @@ namespace SPEL
     }
   }
 
-  void SURFDetector::Train(std::vector<Frame*> frames)
+  void SURFDetector2::Train(std::vector<Frame*> frames)
   {
     Trained.clear();
 
@@ -594,7 +592,7 @@ namespace SPEL
 
     DebugMessage(" SURFDetector Train completed", 2);
   }
-  void SURFDetector::train(const std::vector<Frame*> &frames, std::map<std::string, float> params)
+  void SURFDetector2::train(const std::vector<Frame*> &frames, std::map<std::string, float> params)
   {
     setParameters(params);
     /*if(parameters.externalFrameHeight == 0)
@@ -605,7 +603,7 @@ namespace SPEL
     Train(frames);
   }
 
-  std::vector<int> SURFDetector::getStudiedFramesID(void) const
+  std::vector<int> SURFDetector2::getStudiedFramesID(void) const
   {
     return Trained.StudiedFramesID;
   }
@@ -619,7 +617,7 @@ namespace SPEL
     }
   };
 
-  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::Detect(Frame* frame_) const
+  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::Detect(Frame* frame_) const
   {
     uint8_t debugLevel = 2;
     std::stringstream detectorName;
@@ -881,13 +879,13 @@ namespace SPEL
     return Labels;
   }
 
-  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector::detect(Frame* frame,
+  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::detect(Frame* frame,
        std::map<std::string, float> params, 
       const std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const
   {
     changeParameters(params);
     std::map<uint32_t, std::vector<LimbLabel>> NewLabels;
-    NewLabels = SURFDetector::Detect(frame);
+    NewLabels = SURFDetector2::Detect(frame);
 
     std::stringstream detectorName;
     detectorName << getID();
@@ -911,7 +909,7 @@ namespace SPEL
   }
 
   // It is gag
-  LimbLabel SURFDetector::generateLabel(const BodyPart &bodyPart,
+  LimbLabel SURFDetector2::generateLabel(const BodyPart &bodyPart,
       Frame *workFrame, const cv::Point2f &parent, const cv::Point2f &child,
      DetectorHelper *detectorHelper, std::map<std::string, float> params) const
   {
