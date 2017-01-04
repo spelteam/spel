@@ -791,23 +791,17 @@ namespace SPEL
               Score score(static_cast<float>(LabelScore), detectorName.str());
               std::vector<Score> scores;
               scores.push_back(score);
-              // Rescale polygon points
-              /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
-              {
-                for (int t = 0; t < LabelPolygon.size(); t++)
-                  LabelPolygon[t] *= adjustScale;
-                LabelCenter *= adjustScale;
-              }
-              else*/
-                if(reverseScale > 0 && reverseScale != 1.0f)
-                {
-                  for (int t = 0; t < LabelPolygon.size(); t++)
-                    LabelPolygon[t] *= reverseScale;
-                  LabelCenter *= reverseScale;
-                }
-              
+
               // Create LimbLabel
               LimbLabel Label(id, LabelCenter, LabelAngle, LabelPolygon, scores);
+
+              // Rescale polygon points
+              /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
+                Label.Resize(adjustScale);
+              else*/
+                if(reverseScale > 0 && reverseScale != 1.0f)
+                  Label.Resize(reverseScale);
+
               PartLabels.push_back(Label);
               scores.clear();
             }
