@@ -622,8 +622,9 @@ namespace SPEL
   std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::Detect(Frame* frame_) const
   {
     uint8_t debugLevel = 2;
-    std::stringstream detectorName;
-    detectorName << getID();
+    std::string detectorName = std::to_string(getID());
+
+    DebugMessage(" Preparing frame " + std::to_string(frame_->getID()) + "\n", debugLevel);
 
     Frame* frame = frame_;
     bool scalingFrame = (parameters.internalFrameHeight != 0);
@@ -631,10 +632,7 @@ namespace SPEL
     if (scalingFrame)
     {
       frame = preparedFrame(frame_);
-      std::stringstream s;
-      s << " Scaling frame " << frame_->getID() << std::endl;
-      DebugMessage(s.str(), debugLevel);
-      s.clear();
+      DebugMessage(" Scaling frame \n" , debugLevel);
     }
 
     DebugMessage(" SURFDetector Detect started", debugLevel);
@@ -656,11 +654,7 @@ namespace SPEL
 
     // Calculate frame keypoints
     std::vector<cv::KeyPoint> Keypoints = detectKeypoints(frame, parameters.useMask);
-
-    std::stringstream s1;
-    s1 << " Mask keypoints count: " << Keypoints.size() << std::endl;
-    DebugMessage(s1.str(), debugLevel);
-    s1.clear();
+    DebugMessage(" Mask keypoints count: " + std::to_string(Keypoints.size()) + "\n", debugLevel);
 
     // Extract descriptors
     cv::Mat FrameDescriptors;
@@ -712,17 +706,17 @@ namespace SPEL
       }
     }
 
+    float K = static_cast<float>(Trained.StudiedFramesID.size()); // Score coefficient
+
     std::map<uint32_t, std::vector<LimbLabel>> Labels;
 
     for (int id = 0; id < PartRects.size(); id++)
     {
+      std::string partID = std::to_string(id);
+
       if(Trained.PartKeypoints.at(id).size() == 0)
-      {
-        std::stringstream s;
-        s << " Body Part " << id << " model is empty" << std::endl;
-        DebugMessage(s.str(), debugLevel);
-        s.clear();
-      }
+        DebugMessage(" Body Part " + partID + " model is empty\n", debugLevel);
+
       if(Trained.PartKeypoints.at(id).size() > 0) // or " > threshold"
       {
         std::vector<cv::Point2f> partPolygon = PartRects[id]; 	  
@@ -749,11 +743,9 @@ namespace SPEL
           float LabelAngle = PartAngle + angleShift;
           for(int t = 0; t < LabelPolygon.size(); t++)
             RotatedPolygon[t] = spelHelper::rotatePoint2D(partPolygon[t], PartCenter, angleShift);
-          //b++;
           for(float x = -SearchDist; x < SearchDist; x += minStep)
             for(float y = - SearchDist; y < SearchDist; y += minStep)
             {
-              //g++;
               LabelsPerPart++;
 
               // Shift label polygon
@@ -777,8 +769,8 @@ namespace SPEL
                   }
                 }
               }
+
               // Normalize and inverse score
-              float K = static_cast<float>(Trained.StudiedFramesID.size()); // insurance, temporary fix
               if(LabelScore > 0)
                 LabelScore = 1.0 - K*LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
               else
@@ -788,14 +780,14 @@ namespace SPEL
                 negativeScore = true; 
 
               // Create scores
-              Score score(static_cast<float>(LabelScore), detectorName.str());
+              Score score(static_cast<float>(LabelScore), detectorName);
               std::vector<Score> scores;
               scores.push_back(score);
 
               // Create LimbLabel
               LimbLabel Label(id, LabelCenter, LabelAngle, LabelPolygon, scores);
 
-              // Rescale polygon points
+              // Rescale LimpLabel
               /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
                 Label.Resize(adjustScale);
               else*/
@@ -813,10 +805,7 @@ namespace SPEL
         // Insurance, temporary fix: score can be less then 0.0f if keyframes has too different keypoints combination
         if (negativeScore)
         {
-          std::stringstream s;
-          s << "Renormalize scores for part " << id << std::endl;
-          DebugMessage(s.str(), debugLevel);
-          s.clear();
+          DebugMessage("Renormalize scores for part " + partID + "\n", debugLevel);
 
           float scoreValue = 0.0f;
           float minScore = 0.0f;
@@ -830,7 +819,7 @@ namespace SPEL
             for (int l = 0; l < PartLabels.size(); l++)
             {
               scoreValue = (PartLabels[l].getAvgScore() - minScore)/(1.0f - minScore);
-              Score score(scoreValue, detectorName.str());
+              Score score(scoreValue, detectorName);
               std::vector<Score> scores;
               scores.push_back(score);
               LimbLabel Label(id, PartLabels[l].getCenter(), PartLabels[l].getAngle(), PartLabels[l].getPolygon(), scores);
@@ -842,7 +831,7 @@ namespace SPEL
         if (PartLabels.size() == 0)
         {
           float scoreValue = 1.0f; // {-1.0f, INFINITY} !??????
-          Score score(scoreValue, detectorName.str());
+          Score score(scoreValue, detectorName);
           std::vector<Score> scores;
           scores.push_back(score);
           LimbLabel Label(id, PartCenter, PartAngle, partPolygon, scores); // !?????? 
@@ -853,10 +842,8 @@ namespace SPEL
         Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
         PartLabels.clear();
       
-        std::stringstream s;
-        s << " Limb Labels count per Body Part " << id <<": " << LabelsPerPart << std::endl;
-        DebugMessage(s.str(), debugLevel);
-        s.clear();
+        std::string message = " Limb Labels count per Body Part " + partID + ": " + std::to_string(LabelsPerPart) + "\n";
+        DebugMessage(message, debugLevel);
       }
     }
 
@@ -896,8 +883,6 @@ namespace SPEL
           parameters.isWeakThreshold);
       filteredLabels.emplace(std::pair<uint32_t, std::vector<LimbLabel>>(i, partLabels));
     }
-
-    detectorName.clear();
 
     //return NewLabels;
     return merge(limbLabels, filteredLabels, std::map<uint32_t, std::vector<LimbLabel>>());
