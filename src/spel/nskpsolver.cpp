@@ -397,8 +397,7 @@ namespace SPEL
 
         const auto labelsCount = labels.size();
         // obtain the (approximate) argmin
-        std::vector<size_t> labeling;
-        labeling.reserve(labelsCount);
+        std::vector<size_t> labeling(labelsCount);
         bp.arg(labeling);
 
         std::vector<LimbLabel> solutionLabels;
