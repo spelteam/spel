@@ -11,10 +11,7 @@ namespace SPEL
     m_center = cv::Point2f(0, 0);
     m_angle = 0;
     m_scores = std::vector<Score>();
-    m_polygon = std::vector<cv::Point2f>();
-    m_polygon.reserve(4);
-    for (auto i = 0; i < 4; ++i)
-      m_polygon.push_back(cv::Point2f(0, 0));
+    m_polygon = std::vector<cv::Point2f>(4, cv::Point2f(0, 0));
     m_isOccluded = true;
   }
 
