@@ -627,18 +627,18 @@ namespace SPEL
     DebugMessage(" Preparing frame " + std::to_string(frame_->getID()) + "\n", debugLevel);
 
     Frame* frame = frame_;
-    bool scalingFrame = (parameters.internalFrameHeight != 0);
+    /*bool scalingFrame = (parameters.internalFrameHeight != 0);
     scalingFrame = (scalingFrame && parameters.internalFrameHeight != frame_->getImageSize().height);
     if (scalingFrame)
     {
       frame = preparedFrame(frame_);
       DebugMessage(" Scaling frame \n" , debugLevel);
-    }
+    }*/
 
     DebugMessage(" SURFDetector Detect started", debugLevel);
     cv::Mat image = frame->getImage();
 
-    float reverseScale = 1.0f;
+/*    float reverseScale = 1.0f;
     if (parameters.externalFrameHeight == 0 && parameters.internalFrameHeight > 0) // !??????
     {	
       int inputFrameHeight = frame_->getImageSize().height;
@@ -647,7 +647,7 @@ namespace SPEL
       
     if (parameters.internalFrameHeight > 0 && parameters.externalFrameHeight > 0)
       reverseScale = static_cast<float>(parameters.externalFrameHeight) / static_cast<float>(parameters.internalFrameHeight);
-
+*/
     /*float adjustScale = 1.0f; 
     if(parameters.adjustSolves)
       adjustScale = 1.0f / frame->getScale(); // ! */
@@ -723,6 +723,7 @@ namespace SPEL
       float PartAngle = static_cast<float>(spelHelper::getAngle(partPolygon[0], partPolygon[1]));
 
       // Create limbLabels
+      std::vector<LimbLabel> PartLabels;
       if(Trained.PartKeypoints.at(id).size() > 0) // or " > threshold"
       {	  
         float partLenght = getLenght(partPolygon);
@@ -738,7 +739,7 @@ namespace SPEL
 
         bool negativeScore = false;
         int LabelsPerPart = 0;
-        std::vector<LimbLabel> PartLabels;
+
 
         for (float angleShift = - parameters.minTheta; angleShift < parameters.maxTheta; angleShift += parameters.stepTheta)
         { 
@@ -794,8 +795,8 @@ namespace SPEL
               /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
                 Label.Resize(adjustScale);
               else*/
-                if(reverseScale > 0 && reverseScale != 1.0f)
-                  Label.Resize(reverseScale);
+              /*  if(reverseScale > 0 && reverseScale != 1.0f)
+                  Label.Resize(reverseScale);*/
 
               PartLabels.push_back(Label);
               scores.clear();
@@ -831,30 +832,30 @@ namespace SPEL
         }
     
         // Save part labels
-        Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
-        PartLabels.clear();
-      
+        if(PartLabels.size() > 0)
+          Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
+   
         std::string message = " Limb Labels count per Body Part " + partID + ": " + std::to_string(LabelsPerPart) + "\n";
         DebugMessage(message, debugLevel);
       }
-	  // Adding one bad label if trained partModel is empty
-      if (Trained.PartKeypoints.at(id).size() == 0)
+
+      // Adding one bad label if trained partModel is empty
+      if (PartLabels.size() == 0)
       {
-        std::vector<LimbLabel> PartLabels;
-        float scoreValue = 1.0f; // {-1.0f, INFINITY} !??????
+        float scoreValue = 1.1f; // {-1.0f, INFINITY} !??????
         Score score(scoreValue, detectorName);
         std::vector<Score> scores;
         scores.push_back(score);
         LimbLabel Label(id, PartCenter, PartAngle, partPolygon, scores); // !?????? 
         PartLabels.push_back(Label);
         Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
-        PartLabels.clear(); 
       }
+      PartLabels.clear();
     }
 
-    if (scalingFrame)
+    /*if (scalingFrame)
       delete frame;
-    else
+    else*/
     {
       if (frame->GetImagePath().empty()) frame->cacheImage(); // !??????
       frame->UnloadImage();
