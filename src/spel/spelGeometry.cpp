@@ -2,6 +2,8 @@
 
 namespace SPEL
 {
+//ROI
+
   // Matrixes for search contour operations
   const uchar C_[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; 
   const cv::Point2i P_[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) };
@@ -159,4 +161,154 @@ namespace SPEL
 
     return cv::Rect(p0, NewROISize);
   }
+
+//PartPolygons
+
+  std::vector<cv::Point2f> buildPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1)
+  {
+    std::vector<cv::Point2f> partRect;
+    cv::Point2f d = p0 - p1;
+    //if (LWRatio <=0) DebugMessage(" LWRatio <= 0", 2);
+    if (LWRatio > 0)
+    {
+      float k = 0.5f/LWRatio;
+      float dx = k*(d.y);
+      float dy = k*(-d.x);
+      partRect.push_back(cv::Point2f(p0.x + dx, p0.y + dy));
+      partRect.push_back(cv::Point2f(p1.x + dx, p1.y + dy));
+      partRect.push_back(cv::Point2f(p1.x - dx, p1.y - dy));
+      partRect.push_back(cv::Point2f(p0.x - dx, p0.y - dy));
+    }
+
+    return partRect;
+  }
+
+  float getLenght(std::vector<cv::Point2f> partPolygon)
+  {
+    cv::Point2f d = partPolygon[1] - partPolygon[0];
+    return sqrt(d.x*d.x + d.y*d.y);
+  }
+
+  float getWidth(std::vector<cv::Point2f> partPolygon)
+  {
+    cv::Point2f d = partPolygon[3] - partPolygon[0];
+    return sqrt(d.x*d.x + d.y*d.y);
+  }
+
+  std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton &skeleton)
+  {
+    std::map<int, std::vector<cv::Point2f>> Rects;
+    tree<BodyPart> PartTree = skeleton.getPartTree();
+    for (tree<BodyPart>::iterator BP_iterator = PartTree.begin(); BP_iterator != PartTree.end(); BP_iterator++)
+    {
+      BodyJoint *j0 = skeleton.getBodyJoint(BP_iterator->getParentJoint());
+      BodyJoint *j1 = skeleton.getBodyJoint(BP_iterator->getChildJoint());
+      std::vector<cv::Point2f> Rect = buildPartPolygon(BP_iterator->getLWRatio(), j0->getImageLocation(), j1->getImageLocation());
+      Rects.emplace(std::pair<int, std::vector<cv::Point2f>>((*BP_iterator).getPartID(), Rect));
+    }
+    return Rects;
+  }
+
+//Skeleton
+
+  Skeleton operator+(Skeleton s1, Skeleton s2)
+  {
+    Skeleton s;
+    tree<BodyJoint> joints1 = s1.getJointTree(); 
+    tree<BodyJoint> joints2 = s2.getJointTree();
+    if (joints1.size() == joints2.size())
+    {
+      tree<BodyJoint>::iterator i1 = joints1.begin();
+      tree<BodyJoint>::iterator i2 = joints2.begin();
+      for (i1; i1 != joints1.end(); i1++)
+      {
+        cv::Point2f a = i1->getImageLocation() + i2->getImageLocation();
+        cv::Point3f b = i1->getSpaceLocation() + i2->getSpaceLocation();
+        i1->setImageLocation(a);
+        i1->setSpaceLocation(b);
+        i2++;
+      }
+      s = s1;
+      s.setJointTree(joints1);
+    }
+    
+    return s;
+  }
+
+  Skeleton operator+(Skeleton s, cv::Point2f P)
+  {
+    Skeleton s1;
+    tree<BodyJoint> joints1 = s.getJointTree(); 
+    tree<BodyJoint>::iterator i1 = joints1.begin();
+    for (i1; i1 != joints1.end(); i1++)
+    {
+      cv::Point2f a = i1->getImageLocation() + P;
+      cv::Point3f b = i1->getSpaceLocation() + cv::Point3f(P.x, P.y, 0.0f);
+      i1->setImageLocation(a);
+      i1->setSpaceLocation(b);
+    }
+    s1 = s;
+    s1.setJointTree(joints1);
+
+    return s1;
+  }
+
+  Skeleton operator+(cv::Point2f P, Skeleton s)
+  {
+    return (s + P);
+  }
+
+  Skeleton operator-(Skeleton s1, cv::Point2f P)
+  {
+    return s1+(-P);
+  }
+
+  Skeleton operator*(Skeleton s, float k)
+  {
+    Skeleton s1;
+    tree<BodyJoint> joints1 = s.getJointTree();
+
+    tree<BodyJoint>::iterator i1 = joints1.begin();
+    for (i1; i1 != joints1.end(); i1++)
+    {
+      cv::Point2f a = i1->getImageLocation() * k;
+      cv::Point3f b = i1->getSpaceLocation() * k;
+      i1->setImageLocation(a);
+      i1->setSpaceLocation(b);
+    }
+    s1 = s;
+    s1.setJointTree(joints1);
+
+    return s1;
+  }
+
+  Skeleton operator*(float k, Skeleton s)
+  {
+    return (s*k);
+  }
+
+  Skeleton operator/(Skeleton s, float k)
+  {
+    Skeleton s1;
+    if(k != 0.0f) s1 = s*(1/k);
+
+    return s1;
+  }
+
+//Visualization
+
+  void PutPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color)
+  {
+    polygon.push_back(polygon[0]);
+    for (unsigned int i = 1; i < polygon.size(); i++)
+      line(Image, polygon[i - 1], polygon[i], color, 1, 1);
+  }
+
+  void putSkeleton(cv::Mat image, Skeleton skeleton, cv::Scalar color)
+  {
+    std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
+    for (auto p = 0; p < polygons.size(); p++)
+      PutPartRect(image, polygons[p], color);
+  }
+
 }

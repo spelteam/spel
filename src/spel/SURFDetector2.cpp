@@ -178,48 +178,11 @@ namespace SPEL
     }
     parameters.internalFrameHeight = maxHeight;
   }
-
-  std::vector<cv::Point2f> SURFDetector2::getPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1) const
-  {
-    std::vector<cv::Point2f> partRect;
-    cv::Point2f d = p0 - p1;
-    if (LWRatio <=0) DebugMessage(" LWRatio <= 0", 2);
-    float k = 0.5f/LWRatio;
-    float dx = k*(d.y);
-    float dy = k*(-d.x);
-    partRect.push_back(cv::Point2f(p0.x + dx, p0.y + dy));
-    partRect.push_back(cv::Point2f(p1.x + dx, p1.y + dy));
-    partRect.push_back(cv::Point2f(p1.x - dx, p1.y - dy));
-    partRect.push_back(cv::Point2f(p0.x - dx, p0.y - dy));
-
-    return partRect;
-  }
-
-  float SURFDetector2::getLenght(std::vector<cv::Point2f> polygon) const
-  {
-    cv::Point2f d = polygon[1] - polygon[0];
-    return sqrt(d.x*d.x + d.y*d.y);
-  }
-
-  float SURFDetector2::getWidth(std::vector<cv::Point2f> polygon) const
-  {
-    cv::Point2f d = polygon[3] - polygon[0];
-    return sqrt(d.x*d.x + d.y*d.y);
-  }
-
-  std::map<int, std::vector<cv::Point2f>> SURFDetector2::getAllPolygons(Skeleton &skeleton) const
-  {
-    std::map<int, std::vector<cv::Point2f>> Rects;
-    tree<BodyPart> PartTree = skeleton.getPartTree();
-    for (tree<BodyPart>::iterator BP_iterator = PartTree.begin(); BP_iterator != PartTree.end(); BP_iterator++)
-    {
-      BodyJoint *j0 = skeleton.getBodyJoint(BP_iterator->getParentJoint());
-      BodyJoint *j1 = skeleton.getBodyJoint(BP_iterator->getChildJoint());
-      std::vector<cv::Point2f> Rect = getPartPolygon(BP_iterator->getLWRatio(), j0->getImageLocation(), j1->getImageLocation());
-      Rects.emplace(std::pair<int, std::vector<cv::Point2f>>((*BP_iterator).getPartID(), Rect));
-    }
-    return Rects;
-  }
+  // Moved to "spelGeometry.cpp":
+  // std::vector<cv::Point2f> SURFDetector2::getPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1) const;
+  // float SURFDetector2::getLenght(std::vector<cv::Point2f> polygon) const;
+  // float SURFDetector2::getWidth(std::vector<cv::Point2f> polygon) const;
+  // std::map<int, std::vector<cv::Point2f>> SURFDetector2::getAllPolygons(Skeleton &skeleton) const;
 
   std::vector<int> SURFDetector2::PolygonsPriority(std::map<int, std::vector<cv::Point2f>> partRects) const
   {
@@ -821,7 +784,7 @@ namespace SPEL
     int id = bodyPart.getPartID();
     float angle = spelHelper::getAngle(parent, child);
     cv::Point2f center = 0.5f*(parent + child);
-    std::vector<cv::Point2f> polygon = getPartPolygon(bodyPart.getLWRatio(), parent, child);
+    std::vector<cv::Point2f> polygon = buildPartPolygon(bodyPart.getLWRatio(), parent, child);
     float LabelScore = 0.0f;
 
     for (unsigned int p = 0; p < MaskKeypoins.size(); p++)

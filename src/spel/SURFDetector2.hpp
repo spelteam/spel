@@ -101,12 +101,14 @@ namespace SPEL
     std::vector<cv::KeyPoint> detectKeypoints(Frame* frame, bool useMask = true) const;
     mutable Parameters parameters;
     mutable SkeletonModel Trained;
-
-    float getLenght(std::vector<cv::Point2f> polygon) const;
+    
+    // Moved to "spelGeometry.cpp":
+    /*float getLenght(std::vector<cv::Point2f> polygon) const;
     float getWidth(std::vector<cv::Point2f> polygon) const;
     std::vector<cv::Point2f> getPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1) const;
-
     std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton &skeleton) const;
+    */
+    
     std::vector<int> PolygonsPriority(std::map<int, std::vector<cv::Point2f>> partRects) const;
     std::vector<cv::KeyPoint> SelectMaskKeypoints(cv::Mat &mask, std::vector<cv::KeyPoint> FrameKeypoints) const;
     int PartCellIndex(int PartID, cv::Point2f pt, std::vector<cv::Point2f> polygon, cv::Size CellsCount = cv::Size(0, 0)) const;

@@ -17,6 +17,7 @@
 #include "spelParameters.hpp"
 #include "TestsFunctions.hpp"
 #include "spelHelper.hpp"
+#include "spelGeometry.hpp"
 
 using namespace std;
 #if defined (HAVE_OPENCV_XFEATURES2D)
@@ -613,7 +614,7 @@ namespace SPEL
       BodyPart bodyPart(0, "", 0, 1);
       bodyPart.setLWRatio(LWRatio);
 
-      vector<Point2f> polygon = D.getPartPolygon(LWRatio, p0_, p1_);
+      vector<Point2f> polygon = getPartPolygon(LWRatio, p0_, p1_);
       vector<Point2f> rect = bodyPart.getBodyPartRect(p0_, p1_).asVector();
       
       for (int i = 0; i < polygon.size(); i++)
