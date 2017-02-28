@@ -53,8 +53,8 @@ namespace SPEL
   Skeleton operator/(Skeleton s, float k);
 
 //Visualization
-  void putPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color);
-  void putSkeleton(cv::Mat image, Skeleton skeleton, cv::Scalar color);
+  void putPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color = cv::Scalar(255, 255, 255));
+  void putSkeleton(cv::Mat image, Skeleton skeleton, cv::Scalar color = cv::Scalar(255, 255, 255));
 }
 
 #endif;
