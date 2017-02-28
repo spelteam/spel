@@ -24,8 +24,12 @@
 
 namespace SPEL
 {
-  // Return ROI (rect which include white object with max area on this mask image)
-  cv::Rect SearchROI_(cv::Mat mask);
+  // Return ROI (endpoints of the rect which include white object with max area on this mask image)
+  std::vector<cv::Point2i> SearchROI(cv::Mat mask);
+  cv::Rect toROIRect(std::vector<cv::Point2i> endpoints);
+  // Search center of white figure in the ROI of cv::Mat<UC_8UC1> image
+  cv::Point2i MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROIEndpoints, uchar colorThreshold = 9);
+  cv::Point2i MaskCenter(cv::Mat mask, cv::Rect ROIRect, uchar colorThreshold = 9);
 
   // ROI transformation: to narrow or extend
   cv::Rect resizeROI_(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize = cv::Size(0,0) );

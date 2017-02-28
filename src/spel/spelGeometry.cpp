@@ -2,8 +2,9 @@
 
 namespace SPEL
 {
-  const uchar C_[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; // Matrix for search contour operation
-  const cv::Point2i P_[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) }; // Matrix for search contour operation
+  // Matrixes for search contour operations
+  const uchar C_[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; 
+  const cv::Point2i P_[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) };
 
   // Search contour iteration
   bool f_(cv::Mat mask, cv::Point2i &p0, cv::Point2i &p1, cv::Point2i p00)
@@ -32,7 +33,7 @@ namespace SPEL
   }
 
   // Search all ROI on the mask and return coordinates of max ROI: {topLeft, bottomRight}
-  cv::Rect SearchROI_(cv::Mat mask)
+  std::vector<cv::Point2i> SearchROI(cv::Mat mask)
   {
     cv::Size size = mask.size();
     int cols = size.width;
@@ -90,14 +91,52 @@ namespace SPEL
       temp.push_back(ROI[N].second);
     }
 
-    cv::Rect maskROI(temp[0], temp[1]);
+    //cv::Rect maskROI(temp[0], temp[1]);
     /*cv::Size borderSize = cv::Size(5, 5);
     borderSize += borderSize;
     maskROI = resizeROI_(maskROI, maskROI.size() + borderSize, mask.size());*/
 
+    return temp; // vector of ROI endpoints
+  }
+
+  cv::Rect toROIRect(std::vector<cv::Point2i> endpoints)
+  {
+    cv::Rect maskROI(endpoints[0], endpoints[1]);
     return maskROI;
   }
 
+  // Search center of mask in the ROI
+  // "ROIEndpoints" - endpoints of mask ROI: {topLeft, bottomRight}
+  // "colorThreshold" -  max value of background color, white pixel threshold
+  cv::Point2i MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROIEndpoints, uchar colorThreshold)
+  {
+    double N = 0;
+    cv::Point2d center(0.0, 0.0);
+    for (int y = ROIEndpoints[0].y; y <= ROIEndpoints[1].y; y++ )
+      for (int x = ROIEndpoints[0].x; x <= ROIEndpoints[1].x; x++)
+      {
+        if(mask.at<uchar>(y,x) > colorThreshold)
+        { 
+          N++;
+          center = center + cv::Point2d(x, y);
+        }         
+      }
+
+    return cv::Point2i(static_cast<int>(round(center.x/ N)), static_cast<int>(round(center.y/N)));
+  }
+
+  // Search center of mask in the ROI
+  // "colorThreshold" -  max value of background color, white pixel threshold
+  cv::Point2i MaskCenter(cv::Mat mask, cv::Rect ROIRect, uchar colorThreshold)
+  {
+    cv::Point2i p0(ROIRect.x, ROIRect.y);
+    cv::Point2i p1(ROIRect.x + ROIRect.width, ROIRect.y + ROIRect.height);
+    std::vector<cv::Point2i> endpoints = { p1, p0 };
+
+    return MaskCenter(mask, endpoints, colorThreshold);
+  }
+
+  // ?
   cv::Rect resizeROI_(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize)
   {
     float dx = static_cast<float>(NewROISize.width - ROI.width);

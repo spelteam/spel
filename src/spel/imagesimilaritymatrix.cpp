@@ -1,6 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "imagesimilaritymatrix.hpp"
+#include "spelGeometry.hpp"
 
 namespace SPEL
 {
@@ -393,117 +394,13 @@ namespace SPEL
   //----------------------------------------------------------
   // Alternative MSM
 
-  uchar C[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } }; // Matrix for search contour operation
-  cv::Point2i P[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) }; // Matrix for search contour operation
+  // Moved to "spelGeometry.cpp":
+  // uchar C[3][3] = { { 7, 0, 1 },{ 6, 0, 2 },{ 5, 4, 3 } };
+  // cv::Point2i P[8] = { cv::Point2i(0, -1), cv::Point2i(1, -1), cv::Point2i(1, 0), cv::Point2i(1, 1), cv::Point2i(0, 1), cv::Point2i(-1, 1), cv::Point2i(-1, 0), cv::Point2i(-1, -1) };
+  // bool f(cv::Mat mask, cv::Point2i &p0, cv::Point2i &p1, cv::Point2i p00);
+  // std::vector<cv::Point2i> SearchROI(cv::Mat mask);
+  //
 
-  // Search contour iteration
-  bool f(cv::Mat mask, cv::Point2i &p0, cv::Point2i &p1, cv::Point2i p00)
-  {
-    int Q = 9;
-    cv::Size size = mask.size();
-    bool color = 0;
-    cv::Point2i d = p0 - p1, p = p0;
-    int n = C[d.y + 1][d.x + 1];
-
-    int  k = 0;
-    while (!color)
-    { 
-      p0 = p;
-      p = p1 + P[n];
-      if (k > 7) p = p00;
-      if((p.x >= 0) && (p.x < size.width) && (p.y >= 0) && (p.y < size.height))
-      { color = (mask.at<uchar>(p.y, p.x) > Q); }
-      else { color = 0; }
-      n++;
-      if (n > 7) n = 0;
-      k++;
-    }
-    p1 = p;
-    return (p1 == p00);
-  }
-
-  // Search all ROI on the mask and return coordinates of max ROI: {topLeft, bottomRight}
-  std::vector<cv::Point2i> SearchROI(cv::Mat mask)
-  {
-    cv::Size size = mask.size();
-    int cols = size.width;
-    int rows = size.height;
-
-    int Q = 10 - 1;
-    int maxArea = 0;
-    int N = -1;
-
-    std::vector<std::pair<cv::Point2i, cv::Point2i>> ROI;
-
-    for (int y = 0; y < rows; y++)
-      for (int x = 0; x < cols; x++)
-      {
-        cv::Point2i p(x, y);
-        bool b = false;
-        for (int i = 0; i < ROI.size(); i++)
-        {
-          if((p.x >= ROI[i].first.x) && (p.x <= ROI[i].second.x) && (p.y >= ROI[i].first.y) && (p.y <= ROI[i].second.y))
-          {
-            x = ROI[i].second.x;
-            b = true;
-          }
-        }
-        if ((!b) && (mask.at<uchar>(y, x) > Q))
-        {
-          cv::Point2i  p1 = p, p0 = p + cv::Point2i(-1, 0), p00 = p;
-
-          bool FindedStartPoint = false;
-          cv::Point2i A(cols, rows), B(0, 0);
-
-          while (!FindedStartPoint)
-          {
-            FindedStartPoint = f(mask, p0, p1, p00);
-
-            if (p1.x < A.x) A.x = p1.x;
-            if (p1.x > B.x) B.x = p1.x;
-            if (p1.y < A.y) A.y = p1.y;
-            if (p1.y > B.y) B.y = p1.y;
-          }
-          ROI.push_back(std::pair<cv::Point2f, cv::Point2f>(A, B));
-          cv::Point2f P = B - A;
-          float S = P.x*P.y;
-          if ( S > maxArea)
-          {
-            maxArea = S;
-            N = ROI.size() - 1;
-          }
-        }		
-      }
-    std::vector<cv::Point2i> temp;
-    if (N > -1)
-    {
-      temp.push_back(ROI[N].first);
-      temp.push_back(ROI[N].second);
-    }
-
-    return temp;
-    }
-
-  // Search center of mask in the ROI
-  // "ROI" - end points of mask ROI: {topLeft, bottomRight}
-  cv::Point2i MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROI)
-  {
-    uchar Q = 10 - 1;
-    double N = 0;
-    cv::Point2d center(0.0, 0.0);
-    for (int y = ROI[0].y; y <= ROI[1].y; y++ )
-      for (int x = ROI[0].x; x <= ROI[1].x; x++)
-      {
-        if(mask.at<uchar>(y,x) > Q)
-        { 
-          N++;
-          center = center + cv::Point2d(x, y);
-        }         
-      }
-
-    return cv::Point2i(static_cast<int>(round(center.x/ N)), static_cast<int>(round(center.y/N)));
-  }
- 
   // Build MaskSimilarityMatrix  
   // Test version
   // "UseRGBScore" = false  - for build MSM

@@ -368,7 +368,7 @@ namespace SPEL
     {
       // Detect ROI keypoints
       cv::Mat Mask = frame->getMask();
-      cv::Rect ROI = SearchROI_(Mask);
+      cv::Rect ROI = toROIRect(SearchROI(Mask));
       //Image.adjustROI(ROI.y, ROI.y+ROI.height, ROI.x, ROI.width);
       std::vector<cv::KeyPoint> FrameKeypoints;
       detector->detect(Image(ROI), FrameKeypoints);
