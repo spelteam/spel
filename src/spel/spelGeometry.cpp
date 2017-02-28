@@ -297,7 +297,7 @@ namespace SPEL
 
 //Visualization
 
-  void PutPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color)
+  void putPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color)
   {
     polygon.push_back(polygon[0]);
     for (unsigned int i = 1; i < polygon.size(); i++)
@@ -308,7 +308,7 @@ namespace SPEL
   {
     std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
     for (auto p = 0; p < polygons.size(); p++)
-      PutPartRect(image, polygons[p], color);
+      putPartRect(image, polygons[p], color);
   }
 
 }
