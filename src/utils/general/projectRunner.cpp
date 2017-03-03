@@ -61,6 +61,8 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
   }
   map <string, float> params;
   params.emplace("debugLevel", debugLevel);
+  params.emplace("useDedefaultScale", 1.0f);
+  params.emplace("defaultScale", 1.0f);
 
   vector <Frame*> allFrames = projectLoader.getFrames();
   vector <Frame*> trainFrames;
@@ -72,7 +74,7 @@ int ProjectRunner::Run(int argc, char **argv, map <uint32_t, map <uint32_t, vect
     seq = new Sequence(0, testName, allFrames);
     if (seq != 0)
     {
-      seq->estimateUniformScale(params);
+      //seq->estimateUniformScale(params);
       seq->computeInterpolation(params);
     }
     else
