@@ -511,13 +511,15 @@ namespace SPEL
     extractor->compute(image, Keypoints, FrameDescriptors);
 
     // Create skeleton model for the current frame
-    SkeletonModel Local;
+    //SkeletonModel Local;
+    Local.clear();
     Local.Keypoints = Keypoints;
     Local.Descriptors = FrameDescriptors;
     Skeleton skeleton = frame->getSkeleton();
     std::map<int, std::vector<cv::Point2f>> PartRects = getAllPolygons(skeleton);
     for (int i = 0; i < PartRects.size(); i++)
       Local.PartKeypoints.emplace(i, std::vector<int>());
+    SkeletonModel Temp = Local;
 
     // Create matches
     int n = 2; //matches per keypoint
@@ -618,7 +620,7 @@ namespace SPEL
                   if(Trained.Keypoints[matches[k][0].trainIdx].class_id == partCellID)
                   {
                     LabelScore = LabelScore + matches[k][0].distance;
-                    //Local.PartKeypoints[id].push_back(p);
+                    Temp.PartKeypoints[id].push_back(p);
                   }
                 }
               }
@@ -701,6 +703,9 @@ namespace SPEL
       }
       PartLabels.clear();
     }
+
+    Local = Temp;
+    Temp.clear();
 
     /*if (scalingFrame)
       delete frame;
@@ -805,4 +810,25 @@ namespace SPEL
     return Label;
   }
 
+  std::vector<cv::KeyPoint> SURFDetector2::getPartKeypoints(int partID) const
+  {
+    std::vector<cv::KeyPoint> keypoints;
+
+    if (partID < Local.PartKeypoints.size())
+      for (int i = 0; i < Local.PartKeypoints[partID].size(); i++)
+      {
+        int k = Local.PartKeypoints[partID][i];
+        keypoints.push_back(Local.Keypoints[k]);
+      }
+    return keypoints;
+  }
+
+  std::map<uint32_t, std::vector<cv::KeyPoint>> SURFDetector2::getPartsKeypoints() const
+  {
+    std::map<uint32_t, std::vector<cv::KeyPoint>> partsKeytoints;
+    for(int i = 0; i < Local.PartKeypoints.size(); i++)
+      partsKeytoints.emplace(std::pair<int, std::vector<cv::KeyPoint>>(i, getPartKeypoints(i)));
+
+    return partsKeytoints;
+  }
 }

@@ -92,6 +92,9 @@ namespace SPEL
           std::map<std::string, float> params,
          const std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const;
 
+      std::vector<cv::KeyPoint> getPartKeypoints(int partID) const;
+      std::map<uint32_t, std::vector<cv::KeyPoint>> getPartsKeypoints() const;
+
   private:
     const int partCellsLimit = 100000;
     void setCellsCount(std::map<int, std::vector<cv::Point2f>> &partPolygons, float markingError);
@@ -101,6 +104,7 @@ namespace SPEL
     std::vector<cv::KeyPoint> detectKeypoints(Frame* frame, bool useMask = true) const;
     mutable Parameters parameters;
     mutable SkeletonModel Trained;
+    mutable SkeletonModel Local;
     
     // Moved to "spelGeometry.cpp":
     /*float getLenght(std::vector<cv::Point2f> polygon) const;
