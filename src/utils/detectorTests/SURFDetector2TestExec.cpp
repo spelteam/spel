@@ -5,6 +5,6 @@
 
 int main(int argc, char **argv)
 {
-  SURFDetectorTest test;
+  SURFDetector2Test test;
   return test.Run(argc, argv);
 }

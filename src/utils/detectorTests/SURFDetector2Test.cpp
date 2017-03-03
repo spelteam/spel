@@ -3,22 +3,22 @@
 
 #include "SURFDetector2Test.hpp"
 
-void SURFDetectorTest::train(vector <Frame*> _frames, map <string, float> params)
+void SURFDetector2Test::train(vector <Frame*> _frames, map <string, float> params)
 {
   SURFDetector2::train(_frames, params);
 }
-map <uint32_t, vector <LimbLabel> > SURFDetectorTest::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
+map <uint32_t, vector <LimbLabel> > SURFDetector2Test::detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels)
 {
   return SURFDetector2::detect(frame, params, limbLabels);
   detected.emplace(std::pair<uint32_t, std::map<uint32_t, std::vector<cv::KeyPoint>>>(frame->getID(), getPartsKeypoints()));
 }
 
-void SURFDetectorTest::DrawSpecific(string outFolder)
+void SURFDetector2Test::DrawSpecific(string outFolder)
 {
   drawFramesKeyPoints(outFolder, Scalar(0, 255, 0));
 }
 
-bool SURFDetectorTest::drawFramesKeyPoints(string outFolder, Scalar color)
+bool SURFDetector2Test::drawFramesKeyPoints(string outFolder, Scalar color)
 {
   ProjectLoader::CreateDirectorySystemIndependent(outFolder);
   string outFileName = outFolder;
@@ -60,7 +60,7 @@ bool SURFDetectorTest::drawFramesKeyPoints(string outFolder, Scalar color)
   return true;
 }
 
-Mat SURFDetectorTest::drawKeyPoints(Frame *frame, std::vector<cv::KeyPoint> keypoints, Scalar color)
+Mat SURFDetector2Test::drawKeyPoints(Frame *frame, std::vector<cv::KeyPoint> keypoints, Scalar color)
 {
   Mat source = frame->getImage();
   Mat destination = source.clone();

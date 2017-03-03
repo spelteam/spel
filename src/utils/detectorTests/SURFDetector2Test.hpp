@@ -5,10 +5,10 @@
 using namespace std;
 using namespace SPEL;
 
-class SURFDetectorTest : public ProjectRunner, public SURFDetector2
+class SURFDetector2Test : public ProjectRunner, public SURFDetector2
 {
 public:
-  SURFDetectorTest(void) : ProjectRunner("SURFDetector2"), SURFDetector2() { };
+  SURFDetector2Test(void) : ProjectRunner("SURFDetector2"), SURFDetector2() { };
   void train(vector <Frame*> _frames, map <string, float> params);
   map <uint32_t, vector <LimbLabel> > detect(Frame *frame, map <string, float> params, map <uint32_t, vector <LimbLabel>> limbLabels);
   void DrawSpecific(string outFolder);

@@ -512,14 +512,18 @@ namespace SPEL
 
     // Create skeleton model for the current frame
     //SkeletonModel Local;
+    SkeletonModel Temp;
     Local.clear();
+    //Local.PartCellsCount = Trained.PartCellsCount;
     Local.Keypoints = Keypoints;
     Local.Descriptors = FrameDescriptors;
     Skeleton skeleton = frame->getSkeleton();
     std::map<int, std::vector<cv::Point2f>> PartRects = getAllPolygons(skeleton);
     for (int i = 0; i < PartRects.size(); i++)
+    {
       Local.PartKeypoints.emplace(i, std::vector<int>());
-    SkeletonModel Temp = Local;
+      Temp.PartKeypoints.emplace(i, std::vector<int>());
+    }
 
     // Create matches
     int n = 2; //matches per keypoint
@@ -620,7 +624,7 @@ namespace SPEL
                   if(Trained.Keypoints[matches[k][0].trainIdx].class_id == partCellID)
                   {
                     LabelScore = LabelScore + matches[k][0].distance;
-                    Temp.PartKeypoints[id].push_back(p);
+                    Temp.PartKeypoints[id].push_back(k);
                   }
                 }
               }

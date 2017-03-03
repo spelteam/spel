@@ -133,7 +133,7 @@ namespace SPEL
   {
     cv::Point2i p0(ROIRect.x, ROIRect.y);
     cv::Point2i p1(ROIRect.x + ROIRect.width, ROIRect.y + ROIRect.height);
-    std::vector<cv::Point2i> endpoints = { p1, p0 };
+    std::vector<cv::Point2i> endpoints = { p0, p1 };
 
     return MaskCenter(mask, endpoints, colorThreshold);
   }
