@@ -22,7 +22,9 @@
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG
 
+#include "frame.hpp"
 #include "skeleton.hpp"
+#include "imagepixelsimilaritymatrix.hpp"
 
 namespace SPEL
 {
@@ -52,9 +54,24 @@ namespace SPEL
   Skeleton operator*(Skeleton s, float k);
   Skeleton operator/(Skeleton s, float k);
 
+//Interpolation
+  // Remove skeletons from all frames
+  void clearSkeletons(std::vector<Frame*> frames);
+  // Rough interpolation. Only slice which has a keyframes on the his beginning and end positions will interpolated.
+  void interpolate(std::vector<Frame*> slice); // bad interpolation!?
+  // Create interpolated skeleton, if "useNotEmptyAsKeyframe == true" - then all existing skeletons will used as keyframes and interpolation will created only for empty skeletons.
+  void interpolate2(std::vector<Frame*> slice, bool useKeyframesOnly = true, bool replaceExisting = true); // works on short slices (slices without redirecting motion)
+  // Interpolation by ISM, creating skeleton as average from similary keyframes
+  std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.55f);
+  // Copy similary keyframes as interpolation
+  std::vector<int> propagateKeyFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.55f, bool keyframesOnly = true);
+  // Copy similary frames as interpolation
+  std::vector<int> propagateFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.55f, bool replaceExisting = false);
+
 //Visualization
   void putPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color = cv::Scalar(255, 255, 255));
   void putSkeleton(cv::Mat image, Skeleton skeleton, cv::Scalar color = cv::Scalar(255, 255, 255));
+  void putLabels(cv::Mat image, std::vector<LimbLabel> frameLabels, cv::Scalar color = cv::Scalar(255, 255, 255));
 }
 
 #endif;

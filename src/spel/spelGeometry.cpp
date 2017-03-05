@@ -295,6 +295,250 @@ namespace SPEL
     return s1;
   }
 
+//Interpolation
+
+  void clearSkeletons(std::vector<Frame*> frames)
+  {
+    Skeleton empty;
+    empty.setJointTree(tree<BodyJoint>());
+    empty.setPartTree(tree<BodyPart>());
+
+    for(int i = 0; i < frames.size(); i++)
+      if(frames[i]->getFrametype() != KEYFRAME)
+        frames[i]->setSkeleton(empty);
+  }
+
+  void interpolate(std::vector<Frame*> slice)
+  {
+    int n = slice.size();
+    std::vector<int> interpolated;
+
+    if(slice[0]->getFrametype() == KEYFRAME && slice[n - 1]->getFrametype() == KEYFRAME)
+    {
+      for (int i = 0; i < n; i++)
+        if(slice[i]->getFrametype() == KEYFRAME)
+          interpolated.push_back(i);
+      while(interpolated.size() < n)
+      {
+        int m = interpolated.size() - 1;
+        for(int t = 0; t < m; t++)
+        {
+          float f1 = interpolated[t];
+          float f2 = interpolated[t+1];
+          int k = static_cast<int>(0.5f*(f1 + f2));
+          int N = slice[k]->getSkeleton().getJointTreePtr()->size();
+          if (f1 != k && f2 != k && N == 0)
+          {
+            Skeleton S1 = slice[f1]->getSkeleton();
+            Skeleton S2 = slice[f2]->getSkeleton();
+            slice[k]->setSkeleton((S1 + S2)*0.5f);
+            interpolated.push_back(k);
+          }
+        }
+        std::sort(interpolated.begin(), interpolated.end());
+      }
+    }
+  }
+
+  void interpolate2(std::vector<Frame*> slice, bool useKeyframesOnly, bool replaceExisting)
+  {
+    int n = slice.size();
+
+    std::vector<int> keyframes;
+    for (int i = 0; i < n; i++)
+    {
+      if(slice[i]->getFrametype() == KEYFRAME)
+        keyframes.push_back(i);
+      else
+        if(!useKeyframesOnly)
+          if(slice[i]->getSkeletonPtr()->getPartTreePtr()->size() != 0)
+            keyframes.push_back(i);
+    }
+
+    int m = keyframes.size() - 1;
+    for(int t = 0; t < m; t++)
+    {
+      int f1 = keyframes[t];
+      int f2 = keyframes[t+1];
+      for(int k = f1 + 1; k != f2; k++)
+      if(slice[k]->getSkeletonPtr()->getPartTreePtr()->size() == 0 || replaceExisting)// ?
+      {
+        Skeleton S1 = slice[f1]->getSkeleton();
+        Skeleton S2 = slice[f2]->getSkeleton();
+        if (f2 - f1 > 0)
+        {
+          float K = static_cast<float>(k - f1)/static_cast<float>(f2 - f1);
+            slice[k]->setSkeleton(S1*(1.0f - K) + S2*K);
+        }
+      }
+    }
+
+  }
+
+std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold)
+  {
+    float Q = SimilarityThreshold;
+    if (Q <= 0.0f) Q = 0.55f;
+
+    bool newISM = (MSM == 0);
+    if(newISM) MSM = new ImagePixelSimilarityMatrix();
+    if (MSM->size() != frames.size())
+    {
+      DebugMessage("ISM not found ", 2);
+      DebugMessage("Building Image similarity matrix ", 2);
+      MSM->buildImageSimilarityMatrix(frames, 0, 0, false, false);
+      DebugMessage("ISM created ", 2);
+      //MSM.write("MSM.txt");
+    }
+
+    std::vector<int> createdSkeletons;
+
+    for (int i = 0; i < frames.size(); i++)
+    {
+      if (frames[i]->getFrametype() !=KEYFRAME)
+      {
+        std::vector<Skeleton> S;
+        std::vector<float> scores;
+        for(int k = 0; k < frames.size(); k++)
+        if(frames[k]->getFrametype() == KEYFRAME)
+          if(MSM->at(i,k) > Q)
+          {
+            S.push_back((frames[k]->getSkeleton() - MSM->getShift(i,k)));
+            scores.push_back(MSM->at(i, k));
+          }
+        Skeleton s0;
+        s0.setJointTree(tree<BodyJoint>());
+        s0.setPartTree(tree<BodyPart>());
+      
+        int n = scores.size();
+        if(n > 0) 
+        {
+          float score = 0.0f;
+          for(int k = 0; k < n; k++)
+            score = score + scores[k];
+          for (int k = 0; k < n; k++)
+            scores[k] /= score;
+
+          s0 = S[0]*0.0f;
+          for (int k = 0; k < S.size(); k++)
+            s0 = s0 + S[k]*scores[k];
+     
+          s0.setName("interpolate3");
+          frames[i]->setSkeleton(s0);
+          createdSkeletons.push_back(frames[i]->getID());
+        }
+        /*else frames[i]->setSkeleton(s0);*/       
+      }
+
+    }
+    if (newISM) delete MSM;
+
+    return createdSkeletons;
+  }
+
+  std::vector<int> propagateKeyFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold, bool keyframesOnly)
+  {
+    float Q = SimilarityThreshold;
+    if(Q <= 0.0f) Q = 0.55f;
+
+    bool newISM = (MSM == 0);
+    if (newISM) MSM = new ImagePixelSimilarityMatrix();
+    if (MSM->size() != frames.size())
+    {
+      DebugMessage("ISM not found ", 2);
+      DebugMessage("Building Image similarity matrix ", 2);
+      MSM->buildImageSimilarityMatrix(frames, 0, 0, false, false);
+      DebugMessage("ISM created ", 2);
+      //MSM.write("MSM.txt");
+    }
+
+    std::vector<int> Replaced;
+
+    for (int i = 0; i < frames.size(); i++)
+    {
+      if (frames[i]->getFrametype() !=KEYFRAME)
+      {
+        int n = -1;
+        float f = 0.0f;
+        for (int k = 0; k < frames.size(); k++)
+        {
+          if(frames[k]->getFrametype() == KEYFRAME)
+          {
+            if(MSM->at(i,k) > Q && f < MSM->at(i,k) )
+            {
+              n = k;
+              f = MSM->at(i, k);
+            }
+          }
+        }
+
+        std::cout << "frame [" << i << "] skeleton similar to " << n << std::endl;
+  
+        if(n > -1) 
+        {
+          Skeleton skeleton = frames[n]->getSkeleton() - MSM->getShift(i, n);
+          skeleton.setName("propagateKeyFrames");
+          frames[i]->setSkeleton(skeleton);
+          Replaced.push_back(frames[i]->getID());
+        }
+      }
+    }
+    if (newISM) delete MSM;
+
+    return Replaced;
+  }
+
+  std::vector<int> propagateFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold, bool replaceExisting)
+  {
+    float Q = SimilarityThreshold;
+    if(Q <= 0.0f) Q = 0.55f;
+
+    bool newISM = (MSM == 0);
+    if (newISM) MSM = new ImagePixelSimilarityMatrix();
+    if (MSM->size() != frames.size())
+    {
+      DebugMessage("ISM not found ", 2);
+      DebugMessage("Building Image similarity matrix ", 2);
+      MSM->buildImageSimilarityMatrix(frames, 0, 0, false, false);
+      DebugMessage("ISM created ", 2);
+      //MSM.write("MSM.txt");
+    }
+
+    std::vector<int> Replaced;
+
+    for (int i = 0; i < frames.size(); i++)
+    {
+      bool emptySkeleton = frames[i]->getSkeletonPtr()->getPartTreePtr()->size() == 0;
+      if ((frames[i]->getFrametype() != KEYFRAME) && (emptySkeleton || replaceExisting))
+      {
+        int n = -1;
+        float f = 0.0f;
+        for (int k = 0; k < frames.size(); k++)
+          if(frames[k]->getSkeletonPtr()->getPartTreePtr()->size() != 0)
+          {
+            if(MSM->at(i,k) > Q && f < MSM->at(i,k) )
+            {
+              n = k;
+              f = MSM->at(i, k);
+            }
+          }
+
+        std::cout << "frame [" << i << "] skeleton similar to " << n << std::endl;
+ 
+        if(n > -1)
+        {
+          Skeleton skeleton = frames[n]->getSkeleton() - MSM->getShift(i, n);
+          skeleton.setName("propagateFrames");
+          frames[i]->setSkeleton(skeleton);
+          Replaced.push_back(frames[i]->getID());
+        }
+      }
+    }
+    if (newISM) delete MSM;
+
+    return Replaced;
+  }
+
 //Visualization
 
   void putPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color)
@@ -311,4 +555,9 @@ namespace SPEL
       putPartRect(image, polygons[p], color);
   }
 
+  void putLabels(cv::Mat image, std::vector<LimbLabel> frameLabels, cv::Scalar color)
+  {
+    for (int k = 0; k < frameLabels.size(); k++)
+      putPartRect(image, frameLabels[k].getPolygon(), color);
+  }
 }
