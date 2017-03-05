@@ -59,7 +59,7 @@ namespace SPEL
   void clearSkeletons(std::vector<Frame*> frames);
   // Rough interpolation. Only slice which has a keyframes on the his beginning and end positions will interpolated.
   void interpolate(std::vector<Frame*> slice); // bad interpolation!?
-  // Create interpolated skeleton, if "useKeyframesOnly == true && replaceExisting == false" - then all existing skeletons will used as keyframes and interpolation will created only for empty skeletons.
+  // Create interpolated skeleton, if "useKeyframesOnly == false && replaceExisting == false" - then all existing skeletons will used as keyframes and interpolation will created only for empty skeletons.
   void interpolate2(std::vector<Frame*> slice, bool useKeyframesOnly = true, bool replaceExisting = true); // works on short slices (slices without redirecting motion)
   // Interpolation by ISM, creating skeleton as average from similary keyframes
   std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.55f, bool replaceExisting = true);

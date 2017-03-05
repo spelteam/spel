@@ -368,7 +368,9 @@ namespace SPEL
         if (f2 - f1 > 0)
         {
           float K = static_cast<float>(k - f1)/static_cast<float>(f2 - f1);
-            slice[k]->setSkeleton(S1*(1.0f - K) + S2*K);
+          Skeleton skeleton = S1*(1.0f - K) + S2*K;
+          skeleton.setName("interpolate2");
+          slice[k]->setSkeleton(skeleton);
         }
       }
     }
