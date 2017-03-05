@@ -375,7 +375,7 @@ namespace SPEL
 
   }
 
-std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold)
+std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold, bool replaceExisting)
   {
     float Q = SimilarityThreshold;
     if (Q <= 0.0f) Q = 0.55f;
@@ -395,7 +395,8 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
 
     for (int i = 0; i < frames.size(); i++)
     {
-      if (frames[i]->getFrametype() !=KEYFRAME)
+      bool haveSkeleton = (frames[i]->getSkeletonPtr()->getPartTreePtr()->size() > 0);
+      if (frames[i]->getFrametype() != KEYFRAME && (!haveSkeleton || replaceExisting))
       {
         std::vector<Skeleton> S;
         std::vector<float> scores;
@@ -436,7 +437,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
     return createdSkeletons;
   }
 
-  std::vector<int> propagateKeyFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold, bool keyframesOnly)
+  std::vector<int> propagateKeyFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold, bool replaceExisting)
   {
     float Q = SimilarityThreshold;
     if(Q <= 0.0f) Q = 0.55f;
@@ -456,7 +457,8 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
 
     for (int i = 0; i < frames.size(); i++)
     {
-      if (frames[i]->getFrametype() !=KEYFRAME)
+      bool haveSkeleton = (frames[i]->getSkeletonPtr()->getPartTreePtr()->size() > 0);
+      if (frames[i]->getFrametype() != KEYFRAME && (!haveSkeleton || replaceExisting))
       {
         int n = -1;
         float f = 0.0f;
