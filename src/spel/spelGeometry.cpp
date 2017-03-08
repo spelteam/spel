@@ -226,7 +226,7 @@ namespace SPEL
     return 0.5f*(partPolygon[3] + partPolygon[1]);
   }
 
-  std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton &skeleton)
+  std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton skeleton)
   {
     std::map<int, std::vector<cv::Point2f>> Rects;
     tree<BodyPart> PartTree = skeleton.getPartTree();

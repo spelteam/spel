@@ -47,7 +47,7 @@ namespace SPEL
   float getLenght(std::vector<cv::Point2f> partPolygon);
   float getWidth(std::vector<cv::Point2f> partPolygon);
   cv::Point2f getPartCenter(std::vector<cv::Point2f> partPolygon);
-  std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton &skeleton);
+  std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton skeleton);
   std::vector<cv::Point2f> getEndpoints(std::vector<cv::Point2f> polygon);
   std::vector<cv::Point2f> getEndpoints(std::map<int, std::vector<cv::Point2f>> polygons);
   std::vector<cv::Point2f> getEndpoints(Skeleton skeleton);
