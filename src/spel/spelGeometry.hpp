@@ -32,6 +32,7 @@ namespace SPEL
   // Return ROI (endpoints of the rect which include white object with max area on this mask image)
   std::vector<cv::Point2i> SearchROI(cv::Mat mask);
   cv::Rect toROIRect(std::vector<cv::Point2i> endpoints);
+  cv::Rect toROIRect(std::vector<cv::Point2f> endpoints);
 
   // Search center of white figure in the ROI of cv::Mat<UC_8UC1> image
   cv::Point2i MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROIEndpoints, uchar colorThreshold = 9);
@@ -41,10 +42,15 @@ namespace SPEL
   cv::Rect resizeROI_(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize = cv::Size(0,0) );
 
 //Part polygon
+  bool isPartPolygon(std::vector<cv::Point2f> partPolygon, float error = 0.01);
   std::vector<cv::Point2f> buildPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1);
   float getLenght(std::vector<cv::Point2f> partPolygon);
   float getWidth(std::vector<cv::Point2f> partPolygon);
+  cv::Point2f getPartCenter(std::vector<cv::Point2f> partPolygon);
   std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton &skeleton);
+  std::vector<cv::Point2f> getEndpoints(std::vector<cv::Point2f> polygon);
+  std::vector<cv::Point2f> getEndpoints(std::map<int, std::vector<cv::Point2f>> polygons);
+  std::vector<cv::Point2f> getEndpoints(Skeleton skeleton);
 
 //Skeleton
   Skeleton operator+(Skeleton s1, Skeleton s2);
@@ -52,10 +58,14 @@ namespace SPEL
   Skeleton operator+(cv::Point2f P, Skeleton s);
   Skeleton operator-(Skeleton s1, cv::Point2f P);
   Skeleton operator*(Skeleton s, float k);
+  Skeleton operator*(float k, Skeleton s);
   Skeleton operator/(Skeleton s, float k);
 
 //Interpolation
-  // Remove skeletons from all frames
+  // Remove lockframe skeleton
+  void clearSkeleton(Frame frame);
+  void clearSkeleton(Frame* frame);
+  // Remove skeletons from all lockframes
   void clearSkeletons(std::vector<Frame*> frames);
   // Rough interpolation. Only slice which has a keyframes on the his beginning and end positions will interpolated.
   void interpolate(std::vector<Frame*> slice); // bad interpolation!?
@@ -63,14 +73,19 @@ namespace SPEL
   void interpolate2(std::vector<Frame*> slice, bool useKeyframesOnly = true, bool replaceExisting = true); // works on short slices (slices without redirecting motion)
   // Interpolation by ISM, creating skeleton as average from similary keyframes
   std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.55f, bool replaceExisting = true);
+  // Interpolation by ISM, creating skeleton as average from similary keyframes
+  std::vector<int> interpolate4(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.45f);
   // Copy similary keyframes as interpolation
   std::vector<int> propagateKeyFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.55f, bool replaceExisting = true);
   // Copy similary frames as interpolation
   std::vector<int> propagateFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM = 0, float SimilarityThreshold = 0.55f, bool replaceExisting = false);
+  // Compare mask and skeleton mask: score 1.0f = 100%, 0.0f = 0% coincidence
+  float skeletonScore(cv::Mat mask, Skeleton skeleton, cv::Point2f skeletonShift = cv::Point2f(0.0f, 0.0f));
 
 //Visualization
-  void putPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color = cv::Scalar(255, 255, 255));
+  void putPartRect(cv::Mat image, std::vector<cv::Point2f> polygon, cv::Scalar color = cv::Scalar(255, 255, 255));
   void putSkeleton(cv::Mat image, Skeleton skeleton, cv::Scalar color = cv::Scalar(255, 255, 255));
+  void putSkeletonMask(cv::Mat mask, Skeleton skeleton, cv::Size maskSize = cv::Size(0, 0), uchar color = 255);
   void putLabels(cv::Mat image, std::vector<LimbLabel> frameLabels, cv::Scalar color = cv::Scalar(255, 255, 255));
 }
 

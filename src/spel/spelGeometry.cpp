@@ -107,6 +107,14 @@ namespace SPEL
     return maskROI;
   }
 
+  cv::Rect toROIRect(std::vector<cv::Point2f> endpoints)
+  {
+    cv::Point2i p0(static_cast<int>(trunc(endpoints[0].x)), static_cast<int>(trunc(endpoints[0].y)));
+    cv::Point2i p1(static_cast<int>(ceil(endpoints[1].x)), static_cast<int>(ceil(endpoints[1].y)));
+    cv::Rect maskROI(p0, p1);
+    return maskROI;
+  }
+
   // Search center of mask in the ROI
   // "ROIEndpoints" - endpoints of mask ROI: {topLeft, bottomRight}
   // "colorThreshold" -  max value of background color, white pixel threshold
@@ -164,6 +172,24 @@ namespace SPEL
 
 //PartPolygons
 
+  bool isPartPolygon(std::vector<cv::Point2f> partPolygon, float error)
+  {
+    bool b = (partPolygon.size() == 4);
+    if (b)
+    {
+      cv::Point2f d = partPolygon[3] - partPolygon[0];
+      cv::Point2f f = partPolygon[2] - partPolygon[1];
+
+      float D = d.x*d.x + d.y*d.y;
+      float F = f.x*f.x + f.y*f.y;
+      float e = D*error*error;
+
+      b = b && (abs(D - F) < e);
+    }
+
+    return b;
+  }
+
   std::vector<cv::Point2f> buildPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1)
   {
     std::vector<cv::Point2f> partRect;
@@ -195,6 +221,11 @@ namespace SPEL
     return sqrt(d.x*d.x + d.y*d.y);
   }
 
+  cv::Point2f getPartCenter(std::vector<cv::Point2f> partPolygon)
+  {
+    return 0.5f*(partPolygon[3] + partPolygon[1]);
+  }
+
   std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton &skeleton)
   {
     std::map<int, std::vector<cv::Point2f>> Rects;
@@ -206,9 +237,47 @@ namespace SPEL
       std::vector<cv::Point2f> Rect = buildPartPolygon(BP_iterator->getLWRatio(), j0->getImageLocation(), j1->getImageLocation());
       Rects.emplace(std::pair<int, std::vector<cv::Point2f>>((*BP_iterator).getPartID(), Rect));
     }
+
     return Rects;
   }
 
+  std::vector<cv::Point2f> getEndpoints(std::vector<cv::Point2f> polygon)
+  {
+    cv::Point2f p0(FLT_MAX, FLT_MAX), p1(FLT_MIN, FLT_MIN);
+    for(int i = 0; i < polygon.size(); i++)
+    {
+      if(polygon[i].x < p0.x) p0.x = polygon[i].x;  
+      if(polygon[i].x > p1.x) p1.x = polygon[i].x;
+      if(polygon[i].y < p0.y) p0.y = polygon[i].y;
+      if(polygon[i].y > p1.y) p1.y = polygon[i].y;
+    }
+    std::vector<cv::Point2f> endpoints = { p0, p1 };
+
+    return endpoints;
+  }
+
+  std::vector<cv::Point2f> getEndpoints(std::map<int, std::vector<cv::Point2f>> polygons)
+  {
+    std::vector<cv::Point2f> temp;
+    for(int i = 0; i < polygons.size(); i++)
+      for(int k = 0; k < polygons[i].size(); k++)
+        temp.push_back(polygons[i][k]);
+
+    std::vector<cv::Point2f> endpoints = getEndpoints(temp);
+    temp.clear();
+
+    return endpoints;
+  }
+
+  std::vector<cv::Point2f> getEndpoints(Skeleton skeleton)
+  {
+    std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
+    std::vector<cv::Point2f> endpoints = getEndpoints(polygons);
+    polygons.clear();
+
+    return endpoints;
+  }
+ 
 //Skeleton
 
   Skeleton operator+(Skeleton s1, Skeleton s2)
@@ -296,16 +365,31 @@ namespace SPEL
   }
 
 //Interpolation
-
-  void clearSkeletons(std::vector<Frame*> frames)
+  void clearSkeleton(Frame frame)
   {
     Skeleton empty;
     empty.setJointTree(tree<BodyJoint>());
     empty.setPartTree(tree<BodyPart>());
 
+    if(frame.getFrametype() != KEYFRAME)
+      frame.setSkeleton(empty);
+  }
+
+  void clearSkeleton(Frame* frame)
+  {
+    Skeleton empty;
+    empty.setJointTree(tree<BodyJoint>());
+    empty.setPartTree(tree<BodyPart>());
+
+    if(frame->getFrametype() != KEYFRAME)
+      frame->setSkeleton(empty);
+  }
+
+
+  void clearSkeletons(std::vector<Frame*> frames)
+  {
     for(int i = 0; i < frames.size(); i++)
-      if(frames[i]->getFrametype() != KEYFRAME)
-        frames[i]->setSkeleton(empty);
+      clearSkeleton(frames[i]);
   }
 
   void interpolate(std::vector<Frame*> slice)
@@ -361,6 +445,7 @@ namespace SPEL
       int f1 = keyframes[t];
       int f2 = keyframes[t+1];
       for(int k = f1 + 1; k != f2; k++)
+      if (slice[k]->getFrametype() != KEYFRAME)
       if(slice[k]->getSkeletonPtr()->getPartTreePtr()->size() == 0 || replaceExisting)// ?
       {
         Skeleton S1 = slice[f1]->getSkeleton();
@@ -370,7 +455,8 @@ namespace SPEL
           float K = static_cast<float>(k - f1)/static_cast<float>(f2 - f1);
           Skeleton skeleton = S1*(1.0f - K) + S2*K;
           skeleton.setName("interpolate2");
-          slice[k]->setSkeleton(skeleton);
+          
+            slice[k]->setSkeleton(skeleton);
         }
       }
     }
@@ -438,6 +524,57 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
 
     return createdSkeletons;
   }
+
+  /*
+  // For testing
+  std::vector<int> interpolate4(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold)
+  {
+    DebugMessage("Started nterpolate4 ", 2);
+    interpolate2(frames);
+    for (int i = 0; i < frames.size(); i++)
+    {
+      Skeleton skeleton = frames[i]->getSkeleton();
+      if(skeleton.getName() == "interpolate2")
+        if (skeletonScore(frames[i]->getMask(), skeleton) < SimilarityThreshold)
+          clearSkeleton(frames[i]);
+    }
+
+    interpolate3(frames, MSM, SimilarityThreshold, false);
+    for (int i = 0; i < frames.size(); i++)
+    {
+      Skeleton skeleton = frames[i]->getSkeleton();
+      if(skeleton.getName() == "interpolate3")
+        if (skeletonScore(frames[i]->getMask(), skeleton) < SimilarityThreshold)
+          clearSkeleton(frames[i]);
+    }
+    propagateKeyFrames(frames, MSM, SimilarityThreshold, false);
+    for (int i = 0; i < frames.size(); i++)
+    {
+      Skeleton skeleton = frames[i]->getSkeleton();
+      if(skeleton.getName() == "propagateKeyFrames")
+        if (skeletonScore(frames[i]->getMask(), skeleton) < SimilarityThreshold)
+          clearSkeleton(frames[i]);
+    }
+    propagateFrames(frames, MSM, SimilarityThreshold, false);
+    for (int i = 0; i < frames.size(); i++)
+    {
+      Skeleton skeleton = frames[i]->getSkeleton();
+      if(skeleton.getName() == "propagateFrames")
+        if (skeletonScore(frames[i]->getMask(), skeleton) < SimilarityThreshold)
+          clearSkeleton(frames[i]);
+    }
+    interpolate2(frames, true, false);
+    for (int i = 0; i < frames.size(); i++)
+    {
+      Skeleton skeleton = frames[i]->getSkeleton();
+      if (skeleton.getName() == "interpolate2")
+        if (skeletonScore(frames[i]->getMask(), skeleton) < SimilarityThreshold)
+          clearSkeleton(frames[i]);
+    }
+    DebugMessage("Interpolate4 finished ", 2);
+
+    return std::vector<int>();
+  }*/
 
   std::vector<int> propagateKeyFrames(std::vector<Frame*> frames, ImagePixelSimilarityMatrix* MSM, float SimilarityThreshold, bool replaceExisting)
   {
@@ -527,7 +664,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
             }
           }
 
-        std::cout << "frame [" << i << "] skeleton similar to " << n << std::endl;
+        DebugMessage("frame [" + std::to_string(i) +  "] skeleton similar to " + std::to_string(n), 2);
  
         if(n > -1)
         {
@@ -543,13 +680,65 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
     return Replaced;
   }
 
+  /*
+  float skeletonScore(cv::Mat mask, Skeleton skeleton, cv::Point2f skeletonShift)
+  {
+    float score = -1.0f;
+    if(skeleton.getPartTreePtr()->size() != 0)
+    {
+      // Create part polygons
+      Skeleton tempSkeleton = skeleton + skeletonShift;
+      std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(tempSkeleton);
+
+      //Select union ROI
+      std::vector<cv::Point2i> maskEndpoints = SearchROI(mask);
+      std::vector<cv::Point2f> skeletonEndpoints = getEndpoints(polygons);
+      for(int i = 0; i < maskEndpoints.size(); i++)
+        skeletonEndpoints.push_back(static_cast<cv::Point2f>(maskEndpoints[i]));
+      skeletonEndpoints = getEndpoints(skeletonEndpoints);
+      cv::Point2i p0 = skeletonEndpoints[0];
+      cv::Point2i p1 = skeletonEndpoints[1];
+
+      //Create skeleton mask
+      cv::Mat skeletonMask = cv::Mat::zeros(mask.size(), CV_8UC1);
+      putSkeletonMask(skeletonMask, tempSkeleton);
+
+      // Compare
+      int Q = 9;
+      
+      int intersection = 0, difference = 0;
+      for(int x = p0.x; x < p1.x; x++)
+        for(int y = p0.y; y < p1.y; y++)
+        {
+          bool color1 = false;
+          bool color2 = false;
+          cv::Point2i p = cv::Point2i(x, y);
+          if (x >= 0 && x < mask.cols && y >= 0 && y < mask.rows)
+            color1 = (mask.at<uchar>(y, x) > Q);
+          if (p.x >= 0 && p.x < mask.cols && p.y >= 0 && p.y < mask.rows)
+            color2 = (skeletonMask.at<uchar>(p.y, p.x) > Q);
+          if (color1 && color2) intersection++;
+          if (color1 != color2) difference++;
+        }
+      if(difference + intersection > 0)
+        score = static_cast<float>(intersection) / static_cast<float>(difference + intersection);
+
+      skeletonMask.release();
+      skeletonEndpoints.clear();
+      maskEndpoints.clear();
+      polygons.clear();
+    }
+
+    return score;
+  }*/
+
 //Visualization
 
-  void putPartRect(cv::Mat &Image, std::vector<cv::Point2f> polygon, cv::Scalar color)
+  void putPartRect(cv::Mat image, std::vector<cv::Point2f> polygon, cv::Scalar color)
   {
     polygon.push_back(polygon[0]);
     for (unsigned int i = 1; i < polygon.size(); i++)
-      line(Image, polygon[i - 1], polygon[i], color, 1, 1);
+      line(image, polygon[i - 1], polygon[i], color, 1, 1);
   }
 
   void putSkeleton(cv::Mat image, Skeleton skeleton, cv::Scalar color)
@@ -557,6 +746,40 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
     std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
     for (auto p = 0; p < polygons.size(); p++)
       putPartRect(image, polygons[p], color);
+  }
+
+  void putSkeletonMask(cv::Mat mask, Skeleton skeleton, cv::Size maskSize, uchar color)
+  {
+    std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
+    std::vector<cv::Point2f> endpoints = getEndpoints(polygons);
+    cv::Rect ROI = toROIRect(endpoints);
+
+    //Creat mew mask image if maskSize > size(0,0)
+    if (maskSize.width > 0 && maskSize.height > 0)
+    {
+      mask.release();
+      mask = cv::Mat::zeros(maskSize, CV_8UC1);
+    }
+    //Creat mew mask image if the mask is less than skeleton
+    if (mask.size().height < endpoints[1].y || mask.size().width < endpoints[1].x)
+    {
+      mask.release();
+      mask = cv::Mat::zeros(ROI.size(), CV_8UC1);
+      polygons = getAllPolygons(skeleton - cv::Point2f(ROI.x, ROI.y));
+    }
+
+    //draw skeleton mask
+    for(int i = 0; i < polygons.size(); i++)
+    {
+      std::vector<cv::Point2f> endpoints = getEndpoints(polygons[i]);
+      for(float x = endpoints[0].x; x < endpoints[1].x; x++)
+        for (float y = endpoints[0].y; y < endpoints[1].y; y++)
+          if(cv::pointPolygonTest(polygons[i], cv::Point2f(x, y), false) > 0)
+            mask.at<uint8_t>(y, x) = color;
+    }	 
+
+    polygons.clear();
+    endpoints.clear();
   }
 
   void putLabels(cv::Mat image, std::vector<LimbLabel> frameLabels, cv::Scalar color)

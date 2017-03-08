@@ -574,7 +574,7 @@ namespace SPEL
 
       // Get part polygon from current interpolationframe
       std::vector<cv::Point2f> partPolygon = PartRects[id];
-      cv::Point2f PartCenter = 0.5f*(partPolygon[3] + partPolygon[1]);
+      cv::Point2f PartCenter = getPartCenter(partPolygon);
       float PartAngle = static_cast<float>(spelHelper::getAngle(partPolygon[0], partPolygon[1]));
 
       // Create limbLabels
