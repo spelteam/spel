@@ -11,6 +11,9 @@
 #include "solver.hpp"
 #include "frame.hpp"
 
+#include "imagemasksimilaritymatrix.hpp"
+#include "imagepixelsimilaritymatrix.hpp"
+
 namespace SPEL
 {
   class frameSolver
@@ -44,7 +47,7 @@ namespace SPEL
     Solvlet solveFrame(std::map<uint32_t, std::vector<LimbLabel>> limbLabels, int frameID = -1);
     std::map<uint32_t, partAdjacentsJoints> toJointMap(Skeleton skeleton);
     Skeleton getAverageJointsSkeleton(Skeleton pattern) ;
-    Skeleton frameSolver::getShiftedLabelsSkeleton(Skeleton pattern);
+    Skeleton getShiftedLabelsSkeleton(Skeleton pattern);
 
     int skeletonSize();
     bool IsSolved();

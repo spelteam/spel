@@ -4,8 +4,7 @@
 #include "hogDetector.hpp"
 #include "surfDetector.hpp"
 #include "SURFDetector2.hpp"
-#include "imagemasksimilaritymatrix.hpp"
-#include "imagepixelsimilaritymatrix.hpp"
+
 #include "_Solver.hpp"
 #include "spelGeometry.hpp"
 
