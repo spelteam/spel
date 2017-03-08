@@ -42,7 +42,7 @@ LIST ( APPEND ${SPEL_MODULE}_SRC imagepixelsimilaritymatrix.cpp )
 LIST ( APPEND ${SPEL_MODULE}_SRC imagehogsimilaritymatrix.cpp )
 LIST ( APPEND ${SPEL_MODULE}_SRC imagemasksimilaritymatrix.cpp )
 LIST ( APPEND ${SPEL_MODULE}_SRC SURFDetector2.cpp )
-#LIST ( APPEND ${SPEL_MODULE}_SRC _Solver.cpp )
+LIST ( APPEND ${SPEL_MODULE}_SRC _Solver.cpp )
 LIST ( APPEND ${SPEL_MODULE}_SRC spelGeometry.cpp )
 
 LIST ( APPEND ${SPEL_MODULE}_HDR bodyJoint.hpp )
@@ -75,7 +75,7 @@ LIST ( APPEND ${SPEL_MODULE}_HDR imagepixelsimilaritymatrix.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR imagehogsimilaritymatrix.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR imagemasksimilaritymatrix.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR SURFDetector2.hpp )
-#LIST ( APPEND ${SPEL_MODULE}_HDR _Solver.hpp )
+LIST ( APPEND ${SPEL_MODULE}_HDR _Solver.hpp )
 LIST ( APPEND ${SPEL_MODULE}_HDR spelGeometry.hpp )
 
 # Create a static library
