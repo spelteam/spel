@@ -74,6 +74,7 @@ namespace SPEL
     
     std::vector<Solvlet> solve(Sequence& seq);
     std::vector<Solvlet> solve(Sequence& seq, std::map<std::string, float> params);
+    static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> frames);
 
     void emplaceDefaultParameters(std::map<std::string, float> &params) const;
 

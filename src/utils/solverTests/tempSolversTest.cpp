@@ -22,13 +22,22 @@ int main (int argc, char **argv)
     /*ios_base::sync_with_stdio(false); //turn off syncing of stdio for async operation
     unsigned int n = std::thread::hardware_concurrency();
     std::cout << n << " concurrent threads are supported.\n";*/ 
-    std::cout << " Concerrent threads not used. \n";
 
     // Checking argv
-    if (argc != 3)
+    if (argc < 3)
     {
       cout << "Usage tempSolverTest [project.xml] [out directory]" << endl;
       return -1;
+    }
+    string outDirectory = "";
+    bool useVisualization = false;
+    if (argc > 3)
+    {
+      outDirectory = argv[2];
+      if (outDirectory[outDirectory.size()] != '/')
+        outDirectory += "/";
+      ProjectLoader::CreateDirectorySystemIndependent(outDirectory);
+      useVisualization = true;
     }
 
     string curFolder = argv[1];
@@ -59,56 +68,58 @@ int main (int argc, char **argv)
     // Set parameters
     map <string, float> params; //use the default params
     params.emplace("debugLevel", 1); //set the debug setting to highest (0,1,2,3)
-    params.emplace("useDedefaultScale", 1.0f);
-    params.emplace("defaultScale", 1.0f);
-    params.emplace("useCSdet", 0);
-    params.emplace("useHoGdet", 1);
-    params.emplace("useSURFdet", 0);
+
+    params.emplace("useCSdet", 0.0f);
+    params.emplace("useHoGdet", 1.0f);
+    params.emplace("useSURFdet", 0.0f);
     params.emplace("uniqueLocationCandidates", 0.1f);
-    params.emplace("uniqueAngleCandidates", 0.1f);
-    //params.emplace("searchDistCoeff", 2.0f);
-    //params.emplace("searchDistCoeffMult", 1.25f);
-    //params.emplace("stepTheta", 5.0f);
-    //params.emplace("minHessian", 300.0f);
-    //params.emplace("FixedWidthCells", 10.0f);
-    //params.emplace("FixedLenghtCells", 10.0f);
-    //params.emplace("FixedWidthCells", 4.0f);
-    //params.emplace("FixedLenghtCells", 10.0f);    
-    cv::Mat image = seq.getFrame(0)->getImage();
-    params.emplace("maxFrameHeight", image.size().height);
-    image.release();
+    params.emplace("uniqueAngleCandidates", 0.1f);  
+    params.emplace("useDedefaultScale", 1.0f);
+    params.emplace("defaultScale", 1.0f);   
+    params.emplace("maxFrameHeight", seq.getFrame(0)->getMask().size().height);
 
     // Create ISM
-    std::cout << "Create ISM\n";
+    std::cout << "\nCreate ISM\n";
     long int t0 = clock();
     ImagePixelSimilarityMatrix* M = new ImagePixelSimilarityMatrix();
     M->buildImageSimilarityMatrix(vFrames, 0, 0, false, false);
     long int t1 = clock();
     t1 = (t1 - t0) * 1000 / CLOCKS_PER_SEC;
-    cout << "ISM creating time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;
+    cout << "ISM creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
 
-	std::cout << std::endl;
+    std::cout << std::endl;
 
     // Calculate interpolation
-    /*  //seq.computeInterpolation(params);
-    //vFrames = seq.getFrames();
-    clearSkeletons(vFrames);
-    //interpolate2(vFrames);
-    interpolate3(vFrames, M);
-    //propagateKeyFrames(vFrames,M, 0.55f);*/
+    if (useVisualization)
+    {
+      //seq.computeInterpolation(params);
+      //vFrames = seq.getFrames();
+      clearSkeletons(vFrames);
+      //interpolate2(vFrames);
+      //propagateKeyFrames(vFrames,M, 0.55f);
+
+      interpolate3(vFrames, M);
+      std::vector<vector<Frame*>> slices = _Solver::createSlices(vFrames);
+      for(uint32_t i = 0; i < slices.size(); i++)
+        if (slices[i].size() < 11)
+          interpolate2(slices[i]);
+      cout << "int - ok\n";
+    }
     
     // Put masks
-    /*for (int i = 0; i < vFrames.size(); i++)
+    if (useVisualization)
+    for (int i = 0; i < vFrames.size(); i++)
     {
       cv::Mat temp = vFrames[i]->getMask().clone();
       Skeleton skeleton = vFrames[i]->getSkeleton();
       putSkeletonMask(temp, skeleton, cv::Size(0, 0), 128);
-      imwrite("mask" + to_string(i) + ".jpg", temp);
+      imwrite(outDirectory + "mask" + to_string(i) + ".jpg", temp);
       temp.release();
-    }*/
+    }
 
     // Put interpolation   
-    /*for (int i = 0; i < vFrames.size(); i++)
+    if (useVisualization)
+    for (int i = 0; i < vFrames.size(); i++)
     {
       cv::Mat image = vFrames[i]->getImage();
       Skeleton skeleton = vFrames[i]->getSkeleton();
@@ -122,18 +133,18 @@ int main (int argc, char **argv)
         cv::putText(image, "Interpolated skeleton", Point2f(20.0f, 30.0f), 0, 1.0f, color, 4, 1);
       putSkeleton(image, skeleton, color);
 
-      stringstream S;
-      if (i < 10) S << "0";
-      if(i < 100) S << "0";
-      S << i << ".jpg";
-      imwrite("int" + S.str(), image);
-      S.clear();
+      string S;
+      if (i < 10) S += "0";
+      if(i < 100) S += "0";
+      S += to_string(i) + ".jpg";
+      imwrite(outDirectory + "int" + S, image);
       image.release();
-    }*/
+    }
 
     // Run _Solver
-    Sequence seqi2(0, "", vFrames);
     cout << "Testing _Solver\n";
+    clearSkeletons(vFrames);
+    Sequence seqi2(0, "", vFrames);
     _Solver _solver;
     t0 = clock();
     std::vector<Solvlet> seqSolves = _solver.solve(seqi2, params);
@@ -142,7 +153,8 @@ int main (int argc, char **argv)
     cout << "Sequence solving time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;
 
     // Put solves
-    /*for (int i = 0; i < seqSolves.size(); i++)
+    if (useVisualization)
+    for (int i = 0; i < seqSolves.size(); i++)
     {
       int frameID = seqSolves[i].getFrameID();
       std::vector<LimbLabel> frameLabels = seqSolves[i].getLabels();
@@ -158,16 +170,17 @@ int main (int argc, char **argv)
       if (params.at("useCSdet") > 0.01f) cv::putText(image, "used ColorHistDetector", Point2f(20.f, y - 60.0f), 0, 0.7f, color, 2, 1);
       if (params.at("useSURFdet") > 0.01f) cv::putText(image, "used  SURF2Detector", Point2f(20.0f, y - 90.0f), 0, 0.7f, color, 2, 1);
 
-      stringstream S;
-      if (frameID < 10) S << "0";
-      if (frameID < 100) S << "0";
-      S << frameID << ".jpg";
-      imwrite("solve" + S.str(), image);
+      string S;
+      if (frameID < 10) S += "0";
+      if (frameID < 100) S += "0";
+      S += to_string(frameID) + ".jpg";
+      imwrite(outDirectory + "solve" + S, image);
       image.release();
-    }*/
+    }
 
     // Put "toSkeleton()"
-    /*vFrames = seqi2.getFrames();
+    vFrames = seqi2.getFrames();
+    if (useVisualization)
     for (int i = 0; i < vFrames.size(); i++)    
     {
       int frameID = vFrames[i]->getID();
@@ -190,16 +203,15 @@ int main (int argc, char **argv)
                
       putSkeleton(image, vFrames[i]->getSkeleton(), color);
 
-      stringstream S;
-      if (frameID < 10) S << "0";
-      if (frameID < 100) S << "0";
-      S << frameID << ".jpg";
-      imwrite("toSkeleton" + S.str(), image);
+      string S;
+      if (frameID < 10) S += "0";
+      if (frameID < 100) S += "0";
+      S += to_string(frameID) + ".jpg";
+      imwrite(outDirectory + "toSkeleton" + S, image);
       if (vFrames[i]->getFrametype() == KEYFRAME)
-        imwrite("solve" + S.str(), image);
-      S.clear();
+        imwrite(outDirectory + "solve" + S, image);
       image.release();
-    }*/
+    }
 
     //=============================================
     //draw the solution
@@ -218,4 +230,3 @@ int main (int argc, char **argv)
 #endif  // MEMORY_DEBUG && UNIX   
     return 0;
 }
-

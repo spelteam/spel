@@ -17,7 +17,7 @@ namespace SPEL
     return ExecTime*1000 / CLOCKS_PER_SEC;
   }
 
-  std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> frames)
+  std::vector<std::vector<Frame*>> _Solver::createSlices(std::vector<Frame*> frames)
   {
     long t0 = clock();
     std::vector<std::vector<Frame*>> Slices;
@@ -562,8 +562,8 @@ namespace SPEL
 
     emplaceDefaultParameters(params);
 
-	// Create interpolation
-	clearSkeletons(frames);
+    // Create interpolation
+    clearSkeletons(frames);
     interpolate3(frames, ISM);
 
     bool useHist = params.at("useCSdet") > 0.01f;
