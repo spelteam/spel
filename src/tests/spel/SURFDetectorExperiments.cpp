@@ -15,6 +15,7 @@
 #include "limbLabel.hpp"
 #include "spelParameters.hpp"
 #include "TestsFunctions.hpp"
+#include "spelGeometry.hpp"
 
 using namespace std;
 #if defined (HAVE_OPENCV_XFEATURES2D)

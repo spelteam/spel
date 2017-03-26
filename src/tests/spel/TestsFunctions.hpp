@@ -46,7 +46,6 @@ namespace SPEL
   map<int, vector<float>> LabelsAngleErrors(map<uint32_t, vector<LimbLabel>> &Labels, Skeleton &pattern);
   map<int, map<int, LimbLabel>> selectEffectiveLabels(map<uint32_t, vector<LimbLabel>> &Labels, map<int, vector<Point2f>> &Errors, float TolerableLinearError);
   vector<float> MinLabelsError(map<int, vector<float>> Errors, int TopLabelsCount);
-  long clock_to_ms(long ExecTime);
 
   vector<int> selectNotFoundedParts(Skeleton &skeleton, map<int, vector<float>> &Errors, map<uint32_t, vector<LimbLabel>> &Labels, int TolerableLinearError, int TopLabelsCount = 0);
 

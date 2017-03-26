@@ -14,6 +14,7 @@
 #include <surfDetector.hpp>
 #include "limbLabel.hpp"
 #include "TestsFunctions.hpp"
+#include "spelGeometry.hpp"
 
 using namespace std;
 #if defined (HAVE_OPENCV_XFEATURES2D)

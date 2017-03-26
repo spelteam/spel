@@ -11,6 +11,7 @@
 #include <lockframe.hpp>
 #include <fstream>
 #include "TestsFunctions.hpp"
+#include "spelGeometry.hpp"
 
 using namespace cv;
 using namespace std;

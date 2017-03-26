@@ -16,6 +16,7 @@
 #include "limbLabel.hpp"
 #include "spelHelper.hpp"
 #include "TestsFunctions.hpp"
+#include "spelGeometry.hpp"
 
 namespace SPEL
 {

@@ -15,6 +15,7 @@
 #include "lockframe.hpp"
 #include "interpolation.hpp"
 #include "TestsFunctions.hpp"
+#include "spelGeometry.hpp"
 #include "sequence.hpp"
 
 namespace SPEL
