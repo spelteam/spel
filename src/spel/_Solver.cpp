@@ -15,11 +15,6 @@
 
 namespace SPEL
 {
-  long clock_to_ms(long ExecTime)
-  {
-    return ExecTime*1000 / CLOCKS_PER_SEC;
-  }
-
   std::vector<std::vector<Frame*>> _Solver::createSlices(std::vector<Frame*> frames)
   {
     long t0 = clock();
@@ -76,7 +71,7 @@ namespace SPEL
     parts = toJointMap(pattern);
     iterations = 0;
     bool solved = false;
-    for (int i = 0; i < SkeletonLabelsScores.size(); i++)
+    for (int i = 0; i < parts.size(); i++)
     {
       SkeletonLabelsScores.emplace(std::pair<uint32_t, float>(i, 0));
       ignored.emplace(std::pair<uint32_t, bool>(i, false));
@@ -594,7 +589,7 @@ namespace SPEL
       //interpolate(slices[q]);
       std::cout << " - Ok\n";*/
       DebugMessage("Traning on sequence " + std::to_string(q), 2);
-      long int t0 = 0, t1 = 0, T0 =0, T1 = 0;
+      long int t0 = 0, t1 = 0, T0 = 0, T1 = 0;
 
       std::cout << "Solving of the Slices[" << q << "] started\n";
       if (useHog)
@@ -649,14 +644,15 @@ namespace SPEL
           T0 = clock();
 
           int N = slices[q][i]->getSkeleton().getPartTreePtr()->size();
-          cv::Point2f shift(0, 0);
-          int p = i - n;
-          if(p != m) shift = ISM->getShift(i, p);
           if (N == 0)
           {
-            
+            cv::Point2f shift(0, 0);
+           
             // Copiyng skeleton from neighbor frame, variant A
-            /*slices[q][i]->setSkeleton((skeleton + shift));// +slices[q][i]->getSkeleton())*0.5f);
+            /*
+            int p = i - n;
+            if(p != m) shift = ISM->getShift(i, p);
+            slices[q][i]->setSkeleton((skeleton + shift));// +slices[q][i]->getSkeleton())*0.5f);
 
             // Debug
             //cv::Mat tempMask = slices[q][i]->getMask().clone();
@@ -699,8 +695,8 @@ namespace SPEL
             //std::cout << " Mask ROI: " << ROI1 << std::endl;
             //std::cout << " Skeleton ROI: " << ROI2 << std::endl;
             //std::cout << " Mask center: " << c1 << std::endl;
-            //std::cout << " Skeleton center: " << c << std::endl;
-            //std::cout << " Skeleton mask center: " << c2 << std::endl;
+            //std::cout << " Skeleton mask center: " << c << std::endl;
+            //std::cout << " Skeleton center: " << c2 << std::endl;
             //tempMask = slices[q][i]->getMask().clone();  
             //putSkeletonMask(tempMask, skeleton - shift, cv::Size(0,0), 128);
             //imwrite(to_string(slices[q][i]->getID(), 3) + ".png", tempMask);

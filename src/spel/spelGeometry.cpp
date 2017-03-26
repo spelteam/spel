@@ -491,12 +491,12 @@ namespace SPEL
 // Points
   bool inside(cv::Point2f p, cv::Size imageSize)
   {
-    return (p.x >= 0 && p.x < imageSize.width && p.y >=0 && p.y < imageSize.height);
+    return inside(cv::Point2i(static_cast<int>(p.x), static_cast<int>(p.y)), imageSize);
   }
 
   bool inside(cv::Point p, cv::Size imageSize)
   {
-    return (p.x >= 0 && p.x < imageSize.width && p.y >=0 && p.y < imageSize.height);
+    return (p.x >= 0 && p.x < imageSize.width && p.y >= 0 && p.y < imageSize.height);
   }
 
 //Interpolation
@@ -889,7 +889,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
     std::vector<cv::Point2f> endpoints = getEndpoints(polygons);
     cv::Rect ROI = toROIRect(endpoints);
 
-    //Creat mew mask image if maskSize > size(0,0)
+    //Creat mew mask image if maskSize > size(0, 0)
     if (maskSize.width > 0 && maskSize.height > 0)
     {
       mask.release();
@@ -944,5 +944,10 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
       s = "0" + s;
 
     return s;
+  }
+
+  long clock_to_ms(long t)
+  {
+    return t*1000 / CLOCKS_PER_SEC;
   }
 }
