@@ -213,6 +213,11 @@ namespace SPEL
       dst.insert(src.begin(), src.end());
   }
 
+  long spelHelper::clock_to_ms(long t)
+  {
+    return t*1000 / CLOCKS_PER_SEC;
+  }
+
   std::string spelHelper::getGUID(void) 
   {
     std::string guid;

@@ -599,7 +599,7 @@ namespace SPEL
         t0 = clock();
         hogdetector->train(slices[q], params);
         t1 = clock();
-        std::cout << " time = " << clock_to_ms(t1-t0) << "ms - Ok\n";
+        std::cout << " time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
       }
 
       if (useHist)
@@ -609,7 +609,7 @@ namespace SPEL
         t0 = clock();
         histdetector->train(slices[q], params);
         t1 = clock();
-        std::cout << " time = " << clock_to_ms(t1 - t0) << "ms - Ok\n";
+        std::cout << " time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
       }
 
       if (useSurf2)
@@ -619,7 +619,7 @@ namespace SPEL
         t0 = clock();
         surf2detector->train(slices[q], params);
         t1 = clock();
-        std::cout << " time = " << clock_to_ms(t1 - t0) << "ms - Ok\n";
+        std::cout << " time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
       }
       std::cout << "\n";
       
@@ -713,7 +713,7 @@ namespace SPEL
             LimbLabels = surf2detector->detect(slices[q][i], params, LimbLabels);
             t1 = clock();
             for(int l = 0; l < LimbLabels.size(); l++) labelsCount += LimbLabels[l].size();			
-            std::cout << "Limb labels count = "  << labelsCount << ", time = " << clock_to_ms(t1 - t0) <<"ms - Ok\n";
+            std::cout << "Limb labels count = "  << labelsCount << ", time = " << spelHelper::clock_to_ms(t1 - t0) <<"ms - Ok\n";
           }   
           if (useHog)
           {
@@ -723,7 +723,7 @@ namespace SPEL
             t1 = clock();
             labelsCount = 0;
             for (int l = 0; l < LimbLabels.size(); l++) labelsCount += LimbLabels[l].size();
-            std::cout << "Limb labels count = " << labelsCount << ", time = " << clock_to_ms(t1 - t0) << "ms - Ok\n";
+            std::cout << "Limb labels count = " << labelsCount << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
           }
 
           if (useHist)
@@ -734,7 +734,7 @@ namespace SPEL
             t1 = clock();
             labelsCount = 0;
             for (int l = 0; l < LimbLabels.size(); l++) labelsCount += LimbLabels[l].size();
-            std::cout << "Limb labels count = " << labelsCount << ", time = " << clock_to_ms(t1 - t0) << "ms - Ok\n";;
+            std::cout << "Limb labels count = " << labelsCount << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";;
           }
 
           std::cout << " Solving of the frame [" << slices[q][i]->getID() << "]: ";
@@ -743,11 +743,11 @@ namespace SPEL
           Solvlet solve = fsolver.solveFrame(LimbLabels, slices[q][i]->getID());
           solves.push_back(solve);
           t1 = clock();
-          std::cout << "iterations count = " << fsolver.iterations << ", time = " << clock_to_ms(t1 - t0) << "ms - Ok\n";
+          std::cout << "iterations count = " << fsolver.iterations << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
           skeleton = (0.5f*fsolver.getAverageJointsSkeleton(pattern) + 0.5f*fsolver.getShiftedLabelsSkeleton(pattern));
           slices[q][i]->setSkeleton(skeleton);
           T1 = clock();
-          DebugMessage("Frame " + std::to_string(slices[q][i]->getID()) + " solved - " + std::to_string(clock_to_ms(T1 - T0)) + " ms" , 2);
+          DebugMessage("Frame " + std::to_string(slices[q][i]->getID()) + " solved - " + std::to_string(spelHelper::clock_to_ms(T1 - T0)) + " ms" , 2);
           std::cout << std::endl;
         }
 

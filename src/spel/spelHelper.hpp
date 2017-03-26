@@ -221,6 +221,7 @@ namespace SPEL
     /// <param name="dst">The destination.</param>
     /// <param name="src">The source.</param>
     static void mergeParameters(std::map <std::string, float> &dst, const std::map <std::string, float> &src);
+    static long clock_to_ms(long t);
   };
 
   /// <summary>

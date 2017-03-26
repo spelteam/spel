@@ -945,9 +945,4 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
 
     return s;
   }
-
-  long clock_to_ms(long t)
-  {
-    return t*1000 / CLOCKS_PER_SEC;
-  }
 }

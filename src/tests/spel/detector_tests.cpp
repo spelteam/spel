@@ -1023,8 +1023,8 @@ namespace SPEL
 
     // Cheking the values and put test result
     vector<int> notFoundedParts = selectNotFoundedParts(SkeletonPattern, LinearErrors, Labels, TolerableLinearError, TopLabelsCount);
-    cout << "\n EXECUTION TIME\n" << "\nTrain: " << clock_to_ms(train_t1 - train_t0) << " ms\n";
-    cout << "Detect: " << clock_to_ms(detect_t1 - detect_t0) << " ms\n";
+    cout << "\n EXECUTION TIME\n" << "\nTrain: " << spelHelper::clock_to_ms(train_t1 - train_t0) << " ms\n";
+    cout << "Detect: " << spelHelper::clock_to_ms(detect_t1 - detect_t0) << " ms\n";
 
     cout << "\n TEST PARAMETERS\n\n";
     cout << "Image size = " << Pattern[0]->getMask().size() << endl;
