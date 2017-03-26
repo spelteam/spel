@@ -420,7 +420,8 @@ namespace SPEL
     for (unsigned int i = 0; i < frames.size(); i++)
     {
       ROI.push_back(SearchROI(frames[i]->getMask())); // Search ROI for all frames
-      Center.push_back(MaskCenter(frames[i]->getMask(), ROI[i])); // Search mask center for all frames
+      cv::Point2f p = MaskCenter(frames[i]->getMask(), ROI[i]);
+      Center.push_back(cv::Point2i(static_cast<int>(p.x), static_cast<int>(p.y))); // Search mask center for all frames
     }
 
     uchar Q = 9;

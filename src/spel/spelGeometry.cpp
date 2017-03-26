@@ -118,7 +118,7 @@ namespace SPEL
   // Search center of mask in the ROI
   // "ROIEndpoints" - endpoints of mask ROI: {topLeft, bottomRight}
   // "colorThreshold" -  max value of background color, white pixel threshold
-  cv::Point2i MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROIEndpoints, uchar colorThreshold)
+  cv::Point2f MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROIEndpoints, uchar colorThreshold)
   {
     double N = 0;
     cv::Point2d center(0.0, 0.0);
@@ -131,22 +131,29 @@ namespace SPEL
           center = center + cv::Point2d(x, y);
         }         
       }
+    if (N > 0)
+      center = cv::Point2d(center.x / N, center.y / N);
+    else
+    {
+      center = 0.5 * (ROIEndpoints[0] +  ROIEndpoints[1]);
+      DebugMessage("Mask ROI is empty", 2);
+    }
 
-    return cv::Point2i(static_cast<int>(round(center.x/ N)), static_cast<int>(round(center.y/N)));
+    return cv::Point2f(static_cast<float>(center.x), static_cast<float>(center.y));
   }
 
   // Search center of mask in the ROI
   // "colorThreshold" -  max value of background color, white pixel threshold
-  cv::Point2i MaskCenter(cv::Mat mask, cv::Rect ROIRect, uchar colorThreshold)
+  cv::Point2f MaskCenter(cv::Mat mask, cv::Rect ROIRect, uchar colorThreshold)
   {
     cv::Point2i p0(ROIRect.x, ROIRect.y);
-    cv::Point2i p1(ROIRect.x + ROIRect.width, ROIRect.y + ROIRect.height);
+    cv::Point2i p1(ROIRect.x + ROIRect.width - 1, ROIRect.y + ROIRect.height - 1);
     std::vector<cv::Point2i> endpoints = { p0, p1 };
 
     return MaskCenter(mask, endpoints, colorThreshold);
   }
 
-  // ?
+  // == cv::adjustROI ?
   cv::Rect resizeROI_(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize)
   {
     float dx = static_cast<float>(NewROISize.width - ROI.width);
@@ -170,11 +177,74 @@ namespace SPEL
     return cv::Rect(p0, NewROISize);
   }
 
+  bool correctROI(cv::Rect &ROI, cv::Size imageSize)
+  {
+    cv::Rect temp = ROI;
+    if (temp.x < 0) temp.x = 0;
+    if (temp.y < 0) temp.y = 0;
+    if (temp.x >= imageSize.width) temp.x = imageSize.width - 1;
+    if (temp.y >= imageSize.height) temp.y = imageSize.height - 1;
+    if (temp.width < 0) temp.width = 0;
+    if (temp.height < 0) temp.height = 0;
+    if (temp.x + temp.width > imageSize.width) 
+      temp.width = imageSize.width - temp.x;
+    if (temp.y + temp.height > imageSize.height) 
+      temp.height = imageSize.height - temp.y;
+
+    bool b = (temp != ROI);
+    if(b)
+      DebugMessage("ROI out of range - fixed", 5);
+  
+    ROI = temp;
+    return b;
+  }
+
+  bool correctEndpoints(std::vector<cv::Point2f> &endpoints, cv::Size imageSize)
+  {
+    std::vector<cv::Point2f> temp = endpoints;
+    float f;
+    if(temp[0].x > temp[1].x) 
+    {
+      f = temp[0].x;
+      temp[0].x = temp[1].x;
+      temp[1].x = f;
+    }
+    if (temp[0].y > temp[1].y)
+    {
+      f = temp[0].y;
+      temp[0].y = temp[1].y;
+      temp[1].y = f;
+    }
+    if (temp[0].x < 0) temp[0].x = 0;
+    if (temp[0].y < 0) temp[0].y = 0;
+    if (temp[1].x >= imageSize.width) 
+      temp[1].x = imageSize.width - 1;
+    if (temp[1].y >= imageSize.height) 
+      temp[1].y = imageSize.height - 1;
+
+    bool b = (temp != endpoints);
+    if(b)
+      DebugMessage("Endpoints out of range - fixed", 5);
+
+    endpoints = temp;
+    return b;
+  }
+
 //PartPolygons
 
   bool isPartPolygon(std::vector<cv::Point2f> partPolygon, float error)
   {
     bool b = (partPolygon.size() == 4);
+
+    if (b)
+    {
+      cv::Point2f Z(0.0f, 0.0f);
+      if(partPolygon[0] == Z && partPolygon[2] == Z)
+        b = false;
+      if (partPolygon[1] == Z && partPolygon[3] == Z)
+        b = false;
+    }
+
     if (b)
     {
       cv::Point2f d = partPolygon[3] - partPolygon[0];
@@ -184,7 +254,8 @@ namespace SPEL
       float F = f.x*f.x + f.y*f.y;
       float e = D*error*error;
 
-      b = b && (abs(D - F) < e);
+      b = (D > 0.0f) && (F > 0.0f);
+      if(b) b = (abs(D - F) < e);
     }
 
     return b;
@@ -209,13 +280,13 @@ namespace SPEL
     return partRect;
   }
 
-  float getLenght(std::vector<cv::Point2f> partPolygon)
+  float getPartLenght(std::vector<cv::Point2f> partPolygon)
   {
     cv::Point2f d = partPolygon[1] - partPolygon[0];
     return sqrt(d.x*d.x + d.y*d.y);
   }
 
-  float getWidth(std::vector<cv::Point2f> partPolygon)
+  float getPartWidth(std::vector<cv::Point2f> partPolygon)
   {
     cv::Point2f d = partPolygon[3] - partPolygon[0];
     return sqrt(d.x*d.x + d.y*d.y);
@@ -224,6 +295,20 @@ namespace SPEL
   cv::Point2f getPartCenter(std::vector<cv::Point2f> partPolygon)
   {
     return 0.5f*(partPolygon[3] + partPolygon[1]);
+  }
+
+  cv::Point2f getCenter(std::vector<cv::Point2f> polygon)
+  {
+    cv::Point2f c(0.0f, 0.0f);
+
+    if (polygon.size() > 0)
+    {
+      for (int i = 0; i < polygon.size(); i++)
+        c += polygon[i];
+      c = c / static_cast<float>(polygon.size());
+    }
+
+    return c;
   }
 
   std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton skeleton)
@@ -362,6 +447,53 @@ namespace SPEL
     if(k != 0.0f) s1 = s*(1/k);
 
     return s1;
+  }
+
+  cv::Point2f SkeletonCenter(std::map<int, std::vector<cv::Point2f>> polygons)
+  {
+    cv::Point2f c = cv::Point2f(0.0f, 0.0f);
+    float S = 0.0f;
+    for (int k = 0; k < polygons.size(); k++)
+    {
+      float s = getPartLenght(polygons[k])*getPartWidth(polygons[k]);
+      S += s;
+      c = c + s*getPartCenter(polygons[k]);
+    }
+
+    if(S > 0.0f) 
+      c = c/S;
+    else
+    {
+      for(int i = 0; i < polygons.size(); i++)
+        for(int k = 0; k < polygons[i].size(); k++)
+        {
+          S++;
+          c += polygons[i][k];
+        }
+      if(S > 0.0f)
+        c = c/S;
+    }
+
+    return c;
+  }
+
+  cv::Point2f SkeletonCenter(Skeleton skeleton)
+  {
+    std::map<int, std::vector<cv::Point2f>> polygons;
+    polygons = getAllPolygons(skeleton);
+
+    return SkeletonCenter(polygons);
+  }
+
+// Points
+  bool inside(cv::Point2f p, cv::Size imageSize)
+  {
+    return (p.x >= 0 && p.x < imageSize.width && p.y >=0 && p.y < imageSize.height);
+  }
+
+  bool inside(cv::Point p, cv::Size imageSize)
+  {
+    return (p.x >= 0 && p.x < imageSize.width && p.y >=0 && p.y < imageSize.height);
   }
 
 //Interpolation
@@ -748,7 +880,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
       putPartRect(image, polygons[p], color);
   }
 
-  void putSkeletonMask(cv::Mat mask, Skeleton skeleton, cv::Size maskSize, uchar color)
+  void putSkeletonMask(cv::Mat &mask, Skeleton skeleton, cv::Size maskSize, uchar color)
   {
     std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
     std::vector<cv::Point2f> endpoints = getEndpoints(polygons);
@@ -760,22 +892,36 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
       mask.release();
       mask = cv::Mat::zeros(maskSize, CV_8UC1);
     }
-    //Creat mew mask image if the mask is less than skeleton
-    if (mask.size().height < endpoints[1].y || mask.size().width < endpoints[1].x)
+    //Creat mew mask image if the mask size is zero
+    if (mask.size().height == 0 || mask.size().width == 0)
     {
       mask.release();
       mask = cv::Mat::zeros(ROI.size(), CV_8UC1);
-      polygons = getAllPolygons(skeleton - cv::Point2f(ROI.x, ROI.y));
+      polygons = getAllPolygons(skeleton - endpoints[0]);
     }
 
     //draw skeleton mask
+    bool outOfRange = false;
+    cv::Size size = mask.size();
     for(int i = 0; i < polygons.size(); i++)
     {
       std::vector<cv::Point2f> endpoints = getEndpoints(polygons[i]);
-      for(float x = endpoints[0].x; x < endpoints[1].x; x++)
-        for (float y = endpoints[0].y; y < endpoints[1].y; y++)
-          if(cv::pointPolygonTest(polygons[i], cv::Point2f(x, y), false) > 0)
-            mask.at<uint8_t>(y, x) = color;
+      outOfRange = correctEndpoints(endpoints, size);
+      for(float x = endpoints[0].x; x <= endpoints[1].x; x++)
+        for (float y = endpoints[0].y; y <= endpoints[1].y; y++)
+        {
+          cv::Point2f p(x, y);
+          if(cv::pointPolygonTest(polygons[i], p, false) > 0)
+          {
+            //if (inside(p, size))
+              mask.at<uchar>(y, x) = color;
+            /*else
+              outOfRange = true;*/       
+          }		  
+        }
+
+      if (outOfRange)
+        DebugMessage("Polygon " + std::to_string(i) + " mask out of range", 2);
     }	 
 
     polygons.clear();
@@ -786,5 +932,14 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
   {
     for (int k = 0; k < frameLabels.size(); k++)
       putPartRect(image, frameLabels[k].getPolygon(), color);
+  }
+
+  std::string to_string(int num, uchar length)
+  {
+    std::string s = std::to_string(num);
+    while(s.length() < length)
+      s = "0" + s;
+
+    return s;
   }
 }

@@ -555,9 +555,9 @@ namespace SPEL
     /*if (!M->read("ISM.txt") || M->size() != frames.size())
     {*/
       //DebugMessage("ISM not found ", 2);
-      DebugMessage("Building Image similarity matrix ", 2);
+      /*DebugMessage("Building Image similarity matrix ", 2);
       ISM->buildImageSimilarityMatrix(frames, 0, 0, false, false);
-      DebugMessage("ISM created ", 2);
+      DebugMessage("ISM created ", 2);*/
     /*}*/
 
     emplaceDefaultParameters(params);
@@ -639,6 +639,7 @@ namespace SPEL
       if (slices[q].size() < 11)  //?   
         interpolate2(slices[i]); //?
       for (i; i != m; i = i + n)
+      if(i < slices[q].size())
         if (slices[q][i]->getFrametype() != KEYFRAME)
         {
           std::cout << " Detect on frame [" << slices[q][i]->getID() << "] started " << std::endl;
@@ -648,8 +649,60 @@ namespace SPEL
           cv::Point2f shift(0, 0);
           int p = i - n;
           if(p != m) shift = ISM->getShift(i, p);
-          if(N == 0)
-            slices[q][i]->setSkeleton((skeleton + shift));// +slices[q][i]->getSkeleton())*0.5f);
+          if (N == 0)
+          {
+            
+            // Copiyng skeleton from neighbor frame, variant A
+            /*slices[q][i]->setSkeleton((skeleton + shift));// +slices[q][i]->getSkeleton())*0.5f);
+
+            // Debug
+            //cv::Mat tempMask = slices[q][i]->getMask().clone();
+            //putSkeletonMask(tempMask, skeleton + shift, cv::Size(0, 0), 128);
+            //imwrite(std::to_string(slices[q][i]->getID()) + ".png", tempMask);
+            //tempMask.release();*/
+            
+            // Copiyng skeleton from neighbor frame, variant B
+            /**/
+            // Create mask for the previous skeleton
+            cv::Size size = slices[q][i]->getMask().size();
+
+            // Select mask ROI
+            std::vector<cv::Point2i> endpoints1 = SearchROI(slices[q][i]->getMask());
+            cv::Rect ROI1 = toROIRect(endpoints1);
+            correctROI(ROI1, size);
+
+            // Selecting skeleton ROI
+            std::vector<cv::Point2f> endpoints2 = getEndpoints(skeleton);
+            cv::Rect ROI2 = toROIRect(endpoints2);
+            correctROI(ROI2, size);
+
+            // Calculate distance
+            cv::Point2i c1 = MaskCenter(slices[q][i]->getMask(), ROI1);
+            cv::Point2f c2 = SkeletonCenter(skeleton);
+            shift = cv::Point2i(static_cast<int>(c2.x), static_cast<int>(c2.y)) - c1;
+
+            // Copy skeleton
+            slices[q][i]->setSkeleton(skeleton - shift);
+
+            // Debug
+            cv::Mat tempMask;// = cv::Mat::zeros(size, CV_8UC1);;
+            //putSkeletonMask(tempMask, skeleton, size, 255);
+            //cv::Point2i c = MaskCenter(tempMask, ROI2);
+            //tempMask.release();
+
+            // Debug messages
+            //std::cout << " Frame " << std::to_string(slices[q][i]->getID()) << " endpoints: " << endpoints1 << std::endl;
+            //std::cout << " Skeleton endpoints: " << endpoints2 << std::endl;
+            //std::cout << " Mask ROI: " << ROI1 << std::endl;
+            //std::cout << " Skeleton ROI: " << ROI2 << std::endl;
+            //std::cout << " Mask center: " << c1 << std::endl;
+            //std::cout << " Skeleton center: " << c << std::endl;
+            //std::cout << " Skeleton mask center: " << c2 << std::endl;
+            //tempMask = slices[q][i]->getMask().clone();  
+            //putSkeletonMask(tempMask, skeleton - shift, cv::Size(0,0), 128);
+            //imwrite(to_string(slices[q][i]->getID(), 3) + ".png", tempMask);
+            //tempMask.release();
+          }
 
           std::map<uint32_t, std::vector<LimbLabel>> LimbLabels;
 
@@ -692,7 +745,7 @@ namespace SPEL
           solves.push_back(solve);
           t1 = clock();
           std::cout << "iterations count = " << fsolver.iterations << ", time = " << clock_to_ms(t1 - t0) << "ms - Ok\n";
-          skeleton = (1.0f*fsolver.getAverageJointsSkeleton(pattern) + 0.0f*fsolver.getShiftedLabelsSkeleton(pattern));
+          skeleton = (0.5f*fsolver.getAverageJointsSkeleton(pattern) + 0.5f*fsolver.getShiftedLabelsSkeleton(pattern));
           slices[q][i]->setSkeleton(skeleton);
           T1 = clock();
           DebugMessage("Frame " + std::to_string(slices[q][i]->getID()) + " solved - " + std::to_string(clock_to_ms(T1 - T0)) + " ms" , 2);

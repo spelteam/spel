@@ -198,7 +198,7 @@ namespace SPEL
 
     std::vector<PartArea> PolygonsArea(partRects.size());
     for (int i = 0; i < partRects.size(); i++)
-      PolygonsArea[i] = std::pair<int, float>(i, getLenght(partRects[i])*getWidth(partRects[i]));
+      PolygonsArea[i] = std::pair<int, float>(i, getPartLenght(partRects[i])*getPartWidth(partRects[i]));
     
     std::sort(PolygonsArea.begin(), PolygonsArea.end(), ComparePartsArea());
     std::vector<int> temp(partRects.size());
@@ -228,8 +228,8 @@ namespace SPEL
   {
     if(CellsCount == cv::Size(0,0))
       CellsCount = Trained.PartCellsCount[PartID];
-    double L = getLenght(polygon);
-    double W = getWidth(polygon);
+    double L = getPartLenght(polygon);
+    double W = getPartWidth(polygon);
     double l = L / static_cast<double>(CellsCount.height);
     double w = W / static_cast<double>(CellsCount.width);
     double a = W;
@@ -266,8 +266,8 @@ namespace SPEL
       if ( abs(markingError) > 1.0f)
       {
         float e = abs(ceil(markingError));
-        int lenghtCells = static_cast<int>(trunc(getLenght(partPolygons[k]) / e));
-        int widthCells = static_cast<int>(trunc(getWidth(partPolygons[k]) / e));
+        int lenghtCells = static_cast<int>(trunc(getPartLenght(partPolygons[k]) / e));
+        int widthCells = static_cast<int>(trunc(getPartWidth(partPolygons[k]) / e));
         if (widthCells < 1) widthCells = 1;
         if (lenghtCells < 1) lenghtCells = 1;
         cellsCount = cv::Size(widthCells, lenghtCells);
@@ -303,8 +303,8 @@ namespace SPEL
   {
     for (unsigned int i = 0; i < partPolygons.size(); i++)
     {
-      float lenght = getLenght(partPolygons[i]);
-      float widht = getWidth(partPolygons[i]);
+      float lenght = getPartLenght(partPolygons[i]);
+      float widht = getPartWidth(partPolygons[i]);
       float nl = static_cast<float>(Trained.PartCellsCount[i].height);
       float nw = static_cast<float>(Trained.PartCellsCount[i].width);
       if (lenght/nl < parameters.minCellSize)
@@ -332,7 +332,8 @@ namespace SPEL
       // Detect ROI keypoints
       cv::Mat Mask = frame->getMask();
       cv::Rect ROI = toROIRect(SearchROI(Mask));
-      //Image.adjustROI(ROI.y, ROI.y+ROI.height, ROI.x, ROI.width);
+      correctROI(ROI, Mask.size());
+      //Image.adjustROI(2, 2, 2, 2);
       std::vector<cv::KeyPoint> FrameKeypoints;
       detector->detect(Image(ROI), FrameKeypoints);
       //cv::imwrite("zROI.jpg", Image(ROI));
@@ -581,8 +582,8 @@ namespace SPEL
       std::vector<LimbLabel> PartLabels;
       if(Trained.PartKeypoints.at(id).size() > 0) // or " > threshold"
       {	  
-        float partLenght = getLenght(partPolygon);
-        float partWidth = getWidth(partPolygon);
+        float partLenght = getPartLenght(partPolygon);
+        float partWidth = getPartWidth(partPolygon);
         std::vector<cv::Point2f> LabelPolygon(4), RotatedPolygon(4);
 
         float SearchDist = parameters.searchDistCoeff*partLenght;

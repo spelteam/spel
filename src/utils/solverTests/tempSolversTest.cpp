@@ -72,6 +72,9 @@ int main (int argc, char **argv)
     params.emplace("useCSdet", 0.0f);
     params.emplace("useHoGdet", 1.0f);
     params.emplace("useSURFdet", 0.0f);
+    //params.emplace("searchDistCoeff", 2.0f);
+    //params.emplace("searchDistCoeffMult", 2.25f);
+    //params.emplace("stepTheta", 5.0f);
     params.emplace("uniqueLocationCandidates", 0.1f);
     params.emplace("uniqueAngleCandidates", 0.1f);  
     params.emplace("useDedefaultScale", 1.0f);
@@ -92,6 +95,7 @@ int main (int argc, char **argv)
     // Calculate interpolation
     if (useVisualization)
     {
+      t0 = clock();
       //seq.computeInterpolation(params);
       //vFrames = seq.getFrames();
       clearSkeletons(vFrames);
@@ -103,7 +107,8 @@ int main (int argc, char **argv)
       for(uint32_t i = 0; i < slices.size(); i++)
         if (slices[i].size() < 11)
           interpolate2(slices[i]);
-      cout << "int - ok\n";
+      t1 = clock();
+      cout << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
     }
     
     // Put masks
@@ -113,7 +118,7 @@ int main (int argc, char **argv)
       cv::Mat temp = vFrames[i]->getMask().clone();
       Skeleton skeleton = vFrames[i]->getSkeleton();
       putSkeletonMask(temp, skeleton, cv::Size(0, 0), 128);
-      imwrite(outDirectory + "mask" + to_string(i) + ".jpg", temp);
+      imwrite(outDirectory + "mask" + to_string(i, 3) + ".jpg", temp);
       temp.release();
     }
 
@@ -133,11 +138,7 @@ int main (int argc, char **argv)
         cv::putText(image, "Interpolated skeleton", Point2f(20.0f, 30.0f), 0, 1.0f, color, 4, 1);
       putSkeleton(image, skeleton, color);
 
-      string S;
-      if (i < 10) S += "0";
-      if(i < 100) S += "0";
-      S += to_string(i) + ".jpg";
-      imwrite(outDirectory + "int" + S, image);
+      imwrite(outDirectory + "int" + to_string(i, 3) + ".jpg", image);
       image.release();
     }
 
@@ -170,11 +171,7 @@ int main (int argc, char **argv)
       if (params.at("useCSdet") > 0.01f) cv::putText(image, "used ColorHistDetector", Point2f(20.f, y - 60.0f), 0, 0.7f, color, 2, 1);
       if (params.at("useSURFdet") > 0.01f) cv::putText(image, "used  SURF2Detector", Point2f(20.0f, y - 90.0f), 0, 0.7f, color, 2, 1);
 
-      string S;
-      if (frameID < 10) S += "0";
-      if (frameID < 100) S += "0";
-      S += to_string(frameID) + ".jpg";
-      imwrite(outDirectory + "solve" + S, image);
+      imwrite(outDirectory + "solve" + to_string(frameID, 3) + ".jpg", image);
       image.release();
     }
 
@@ -203,10 +200,7 @@ int main (int argc, char **argv)
                
       putSkeleton(image, vFrames[i]->getSkeleton(), color);
 
-      string S;
-      if (frameID < 10) S += "0";
-      if (frameID < 100) S += "0";
-      S += to_string(frameID) + ".jpg";
+      string S = to_string(frameID, 3) + ".jpg";
       imwrite(outDirectory + "toSkeleton" + S, image);
       if (vFrames[i]->getFrametype() == KEYFRAME)
         imwrite(outDirectory + "solve" + S, image);
@@ -222,7 +216,7 @@ int main (int argc, char **argv)
     {
       Solvlet solve = seqSolves[i];
       int frameID = solve.getFrameID();
-      projectLoader.drawFrameSolvlets(solve, vFrames[frameID], argv[2], Scalar(0,0,255), 2);
+      projectLoader.drawFrameSolvlets(solve, vFrames[frameID], argv[2], Scalar(0, 0, 255), 2);
     }
 
 #if defined(MEMORY_DEBUG) && defined(UNIX)

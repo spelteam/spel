@@ -35,18 +35,21 @@ namespace SPEL
   cv::Rect toROIRect(std::vector<cv::Point2f> endpoints);
 
   // Search center of white figure in the ROI of cv::Mat<UC_8UC1> image
-  cv::Point2i MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROIEndpoints, uchar colorThreshold = 9);
-  cv::Point2i MaskCenter(cv::Mat mask, cv::Rect ROIRect, uchar colorThreshold = 9);
+  cv::Point2f MaskCenter(cv::Mat mask, std::vector<cv::Point2i> ROIEndpoints, uchar colorThreshold = 9);
+  cv::Point2f MaskCenter(cv::Mat mask, cv::Rect ROIRect, uchar colorThreshold = 9);
 
   // ROI transformation: to narrow or extend
   cv::Rect resizeROI_(cv::Rect ROI, cv::Size NewROISize, cv::Size ImageSize = cv::Size(0,0) );
+  bool correctROI(cv::Rect &ROI, cv::Size imageSize);
+  bool correctEndpoints(std::vector<cv::Point2f> &endpoints, cv::Size imageSize);
 
 //Part polygon
   bool isPartPolygon(std::vector<cv::Point2f> partPolygon, float error = 0.01);
   std::vector<cv::Point2f> buildPartPolygon(float LWRatio, cv::Point2f p0, cv::Point2f p1);
-  float getLenght(std::vector<cv::Point2f> partPolygon);
-  float getWidth(std::vector<cv::Point2f> partPolygon);
+  float getPartLenght(std::vector<cv::Point2f> partPolygon);
+  float getPartWidth(std::vector<cv::Point2f> partPolygon);
   cv::Point2f getPartCenter(std::vector<cv::Point2f> partPolygon);
+  cv::Point2f getCenter(std::vector<cv::Point2f> polygon);
   std::map<int, std::vector<cv::Point2f>> getAllPolygons(Skeleton skeleton);
   std::vector<cv::Point2f> getEndpoints(std::vector<cv::Point2f> polygon);
   std::vector<cv::Point2f> getEndpoints(std::map<int, std::vector<cv::Point2f>> polygons);
@@ -60,6 +63,12 @@ namespace SPEL
   Skeleton operator*(Skeleton s, float k);
   Skeleton operator*(float k, Skeleton s);
   Skeleton operator/(Skeleton s, float k);
+  cv::Point2f SkeletonCenter(std::map<int, std::vector<cv::Point2f>> polygons);
+  cv::Point2f SkeletonCenter(Skeleton skeleton);
+
+// Points
+  bool inside(cv::Point2f p, cv::Size imageSize);
+  bool inside(cv::Point p, cv::Size imageSize);
 
 //Interpolation
   // Remove lockframe skeleton
@@ -85,8 +94,9 @@ namespace SPEL
 //Visualization
   void putPartRect(cv::Mat image, std::vector<cv::Point2f> polygon, cv::Scalar color = cv::Scalar(255, 255, 255));
   void putSkeleton(cv::Mat image, Skeleton skeleton, cv::Scalar color = cv::Scalar(255, 255, 255));
-  void putSkeletonMask(cv::Mat mask, Skeleton skeleton, cv::Size maskSize = cv::Size(0, 0), uchar color = 255);
+  void putSkeletonMask(cv::Mat &mask, Skeleton skeleton, cv::Size maskSize = cv::Size(0, 0), uchar color = 255);
   void putLabels(cv::Mat image, std::vector<LimbLabel> frameLabels, cv::Scalar color = cv::Scalar(255, 255, 255));
+  std::string to_string(int num, uchar length);
 }
 
 #endif;
