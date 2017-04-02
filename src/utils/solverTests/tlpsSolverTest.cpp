@@ -4,6 +4,7 @@
 #include <iostream>
 #include <tlpssolver.hpp>
 #include "projectLoader.hpp"
+#include "_Solver.hpp"
 
 using namespace std;
 using namespace SPEL;
@@ -50,9 +51,9 @@ int main (int argc, char **argv)
   params.emplace("tempCoeff", 0.1);
 
   //detector settings
-  params.emplace("useCSdet", 0.1); //determine if ColHist detector is used and with what coefficient
-  params.emplace("useHoGdet", 0.9); //determine if HoG descriptor is used and with what coefficient
-  params.emplace("useSURFdet", 0.0); //determine whether SURF detector is used and with what coefficient
+  params.emplace("useCSdet", 0.0f); //determine if ColHist detector is used and with what coefficient
+  params.emplace("useHoGdet", 1.0f); //determine if HoG descriptor is used and with what coefficient
+  params.emplace("useSURFdet", 0.0f); //determine whether SURF detector is used and with what coefficient
 
   params.emplace("grayImages", 1); // use grayscale images for HoG?
 
@@ -64,21 +65,32 @@ int main (int argc, char **argv)
   params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
   params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
 
-  params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
-  params.emplace("maxPartCandidates", 0.1); //set the max number of part candidates to allow into the solver
-  params.emplace("uniqueLocationCandidates", 360);
+  //params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+  params.emplace("maxPartCandidates", 0.2f); //set the max number of part candidates to allow into the solver
+  params.emplace("uniqueLocationCandidates", 0.2f);
   params.emplace("debugLevel", 0);
   vector<Solvlet> solve;
   
   vector <Frame*> vFrames = projectLoader.getFrames();
+
+  for(int i = 0; i < vFrames.size(); i++)
+    vFrames[i]->getSkeletonPtr()->setScale(1.0f);
+
   Sequence seq(0, "test", vFrames);
 
+  params.emplace("useDedefaultScale", 1.0f);
+  params.emplace("defaultScale", 1.0f);
+  params.emplace("maxFrameHeight", seq.getFrame(0)->getMask().size().height);
+
   //now test inrepolation for this sequence
-  seq.estimateUniformScale(params);
+  //seq.estimateUniformScale(params);
   seq.computeInterpolation(params);
 
-  vFrames.clear();
 
+  vFrames.clear();
+  vFrames = seq.getFrames();
+  std::cout << "scale = " << vFrames[0]->getSkeleton().getScale() << std::endl;
+  //projectLoader.getFrames();
   //first, test the 3D locations
   for(uint32_t i=0; i<vFrames.size(); ++i)
   {
@@ -103,10 +115,26 @@ int main (int argc, char **argv)
   //solve with some default params
   solve = tSolver.solve(seq, params);
 
+  cout << endl << "Solves size = " << solve.size() << endl;
+  for (uint32_t i = 0; i<solve.size(); ++i)
+  {
+    cout << endl << "Solve[" << i << "]:" << endl;
+    vector<LimbLabel> labels = solve[i].getLabels();
+    for (int k = 0; k < labels.size(); k++)
+    {
+      cout << "  polygon" << k << ": {";
+      vector<cv::Point2f> polygon = labels[k].getPolygon();
+      for(int t = 0; t < polygon.size(); t++)
+        cout  <<  polygon[t] << ", ";
+      cout << "}" << endl;
+    }
+  }
+
   for(uint32_t i=0; i<solve.size();++i)
   {
     projectLoader.drawFrameSolvlets(solve[i], vFrames[solve[i].getFrameID()], argv[2], Scalar(0,0,255), 2);
   }
+
 #if defined(MEMORY_DEBUG) && defined(UNIX)
   Debug(list_allocations_on(libcw_do));
 #endif  // MEMORY_DEBUG && UNIX
