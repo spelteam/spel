@@ -895,7 +895,7 @@ namespace SPEL
     if (SpelObject::getDebugLevel() >= 1)
     {
       std::stringstream ss;
-      std::cerr << "Solution evaluation score - " << solutionEval << 
+      ss << "Solution evaluation score - " << solutionEval << 
         " for frame " << frame->getID() << " solve from " << 
         frame->getParentFrameID();
       DebugMessage(ss.str(), 1);

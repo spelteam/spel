@@ -5,7 +5,7 @@
 
 namespace SPEL
 {
-  BodyJoint::BodyJoint(void)  : BodyJoint(0, "", cv::Point2f(0.0f, 0.0f), cv::Point3f(0.0f, 0.0f, 0.0f), false)
+  BodyJoint::BodyJoint(void) : BodyJoint(0, "", cv::Point2f(0.0f, 0.0f), cv::Point3f(0.0f, 0.0f, 0.0f), false)
   {    
   }
   
@@ -45,7 +45,7 @@ namespace SPEL
   }
 
   BodyJoint::BodyJoint(const int id, const std::string & name,
-    const cv::Point2f & imageLocation, const cv::Point3f & spaceLocation)  : 
+    const cv::Point2f & imageLocation, const cv::Point3f & spaceLocation) : 
   BodyJoint(id, name, imageLocation, spaceLocation, false)
   {    
   }
