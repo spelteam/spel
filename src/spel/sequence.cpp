@@ -81,7 +81,7 @@ namespace SPEL
   void Sequence::computeInterpolation(std::map<std::string, float> &params)
   {
     params.emplace("useDefaultScale", 1);
-    params.emplace("defaultScale", 180);
+    params.emplace("defaultScale", 1);//180
     params.emplace("interpolate2d", 0);
     bool interpolate2d = params.at("interpolate2d");
 
