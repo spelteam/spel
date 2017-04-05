@@ -18,7 +18,7 @@ int main (int argc, char **argv)
 #endif  // MEMORY_DEBUG && UNIX
   if (argc < 3) 
   {
-    cout << "Usage tlpsSolverTest [project.xml] [out directory] {use_oldSolver}" << endl;
+    cout << "Usage tlpsSolverTest [project.xml] [out directory] {use_oldsolver}" << endl;
     return -1;
   }
   string curFolder = argv[1];
