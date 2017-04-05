@@ -70,7 +70,7 @@ int main (int argc, char **argv)
   params.emplace("grayImages", 1); // use grayscale images for HoG?
 
   //solver settings
-  params.emplace("useCSdet", 0.0f); //determine if ColHist detector is used and with what coefficient
+  params.emplace("useCSdet", 1.0f); //determine if ColHist detector is used and with what coefficient
   params.emplace("useHoGdet", 1.0f); //determine if HoG descriptor is used and with what coefficient
   params.emplace("useSURFdet", 0.0f); //determine whether SURF detector is used and with what coefficient
 
@@ -91,7 +91,7 @@ int main (int argc, char **argv)
 
   if(useOldTLPSSolver)
   {
-    params.at("maxPartCandidates") = 0.2; // set 1.0 for using the max number of part candidates to allow into the solver
+    params.at("maxPartCandidates") = 0.1; // set 1.0 for using the max number of part candidates to allow into the solver
     params.at("uniqueLocationCandidates") = 360; //unique location candidates count limit  
   }
 
