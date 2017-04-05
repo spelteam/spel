@@ -1,23 +1,23 @@
-#include "tlpssolver.hpp"
+#include "tlpssolver_old.hpp"
 
 namespace SPEL
 {
-  TLPSSolver::TLPSSolver(void)
+  TLPSSolver_old::TLPSSolver_old(void)
   {
     m_id = 0;
     m_name = "TLPS";
   }
 
-  TLPSSolver::~TLPSSolver(void)
+  TLPSSolver_old::~TLPSSolver_old(void)
   {
 
   }
 
-  std::vector<Solvlet> TLPSSolver::solve(Sequence &frames) //inherited virtual
+  std::vector<Solvlet> TLPSSolver_old::solve(Sequence &frames) //inherited virtual
   {
     std::map<std::string, float> params; //set the default parameters std::
 
-      //set some parameter deefaults
+    //set some parameter deefaults
     params.at("scoreIndex") = 0;
 
     //pass to next level solve function, for ISM computing
@@ -25,7 +25,7 @@ namespace SPEL
     return this->solve(frames, params);
   }
 
-  std::vector<Solvlet> TLPSSolver::solve(Sequence &sequence, std::map<std::string, float> params, std::vector<Solvlet> solvlets) //inherited virtual
+  std::vector<Solvlet> TLPSSolver_old::solve(Sequence &sequence, std::map<std::string, float> params, std::vector<Solvlet> solvlets) //inherited virtual
   {
     std::vector<Solvlet> tlpsSolvlets = solve(sequence, params); //inherited virtual
 
@@ -37,7 +37,7 @@ namespace SPEL
     return tlpsSolvlets;
   }
 
-  std::vector<Solvlet> TLPSSolver::solve(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
+  std::vector<Solvlet> TLPSSolver_old::solve(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
     std::vector<Frame*> frames = sequence.getFrames();
     if (frames.size() == 0)
@@ -77,7 +77,7 @@ namespace SPEL
     //solver eval parameters
     params.emplace("tlpsLockframeThreshold", 0.52); //set up the lockframe accept threshold by mask coverage
 
-    //sequence.estimateUniformScale(params);
+    sequence.estimateUniformScale(params);
     sequence.computeInterpolation(params);
 
     for (auto f : frames)
@@ -93,7 +93,7 @@ namespace SPEL
     return solution;
   }
 
-  std::vector<Solvlet> TLPSSolver::solveGlobal(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
+  std::vector<Solvlet> TLPSSolver_old::solveGlobal(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
     float baseRotationStep = params.at("baseRotationStep");
 
@@ -110,7 +110,7 @@ namespace SPEL
     uint32_t debugLevel = params.at("debugLevel");
     //first slice up the sequences
     if (debugLevel >= 1)
-      std::cout << "TLPSSolver started, slicing sequence..." << std::endl;
+      std::cout << "TLPSSolver_old started, slicing sequence..." << std::endl;
 
     std::vector<Frame*> origFrames = sequence.getFrames();
     std::vector<std::vector<Frame*> > slices = slice(origFrames);
@@ -608,7 +608,7 @@ namespace SPEL
     return retSolve;
   }
 
-  std::vector<Solvlet> TLPSSolver::solveWindowed(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
+  std::vector<Solvlet> TLPSSolver_old::solveWindowed(Sequence &sequence, std::map<std::string, float> params) //inherited virtual
   {
     ///define the space
     typedef opengm::DiscreteSpace<> Space;
@@ -639,7 +639,7 @@ namespace SPEL
     return solution;
   }
 
-  float TLPSSolver::evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params)
+  float TLPSSolver_old::evaluateSolution(Frame* frame, std::vector<LimbLabel> labels, std::map<std::string, float> params)
   {
     // /*
     //   There should clearly be several factors that affect the outcome of an evaluation:
@@ -785,7 +785,7 @@ namespace SPEL
     return solutionEval;
   }
 
-  int TLPSSolver::findFrameIndexById(int id, std::vector<Frame*> frames)
+  int TLPSSolver_old::findFrameIndexById(int id, std::vector<Frame*> frames)
   {
     for (uint32_t i = 0; i < frames.size(); ++i)
       if (frames[i]->getID() == id)
@@ -794,7 +794,7 @@ namespace SPEL
   }
 
   //compute label score
-  float TLPSSolver::computeScoreCost(const LimbLabel& label, std::map<std::string, float> params)
+  float TLPSSolver_old::computeScoreCost(const LimbLabel& label, std::map<std::string, float> params)
   {
     std::string hogName = "18500";
     std::string csName = "4409412";
@@ -851,7 +851,7 @@ namespace SPEL
   }
 
   //compute distance to parent limb label
-  float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild)
+  float TLPSSolver_old::computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild)
   {
     //emplace default
     //params.emplace("jointCoeff", 0.5);
@@ -871,7 +871,7 @@ namespace SPEL
       return sqrt(pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2));
   }
 
-  float TLPSSolver::computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float max, bool toChild)
+  float TLPSSolver_old::computeNormJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, float max, bool toChild)
   {
     //emplace default
     params.emplace("jointCoeff", 0.5);
@@ -905,7 +905,7 @@ namespace SPEL
     return lambda*score;
   }
 
-  float TLPSSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params)
+  float TLPSSolver_old::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params)
   {
     //  params.emplace("priorCoeff", 0.0);
     //	float lambda = params.at("priorCoeff");
@@ -920,7 +920,7 @@ namespace SPEL
     return pow((p0.x - pp0.x), 2) + pow((p0.y - pp0.y), 2) + pow((p1.x - pp1.x), 2) + pow((p1.y - pp1.y), 2);
   }
 
-  float TLPSSolver::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float max)
+  float TLPSSolver_old::computeNormPriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params, float max)
   {
     params.emplace("priorCoeff", 0.0);
     float lambda = params.at("priorCoeff");
@@ -935,7 +935,7 @@ namespace SPEL
     return lambda*((pow((p0.x - pp0.x), 2) + pow((p0.y - pp0.y), 2) + pow((p1.x - pp1.x), 2) + pow((p1.y - pp1.y), 2)) / max);
   }
 
-  float TLPSSolver::computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params)
+  float TLPSSolver_old::computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params)
   {
     //emplace default
     params.emplace("tempCoeff", 0.5);
@@ -954,7 +954,7 @@ namespace SPEL
     return (pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2) + pow((c1.x - p1.x), 2) + pow((c1.y - p1.y), 2));
   }
 
-  float TLPSSolver::computeNormPastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params, float max)
+  float TLPSSolver_old::computeNormPastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params, float max)
   {
     //emplace default
     params.emplace("tempCoeff", 0.5);
@@ -973,7 +973,7 @@ namespace SPEL
     return lambda*((pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2) + pow((c1.x - p1.x), 2) + pow((c1.y - p1.y), 2)) / max);
   }
 
-  float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params)
+  float TLPSSolver_old::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params)
   {
     //emplace default
     params.emplace("tempCoeff", 0.5);
@@ -990,7 +990,7 @@ namespace SPEL
     return score;
   }
 
-  float TLPSSolver::computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params, float max)
+  float TLPSSolver_old::computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params, float max)
   {
     //emplace default
     params.emplace("tempCoeff", 0.5);
@@ -1009,7 +1009,7 @@ namespace SPEL
     return score;
   }
 
-  float TLPSSolver::computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params)
+  float TLPSSolver_old::computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params)
   {
     //emploace default
     params.emplace("anchorCoeff", 1.0);
@@ -1031,7 +1031,7 @@ namespace SPEL
     //compute the cost of anchoring this label
   }
 
-  float TLPSSolver::computeNormAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params, float max)
+  float TLPSSolver_old::computeNormAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params, float max)
   {
     //emploace default
     params.emplace("anchorCoeff", 1.0);
@@ -1053,7 +1053,7 @@ namespace SPEL
     //compute the cost of anchoring this label
   }
 
-  std::vector<std::vector<Frame*> > TLPSSolver::slice(const std::vector<Frame*>& frames) //separate the sequence into slices, for temporal solve
+  std::vector<std::vector<Frame*> > TLPSSolver_old::slice(const std::vector<Frame*>& frames) //separate the sequence into slices, for temporal solve
   {
     //frames should be sliced into frame sets, where every non Keyframe non Lockframe frame should belong to a BOUNDED set
     //unbounded sets are not included in the solve

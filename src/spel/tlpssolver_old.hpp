@@ -1,5 +1,5 @@
-#ifndef _TLPSSOLVER_HPP_
-#define _TLPSSOLVER_HPP_
+#ifndef _TLPSSOLVER_OLD_HPP_
+#define _TLPSSOLVER_OLD_HPP_
 
 // SPEL definitions
 #include "predef.hpp"
@@ -37,12 +37,12 @@
 namespace SPEL
 {
   ///define the space and the model
-  class TLPSSolver : public Solver
+  class TLPSSolver_old : public Solver
   {
   public:
-    TLPSSolver(void);
+    TLPSSolver_old(void);
     ///inherited virtual
-    virtual ~TLPSSolver(void);
+    virtual ~TLPSSolver_old(void);
     ///inherited virtual
     virtual std::vector<Solvlet> solve(Sequence& frames);
     ///inherited virtual
@@ -82,4 +82,4 @@ namespace SPEL
 
 }
 
-#endif  // _TLPSSOLVER_HPP_
+#endif  // _TLPSSOLVER_OLD_HPP_
