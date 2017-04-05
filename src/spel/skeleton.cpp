@@ -144,9 +144,9 @@ namespace SPEL
   {
     for (auto &joint : m_jointTree)
     {
-      cv::Point3f p = joint.getSpaceLocation();
-      joint.setImageLocation(cv::Point2f(p.x, p.y) * m_scale);
-	  joint.setSpaceLocation(p* m_scale); // ?
+      const auto &p = joint.getSpaceLocation() * m_scale;
+      joint.setImageLocation(cv::Point2f(p.x, p.y));
+	    joint.setSpaceLocation(p); // ?
     }
   }
 
