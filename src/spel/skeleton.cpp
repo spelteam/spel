@@ -143,7 +143,11 @@ namespace SPEL
   void Skeleton::infer2D(void) 
   {
     for (auto &joint : m_jointTree)
-      joint.setImageLocation(joint.getImageLocation() * m_scale);
+    {
+      cv::Point3f p = joint.getSpaceLocation();
+      joint.setImageLocation(cv::Point2f(p.x, p.y) * m_scale);
+	  joint.setSpaceLocation(p* m_scale); // ?
+    }
   }
 
   void Skeleton::infer3D(void)
