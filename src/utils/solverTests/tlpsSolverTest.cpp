@@ -32,7 +32,7 @@ int main (int argc, char **argv)
   if (argc > 3)
   {
     string s = argv[3];
-    std::transform(s.begin(), s.end(), s.begin(), std::tolower);
+    //std::transform(s.begin(), s.end(), s.begin(), std::tolower);
     if( s == "use_oldsolver" || s == "true" || stoi(s) == 1)
     useOldTLPSSolver = true;
     cout << "Used OLD TLPSSolver version" << endl;
