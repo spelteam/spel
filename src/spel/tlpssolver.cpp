@@ -540,130 +540,113 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    auto maxFrameHeight = params.at(
+    const auto maxFrameHeight = params.at(
       COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name());
 
-    cv::Mat mask = frame->getMask().clone();
+    auto mask = frame->getMask().clone();
 
-    float factor = 1;
+    const auto factor = maxFrameHeight / static_cast<float>(mask.rows);
     //compute the scaling factor
-    if (maxFrameHeight != 0)
+    if (spelHelper::compareFloat(factor, 0.0f) > 0 && 
+      spelHelper::compareFloat(factor, 1.0f) != 0)
     {
-      factor = (float)maxFrameHeight / (float)mask.rows;
-
-      resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
+      resize(mask, mask, cvSize(static_cast<int>(mask.cols * factor), 
+        static_cast<int>(mask.rows * factor)));
+      for (auto &label : labels)
+        label.Resize(factor);
     }
-    for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
-      label->Resize(factor);
 
-    int correctPixels = 0, incorrectPixels = 0;
-    int pixelsInMask = 0;
-    int coveredPixelsInMask = 0;
-    int incorrectlyCoveredPixels = 0;
-    int missedPixels = 0;
+    auto correctPixels = 0.0f, incorrectPixels = 0.0f;
 
-    for (int i = 0; i < mask.cols; ++i) //at every col - x
+    for (auto i = 0; i < mask.cols; ++i) //at every col - x
     {
-      for (int j = 0; j < mask.rows; ++j) //and every row - y
+      for (auto j = 0; j < mask.rows; ++j) //and every row - y
       {
-        //int test = labels[0].containsPoint(Point2f(480,100));
         //check whether pixel hit a label from solution
-        bool labelHit = false;
-        for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+        auto labelHit = false;
+        for (const auto &label : labels)
         {
-          if (label->containsPoint(cv::Point2f(i, j))) //this is done in x,y coords
+          if (label.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j)))) //this is done in x,y coords
           {
             labelHit = true;
-            //break;
+            break;
           }
         }
-
         //check pixel colour
-        int intensity = mask.at<uchar>(j, i); //this is done with reve
-        bool blackPixel = (intensity < 10);
-
-        if (!blackPixel)
-          pixelsInMask++;
+        const auto blackPixel = (mask.at<uchar>(j, i) < 10);
 
         if (blackPixel && labelHit) //if black in label, incorrect
-        {
-          incorrectPixels++;
-          incorrectlyCoveredPixels++;
-        }
+          ++incorrectPixels;
         else if (!blackPixel && !labelHit) //if white not in label, incorret
-        {
-          incorrectPixels++;
-          missedPixels++;
-        }
+          ++incorrectPixels;
         else if (!blackPixel && labelHit)//otherwise correct
-        {
-          correctPixels++;
-          coveredPixelsInMask++;
-        }
-        //            else //black pixel and not label hit
-        //                correctPixels++; //don't count these at all?
+          ++correctPixels;
       }
     }
 
-    double solutionEval = (float)correctPixels / ((float)correctPixels + (float)incorrectPixels);
+    auto solutionEval = correctPixels / (correctPixels + incorrectPixels);
 
     //now check for critical part failures - label mostly outside of mask
 
-    std::vector<cv::Point2f> badLabelScores;
-    auto badLabelThresh = params.at(
+    std::vector<std::pair<int, float>> badLabelScores;
+    const auto badLabelThresh = params.at(
       COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH().name());
 
-    for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+    for (const auto &label : labels)
     {
-      std::vector<cv::Point2f> poly = label->getPolygon(); //get the label polygon
+      const auto poly = label.getPolygon(); //get the label polygon
       //compute min and max x and y
       //float xMin, xMax, yMin, yMax;
       std::vector<float> xS = { poly[0].x, poly[1].x, poly[2].x, poly[3].x };
       std::vector<float> yS = { poly[0].y, poly[1].y, poly[2].y, poly[3].y };
-      auto xMin = min_element(xS.begin(), xS.end());
-      auto xMax = max_element(xS.begin(), xS.end());
+      const auto xMin = static_cast<int>(*(min_element(xS.begin(), xS.end())));
+      const auto xMax = static_cast<int>(*(max_element(xS.begin(), xS.end())));
+      const auto yMin = static_cast<int>(*(min_element(yS.begin(), yS.end())));
+      const auto yMax = static_cast<int>(*(max_element(yS.begin(), yS.end())));
 
-      auto yMin = min_element(yS.begin(), yS.end());
-      auto yMax = max_element(yS.begin(), yS.end());
+      auto labelPixels = 0U;
+      auto badLabelPixels = 0U;
 
-      int labelPixels = 0;
-      int badLabelPixels = 0;
-
-      for (int x = *xMin; x < *xMax; ++x)
+      for (auto x = xMin; x < xMax; ++x)
       {
-        for (int y = *yMin; y < *yMax; ++y)
+        for (auto y = yMin; y < yMax; ++y)
         {
-          if (label->containsPoint(cv::Point2f(x, y)))
+          if (label.containsPoint(cv::Point2f(static_cast<float>(x), static_cast<float>(y))))
           {
-            int intensity = mask.at<uchar>(y, x); //this is done with reverse y,x
-            bool blackPixel = (intensity < 10);
-            labelPixels++;
+            const auto blackPixel = (mask.at<uchar>(y, x) < 10);
+            ++labelPixels;
             if (blackPixel)
               ++badLabelPixels;
           }
         }
       }
 
-      float labelRatio = 1.0 - (float)badLabelPixels / (float)labelPixels; //high is good
+      const auto labelRatio = 1.0f - static_cast<float>(badLabelPixels) / 
+        static_cast<float>(labelPixels); //high is good
 
-      if (labelRatio < badLabelThresh /*&& !label->getIsWeak()*/ && !label->getIsOccluded()) //not weak, not occluded, badly localised
-        badLabelScores.push_back(cv::Point2f(label->getLimbID(), labelRatio));
+      if (labelRatio < badLabelThresh && !label.getIsOccluded()) //not weak, not occluded, badly localised
+        badLabelScores.push_back(std::make_pair(label.getLimbID(), labelRatio));
     }
 
     if (SpelObject::getDebugLevel() >= 1)
     {
-      for (std::vector<cv::Point2f>::iterator badL = badLabelScores.begin(); badL != badLabelScores.end(); ++badL)
+      for (const auto &badL : badLabelScores)
       {
-        std::cerr << "Part " << badL->x << " is badly localised, with score " << badL->y << std::endl;
+        std::stringstream ss;
+        ss << "Part " << badL.first << " is badly localised, with score " << badL.second;
+        DebugMessage(ss.str(), 1);
       }
     }
 
     if (badLabelScores.size() != 0) //make the solution eval fail if a part is badly localised
-      solutionEval = solutionEval - 1.0;
+      solutionEval -= 1.0f;
 
     if (SpelObject::getDebugLevel() >= 1)
-      std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << std::endl;
-
+    {
+      std::stringstream ss;
+      ss << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID();
+      DebugMessage(ss.str(), 1);
+    }
     frame->UnloadAll();
 
     return solutionEval;
@@ -674,52 +657,51 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    std::string hogName = "18500";
-    std::string csName = "4409412";
-    std::string surfName = "21316";
+    const std::string hogName = "18500";
+    const std::string csName = "4409412";
+    const std::string surfName = "21316";
 
     //@FIX
-    auto useHoG =
+    const auto useHoG =
       params.at(COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
-    auto useCS =
+    const auto useCS =
       params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name());
-    auto useSURF =
+    const auto useSURF =
       params.at(COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
 
     //TODO: Fix score combinations
-    std::vector<Score> scores = label.getScores();
+    const auto &scores = label.getScores();
 
     //compute the weighted sum of scores
-    float finalScore = 0;
-    bool hogFound = false;
-    bool csFound = false;
-    bool surfFound = false;
-    for (uint32_t i = 0; i < scores.size(); ++i)
+    auto finalScore = 0.0f;
+    auto hogFound = false;
+    auto csFound = false;
+    auto surfFound = false;
+    for (const auto &i : scores)
     {
-      float score = scores[i].getScore();
-      if (scores[i].getScore() == -1)//if score is -1, set it to 1
+      auto score = i.getScore();
+      if (spelHelper::compareFloat(score, -1.0f) == 0)//if score is -1, set it to 1
+        score = 1.0f; //set a high cost for invalid scores
+      const auto &name = i.getDetName();
+      if (name == hogName)
       {
-        score = 1.0; //set a high cost for invalid scores
-      }
-      if (scores[i].getDetName() == hogName)
-      {
-        finalScore = finalScore + score*useHoG;
+        finalScore += (score * useHoG);
         hogFound = true;
       }
-      else if (scores[i].getDetName() == csName)
+      else if (name == csName)
       {
-        finalScore = finalScore + score*useCS;
+        finalScore += (score * useCS);
         csFound = true;
       }
-      else if (scores[i].getDetName() == surfName)
+      else if (name == surfName)
       {
-        finalScore = finalScore + score*useSURF;
+        finalScore += (score * useSURF);
         surfFound = true;
       }
     }
 
     //now add 1.0*coeff for each not found score in this label, that should have been there (i.e., assume the worst)
-    finalScore += 1.0*useHoG*(!hogFound) + 1.0*useCS*(!csFound) + 1.0*useSURF*(!surfFound);
+    finalScore += 1.0f * useHoG * (!hogFound) + 1.0f * useCS * (!csFound) + 1.0f * useSURF *(!surfFound);
 
     return finalScore;
   }
@@ -728,9 +710,6 @@ namespace SPEL
   float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild)
   {
     emplaceDefaultParameters(params);
-    //emplace default
-    //params.emplace("jointCoeff", 0.5);
-    //float lambda = params.at("jointCoeff");
     cv::Point2f p0, p1, c0, c1;
 
     //@FIX this is really too simplistic, connecting these points
