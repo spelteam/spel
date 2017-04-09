@@ -97,6 +97,7 @@ namespace SPEL
     /// <param name="p0">The first point.</param>
     /// <param name="p1">The second point.</param>
     void getEndpoints(cv::Point2f &p0, cv::Point2f &p1) const;
+    std::pair<cv::Point2f, cv::Point2f> getEndpoints(void) const;
     /// <summary>Adds the score.</summary>
     /// <param name="detectionScore">The detection score.</param>
     void addScore(Score detectionScore) ;

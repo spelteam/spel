@@ -139,6 +139,15 @@ namespace SPEL
 
   void LimbLabel::getEndpoints(cv::Point2f &p0, cv::Point2f &p1) const
   {
+    const auto ep = getEndpoints();
+    p0 = ep.first;
+    p1 = ep.second;
+
+    return;
+  }
+
+  std::pair<cv::Point2f, cv::Point2f> LimbLabel::getEndpoints(void) const
+  {
     const auto err = "Polygon should contain only 4 elements";
     if (m_polygon.size() != 4)
     {
@@ -149,10 +158,10 @@ namespace SPEL
         throw std::logic_error(err);
     }
     //0-1 R, 1-2 G, 2-3 B, 3-0 P
-    p0 = 0.5 * m_polygon.at(3) + 0.5 * m_polygon.at(0); //pink = parent
-    p1 = 0.5 * m_polygon.at(1) + 0.5 * m_polygon.at(2); //green = child
+    const auto p0 = 0.5 * m_polygon.at(3) + 0.5 * m_polygon.at(0); //pink = parent
+    const auto p1 = 0.5 * m_polygon.at(1) + 0.5 * m_polygon.at(2); //green = child
 
-    return; // this function needs to update the two endpoints passed into it
+    return std::make_pair(p0, p1);
   }
 
   bool LimbLabel::containsPoint(cv::Point2f pt) const
