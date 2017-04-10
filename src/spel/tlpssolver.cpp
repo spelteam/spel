@@ -710,11 +710,12 @@ namespace SPEL
   float TLPSSolver::computeJointCost(const LimbLabel& child, const LimbLabel& parent, std::map<std::string, float> params, bool toChild)
   {
     emplaceDefaultParameters(params);
-    cv::Point2f p0, p1, c0, c1;
-
     //@FIX this is really too simplistic, connecting these points
-    child.getEndpoints(c0, c1);
-    parent.getEndpoints(p0, p1);
+    const auto cep = child.getEndpoints();
+    const auto &c0 = cep.first;
+    const auto pep = parent.getEndpoints();
+    const auto &p0 = pep.first;
+    const auto &p1 = pep.second;
 
     //normalise this?
 
@@ -729,29 +730,11 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
     //read params
-    float lambda = params.at(COMMON_SOLVER_PARAMETERS::JOINT_COEFFICIENT().name());
-
-    //float leeway = params.at("jointLeeway");
-    cv::Point2f p0, p1, c0, c1;
-
-    //@FIX this is really too simplistic, connecting these points
-    child.getEndpoints(c0, c1);
-    parent.getEndpoints(p0, p1);
-
+    const auto lambda = params.at(COMMON_SOLVER_PARAMETERS::JOINT_COEFFICIENT().name());
     //normalise this?
     //give some leeway
-    float score = 0;
-    if (toChild) //connected to parent's child joint
-      score = sqrt(pow(c0.x - p1.x, 2) + pow(c0.y - p1.y, 2)) / max;
-    else //else connected to parent's parent joint
-      score = sqrt(pow(c0.x - p0.x, 2) + pow(c0.y - p0.y, 2)) / max;
+    return computeJointCost(child, parent, params, toChild) / max * lambda;
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
-
-    //output a sentence about who connected to whom and what the score was
-    if (SpelObject::getDebugLevel() >= 1 && (child.getLimbID() == 7 || child.getLimbID() == 6) && !toChild)
-      std::cerr << "Part " << child.getLimbID() << " is connecting to part " << parent.getLimbID() << " PARENT joint" << std::endl;
-
-    return lambda*score;
   }
 
   float TLPSSolver::computePriorCost(const LimbLabel& label, const BodyPart& prior, const Skeleton& skeleton, std::map<std::string, float> params)
@@ -759,10 +742,11 @@ namespace SPEL
     emplaceDefaultParameters(params);
     //  params.emplace("priorCoeff", 0.0);
     //	float lambda = params.at("priorCoeff");
-    cv::Point2f p0, p1, pp0, pp1;
-    label.getEndpoints(p0, p1);
-    pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
-    pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
+    const auto ep = label.getEndpoints();
+    const auto &p0 = ep.first;
+    const auto &p1 = ep.second;
+    const auto &pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
+    const auto &pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
 
     //normalise this cost?
 
@@ -774,16 +758,9 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());
-    cv::Point2f p0, p1, pp0, pp1;
-    label.getEndpoints(p0, p1);
-    pp0 = skeleton.getBodyJoint(prior.getParentJoint())->getImageLocation();
-    pp1 = skeleton.getBodyJoint(prior.getChildJoint())->getImageLocation();
-
-    //normalise this cost?
-
+    const auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());    
+    return computePriorCost(label, prior, skeleton, params) / max * lambda;
     //return the sum of squared distances between the corresponding joints, prior to label
-    return lambda*((pow((p0.x - pp0.x), 2) + pow((p0.y - pp0.y), 2) + pow((p1.x - pp1.x), 2) + pow((p1.y - pp1.y), 2)) / max);
   }
 
   float TLPSSolver::computePastTempCost(const LimbLabel& thisLabel, const LimbLabel& pastLabel, std::map<std::string, float> params)
@@ -793,11 +770,13 @@ namespace SPEL
 
     //@PARAM there should be a parameter that sets the temporal cost constant (beta)
     //compute the joint joining cost for the skeleton
-    cv::Point2f p0, p1, c0, c1;
-
     //@FIX this is really too simplistic, connecting these points
-    thisLabel.getEndpoints(c0, c1);
-    pastLabel.getEndpoints(p0, p1);
+    const auto cep = thisLabel.getEndpoints();
+    const auto &c0 = cep.first;
+    const auto &c1 = cep.second;
+    const auto pep = pastLabel.getEndpoints();
+    const auto &p0 = pep.first;
+    const auto &p1 = pep.second;
 
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
     return (pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2) + pow((c1.x - p1.x), 2) + pow((c1.y - p1.y), 2));
@@ -807,20 +786,10 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
     //emplace default
-    auto lambda = params.at(
+    const auto lambda = params.at(
       COMMON_TLPS_SOLVER_PARAMETERS::TEMPORAL_LINK_COEFFICIENT().name());
-    //compute the temporal connection cost to label in the past
-
-    //@PARAM there should be a parameter that sets the temporal cost constant (beta)
-    //compute the joint joining cost for the skeleton
-    cv::Point2f p0, p1, c0, c1;
-
-    //@FIX this is really too simplistic, connecting these points
-    thisLabel.getEndpoints(c0, c1);
-    pastLabel.getEndpoints(p0, p1);
-
+    return computePastTempCost(thisLabel, pastLabel, params) / max * lambda;
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
-    return lambda*((pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2) + pow((c1.x - p1.x), 2) + pow((c1.y - p1.y), 2)) / max);
   }
 
   float TLPSSolver::computeFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params)
@@ -828,52 +797,45 @@ namespace SPEL
     emplaceDefaultParameters(params);
     //compute temporal connection cost to label in the future
     //@PARAM there needs to be a beta param here as well
-    cv::Point2f p0, p1, c0, c1;
-
     //@FIX this is really too simplistic, connecting these points
-    thisLabel.getEndpoints(c0, c1);
-    futureLabel.getEndpoints(p0, p1);
+    const auto cep = thisLabel.getEndpoints();
+    const auto &c0 = cep.first;
+    const auto &c1 = cep.second;
+    const auto pep = futureLabel.getEndpoints();
+    const auto &p0 = pep.first;
+    const auto &p1 = pep.second;
 
-    float score = (pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2) + pow((c1.x - p1.x), 2) + pow((c1.y - p1.y), 2));
-    return score;
+    return (pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2) + pow((c1.x - p1.x), 2) + pow((c1.y - p1.y), 2));
   }
 
   float TLPSSolver::computeNormFutureTempCost(const LimbLabel& thisLabel, const LimbLabel& futureLabel, std::map<std::string, float> params, float max)
   {
     emplaceDefaultParameters(params);
     //emplace default
-    float lambda = params.at(
+    const auto lambda = params.at(
       COMMON_TLPS_SOLVER_PARAMETERS::TEMPORAL_LINK_COEFFICIENT().name());
-    //compute temporal connection cost to label in the future
-    //@PARAM there needs to be a beta param here as well
-    cv::Point2f p0, p1, c0, c1;
-
-    //@FIX this is really too simplistic, connecting these points
-    thisLabel.getEndpoints(c0, c1);
-    futureLabel.getEndpoints(p0, p1);
-
-    float score = lambda*((pow((c0.x - p0.x), 2) + pow((c0.y - p0.y), 2) + pow((c1.x - p1.x), 2) + pow((c1.y - p1.y), 2)) / max);
+    return computeFutureTempCost(thisLabel, futureLabel, params) / max * lambda;
     //return the squared distance from the lower parent joint p1, to the upper child joint c0
-
-    return score;
   }
 
   float TLPSSolver::computeAnchorCost(const LimbLabel& thisLabel, Frame* anchor, std::map<std::string, float> params)
   {
     emplaceDefaultParameters(params);
-    //emploace default
+    //emplace default
+    const auto partPolygon = anchor->getPartPolygon(thisLabel.getLimbID());
+    const auto labelPolygon = thisLabel.getPolygon();
 
-    int limbId = thisLabel.getLimbID();
-
-    std::vector<cv::Point2f> partPolygon = anchor->getPartPolygon(limbId);
-    std::vector<cv::Point2f> labelPolygon = thisLabel.getPolygon();
-
-    assert(partPolygon.size() == labelPolygon.size());
-
+    if (partPolygon.size() != labelPolygon.size())
+    {
+      std::stringstream ss;
+      ss << "partPolygon.size() not equal labelPolygon.size(): " << partPolygon.size() << " : " << labelPolygon.size();
+      DebugMessage(ss.str(), 1);
+      throw std::logic_error(ss.str());
+    }
     //return the error between these'
-    float score = 0;
-    for (size_t i = 0; i < partPolygon.size(); ++i)
-      score += pow(partPolygon[i].x - labelPolygon[i].x, 2) + pow(partPolygon[i].y - labelPolygon[i].y, 2);
+    auto score = 0.0f;
+    for (auto i = 0U; i < partPolygon.size(); ++i)
+      score += pow(partPolygon.at(i).x - labelPolygon.at(i).x, 2) + pow(partPolygon.at(i).y - labelPolygon.at(i).y, 2);
 
     return score;
     //compute the cost of anchoring this label
@@ -883,22 +845,9 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
     //emploace default
-    auto lambda =
+    const auto lambda =
       params.at(COMMON_TLPS_SOLVER_PARAMETERS::ANCHOR_COEFICIENT().name());
-
-    int limbId = thisLabel.getLimbID();
-
-    std::vector<cv::Point2f> partPolygon = anchor->getPartPolygon(limbId);
-    std::vector<cv::Point2f> labelPolygon = thisLabel.getPolygon();
-
-    assert(partPolygon.size() == labelPolygon.size());
-
-    //return the error between these'
-    float score = 0;
-    for (size_t i = 0; i < partPolygon.size(); ++i)
-      score += pow(partPolygon[i].x - labelPolygon[i].x, 2) + pow(partPolygon[i].y - labelPolygon[i].y, 2);
-
-    return lambda*score / max;
+    return computeAnchorCost(thisLabel, anchor, params) / max * lambda;
     //compute the cost of anchoring this label
   }
 
@@ -911,28 +860,28 @@ namespace SPEL
 
     std::vector<Frame*> currentSet;
     //bool isOpen;
-    for (uint32_t i = 0; i < frames.size(); ++i)
+    for (const auto frame : frames)
     {
-      currentSet.push_back(frames[i]); //push the frame to current set
-      if (frames[i]->getFrametype() == KEYFRAME || frames[i]->getFrametype() == LOCKFRAME)
+      currentSet.push_back(frame); //push the frame to current set
+      if (frame->getFrametype() == KEYFRAME || frame->getFrametype() == LOCKFRAME)
       {
         aux.push_back(currentSet);
         currentSet.clear();
-        currentSet.push_back(frames[i]);
+        currentSet.push_back(frame);
       }
     }
     //now go through every set, and eliminate it if:
     //1) it contains 2 or less elements
     //2) it doesn't end with a LOCKFRAME or a KEYFRAME
     //3) it doesn't begin with a LOCKFRAME or a KEYFRAME
-    for (uint32_t i = 0; i < aux.size(); ++i)
+    for (const auto &i : aux)
     {
-      if (aux[i].at(0)->getFrametype() == LOCKFRAME || aux[i].at(0)->getFrametype() == KEYFRAME) //if the set STARTS with a keyframe or a lockframe
+      if (i.at(0)->getFrametype() == LOCKFRAME || i.at(0)->getFrametype() == KEYFRAME) //if the set STARTS with a keyframe or a lockframe
       {
-        if (aux[i].back()->getFrametype() == LOCKFRAME || aux[i].back()->getFrametype() == KEYFRAME) //if the set ENDS with a keyframe or a lockframe
+        if (i.back()->getFrametype() == LOCKFRAME || i.back()->getFrametype() == KEYFRAME) //if the set ENDS with a keyframe or a lockframe
         {
-          if (aux[i].size() > 2) //if size is greater than two elements
-            slices.push_back(aux[i]); //push back slice
+          if (i.size() > 2) //if size is greater than two elements
+            slices.push_back(i); //push back slice
         }
       }
     }
