@@ -149,7 +149,7 @@ namespace SPEL
       trainingFrames.push_back(seqSlice.front()); //set training frame by index
       trainingFrames.push_back(seqSlice.back());
 
-      for (auto &detector : detectors)
+      for (auto detector : detectors)
         detector->train(trainingFrames, params);
 
       std::vector<std::map<uint32_t, std::vector<LimbLabel>>> detections; //numbers of labels per part, per frame, for this slice
@@ -547,10 +547,10 @@ namespace SPEL
 
     const auto factor = maxFrameHeight / static_cast<float>(mask.rows);
     //compute the scaling factor
-    if (spelHelper::compareFloat(factor, 0.0f) > 0 && 
+    if (spelHelper::compareFloat(factor, 0.0f) > 0 &&
       spelHelper::compareFloat(factor, 1.0f) != 0)
     {
-      resize(mask, mask, cvSize(static_cast<int>(mask.cols * factor), 
+      resize(mask, mask, cvSize(static_cast<int>(mask.cols * factor),
         static_cast<int>(mask.rows * factor)));
       for (auto &label : labels)
         label.Resize(factor);
@@ -621,7 +621,7 @@ namespace SPEL
         }
       }
 
-      const auto labelRatio = 1.0f - static_cast<float>(badLabelPixels) / 
+      const auto labelRatio = 1.0f - static_cast<float>(badLabelPixels) /
         static_cast<float>(labelPixels); //high is good
 
       if (labelRatio < badLabelThresh && !label.getIsOccluded()) //not weak, not occluded, badly localised
@@ -758,7 +758,7 @@ namespace SPEL
   {
     emplaceDefaultParameters(params);
 
-    const auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());    
+    const auto lambda = params.at(COMMON_SOLVER_PARAMETERS::PRIOR_COEFFICIENT().name());
     return computePriorCost(label, prior, skeleton, params) / max * lambda;
     //return the sum of squared distances between the corresponding joints, prior to label
   }
@@ -859,7 +859,7 @@ namespace SPEL
     std::vector<std::vector<Frame*> > slices;
 
     std::vector<Frame*> currentSet;
-    //bool isOpen;
+
     for (const auto frame : frames)
     {
       currentSet.push_back(frame); //push the frame to current set
@@ -876,14 +876,10 @@ namespace SPEL
     //3) it doesn't begin with a LOCKFRAME or a KEYFRAME
     for (const auto &i : aux)
     {
-      if (i.at(0)->getFrametype() == LOCKFRAME || i.at(0)->getFrametype() == KEYFRAME) //if the set STARTS with a keyframe or a lockframe
-      {
-        if (i.back()->getFrametype() == LOCKFRAME || i.back()->getFrametype() == KEYFRAME) //if the set ENDS with a keyframe or a lockframe
-        {
-          if (i.size() > 2) //if size is greater than two elements
-            slices.push_back(i); //push back slice
-        }
-      }
+      if ((i.front()->getFrametype() == LOCKFRAME || i.front()->getFrametype() == KEYFRAME) &&//if the set STARTS with a keyframe or a lockframe
+        (i.back()->getFrametype() == LOCKFRAME || i.back()->getFrametype() == KEYFRAME) && //if the set ENDS with a keyframe or a lockframe
+        (i.size() > 2)) //if size is greater than two elements
+        slices.push_back(i); //push back slice
     }
 
     return slices;
