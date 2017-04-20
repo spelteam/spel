@@ -22,38 +22,55 @@ namespace SPEL
 {
   TEST(skeletonTest, infer2D)
   {
-    float scale = 1.2f;
-
     //Load the input data
-    TestProjectLoader project("speltests_TestData/CHDTrainTestData/", "trijumpSD_50x41.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
     vector<Frame*> frames = project.getFrames();
     Skeleton skeleton = frames[0]->getSkeleton();
+    
+    
+    //Set scale
+    float partID = 0;
+    BodyPart * bodyPart = skeleton.getBodyPart(partID);
+    Point2f p0 = skeleton.getBodyJoint(bodyPart->getParentJoint())->getImageLocation();
+    Point2f p1 = skeleton.getBodyJoint(bodyPart->getChildJoint())->getImageLocation();
+    float scale = skeleton.getBodyPart(partID)->getBoneLength(p0, p1) / bodyPart->getRelativeLength();
+    /*float relativeLength = 0.2953f;
+    float partLength = 44.721f;
+    float scale = partLength / relativeLength; // == 151.443*/
 
     //Set the skeleton joints space locations!
     tree <BodyJoint> jointsTree = skeleton.getJointTree();
     for (tree <BodyJoint>::iterator i = jointsTree.begin(); i != jointsTree.end(); ++i)
     {
       Point2f p0 = i->getImageLocation();
-      i->setSpaceLocation(Point3f(p0.x, p0.y, 0.0f));
+      i->setSpaceLocation(Point3f(p0.x/scale, p0.y/scale, 0.0f));
     }
     skeleton.setJointTree(jointsTree);
 
     //Create expected value
     map<int, pair<Point2f, Point2f>> expected_partLocations = getPartLocations(skeleton);
-    for (unsigned int i= 0; i < expected_partLocations.size(); i++)
+    /*for (unsigned int i= 0; i < expected_partLocations.size(); i++)
     {
       expected_partLocations[i].first *= scale;
       expected_partLocations[i].second *= scale;
-    }
+    }*/
 
     //Create actual value
     skeleton.setScale(scale);
+    //cout << "skeleton.getScale = " << skeleton.getScale() << endl;
     skeleton.infer2D();
     map<int, pair<Point2f, Point2f>> actual_partLocations = getPartLocations(skeleton);
-    //cout << "skeleton.scale = " << skeleton.getScale() << endl;
 
     //Compare
-    EXPECT_EQ(expected_partLocations, actual_partLocations);
+    float error = 0.5f;
+    ASSERT_EQ(expected_partLocations.size(), actual_partLocations.size());
+    for (int i = 0; i < expected_partLocations.size(); i++)
+    {
+      EXPECT_NEAR(expected_partLocations[i].first.x, actual_partLocations[i].first.x, error);
+      EXPECT_NEAR(expected_partLocations[i].first.y, actual_partLocations[i].first.y, error);
+      EXPECT_NEAR(expected_partLocations[i].second.x, actual_partLocations[i].second.x, error);
+      EXPECT_NEAR(expected_partLocations[i].second.y, actual_partLocations[i].second.y, error);
+    }
 
     //Clear
     //project.TestProjectLoader::~TestProjectLoader();
