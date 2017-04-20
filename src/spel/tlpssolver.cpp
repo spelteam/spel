@@ -292,7 +292,7 @@ namespace SPEL
           varIndices.push_back(varID); //push first value in
           const std::vector<size_t> scoreCostShape = { partIterLabelSize }; //number of labels
 
-          addModelFactor(scoreCostShape, partIterLabel, varIndices, gm, [&](const LimbLabel &current) {
+          addModelFactor(scoreCostShape, partIterLabel, varIndices, gm, [&](const auto &current) {
             return computeScoreCost(current, params);
           });
           ++suppFactors;
@@ -310,7 +310,7 @@ namespace SPEL
             }
 
             //we already know the shape from the previous functions
-            addModelFactor(scoreCostShape, partIterLabel, varIndices, gm, [&](const LimbLabel &current) {
+            addModelFactor(scoreCostShape, partIterLabel, varIndices, gm, [&](const auto &current) {
               return computeNormAnchorCost(current, slice, params, anchorMax);
             });
             ++anchorFactors;
@@ -331,9 +331,9 @@ namespace SPEL
             //first figure out which of the current body part's joints should be in common with the parent body part
             const auto toChild = parentPartIter->getChildJoint() == partIter->getParentJoint();
 
-            addModelFactor(jointCostShape, partIterLabel, parentPartIterLabel, varIndices, gm, [&](const LimbLabel &left, const LimbLabel &right) {
+            addModelFactor(jointCostShape, partIterLabel, parentPartIterLabel, varIndices, gm, [&](const auto &left, const auto &right) {
               return computeJointCost(left, right, params, toChild);
-            }, [&](const LimbLabel &left, const LimbLabel &right, const float max) {
+            }, [&](const auto &left, const auto &right, const float max) {
               return computeNormJointCost(left, right, params, max, toChild);
             });
             ++jointFactors;
@@ -351,9 +351,9 @@ namespace SPEL
 
             const std::vector<size_t> futureCostShape = { partIterLabelSize, currentDetectionsSize }; //number of labels
 
-            addModelFactor(futureCostShape, partIterLabel, currentDetections, varIndices, gm, [&](const LimbLabel &left, const LimbLabel &right) {
+            addModelFactor(futureCostShape, partIterLabel, currentDetections, varIndices, gm, [&](const auto &left, const auto &right) {
               return computeFutureTempCost(left, right, params);
-            }, [&](const LimbLabel &left, const LimbLabel &right, const float max) {
+            }, [&](const auto &left, const auto &right, const float max) {
               return computeNormFutureTempCost(left, right, params, max);
             });
             ++tempFactors;
@@ -848,7 +848,7 @@ namespace SPEL
   {
     opengm::ExplicitFunction<float> costFoo(sizeArray.cbegin(), sizeArray.cend());
     auto i = 0U;
-    spelHelper::for_each(partLabels, [&](const LimbLabel &partLabel) {
+    spelHelper::for_each(partLabels, [&](const auto &partLabel) {
       costFoo(i++) = handler(partLabel);
     });
     model.addFactor(model.addFunction(costFoo), indices.begin(), indices.end()); //bind to factor and variables
@@ -861,14 +861,14 @@ namespace SPEL
   {
     opengm::ExplicitFunction<float> costFoo(sizeArray.cbegin(), sizeArray.cend());
     auto jointMax = 0.0f;
-    spelHelper::for_each(partLabels, parentPartLabels, [&](const LimbLabel &left, const LimbLabel &right) {
+    spelHelper::for_each(partLabels, parentPartLabels, [&](const auto &left, const auto &right) {
       const auto val = handler(left, right);
       if (val > jointMax && val != std::numeric_limits<float>::max())
         jointMax = val;
     });
     auto i = 0U, j = 0U;
-    spelHelper::for_each(partLabels, [&](const LimbLabel &left) {
-      spelHelper::for_each(parentPartLabels, [&](const LimbLabel &right) {
+    spelHelper::for_each(partLabels, [&](const auto &left) {
+      spelHelper::for_each(parentPartLabels, [&](const auto &right) {
         costFoo(j++, i) = handlerNorm(left, right, jointMax);
       });
       ++i;
