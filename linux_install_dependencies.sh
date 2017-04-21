@@ -46,16 +46,16 @@ cd ../../
 mkdir gtest
 cd gtest
 wget https://github.com/google/googletest/archive/release-1.8.0.zip
-unzip release-1.8.0.zip
-mv googletest-release-1.8.0/googletest/ ../../thirdparty/
+unzip release-1.8.0.zip > /dev/null 2>&1
+mv googletest-release-1.8.0/googletest/ ../../../thirdparty/
 cd ../
 
 # TinyXml2
 mkdir tinyxml
 cd tinyxml
 wget https://github.com/leethomason/tinyxml2/archive/4.0.1.zip
-unzip 4.0.1.zip
-mv tinyxml2-4.0.1/ ../../thirdparty/tinyxml2
+unzip 4.0.1.zip > /dev/null 2>&1
+mv tinyxml2-4.0.1/ ../../../thirdparty/tinyxml2
 cd ../
 
 cd ../
