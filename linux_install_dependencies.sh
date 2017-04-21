@@ -11,7 +11,7 @@ unzip master.zip > /dev/null 2>&1
 mkdir build
 cd build
 cmake -DBUILD_EXAMPLES=OFF -DBUILD_TUTORIALS=OFF -dBUILD_TESTING=OFF ../opengm-master
-#make -j2
+make -j2
 sudo make install
 cd ../../
 
