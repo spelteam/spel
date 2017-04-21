@@ -4,6 +4,8 @@ compiler:
   - gcc
 #  - clang
 
+sudo: required
+
 addons:
   apt:
     sources:
