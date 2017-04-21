@@ -19,6 +19,7 @@ addons:
       - libboost-date-time1.55-dev
       - libboost-chrono1.55-dev
       - libboost-python1.55-dev
+      - qtbase5-dev
 
 env:
   matrix:
