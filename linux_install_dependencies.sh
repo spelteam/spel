@@ -17,9 +17,11 @@ cd ../../
 mkdir opencv
 cd opencv
 wget https://github.com/opencv/opencv/archive/3.2.0.zip
-unzip opencv-3.2.0.zip
+unzip 3.2.0.zip
+rm 3.2.0.zip
 wget https://github.com/opencv/opencv_contrib/archive/3.2.0.zip
-unzip opencv_contrib-3.2.0.zip
+unzip 3.2.0.zip
+rm 3.2.0.zip
 mkdir build
 cd build
 cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-3.2.0/modules ../opencv-3.2.0 && make && sudo make install
