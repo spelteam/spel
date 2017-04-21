@@ -9,7 +9,7 @@ wget https://github.com/opengm/opengm/archive/master.zip
 unzip master.zip
 mkdir build
 cd build
-cmake ../ && make && make install
+cmake ../opengm-master && make && make install
 cd ../../
 
 cd ../
