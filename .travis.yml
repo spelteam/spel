@@ -26,4 +26,4 @@ matrix:
   fast_finish: true
 
 script:
-  - if [[ "${SPEL_BUILD_TYPE}" == "linux" ]]; then ( mkdir build && cd build && ../linux_install_dependencies.sh cmake ../src/ && make ) fi
+  - if [[ "${SPEL_BUILD_TYPE}" == "linux" ]]; then ( mkdir build && cd build && ../linux_install_dependencies.sh && cmake ../src/ && make ) fi
