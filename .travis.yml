@@ -1,0 +1,15 @@
+language: cpp
+script: cmake
+compiler:
+  - gcc
+#  - clang
+
+env:
+  matrix:
+    - SPEL_BUILD_TYPE=linux
+
+matrix:
+  fast_finish: true
+
+script:
+  - if [[ "${SPEL_BUILD_TYPE}" == "linux" ]]; then ( mkdir build && cd build && cmake ../src/ && make ) fi
