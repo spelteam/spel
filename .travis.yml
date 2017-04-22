@@ -10,8 +10,8 @@ addons:
       - ubuntu-toolchain-r-test
       - boost-latest
     packages:
-      - g++-5
-      - g++-5-multilib
+      - g++-4.9
+      - g++-4.9-multilib
       - g++-multilib
       - libhdf5-dev
       - libhdf5-serial-dev
@@ -34,5 +34,5 @@ matrix:
         - mkdir build
         - cd build
         - ../linux_install_dependencies.sh
-        - cmake -DCMAKE_CXX_COMPILER=g++-5 ../src/
+        - cmake -DCMAKE_CXX_COMPILER=g++-4.9 -DCMAKE_C_COMPILER=gcc-4.9 ../src/
         - make -j2
