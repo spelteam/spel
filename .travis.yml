@@ -28,10 +28,10 @@ matrix:
   fast_finish: true
   include:
     - os: linux
-      compiler: gcc-5
+      compiler: gcc
       script:
         - mkdir build
         - cd build
         - ../linux_install_dependencies.sh
-        - cmake ../src/
+        - cmake -DCMAKE_CXX_COMPILER=g++-5 ../src/
         - make -j2
