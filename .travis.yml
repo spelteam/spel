@@ -1,9 +1,6 @@
 dist: trusty
 language: cpp
 script: cmake
-compiler:
-  - gcc
-#  - clang
 
 sudo: required
 
@@ -27,13 +24,14 @@ addons:
       - libqt5xmlpatterns5-dev
       - libqt5opengl5-dev
 
-env:
-  matrix:
-    - SPEL_BUILD_TYPE=linux
-      compiler=gcc-5
-
 matrix:
   fast_finish: true
-
-script:
-  - if [[ "${SPEL_BUILD_TYPE}" == "linux" ]]; then ( mkdir build && cd build && ../linux_install_dependencies.sh && cmake ../src/ && make -j2 ) fi
+  include:
+    - os: linux
+      compiler: gcc-5
+      script:
+        - mkdir build
+        - cd build
+        - ../linux_install_dependencies.sh
+        - cmake ../src/
+        - make -j2
