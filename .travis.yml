@@ -10,8 +10,12 @@ sudo: required
 addons:
   apt:
     sources:
+      - ubuntu-toolchain-r-test
       - boost-latest
     packages:
+      - g++-5
+      - g++-5-multilib
+      - g++-multilib
       - libhdf5-dev
       - libhdf5-serial-dev
       - libboost-thread1.55-dev
@@ -26,6 +30,7 @@ addons:
 env:
   matrix:
     - SPEL_BUILD_TYPE=linux
+      compiler=gcc-5
 
 matrix:
   fast_finish: true
