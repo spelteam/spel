@@ -1,0 +1,38 @@
+dist: trusty
+language: cpp
+script: cmake
+
+sudo: required
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - boost-latest
+    packages:
+      - g++-4.9
+      - g++-4.9-multilib
+      - g++-multilib
+      - libhdf5-dev
+      - libhdf5-serial-dev
+      - libboost-thread1.55-dev
+      - libboost-system1.55-dev
+      - libboost-date-time1.55-dev
+      - libboost-chrono1.55-dev
+      - libboost-python1.55-dev
+      - qtbase5-dev
+      - libqt5xmlpatterns5-dev
+      - libqt5opengl5-dev
+      - uuid-dev
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      compiler: gcc
+      script:
+        - mkdir build
+        - cd build
+        - ../linux_install_dependencies.sh
+        - cmake -DCMAKE_CXX_COMPILER=g++-4.9 -DCMAKE_C_COMPILER=gcc-4.9 ../src/
+        - make -j2

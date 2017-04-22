@@ -8,6 +8,13 @@
 #include <gtest/gtest_prod.h>
 #endif  // DEBUG
 
+// OpenGM
+#include <opengm/graphicalmodel/space/discretespace.hxx>
+#include <opengm/graphicalmodel/graphicalmodel.hxx>
+#include <opengm/graphicalmodel/graphicalmodel_hdf5.hxx>
+#include <opengm/operations/minimizer.hxx>
+#include <opengm/inference/messagepassing/messagepassing.hxx>
+
 // STL
 #include <vector>
 

@@ -1,13 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-// OpenGM
-#include <opengm/graphicalmodel/space/discretespace.hxx>
-#include <opengm/graphicalmodel/graphicalmodel.hxx>
-#include <opengm/graphicalmodel/graphicalmodel_hdf5.hxx>
-#include <opengm/operations/minimizer.hxx>
-#include <opengm/inference/messagepassing/messagepassing.hxx>
-
 #include "lockframe.hpp"
 
 #include "colorHistDetector.hpp"
@@ -293,7 +286,7 @@ namespace SPEL
           const std::vector<size_t> scoreCostShape = { partIterLabelSize }; //number of labels
 
           addModelFactor(scoreCostShape, partIterLabel, varIndices, gm, [&](const auto &current) {
-            return computeScoreCost(current, params);
+            return this->computeScoreCost(current, params);
           });
           ++suppFactors;
 
@@ -311,7 +304,7 @@ namespace SPEL
 
             //we already know the shape from the previous functions
             addModelFactor(scoreCostShape, partIterLabel, varIndices, gm, [&](const auto &current) {
-              return computeNormAnchorCost(current, slice, params, anchorMax);
+              return this->computeNormAnchorCost(current, slice, params, anchorMax);
             });
             ++anchorFactors;
           }
@@ -332,9 +325,9 @@ namespace SPEL
             const auto toChild = parentPartIter->getChildJoint() == partIter->getParentJoint();
 
             addModelFactor(jointCostShape, partIterLabel, parentPartIterLabel, varIndices, gm, [&](const auto &left, const auto &right) {
-              return computeJointCost(left, right, params, toChild);
+              return this->computeJointCost(left, right, params, toChild);
             }, [&](const auto &left, const auto &right, const float max) {
-              return computeNormJointCost(left, right, params, max, toChild);
+              return this->computeNormJointCost(left, right, params, max, toChild);
             });
             ++jointFactors;
           }
@@ -352,9 +345,9 @@ namespace SPEL
             const std::vector<size_t> futureCostShape = { partIterLabelSize, currentDetectionsSize }; //number of labels
 
             addModelFactor(futureCostShape, partIterLabel, currentDetections, varIndices, gm, [&](const auto &left, const auto &right) {
-              return computeFutureTempCost(left, right, params);
+              return this->computeFutureTempCost(left, right, params);
             }, [&](const auto &left, const auto &right, const float max) {
-              return computeNormFutureTempCost(left, right, params, max);
+              return this->computeNormFutureTempCost(left, right, params, max);
             });
             ++tempFactors;
           }
