@@ -3,7 +3,7 @@ REM @echo off
 set configuration=%1
 set platform=%2
 
-call "%VS120COMNTOOLS%\vsvars32.bat"
+call "%VS140COMNTOOLS%\vsvars32.bat"
 
 cd ../
 mkdir dependencies
