@@ -30,7 +30,8 @@ mkdir build
 cd build
 cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-3.2.0/modules -DBUILD_opencv_apps=OFF -DBUILD_DOCS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF -DBUILD_FAT_JAVA_LIB=OFF ../opencv-3.2.0
 REM devenv OpenCV.sln /Build "%configuration%|%platform%"
-devenv OpenCV.sln /Build "Debug|x64"
+dir
+devenv C:\projects\dependencies\opencv\build\OpenCV.sln /Build "Debug|x64"
 cd ../../
 
 cd ../spel
