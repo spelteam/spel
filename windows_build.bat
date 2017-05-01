@@ -20,6 +20,6 @@ cd ../spel
 
 mkdir build
 cd build
-cmake ../src/
+cmake ../src/ -DOpenGM_INCLUDE_DIR='C:\projects\dependencies\OpenGM\opengm-master\include'
 
 REM devenv %solution_name% /Build "%configuration%|%platform%"
