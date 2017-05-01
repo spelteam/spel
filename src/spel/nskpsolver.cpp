@@ -522,14 +522,11 @@ namespace SPEL
       //never replace keyframes and existing lockframes
       if (frameType != LOCKFRAME && frameType != KEYFRAME) 
       {
-        //delete the frame currently there, and replace with lockframe
-        delete frame; 
         //make pointers point to the correct objects
         *frame = *lockframe; 
         solvlets.push_back(bestSolves.at(lockframeId).solvlet);
       }
-      else
-        delete lockframe;
+      delete lockframe;
     }
 
     if (SpelObject::getDebugLevel() >= 5)

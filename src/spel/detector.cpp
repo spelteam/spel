@@ -18,9 +18,8 @@
 
 namespace SPEL
 {
-  Detector::Detector(void) 
+  Detector::Detector(void) : m_id(0U), maxFrameHeight(0U)
   {
-    m_id = 0x00000000;
   }
 
   Detector::~Detector(void) 
