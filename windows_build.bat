@@ -12,9 +12,9 @@ cd dependencies
 REM OpenGM
 mkdir OpenGM
 cd OpenGM
-curl -o 'master.zip' 'https://github.com/opengm/opengm/archive/master.zip'
+REM curl -o 'master.zip' 'https://github.com/opengm/opengm/archive/master.zip'
+powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('https://github.com/opengm/opengm/archive/master.zip','C:\dependencies\OpenGM\master.zip')
 7z x master.zip
-REM powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('https://github.com/opengm/opengm/archive/master.zip','C:\dependencies\OpenGM')
 cd ../
 
 cd ../spel
