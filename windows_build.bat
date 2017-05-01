@@ -1,8 +1,5 @@
 REM @echo off
 
-set configuration=%1
-set platform=%2
-
 call "%VS140COMNTOOLS%\vsvars32.bat"
 
 cd ../
@@ -28,16 +25,14 @@ wget https://github.com/opencv/opencv_contrib/archive/3.2.0.zip
 rm 3.2.0.zip
 mkdir build
 cd build
-cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-3.2.0/modules -DBUILD_opencv_apps=OFF -DBUILD_DOCS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF -DBUILD_FAT_JAVA_LIB=OFF ../opencv-3.2.0
-REM devenv OpenCV.sln /Build "%configuration%|%platform%"
-dir
-devenv C:\projects\dependencies\opencv\build\OpenCV.sln /build "Debug|x64"
+cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-3.2.0/modules -DBUILD_opencv_apps=OFF -DBUILD_DOCS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF -DBUILD_FAT_JAVA_LIB=OFF ../opencv-3.2.0
+devenv OpenCV.sln /build "Debug|x64"
 cd ../../
 
 cd ../spel
 
 mkdir build
 cd build
-cmake ../src/ -DOpenGM_INCLUDE_DIR='C:\projects\dependencies\OpenGM\opengm-master\include' -DOpenCV_DIR='C:\projects\dependencies\opencv\build'
+cmake ../src/ -DCMAKE_GENERATOR_PLATFORM=x64 -DOpenGM_INCLUDE_DIR='C:\projects\dependencies\OpenGM\opengm-master\include' -DOpenCV_DIR='C:\projects\dependencies\opencv\build'
 
 REM devenv %solution_name% /Build "%configuration%|%platform%"
