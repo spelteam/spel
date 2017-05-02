@@ -48,7 +48,7 @@ mkdir gtest
 cd gtest
 powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('https://github.com/google/googletest/archive/release-1.8.0.zip','C:\projects\dependencies\gtest\release-1.8.0.zip')
 7z x release-1.8.0.zip
-mv googletest-release-1.8.0/googletest/ ../../../thirdparty/
+mv googletest-release-1.8.0/googletest/ ../../spel/thirdparty/
 cd ../
 
 REM TinyXml2
@@ -56,7 +56,7 @@ mkdir tinyxml
 cd tinyxml
 powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('https://github.com/leethomason/tinyxml2/archive/4.0.1.zip','C:\projects\dependencies\tinyxml\4.0.1.zip')
 7z x 4.0.1.zip
-mv tinyxml2-4.0.1/ ../../../thirdparty/tinyxml2
+mv tinyxml2-4.0.1/ ../../spel/thirdparty/tinyxml2
 cd ../
 
 cd ../spel
