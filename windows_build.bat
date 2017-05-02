@@ -40,7 +40,9 @@ mkdir hdf5
 cd hdf5
 powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.14/bin/windows/extra/hdf5-1.8.14-win64-vs2013-shared.zip','C:\projects\dependencies\hdf5\hdf5-1.8.14-win64-vs2013-shared.zip')
 7z x hdf5-1.8.14-win64-vs2013-shared.zip
-cd ../
+cd hdf5-1.8.14
+7z x HDF5-1.8.14-win64.exe
+cd ../../
 
 REM REM Google Test
 REM mkdir gtest
@@ -64,5 +66,5 @@ dir C:\projects\dependencies\hdf5\include
 
 REM mkdir build
 REM cd build
-REM cmake ../src/ -DCMAKE_GENERATOR_PLATFORM=x64 -DOpenGM_INCLUDE_DIR='C:\projects\dependencies\OpenGM\opengm-master\include' -DOpenCV_DIR='C:\projects\dependencies\opencv\build' -DEigen3_INCLUDE_DIR='C:\projects\dependencies\eigen\eigen-eigen-b9cd8366d4e8' -DHDF5_HL_IMPORT_LIB='C:\projects\dependencies\hdf5\lib\hdf5_hl.lib' -DHDF5_IMPORT_LIB='C:\projects\dependencies\hdf5\lib\hdf5.lib' -DHDF5_INCLUDE_DIR='C:\projects\dependencies\hdf5\include' -DQt5Core_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Core' -DQt5Gui_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Gui' -DQt5Network_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Network' -DQt5OpenGL_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5OpenGL' -DQt5Widgets_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Widgets' -DQt5Xml_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Xml' -DQt5XmlPatterns_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5XmlPatterns'
+REM cmake ../src/ -DCMAKE_GENERATOR_PLATFORM=x64 -DOpenGM_INCLUDE_DIR='C:\projects\dependencies\OpenGM\opengm-master\include' -DOpenCV_DIR='C:\projects\dependencies\opencv\build' -DEigen3_INCLUDE_DIR='C:\projects\dependencies\eigen\eigen-eigen-b9cd8366d4e8' -DHDF5_HL_IMPORT_LIB='C:\projects\dependencies\hdf5\hdf5-1.8.14\lib\hdf5_hl.lib' -DHDF5_IMPORT_LIB='C:\projects\dependencies\hdf5\hdf5-1.8.14\lib\hdf5.lib' -DHDF5_INCLUDE_DIR='C:\projects\dependencies\hdf5\hdf5-1.8.14\include' -DQt5Core_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Core' -DQt5Gui_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Gui' -DQt5Network_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Network' -DQt5OpenGL_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5OpenGL' -DQt5Widgets_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Widgets' -DQt5Xml_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5Xml' -DQt5XmlPatterns_DIR='C:\QT\5.8\MSVC2015_64\lib\cmake\Qt5XmlPatterns'
 REM devenv spel.sln /build "Debug|x64"
