@@ -61,6 +61,8 @@ cd ../
 
 cd ../spel
 
+tree C:\Qt\5.8\msvc2015_64
+
 mkdir build
 cd build
 cmake ../src/ -DCMAKE_GENERATOR_PLATFORM=x64 -DOpenGM_INCLUDE_DIR='C:\projects\dependencies\OpenGM\opengm-master\include' -DOpenCV_DIR='C:\projects\dependencies\opencv\build' -DEigen3_INCLUDE_DIR='C:\projects\dependencies\eigen\eigen-eigen-b9cd8366d4e8' -DHDF5_HL_IMPORT_LIB='C:\projects\dependencies\hdf5\HDF5-1.8.14-win64\lib\hdf5_hl.lib' -DHDF5_IMPORT_LIB='C:\projects\dependencies\hdf5\HDF5-1.8.14-win64\lib\hdf5.lib'
