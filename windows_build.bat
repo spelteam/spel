@@ -32,7 +32,7 @@ REM Eigen
 mkdir eigen
 cd eigen
 powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://bitbucket.org/eigen/eigen/get/3.2.10.zip','C:\projects\dependencies\eigen\3.2.10.zip')
-7z x unzip 3.2.10.zip
+7z x 3.2.10.zip
 cmake ../eigen-eigen-b9cd8366d4e8
 cd ../
 
