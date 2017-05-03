@@ -618,7 +618,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
 
     for (int i = 0; i < frames.size(); i++)
     {
-      bool haveSkeleton = (frames[i]->getSkeletonPtr()->getPartTreePtr()->size() > 0);
+      bool haveSkeleton = (frames[i]->getSkeleton().getPartTreeCount() > 0);
       if (frames[i]->getFrametype() != KEYFRAME && (!haveSkeleton || replaceExisting))
       {
         std::vector<Skeleton> S;
@@ -633,20 +633,24 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
         Skeleton s0;
         s0.setJointTree(tree<BodyJoint>());
         s0.setPartTree(tree<BodyPart>());
-      
+
         int n = scores.size();
         if(n > 0) 
         {
           float score = 0.0f;
           for(int k = 0; k < n; k++)
             score = score + scores[k];
-          for (int k = 0; k < n; k++)
-            scores[k] /= score;
+          if(score > 0.0f)
+            for (int k = 0; k < n; k++)
+              scores[k] /= score;
 
           s0 = S[0]*0.0f;
           for (int k = 0; k < S.size(); k++)
-            s0 = s0 + S[k]*scores[k];
-     
+          {
+            Skeleton temp = s0 + S[k] * scores[k];
+            s0 =  temp; // for supporting tree.hh 3.1
+          }
+
           s0.setName("interpolate3");
           frames[i]->setSkeleton(s0);
           createdSkeletons.push_back(frames[i]->getID());

@@ -744,7 +744,8 @@ namespace SPEL
           solves.push_back(solve);
           t1 = clock();
           std::cout << "iterations count = " << fsolver.iterations << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
-          skeleton = (0.5f*fsolver.getAverageJointsSkeleton(pattern) + 0.5f*fsolver.getShiftedLabelsSkeleton(pattern));
+          Skeleton temp = (0.5f*fsolver.getAverageJointsSkeleton(pattern) + 0.5f*fsolver.getShiftedLabelsSkeleton(pattern));
+          skeleton = temp;// for supporting tree.hh 3.1
           slices[q][i]->setSkeleton(skeleton);
           T1 = clock();
           DebugMessage("Frame " + std::to_string(slices[q][i]->getID()) + " solved - " + std::to_string(spelHelper::clock_to_ms(T1 - T0)) + " ms" , 2);
