@@ -58,20 +58,118 @@ namespace SPEL
   }
 
 //=========================================================================
-//"frameSolver" class
+//"IndexedSkeletonModel" class
 
-  frameSolver::JointLink::JointLink(int partID_, int isChildJoint)
+  IndexedSkeletonModel::JointLink::JointLink(int partID_, int isChildJoint)
   {
     partID = partID_;
     num = isChildJoint;
   }
-
-  frameSolver::frameSolver(Skeleton pattern)
+  
+  IndexedSkeletonModel::IndexedSkeletonModel(Skeleton skeleton, std::string name)
   {
-    parts = toJointMap(pattern);
+    fromSkeleton(skeleton, name);
+  }
+
+  IndexedSkeletonModel::~IndexedSkeletonModel()
+  {
+    clear();
+  }
+
+  IndexedSkeletonModel::partAdjacentsJoints IndexedSkeletonModel::getPartConnections(int partID)
+  {
+    return parts.at(partID);
+  }
+
+  void IndexedSkeletonModel::fromSkeleton(Skeleton skeleton, std::string name)
+  {
+    tree<BodyPart> partTree = skeleton.getPartTree();
+    tree<BodyJoint> jointTree = skeleton.getJointTree();
+    int partsCount = partTree.size();
+    int jointsCount = jointTree.size();
+
+    std::map<int, std::vector<int>> PartsByParentJoint;
+    std::map<int, std::vector<int>> PartsByChildJoint;
+    for (int i = 0; i < jointsCount; i++)
+    {
+      PartsByParentJoint.emplace(std::pair<int, std::vector<int>>(i, std::vector<int>()));
+      PartsByChildJoint.emplace(std::pair<int, std::vector<int>>(i, std::vector<int>()));
+    }
+
+    // Parts ID indexed by joints ID
+    tree<BodyPart>:: pre_order_iterator p = partTree.begin();
+    for (tree<BodyPart>::iterator p = partTree.begin(); p != partTree.end(); p++)
+    {
+      int j0_id = p->getParentJoint();
+      int j1_id = p->getChildJoint();
+      int partID = p->getPartID();
+      PartsByParentJoint.at(j0_id).push_back(partID);
+      PartsByChildJoint.at(j1_id).push_back(partID);
+    }
+
+    std::map<uint32_t, partAdjacentsJoints> bodyBarts;
+    for(int i = 0; i < partsCount; i++)
+      bodyBarts.emplace(std::pair<uint32_t, partAdjacentsJoints>(i, partAdjacentsJoints()) );
+
+    // Joints ID indexed by Part ID
+    for (tree<BodyPart>::iterator p = partTree.begin(); p != partTree.end(); p++)
+    {
+      int j0_id = p->getParentJoint();
+      int j1_id = p->getChildJoint();
+      int partID = p->getPartID();
+
+      std::vector<JointLink> ChildJointConnections;
+      std::vector<JointLink> ParentJointConnections;
+
+      // Create parent joint connections list
+      for (int i = 0; i < PartsByParentJoint[j0_id].size(); i++)
+        if (PartsByParentJoint[j0_id][i] != partID)
+          ParentJointConnections.push_back(JointLink(PartsByParentJoint[j0_id][i], 0)); // Parent joints of another parts
+      for (int i = 0; i < PartsByChildJoint[j0_id].size(); i++)
+        if (PartsByChildJoint[j0_id][i] != partID)
+          ParentJointConnections.push_back(JointLink(PartsByChildJoint[j0_id][i], 1)); // Child joints of another parts
+
+      // Create child joint connections list
+      for (int i = 0; i < PartsByParentJoint[j1_id].size(); i++)
+        if(PartsByParentJoint[j1_id][i] != partID)
+         ChildJointConnections.push_back(JointLink(PartsByParentJoint[j1_id][i], 0)); // Can be connected only to a parent joint of anoter parts
+
+      bodyBarts[partID].ChildJointConnections = ChildJointConnections;
+      bodyBarts[partID].ParentJointConnections = ParentJointConnections;
+    }
+
+    PartsByParentJoint.clear();
+    PartsByChildJoint.clear();
+  
+    parts = bodyBarts;
+    m_name = name;
+  }
+
+  std::string IndexedSkeletonModel::getName()
+  {
+    return m_name;
+  }
+
+  uint32_t IndexedSkeletonModel::size()
+  {
+    return parts.size();
+  }
+
+  void IndexedSkeletonModel::clear()
+  {
+    for(int i = 0;  i < parts.size(); i++)
+      parts[i].clear();
+    parts.clear();
+  }
+//=========================================================================
+//"frameSolver" class
+
+  frameSolver::frameSolver(IndexedSkeletonModel *pattern)
+  {
+    m_pattern = pattern;
     iterations = 0;
     bool solved = false;
-    for (int i = 0; i < parts.size(); i++)
+    for (int i = 0; i < pattern->size(); i++)
     {
       SkeletonLabelsScores.emplace(std::pair<uint32_t, float>(i, 0));
       ignored.emplace(std::pair<uint32_t, bool>(i, false));
@@ -81,16 +179,10 @@ namespace SPEL
   frameSolver::~frameSolver(void)
   {
     clear();
-    for(int i = 0 ; i < parts.size(); i++)
-      parts[i].clear();
-    parts.clear();
   }
 
   void frameSolver::clear()
   {
-    /*for(int i = 0 ; i < parts.size(); i++)
-      parts[i].clear();
-    parts.clear();*/
     for (int i = 0; i < labels.size(); i++)
       labels[i].clear();
     labels.clear();
@@ -101,7 +193,7 @@ namespace SPEL
     iterations = 0;
   }
 
-  void frameSolver::refresh(void)
+  void frameSolver::refresh(void) //?
   {
     for (int i = 0; i < ignored.size(); i++)
       ignored[i] = false;
@@ -111,11 +203,6 @@ namespace SPEL
 
     solved = false;
     iterations = 0;
-  }
-
-  int frameSolver::skeletonSize()
-  {
-    return parts.size();
   }
 
   bool frameSolver::IsSolved()
@@ -128,21 +215,21 @@ namespace SPEL
     double score = labels[partID][labelIndex].score;
     double jointsDistancesSum1 = 0.0f;
     double jointsDistancesSum2 = 0.0f;
-    int n = parts[partID].ParentJointConnections.size();
+    int n = m_pattern->parts[partID].ParentJointConnections.size();
     for (int k = 0; k < n; k++)
     {
-      int p = parts[partID].ParentJointConnections[k].partID; // adjacents Part ID
-      int j = parts[partID].ParentJointConnections[k].num; // adjacents Joint Type
+      int p = m_pattern->parts[partID].ParentJointConnections[k].partID; // adjacents Part ID
+      int j = m_pattern->parts[partID].ParentJointConnections[k].num; // adjacents Joint Type
       int t = SkeletonLabelsIndexes[p]; // adjacents Part label index
       cv::Point2f d = labels[p][t].joints[j] - labels[partID][labelIndex].joints[0];
       double distance = /*sqrt*/(d.x*d.x + d.y*d.y);
       jointsDistancesSum1 = jointsDistancesSum1 + distance;
     }
-    int m = parts[partID].ChildJointConnections.size();
+    int m = m_pattern->parts[partID].ChildJointConnections.size();
     for (int k = 0; k < m; k++)
     {
-      int p = parts[partID].ChildJointConnections[k].partID; // adjacents Part ID
-      int j = parts[partID].ChildJointConnections[k].num; // adjacents Joint Type
+      int p = m_pattern->parts[partID].ChildJointConnections[k].partID; // adjacents Part ID
+      int j = m_pattern->parts[partID].ChildJointConnections[k].num; // adjacents Joint Type
       int t = SkeletonLabelsIndexes[p]; // adjacents Part label index
       cv::Point2f d = labels[p][t].joints[j] - labels[partID][labelIndex].joints[1];
       double distance = /*sqrt*/(d.x*d.x + d.y*d.y);
@@ -196,7 +283,7 @@ namespace SPEL
     float badPartScore = 0.0f;
     float oldSkeletonScore = 0.0f;
 
-    while(idleIterations <= parts.size() && iterations < iterationsLimit)
+    while(idleIterations <= m_pattern->size() && iterations < iterationsLimit)
     {
       iterations++;
       //std::cout << std::endl << "Iteration " << iterations << ":" << std::endl;
@@ -253,15 +340,15 @@ namespace SPEL
 
         // Recalculation new and adjusted labels scores
         SkeletonLabelsScores[badPartID] = labelScore(badPartID, newLabelIndex);
-        for (int k = 0; k < parts[badPartID].ParentJointConnections.size(); k++)
+        for (int k = 0; k < m_pattern->parts[badPartID].ParentJointConnections.size(); k++)
         {
-          int p = parts[badPartID].ParentJointConnections[k].partID;
+          int p = m_pattern->parts[badPartID].ParentJointConnections[k].partID;
           int l = SkeletonLabelsIndexes[p];
           SkeletonLabelsScores[p] = labelScore(p, l);
         }
-        for (int i = 0; i < parts[badPartID].ChildJointConnections.size(); i++)
+        for (int i = 0; i < m_pattern->parts[badPartID].ChildJointConnections.size(); i++)
         {
-          int p = parts[badPartID].ChildJointConnections[i].partID;
+          int p = m_pattern->parts[badPartID].ChildJointConnections[i].partID;
           int l = SkeletonLabelsIndexes[p];
           SkeletonLabelsScores[p] = labelScore(p, l);
         }
@@ -407,68 +494,7 @@ namespace SPEL
     return temp;
   }
 
-  std::map<uint32_t, frameSolver::partAdjacentsJoints> frameSolver::toJointMap(Skeleton skeleton)
-  {
-    tree<BodyPart> partTree = skeleton.getPartTree();
-    tree<BodyJoint> jointTree = skeleton.getJointTree();
-    int partsCount = partTree.size();
-    int jointsCount = jointTree.size();
-
-    std::map<int, std::vector<int>> PartsByParentJoint;
-    std::map<int, std::vector<int>> PartsByChildJoint;
-    for (int i = 0; i < jointsCount; i++)
-    {
-      PartsByParentJoint.emplace(std::pair<int, std::vector<int>>(i, std::vector<int>()));
-      PartsByChildJoint.emplace(std::pair<int, std::vector<int>>(i, std::vector<int>()));
-    }
-
-    // Parts ID indexed by joints ID
-    tree<BodyPart>:: pre_order_iterator p = partTree.begin();
-    for (tree<BodyPart>::iterator p = partTree.begin(); p != partTree.end(); p++)
-    {
-      int j0_id = p->getParentJoint();
-      int j1_id = p->getChildJoint();
-      int partID = p->getPartID();
-      PartsByParentJoint.at(j0_id).push_back(partID);
-      PartsByChildJoint.at(j1_id).push_back(partID);
-    }
-
-    std::map<uint32_t, partAdjacentsJoints> bodyBarts;
-    for(int i = 0; i < partsCount; i++)
-      bodyBarts.emplace(std::pair<uint32_t, partAdjacentsJoints>(i, partAdjacentsJoints()) );
-
-    // Joints ID indexed by Part ID
-    for (tree<BodyPart>::iterator p = partTree.begin(); p != partTree.end(); p++)
-    {
-      int j0_id = p->getParentJoint();
-      int j1_id = p->getChildJoint();
-      int partID = p->getPartID();
-
-      std::vector<JointLink> ChildJointConnections;
-      std::vector<JointLink> ParentJointConnections;
-
-      // Create parent joint connections list
-      for (int i = 0; i < PartsByParentJoint[j0_id].size(); i++)
-        if (PartsByParentJoint[j0_id][i] != partID)
-          ParentJointConnections.push_back(JointLink(PartsByParentJoint[j0_id][i], 0)); // Parent joints of another parts
-      for (int i = 0; i < PartsByChildJoint[j0_id].size(); i++)
-        if (PartsByChildJoint[j0_id][i] != partID)
-          ParentJointConnections.push_back(JointLink(PartsByChildJoint[j0_id][i], 1)); // Child joints of another parts
-
-      // Create child joint connections list
-      for (int i = 0; i < PartsByParentJoint[j1_id].size(); i++)
-        if(PartsByParentJoint[j1_id][i] != partID)
-         ChildJointConnections.push_back(JointLink(PartsByParentJoint[j1_id][i], 0)); // Can be connected only to a parent joint of anoter parts
-
-      bodyBarts[partID].ChildJointConnections = ChildJointConnections;
-      bodyBarts[partID].ParentJointConnections = ParentJointConnections;
-    }
-
-    PartsByParentJoint.clear();
-    PartsByChildJoint.clear();
   
-    return bodyBarts;
-  }
 
   std::vector<cv::Point2f> frameSolver::getLimbLabelJoints(LimbLabel limbLabel)
   {
@@ -578,11 +604,12 @@ namespace SPEL
     Skeleton pattern;
     if (frames[i]->getFrametype() == KEYFRAME)
       pattern = frames[i]->getSkeleton();
+    IndexedSkeletonModel *indexedSkeleton = new IndexedSkeletonModel(pattern);
     //std::cout << "Pattern is Keyframe = " << (frames[i]->getFrametype() == KEYFRAME) << std::endl;
 
-    frameSolver fsolver(pattern);
+    frameSolver fsolver(indexedSkeleton);
 
-    if (pattern.getPartTree().size() > 0)
+    if (indexedSkeleton->size() > 0)
     for (int q = 0; q < slices.size(); q++)
     { 
       /*std::cout << "Interpolate of the Slices[" << q << "] started";
@@ -759,6 +786,8 @@ namespace SPEL
       if (useSurf2) delete surf2detector;
       std::cout << "Slices[" << q << "] solved\n";
     }
+
+    delete indexedSkeleton;
 
     return solves;
   }

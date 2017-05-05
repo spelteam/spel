@@ -16,7 +16,7 @@
 
 namespace SPEL
 {
-  class frameSolver
+  class IndexedSkeletonModel
   {
   public:
     struct JointLink {
@@ -33,31 +33,46 @@ namespace SPEL
         ParentJointConnections.clear();
       }
     };
+    ~IndexedSkeletonModel();
+    IndexedSkeletonModel(Skeleton skeleton, std::string name = "");
+    partAdjacentsJoints getPartConnections(int partID);
+
+    void fromSkeleton(Skeleton skeleton, std::string name = "");
+    std::string getName();
+    uint32_t size();
+    void clear();
+
+  private:
+    friend class frameSolver;
+    std::map<uint32_t, partAdjacentsJoints> parts;
+    std::string m_name;
+  };
+
+  class frameSolver
+  {
+  public:
     struct Label {
       std::vector<cv::Point2f> joints;
       float score;
     };
-
   public:
-    frameSolver(Skeleton pattern);
+    frameSolver(IndexedSkeletonModel *pattern);
     ~frameSolver(void);
     void clear(void);
     void refresh(void);
-    float labelScore(int partID, int labelIndex);
-    Solvlet solveFrame(std::map<uint32_t, std::vector<LimbLabel>> limbLabels, int frameID = -1);
-    std::map<uint32_t, partAdjacentsJoints> toJointMap(Skeleton skeleton);
+    float frameSolver::labelScore(int partID, int labelIndex);
+    Solvlet solveFrame(std::map<uint32_t, std::vector<LimbLabel>> limbLabels, int frameID = -1);   
     Skeleton getAverageJointsSkeleton(Skeleton pattern) ;
     Skeleton getShiftedLabelsSkeleton(Skeleton pattern);
 
-    int skeletonSize();
     bool IsSolved();
     long int iterations;
 
   private:
     std::vector<cv::Point2f> getLimbLabelJoints(LimbLabel limbLabel);
     std::map<int, std::vector<Label>> prepareLimbLabels(std::map<uint32_t, std::vector<LimbLabel>> limbLabels);
-    
-    std::map<uint32_t, partAdjacentsJoints> parts; // partJoints, indexed by part ID
+     
+    IndexedSkeletonModel *m_pattern; // partJoints, indexed by part ID
     std::map<int, std::vector<Label>> labels; // adapted for this solver labels form
     std::map<uint32_t, uint32_t> SkeletonLabelsIndexes; // partID ~ labelIndex
     std::map<uint32_t, double> SkeletonLabelsScores;
