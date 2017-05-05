@@ -60,7 +60,7 @@ namespace SPEL
     ~frameSolver(void);
     void clear(void);
     void refresh(void);
-    float frameSolver::labelScore(int partID, int labelIndex);
+    float labelScore(int partID, int labelIndex);
     Solvlet solveFrame(std::map<uint32_t, std::vector<LimbLabel>> limbLabels, int frameID = -1);   
     Skeleton getAverageJointsSkeleton(Skeleton pattern) ;
     Skeleton getShiftedLabelsSkeleton(Skeleton pattern);
@@ -89,10 +89,15 @@ namespace SPEL
     
     std::vector<Solvlet> solve(Sequence& seq);
     std::vector<Solvlet> solve(Sequence& seq, std::map<std::string, float> params);
+    void train(std::vector<Frame*> &slice, std::map<std::string, float> &params);
+    std::map<uint32_t, std::vector<LimbLabel>>detect(Frame* &frame, std::map<std::string, float> &params, Skeleton prevSkeleton);
     static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> frames);
 
     void emplaceDefaultParameters(std::map<std::string, float> &params) const;
 
+  private:
+    std::vector<Detector*> detectors;
+    std::vector<std::string> detectorsNames;
   };
 }
 
