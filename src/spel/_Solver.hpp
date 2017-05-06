@@ -61,27 +61,36 @@ namespace SPEL
     void clear(void);
     void refresh(void);
     float labelScore(int partID, int labelIndex);
+    bool initialize(std::map<uint32_t, std::vector<LimbLabel>> limbLabels);
+    void singleIteration();
     Solvlet solveFrame(std::map<uint32_t, std::vector<LimbLabel>> limbLabels, int frameID = -1);   
     Skeleton getAverageJointsSkeleton(Skeleton pattern) ;
     Skeleton getShiftedLabelsSkeleton(Skeleton pattern);
+    long int getIterationNumber();
+    bool isSolved();
 
     void setLogStream(std::ostream * logStream);
 
-    bool IsSolved();
-    long int iterations;
-
-  private:
+  private:   
     std::vector<cv::Point2f> getLimbLabelJoints(LimbLabel limbLabel);
     std::map<int, std::vector<Label>> prepareLimbLabels(std::map<uint32_t, std::vector<LimbLabel>> limbLabels);
-     
+
+    std::vector<frameSolver*> neighborFrameSolvers;
     IndexedSkeletonModel *m_pattern; // partJoints, indexed by part ID
     std::map<int, std::vector<Label>> labels; // adapted for this solver labels form
     std::map<uint32_t, uint32_t> SkeletonLabelsIndexes; // partID ~ labelIndex
     std::map<uint32_t, double> SkeletonLabelsScores;
     std::map<uint32_t, bool> ignored;
+
+    long int iterations;
+    int idleIterations = 0;
+    const int iterationsLimit = 30000;
+    bool solved;
+
+
     std::ostream * LogStream;
 
-    bool solved;
+
   }; 
   
   class _Solver : public Solver

@@ -167,13 +167,15 @@ namespace SPEL
   frameSolver::frameSolver(IndexedSkeletonModel *pattern)
   {
     m_pattern = pattern;
-    iterations = 0;
-    bool solved = false;
-    for (int i = 0; i < pattern->size(); i++)
+    for(int i = 0; i < pattern->size(); i++)
     {
       SkeletonLabelsScores.emplace(std::pair<uint32_t, float>(i, 0));
       ignored.emplace(std::pair<uint32_t, bool>(i, false));
     }
+    for(uint32_t i = 0; i < pattern->size(); i++)
+      SkeletonLabelsIndexes.emplace(std::pair<uint32_t, uint32_t>(i, 0));
+    refresh();
+
     LogStream = &std::cout;
   }
 
@@ -196,17 +198,19 @@ namespace SPEL
 
   void frameSolver::refresh(void) //?
   {
-    for (int i = 0; i < ignored.size(); i++)
-      ignored[i] = false;
-    for (int i = 0; i < labels.size(); i++)
-      labels[i].clear();
-    labels.clear();
-
     solved = false;
     iterations = 0;
+    idleIterations = 0;
+    for (uint32_t i = 0; i < m_pattern->size(); i++)
+    {
+      SkeletonLabelsIndexes[i] = 0;
+      ignored[i] = false;
+      labels[i].clear();
+    }
+    labels.clear();
   }
 
-  bool frameSolver::IsSolved()
+  bool frameSolver::isSolved()
   {
     return solved;
   }
@@ -245,120 +249,118 @@ namespace SPEL
     return score;
   }
 
-  Solvlet frameSolver::solveFrame(std::map<uint32_t, std::vector<LimbLabel>> limbLabels, int frameID)
+  // Initialization (create first approximation)
+  bool frameSolver::initialize(std::map<uint32_t, std::vector<LimbLabel>> limbLabels)
   {
-    iterations = 0;
-    int iterationsLimit = 30000;
+    if (limbLabels.size() != m_pattern->size())
+      return false;
 
-    // Prepare LimbLabels
-    labels.clear();	
+    refresh();
     labels = prepareLimbLabels(limbLabels);
-
-    // Initialization (create first approximation)
-    for (int i = 0; i < ignored.size(); i++)
-      ignored[i] = false;
-    SkeletonLabelsIndexes.clear();
     for (int i = 0; i < labels.size(); i++)
     {
       int optLabelIndex = 0;
       for(int k = 0; k < labels[i].size(); k++)
         if(labels[i][k].score < labels[i][optLabelIndex].score)
           optLabelIndex = k;
-      SkeletonLabelsIndexes.emplace(std::pair<uint32_t, uint32_t>(i, optLabelIndex));
+      SkeletonLabelsIndexes[i] = optLabelIndex;
     }
-    float skeletonScore = 0.0f;
     for (int i = 0; i < SkeletonLabelsIndexes.size(); i++)  
     {
       int currentLabelIndex = SkeletonLabelsIndexes[i];
       SkeletonLabelsScores[i] = labelScore(i, currentLabelIndex);
-      skeletonScore = skeletonScore + SkeletonLabelsScores[i];
+      //skeletonScore = skeletonScore + SkeletonLabelsScores[i];
     }
-    
 
+    return true;
+  }
+
+  void frameSolver::singleIteration()
+  {
+    iterations++;
+    //*LogStream << std::endl << "Iteration " << iterations << ":" << std::endl;
+
+    //oldSkeletonScore = skeletonScore;
+    float skeletonScore = 0.0f;
+    float badPartID = 0;
+    float badPartScore = 0.0f;
+
+    // Searth a bad label
+    for (int i = 0; i < SkeletonLabelsIndexes.size(); i++)
+      if(!ignored[i])    
+      {
+        int currentLabelIndex = SkeletonLabelsIndexes[i];
+        if (SkeletonLabelsScores[i] > badPartScore)
+        {
+          badPartScore = SkeletonLabelsScores[i];
+          badPartID = i;    
+        }		
+        skeletonScore = skeletonScore + SkeletonLabelsScores[i];
+      }
+    //*LogStream << "  bad partID = " << badPartID << std::endl;
+
+    // Searching new label for the bad part
+    int newLabelIndex = SkeletonLabelsIndexes[badPartID];
+      
+    float tempLabelScore = 0.0f;
+    int actualLabels;/* = int(d*labels[badPartID].size());
+    /if(labels[badPartID].size() < actualLabels)*/
+    actualLabels = labels[badPartID].size();
+    for (int l = 0; l < actualLabels; l++)
+    {
+      tempLabelScore = labelScore(badPartID, l);
+      if (tempLabelScore < SkeletonLabelsScores[badPartID])
+        newLabelIndex = l;	  
+    }
+    //*LogStream << " newLabelIndex =" << newLabelIndex << std::endl;
+
+    // Modify skeleton
+    if (newLabelIndex == SkeletonLabelsIndexes[badPartID])
+    {
+      ignored[badPartID] = true;
+      idleIterations++;
+      //*LogStream << "  idle iteration on part " << badPartID << std::endl;
+    }
+    else
+    {
+      // Replacing the bad part
+      for(int i = 0; i < ignored.size(); i++)
+        ignored[i] = false;
+      idleIterations = 0;
+      SkeletonLabelsIndexes[badPartID] = newLabelIndex;
+      //*LogStream << "  replaced part " << badPartID << std::endl;
+
+      // Recalculation new and adjusted labels scores
+      SkeletonLabelsScores[badPartID] = labelScore(badPartID, newLabelIndex);
+      for (int k = 0; k < m_pattern->parts[badPartID].ParentJointConnections.size(); k++)
+      {
+        int p = m_pattern->parts[badPartID].ParentJointConnections[k].partID;
+        int l = SkeletonLabelsIndexes[p];
+        SkeletonLabelsScores[p] = labelScore(p, l);
+      }
+      for (int i = 0; i < m_pattern->parts[badPartID].ChildJointConnections.size(); i++)
+      {
+        int p = m_pattern->parts[badPartID].ChildJointConnections[i].partID;
+        int l = SkeletonLabelsIndexes[p];
+        SkeletonLabelsScores[p] = labelScore(p, l);
+      }
+    }    
+  }
+
+  Solvlet frameSolver::solveFrame(std::map<uint32_t, std::vector<LimbLabel>> limbLabels, int frameID)
+  {  
+    initialize(limbLabels);
+    
     // Starting solve
     /*float searchDepth = 0.1f;
     for (float d = 0.0f; d <1.0f; d += searchDepth)
     {*/
-    int idleIterations = 0;
-    int badPartID = 0;
-    float badPartScore = 0.0f;
-    float oldSkeletonScore = 0.0f;
-
     while(idleIterations <= m_pattern->size() && iterations < iterationsLimit)
-    {
-      iterations++;
-      //std::cout << std::endl << "Iteration " << iterations << ":" << std::endl;
-
-      oldSkeletonScore = skeletonScore;
-      skeletonScore = 0.0f;
-      badPartID = 0;
-      badPartScore = 0.0f;
-
-      // Searth a bad label
-      for (int i = 0; i < SkeletonLabelsIndexes.size(); i++)
-        if(!ignored[i])    
-        {
-          int currentLabelIndex = SkeletonLabelsIndexes[i];
-          if (SkeletonLabelsScores[i] > badPartScore)
-          {
-            badPartScore = SkeletonLabelsScores[i];
-            badPartID = i;    
-          }		
-          skeletonScore = skeletonScore + SkeletonLabelsScores[i];
-        }
-      //*LogStream << "  bad partID = " << badPartID << std::endl;
-
-      // Searching new label for the bad part
-      int newLabelIndex = SkeletonLabelsIndexes[badPartID];
-      
-      float tempLabelScore = 0.0f;
-      int actualLabels;/* = int(d*labels[badPartID].size());
-      /if(labels[badPartID].size() < actualLabels)*/
-        actualLabels = labels[badPartID].size();
-      for (int l = 0; l < actualLabels; l++)
-      {
-        tempLabelScore = labelScore(badPartID, l);
-        if (tempLabelScore < SkeletonLabelsScores[badPartID])
-          newLabelIndex = l;	  
-      }
-      //*LogStream << " newLabelIndex =" << newLabelIndex << std::endl;
-
-      // Modify skeleton
-      if (newLabelIndex == SkeletonLabelsIndexes[badPartID])
-      {
-        ignored[badPartID] = true;
-        idleIterations++;
-        //*LogStream << "  idle iteration on part " << badPartID << std::endl;
-      }
-      else
-      {
-        // Replacing the bad part
-        for(int i = 0; i < ignored.size(); i++)
-          ignored[i] = false;
-        idleIterations = 0;
-        SkeletonLabelsIndexes[badPartID] = newLabelIndex;
-        //*LogStream << "  replaced part " << badPartID << std::endl;
-
-        // Recalculation new and adjusted labels scores
-        SkeletonLabelsScores[badPartID] = labelScore(badPartID, newLabelIndex);
-        for (int k = 0; k < m_pattern->parts[badPartID].ParentJointConnections.size(); k++)
-        {
-          int p = m_pattern->parts[badPartID].ParentJointConnections[k].partID;
-          int l = SkeletonLabelsIndexes[p];
-          SkeletonLabelsScores[p] = labelScore(p, l);
-        }
-        for (int i = 0; i < m_pattern->parts[badPartID].ChildJointConnections.size(); i++)
-        {
-          int p = m_pattern->parts[badPartID].ChildJointConnections[i].partID;
-          int l = SkeletonLabelsIndexes[p];
-          SkeletonLabelsScores[p] = labelScore(p, l);
-        }
-      }
-    }
+      singleIteration();
     //}
-    //*LogStream << "Iteration count = " << iterations << std::endl;
+    //*LogStream << "Iterations count = " << iterations << std::endl;
 
-    // Create solvet skeleton for current frame
+    // Create solve for current frame
     Solvlet solve;
     std::vector<LimbLabel> temp;
     for (int p = 0; p < labels.size(); p++)
@@ -417,6 +419,11 @@ namespace SPEL
     //*LogStream << "  Skeleton creating time = " << clock_to_ms(t1 - t0) << " ms\n";
 
     return temp;
+  }
+
+  long int frameSolver::getIterationNumber()
+  {
+    return iterations;
   }
 
   Skeleton frameSolver::getShiftedLabelsSkeleton(Skeleton pattern)
@@ -547,7 +554,6 @@ namespace SPEL
           label.score = 1.0f;
         // end of score variant B
         temp.push_back(label);
-
       }
       labels.emplace(std::pair<uint32_t, std::vector<Label>>(i, temp));
     }
@@ -638,7 +644,7 @@ namespace SPEL
       *LogStream << "Solving of the Slices[" << q << "] started\n";
       long int t0 = 0, t1 = 0, T0 = 0, T1 = 0;
 
-      DebugMessage("Traning on slice " + std::to_string(q), 1);
+      DebugMessage("Training on slice " + std::to_string(q), 1);
       train(slices[q], params);
       *LogStream << "\n";
 
@@ -751,7 +757,7 @@ namespace SPEL
     t0 = clock();
     Solvlet solve = fSolver.solveFrame(LimbLabels, frame->getID());
     t1 = clock();
-    *LogStream << "iterations count = " << fSolver.iterations << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
+    *LogStream << "iterations count = " << fSolver.getIterationNumber() << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
     *LogStream << std::endl;	
 
     Skeleton pattern = frame->getSkeleton();
