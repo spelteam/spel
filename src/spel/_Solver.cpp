@@ -15,7 +15,7 @@
 
 namespace SPEL
 {
-  std::vector<std::vector<Frame*>> _Solver::createSlices(std::vector<Frame*> frames)
+  std::vector<std::vector<Frame*>> _Solver::createSlices(std::vector<Frame*> &frames)
   {
     long t0 = clock();
     std::vector<std::vector<Frame*>> Slices;
@@ -653,13 +653,16 @@ namespace SPEL
       }
 
       DebugMessage("Solving the slice " + std::to_string(q), 2);
-      /*if (slices[q].size() < 11)  //?   
-        interpolate2(slices[i]); //?
+      /*if (slices[q].size() < 13)  //?   
+        interpolate2(slices[q]); //?
       std::cout << "interpolate2 - Ok" << std::endl;*/
       for (i; i != m; i = i + n)
       if(i < slices[q].size())
         if (slices[q][i]->getFrametype() != KEYFRAME)
         {        
+          std::cout << "  frame[" << slices[q][i]->getID() << "].skeleton = '" << slices[q][i]->getSkeletonPtr()->getName() << "'"
+            //<< " size = " << slices[q][i]->getSkeletonPtr()->getPartTreeCount()
+            << std::endl;
           Solvlet solve = solveFrame(params, fsolver, slices[q][i], prevFrame);
           solves.push_back(solve);
           prevFrame = slices[q][i];      
@@ -671,13 +674,15 @@ namespace SPEL
         for (int k = n; k >= i; k--)
         if(k < slices[q].size())
           if (slices[q][k]->getFrametype() != KEYFRAME)
-          {        
+          {       
+            std::cout << "  frame[" << slices[q][k]->getID() << "].skeleton = '" << slices[q][k]->getSkeletonPtr()->getName() << "'"
+              //<< " size = "  << slices[q][i]->getSkeletonPtr()->getPartTreeCount() 
+              << std::endl;
             Solvlet solve = solveFrame(params, fsolver, slices[q][k], prevFrame);
             solves.push_back(solve);
             prevFrame = slices[q][k];      
           }
       }
-
       seq.setFrames(frames);
 
       std::cout << "Slices[" << q << "] solved\n";
@@ -707,7 +712,8 @@ namespace SPEL
   {
     long int T0 = clock();
 
-    bool haveSkeleton = (frame->getSkeleton().getPartTreePtr()->size() > 0);
+    bool haveSkeleton = (frame->getSkeletonPtr()->getPartTreeCount() > 0);
+    //bool isInterpolation = (frame->getSkeletonPtr()->getName() == "interpolate2");
     if(!haveSkeleton && previousFrame != 0 )
       setSkeleton(frame, previousFrame);
 

@@ -93,7 +93,7 @@ namespace SPEL
     std::map<uint32_t, std::vector<LimbLabel>>detect(std::map<std::string, float> &params, Frame* &frame, Frame* previousFrame = 0);
     Solvlet solveFrame(std::map<std::string, float> &params, frameSolver &fSolver, Frame* frame, Frame* prevFrame = 0);
     
-    static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> frames);
+    static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> &frames);
 
     void emplaceDefaultParameters(std::map<std::string, float> &params) const;
 

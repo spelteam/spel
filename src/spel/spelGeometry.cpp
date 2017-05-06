@@ -625,7 +625,7 @@ namespace SPEL
           Skeleton skeleton = S1*(1.0f - K) + S2*K;
           skeleton.setName("interpolate2");
           
-            slice[k]->setSkeleton(skeleton);
+          slice[k]->setSkeleton(skeleton);
         }
       }
     }

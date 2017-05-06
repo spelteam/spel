@@ -93,26 +93,21 @@ int main (int argc, char **argv)
     //M->write("tempSolverTest.ism");
 
     // Calculate interpolation
-    if (useVisualization)
-    {
-      t0 = clock();
+    t0 = clock();
+    clearSkeletons(vFrames);
+    /*seq.estimateUniformScale(params);
+    seq.computeInterpolation(params);*/
+    /*interpolate2(vFrames);
+    propagateKeyFrames(vFrames, M, 0.55f);
+    interpolate3(vFrames, M);*/
+    std::vector<vector<Frame*>> slices = _Solver::createSlices(vFrames);
+    for (uint32_t i = 0; i < slices.size(); i++)
+      if (slices[i].size() < 13)
+        interpolate2(slices[i]);
+    seq.setFrames(vFrames);
+    t1 = clock();
+    cout << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
 
-      //seq.computeInterpolation(params);
-      //vFrames = seq.getFrames();
-      //clearSkeletons(vFrames);
-      //interpolate2(vFrames);
-      //propagateKeyFrames(vFrames,M, 0.55f);
-      /*clearSkeletons(vFrames);
-      interpolate3(vFrames, M);
-
-      std::vector<vector<Frame*>> slices = _Solver::createSlices(vFrames);
-      for(uint32_t i = 0; i < slices.size(); i++)
-        if (slices[i].size() < 11)
-          interpolate2(slices[i]);
-      t1 = clock();
-      cout << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;*/
-    }
-    
     // Put masks
     if (useVisualization)
     for (int i = 0; i < vFrames.size(); i++)
@@ -146,11 +141,10 @@ int main (int argc, char **argv)
 
     // Run _Solver
     cout << "Testing _Solver\n";
-    clearSkeletons(vFrames);
-    Sequence seqi2(0, "", vFrames);
+   
     _Solver _solver;
     t0 = clock();
-    std::vector<Solvlet> seqSolves = _solver.solve(seqi2, params);
+    std::vector<Solvlet> seqSolves = _solver.solve(seq, params);
     t1 = clock();
     t1 = (t1 - t0)*1000 / CLOCKS_PER_SEC;
     cout << "Sequence solving time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;
@@ -178,7 +172,8 @@ int main (int argc, char **argv)
     }
 
     // Put "toSkeleton()"
-    vFrames = seqi2.getFrames();
+    vFrames.clear();
+    vFrames = seq.getFrames();
     if (useVisualization)
     for (int i = 0; i < vFrames.size(); i++)    
     {
