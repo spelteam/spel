@@ -445,6 +445,8 @@ namespace SPEL
     std::vector<Solvlet> Solves;
     ImageMaskSimilarityMatrix ISM(Frames);
     Solves = solver.solve(sequence, params, ISM);
+
+    // Debug messages
     cout << "Solves size = " << Solves.size() << endl;
     for (int i = 0; i < Solves.size(); i++)
     {
@@ -452,8 +454,9 @@ namespace SPEL
       cout << "PartTree[" << i << "] size = " << x.getPartTree().size() << endl;
     }
 
-    // Compute expected value and compare
-    CompareSolves(Solves, Frames, ISM); 
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels;
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     Frames.clear();
@@ -465,18 +468,19 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "skier.xml");
     vector<Frame*> Frames = sequence.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
 
     // Run "solve"
     NSKPSolver solver;
     std::vector<Solvlet> Solves;
     Solves = solver.solve(sequence);
 
-    // Compute expected value and compare
-    TestISM testISM;
-    testISM.build(Frames, false);
-    CompareSolves(Solves, Frames, testISM);
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels;
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     //sequence.TestSequence::~TestSequence();
@@ -491,23 +495,24 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "skier.xml");
     vector<Frame*> Frames = sequence.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
 
     // Run "solve"
     NSKPSolver solver;
     std::vector<Solvlet> Solves;
     Solves = solver.solve(sequence, params);
 
-    // Compute expected value and compare
-    TestISM testISM;
-    testISM.build(Frames, false);
-    CompareSolves(Solves, Frames, testISM);
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels;
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     //sequence.TestSequence::~TestSequence();
     for (unsigned int i = 0; i < Frames.size(); i++)
-        delete Frames[i];
+      delete Frames[i];
     Frames.clear();
   }
 
@@ -521,8 +526,11 @@ namespace SPEL
 
     //Load the input data
     std::map<std::string, float>  params;
-    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestSequence sequence(params, "speltests_TestData/nskpsolverTestData/", "skier.xml");
     vector<Frame*> Frames = sequence.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
+
     int k = FirstKeyFrameNum(Frames);
     unsigned int partsCount = Frames[k]->getSkeleton().getPartTree().size();
     //sequence.TestSequence::~TestSequence();
@@ -551,8 +559,9 @@ namespace SPEL
     for (unsigned int i = 0; i < Solves.size(); i++)
       ASSERT_EQ(partsCount, Solves[i].getLabels().size());
 
-    // Compute expected value and compare
-    CompareSolves(Solves, Frames, MSM);
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels;
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     for (unsigned int i = 0; i < Frames.size(); i++)

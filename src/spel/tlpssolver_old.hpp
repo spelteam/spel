@@ -50,11 +50,7 @@ namespace SPEL
     virtual std::vector<Solvlet> solve(Sequence& frames, std::map<std::string, float> params, std::vector<Solvlet> solvlets);
   protected:
 #ifdef DEBUG
-    FRIEND_TEST(tlpssolverTests, solve_3);
-    FRIEND_TEST(tlpssolverTests, evaluateSolution);
-    FRIEND_TEST(tlpssolverTests, findFrameIndexById);
-    FRIEND_TEST(tlpssolverTests, ScoreCostAndJointCost);
-    FRIEND_TEST(tlpssolver_Tests, slice_);
+    FRIEND_TEST(tlpssolverTests_old, solve);
 #endif  // DEBUG
       
     virtual std::vector<Solvlet> solveWindowed(Sequence &sequence, std::map<std::string, float> params); //inherited virtual
