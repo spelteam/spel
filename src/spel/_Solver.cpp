@@ -636,43 +636,46 @@ namespace SPEL
       train(slices[q], params);
       std::cout << "\n";
 
+      bool b = false;
       int i = 1, n = 1, m = slices[q].size();
-      Skeleton skeleton = slices[q][0]->getSkeleton();
-      if(slices[q][0]->getFrametype() != KEYFRAME)
+      Frame* prevFrame = slices[q][0];
+      if (slices[q][0]->getFrametype() != KEYFRAME)
       {
         i = slices[q].size() - 1;
-        skeleton = slices[q][i]->getSkeleton();
         n = -1;
         m = -1;
+        prevFrame = slices[q][i];
+      }
+      else
+      {
+        b = (slices[q][m - 1]->getFrametype() == KEYFRAME);
+        m = m/2;
       }
 
       DebugMessage("Solving the slice " + std::to_string(q), 2);
-
       if (slices[q].size() < 11)  //?   
         interpolate2(slices[i]); //?
       for (i; i != m; i = i + n)
       if(i < slices[q].size())
         if (slices[q][i]->getFrametype() != KEYFRAME)
-        {
-          std::cout << " Detect on frame [" << slices[q][i]->getID() << "] started " << std::endl;
-          T0 = clock();
-          std::map<uint32_t, std::vector<LimbLabel>> LimbLabels = detect(slices[q][i], params, skeleton);
-
-          std::cout << " Solving of the frame [" << slices[q][i]->getID() << "]: ";
-          //fsolver.refresh();         
-          t0 = clock();
-          Solvlet solve = fsolver.solveFrame(LimbLabels, slices[q][i]->getID());
+        {        
+          Solvlet solve = solveFrame(params, fsolver, slices[q][i], prevFrame);
           solves.push_back(solve);
-          t1 = clock();
-          std::cout << "iterations count = " << fsolver.iterations << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
-          Skeleton temp = (0.5f*fsolver.getAverageJointsSkeleton(pattern) + 0.5f*fsolver.getShiftedLabelsSkeleton(pattern));
-          skeleton = temp;// for supporting tree.hh 3.1
-          skeleton.setName("solved");
-          slices[q][i]->setSkeleton(skeleton);
-          T1 = clock();
-          DebugMessage("Frame " + std::to_string(slices[q][i]->getID()) + " solved - " + std::to_string(spelHelper::clock_to_ms(T1 - T0)) + " ms" , 2);
-          std::cout << std::endl;
+          prevFrame = slices[q][i];      
         }
+      if (b)
+      {
+        n = slices[q].size()-1;
+        prevFrame = slices[q][n];
+        for (int k = n; k >= i; k--)
+        if(k < slices[q].size())
+          if (slices[q][k]->getFrametype() != KEYFRAME)
+          {        
+            Solvlet solve = solveFrame(params, fsolver, slices[q][k], prevFrame);
+            solves.push_back(solve);
+            prevFrame = slices[q][k];      
+          }
+      }
 
       seq.setFrames(frames);
 
@@ -699,72 +702,15 @@ namespace SPEL
       }
   }
 
-  std::map<uint32_t, std::vector<LimbLabel>> _Solver::detect(Frame* &frame, std::map<std::string, float> &params, Skeleton prevSkeleton)
+  std::map<uint32_t, std::vector<LimbLabel>> _Solver::detect(std::map<std::string, float> &params, Frame* &frame, Frame* previousFrame)
   {
     long int T0 = clock();
 
     bool haveSkeleton = (frame->getSkeleton().getPartTreePtr()->size() > 0);
-    if (!haveSkeleton)
-    {
-      cv::Point2f shift(0, 0);
-
-      // Copiyng skeleton from neighbor frame, variant A
-      /*
-      int p = i - n;
-      if(p != m) shift = ISM->getShift(i, p);
-      slices[q][i]->setSkeleton((skeleton + shift));// +slices[q][i]->getSkeleton())*0.5f);
-
-      // Debug
-      //cv::Mat tempMask = slices[q][i]->getMask().clone();
-      //putSkeletonMask(tempMask, skeleton + shift, cv::Size(0, 0), 128);
-      //imwrite(std::to_string(slices[q][i]->getID()) + ".png", tempMask);
-      //tempMask.release();*/
-
-      // Copiyng skeleton from neighbor frame, variant B
-      /**/
-      // Create mask for the previous skeleton
-      cv::Size size = frame->getMask().size();
-
-      // Select mask ROI
-      std::vector<cv::Point2i> endpoints1 = SearchROI(frame->getMask());
-      cv::Rect ROI1 = toROIRect(endpoints1);
-      correctROI(ROI1, size);
-
-      // Selecting skeleton ROI
-      std::vector<cv::Point2f> endpoints2 = getEndpoints(prevSkeleton);
-      cv::Rect ROI2 = toROIRect(endpoints2);
-      correctROI(ROI2, size);
-
-      // Calculate distance
-      cv::Point2i c1 = MaskCenter(frame->getMask(), ROI1);
-      cv::Point2f c2 = SkeletonCenter(prevSkeleton);
-      shift = cv::Point2i(static_cast<int>(c2.x), static_cast<int>(c2.y)) - c1;
-
-      // Copy skeleton
-      frame->setSkeleton(prevSkeleton - shift);
-
-      // Debug
-      //cv::Mat tempMask;// = cv::Mat::zeros(size, CV_8UC1);;
-      //putSkeletonMask(tempMask, skeleton, size, 255);
-      //cv::Point2i c = MaskCenter(tempMask, ROI2);
-      //tempMask.release();
-
-      // Debug messages
-      //std::cout << " Frame " << std::to_string(slices[q][i]->getID()) << " endpoints: " << endpoints1 << std::endl;
-      //std::cout << " Skeleton endpoints: " << endpoints2 << std::endl;
-      //std::cout << " Mask ROI: " << ROI1 << std::endl;
-      //std::cout << " Skeleton ROI: " << ROI2 << std::endl;
-      //std::cout << " Mask center: " << c1 << std::endl;
-      //std::cout << " Skeleton mask center: " << c << std::endl;
-      //std::cout << " Skeleton center: " << c2 << std::endl;
-      //tempMask = slices[q][i]->getMask().clone();  
-      //putSkeletonMask(tempMask, skeleton - shift, cv::Size(0,0), 128);
-      //imwrite(to_string(slices[q][i]->getID(), 3) + ".png", tempMask);
-      //tempMask.release();
-    }
+    if(!haveSkeleton && previousFrame != 0 )
+      setSkeleton(frame, previousFrame);
 
     std::map<uint32_t, std::vector<LimbLabel>> LimbLabels;
-
     long int t0, t1;
     for (int d = 0; d < detectors.size(); d++)
     {
@@ -781,6 +727,30 @@ namespace SPEL
     return LimbLabels;
   }
 
+  Solvlet _Solver::solveFrame(std::map<std::string, float> &params, frameSolver &fSolver, Frame* frame, Frame* prevFrame)
+  {
+    long int T0 = clock();
+    std::cout << " Detect on frame [" << frame->getID() << "] started " << std::endl;
+    std::map<uint32_t, std::vector<LimbLabel>> LimbLabels = detect(params, frame, prevFrame);
+
+    std::cout << " Solving of the frame [" << frame->getID() << "]: ";
+    long int t0 = 0, t1 = 0;
+    t0 = clock();
+    Solvlet solve = fSolver.solveFrame(LimbLabels, frame->getID());
+    t1 = clock();
+    std::cout << "iterations count = " << fSolver.iterations << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
+    std::cout << std::endl;	
+
+    Skeleton pattern = frame->getSkeleton();
+    Skeleton temp = (0.5f*fSolver.getAverageJointsSkeleton(pattern) + 0.5f*fSolver.getShiftedLabelsSkeleton(pattern));
+    Skeleton skeleton = temp;// for supporting tree.hh 3.1
+    skeleton.setName("solved");
+    frame->setSkeleton(skeleton);
+    long int T1 = clock();
+    DebugMessage("Frame " + std::to_string(frame->getID()) + " solved - " + std::to_string(spelHelper::clock_to_ms(T1 - T0)) + " ms", 2);
+
+    return solve;
+  }
 
   void _Solver::emplaceDefaultParameters(std::map<std::string, float> &params) const
   {

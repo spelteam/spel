@@ -65,6 +65,8 @@ namespace SPEL
   Skeleton operator/(Skeleton s, float k);
   cv::Point2f SkeletonCenter(std::map<int, std::vector<cv::Point2f>> polygons);
   cv::Point2f SkeletonCenter(Skeleton skeleton);
+  // Copiyng shifted skeleton from neighbor frame
+  void setSkeleton(Frame* frame, Frame* neighborFrame);
 
 // Points
   bool inside(cv::Point2f p, cv::Size imageSize);

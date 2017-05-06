@@ -488,6 +488,36 @@ namespace SPEL
     return SkeletonCenter(polygons);
   }
 
+  void setSkeleton(Frame* frame, Frame* neighborFrame)
+  {
+    bool havePattern = (neighborFrame->getSkeleton().getPartTreePtr()->size() > 0);
+    if (havePattern)
+    {  
+      // Create mask for the previous skeleton
+      cv::Size size = frame->getMask().size();
+
+      // Select mask ROI
+      std::vector<cv::Point2i> endpoints1 = SearchROI(frame->getMask());
+      cv::Rect ROI1 = toROIRect(endpoints1);
+      correctROI(ROI1, size);
+
+      // Selecting skeleton ROI
+      Skeleton prevSkeleton = neighborFrame->getSkeleton();
+      std::vector<cv::Point2f> endpoints2 = getEndpoints(prevSkeleton);
+      cv::Rect ROI2 = toROIRect(endpoints2);
+      correctROI(ROI2, size);
+
+      // Calculate distance
+      cv::Point2f shift(0, 0);
+      cv::Point2i c1 = MaskCenter(frame->getMask(), ROI1);
+      cv::Point2f c2 = SkeletonCenter(prevSkeleton);
+      shift = cv::Point2i(static_cast<int>(c2.x), static_cast<int>(c2.y)) - c1;
+
+      // Copy skeleton
+      frame->setSkeleton(prevSkeleton - shift);
+    }
+  }
+
 // Points
   bool inside(cv::Point2f p, cv::Size imageSize)
   {

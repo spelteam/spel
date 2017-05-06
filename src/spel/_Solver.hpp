@@ -90,7 +90,9 @@ namespace SPEL
     std::vector<Solvlet> solve(Sequence& seq);
     std::vector<Solvlet> solve(Sequence& seq, std::map<std::string, float> params);
     void train(std::vector<Frame*> &slice, std::map<std::string, float> &params);
-    std::map<uint32_t, std::vector<LimbLabel>>detect(Frame* &frame, std::map<std::string, float> &params, Skeleton prevSkeleton);
+    std::map<uint32_t, std::vector<LimbLabel>>detect(std::map<std::string, float> &params, Frame* &frame, Frame* previousFrame = 0);
+    Solvlet solveFrame(std::map<std::string, float> &params, frameSolver &fSolver, Frame* frame, Frame* prevFrame = 0);
+    
     static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> frames);
 
     void emplaceDefaultParameters(std::map<std::string, float> &params) const;
