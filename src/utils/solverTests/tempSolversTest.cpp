@@ -62,7 +62,7 @@ int main (int argc, char **argv)
     vector <Frame*> vFrames = projectLoader.getFrames();
     Sequence seq(0, "test", vFrames);
     cout << "Frames.size = " << vFrames.size() << endl;
-    string LogFileName = "_Solver_Log.txt";
+    string LogFileName = outDirectory + "_Solver_Log.txt";
     ofstream logFile(LogFileName);
     ofstream* logStream = &logFile;//&cout
 
@@ -214,7 +214,7 @@ int main (int argc, char **argv)
     //=============================================
     //draw the solution
 
-    DebugMessage("Log file " + LogFileName, 1);
+    DebugMessage("Log file:\n" + LogFileName, 1);
     *logStream << "Solves size: " << seqSolves.size() << std::endl;
     logFile.close();
 
