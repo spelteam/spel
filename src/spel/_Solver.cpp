@@ -590,8 +590,8 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     // Create interpolation
-    clearSkeletons(frames);
-    interpolate3(frames, ISM);
+    /*clearSkeletons(frames);
+    interpolate3(frames, ISM);*/
 
     //Create detectors
     bool useHist = params.at("useCSdet") > 0.01f;
@@ -653,8 +653,9 @@ namespace SPEL
       }
 
       DebugMessage("Solving the slice " + std::to_string(q), 2);
-      if (slices[q].size() < 11)  //?   
+      /*if (slices[q].size() < 11)  //?   
         interpolate2(slices[i]); //?
+      std::cout << "interpolate2 - Ok" << std::endl;*/
       for (i; i != m; i = i + n)
       if(i < slices[q].size())
         if (slices[q][i]->getFrametype() != KEYFRAME)
@@ -694,7 +695,7 @@ namespace SPEL
     for (int i = 0; i < detectors.size(); i++)
       if (detectors[i] != 0)
       {
-        std::cout << detectorsNames[i] + " train: ";
+        std::cout << detectorsNames[i] + " train: \n";
         t0 = clock();
         detectors[i]->train(slice, params);
         t1 = clock();

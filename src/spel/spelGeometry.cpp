@@ -530,26 +530,30 @@ namespace SPEL
   }
 
 //Interpolation
-  void clearSkeleton(Frame frame)
+  void clearSkeleton(Frame &frame)
   {
-    Skeleton empty;
-    empty.setJointTree(tree<BodyJoint>());
-    empty.setPartTree(tree<BodyPart>());
-
     if(frame.getFrametype() != KEYFRAME)
+    {
+      Skeleton empty;
+      empty.setJointTree(tree<BodyJoint>());
+      empty.setPartTree(tree<BodyPart>());
+
       frame.setSkeleton(empty);
+    }
   }
 
   void clearSkeleton(Frame* frame)
   {
-    Skeleton empty;
-    empty.setJointTree(tree<BodyJoint>());
-    empty.setPartTree(tree<BodyPart>());
+    if (frame->getFrametype() != KEYFRAME)
+    {
+      Skeleton empty;
+      empty.setJointTree(tree<BodyJoint>());
+      empty.setPartTree(tree<BodyPart>());
 
-    if(frame->getFrametype() != KEYFRAME)
-      frame->setSkeleton(empty);
+      frame->getSkeletonPtr()->getJointTreePtr()->clear();
+      frame->getSkeletonPtr()->getPartTreePtr()->clear();
+    }
   }
-
 
   void clearSkeletons(std::vector<Frame*> frames)
   {

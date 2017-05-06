@@ -74,7 +74,7 @@ namespace SPEL
 
 //Interpolation
   // Remove lockframe skeleton
-  void clearSkeleton(Frame frame);
+  void clearSkeleton(Frame &frame);
   void clearSkeleton(Frame* frame);
   // Remove skeletons from all lockframes
   void clearSkeletons(std::vector<Frame*> frames);

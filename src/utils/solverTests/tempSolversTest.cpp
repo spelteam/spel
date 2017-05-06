@@ -61,6 +61,7 @@ int main (int argc, char **argv)
     }
     vector <Frame*> vFrames = projectLoader.getFrames();
     Sequence seq(0, "test", vFrames);
+    cout << "Frames.size = " << vFrames.size() << endl;
 
     //=============================================
     // Testing _Solver class
@@ -88,27 +89,28 @@ int main (int argc, char **argv)
     M->buildImageSimilarityMatrix(vFrames, 0, 0, false, false);
     long int t1 = clock();
     t1 = (t1 - t0) * 1000 / CLOCKS_PER_SEC;
-    cout << "ISM creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
-
-    std::cout << std::endl;
+    cout << "ISM creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl<< endl;
+    //M->write("tempSolverTest.ism");
 
     // Calculate interpolation
     if (useVisualization)
     {
       t0 = clock();
+
       //seq.computeInterpolation(params);
       //vFrames = seq.getFrames();
-      clearSkeletons(vFrames);
+      //clearSkeletons(vFrames);
       //interpolate2(vFrames);
       //propagateKeyFrames(vFrames,M, 0.55f);
-
+      /*clearSkeletons(vFrames);
       interpolate3(vFrames, M);
+
       std::vector<vector<Frame*>> slices = _Solver::createSlices(vFrames);
       for(uint32_t i = 0; i < slices.size(); i++)
         if (slices[i].size() < 11)
           interpolate2(slices[i]);
       t1 = clock();
-      cout << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
+      cout << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;*/
     }
     
     // Put masks

@@ -446,7 +446,7 @@ namespace SPEL
    Actual_Slice.clear();
  }
 
-TEST(tlpssolverTests_old, solve)
+  TEST(tlpssolverTests_old, solve)
   { 
     //Load the input data
     TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
