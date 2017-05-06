@@ -65,6 +65,8 @@ namespace SPEL
     Skeleton getAverageJointsSkeleton(Skeleton pattern) ;
     Skeleton getShiftedLabelsSkeleton(Skeleton pattern);
 
+    void setLogStream(std::ostream * logStream);
+
     bool IsSolved();
     long int iterations;
 
@@ -77,6 +79,7 @@ namespace SPEL
     std::map<uint32_t, uint32_t> SkeletonLabelsIndexes; // partID ~ labelIndex
     std::map<uint32_t, double> SkeletonLabelsScores;
     std::map<uint32_t, bool> ignored;
+    std::ostream * LogStream;
 
     bool solved;
   }; 
@@ -92,14 +95,16 @@ namespace SPEL
     void train(std::vector<Frame*> &slice, std::map<std::string, float> &params);
     std::map<uint32_t, std::vector<LimbLabel>>detect(std::map<std::string, float> &params, Frame* &frame, Frame* previousFrame = 0);
     Solvlet solveFrame(std::map<std::string, float> &params, frameSolver &fSolver, Frame* frame, Frame* prevFrame = 0);
-    
-    static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> &frames);
-
     void emplaceDefaultParameters(std::map<std::string, float> &params) const;
 
+    static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> &frames);   
+    void setLogStream(std::ostream * logStream);
+    
   private:
     std::vector<Detector*> detectors;
     std::vector<std::string> detectorsNames;
+
+    std::ostream * LogStream;
   };
 }
 

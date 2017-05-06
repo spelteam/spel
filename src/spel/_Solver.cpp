@@ -174,6 +174,7 @@ namespace SPEL
       SkeletonLabelsScores.emplace(std::pair<uint32_t, float>(i, 0));
       ignored.emplace(std::pair<uint32_t, bool>(i, false));
     }
+    LogStream = &std::cout;
   }
 
   frameSolver::~frameSolver(void)
@@ -305,7 +306,7 @@ namespace SPEL
           }		
           skeletonScore = skeletonScore + SkeletonLabelsScores[i];
         }
-      //std::cout << "  bad partID = " << badPartID << std::endl;
+      //*LogStream << "  bad partID = " << badPartID << std::endl;
 
       // Searching new label for the bad part
       int newLabelIndex = SkeletonLabelsIndexes[badPartID];
@@ -320,14 +321,14 @@ namespace SPEL
         if (tempLabelScore < SkeletonLabelsScores[badPartID])
           newLabelIndex = l;	  
       }
-      //std::cout << " newLabelIndex =" << newLabelIndex << std::endl;
+      //*LogStream << " newLabelIndex =" << newLabelIndex << std::endl;
 
       // Modify skeleton
       if (newLabelIndex == SkeletonLabelsIndexes[badPartID])
       {
         ignored[badPartID] = true;
         idleIterations++;
-        //std::cout << "  idle iteration on part " << badPartID << std::endl;
+        //*LogStream << "  idle iteration on part " << badPartID << std::endl;
       }
       else
       {
@@ -336,7 +337,7 @@ namespace SPEL
           ignored[i] = false;
         idleIterations = 0;
         SkeletonLabelsIndexes[badPartID] = newLabelIndex;
-        //std::cout << "  replaced part " << badPartID << std::endl;
+        //*LogStream << "  replaced part " << badPartID << std::endl;
 
         // Recalculation new and adjusted labels scores
         SkeletonLabelsScores[badPartID] = labelScore(badPartID, newLabelIndex);
@@ -355,7 +356,7 @@ namespace SPEL
       }
     }
     //}
-    //std::cout << "Iteration count = " << iterations << std::endl;
+    //*LogStream << "Iteration count = " << iterations << std::endl;
 
     // Create solvet skeleton for current frame
     Solvlet solve;
@@ -413,7 +414,7 @@ namespace SPEL
     temp.setJointTree(jointTree);
     long t1 = clock();
 
-    //std::cout << "  Skeleton creating time = " << clock_to_ms(t1 - t0) << " ms\n";
+    //*LogStream << "  Skeleton creating time = " << clock_to_ms(t1 - t0) << " ms\n";
 
     return temp;
   }
@@ -489,12 +490,15 @@ namespace SPEL
     temp.setJointTree(jointTree);
     long t1 = clock();
 
-    //std::cout << "  Skeleton creating time = " << clock_to_ms(t1 - t0) << " ms\n";
+    //*LogStream << "  Skeleton creating time = " << clock_to_ms(t1 - t0) << " ms\n";
 
     return temp;
   }
 
-  
+  void frameSolver::setLogStream(std::ostream * logStream)
+  {
+    LogStream = logStream;
+  }
 
   std::vector<cv::Point2f> frameSolver::getLimbLabelJoints(LimbLabel limbLabel)
   {
@@ -557,6 +561,7 @@ namespace SPEL
   {
     m_id = 2;
     m_name = "_";
+    LogStream = &std::cout;
   }
 
   _Solver::~_Solver(void)
@@ -626,15 +631,16 @@ namespace SPEL
 
     // Solving
     frameSolver fsolver(indexedSkeleton);
+    fsolver.setLogStream(LogStream);
     if (indexedSkeleton->size() > 0)
     for (int q = 0; q < slices.size(); q++)
     { 
-      std::cout << "Solving of the Slices[" << q << "] started\n";
+      *LogStream << "Solving of the Slices[" << q << "] started\n";
       long int t0 = 0, t1 = 0, T0 = 0, T1 = 0;
 
-      DebugMessage("Traning on slice " + std::to_string(q), 2);
+      DebugMessage("Traning on slice " + std::to_string(q), 1);
       train(slices[q], params);
-      std::cout << "\n";
+      *LogStream << "\n";
 
       bool b = false;
       int i = 1, n = 1, m = slices[q].size();
@@ -652,15 +658,15 @@ namespace SPEL
         m = m/2;
       }
 
-      DebugMessage("Solving the slice " + std::to_string(q), 2);
+      DebugMessage("Solving the slice " + std::to_string(q), 1);
       /*if (slices[q].size() < 13)  //?   
         interpolate2(slices[q]); //?
-      std::cout << "interpolate2 - Ok" << std::endl;*/
+      *LogStream << "interpolate2 - Ok" << std::endl;*/
       for (i; i != m; i = i + n)
       if(i < slices[q].size())
         if (slices[q][i]->getFrametype() != KEYFRAME)
         {        
-          std::cout << "  frame[" << slices[q][i]->getID() << "].skeleton = '" << slices[q][i]->getSkeletonPtr()->getName() << "'"
+          *LogStream << "  frame[" << slices[q][i]->getID() << "].skeleton = '" << slices[q][i]->getSkeletonPtr()->getName() << "'"
             //<< " size = " << slices[q][i]->getSkeletonPtr()->getPartTreeCount()
             << std::endl;
           Solvlet solve = solveFrame(params, fsolver, slices[q][i], prevFrame);
@@ -675,7 +681,7 @@ namespace SPEL
         if(k < slices[q].size())
           if (slices[q][k]->getFrametype() != KEYFRAME)
           {       
-            std::cout << "  frame[" << slices[q][k]->getID() << "].skeleton = '" << slices[q][k]->getSkeletonPtr()->getName() << "'"
+            *LogStream << "  frame[" << slices[q][k]->getID() << "].skeleton = '" << slices[q][k]->getSkeletonPtr()->getName() << "'"
               //<< " size = "  << slices[q][i]->getSkeletonPtr()->getPartTreeCount() 
               << std::endl;
             Solvlet solve = solveFrame(params, fsolver, slices[q][k], prevFrame);
@@ -685,7 +691,7 @@ namespace SPEL
       }
       seq.setFrames(frames);
 
-      std::cout << "Slices[" << q << "] solved\n";
+      *LogStream << "Slices[" << q << "] solved\n";
     }
 
     delete indexedSkeleton;
@@ -700,11 +706,11 @@ namespace SPEL
     for (int i = 0; i < detectors.size(); i++)
       if (detectors[i] != 0)
       {
-        std::cout << detectorsNames[i] + " train: \n";
+        *LogStream << detectorsNames[i] + " train: ";
         t0 = clock();
         detectors[i]->train(slice, params);
         t1 = clock();
-        std::cout << " time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
+        *LogStream << " time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
       }
   }
 
@@ -721,14 +727,14 @@ namespace SPEL
     long int t0, t1;
     for (int d = 0; d < detectors.size(); d++)
     {
-      std::cout << " " + detectorsNames[d] + ": ";
+      *LogStream << " " + detectorsNames[d] + ": ";
       t0 = clock();
       LimbLabels = detectors[d]->detect(frame, params, LimbLabels);
       t1 = clock();
       int labelsCount = 0;
       for (int l = 0; l < LimbLabels.size(); l++)
         labelsCount += LimbLabels[l].size();
-      std::cout << "Limb labels count = " << labelsCount << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
+      *LogStream << "Limb labels count = " << labelsCount << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
     }
 
     return LimbLabels;
@@ -737,16 +743,16 @@ namespace SPEL
   Solvlet _Solver::solveFrame(std::map<std::string, float> &params, frameSolver &fSolver, Frame* frame, Frame* prevFrame)
   {
     long int T0 = clock();
-    std::cout << " Detect on frame [" << frame->getID() << "] started " << std::endl;
+    *LogStream << " Detect on frame [" << frame->getID() << "] started " << std::endl;
     std::map<uint32_t, std::vector<LimbLabel>> LimbLabels = detect(params, frame, prevFrame);
 
-    std::cout << " Solving of the frame [" << frame->getID() << "]: ";
+    *LogStream << " Solving of the frame [" << frame->getID() << "]: ";
     long int t0 = 0, t1 = 0;
     t0 = clock();
     Solvlet solve = fSolver.solveFrame(LimbLabels, frame->getID());
     t1 = clock();
-    std::cout << "iterations count = " << fSolver.iterations << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
-    std::cout << std::endl;	
+    *LogStream << "iterations count = " << fSolver.iterations << ", time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
+    *LogStream << std::endl;	
 
     Skeleton pattern = frame->getSkeleton();
     Skeleton temp = (0.5f*fSolver.getAverageJointsSkeleton(pattern) + 0.5f*fSolver.getShiftedLabelsSkeleton(pattern));
@@ -754,9 +760,14 @@ namespace SPEL
     skeleton.setName("solved");
     frame->setSkeleton(skeleton);
     long int T1 = clock();
-    DebugMessage("Frame " + std::to_string(frame->getID()) + " solved - " + std::to_string(spelHelper::clock_to_ms(T1 - T0)) + " ms", 2);
+    DebugMessage("Frame " + std::to_string(frame->getID()) + " solved - " + std::to_string(spelHelper::clock_to_ms(T1 - T0)) + " ms", 1);
 
     return solve;
+  }
+  
+  void _Solver::setLogStream(std::ostream * logStream)
+  {
+    LogStream = logStream;
   }
 
   void _Solver::emplaceDefaultParameters(std::map<std::string, float> &params) const
