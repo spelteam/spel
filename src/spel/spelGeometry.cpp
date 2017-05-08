@@ -366,7 +366,7 @@ namespace SPEL
     return endpoints;
   }
 
-  std::map<uint32_t, std::vector<LimbLabel>> createLabels(Skeleton &skeleton)
+  std::map<uint32_t, std::vector<LimbLabel>> createLabels(Skeleton skeleton)
   {
     std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
     std::map<uint32_t, std::vector<LimbLabel>> limbLabels;

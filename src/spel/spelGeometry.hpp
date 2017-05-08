@@ -55,7 +55,7 @@ namespace SPEL
   std::vector<cv::Point2f> getEndpoints(std::vector<cv::Point2f> polygon);
   std::vector<cv::Point2f> getEndpoints(std::map<int, std::vector<cv::Point2f>> polygons);
   std::vector<cv::Point2f> getEndpoints(Skeleton skeleton);
-  std::map<uint32_t,std::vector<LimbLabel>> createLabels(Skeleton & skeleton);
+  std::map<uint32_t,std::vector<LimbLabel>> createLabels(Skeleton skeleton);
 
 //Skeleton
   Skeleton operator+(Skeleton s1, Skeleton s2);

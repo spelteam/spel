@@ -282,16 +282,21 @@ namespace SPEL
       jointsDistancesSum2 = jointsDistancesSum2 + distance;
     }
 
-    if (neighborFrameSolvers[0] != 0)
-      jointsDistancesSum1 += getInterframeDistance(partID, 0) + getInterframeDistance(partID, 1);
-    if (neighborFrameSolvers[1] != 0)
-      jointsDistancesSum2 += neighborFrameSolvers[1]->getInterframeDistance(partID, 0)
-      + neighborFrameSolvers[1]->getInterframeDistance(partID, 1);
-
     if (n > 0) jointsDistancesSum1 /= static_cast<double>(n);
-      else jointsDistancesSum1 = score*score*100.0f;
+    else jointsDistancesSum1 = score*score*100.0f;
     if (m > 0) jointsDistancesSum2 /= static_cast<double>(m);
-      else jointsDistancesSum2 = score*score*100.0f;
+    else jointsDistancesSum2 = score*score*100.0f;
+
+    if (neighborFrameSolvers[0] != 0)
+    {
+      jointsDistancesSum1 += getInterframeDistance(partID, 0);
+      jointsDistancesSum2 += getInterframeDistance(partID, 1);
+    }
+    if (neighborFrameSolvers[1] != 0)
+    {
+      jointsDistancesSum1 += neighborFrameSolvers[1]->getInterframeDistance(partID, 0);
+      jointsDistancesSum2 += neighborFrameSolvers[1]->getInterframeDistance(partID, 1);
+    }
 
     score = static_cast<float>(score*score*(jointsDistancesSum1 + jointsDistancesSum2));
 
@@ -980,7 +985,7 @@ namespace SPEL
           //std::cout << iterations << ". Iteration on frame" << temp << std::endl;
         }          
       }
-      DebugMessage("Iteration count: " + std::to_string(iterations), 1);
+      DebugMessage("Iterations count: " + std::to_string(iterations), 1);
 
       for (int i = 0; i < m; i++)
       {
