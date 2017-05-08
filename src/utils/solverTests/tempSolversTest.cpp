@@ -151,7 +151,7 @@ int main (int argc, char **argv)
     _Solver _solver;
     _solver.setLogStream(logStream);
     t0 = clock();
-    std::vector<Solvlet> seqSolves = _solver.solve(seq, params);
+    std::vector<Solvlet> seqSolves = _solver.solve(seq, params);//solveGlobal(seq, params);
     t1 = clock();
     t1 = (t1 - t0)*1000 / CLOCKS_PER_SEC;
     *logStream << "Sequence solving time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;

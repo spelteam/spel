@@ -365,7 +365,43 @@ namespace SPEL
 
     return endpoints;
   }
- 
+
+  std::map<uint32_t, std::vector<LimbLabel>> createLabels(Skeleton &skeleton)
+  {
+    std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
+    std::map<uint32_t, std::vector<LimbLabel>> limbLabels;
+    std::vector<Score> scores = { Score(0.0f, "keyframe") };
+    std::vector<LimbLabel> temp;
+    for (uint32_t i = 0; i < polygons.size(); i++)
+    {
+      LimbLabel label(int(i), getPartCenter(polygons[i]), 0.0f, polygons[i], scores);
+      temp = { label };
+      limbLabels.emplace(std::pair<uint32_t, std::vector<LimbLabel>>(i, temp));
+      temp.clear();
+    }
+    scores.clear();
+    polygons.clear();
+
+    return limbLabels;
+  }
+
+  /*Solvlet createSolve(Skeleton & skeleton) // for testing
+  {
+    std::map<int, std::vector<cv::Point2f>> polygons = getAllPolygons(skeleton);
+    std::vector<LimbLabel> limbLabels;
+    std::vector<Score> scores;
+    scores.push_back(Score(0.0f, "keyframe"));
+    for (int i = 0; i < polygons.size(); i++)
+      limbLabels.push_back(LimbLabel(i, getPartCenter(polygons[i]),0.0f, polygons[i], scores));
+
+    Solvlet solve(0, limbLabels);
+    polygons.clear();
+    limbLabels.clear();
+    scores.clear();
+
+    return solve;
+  }*/
+
 //Skeleton
 
   Skeleton operator+(Skeleton s1, Skeleton s2)
@@ -785,8 +821,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
             }
           }
         }
-
-        std::cout << "frame [" << i << "] skeleton similar to " << n << std::endl;
+        //std::cout << "frame [" << i << "] skeleton similar to " << n << std::endl;
   
         if(n > -1) 
         {
