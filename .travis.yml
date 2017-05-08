@@ -4,6 +4,13 @@ script: cmake
 
 sudo: required
 
+notifications:
+  email:
+    recipients:
+      - lestat.de.lionkur@gmail.com
+    on_success: always
+    on_failure: always
+
 addons:
   apt:
     sources:

@@ -1,5 +1,12 @@
 image: Visual Studio 2015
 
+notifications:
+  - provider: Email
+    to:
+      - lestat.de.lionkur@gmail.com
+    on_build_success: true
+    on_build_failure: true
+
 matrix:
   fast_finish: true
 
