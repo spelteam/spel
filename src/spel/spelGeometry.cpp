@@ -488,6 +488,36 @@ namespace SPEL
     return SkeletonCenter(polygons);
   }
 
+  void setSkeleton(Frame* frame, Frame* neighborFrame)
+  {
+    bool havePattern = (neighborFrame->getSkeleton().getPartTreePtr()->size() > 0);
+    if (havePattern)
+    {  
+      // Create mask for the previous skeleton
+      cv::Size size = frame->getMask().size();
+
+      // Select mask ROI
+      std::vector<cv::Point2i> endpoints1 = SearchROI(frame->getMask());
+      cv::Rect ROI1 = toROIRect(endpoints1);
+      correctROI(ROI1, size);
+
+      // Selecting skeleton ROI
+      Skeleton prevSkeleton = neighborFrame->getSkeleton();
+      std::vector<cv::Point2f> endpoints2 = getEndpoints(prevSkeleton);
+      cv::Rect ROI2 = toROIRect(endpoints2);
+      correctROI(ROI2, size);
+
+      // Calculate distance
+      cv::Point2f shift(0, 0);
+      cv::Point2i c1 = MaskCenter(frame->getMask(), ROI1);
+      cv::Point2f c2 = SkeletonCenter(prevSkeleton);
+      shift = cv::Point2i(static_cast<int>(c2.x), static_cast<int>(c2.y)) - c1;
+
+      // Copy skeleton
+      frame->setSkeleton(prevSkeleton - shift);
+    }
+  }
+
 // Points
   bool inside(cv::Point2f p, cv::Size imageSize)
   {
@@ -500,26 +530,30 @@ namespace SPEL
   }
 
 //Interpolation
-  void clearSkeleton(Frame frame)
+  void clearSkeleton(Frame &frame)
   {
-    Skeleton empty;
-    empty.setJointTree(tree<BodyJoint>());
-    empty.setPartTree(tree<BodyPart>());
-
     if(frame.getFrametype() != KEYFRAME)
+    {
+      Skeleton empty;
+      empty.setJointTree(tree<BodyJoint>());
+      empty.setPartTree(tree<BodyPart>());
+
       frame.setSkeleton(empty);
+    }
   }
 
   void clearSkeleton(Frame* frame)
   {
-    Skeleton empty;
-    empty.setJointTree(tree<BodyJoint>());
-    empty.setPartTree(tree<BodyPart>());
+    if (frame->getFrametype() != KEYFRAME)
+    {
+      Skeleton empty;
+      empty.setJointTree(tree<BodyJoint>());
+      empty.setPartTree(tree<BodyPart>());
 
-    if(frame->getFrametype() != KEYFRAME)
-      frame->setSkeleton(empty);
+      frame->getSkeletonPtr()->getJointTreePtr()->clear();
+      frame->getSkeletonPtr()->getPartTreePtr()->clear();
+    }
   }
-
 
   void clearSkeletons(std::vector<Frame*> frames)
   {
@@ -591,7 +625,7 @@ namespace SPEL
           Skeleton skeleton = S1*(1.0f - K) + S2*K;
           skeleton.setName("interpolate2");
           
-            slice[k]->setSkeleton(skeleton);
+          slice[k]->setSkeleton(skeleton);
         }
       }
     }
@@ -618,7 +652,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
 
     for (int i = 0; i < frames.size(); i++)
     {
-      bool haveSkeleton = (frames[i]->getSkeletonPtr()->getPartTreePtr()->size() > 0);
+      bool haveSkeleton = (frames[i]->getSkeleton().getPartTreeCount() > 0);
       if (frames[i]->getFrametype() != KEYFRAME && (!haveSkeleton || replaceExisting))
       {
         std::vector<Skeleton> S;
@@ -633,20 +667,24 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
         Skeleton s0;
         s0.setJointTree(tree<BodyJoint>());
         s0.setPartTree(tree<BodyPart>());
-      
+
         int n = scores.size();
         if(n > 0) 
         {
           float score = 0.0f;
           for(int k = 0; k < n; k++)
             score = score + scores[k];
-          for (int k = 0; k < n; k++)
-            scores[k] /= score;
+          if(score > 0.0f)
+            for (int k = 0; k < n; k++)
+              scores[k] /= score;
 
           s0 = S[0]*0.0f;
           for (int k = 0; k < S.size(); k++)
-            s0 = s0 + S[k]*scores[k];
-     
+          {
+            Skeleton temp = s0 + S[k] * scores[k];
+            s0 =  temp; // for supporting tree.hh 3.1
+          }
+
           s0.setName("interpolate3");
           frames[i]->setSkeleton(s0);
           createdSkeletons.push_back(frames[i]->getID());

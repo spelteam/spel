@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include "tlpssolver.hpp"
+#include "tlpssolver_old.hpp"
 #include "keyframe.hpp"
 #include "lockframe.hpp"
 #include "limbLabel.hpp"
@@ -29,8 +30,10 @@ namespace SPEL
   TEST(tlpssolverTests, DISABLED_solve_0)
   {
     //Load the input data
-    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "skier.xml");
     vector<Frame*> Frames = project.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -38,10 +41,9 @@ namespace SPEL
     std::vector<Solvlet> Solves;
     Solves = solver.solve(sequence);
 
-    // Compute expected value and compare
-    TestISM testISM;
-    testISM.build(Frames, false);
-    CompareSolves(Solves, Frames, testISM); 
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     //project.TestProjectLoader::~TestProjectLoader();
@@ -51,23 +53,25 @@ namespace SPEL
   TEST(tlpssolverTests, DISABLED_solve_1)
   {
     //Load the input data
-    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "skier.xml");
     vector<Frame*> Frames = project.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
+    std::map<std::string, float>  params;
     TLPSSolver solver;
     std::vector<Solvlet> Solves;
-    Solves = solver.solve(sequence);
-    std::map<std::string, float>  params;
     Solves = solver.solve(sequence, params, Solves);
 
     // Compute expected value and compare
     for (unsigned int i = 1; i < Solves.size(); i++)
       EXPECT_LE(Solves[i - 1].getFrameID(), Solves[i].getFrameID());
-    //TestISM testISM;
-    //testISM.build(Frames, false);
-    //CompareSolves(Solves, Frames, testISM); 
+
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     //project.TestProjectLoader::~TestProjectLoader();
@@ -78,8 +82,10 @@ namespace SPEL
   {
     //Load the input data
     std::map<std::string, float>  params;
-    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "trijumpSD_13-22.xml");
+    TestProjectLoader project("speltests_TestData/nskpsolverTestData/", "skier.xml");
     vector<Frame*> Frames = project.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
     Sequence sequence(0, "colorHistDetector", Frames);
 
     // Run "solve"
@@ -87,17 +93,16 @@ namespace SPEL
     std::vector<Solvlet> Solves;
     Solves = solver.solve(sequence, params);
 
-    // Compute expected value and compare
-    TestISM testISM;
-    testISM.build(Frames, false);
-    CompareSolves(Solves, Frames, testISM);
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     //project.TestProjectLoader::~TestProjectLoader();
     Frames.clear();
   }
 
-  TEST(tlpssolverTests, solveGlobal)
+  TEST(tlpssolverTests, DISABLED_solveGlobal)
   { 
     //Load the input data
     /*std::map<std::string, float>  params;
@@ -163,11 +168,10 @@ namespace SPEL
     TLPSSolver solver;
     std::vector<Solvlet> Solves;
     Solves = solver.solveGlobal(sequence, params);
-/*
-    // Compute expected value and compare
-    TestISM testISM;
-    testISM.build(Frames, false);
-    CompareSolves(Solves, Frames, testISM);*/
+
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
 
     // Clear
     //project.TestProjectLoader::~TestProjectLoader();
@@ -441,5 +445,64 @@ namespace SPEL
      Actual_Slice[i].clear();
    Actual_Slice.clear();
  }
+
+  TEST(tlpssolverTests_old, solve)
+  { 
+    //Load the input data
+    TestProjectLoader project("speltests_TestData/SurfDetectorTestsData/C/", "skier.xml");
+    vector<Frame*> Frames = project.getFrames();
+    TestProjectLoader projectPattern("speltests_TestData/SurfDetectorTestsData/C/", "skier_pattern.xml");
+    vector<Frame*> Patterns = projectPattern.getFrames();
+    
+    //Frames[1]->setSkeleton(Patterns[1]->getSkeleton()); //interoilation
+
+    // Set Solver parameters
+    std::map<std::string, float>  params;
+    //global settings
+    params.emplace("debugLevel", 0);
+    params.emplace("imageCoeff", 1.0); //set solver detector infromation sensitivity
+    params.emplace("jointCoeff", 0.6); //set solver body part connectivity sensitivity
+    params.emplace("priorCoeff", 0.0); //set solver distance to prior sensitivity
+    params.emplace("tempCoeff", 0.1);
+    //detectors settings
+    params.emplace("uniqueLocationCandidates", 360); //unique location candidates count limit 
+    //params.emplace("maxFrameHeight", 288); //scale to 288p - same size as trijump video seq, for detection
+    params.emplace("maxFrameHeight", Frames[0]->getMask().size().height); // disable image scaling
+    params.emplace("grayImages", 1); // use grayscale images for HoG?
+    //solver settings
+    params.emplace("useCSdet", 1.0f); //determine if ColHist detector is used and with what coefficient
+    params.emplace("useHoGdet", 1.0f); //determine if HoG descriptor is used and with what coefficient
+    params.emplace("useSURFdet", 0.0f); //determine whether SURF detector is used and with what coefficient
+
+    params.emplace("badLabelThresh", 0.45); //set bad label threshold, which will force solution discard at 0.45
+    params.emplace("partDepthRotationCoeff", 1.25); //search radius increase for each depth level in the part tree
+
+    params.emplace("anchorBindDistance", 0); //restrict search regions if within bind distance of existing keyframe or lockframe (like a temporal link
+    params.emplace("anchorBindCoeff", 0.3); //multiplier for narrowing the search range if close to an anchor (lockframe/keyframe)
+
+    params.emplace("bindToLockframes", 0); //should binds be also used on lockframes?
+    params.emplace("maxPartCandidates", 0.1); // set 1.0 for using the max number of part candidates to allow into the solver
+
+    params.emplace("tlpsLockframeThreshold", 0.0); // 0.0 avoiding the rejection of some TLPS solutions
+
+    //Create Sequence
+    Sequence sequence(0, "test", Frames);
+    sequence.computeInterpolation(params);
+    sequence.estimateUniformScale(params);
+
+    // Run "solveGlobal"
+    TLPSSolver_old solver;
+    std::vector<Solvlet> Solves;	
+    Solves = solver.solve(sequence, params);
+    cout << "Solves.size() = " << Solves.size() << endl;
+
+    // Compare
+    float AcceptableJointLinearError = 5; // pixels
+    CompareSolves(Solves, Patterns, AcceptableJointLinearError);
+
+    // Clear
+    //project.TestProjectLoader::~TestProjectLoader();
+    Frames.clear();    
+  }
 
 }

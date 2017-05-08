@@ -71,7 +71,7 @@ namespace SPEL
   vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1); // building a part rectangle on part joints, == DetectorGetPartRect, but used another way
   vector<Point2f> getPartRect(float LWRatio, Point2f p0, Point2f p1, cv::Size blockSize);
 
-  void CompareSolves(vector<Solvlet> Solves, vector<Frame*> Frames, ImageSimilarityMatrix &ISM);
+  void CompareSolves(vector<Solvlet> Solves, vector<Frame*> Frames, float AcceptableLinearError);
   vector<vector<vector<float>>> averageGradientStrengths(const cv::Mat & Image, std::vector<float>& descriptors, const cv::Size & winSize, const cv::Size & blockSize, const cv::Size & blockStride, const cv::Size & cellSize, const int nBins, const int derivAper, const double winSigma, const int histogramNormType, const double L2HysThresh, const bool gammaCorrection, const int nlevels);
   
   class TestISM : public ImageSimilarityMatrix

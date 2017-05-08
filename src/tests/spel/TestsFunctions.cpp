@@ -304,56 +304,58 @@ namespace SPEL
     return partRect;
   }
 
-  void CompareSolves(vector<Solvlet> Solves, vector<Frame*> Frames, ImageSimilarityMatrix &ISM)
+  void CompareSolves(vector<Solvlet> Solves, vector<Frame*> Frames, float AcceptableLinearError)
   {
+    std::cout << "AcceptableLinearError = " << AcceptableLinearError << " pixels" << std::endl;
     ASSERT_GE(Solves.size(), 0);
 
-    // Copy ID of all frames, which identical to the selected frame ("frameID")
-    map<int, vector<int>> IdenticalFrames;
-    for (unsigned int i = 0; i < ISM.size(); i++)
-      for (unsigned int k = 0; k < ISM.size(); k++)
+    map<int,float> framesErrors;
+    vector<float> partsErrors;
+    bool tooLargeError = false;
+    for (unsigned int i = 0; i < Frames.size(); i++)
+      for (unsigned int s = 0; s < Solves.size(); s++)
       {
-        vector<int> temp;
-        if((Frames[i]->getFrametype() == KEYFRAME))
-          if ((ISM.at(i, k) <= 0.05) && (Frames[k]->getFrametype() != KEYFRAME))
-            temp.push_back(k);
-        IdenticalFrames.emplace(pair<int, vector<int>>(i,temp));
-        temp.clear();
-      }// IdenticalFrames[i] consist ID of all lockframes, wich identical to Frames[i]  
+        if(Frames[i]->getID() == Solves[s].getFrameID())
+        {
+          Skeleton skeleton = Frames[i]->getSkeleton();
+          map<int, pair<Point2f, Point2f>> PartLocations = getPartLocations(skeleton);
+          vector<LimbLabel> Labels = Solves[s].getLabels();
+          ASSERT_EQ(PartLocations.size(), Labels.size());
+          float maxError = 0.0f;
+          for (unsigned int k = 0; k < PartLocations.size(); k++)
+          {
+            //Calculate error
+            std::pair<Point2f, Point2f> labelJointsLocation = Labels[k].getEndpoints(); // Actual current part joints locations      
+            int partID = Labels[k].getLimbID();
+            float error = getLinearError(PartLocations[partID], Labels[k]);
+            partsErrors.push_back(error);
+            if (error > maxError)
+              maxError = error;
 
-      // Compare parts from all identical frames
-      float AcceptableError = 2; // 2 pixels
-      for (unsigned int i = 0; i < IdenticalFrames.size(); i++)
-      {
-        Skeleton skeleton = Frames[i]->getSkeleton();
-        map<int, pair<Point2f, Point2f>> PartLocations = getPartLocations(skeleton);
-        for (unsigned int n = 0; n < IdenticalFrames[i].size(); n++)
-          for (unsigned int k = 0; k < Solves.size(); k++)
-            if (Solves[k].getFrameID() == IdenticalFrames[i][n])
-              {
-                vector<LimbLabel> Labels = Solves[k].getLabels();
-                //Compare all parts from current lockframe and root frame
-                for (unsigned int t = 0; t < Labels.size(); t++)
-                 {
-                   Point2f l0, l1; // Actual current part joints locations
-                   Labels[t].getEndpoints(l0, l1);
-                   int partID = Labels[t].getLimbID();
+            //Compare            
+            if (error > AcceptableLinearError)
+            {
+              tooLargeError = true;
+              std::cout << "LockframeID = " << Frames[i]->getID() << ", PartID = " << partID << ", Error = " << round(error) << "(pixels)" << std::endl;
+            }
+            
+          }
+        framesErrors.emplace(Frames[i]->getID(), maxError);
+      }
+    }
 
-                   Point2f p0, p1; // Expected current part joints locations
-                   p0 = PartLocations[partID].first;// [t]
-                   p1 = PartLocations[partID].second;// [t]
+    //cout << "partsErrors = " << partsErrors << endl;
+    int framesSolved = 0, partsFound = 0;
+    for (unsigned int i = 0; i < partsErrors.size(); i++)
+      if (partsErrors[i] <= AcceptableLinearError)
+        partsFound++;
+    for(auto error = framesErrors.begin(); error != framesErrors.end(); ++error)
+      if(error->second <= AcceptableLinearError)
+        framesSolved++;
 
-                   Point2f delta0 = l0 - p0;
-                   Point2f  delta1 = l1 - p1;
-                   float error_A = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
-                   delta0 = l0 - p1;
-                   delta1 = l1 - p0;
-                   float error_B = max(sqrt(pow(delta0.x, 2) + pow(delta0.y, 2)), sqrt(pow(delta1.x, 2) + pow(delta1.y, 2)));
-                   float error = min(error_A, error_B); // Distance between ideal body part and label
-                   EXPECT_LE(error, AcceptableError) << "RootFrameID = " << i << ", LockframeID = " << IdenticalFrames[i][n] << ", PartID = " << partID << ", Error = " << error << "(pixels)" << endl;
-                }
-              }
-        }
+    std::cout << (static_cast<float>(partsFound) / static_cast<float>(partsErrors.size())) << "% of the body parts was found\n";
+    std::cout << static_cast<float>(framesSolved) / static_cast<float>(framesErrors.size()) << "% of the sequence was solved correctly\n";
+    EXPECT_FALSE(tooLargeError);
   }
 
    //Copyed from: http://www.juergenwiki.de/work/wiki/doku.php?id=public:hog_descriptor_computation_and_visualization

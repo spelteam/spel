@@ -61,14 +61,20 @@ int main (int argc, char **argv)
     }
     vector <Frame*> vFrames = projectLoader.getFrames();
     Sequence seq(0, "test", vFrames);
+    cout << "Frames.size = " << vFrames.size() << endl;
+    string LogFileName = outDirectory + "_Solver_Log.txt";
+    ofstream logFile(LogFileName);
+    ofstream* logStream = &logFile;//&cout
 
+    long int t0, t1;
     //=============================================
     // Testing _Solver class
 
     // Set parameters
     map <string, float> params; //use the default params
+    SpelObject::setDebugLevel(1);
     params.emplace("debugLevel", 1); //set the debug setting to highest (0,1,2,3)
-
+    
     params.emplace("useCSdet", 0.0f);
     params.emplace("useHoGdet", 1.0f);
     params.emplace("useSURFdet", 0.0f);
@@ -82,35 +88,32 @@ int main (int argc, char **argv)
     params.emplace("maxFrameHeight", seq.getFrame(0)->getMask().size().height);
 
     // Create ISM
-    std::cout << "\nCreate ISM\n";
-    long int t0 = clock();
+    /*
+    *logStream << "\nCreate ISM\n";
+    t0 = clock();
     ImagePixelSimilarityMatrix* M = new ImagePixelSimilarityMatrix();
     M->buildImageSimilarityMatrix(vFrames, 0, 0, false, false);
-    long int t1 = clock();
+    t1 = clock();
     t1 = (t1 - t0) * 1000 / CLOCKS_PER_SEC;
-    cout << "ISM creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
-
-    std::cout << std::endl;
+    *logStream << "ISM creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl<< endl;
+    //M->write("tempSolverTest.ism");*/
 
     // Calculate interpolation
-    if (useVisualization)
-    {
-      t0 = clock();
-      //seq.computeInterpolation(params);
-      //vFrames = seq.getFrames();
-      clearSkeletons(vFrames);
-      //interpolate2(vFrames);
-      //propagateKeyFrames(vFrames,M, 0.55f);
+    t0 = clock();
+    clearSkeletons(vFrames);
+    /*seq.estimateUniformScale(params);
+    seq.computeInterpolation(params);*/
+    /*interpolate2(vFrames);
+    propagateKeyFrames(vFrames, M, 0.55f);
+    interpolate3(vFrames, M);*/
+    std::vector<vector<Frame*>> slices = _Solver::createSlices(vFrames);
+    for (uint32_t i = 0; i < slices.size(); i++)
+      if (slices[i].size() < 13)
+        interpolate2(slices[i]);
+    seq.setFrames(vFrames);
+    t1 = clock();
+    *logStream << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
 
-      interpolate3(vFrames, M);
-      std::vector<vector<Frame*>> slices = _Solver::createSlices(vFrames);
-      for(uint32_t i = 0; i < slices.size(); i++)
-        if (slices[i].size() < 11)
-          interpolate2(slices[i]);
-      t1 = clock();
-      cout << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
-    }
-    
     // Put masks
     if (useVisualization)
     for (int i = 0; i < vFrames.size(); i++)
@@ -143,15 +146,15 @@ int main (int argc, char **argv)
     }
 
     // Run _Solver
-    cout << "Testing _Solver\n";
-    clearSkeletons(vFrames);
-    Sequence seqi2(0, "", vFrames);
+    *logStream << "Testing _Solver\n";
+
     _Solver _solver;
+    _solver.setLogStream(logStream);
     t0 = clock();
-    std::vector<Solvlet> seqSolves = _solver.solve(seqi2, params);
+    std::vector<Solvlet> seqSolves = _solver.solve(seq, params);
     t1 = clock();
     t1 = (t1 - t0)*1000 / CLOCKS_PER_SEC;
-    cout << "Sequence solving time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;
+    *logStream << "Sequence solving time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;
 
     // Put solves
     if (useVisualization)
@@ -176,7 +179,8 @@ int main (int argc, char **argv)
     }
 
     // Put "toSkeleton()"
-    vFrames = seqi2.getFrames();
+    vFrames.clear();
+    vFrames = seq.getFrames();
     if (useVisualization)
     for (int i = 0; i < vFrames.size(); i++)    
     {
@@ -210,7 +214,9 @@ int main (int argc, char **argv)
     //=============================================
     //draw the solution
 
-    std::cout << "Solves size: " << seqSolves.size() << std::endl;
+    DebugMessage("Log file:\n" + LogFileName, 1);
+    *logStream << "Solves size: " << seqSolves.size() << std::endl;
+    logFile.close();
 
     for(uint32_t i = 0; i < seqSolves.size(); i++)
     {
