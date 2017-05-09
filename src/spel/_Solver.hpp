@@ -125,11 +125,14 @@ namespace SPEL
 
     static std::vector<std::vector<Frame*>> createSlices(std::vector<Frame*> &frames);   
     void setLogStream(std::ostream * logStream);
+    long int getTrainTime();
+    long int getDetectTime();
     
   private:
     std::vector<Detector*> detectors;
     std::vector<std::string> detectorsNames;
-
+    long int trainTime;
+    long int detectTime;
     std::ostream * LogStream;
   };
 }

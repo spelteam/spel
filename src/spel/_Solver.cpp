@@ -796,6 +796,8 @@ namespace SPEL
     IndexedSkeletonModel *indexedSkeleton = new IndexedSkeletonModel(pattern);
 
     // Solving
+    trainTime = 0;
+    detectTime = 0;
     frameSolver fsolver(indexedSkeleton);
     fsolver.setLogStream(LogStream);
     if (indexedSkeleton->size() > 0)
@@ -910,12 +912,15 @@ namespace SPEL
       detectorsNames.push_back("SURFDetector2");
     }
 
+    //Solving
+    trainTime = 0;
+    detectTime = 0;
     std::vector<Solvlet> Solves;
     DebugMessage("Slices count: " + std::to_string(slices.size()),1);
     for (int q = 0; q < slices.size(); q++)
     {
       DebugMessage("Solving slice " + std::to_string(q), 1);
-      //std::cout << "Solving slice " << q << std::endl;
+      *LogStream << "\nSolving slice " << q << std::endl;
       int m = slices[q].size();
       std::vector<std::map<uint32_t, std::vector<LimbLabel>>> sliceLabels(m);
 
@@ -959,7 +964,6 @@ namespace SPEL
       while (!sliceSolved && iterations < 30000)//IdleIterations < (2*m)
       {
         iterations++;
-        //std::cout << iterations << std::endl;
         //Search a bad frame
         double maxScore = 0.0;
         int temp = 0;
@@ -969,21 +973,20 @@ namespace SPEL
             temp = i;
             maxScore = fsolvers[i]->getSkeletonScore();		
           }
-        //std::cout << "Slice " << q << " badFrameIndex =  " << temp << " Score = " << maxScore << std::endl;
         if (temp != 0)
         {
           if (temp == badSkeleton || fsolvers[temp]->isSolved())
           {
             ignored[temp] = true;
-            DebugMessage("Idle iteration on frame " + std::to_string(badSkeleton), 1);
-            //std::cout << iterations << ". Idle iteration on slice[" << q <<"]->frame[" << temp << "]" << std::endl;
+            DebugMessage("Idle iteration on frame " + std::to_string(slices[q][badSkeleton]->getID()), 1);
+            *LogStream << iterations << ". Idle iteration on frame " << slices[q][badSkeleton]->getID() << " Score = "<< maxScore << std::endl;
           }
           else
           {
             badSkeleton = temp;
-            DebugMessage("Iteration on frame " + std::to_string(badSkeleton), 1);
+            DebugMessage("Iteration on frame " + std::to_string(slices[q][badSkeleton]->getID()), 1);
             fsolvers[badSkeleton]->singleIteration();
-            //std::cout << iterations << ". Iteration on slice[" << q <<"]->frame[" << temp << "]" << std::endl;
+            *LogStream << iterations << ". Iteration on frame " << slices[q][badSkeleton]->getID() << " Score = "<< maxScore << std::endl;
           }      
         }
         if(temp == 0)
@@ -992,7 +995,7 @@ namespace SPEL
           if(IdleIterations >= (m-2) )
           {
             sliceSolved = true;
-            //std::cout << "Slice " << q << " Solved, maxScore = " << maxScore << std::endl;
+            *LogStream << "Slice " << q << " Solved, maxScore = " << maxScore << std::endl;
           }          
           for (int i = 0; i < m; i++)
             if (slices[q][i]->getFrametype() != KEYFRAME)
@@ -1002,7 +1005,7 @@ namespace SPEL
             }       
         }
       }
-      DebugMessage("Iterations count: " + std::to_string(iterations), 1);
+      DebugMessage("Iterations count: " + std::to_string(iterations), 1);    
 
       for (int i = 0; i < m; i++)
       {
@@ -1011,7 +1014,7 @@ namespace SPEL
           Skeleton temp = fsolvers[i]->getShiftedLabelsSkeleton(skeleton);
           temp.setName("Solve.toSkeleton");
           slices[q][i]->setSkeleton(temp);
-          std::cout<< slices[q][i]->getSkeletonPtr()->getName() << std::endl;
+          *LogStream << "Solve" << slices[q][i]->getID() << ".toSkeleton" << std::endl;
           Solves.push_back(fsolvers[i]->getSolve(sliceLabels[i]));        
         }
         delete fsolvers[i];
@@ -1035,6 +1038,7 @@ namespace SPEL
         t0 = clock();
         detectors[i]->train(slice, params);
         t1 = clock();
+        trainTime += t1 - t0;
         *LogStream << " time = " << spelHelper::clock_to_ms(t1 - t0) << "ms - Ok\n";
       }
   }
@@ -1056,6 +1060,7 @@ namespace SPEL
       t0 = clock();
       LimbLabels = detectors[d]->detect(frame, params, LimbLabels);
       t1 = clock();
+      detectTime += t1 - t0;
       int labelsCount = 0;
       for (int l = 0; l < LimbLabels.size(); l++)
         labelsCount += LimbLabels[l].size();
@@ -1093,6 +1098,14 @@ namespace SPEL
   void _Solver::setLogStream(std::ostream * logStream)
   {
     LogStream = logStream;
+  }
+  long int _Solver::getTrainTime()
+  {
+    return trainTime;
+  }
+  long int _Solver::getDetectTime()
+  {
+    return detectTime;
   }
 
   void _Solver::emplaceDefaultParameters(std::map<std::string, float> &params) const

@@ -153,8 +153,25 @@ int main (int argc, char **argv)
     t0 = clock();
     std::vector<Solvlet> seqSolves = _solver.solve(seq, params);//solveGlobal(seq, params);
     t1 = clock();
-    t1 = (t1 - t0)*1000 / CLOCKS_PER_SEC;
+    float trainFraction = round(10000.0*(static_cast<float>(_solver.getTrainTime()) / static_cast<float>(t1 - t0)))/100.0;
+    float detectFraction = round(10000.0*(static_cast<float>(_solver.getDetectTime()) / static_cast<float>(t1 - t0)))/100.0;
+    float solveFraction = 100.0 - trainFraction - detectFraction;
+
+    t1 = spelHelper::clock_to_ms(t1 - t0);
+    *logStream << "Sequence siolved" << std::endl;
+    *logStream << "Solves size: " << seqSolves.size() << std::endl;
+    DebugMessage("Sequence solving time = " + std::to_string(t1) + " ms = " + std::to_string(t1 / 1000) + "s", 1);
     *logStream << "Sequence solving time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;
+    DebugMessage("Average solving speed = " + std::to_string(t1 / seqSolves.size()) + "ms/frame", 1);
+    *logStream << "Average solving speed = " << t1 / seqSolves.size() << "ms/frame" << std::endl;
+    DebugMessage("\nTrain time = " + to_string(trainFraction) + "%", 1);
+    *logStream << "Train time = " << trainFraction << "%" << std::endl;
+    DebugMessage("\nDetect time = " + to_string(detectFraction) + "%", 1);
+    *logStream << "Detect time = " << detectFraction << "%" << std::endl;
+    DebugMessage("\nSolve time = " + to_string(solveFraction) + "%", 1);
+    *logStream << "Solve time = " << solveFraction << "%" << std::endl;
+    DebugMessage("Log file:\n" + LogFileName, 1);
+    logFile.close();
 
     // Put solves
     if (useVisualization)
@@ -213,10 +230,6 @@ int main (int argc, char **argv)
 
     //=============================================
     //draw the solution
-
-    DebugMessage("Log file:\n" + LogFileName, 1);
-    *logStream << "Solves size: " << seqSolves.size() << std::endl;
-    logFile.close();
 
     for(uint32_t i = 0; i < seqSolves.size(); i++)
     {
