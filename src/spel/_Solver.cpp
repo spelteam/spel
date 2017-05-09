@@ -945,6 +945,7 @@ namespace SPEL
         fsolvers[i]->singleIteration();
 
       // Iterations
+      bool sliceSolved = false;
       int badSkeleton = 1;
       long int iterations = 0;
       long int IdleIterations = 0;
@@ -955,35 +956,51 @@ namespace SPEL
           ignored[i] = true;
           fsolvers[i]->setSolved(true);
         }
-
-      while (IdleIterations < (2*m) && iterations < 30000)
+      while (!sliceSolved && iterations < 30000)//IdleIterations < (2*m)
       {
         iterations++;
         //std::cout << iterations << std::endl;
         //Search a bad frame
         double maxScore = 0.0;
-        int temp = 1;
-        for(int i = 0; i < m; i++)
+        int temp = 0;
+        for(int i = 1; i < m - 1; i++)
           if(!ignored[i] && fsolvers[i]->getSkeletonScore() > maxScore)
           {
             temp = i;
-            maxScore = fsolvers[i]->getSkeletonScore();
+            maxScore = fsolvers[i]->getSkeletonScore();		
           }
-        if (temp == badSkeleton || fsolvers[badSkeleton]->isSolved())
+        //std::cout << "Slice " << q << " badFrameIndex =  " << temp << " Score = " << maxScore << std::endl;
+        if (temp != 0)
         {
-          ignored[temp] = true;
-          IdleIterations++;
-          DebugMessage("Idle iteration on frame " + std::to_string(badSkeleton), 1);
-          //std::cout << iterations << ". Idle iteration on frame " << temp << std::endl;
+          if (temp == badSkeleton || fsolvers[temp]->isSolved())
+          {
+            ignored[temp] = true;
+            DebugMessage("Idle iteration on frame " + std::to_string(badSkeleton), 1);
+            //std::cout << iterations << ". Idle iteration on slice[" << q <<"]->frame[" << temp << "]" << std::endl;
+          }
+          else
+          {
+            badSkeleton = temp;
+            DebugMessage("Iteration on frame " + std::to_string(badSkeleton), 1);
+            fsolvers[badSkeleton]->singleIteration();
+            //std::cout << iterations << ". Iteration on slice[" << q <<"]->frame[" << temp << "]" << std::endl;
+          }      
         }
-        else
+        if(temp == 0)
         {
-          badSkeleton = temp;
-          ignored.clear();
-          DebugMessage("Iteration on frame " + std::to_string(badSkeleton), 1);
-          fsolvers[badSkeleton]->singleIteration();
-          //std::cout << iterations << ". Iteration on frame" << temp << std::endl;
-        }          
+          IdleIterations++;
+          if(IdleIterations >= (m-2) )
+          {
+            sliceSolved = true;
+            //std::cout << "Slice " << q << " Solved, maxScore = " << maxScore << std::endl;
+          }          
+          for (int i = 0; i < m; i++)
+            if (slices[q][i]->getFrametype() != KEYFRAME)
+            {
+              ignored[i] = false;
+              fsolvers[i]->setSolved(false);
+            }       
+        }
       }
       DebugMessage("Iterations count: " + std::to_string(iterations), 1);
 
@@ -991,17 +1008,17 @@ namespace SPEL
       {
         if (slices[q][i]->getFrametype() != KEYFRAME)
         {
-          Solves.push_back(fsolvers[i]->getSolve(sliceLabels[i]));
           Skeleton temp = fsolvers[i]->getShiftedLabelsSkeleton(skeleton);
           temp.setName("Solve.toSkeleton");
           slices[q][i]->setSkeleton(temp);
+          std::cout<< slices[q][i]->getSkeletonPtr()->getName() << std::endl;
+          Solves.push_back(fsolvers[i]->getSolve(sliceLabels[i]));        
         }
-
-
         delete fsolvers[i];
       }
       fsolvers.clear();         
     }
+    seq.setFrames(frames);
     delete pattern;
 
     return Solves;

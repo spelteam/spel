@@ -196,7 +196,7 @@ int main (int argc, char **argv)
       else
       {
         float y = image.size().height;
-        cv::putText(image, "Solve.toSkeleton", Point2f(20.0f, 30.0f), 0, 1.0f, color, 4, 1);
+        cv::putText(image, vFrames[i]->getSkeletonPtr()->getName(), Point2f(20.0f, 30.0f), 0, 1.0f, color, 4, 1);//"Solve.toSkeleton"
         if (params.at("useHoGdet") > 0.01f) cv::putText(image, "used HogDetector", Point2f(20.0f, y - 30.0f), 0, 0.7f, color, 2, 1);
         if (params.at("useCSdet") > 0.01f) cv::putText(image, "used ColorHistDetector", Point2f(20.f, y - 60.0f), 0, 0.7f, color, 2, 1);
         if (params.at("useSURFdet") > 0.01f) cv::putText(image, "used  SURF2Detector", Point2f(20.0f, y - 90.0f), 0, 0.7f, color, 2, 1);
