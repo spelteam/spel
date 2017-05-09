@@ -4,6 +4,8 @@ notifications:
   - provider: Email
     to:
       - lestat.de.lionkur@gmail.com
+      - mfastovets@gmail.com
+      - nickd470@gmail.com
     on_build_success: true
     on_build_failure: true
 
