@@ -30,14 +30,19 @@ int main (int argc, char **argv)
       return -1;
     }
     string outDirectory = "";
-    bool useVisualization = false;
+    bool useVisualization = true;
+    outDirectory = argv[2];
+    if (outDirectory[outDirectory.size()] != '/')
+      outDirectory += "/";
+    ProjectLoader::CreateDirectorySystemIndependent(outDirectory);
+
+    std::string solveFunction = "solve";
     if (argc > 3)
     {
-      outDirectory = argv[2];
-      if (outDirectory[outDirectory.size()] != '/')
-        outDirectory += "/";
-      ProjectLoader::CreateDirectorySystemIndependent(outDirectory);
-      useVisualization = true;
+      string s = argv[3];
+      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+      if(s != "solve")
+        solveFunction = "solveGlobal";
     }
 
     string curFolder = argv[1];
@@ -115,7 +120,7 @@ int main (int argc, char **argv)
     *logStream << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
 
     // Put masks
-    if (useVisualization)
+    /*if (useVisualization)
     for (int i = 0; i < vFrames.size(); i++)
     {
       cv::Mat temp = vFrames[i]->getMask().clone();
@@ -123,10 +128,10 @@ int main (int argc, char **argv)
       putSkeletonMask(temp, skeleton, cv::Size(0, 0), 128);
       imwrite(outDirectory + "mask" + to_string(i, 3) + ".jpg", temp);
       temp.release();
-    }
+    }*/
 
     // Put interpolation   
-    if (useVisualization)
+    /*if (useVisualization)
     for (int i = 0; i < vFrames.size(); i++)
     {
       cv::Mat image = vFrames[i]->getImage();
@@ -143,15 +148,20 @@ int main (int argc, char **argv)
 
       imwrite(outDirectory + "int" + to_string(i, 3) + ".jpg", image);
       image.release();
-    }
+    }*/
 
     // Run _Solver
-    *logStream << "Testing _Solver\n";
+    *logStream << "Testing _Solver." << solveFunction << std::endl;
+    DebugMessage("Testing _Solver." + solveFunction, 1);
 
     _Solver _solver;
     _solver.setLogStream(logStream);
+    std::vector<Solvlet> seqSolves;
     t0 = clock();
-    std::vector<Solvlet> seqSolves = _solver.solve(seq, params);//solveGlobal(seq, params);
+    if(solveFunction == "solveGlobal")
+      seqSolves = _solver.solveGlobal(seq, params);
+    else
+      seqSolves = _solver.solve(seq, params);
     t1 = clock();
     float trainFraction = round(10000.0*(static_cast<float>(_solver.getTrainTime()) / static_cast<float>(t1 - t0)))/100.0;
     float detectFraction = round(10000.0*(static_cast<float>(_solver.getDetectTime()) / static_cast<float>(t1 - t0)))/100.0;
