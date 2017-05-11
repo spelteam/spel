@@ -68,6 +68,8 @@ namespace SPEL
     void setInterframeDistances(int PartID);
     double getInterframeDistance(int PartID, int isChildJoint);
     double getSkeletonScore();
+    float getBadPartScore();
+    int findBadPart();
     void recalculateAdjacentsLabels(int partID);
     std::vector<cv::Point2f> getAvgJointsLocation(int partID);   
     bool initialize(std::map<uint32_t, std::vector<LimbLabel>> limbLabels);

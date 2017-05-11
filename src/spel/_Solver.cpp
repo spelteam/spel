@@ -361,12 +361,35 @@ namespace SPEL
     return skeletonScore;
   }
 
+  float frameSolver::getBadPartScore()
+  {
+    return badPartScore;
+  }
+
+  int  frameSolver::findBadPart()
+  {
+    skeletonScore = 0.0f;
+    badPartID = 0;
+    badPartScore = 0.0f;
+    for (int i = 0; i < SkeletonLabelsIndexes.size(); i++)       
+    {
+      if (!ignored[i])
+        if (SkeletonLabelsScores[i] > badPartScore)
+        {
+          badPartScore = SkeletonLabelsScores[i];
+          badPartID = i;    
+        }		
+      skeletonScore = skeletonScore + SkeletonLabelsScores[i];
+    }
+
+    return badPartID;
+  }
+
   // Initialization (create first approximation)
   bool frameSolver::initialize(std::map<uint32_t, std::vector<LimbLabel>> limbLabels)
   {
     if (limbLabels.size() != m_pattern->size())
       return false;
-
 
     refresh();
     /*labels =*/ prepareLimbLabels(limbLabels);
@@ -387,6 +410,7 @@ namespace SPEL
       SkeletonLabelsScores[i] = labelScore(i, currentLabelIndex);
       skeletonScore = skeletonScore + SkeletonLabelsScores[i];
     }
+    findBadPart();
 
     return true;
   }
@@ -395,24 +419,7 @@ namespace SPEL
   {
     iterations++;
     //*LogStream << std::endl << "Iteration " << iterations << ":" << std::endl;
-
     //oldSkeletonScore = skeletonScore;
-    skeletonScore = 0.0f;
-    badPartID = 0;
-    badPartScore = 0.0f;
-
-    // Searth a bad label
-    for (int i = 0; i < SkeletonLabelsIndexes.size(); i++)
-      if(!ignored[i])    
-      {
-        int currentLabelIndex = SkeletonLabelsIndexes[i];
-        if (SkeletonLabelsScores[i] > badPartScore)
-        {
-          badPartScore = SkeletonLabelsScores[i];
-          badPartID = i;    
-        }		
-        skeletonScore = skeletonScore + SkeletonLabelsScores[i];
-      }
     //*LogStream << "  bad partID = " << badPartID << std::endl;
 
     // Searching new label for the bad part
@@ -448,11 +455,20 @@ namespace SPEL
 
       setInterframeDistances(badPartID);
       recalculateAdjacentsLabels(badPartID);
-      if(neighborFrameSolvers[0] != 0)
+      if (neighborFrameSolvers[0] != 0)
+      {
         neighborFrameSolvers[0]->recalculateAdjacentsLabels(badPartID);
+        if(neighborFrameSolvers[0]->isSolved() != true)
+          neighborFrameSolvers[0]->findBadPart();
+      }
       if (neighborFrameSolvers[1] != 0)
+      {
         neighborFrameSolvers[1]->recalculateAdjacentsLabels(badPartID);
-    }    
+        if (neighborFrameSolvers[1]->isSolved() != true)
+          neighborFrameSolvers[1]->findBadPart();
+      }
+    }   
+    findBadPart(); 
   }
 
   // Recalculation new and adjusted labels scores
@@ -861,7 +877,6 @@ namespace SPEL
 
       *LogStream << "Slices[" << q << "] solved\n";
     }
-
     delete indexedSkeleton;
 
     return solves;
@@ -968,25 +983,27 @@ namespace SPEL
         double maxScore = 0.0;
         int temp = 0;
         for(int i = 1; i < m - 1; i++)
-          if(!ignored[i] && fsolvers[i]->getSkeletonScore() > maxScore)
+          if(!ignored[i] && fsolvers[i]->getBadPartScore() > maxScore)//getSkeletonScore()
           {
             temp = i;
-            maxScore = fsolvers[i]->getSkeletonScore();		
+            maxScore = fsolvers[i]->getBadPartScore();//getSkeletonScore() 	
           }
         if (temp != 0)
         {
           if (temp == badSkeleton || fsolvers[temp]->isSolved())
           {
             ignored[temp] = true;
-            DebugMessage("Idle iteration on frame " + std::to_string(slices[q][badSkeleton]->getID()), 1);
-            *LogStream << iterations << ". Idle iteration on frame " << slices[q][badSkeleton]->getID() << " Score = "<< maxScore << std::endl;
+            DebugMessage("Idle iteration on frame " + std::to_string(slices[q][temp]->getID()), 1);
+            *LogStream << iterations << ". Idle iteration on frame " << slices[q][temp]->getID() << " BadPartScore = "
+              << fsolvers[temp]->getBadPartScore() << " SkeletonSkore = " << fsolvers[temp]->getSkeletonScore() << std::endl;
           }
           else
           {
             badSkeleton = temp;
             DebugMessage("Iteration on frame " + std::to_string(slices[q][badSkeleton]->getID()), 1);
             fsolvers[badSkeleton]->singleIteration();
-            *LogStream << iterations << ". Iteration on frame " << slices[q][badSkeleton]->getID() << " Score = "<< maxScore << std::endl;
+            *LogStream << iterations << ". Iteration on frame " << slices[q][badSkeleton]->getID() << " BadPartScore = "
+              << fsolvers[badSkeleton]->getBadPartScore() << " SkeletonScore = " << fsolvers[badSkeleton]->getSkeletonScore() << std::endl;
           }      
         }
         if(temp == 0)
@@ -1099,10 +1116,12 @@ namespace SPEL
   {
     LogStream = logStream;
   }
+
   long int _Solver::getTrainTime()
   {
     return trainTime;
   }
+
   long int _Solver::getDetectTime()
   {
     return detectTime;
