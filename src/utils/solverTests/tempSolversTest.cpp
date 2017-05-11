@@ -168,7 +168,7 @@ int main (int argc, char **argv)
     float solveFraction = 100.0 - trainFraction - detectFraction;
 
     t1 = spelHelper::clock_to_ms(t1 - t0);
-    *logStream << "Sequence siolved" << std::endl;
+    *logStream << "Sequence solved" << std::endl;
     *logStream << "Solves size: " << seqSolves.size() << std::endl;
     DebugMessage("Sequence solving time = " + std::to_string(t1) + " ms = " + std::to_string(t1 / 1000) + "s", 1);
     *logStream << "Sequence solving time = " << t1 << " ms = " << t1 / 1000 << "s" << endl;

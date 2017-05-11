@@ -373,13 +373,13 @@ namespace SPEL
     badPartScore = 0.0f;
     for (int i = 0; i < SkeletonLabelsIndexes.size(); i++)       
     {
+      skeletonScore = skeletonScore + SkeletonLabelsScores[i];
       if (!ignored[i])
         if (SkeletonLabelsScores[i] > badPartScore)
         {
           badPartScore = SkeletonLabelsScores[i];
           badPartID = i;    
         }		
-      skeletonScore = skeletonScore + SkeletonLabelsScores[i];
     }
 
     return badPartID;
@@ -469,6 +469,8 @@ namespace SPEL
       }
     }   
     findBadPart(); 
+    /*if(idleIterations > m_pattern->size() || iterations > iterationsLimit)
+      solved = true;*/
   }
 
   // Recalculation new and adjusted labels scores
@@ -966,9 +968,10 @@ namespace SPEL
 
       // Iterations
       bool sliceSolved = false;
-      int badSkeleton = 1;
+      int badSkeleton = -1;
       long int iterations = 0;
       long int IdleIterations = 0;
+      long int SliceIterations = 0;
       std::vector<bool> ignored(m, false);
       for (int i = 0; i < m; i++)
         if (slices[q][i]->getFrametype() == KEYFRAME)
@@ -983,44 +986,50 @@ namespace SPEL
         double maxScore = 0.0;
         int temp = 0;
         for(int i = 1; i < m - 1; i++)
-          if(!ignored[i] && fsolvers[i]->getBadPartScore() > maxScore)//getSkeletonScore()
+          if(!ignored[i] && !fsolvers[i]->isSolved() && fsolvers[i]->getBadPartScore() > maxScore)//getSkeletonScore()
           {
             temp = i;
             maxScore = fsolvers[i]->getBadPartScore();//getSkeletonScore() 	
           }
         if (temp != 0)
         {
-          if (temp == badSkeleton || fsolvers[temp]->isSolved())
-          {
-            ignored[temp] = true;
+          /*if (fsolvers[temp]->isSolved())//temp == badSkeleton || fsolvers[temp]->isSolved()
+          { 
+            //ignored[temp] = true;//not optimal, for debugging only
             DebugMessage("Idle iteration on frame " + std::to_string(slices[q][temp]->getID()), 1);
             *LogStream << iterations << ". Idle iteration on frame " << slices[q][temp]->getID() << " BadPartScore = "
-              << fsolvers[temp]->getBadPartScore() << " SkeletonSkore = " << fsolvers[temp]->getSkeletonScore() << std::endl;
+              << fsolvers[temp]->getBadPartScore() << " SkeletonScore = " << fsolvers[temp]->getSkeletonScore() << std::endl;
           }
-          else
+          else*/
           {
+            if (temp == badSkeleton)
+              IdleIterations++;
+            else 
+              IdleIterations = 0;
             badSkeleton = temp;
-            DebugMessage("Iteration on frame " + std::to_string(slices[q][badSkeleton]->getID()), 1);
-            fsolvers[badSkeleton]->singleIteration();
-            *LogStream << iterations << ". Iteration on frame " << slices[q][badSkeleton]->getID() << " BadPartScore = "
-              << fsolvers[badSkeleton]->getBadPartScore() << " SkeletonScore = " << fsolvers[badSkeleton]->getSkeletonScore() << std::endl;
+            DebugMessage("Iteration on frame " + std::to_string(slices[q][temp]->getID()), 1);
+            fsolvers[temp]->singleIteration();
+            *LogStream << iterations << ". Iteration on frame " << slices[q][temp]->getID() << " BadPartScore = "
+              << fsolvers[temp]->getBadPartScore() << " SkeletonScore = " << fsolvers[temp]->getSkeletonScore() << std::endl;
+            if (IdleIterations >= 4*pattern->size())//!?
+              ignored[temp] = true;
           }      
         }
         if(temp == 0)
         {
-          IdleIterations++;
-          if(IdleIterations >= (m-2) )
+          SliceIterations++;
+          if(SliceIterations >= (m-2) )
           {
-            sliceSolved = true;
-            *LogStream << "Slice " << q << " Solved, maxScore = " << maxScore << std::endl;
-          }          
+            sliceSolved = true;      
+            *LogStream << "Slice " << q << " Solved" << std::endl;
+          }
           for (int i = 0; i < m; i++)
             if (slices[q][i]->getFrametype() != KEYFRAME)
             {
-              ignored[i] = false;
+              //ignored[i] = false;
               fsolvers[i]->setSolved(false);
             }       
-        }
+        }      
       }
       DebugMessage("Iterations count: " + std::to_string(iterations), 1);    
 
