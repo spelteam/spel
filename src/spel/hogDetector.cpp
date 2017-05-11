@@ -213,18 +213,16 @@ namespace SPEL
       COMMON_HOG_DETECTOR_PARAMETERS::USE_GRAY_IMAGES().name()), 0.0f) == 0;
 
     auto bFirstConversion = true;
-    const auto &handler = [&](Frame *frame, float scale)
-    {
+    Detector::train(frames, params, [&](auto frame, const auto scale) {
       if (bFirstConversion)
       {
         m_partSize = getMaxBodyPartHeightWidth(m_blockSize, scale);
         bFirstConversion = false;
       }
 
-      m_partModels.insert(std::pair <uint32_t, std::map <uint32_t, PartModel>>(
-        frame->getID(), computeDescriptors(frame)));
-    };
-    Detector::train(frames, params, handler);
+      m_partModels.insert(std::make_pair(frame->getID(),
+        computeDescriptors(frame)));
+    });
   }
 
   std::map <uint32_t, std::vector <LimbLabel> > HogDetector::detect(

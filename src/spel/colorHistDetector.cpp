@@ -469,11 +469,10 @@ namespace SPEL
   {
     partModels.clear();
     emplaceDefaultParameters(params);
-    const auto &handler = [&](Frame *frame, float)
-    {
+
+    Detector::train(frames, params, [&](auto frame, const auto) {
       train(frame);
-    };
-    Detector::train(frames, params, handler);
+    });
   }
 
   // Returns a labels vector of possible body parts position

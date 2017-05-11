@@ -28,19 +28,13 @@ namespace SPEL
 
     emplaceDefaultParameters(params);
 
-    auto minHessian = static_cast<uint32_t> (params.at(
-      COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().name()));
+    Detector::train(frames, params, [&](auto frame, const auto) {
+      const auto minHessian = static_cast<uint32_t> (params.at(
+        COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().name()));
 
-    const auto &handler = [&](Frame* frame, float)
-    {
-      try
-      {
-        partModels.insert(std::pair <uint32_t, std::map <uint32_t, PartModel>>(
-          frame->getID(), computeDescriptors(frame, minHessian)));
-      }
-      catch (...) {}
-    };
-    Detector::train(frames, params, handler);
+      partModels.insert(std::make_pair(frame->getID(),
+        computeDescriptors(frame, minHessian)));
+    });
   }
 
   std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(

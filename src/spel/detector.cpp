@@ -550,7 +550,7 @@ namespace SPEL
 
   void Detector::train(const std::vector<Frame*>& frames, 
     std::map<std::string, float> params, 
-    const std::function<void(Frame*, float)>& handler)
+    const std::function<void(Frame*, const float)>& handler)
   {
     emplaceDefaultParameters(params);
     if (frames.size() == 0)
@@ -580,14 +580,21 @@ namespace SPEL
         frame->getFrametype() != LOCKFRAME)
         continue;
 
-      auto scale = frame->Resize(maxFrameHeight);
+      const auto scale = frame->Resize(maxFrameHeight);
 
       if (SpelObject::getDebugLevel() >= 2)
         std::cout << "Training on frame " << frame->getID() << std::endl;
 
       handler(frame, scale);
 
-      frame->UnloadAll();
+      try
+      {
+        frame->UnloadAll();
+      }
+      catch (std::exception ex)
+      {
+        DebugMessage(ex.what(), 1);
+      }
     }
   }
 

@@ -168,7 +168,7 @@ namespace SPEL
     /// <param name="handler">The handler.</param>
     void train(const std::vector <Frame*> &frames,
       std::map <std::string, float> params, 
-      const std::function<void(Frame*, float)> &handler);    
+      const std::function<void(Frame*, const float)> &handler);    
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     virtual void emplaceDefaultParameters(
