@@ -216,12 +216,12 @@ namespace SPEL
     Detector::train(frames, params, [&](auto frame, const auto scale) {
       if (bFirstConversion)
       {
-        m_partSize = getMaxBodyPartHeightWidth(m_blockSize, scale);
+        m_partSize = this->getMaxBodyPartHeightWidth(m_blockSize, scale);
         bFirstConversion = false;
       }
 
       m_partModels.insert(std::make_pair(frame->getID(),
-        computeDescriptors(frame)));
+        this->computeDescriptors(frame)));
     });
   }
 

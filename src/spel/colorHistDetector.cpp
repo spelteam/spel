@@ -471,7 +471,7 @@ namespace SPEL
     emplaceDefaultParameters(params);
 
     Detector::train(frames, params, [&](auto frame, const auto) {
-      train(frame);
+      this->train(frame);
     });
   }
 

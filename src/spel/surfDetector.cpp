@@ -33,7 +33,7 @@ namespace SPEL
         COMMON_SURF_DETECTOR_PARAMETERS::MIN_HESSIAN().name()));
 
       partModels.insert(std::make_pair(frame->getID(),
-        computeDescriptors(frame, minHessian)));
+        this->computeDescriptors(frame, minHessian)));
     });
   }
 
