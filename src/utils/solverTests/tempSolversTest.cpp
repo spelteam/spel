@@ -106,8 +106,12 @@ int main (int argc, char **argv)
     // Calculate interpolation
     t0 = clock();
     clearSkeletons(vFrames);
-    /*seq.estimateUniformScale(params);
-    seq.computeInterpolation(params);*/
+    if (solveFunction == "solveGlobal")
+    {
+      seq.estimateUniformScale(params);
+      seq.computeInterpolation(params);
+      vFrames = seq.getFrames();
+    }
     /*interpolate2(vFrames);
     propagateKeyFrames(vFrames, M, 0.55f);
     interpolate3(vFrames, M);*/
@@ -117,6 +121,7 @@ int main (int argc, char **argv)
         interpolate2(slices[i]);
     seq.setFrames(vFrames);
     t1 = clock();
+    DebugMessage("Iterpolation created - " + std::to_string(t1) + " ms", 1);
     *logStream << "Iterpolation creating time = " << t1 << " ms = " << t1 / 1000 << "s - Ok" << endl;
 
     // Put masks

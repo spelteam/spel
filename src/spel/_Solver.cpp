@@ -888,8 +888,6 @@ namespace SPEL
   std::vector<Solvlet> _Solver::solveGlobal(Sequence& seq, std::map<std::string, float> params)
   {
     //Prepare slices
-    seq.estimateUniformScale(params);
-    seq.computeInterpolation(params);
     std::vector<Frame*> frames = seq.getFrames();
     std::vector<std::vector<Frame*>> temp = createSlices(frames);
     std::vector<std::vector<Frame*>> slices;
