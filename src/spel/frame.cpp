@@ -148,7 +148,7 @@ namespace SPEL
     return m_groundPoint;
   }
 
-  void Frame::setGroundPoint(cv::Point2f groundPoint) 
+  void Frame::setGroundPoint(const cv::Point2f &groundPoint) 
   {
     m_groundPoint = groundPoint;
   }
@@ -280,7 +280,7 @@ namespace SPEL
 
   void Frame::Scale(const float factor) 
   {
-    if (m_scaleFactor != 0.0f)
+    if (spelHelper::compareFloat(m_scaleFactor, 0.0f) == 0)
       m_scaleFactor *= factor;
     else
       m_scaleFactor = factor;
@@ -306,7 +306,7 @@ namespace SPEL
 
   void Frame::AdjustScale(void) 
   {
-    if (m_scaleFactor != 0.0f)
+    if (spelHelper::compareFloat(m_scaleFactor, 0.0f) == 0)
       Scale(1.0f / m_scaleFactor);
   }
 
@@ -319,17 +319,8 @@ namespace SPEL
   {
     if (m_imagePath == path)
       return;
-    auto ext = std::string(".png");
-    auto pos = path.rfind('.');
-    if (pos != std::string::npos)
-    {
-      auto text = path.substr(pos);
-      if (!text.empty())
-        ext = text;
-    }
-    auto dst = spelHelper::getTempFileName(ext);
-    spelHelper::copyFile(dst, path);
-    m_imagePath = dst;
+
+    m_imagePath = spelHelper::getTempFileCopy(path, std::string(".png"));
   }
 
   std::string Frame::GetMaskPath(void) const 
@@ -341,17 +332,8 @@ namespace SPEL
   {
     if (m_maskPath == path)
       return;
-    auto ext = std::string(".pgm");
-    auto pos = path.rfind('.');
-    if (pos != std::string::npos)
-    {
-      auto text = path.substr(pos + 1);
-      if (!text.empty())
-        ext = text;
-    }
-    auto dst = spelHelper::getTempFileName(ext);
-    spelHelper::copyFile(dst, path);
-    m_maskPath = dst;
+    
+    m_maskPath = spelHelper::getTempFileCopy(path, std::string(".pgm"));
   }
 
   void Frame::LoadAll(void)

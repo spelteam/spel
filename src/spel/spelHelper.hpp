@@ -239,6 +239,12 @@ namespace SPEL
           f(i, j);
       return std::move(f);
     }
+
+    static std::string getFileExt(const std::string &path, 
+      const std::string &default);
+
+    static std::string getTempFileCopy(const std::string &src, 
+      const std::string &defaultExt);
   };
 
   /// <summary>

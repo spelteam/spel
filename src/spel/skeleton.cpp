@@ -5,13 +5,10 @@
 namespace SPEL
 {
   //default constructor
-  Skeleton::Skeleton(void) 
+  Skeleton::Skeleton(void) :
+    m_name("Uninitialized"),
+    m_scale(1.0f)
   {
-    /// name of the specific instance of
-    m_name = "Uninitialized";
-    /// tree of bodyparts is component of the body model
-    /// scale factor, used for scaling
-    m_scale = 1.0f;
   }
 
   Skeleton::Skeleton(const Skeleton &skeleton) 
@@ -152,7 +149,7 @@ namespace SPEL
 
   void Skeleton::infer3D(void)
   {
-    if (m_scale == 0.0f)
+    if (spelHelper::compareFloat(m_scale, 0.0f) == 0)
     {
       const auto &str = "Scale shouldn't be equal zero.";
       DebugMessage(str, 1);
@@ -163,10 +160,17 @@ namespace SPEL
 
     for (const auto& tree : m_partTree)
     {
+      const auto parent = getBodyJoint(tree.getParentJoint());
+      const auto child = getBodyJoint(tree.getChildJoint());
+      if (parent == nullptr || child == nullptr)
+      {
+        const auto &str = "Wrong skeleton structure";
+        DebugMessage(str, 1);
+        throw std::logic_error(str);
+      }
       const auto len3d = tree.getRelativeLength();
       const auto len2d = sqrt(spelHelper::distSquared(
-        getBodyJoint(tree.getParentJoint())->getImageLocation(), 
-        getBodyJoint(tree.getChildJoint())->getImageLocation()));
+        parent->getImageLocation(), child->getImageLocation()));
       //compute the difference, this must be the depth
       const auto diff = pow(len3d, 2) - pow(len2d / m_scale, 2);
       if (diff < 0)
@@ -181,6 +185,12 @@ namespace SPEL
     {
       const auto child = getBodyJoint(tree.getChildJoint());
       const auto parent = getBodyJoint(tree.getParentJoint());
+      if (parent == nullptr || child == nullptr)
+      {
+        const auto &str = "Wrong skeleton structure";
+        DebugMessage(str, 1);
+        throw std::logic_error(str);
+      }
       if (tree.getPartID() == 0) //if zero partID, we are on the root part
       {
         parent->setSpaceLocation(cv::Point3f(parent->getImageLocation().x / 

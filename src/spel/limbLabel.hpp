@@ -100,7 +100,7 @@ namespace SPEL
     std::pair<cv::Point2f, cv::Point2f> getEndpoints(void) const;
     /// <summary>Adds the score.</summary>
     /// <param name="detectionScore">The detection score.</param>
-    void addScore(Score detectionScore) ;
+    void addScore(const Score &detectionScore) ;
     /// <summary>Gets the center of the polygon.</summary>
     /// <returns>The center of the polygon.</returns>
     cv::Point2f getCenter(void) const ;
@@ -109,7 +109,7 @@ namespace SPEL
     std::vector<Score> getScores(void) const ;
     /// <summary>Sets the label scores.</summary>
     /// <param name="scores">The label scores.</param>
-    void setScores(std::vector <Score> scores) ;
+    void setScores(const std::vector <Score> &scores) ;
     /// <summary>Gets the limb label identifier.</summary>
     /// <returns>The limb label.</returns>
     int getLimbID(void) const ;
@@ -149,7 +149,7 @@ namespace SPEL
     /// Returns <c>true</c> if the limb label contains specified point. 
     /// Otherwise returns <c>false</c>.
     /// </returns>
-    bool containsPoint(cv::Point2f pt) const;
+    bool containsPoint(const cv::Point2f &pt) const;
   private:
 #ifdef DEBUG
     // Used for set isWeak to "false" in nskpsolver_tests.computeScoreCost
@@ -157,6 +157,7 @@ namespace SPEL
     // Used for set isWeak to "false" in nskpsolver_tests.evaluateSolution
     FRIEND_TEST(nskpsolverTests, evaluateSolution);
 #endif  // DEBUG
+    void CheckPolygonSize(const std::vector<cv::Point2f> &polygon) const;
     /// <summary>The limb label center</summary>
     cv::Point2f m_center;
     /// <summary>
@@ -172,6 +173,7 @@ namespace SPEL
     /// from which scores are generated)
     /// </summary>
     std::vector<cv::Point2f> m_polygon;
+    static const int m_polygon_size = 4;
     /// <summary>signify label is for an occluded limb.</summary>
     bool m_isOccluded;
   };

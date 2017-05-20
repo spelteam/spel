@@ -16,7 +16,7 @@ namespace SPEL
 {
   void spelHelper::RecalculateScoreIsWeak(std::vector <LimbLabel> &labels,
     const std::string &detectorName, const float standardDiviationTreshold)
-    
+
   {
     //@TODO: Ignore this function for now, will be modified before release
     std::vector <float> scoreValues;
@@ -62,7 +62,7 @@ namespace SPEL
   }
 
   cv::Mat spelHelper::rotateImageToDefault(const cv::Mat &imgSource,
-    const spelRECT <cv::Point2f> &initialRect, const float angle, 
+    const spelRECT <cv::Point2f> &initialRect, const float angle,
     const cv::Size &size)
   {
     auto partImage = cv::Mat(size, CV_8UC3, cv::Scalar(0, 0, 0));
@@ -78,18 +78,18 @@ namespace SPEL
         p = spelHelper::rotatePoint2D(p, newCenter, angle) + center - newCenter;
         try
         {
-          if (0.0f <= p.x && 0.0f <= p.y && p.x < width - 1.0f && 
+          if (0.0f <= p.x && 0.0f <= p.y && p.x < width - 1.0f &&
             p.y < height - 1.0f) // !!! For testing
-            if (0.0f <= x && x < size.width - 1.0f && 0.0f <= y && 
+            if (0.0f <= x && x < size.width - 1.0f && 0.0f <= y &&
               y < size.height - 1.0f) // !!! For testing
               partImage.at<cv::Vec3b>(y, x) = imgSource.at<cv::Vec3b>(
-                static_cast<int>(std::round(p.y)), 
+                static_cast<int>(std::round(p.y)),
                 static_cast<int>(std::round(p.x)));
         }
         catch (...)
         {
           std::stringstream ss;
-          ss << "Couldn't get value of indeces " << "[" << x << "][" << y << 
+          ss << "Couldn't get value of indeces " << "[" << x << "][" << y <<
             "] from indeces [" << p.x << "][" << p.y << "]";
           DebugMessage(ss.str(), 1);
           throw std::out_of_range(ss.str());
@@ -99,19 +99,18 @@ namespace SPEL
     return partImage;
   }
 
-  cv::Point2f spelHelper::round(const cv::Point2f& pt) 
+  cv::Point2f spelHelper::round(const cv::Point2f& pt)
   {
     return cv::Point2f(std::round(pt.x), std::round(pt.y));
   }
 
   spelRECT<cv::Point2f> spelHelper::round(const spelRECT<cv::Point2f>& rect)
-    
   {
     return spelRECT<cv::Point2f>(round(rect.point1), round(rect.point2),
       round(rect.point3), round(rect.point4));
   }
 
-  std::string spelHelper::getRandomStr(void) 
+  std::string spelHelper::getRandomStr(void)
   {
     static std::default_random_engine dre(static_cast<unsigned int>(time(0)));
     static std::uniform_int_distribution<int> di(0, std::numeric_limits<int>::max());
@@ -164,8 +163,8 @@ namespace SPEL
 #error "Unsupported version of OS"
 #endif
   }
-  
-  bool spelHelper::checkFileExists(const std::string &file) 
+
+  bool spelHelper::checkFileExists(const std::string &file)
   {
     std::ifstream f(file);
     return f.good();
@@ -178,7 +177,7 @@ namespace SPEL
     if (ifs.bad() || ofs.bad())
     {
       std::stringstream ss;
-      ss << "Can't copy the content of the file '" << src << 
+      ss << "Can't copy the content of the file '" << src <<
         "' to the file '" << dst << "'";
       DebugMessage(ss.str(), 1);
       throw std::out_of_range(ss.str());
@@ -188,21 +187,19 @@ namespace SPEL
     ofs.close();
   }
 
-  float spelHelper::getAngle(const cv::Point2f & j0, const cv::Point2f & j1) 
-    
+  float spelHelper::getAngle(const cv::Point2f & j0, const cv::Point2f & j1)
   {
     return spelHelper::angle2D(1.0f, 0.0f, j1.x - j0.x, j1.y - j0.y) *
       (180.0f / static_cast<float>(M_PI));
   }
 
-  float spelHelper::getAngle(const cv::Point2f & point) 
+  float spelHelper::getAngle(const cv::Point2f & point)
   {
     return spelHelper::angle2D(1.0f, 0.0f, point.x, point.y) *
       (180.0f / static_cast<float>(M_PI));
   }
 
-  float spelHelper::getAngle(const BodyJoint & j0, const BodyJoint & j1) 
-    
+  float spelHelper::getAngle(const BodyJoint & j0, const BodyJoint & j1)
   {
     return spelHelper::getAngle(j0.getImageLocation(), j1.getImageLocation());
   }
@@ -215,14 +212,35 @@ namespace SPEL
 
   long spelHelper::clock_to_ms(long t)
   {
-    return t*1000 / CLOCKS_PER_SEC;
+    return t * 1000 / CLOCKS_PER_SEC;
   }
 
-  std::string spelHelper::getGUID(void) 
+  std::string spelHelper::getFileExt(const std::string & path, 
+    const std::string &default)
+  {
+    const auto pos = path.rfind('.');
+    if (pos != std::string::npos)
+    {
+      auto text = path.substr(pos);
+      if (!text.empty())
+        return text;
+    }
+    return default;
+  }
+
+  std::string spelHelper::getTempFileCopy(const std::string & src, const std::string & defaultExt)
+  {
+    const auto dst = spelHelper::getTempFileName(spelHelper::getFileExt(src, defaultExt));
+    spelHelper::copyFile(dst, src);
+
+    return dst;
+  }
+
+  std::string spelHelper::getGUID(void)
   {
     std::string guid;
 #ifdef WINDOWS
-    UUID uuid = { };
+    UUID uuid = {};
     UuidCreate(&uuid);
     RPC_CSTR str = NULL;
     if (UuidToString(&uuid, &str) == RPC_S_OK)

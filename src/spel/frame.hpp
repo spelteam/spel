@@ -105,7 +105,7 @@ namespace SPEL
     cv::Point2f getGroundPoint(void) const ;
     /// <summary>Sets the ground point.</summary>
     /// <param name="groundPoint">The ground point.</param>
-    void setGroundPoint(cv::Point2f groundPoint) ;
+    void setGroundPoint(const cv::Point2f &groundPoint) ;
     /// <summary>Gets the frametype.</summary>
     /// <returns>The frametype.</returns>
     FRAMETYPE getFrametype(void) const ;
