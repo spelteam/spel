@@ -216,7 +216,7 @@ namespace SPEL
   }
 
   std::string spelHelper::getFileExt(const std::string & path, 
-    const std::string &default)
+    const std::string &defaultExt)
   {
     const auto pos = path.rfind('.');
     if (pos != std::string::npos)
@@ -225,7 +225,7 @@ namespace SPEL
       if (!text.empty())
         return text;
     }
-    return default;
+    return defaultExt;
   }
 
   std::string spelHelper::getTempFileCopy(const std::string & src, const std::string & defaultExt)

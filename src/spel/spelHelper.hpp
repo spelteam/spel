@@ -241,7 +241,7 @@ namespace SPEL
     }
 
     static std::string getFileExt(const std::string &path, 
-      const std::string &default);
+      const std::string &defaultExt);
 
     static std::string getTempFileCopy(const std::string &src, 
       const std::string &defaultExt);
