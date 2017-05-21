@@ -280,7 +280,7 @@ namespace SPEL
 
   void Frame::Scale(const float factor) 
   {
-    if (spelHelper::compareFloat(m_scaleFactor, 0.0f) == 0)
+    if (spelHelper::compareFloat(m_scaleFactor, 0.0f) != 0)
       m_scaleFactor *= factor;
     else
       m_scaleFactor = factor;
@@ -306,7 +306,7 @@ namespace SPEL
 
   void Frame::AdjustScale(void) 
   {
-    if (spelHelper::compareFloat(m_scaleFactor, 0.0f) == 0)
+    if (spelHelper::compareFloat(m_scaleFactor, 0.0f) != 0)
       Scale(1.0f / m_scaleFactor);
   }
 

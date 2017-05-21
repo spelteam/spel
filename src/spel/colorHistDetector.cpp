@@ -201,7 +201,7 @@ namespace SPEL
 
   float ColorHistDetector::PartModel::getAvgSampleSizeFg(void) const
   {
-    if (fgNumSamples == 0 || fgSampleSizes.size() > 0)
+    if (fgNumSamples == 0)
       return 0.0f;
 
     auto sum = 0.0f;
