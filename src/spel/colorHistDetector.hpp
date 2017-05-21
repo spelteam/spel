@@ -40,7 +40,7 @@ namespace SPEL
   /// <seealso cref="Detector" />
   class ColorHistDetector : public Detector
   {
-  protected:
+  private:
     /// <summary>
     /// Part model helper struct.
     /// </summary>
@@ -51,6 +51,8 @@ namespace SPEL
       /// </summary>
       /// <param name="_nBins">The _n bins.</param>
       PartModel(uint8_t _nBins = 8);
+
+      PartModel(const PartModel &model);
       /// <summary>
       /// Finalizes an instance of the <see cref="PartModel"/> class.
       /// </summary>
@@ -78,7 +80,7 @@ namespace SPEL
       /// <summary>Copy operator.</summary>
       /// <param name="model">The model.</param>
       /// <returns></returns>
-      PartModel &operator=(const PartModel &model) ;
+      PartModel &operator=(const PartModel &model);
       /// <summary>Calculates the factor.</summary>
       /// <returns>The factor.</returns>
       uint8_t calculateFactor(void) const;
@@ -89,17 +91,15 @@ namespace SPEL
       /// <returns>
       /// The relative frequency of the RGB-color reiteration.
       /// </returns>
-      float computePixelBelongingLikelihood(const uint8_t r, 
-        const uint8_t g, const uint8_t b) const;
+      float computePixelBelongingLikelihood(const uint8_t r, const uint8_t g, 
+        const uint8_t b) const;
       /// <summary>Sets the part histogram.</summary>
       /// <param name="partColors">The part colors.</param>
-      void setPartHistogram(
-        const std::vector <cv::Point3i> &partColors);
+      void setPartHistogram(const std::vector <cv::Point3i> &partColors);
       /// <summary>Adds the part histogram.</summary>
       /// <param name="partColors">The part colors.</param>
       /// <param name="nBlankPixels">The blank pixel count.</param>
-      void addPartHistogram(
-        const std::vector <cv::Point3i> &partColors, 
+      void addPartHistogram(const std::vector <cv::Point3i> &partColors, 
         const uint32_t nBlankPixels);
       /// <summary>Gets the foreground average sample size.</summary>
       /// <returns>The foreground average sample size.</returns>
@@ -108,17 +108,15 @@ namespace SPEL
       /// <param name="s1">The first sample.</param>
       /// <param name="s2">The second sample.</param>
       /// <returns>The foreground average sample size.</returns>
-      float getAvgSampleSizeFgBetween(const uint32_t s1,
-        const uint32_t s2) const;
+      float getAvgSampleSizeFgBetween(const size_t s1, const size_t s2) const;
       /// <summary>Matches the part histograms.</summary>
       /// <param name="partModelPrev">The previous part model.</param>
       /// <returns>The euclidian distance between two histograms.</returns>
-      float matchPartHistogramsED(
-        const PartModel &partModelPrev) const;
+      float matchPartHistogramsED(const PartModel &partModelPrev) const;
       /// <summary>Adds the background histogram.</summary>
       /// <param name="bgColors">The background colors.</param>
-      void addBackgroundHistogram(
-        const std::vector <cv::Point3i> &bgColors);
+      void addBackgroundHistogram(const std::vector <cv::Point3i> &bgColors);
+      void checknBins(void) const;
     };
   public:
     /// <summary>
@@ -128,6 +126,7 @@ namespace SPEL
     /// </summary>
     /// <param name="_nBins">The nbins.</param>
     ColorHistDetector(uint8_t _nBins = 8);
+    ColorHistDetector(const ColorHistDetector &detector);
     /// <summary>
     /// Finalizes an instance of the <see cref="ColorHistDetector"/> class.
     /// </summary>
@@ -158,6 +157,7 @@ namespace SPEL
     ColorHistDetector &operator=(const ColorHistDetector &c) ;    
   private:
 #ifdef DEBUG
+    friend class TestColorHistDetector;
     FRIEND_TEST(colorHistDetectorTest, Constructors);
     FRIEND_TEST(colorHistDetectorTest, computePixelBelongingLikelihood);
     FRIEND_TEST(colorHistDetectorTest, Operators);
@@ -221,7 +221,9 @@ namespace SPEL
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
-      std::map <std::string, float> &params) const ;
+      std::map <std::string, float> &params) const;
+    static void checknBins(const uint8_t n);
+    void checknBins(void) const;
   };
 }
 #endif  // _LIBPOSE_COLORHISTDETECTOR_HPP_
