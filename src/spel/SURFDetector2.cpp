@@ -469,7 +469,7 @@ namespace SPEL
     }
   };
 
-  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::generateLimbLabels(Skeleton &approximation) const
+  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::generateLimbLabels(Skeleton approximation) const
   {
     std::map<uint32_t, std::vector<LimbLabel>> Labels;
 
@@ -750,7 +750,11 @@ namespace SPEL
     changeParameters(params);
     std::map<uint32_t, std::vector<LimbLabel>> NewLabels;
     if (limbLabels.size() == 0)
-      NewLabels = generateLimbLabels(frame->getSkeleton());
+    {
+      Skeleton skeleton = frame->getSkeleton();
+      NewLabels = generateLimbLabels(skeleton);
+    }
+
     else
       NewLabels = limbLabels;
     NewLabels = SURFDetector2::Detect(frame, NewLabels);
