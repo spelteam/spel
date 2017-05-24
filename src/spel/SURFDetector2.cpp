@@ -469,7 +469,57 @@ namespace SPEL
     }
   };
 
-  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::Detect(Frame* frame_) const
+  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::generateLimbLabels(Skeleton &approximation) const
+  {
+    std::map<uint32_t, std::vector<LimbLabel>> Labels;
+
+    std::map<int, std::vector<cv::Point2f>> PartRects = getAllPolygons(approximation);
+    for (int id = 0; id < PartRects.size(); id++)
+    {
+      std::string partID = std::to_string(id);
+
+      // Get part polygon from current interpolationframe
+      std::vector<cv::Point2f> partPolygon = PartRects[id];
+      cv::Point2f PartCenter = getPartCenter(partPolygon);
+      float PartAngle = static_cast<float>(spelHelper::getAngle(partPolygon[0], partPolygon[1]));
+
+      // Create limbLabels
+      std::vector<LimbLabel> PartLabels;
+                
+      float partLenght = getPartLenght(partPolygon);
+      float partWidth = getPartWidth(partPolygon);
+      std::vector<cv::Point2f> LabelPolygon(4), RotatedPolygon(4);
+
+      float SearchDist = parameters.searchDistCoeff*partLenght;
+      float minStep = abs(parameters.searchStepCoeff*partWidth);
+      minStep = std::max(minStep, 2.0f);
+
+      bool negativeScore = false;
+
+
+      for (float angleShift = -parameters.minTheta; angleShift < parameters.maxTheta; angleShift += parameters.stepTheta)
+      {
+        // Rotation of the part polygon
+        float LabelAngle = PartAngle + angleShift;
+        for (int t = 0; t < LabelPolygon.size(); t++)
+          RotatedPolygon[t] = spelHelper::rotatePoint2D(partPolygon[t], PartCenter, angleShift);
+        for (float x = -SearchDist; x < SearchDist; x += minStep)
+          for (float y = -SearchDist; y < SearchDist; y += minStep)
+          {
+            // Shift label polygon
+            for (int t = 0; t < LabelPolygon.size(); t++)
+              LabelPolygon[t] = RotatedPolygon[t] + cv::Point2f(x, y);
+            cv::Point2f LabelCenter = PartCenter + cv::Point2f(x, y);
+            PartLabels.push_back(LimbLabel(id, LabelCenter, LabelAngle, LabelPolygon, std::vector<Score>(), false));
+          }	  
+      }
+      Labels.emplace(std::pair<uint32_t, std::vector<LimbLabel>> (id, PartLabels));
+    }
+
+    return Labels;
+  }
+
+  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::Detect(Frame* frame_, std::map<uint32_t, std::vector<LimbLabel>> &Labels) const
   {
     uint8_t debugLevel = 2;
     std::string detectorName = std::to_string(getID());
@@ -564,149 +614,114 @@ namespace SPEL
 
     float K = static_cast<float>(Trained.StudiedFramesID.size()); // Score coefficient
 
-    std::map<uint32_t, std::vector<LimbLabel>> Labels;
-
+    //std::map<uint32_t, std::vector<LimbLabel>> Labels;
     for (int id = 0; id < PartRects.size(); id++)
     {
       std::string partID = std::to_string(id);
-
-      if(Trained.PartKeypoints.at(id).size() == 0)
+      if (Trained.PartKeypoints.at(id).size() == 0)
         DebugMessage(" Body Part " + partID + " model is empty\n", debugLevel);
 
-      // Get part polygon from current interpolationframe
-      std::vector<cv::Point2f> partPolygon = PartRects[id];
-      cv::Point2f PartCenter = getPartCenter(partPolygon);
-      float PartAngle = static_cast<float>(spelHelper::getAngle(partPolygon[0], partPolygon[1]));
+      bool negativeScore = false;
+      int LabelsPerPart = 0;
 
-      // Create limbLabels
-      std::vector<LimbLabel> PartLabels;
-      if(Trained.PartKeypoints.at(id).size() > 0) // or " > threshold"
-      {	  
-        float partLenght = getPartLenght(partPolygon);
-        float partWidth = getPartWidth(partPolygon);
-        std::vector<cv::Point2f> LabelPolygon(4), RotatedPolygon(4);
-
-        float SearchDist = parameters.searchDistCoeff*partLenght;
-        float minStep = abs(parameters.searchStepCoeff*partWidth);
-        minStep = std::max(minStep, 2.0f);
-
+      if ((Trained.PartKeypoints.at(id).size() > 0)) // or " > threshold"
+      {
         cv::Size CellsCount = Trained.PartCellsCount[id];
         std::vector<int> keypointsCandidates = Local.PartKeypoints.at(id);
 
-        bool negativeScore = false;
-        int LabelsPerPart = 0;
-
-
-        for (float angleShift = - parameters.minTheta; angleShift < parameters.maxTheta; angleShift += parameters.stepTheta)
-        { 
-          // Rotation of the part polygon
-          float LabelAngle = PartAngle + angleShift;
-          for(int t = 0; t < LabelPolygon.size(); t++)
-            RotatedPolygon[t] = spelHelper::rotatePoint2D(partPolygon[t], PartCenter, angleShift);
-          for(float x = -SearchDist; x < SearchDist; x += minStep)
-            for(float y = - SearchDist; y < SearchDist; y += minStep)
-            {
-              LabelsPerPart++;
-
-              // Shift label polygon
-              for (int t = 0; t < LabelPolygon.size(); t++)
-                LabelPolygon[t] = RotatedPolygon[t] + cv::Point2f(x, y);
-              cv::Point2f LabelCenter = PartCenter + cv::Point2f(x, y);
-
-              // Calculate score for current label
-              double LabelScore = 0;
-
-              for(unsigned int p = 0; p < keypointsCandidates.size(); p++)
-              {
-                int k = keypointsCandidates[p];
-                if(pointPolygonTest(LabelPolygon, Local.Keypoints[k].pt, false) > 0)
-                {
-                  int partCellID = PartCellIndex(id, Local.Keypoints[k].pt, LabelPolygon, CellsCount);
-                  if(Trained.Keypoints[matches[k][0].trainIdx].class_id == partCellID)
-                  {
-                    LabelScore = LabelScore + matches[k][0].distance;
-                    Temp.PartKeypoints[id].push_back(k);
-                  }
-                }
-              }
-
-              // Normalize and inverse score
-              if(LabelScore > 0)
-                LabelScore = 1.0 - K*LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
-              else
-                LabelScore = 1.1f; // {-1.0f, INFINITY} !??????
-              //Local.PartKeypoints[id].clear();
-              if(LabelScore < 0.0f)
-                negativeScore = true; 
-
-              // Create scores
-              Score score(static_cast<float>(LabelScore), detectorName);
-              std::vector<Score> scores;
-              scores.push_back(score);
-
-              // Create LimbLabel
-              LimbLabel Label(id, LabelCenter, LabelAngle, LabelPolygon, scores);
-
-              // Rescale LimpLabel
-              /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
-                Label.Resize(adjustScale);
-              else*/
-              /*  if(reverseScale > 0 && reverseScale != 1.0f)
-                  Label.Resize(reverseScale);*/
-
-              PartLabels.push_back(Label);
-              scores.clear();
-            }
-        }
-        keypointsCandidates.clear();
-        sort(PartLabels.begin(), PartLabels.end(), CompareLabels());
-
-        // Renormalize scores
-        // Insurance, temporary fix: score can be less then 0.0f if keyframes has too different keypoints combination
-        if (negativeScore)
+        for (int l = 0; l < Labels[id].size(); l++)
         {
-          DebugMessage("Renormalize scores for part " + partID + "\n", debugLevel);
+          // Calculate score for current label
+          double LabelScore = 0;
+          std::vector<cv::Point2f> LabelPolygon = Labels[id][l].getPolygon();
 
-          float scoreValue = 0.0f;
-          float minScore = 0.0f;
-          for (int l = 0; l < PartLabels.size(); l++)
+          for(unsigned int p = 0; p < keypointsCandidates.size(); p++)
           {
-            scoreValue = PartLabels[l].getAvgScore();
-            if(scoreValue < minScore)
-              minScore = scoreValue;
-          }
-          if(minScore < 0.0f)
-            for (int l = 0; l < PartLabels.size(); l++)
+            int k = keypointsCandidates[p];
+            if(pointPolygonTest(LabelPolygon, Local.Keypoints[k].pt, false) > 0)
             {
-              scoreValue = (PartLabels[l].getAvgScore() - minScore)/(1.0f - minScore);
-              Score score(scoreValue, detectorName);
-              std::vector<Score> scores;
-              scores.push_back(score);
-              LimbLabel Label(id, PartLabels[l].getCenter(), PartLabels[l].getAngle(), PartLabels[l].getPolygon(), scores);
-              PartLabels[l] = Label;
+              int partCellID = PartCellIndex(id, Local.Keypoints[k].pt, LabelPolygon, CellsCount);
+              if(Trained.Keypoints[matches[k][0].trainIdx].class_id == partCellID)
+              {
+                LabelScore = LabelScore + matches[k][0].distance;
+                Temp.PartKeypoints[id].push_back(k);
+              }
             }
+          }
+
+          // Normalize and inverse score
+          if (LabelScore > 0)
+          {
+            LabelScore = 1.0 - K*LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
+            LabelsPerPart++;
+          }
+            
+          else
+            LabelScore = 1.1f; // {-1.0f, INFINITY} !??????
+          //Local.PartKeypoints[id].clear();
+          if(LabelScore < 0.0f)
+          negativeScore = true; 
+
+          // Create score
+          Score score(static_cast<float>(LabelScore), detectorName);
+
+          // Push score to LimbLabel scores
+          Labels[id][l].addScore(score);
+
+          // Rescale LimpLabel
+          /*if (parameters.adjustSolves == true && adjustScale != 0.0f && adjustScale != 1.0f)
+             Label.Resize(adjustScale);
+           else*/
+          /*  if(reverseScale > 0 && reverseScale != 1.0f)
+                Label.Resize(reverseScale);*/
         }
-    
-        // Save part labels
-        if(PartLabels.size() > 0)
-          Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
-   
-        std::string message = " Limb Labels count per Body Part " + partID + ": " + std::to_string(LabelsPerPart) + "\n";
+
+        keypointsCandidates.clear();
+        sort(Labels[id].begin(), Labels[id].end(), CompareLabels());
+
+      }
+
+      // Renormalize scores
+      // Insurance, temporary fix: score can be less then 0.0f if keyframes has too different keypoints combination
+      if (negativeScore)
+      {
+        DebugMessage("Renormalize scores for part " + partID + "\n", debugLevel);
+
+        float scoreValue = 0.0f;
+        float minScore = 0.0f;
+        for (int l = 0; l < Labels[id].size(); l++)
+        {
+          scoreValue = Labels[id][l].getAvgScore();
+          if(scoreValue < minScore)
+            minScore = scoreValue;
+        }
+        if(minScore < 0.0f)
+        {
+          for (int l = 0; l < Labels[id].size(); l++)
+          {
+            scoreValue = (Labels[id][l].getAvgScore() - minScore)/(1.0f - minScore);
+            Score score(scoreValue, detectorName);
+            std::vector<Score> scores;
+            scores.push_back(score);          
+            Labels[id][l].setScores(scores);
+          }
+        }
+
+        // Adding one bad label if trained partModel is empty
+        if (Labels[id].size() == 0)
+        {
+          float scoreValue = 1.1f; // {-1.0f, INFINITY} !??????
+          Score score(scoreValue, detectorName);
+          std::vector<Score> scores;
+          scores.push_back(score);
+          LimbLabel Label(id, getPartCenter(PartRects[id]), spelHelper::getAngle(PartRects[id][0], PartRects[id][1]), PartRects[id], scores); // !?????? 
+          Labels[id].push_back(Label);
+          LabelsPerPart++;
+        }
+
+        std::string message = " Limb Labels count per Body Part " + partID + " found: " + std::to_string(LabelsPerPart) + "\n";
         DebugMessage(message, debugLevel);
       }
-
-      // Adding one bad label if trained partModel is empty
-      if (PartLabels.size() == 0)
-      {
-        float scoreValue = 1.1f; // {-1.0f, INFINITY} !??????
-        Score score(scoreValue, detectorName);
-        std::vector<Score> scores;
-        scores.push_back(score);
-        LimbLabel Label(id, PartCenter, PartAngle, partPolygon, scores); // !?????? 
-        PartLabels.push_back(Label);
-        Labels.emplace(std::pair<int, std::vector<LimbLabel>>(id, PartLabels));
-      }
-      PartLabels.clear();
     }
 
     Local = Temp;
@@ -724,6 +739,7 @@ namespace SPEL
     detectorName.clear();
 
     DebugMessage(" SURFDetector Detect completed", debugLevel);
+
     return Labels;
   }
 
@@ -733,7 +749,11 @@ namespace SPEL
   {
     changeParameters(params);
     std::map<uint32_t, std::vector<LimbLabel>> NewLabels;
-    NewLabels = SURFDetector2::Detect(frame);
+    if (limbLabels.size() == 0)
+      NewLabels = generateLimbLabels(frame->getSkeleton());
+    else
+      NewLabels = limbLabels;
+    NewLabels = SURFDetector2::Detect(frame, NewLabels);
 
     std::stringstream detectorName;
     detectorName << getID();

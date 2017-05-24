@@ -86,8 +86,8 @@ namespace SPEL
 
       void Train(std::vector<Frame*> frames);
       void train(const std::vector<Frame*> &frames, std::map<std::string, float> params);
-
-      std::map<uint32_t, std::vector<LimbLabel>> Detect(Frame* frame_) const;
+      std::map<uint32_t, std::vector<LimbLabel>> generateLimbLabels(Skeleton &approximation) const;
+      std::map<uint32_t, std::vector<LimbLabel>> Detect(Frame* frame_, std::map<uint32_t, std::vector<LimbLabel>> &Labels) const;
       std::map<uint32_t, std::vector<LimbLabel>> detect(Frame* frame,
           std::map<std::string, float> params,
          const std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const;
