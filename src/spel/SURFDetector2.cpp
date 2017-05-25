@@ -513,7 +513,16 @@ namespace SPEL
             PartLabels.push_back(LimbLabel(id, LabelCenter, LabelAngle, LabelPolygon, std::vector<Score>(), false));
           }	  
       }
+
+      // Adding one label if part labels is empty
+      if (PartLabels.size() == 0)
+      {
+        LimbLabel Label(id, getPartCenter(PartRects[id]), spelHelper::getAngle(PartRects[id][0], PartRects[id][1]), PartRects[id], std::vector<Score>(), false); // !?????? 
+        PartLabels.push_back(Label);
+      }
+
       Labels.emplace(std::pair<uint32_t, std::vector<LimbLabel>> (id, PartLabels));
+      PartLabels.clear();
     }
 
     return Labels;
@@ -654,8 +663,7 @@ namespace SPEL
           {
             LabelScore = 1.0 - K*LabelScore / static_cast<double>(Trained.PartKeypoints[id].size());
             LabelsPerPart++;
-          }
-            
+          }           
           else
             LabelScore = 1.1f; // {-1.0f, INFINITY} !??????
           //Local.PartKeypoints[id].clear();
@@ -705,18 +713,6 @@ namespace SPEL
             scores.push_back(score);          
             Labels[id][l].setScores(scores);
           }
-        }
-
-        // Adding one bad label if trained partModel is empty
-        if (Labels[id].size() == 0)
-        {
-          float scoreValue = 1.1f; // {-1.0f, INFINITY} !??????
-          Score score(scoreValue, detectorName);
-          std::vector<Score> scores;
-          scores.push_back(score);
-          LimbLabel Label(id, getPartCenter(PartRects[id]), spelHelper::getAngle(PartRects[id][0], PartRects[id][1]), PartRects[id], scores); // !?????? 
-          Labels[id].push_back(Label);
-          LabelsPerPart++;
         }
 
         std::string message = " Limb Labels count per Body Part " + partID + " found: " + std::to_string(LabelsPerPart) + "\n";
