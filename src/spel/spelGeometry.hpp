@@ -26,6 +26,8 @@
 #include "solvlet.hpp"
 #include "skeleton.hpp"
 #include "imagepixelsimilaritymatrix.hpp"
+#include "spelHelper.hpp"
+#include "spelParameters.hpp"
 
 namespace SPEL
 {
@@ -101,6 +103,9 @@ namespace SPEL
   void putSkeletonMask(cv::Mat &mask, Skeleton skeleton, cv::Size maskSize = cv::Size(0, 0), uchar color = 255);
   void putLabels(cv::Mat image, std::vector<LimbLabel> frameLabels, cv::Scalar color = cv::Scalar(255, 255, 255));
   std::string to_string(int num, uchar length);
+
+//LimbLabels
+  std::map<uint32_t, std::vector<LimbLabel>> generateLimbLabels(Frame* frame, std::map<std::string, float> params);
 
 }
 

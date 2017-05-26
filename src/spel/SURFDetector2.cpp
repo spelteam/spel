@@ -744,7 +744,8 @@ namespace SPEL
     if (limbLabels.size() == 0)
     {
       Skeleton skeleton = frame->getSkeleton();
-      NewLabels = generatePartsLabels(skeleton);
+	  NewLabels = generatePartsLabels(skeleton);
+      //NewLabels = generateLimbLabels(frame, params);
     }
 
     else
