@@ -469,23 +469,21 @@ namespace SPEL
     }
   };
 
-  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::generateLimbLabels(Skeleton approximation) const
+  std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::generatePartsLabels(Skeleton approximation) const
   {
     std::map<uint32_t, std::vector<LimbLabel>> Labels;
 
     std::map<int, std::vector<cv::Point2f>> PartRects = getAllPolygons(approximation);
     for (int id = 0; id < PartRects.size(); id++)
     {
-      std::string partID = std::to_string(id);
+      std::vector<LimbLabel> PartLabels;
 
       // Get part polygon from current interpolationframe
+      std::string partID = std::to_string(id); // for messages
       std::vector<cv::Point2f> partPolygon = PartRects[id];
       cv::Point2f PartCenter = getPartCenter(partPolygon);
       float PartAngle = static_cast<float>(spelHelper::getAngle(partPolygon[0], partPolygon[1]));
-
-      // Create limbLabels
-      std::vector<LimbLabel> PartLabels;
-                
+          
       float partLenght = getPartLenght(partPolygon);
       float partWidth = getPartWidth(partPolygon);
       std::vector<cv::Point2f> LabelPolygon(4), RotatedPolygon(4);
@@ -494,6 +492,7 @@ namespace SPEL
       float minStep = abs(parameters.searchStepCoeff*partWidth);
       minStep = std::max(minStep, 2.0f);
 
+      // Create limbLabels
       for (float angleShift = -parameters.minTheta; angleShift < parameters.maxTheta; angleShift += parameters.stepTheta)
       {
         // Rotation of the part polygon
@@ -745,7 +744,7 @@ namespace SPEL
     if (limbLabels.size() == 0)
     {
       Skeleton skeleton = frame->getSkeleton();
-      NewLabels = generateLimbLabels(skeleton);
+      NewLabels = generatePartsLabels(skeleton);
     }
 
     else
