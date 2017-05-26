@@ -494,9 +494,6 @@ namespace SPEL
       float minStep = abs(parameters.searchStepCoeff*partWidth);
       minStep = std::max(minStep, 2.0f);
 
-      bool negativeScore = false;
-
-
       for (float angleShift = -parameters.minTheta; angleShift < parameters.maxTheta; angleShift += parameters.stepTheta)
       {
         // Rotation of the part polygon
