@@ -1,114 +1,134 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "solvlet.hpp"
-
+#include "solver.hpp"
+#include "spelParameters.hpp"
 namespace SPEL
 {
 
   Solvlet::Solvlet(void)
+    : Solvlet(-1, std::vector<LimbLabel>())
   {
-    frameId = -1;
   }
-  Solvlet::Solvlet(int id, std::vector<LimbLabel> _labels)
+
+  Solvlet::Solvlet(const int id, const std::vector<LimbLabel> &labels)
+    : m_frameId(id), m_labels(labels)
   {
-    frameId = id;
-    labels = _labels;
+  }
+
+  Solvlet::Solvlet(const Solvlet & s)
+    : m_frameId(s.m_frameId), m_labels(s.m_labels)
+  {
+  }
+
+  Solvlet::Solvlet(Solvlet && s)
+    : m_frameId(std::move(s.m_frameId)),
+    m_labels(std::move(s.m_labels))
+  {
   }
 
   Solvlet::~Solvlet(void)
   {
   }
 
-  Solvlet &Solvlet:: operator=(const Solvlet &s)
+  Solvlet &Solvlet::operator=(const Solvlet &s)
   {
     if (this == &s)
-    {
       return *this;
-    }
-    this->setLabels(s.getLabels());
-    this->setFrameID(s.getFrameID());
+    m_labels = s.m_labels;
+    m_frameId = s.m_frameId;
+    return *this;
+  }
+
+  Solvlet & Solvlet::operator=(Solvlet && s)
+  {
+    m_frameId = std::move(s.m_frameId);
+    std::swap(m_labels, s.m_labels);
+
     return *this;
   }
 
   bool Solvlet::operator<(const Solvlet &s) const
   {
-    return this->getFrameID() < s.getFrameID();
+    return m_frameId < s.m_frameId;
   }
 
   bool Solvlet::operator>(const Solvlet &s) const
   {
-    return this->getFrameID()>s.getFrameID();
+    return m_frameId > s.m_frameId;
   }
 
   int Solvlet::getFrameID(void) const
   {
-    return frameId;
+    return m_frameId;
   }
 
   void Solvlet::setFrameID(int _id)
   {
-    frameId = _id;
+    m_frameId = _id;
   }
 
   std::vector<LimbLabel> Solvlet::getLabels(void) const
   {
-    return labels;
+    return m_labels;
   }
 
   const std::vector<LimbLabel>* Solvlet::getLabelsPtr() const {
-    return &labels;
+    return &m_labels;
   }
 
-  void Solvlet::setLabels(std::vector<LimbLabel> _labels)
+  void Solvlet::setLabels(const std::vector<LimbLabel> &labels)
   {
-    labels = _labels;
+    m_labels = labels;
   }
 
   Skeleton Solvlet::toSkeleton(const Skeleton &example) const
   {
-    Skeleton retSkel = example;
+    auto retSkel = example;
 
-    tree<BodyPart> partTree = retSkel.getPartTree();
-    tree<BodyJoint> jointTree = retSkel.getJointTree();
-    tree<BodyJoint>::iterator cjIter, pjIter, jointIter;
+    const auto &partTree = retSkel.getPartTree();
+    const auto &jointTree = retSkel.getJointTree();
 
-    assert(partTree.size() == labels.size()); //there should be the same number of body parts
-
-    for (tree<BodyPart>::iterator partIter = partTree.begin(); partIter != partTree.end(); ++partIter)
+    if (partTree.size() != m_labels.size())
     {
-      for (auto i = 0; i < labels.size(); ++i)
+      const std::string str = "Incorrect skeleton size.";
+      DebugMessage(str, 1);
+      throw std::logic_error(str);
+    }
+    for (const auto &part : partTree)
+    {
+      for (const auto &label : m_labels)
       {
-        if (partIter->getPartID() == labels[i].getLimbID()) //if you find the right label
+        if (part.getPartID() == label.getLimbID()) //if you find the right label
         {
           //get joint IDs
-          int partID = partIter->getPartID(); //part
-          int cJointID = partIter->getChildJoint(); //child joint
-          int pJointID = partIter->getParentJoint(); //parent joint
+          const auto cJointID = part.getChildJoint(); //child joint
+          const auto pJointID = part.getParentJoint(); //parent joint
 
-          cv::Point2f pj, cj; //parent and child joints from label
-          labels[i].getEndpoints(pj, cj); //set them from label
-
-
-          cjIter = jointTree.end();
-          pjIter = jointTree.end();
-
+          auto cjfound = false, pjfound = false;
+          BodyJoint pj, cj;
           //identify these nodes in the joint tree
-          for (jointIter = jointTree.begin(); jointIter != jointTree.end(); ++jointIter)
+          for (const auto &joint : jointTree)
           {
-            if (jointIter->getLimbID() == cJointID)
-              cjIter = jointIter;
-            if (jointIter->getLimbID() == pJointID)
-              pjIter = jointIter;
-            if (cjIter != jointTree.end() && pjIter != jointTree.end())
+            if (joint.getLimbID() == cJointID)
+            {
+              cj = joint;
+              cjfound = true;
+            }
+            else if (joint.getLimbID() == pJointID)
+            {
+              pj = joint;
+              pjfound = true;
+            }
+            if (cjfound && pjfound)
               break;
           }
-
-          if (partID == 0) //root
-          {
-            //set 2D joint locations
-            pjIter->setImageLocation(pj); //set parent joint only for root node
-          }
-          cjIter->setImageLocation(cj); //set child joint for all other nodes
+          cv::Point2f pjep, cjep; //parent and child joints from label
+          label.getEndpoints(pjep, cjep); //set them from label
+          //set parent joint only for root node
+          //set child joint for all other nodes
+          part.getPartID() == 0 ? pj.setImageLocation(pjep) : 
+            cj.setImageLocation(cjep);
         } //TODO: introduce a more complex scheme of doing this, such as finding midpoints, or points
       }
     }
@@ -119,9 +139,8 @@ namespace SPEL
     return retSkel;
   }
 
-  float Solvlet::evaluateSolution(Frame* frame, std::map<std::string, float> params)
+  float Solvlet::evaluateSolution(Frame* frame, const std::map<std::string, float> &params)
   {
-    std::vector<LimbLabel> labels = this->getLabels();
     // /*
     //   There should clearly be several factors that affect the outcome of an evaluation:
     //   1) Mask coverage
@@ -135,140 +154,108 @@ namespace SPEL
     //incorrect pixels - those pixels that are black and inside a label, and white and outside a label
     //score = correct/(correct+incorrect)
 
-    //emplace defaults
-    params.emplace("badLabelThresh", 0.52); //if less than 52% of the pixels are in the mask, label this label bad
-    params.emplace("debugLevel", 1);
-    params.emplace("maxFrameHeight", 288);  //emplace if not defined
+    auto workFrame = frame->clone(new Frame());
+    const auto factor = workFrame->Resize(static_cast<uint32_t>(params.at(
+      COMMON_SPEL_PARAMETERS::MAX_FRAME_HEIGHT().name())));
 
-    int maxFrameHeight = params.at("maxFrameHeight");
-    int debugLevel = params.at("debugLevel");
+    for (auto &label : m_labels)
+      label.Resize(factor);
 
-    cv::Mat mask = frame->getMask().clone();
+    auto correctPixels = 0U, incorrectPixels = 0U;
 
-    float factor = 1;
-    //compute the scaling factor
-    if (maxFrameHeight != 0)
+    const auto mask = workFrame->getMask();
+
+    for (auto i = 0; i < mask.cols; ++i) //at every col - x
     {
-      factor = (float)maxFrameHeight / (float)mask.rows;
-
-      resize(mask, mask, cvSize(mask.cols * factor, mask.rows * factor));
-    }
-    for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
-    {
-      label->Resize(factor);
-    }
-
-    int correctPixels = 0, incorrectPixels = 0;
-    int pixelsInMask = 0;
-    int coveredPixelsInMask = 0;
-    int incorrectlyCoveredPixels = 0;
-    int missedPixels = 0;
-
-    for (int i = 0; i < mask.cols; ++i) //at every col - x
-    {
-      for (int j = 0; j < mask.rows; ++j) //and every row - y
+      for (auto j = 0; j < mask.rows; ++j) //and every row - y
       {
-        //int test = labels[0].containsPoint(Point2f(480,100));
         //check whether pixel hit a label from solution
-        bool labelHit = false;
-        for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+        auto labelHit = false;
+        for (const auto &label : m_labels)
         {
-          if (label->containsPoint(cv::Point2f(i, j))) //this is done in x,y coords
+          if (label.containsPoint(cv::Point2f(static_cast<float>(i), static_cast<float>(j)))) //this is done in x,y coords
           {
             labelHit = true;
-            //break;
+            break;
           }
         }
 
         //check pixel colour
-        int intensity = mask.at<uchar>(j, i); //this is done with reve
-        bool blackPixel = (intensity < 10);
-
-        if (!blackPixel)
-          pixelsInMask++;
+        const auto blackPixel = (mask.at<uchar>(j, i) < 10);
 
         if (blackPixel && labelHit) //if black in label, incorrect
-        {
-          incorrectPixels++;
-          incorrectlyCoveredPixels++;
-        }
+          ++incorrectPixels;
         else if (!blackPixel && !labelHit) //if white not in label, incorret
-        {
-          incorrectPixels++;
-          missedPixels++;
-        }
+          ++incorrectPixels;
         else if (!blackPixel && labelHit)//otherwise correct
-        {
-          correctPixels++;
-          coveredPixelsInMask++;
-        }
-        //            else //black pixel and not label hit
-        //                correctPixels++; //don't count these at all?
+          ++correctPixels;
       }
     }
-
-
-    double solutionEval = (float)correctPixels / ((float)correctPixels + (float)incorrectPixels);
+    
+    auto solutionEval = static_cast<float>(correctPixels) / (correctPixels + incorrectPixels);
 
     //now check for critical part failures - label mostly outside of mask
+    std::vector<std::pair<int, float>> badLabelScores;
+    const auto badLabelThresh = params.at(COMMON_SOLVER_PARAMETERS::BAD_LABEL_THRESH().name());
 
-    std::vector<cv::Point2f> badLabelScores;
-    float badLabelThresh = params.at("badLabelThresh");
-
-    for (std::vector<LimbLabel>::iterator label = labels.begin(); label != labels.end(); ++label)
+    for (const auto &label : m_labels)
     {
-      std::vector<cv::Point2f> poly = label->getPolygon(); //get the label polygon
-        //compute min and max x and y
-        //float xMin, xMax, yMin, yMax;
+      const auto &poly = label.getPolygon(); //get the label polygon
+      //compute min and max x and y
       std::vector<float> xS = { poly[0].x, poly[1].x, poly[2].x, poly[3].x };
       std::vector<float> yS = { poly[0].y, poly[1].y, poly[2].y, poly[3].y };
-      auto xMin = min_element(xS.begin(), xS.end());
-      auto xMax = max_element(xS.begin(), xS.end());
 
-      auto yMin = min_element(yS.begin(), yS.end());
-      auto yMax = max_element(yS.begin(), yS.end());
+      const auto xMin = *(min_element(xS.begin(), xS.end()));
+      const auto xMax = *(max_element(xS.begin(), xS.end()));
 
-      int labelPixels = 0;
-      int badLabelPixels = 0;
+      const auto yMin = *(min_element(yS.begin(), yS.end()));
+      const auto yMax = *(max_element(yS.begin(), yS.end()));
 
-      for (int x = *xMin; x < *xMax; ++x)
+      auto labelPixels = 0U;
+      auto badLabelPixels = 0U;
+
+      for (auto x = xMin; x < xMax; ++x)
       {
-        for (int y = *yMin; y < *yMax; ++y)
+        for (auto y = yMin; y < yMax; ++y)
         {
-          if (label->containsPoint(cv::Point2f(x, y)))
-          {
-            int intensity = mask.at<uchar>(y, x); //this is done with reverse y,x
-            bool blackPixel = (intensity < 10);
-            labelPixels++;
-            if (blackPixel)
+          if (label.containsPoint(cv::Point2f(x, y)))
+          {            
+            ++labelPixels;
+            //this is done with reverse y,x
+            if (mask.at<uchar>(static_cast<int>(y), static_cast<int>(x)) < 10)
               ++badLabelPixels;
           }
         }
       }
 
-      float labelRatio = 1.0 - (float)badLabelPixels / (float)labelPixels; //high is good
+      const auto labelRatio = 1.0f - static_cast<float>(badLabelPixels) / labelPixels; //high is good
 
-      if (labelRatio < badLabelThresh /*&& !label->getIsWeak()*/ && !label->getIsOccluded()) //not weak, not occluded, badly localised
-        badLabelScores.push_back(cv::Point2f(label->getLimbID(), labelRatio));
+      if (labelRatio < badLabelThresh && !label.getIsOccluded()) //not weak, not occluded, badly localised
+        badLabelScores.push_back(std::make_pair(label.getLimbID(), labelRatio));
     }
 
-    if (debugLevel >= 1)
+    if (SpelObject::getDebugLevel() >= 1)
     {
-      for (std::vector<cv::Point2f>::iterator badL = badLabelScores.begin(); badL != badLabelScores.end(); ++badL)
+      for (const auto &badL : badLabelScores)
       {
-        std::cerr << "Part " << badL->x << " is badly localised, with score " << badL->y << std::endl;
+        std::stringstream ss;
+        ss << "Part " << badL.first << " is badly localised, with score " << badL.second;
+        DebugMessage(ss.str(), 1);
       }
     }
 
     if (badLabelScores.size() != 0) //make the solution eval fail if a part is badly localised
-      solutionEval = solutionEval - 1.0;
+      solutionEval -= 1.0f;
 
-    if (debugLevel >= 1)
-      std::cerr << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID() << std::endl;
+    if (SpelObject::getDebugLevel() >= 1)
+    {
+      std::stringstream ss;
+      ss << "Solution evaluation score - " << solutionEval << " for frame " << frame->getID() << " solve from " << frame->getParentFrameID();
+      DebugMessage(ss.str(), 1);
+    }
 
-    frame->UnloadAll();
+    delete workFrame;
 
     return solutionEval;
-  }
-  
+  }  
 }
