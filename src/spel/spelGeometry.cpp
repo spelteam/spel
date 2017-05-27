@@ -1055,7 +1055,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
       auto partAngle = static_cast<float>(spelHelper::getAngle(partPolygon[0], partPolygon[1]));
       std::vector<cv::Point2f> LabelPolygon(4), RotatedPolygon(4);
 
-      auto minStep = abs(searchStepCoeff*partWidth);
+      auto minStep = /*abs*/(searchStepCoeff*partWidth);
       minStep = std::max(minStep, 2.0f);
 
       auto searchDist = p->getSearchRadius();
