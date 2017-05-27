@@ -12,8 +12,8 @@ namespace SPEL
     cv::Size padding, cv::Size blockSize, cv::Size blockStride,
     cv::Size cellSize, double wndSigma, double thresholdL2hys,
     bool gammaCorrection, int nlevels, int derivAperture,
-    int histogramNormType)  :
-  m_nbins(nbins),
+    int histogramNormType) :
+    m_nbins(nbins),
     m_wndStride(wndStride),
     m_padding(padding),
     m_blockSize(blockSize),
@@ -29,7 +29,7 @@ namespace SPEL
     m_id = 0x48440000;
   }
 
-  HogDetector::~HogDetector(void) 
+  HogDetector::~HogDetector(void)
   {
     for (auto &p : m_partModels)
       for (auto &pp : p.second)
@@ -90,22 +90,11 @@ namespace SPEL
     Frame *frame) const
   {
     std::map <uint32_t, PartModel> parts;
-    cv::Size wndSize;
     const auto &skeleton = frame->getSkeleton();
     const auto &partTree = skeleton.getPartTree();
     for (const auto &part : partTree)
     {
-      try
-      {
-        wndSize = m_partSize.at(part.getPartID());
-      }
-      catch (...)
-      {
-        std::stringstream ss;
-        ss << "Couldn't get partSize for part " << part.getPartID();
-        DebugMessage(ss.str(), 1);
-        throw std::out_of_range(ss.str());
-      }
+      const auto &wndSize = m_partSize.at(part.getPartID());
       auto *joint = skeleton.getBodyJoint(part.getParentJoint());
       if (joint == 0)
       {
@@ -179,15 +168,14 @@ namespace SPEL
           static_cast <uint32_t> (boneWidth * resizeFactor));
         if (result.size() > 0)
         {
-          try
-          {
-            maxSize = result.at(bodyPart.getPartID());
-          }
-          catch (...) {}
+          const auto r = result.find(bodyPart.getPartID());
+          if (r != result.end())
+            maxSize = r->second;
         }
-        result[bodyPart.getPartID()] = cv::Size(std::max(maxSize.width,
+        const auto &bodyPartSize = cv::Size(std::max(maxSize.width,
           static_cast <int> (boneLength * resizeFactor)), std::max(
             maxSize.height, static_cast <int> (boneWidth * resizeFactor)));
+        result.insert(std::make_pair(bodyPart.getPartID(), bodyPartSize));
       }
     }
     // normalize
@@ -253,11 +241,10 @@ namespace SPEL
       COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
 
     cv::Size size;
-    try
-    {
-      size = m_partSize.at(bodyPart.getPartID());
-    }
-    catch (...)
+    const auto r = m_partSize.find(bodyPart.getPartID());
+    if (r != m_partSize.end())
+      size = r->second;
+    else
     {
       std::stringstream ss;
       ss << "Can't get partSize for body part " << bodyPart.getPartID();
@@ -284,18 +271,15 @@ namespace SPEL
     auto count = 0.0f;
     for (const auto &framePartModels : m_partModels)
     {
-      PartModel partModel;
-      try
-      {
-        partModel = framePartModels.second.at(bodyPart.getPartID());
-      }
-      catch (...)
+      const auto pm = framePartModels.second.find(bodyPart.getPartID());
+      if (pm == framePartModels.second.end())
       {
         std::stringstream ss;
         ss << "Can't find part model for body part " << bodyPart.getPartID();
         DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
+      const auto &partModel = pm->second;
       if (model.gradientStrengths.size() != partModel.gradientStrengths.size())
       {
         std::stringstream ss;
@@ -305,36 +289,26 @@ namespace SPEL
         DebugMessage(ss.str(), 1);
         throw std::logic_error(ss.str());
       }
-      for (auto i = 0U; i < model.gradientStrengths.size(); i++)
+      for (decltype(model.gradientStrengths.size()) i = 0U; i < model.gradientStrengths.size(); ++i)
       {
-        if (model.gradientStrengths.at(i).size() !=
-          partModel.gradientStrengths.at(i).size())
+        const auto &mi = model.gradientStrengths[i];
+        const auto &pi = partModel.gradientStrengths[i];
+        if (mi.size() != pi.size())
         {
           std::stringstream ss;
           ss << "Invalid descriptor count. Need: " <<
-            model.gradientStrengths.at(i).size() << ". Have: " <<
-            partModel.gradientStrengths.at(i).size();
+            mi.size() << ". Have: " << pi.size();
           DebugMessage(ss.str(), 1);
           throw std::logic_error(ss.str());
         }
-        for (auto j = 0U; j < model.gradientStrengths.at(i).size(); j++)
+        for (decltype(mi.size()) j = 0U; j < mi.size(); ++j)
         {
-          for (auto b = 0; b < nbins; b++)
+          const auto &mj = mi[j];
+          const auto &pj = pi[j];
+          for (auto b = 0; b < nbins; ++b)
           {
-            try
-            {
-              count++;
-              score += std::abs(model.gradientStrengths.at(i).at(j).at(b) -
-                partModel.gradientStrengths.at(i).at(j).at(b));
-            }
-            catch (...)
-            {
-              std::stringstream ss;
-              ss << "Can't get some descriptor at [" << i << "][" << j <<
-                "][" << b << "]";
-              DebugMessage(ss.str(), 1);
-              throw std::out_of_range(ss.str());
-            }
+            ++count;
+            score += std::abs(mj[b] - pj[b]);
           }
         }
       }
@@ -343,17 +317,17 @@ namespace SPEL
   }
 
   std::map <uint32_t, std::map <uint32_t, HogDetector::PartModel>>
-    HogDetector::getPartModels(void) const 
+    HogDetector::getPartModels(void) const
   {
     return m_partModels;
   }
 
-  cv::Size HogDetector::getCellSize(void) const 
+  cv::Size HogDetector::getCellSize(void) const
   {
     return m_cellSize;
   }
 
-  uint8_t HogDetector::getnbins(void) const 
+  uint8_t HogDetector::getnbins(void) const
   {
     return m_nbins;
   }
@@ -373,121 +347,68 @@ namespace SPEL
 
     detector.compute(image, descriptors);
 
-    std::vector <std::vector <uint32_t>> counter;
+    std::vector <std::vector <uint32_t>> counter(
+      wndSize.height / cellSize.height, std::vector <uint32_t>(
+        wndSize.width / cellSize.width, 0));
 
-    std::vector <std::vector <std::vector <float>>> gradientStrengths;
-    auto i = 0, j = 0;
-    try
-    {
-      for (i = 0; i < wndSize.height; i += cellSize.height)
-      {
-        gradientStrengths.push_back(std::vector <std::vector <float>>());
-        counter.push_back(std::vector <uint32_t>());
-        for (j = 0; j < wndSize.width; j += cellSize.width)
-        {
-          gradientStrengths.at(i / cellSize.height).push_back(
-            std::vector <float>());
-          counter.at(i / cellSize.height).push_back(0);
-          for (auto b = 0; b < nbins; b++)
-            gradientStrengths.at(i / cellSize.height).at(j /
-              cellSize.width).push_back(0.0f);
-        }
-      }
-    }
-    catch (...)
-    {
-      std::stringstream ss;
-      ss << "Can't get gradientStrengths at [" << i / cellSize.height <<
-        "][" << j / cellSize.width << "]";
-      DebugMessage(ss.str(), 1);
-      throw std::out_of_range(ss.str());
-    }
+    std::vector <std::vector <std::vector <float>>> gradientStrengths(
+      wndSize.height / cellSize.height, std::vector <std::vector<float>>(
+        wndSize.width / cellSize.width, std::vector<float>(nbins, 0.0f)));
 
-    auto d = 0, n = 0, k = 0, r = 0, c = 0, b = 0;
-    try
+    auto d = 0U;
+    // window rows
+    for (auto n = 0; n + blockStride.height < wndSize.height; n += blockStride.height)
     {
-      // window rows
-      for (n = 0; n + blockStride.height < wndSize.height; n += blockStride.height)
+      // window cols
+      for (auto k = 0; k + blockStride.width < wndSize.width; k += blockStride.width)
       {
-        // window cols
-        for (k = 0; k + blockStride.width < wndSize.width; k += blockStride.width)
+        // block rows
+        for (auto r = n; r < n + blockSize.height; r += cellSize.height)
         {
-          // block rows
-          for (r = n; r < n + blockSize.height; r += cellSize.height)
+          // block cols
+          for (auto c = k; c < k + blockSize.width; c += cellSize.width)
           {
-            // block cols
-            for (c = k; c < k + blockSize.width; c += cellSize.width)
+            // nbins
+            for (auto b = 0; b < nbins; ++b)
             {
-              // nbins
-              for (b = 0; b < nbins; b++)
-              {
-                gradientStrengths.at(r / cellSize.height).at(c / cellSize.width).at(b) += descriptors.at(d);
-                if (b == 0)
-                  counter.at(r / cellSize.height).at(c / cellSize.width)++;
-                d++;
-              }
+              gradientStrengths[r / cellSize.height][c / cellSize.width][b] += descriptors[d];
+              ++d;
             }
+            ++(counter[r / cellSize.height][c / cellSize.width]);
           }
         }
       }
-    }
-    catch (...)
-    {
-      std::stringstream ss;
-      ss << "Descriptor parse error:" << std::endl << "Window row:\t" << n <<
-        "\tWindow col:\t" << k << std::endl << "Block row:\t" << r <<
-        "\tBlock col:\t" << c << std::endl << "NBins:\t" << b << std::endl;
-      ss << "Total image rows:\t" << wndSize.height <<
-        "\tTotal image cols:\t" << wndSize.width << std::endl;
-      ss << "Total descriptors:\t" << descriptors.size() << std::endl;
-      ss << "Trying to get descriptor at:\t" << d << std::endl;
-      DebugMessage(ss.str(), 1);
-      throw std::out_of_range(ss.str());
     }
 
-    try
+    for (auto i = 0; i < wndSize.height; i += cellSize.height)
     {
-      for (i = 0; i < wndSize.height; i += cellSize.height)
+      for (auto j = 0; j < wndSize.width; j += cellSize.width)
       {
-        for (j = 0; j < wndSize.width; j += cellSize.width)
+        for (auto b = 0; b < nbins; ++b)
         {
-          for (b = 0; b < nbins; b++)
-          {
-            if (counter.at(i / cellSize.height).at(j / cellSize.width) ==
-              0)
-              gradientStrengths.at(i / cellSize.height).at(j /
-                cellSize.width).at(b) = 0;
-            else
-              gradientStrengths.at(i / cellSize.height).at(j /
-                cellSize.width).at(b) /= (counter.at(i /
-                  cellSize.height).at(j / cellSize.width));
-          }
+          if (counter[i / cellSize.height][j / cellSize.width] == 0)
+            gradientStrengths[i / cellSize.height][j / cellSize.width][b] = 0;
+          else
+            gradientStrengths[i / cellSize.height][j / cellSize.width][b] /=
+            (counter[i / cellSize.height][j / cellSize.width]);
         }
       }
-    }
-    catch (...)
-    {
-      std::stringstream ss;
-      ss << "Can't get gradientStrengths at [" << i /
-        cellSize.height << "][" << j / cellSize.width << "]";
-      DebugMessage(ss.str(), 1);
-      throw std::out_of_range(ss.str());
     }
 
     return gradientStrengths;
   }
 
-  void HogDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const 
+  void HogDetector::emplaceDefaultParameters(std::map<std::string, float>& params) const
   {
     Detector::emplaceDefaultParameters(params);
     spelHelper::mergeParameters(params, COMMON_HOG_DETECTOR_PARAMETERS::getParameters());
   }
 
-  HogDetectorHelper::HogDetectorHelper(void) 
+  HogDetectorHelper::HogDetectorHelper(void)
   {
   }
 
-  HogDetectorHelper::~HogDetectorHelper(void) 
+  HogDetectorHelper::~HogDetectorHelper(void)
   {
   }
 
