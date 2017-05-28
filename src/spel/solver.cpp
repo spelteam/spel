@@ -25,13 +25,15 @@ namespace SPEL
     return m_id;
   }
 
-  uint32_t Solver::findFrameIndexById(int id, std::vector<Frame*> frames) const
+  uint32_t Solver::findFrameIndexById(const int id, const std::vector<Frame*> &frames) const
   {
-    for (auto i = 0U; i < frames.size(); ++i)
-    {
-      if (frames.at(i)->getID() == id)
-        return i;
-    }
+    auto idx = 0U;
+    for (const auto frame : frames)
+      if (frame->getID() != id)
+        ++idx;
+      else
+        return idx;
+
     std::stringstream ss;
     ss << "There is no frame with id: " << id;
     throw std::logic_error(ss.str());

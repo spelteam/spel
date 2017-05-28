@@ -47,7 +47,7 @@ namespace SPEL
     /// <param name="id">The identifier.</param>
     /// <param name="frames">The frames.</param>
     /// <returns>The index.</returns>
-    uint32_t findFrameIndexById(int id, std::vector<Frame*> frames) const;
+    uint32_t findFrameIndexById(const int id, const std::vector<Frame*> &frames) const;
   protected:    
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
