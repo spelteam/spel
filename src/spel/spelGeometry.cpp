@@ -1053,9 +1053,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
       const auto partWidth = getPartWidth(partPolygon);
       const auto partCenter = getPartCenter(partPolygon);
       const auto partAngle = spelHelper::getAngle(partPolygon[0], partPolygon[1]);
-      std::vector<cv::Point2f> LabelPolygon, RotatedPolygon;
-      LabelPolygon.reserve(4);
-      RotatedPolygon.reserve(4);
+      std::vector<cv::Point2f> LabelPolygon(4), RotatedPolygon(4);
 
       auto minStep = /*abs*/(searchStepCoeff * partWidth);
       minStep = std::max(minStep, 2.0f);
@@ -1078,8 +1076,8 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
       for (auto angleShift = -minLocalTheta; angleShift < maxLocalTheta; angleShift += stepTheta)
       {        
         const auto labelAngle = partAngle + angleShift;
-        for (const auto &t : partPolygon)
-          RotatedPolygon.push_back(spelHelper::rotatePoint2D(t, partCenter, angleShift));//Part polygon rotation
+        for (auto t = 0U; t < partPolygon.size(); ++t)
+          RotatedPolygon[t] = spelHelper::rotatePoint2D(partPolygon[t], partCenter, angleShift);//Part polygon rotation
         //Iterations by coordinates
         for (auto x = -searchDist; x < searchDist; x += minStep)
           for (auto y = -searchDist; y < searchDist; y += minStep)
@@ -1090,8 +1088,8 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
               blackPixel = (mask.at<uint8_t>(static_cast<int>(labelCenter.y), static_cast<int>(labelCenter.x)) <= Q);
             if (!blackPixel)
             {		  
-              for (const auto &t : partPolygon)
-                LabelPolygon.push_back(t + cv::Point2f(x, y));//Shift label polygon
+              for (auto t = 0U; t < partPolygon.size(); ++t)
+                LabelPolygon[t] = RotatedPolygon[t] + cv::Point2f(x, y);//Shift label polygon
               partLabels.push_back(LimbLabel(partID, labelCenter, labelAngle, LabelPolygon, std::vector<Score>(), false));//Create LimbLabel
             }         
           } 
@@ -1102,8 +1100,8 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
         for (auto angleShift = -minLocalTheta; angleShift < maxLocalTheta; angleShift += stepTheta) 
         {
           const auto labelAngle = partAngle + angleShift;
-          for (const auto &t : partPolygon)
-            RotatedPolygon.push_back(spelHelper::rotatePoint2D(t, partCenter, angleShift));//Part polygon rotation
+          for (auto t = 0U; t < partPolygon.size(); ++t)
+            RotatedPolygon[t] = spelHelper::rotatePoint2D(partPolygon[t], partCenter, angleShift);//Part polygon rotation
           partLabels.push_back(LimbLabel(partID, partCenter, labelAngle, LabelPolygon, std::vector<Score>(), false));//Create LimbLabel
         }
       Labels.emplace(std::make_pair(partID, partLabels));
