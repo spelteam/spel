@@ -68,7 +68,7 @@ namespace SPEL
     /// <returns>The limb labels.</returns>
     virtual std::map <uint32_t, std::vector <LimbLabel> > detect(
       Frame *frame, std::map <std::string, float> params, 
-      const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) 
+      std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) 
       const = 0;
     /// <summary>Detects the specified frame.</summary>
     /// <param name="frame">The frame.</param>
@@ -78,7 +78,7 @@ namespace SPEL
     /// <returns>The limb labels.</returns>
     std::map <uint32_t, std::vector <LimbLabel> > detect(
       Frame *frame, std::map <std::string, float> params, 
-      const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels, 
+      std::map <uint32_t, std::vector <LimbLabel>> &limbLabels, 
       DetectorHelper *detectorHelper) const;
     /// <summary>Merges the specified limb labels.</summary>
     /// <param name="first">The first array of limb labels.</param>
@@ -153,6 +153,11 @@ namespace SPEL
       const BodyPart &bodyPart, Frame *workFrame,
       DetectorHelper *detectorHelper, std::map <std::string, float> params) 
       const;
+    virtual void calculateLabelScore(Frame *workFrame, 
+      DetectorHelper *detectorHelper, LimbLabel &label, 
+      std::map <std::string, float> params) const = 0;
+    void addLabelScore(LimbLabel &label, const std::string &detectorName,
+      const float coeff, const std::function<float()> &compare) const;
     /// <summary>Filters the limb labels.</summary>
     /// <param name="sortedLabels">The sorted labels.</param>
     /// <param name="uniqueLocationCandidates">The unique location candidates.</param>

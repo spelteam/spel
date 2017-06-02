@@ -161,10 +161,13 @@ namespace SPEL
   {
     //decide whether this point belongs to this polygon or not
     CheckPolygonSize(m_polygon);
-    spelRECT <cv::Point2f> poserect(m_polygon.at(0), m_polygon.at(1), 
-      m_polygon.at(2), m_polygon.at(3));
+    return (getRect().containsPoint(pt) != -1);
+  }
 
-    return (poserect.containsPoint(pt) != -1);
+  spelRECT<cv::Point2f> LimbLabel::getRect(void) const
+  {
+    return (spelRECT <cv::Point2f> (m_polygon.at(0), m_polygon.at(1),
+      m_polygon.at(2), m_polygon.at(3)));
   }
 
   void LimbLabel::CheckPolygonSize(const std::vector<cv::Point2f>& polygon) 

@@ -25,6 +25,9 @@
 
 namespace SPEL
 {  
+  // forward declaration
+  template <class T> class spelRECT;
+
   /// <summary>
   /// This class represents the limb label of each body part
   /// </summary>
@@ -150,6 +153,8 @@ namespace SPEL
     /// Otherwise returns <c>false</c>.
     /// </returns>
     bool containsPoint(const cv::Point2f &pt) const;
+
+    spelRECT <cv::Point2f> getRect(void) const;
   private:
 #ifdef DEBUG
     // Used for set isWeak to "false" in nskpsolver_tests.computeScoreCost

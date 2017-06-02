@@ -39,7 +39,7 @@ namespace SPEL
 
   std::map <uint32_t, std::vector <LimbLabel> > SurfDetector::detect(
     Frame *frame, std::map <std::string, float> params, 
-    const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
+    std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
   {
     emplaceDefaultParameters(params);
 
@@ -139,6 +139,16 @@ namespace SPEL
     const auto &rect = 
       BodyPart::getBodyPartRect(bodyPart, j0, j1, originalSize);
 
+    return computeDescriptors(bodyPart.getPartID(), rect, imgMat, keyPoints);
+  }
+
+  SurfDetector::PartModel SurfDetector::computeDescriptors(const LimbLabel & label, const cv::Mat & imgMat, const std::vector<cv::KeyPoint>& keyPoints) const
+  {
+    return computeDescriptors(label.getLimbID(), label.getRect(), imgMat, keyPoints);
+  }
+
+  SurfDetector::PartModel SurfDetector::computeDescriptors(const int partId, const spelRECT<cv::Point2f>& rect, const cv::Mat & imgMat, const std::vector<cv::KeyPoint>& keyPoints) const
+  {
     PartModel partModel;
     partModel.partModelRect = rect;
 
@@ -151,7 +161,7 @@ namespace SPEL
       if (SpelObject::getDebugLevel() >= 2)
       {
         std::stringstream ss;
-        ss << "Couldn't detect keypoints of body part " << bodyPart.getPartID();
+        ss << "Couldn't detect keypoints of body part " << partId;
         DebugMessage(ss.str(), 2);
       }
     }
@@ -165,7 +175,7 @@ namespace SPEL
         {
           std::stringstream ss;
           ss << "Couldn't compute descriptors of body part " <<
-            bodyPart.getPartID();
+            partId;
           DebugMessage(ss.str(), 2);
         }
       }
@@ -210,9 +220,59 @@ namespace SPEL
       useSURFdet, comparer);
   }
 
+  void SurfDetector::calculateLabelScore(Frame *workFrame, 
+    DetectorHelper *detectorHelper, LimbLabel &label, 
+    std::map<std::string, float> params) const
+  {
+    std::stringstream detectorName;
+    detectorName << getID();
+
+    SurfDetectorHelper* helper = 0;
+    try
+    {
+      helper = dynamic_cast<SurfDetectorHelper*> (detectorHelper);
+    }
+    catch (...)
+    {
+      const auto &ss = "Wrong type: detectorHelper is not SurfDetectorHelper";
+      throw std::logic_error(ss);
+    }
+
+    emplaceDefaultParameters(params);
+
+    const auto useSURFdet = params.at(
+      COMMON_DETECTOR_PARAMETERS::USE_SURF_DETECTOR().name());
+    const auto knnMatchCoeff = params.at(
+      COMMON_SURF_DETECTOR_PARAMETERS::KNN_MATCH_COEFFICIENT().name());
+
+    const auto &generatedPartModel = computeDescriptors(label,
+      workFrame->getImage(), helper->keyPoints);
+
+    const auto &comparer = [&]()
+    {
+      return compare(label, generatedPartModel, knnMatchCoeff);
+    };
+
+    Detector::addLabelScore(label, detectorName.str(), useSURFdet, comparer);
+  }
+
   float SurfDetector::compare(const BodyPart &bodyPart, const PartModel &model,
     const cv::Point2f &j0, const cv::Point2f &j1, const float knnMatchCoeff) 
     const
+  {
+    return compare(bodyPart.getPartID(), bodyPart.getBodyPartRect(j0, j1), 
+      model, knnMatchCoeff);
+  }
+
+  float SurfDetector::compare(const LimbLabel & label, const PartModel & model, 
+    const float knnMatchCoeff) const
+  {
+    return compare(label.getLimbID(), label.getRect(), model, knnMatchCoeff);
+  }
+
+  float SurfDetector::compare(const int & partId, 
+    const spelRECT<cv::Point2f>& rect, const PartModel & model, 
+    const float knnMatchCoeff) const
   {
     if (model.descriptors.empty())
     {
@@ -229,32 +289,32 @@ namespace SPEL
     cv::FlannBasedMatcher matcher;
     std::vector <std::vector <cv::DMatch>> matches;
 
-    const auto length = BodyPart::getBoneLength(j0, j1);
-    const auto width = bodyPart.getBoneWidth(length);
+    const auto &size = rect.RectSize<cv::Size2f>();
+
+    const auto length = size.height;
+    const auto width = size.width;
     const auto coeff = sqrt(pow(length, 2) + pow(width, 2));
 
     for (const auto &framePartModels : partModels)
     {
-      PartModel partModel;
-      try
-      {
-        partModel = framePartModels.second.at(bodyPart.getPartID());
-      }
-      catch (...)
+      const auto &framePartModel = framePartModels.second;
+      const auto &res = framePartModel.find(partId);
+      if (res == framePartModel.end())
       {
         std::stringstream ss;
-        ss << "Can't find part model for body part " << bodyPart.getPartID();
+        ss << "Can't find part model for body part " << partId;
         DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }
+      const auto partModel = (*res).second;
 
       if (partModel.descriptors.empty())
       {
         if (SpelObject::getDebugLevel() >= 2)
         {
           std::stringstream ss;
-          ss << "PartModel descriptors of body part [" <<
-            bodyPart.getPartID() << "] are empty";
+          ss << "PartModel descriptors of body part [" << partId << 
+            "] are empty";
           DebugMessage(ss.str(), 2);
         }
       }
@@ -264,16 +324,16 @@ namespace SPEL
         {
           if (partModel.descriptors.rows > 1 && model.descriptors.rows > 1)
           {
-            matcher.knnMatch(model.descriptors, partModel.descriptors, 
+            matcher.knnMatch(model.descriptors, partModel.descriptors,
               matches, 2);
             auto s = 0.0f;
             for (const auto &i : matches)
             {
-              if (i.size() == 2 && (i[0].distance < knnMatchCoeff * 
+              if (i.size() == 2 && (i[0].distance < knnMatchCoeff *
                 (i[1].distance)))
               {
                 s += i[0].distance / coeff;
-                count++;
+                ++count;
               }
             }
             score += s / matches.size();
@@ -283,8 +343,8 @@ namespace SPEL
             if (SpelObject::getDebugLevel() >= 2)
             {
               std::stringstream ss;
-              ss << "Can't match descriptors of body part [" <<
-                bodyPart.getPartID() << "]: Not enough descriptors";
+              ss << "Can't match descriptors of body part [" << partId << 
+                "]: Not enough descriptors";
               DebugMessage(ss.str(), 2);
             }
           }
@@ -294,8 +354,7 @@ namespace SPEL
           if (SpelObject::getDebugLevel() >= 2)
           {
             std::stringstream ss;
-            ss << "Can't match descriptors of body part [" <<
-              bodyPart.getPartID() << "]";
+            ss << "Can't match descriptors of body part [" << partId << "]";
             DebugMessage(ss.str(), 2);
           }
         }

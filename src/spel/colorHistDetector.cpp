@@ -5,6 +5,7 @@
 #include "lockframe.hpp"
 #include "interpolation.hpp"
 #include "spelParameters.hpp"
+#include "spelHelper.hpp"
 
 namespace SPEL
 {
@@ -345,7 +346,7 @@ namespace SPEL
   // Returns a labels vector of possible body parts position
   std::map <uint32_t, std::vector <LimbLabel> > ColorHistDetector::detect(
     Frame *frame, std::map <std::string, float> params,
-    const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
+    std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
   {
     emplaceDefaultParameters(params);
 
@@ -492,59 +493,44 @@ namespace SPEL
     return _pixelLabels;
   }
 
-  float ColorHistDetector::compare(const BodyPart &bodyPart,
-    Frame *frame, const std::map <int32_t, cv::Mat> &_pixelLabels,
-    const cv::Point2f &j0, const cv::Point2f &j1) const
+  float ColorHistDetector::compare(Frame *frame, 
+    const spelRECT<cv::Point2f> &rect, const cv::Mat &bodyPartPixelLabels) 
+    const
   {
     // copy mask from the frame 
     const auto maskMat = frame->getMask();
-    // copy image from the frame
-    const auto imgMat = frame->getImage();
-    // segment center
-    const auto boxCenter = j0 * 0.5f + j1 * 0.5f;
-    // distance between joints
-    const auto boneLength = BodyPart::getBoneLength(j0, j1);
-    // expected bodypart location area?
-    const auto rect = spelHelper::round(bodyPart.getBodyPartRect(j0, j1));
     auto totalPixels = 0;
     auto pixelsInMask = 0;
     auto totalPixelLabelScore = 0.0f;
     float xmax, ymax, xmin, ymin;
     // highlight the extreme points of the body part rect
     rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-    const auto bodyPartPixelLabels = _pixelLabels.at(bodyPart.getPartID());
 
-    // Scan the area near the bodypart center
-    const auto searchXMin = static_cast<int32_t>(boxCenter.x - boneLength * 0.5f);
-    const auto searchXMax = static_cast<int32_t>(boxCenter.x + boneLength * 0.5f);
-    const auto searchYMin = static_cast<int32_t>(boxCenter.y - boneLength * 0.5f);
-    const auto searchYMax = static_cast<int32_t>(boxCenter.y + boneLength * 0.5f);
+    const auto imin = static_cast<int>(xmin);
+    const auto imax = static_cast<int>(xmax);
+    const auto jmin = static_cast<int>(ymin);
+    const auto jmax = static_cast<int>(ymax);
 
-    for (auto i = searchXMin; i < searchXMax; ++i)
+    for (auto i = imin; i <= imax; ++i)
     {
-      for (auto j = searchYMin; j < searchYMax; ++j)
+      for (auto j = jmin; j <= jmax; ++j)
       {
         // if the point is within the image
         if (i < maskMat.cols && j < maskMat.rows && i >= 0 && j >= 0)
         {
-          // if the point within the highlight area
-          if (i <= xmax && i >= xmin && j <= ymax && j >= ymin)
+
+          // if the point belongs to the rectangle
+          if (rect.containsPoint(cv::Point2f(static_cast<float>(i),
+            static_cast<float>(j))) > 0)
           {
-            // if the point belongs to the rectangle
-            if (rect.containsPoint(cv::Point2f(static_cast<float>(i),
-              static_cast<float>(j))) > 0)
+            // counting of the contained pixels
+            ++totalPixels;
+            // pixel is not significant if the mask value is less 
+            // than this threshold
+            if (maskMat.at<uint8_t>(j, i) >= 10)
             {
-              // counting of the contained pixels
-              ++totalPixels;
-              // copy current point mask value 
-              const auto mintensity = maskMat.at<uint8_t>(j, i);
-              // pixel is not significant if the mask value is less 
-              // than this threshold
-              if (mintensity >= 10)
-              {
-                totalPixelLabelScore += bodyPartPixelLabels.at<float>(j, i);
-                ++pixelsInMask; // counting pixels within the mask
-              }
+              totalPixelLabelScore += bodyPartPixelLabels.at<float>(j, i);
+              ++pixelsInMask; // counting pixels within the mask
             }
           }
         }
@@ -563,6 +549,24 @@ namespace SPEL
     const std::string str = "Dirty label!";
     DebugMessage(str, 2);
     return -1.0f;
+  }
+
+  float ColorHistDetector::compare(const BodyPart &bodyPart,
+    Frame *frame, const std::map <int32_t, cv::Mat> &_pixelLabels,
+    const cv::Point2f &j0, const cv::Point2f &j1) const
+  {
+    const auto rect = spelHelper::round(bodyPart.getBodyPartRect(j0, j1));
+    const auto bodyPartPixelLabels = _pixelLabels.at(bodyPart.getPartID());
+    return compare(frame, rect, bodyPartPixelLabels);
+  }
+
+  float ColorHistDetector::compare(Frame * frame, 
+    const std::map<int32_t, cv::Mat>& _pixelLabels, const LimbLabel & label) 
+    const
+  {
+    const auto rect = spelHelper::round(label.getRect());
+    const auto bodyPartPixelLabels = _pixelLabels.at(label.getLimbID());
+    return compare(frame, rect, bodyPartPixelLabels);
   }
 
   void ColorHistDetector::train(Frame * frame)
@@ -773,6 +777,34 @@ namespace SPEL
       comparer);
 
     return label;
+  }
+
+  void ColorHistDetector::calculateLabelScore(Frame * workFrame, 
+    DetectorHelper * detectorHelper, LimbLabel & label, 
+    std::map <std::string, float> params) const
+  {
+    emplaceDefaultParameters(params);
+
+    std::stringstream detectorName;
+    detectorName << getID();
+
+    auto helper = dynamic_cast<ColorHistDetectorHelper*> (detectorHelper);
+    if (helper == nullptr)
+    {
+      const std::string str =
+        "Wrong type: detectorHelper is not ColorHistDetectorHelper";
+      DebugMessage(str, 1);
+      throw std::invalid_argument(str);
+    }
+
+    const auto &comparer = [&]()
+    {
+      return compare(workFrame, helper->pixelLabels, label);
+    };
+
+    Detector::addLabelScore(label, detectorName.str(), 
+      params.at(COMMON_DETECTOR_PARAMETERS::USE_CH_DETECTOR().name()), 
+      comparer);
   }
 
   //Used only as prevent a warning for "const uint8_t nBins";

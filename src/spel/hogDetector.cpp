@@ -36,31 +36,30 @@ namespace SPEL
         pp.second.partImage.release();
   }
 
-  HogDetector::PartModel HogDetector::computeDescriptors(
-    const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1,
-    const cv::Mat &imgMat, const cv::Size &wndSize) const
+  HogDetector::PartModel HogDetector::computeDescriptors(const cv::Mat &imgMat,
+    const spelRECT <cv::Point2f> &rect, const cv::Size &wndSize) 
+    const
   {
-    auto boneLength = BodyPart::getBoneLength(j0, j1);
-    if (boneLength < m_blockSize.width)
-      boneLength = static_cast <float> (m_blockSize.width);
-    else
-      boneLength = boneLength + m_blockSize.width - (
-        static_cast<int>(boneLength) % m_blockSize.width);
+    const auto &size = rect.RectSize<cv::Size2f>();
 
-    auto boneWidth = bodyPart.getBoneWidth(boneLength);
-    if (boneWidth < m_blockSize.height)
-      boneWidth = static_cast <float> (m_blockSize.height);
+    auto boneLength = static_cast<int>(size.height);
+    if (boneLength < m_blockSize.width)
+      boneLength = m_blockSize.width;
     else
-      boneWidth = boneWidth + m_blockSize.width - (
-        static_cast<int>(boneWidth) % m_blockSize.height);
+      boneLength = boneLength + m_blockSize.width - (boneLength % 
+        m_blockSize.width);
+
+    auto boneWidth = static_cast<int>(size.width);
+    if (boneWidth < m_blockSize.height)
+      boneWidth = m_blockSize.height;
+    else
+      boneWidth = boneWidth + m_blockSize.width - (boneWidth % 
+        m_blockSize.height);
 
     const auto &originalSize = cv::Size(static_cast <uint32_t> (boneLength),
       static_cast <uint32_t> (boneWidth));
-    const auto &rect = bodyPart.getBodyPartRect(j0, j1, m_blockSize);
 
-    float xmax, ymax, xmin, ymin;
-    rect.GetMinMaxXY <float>(xmin, ymin, xmax, ymax);
-    const auto &direction = j1 - j0;
+    const auto &direction = rect.point3 - rect.point2;
     const auto rotationAngle = spelHelper::getAngle(direction);
     PartModel partModel;
     partModel.partModelRect = rect;
@@ -84,6 +83,20 @@ namespace SPEL
 #endif  // DEBUG
 
     return partModel;
+  }
+
+  HogDetector::PartModel HogDetector::computeDescriptors (
+    const cv::Mat &imgMat, const cv::Size &wndSize, LimbLabel &label) const
+  {
+    return computeDescriptors(imgMat, label.getRect(), wndSize);
+  }
+
+  HogDetector::PartModel HogDetector::computeDescriptors(
+    const BodyPart &bodyPart, const cv::Point2f &j0, const cv::Point2f &j1,
+    const cv::Mat &imgMat, const cv::Size &wndSize) const
+  {
+    const auto &rect = bodyPart.getBodyPartRect(j0, j1, m_blockSize);
+    return computeDescriptors(imgMat, rect, wndSize);
   }
 
   std::map <uint32_t, HogDetector::PartModel> HogDetector::computeDescriptors(
@@ -227,7 +240,7 @@ namespace SPEL
 
   std::map <uint32_t, std::vector <LimbLabel> > HogDetector::detect(
     Frame *frame, std::map <std::string, float> params,
-    const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
+    std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const
   {
     auto detectorHelper = new HogDetectorHelper();
 
@@ -252,18 +265,7 @@ namespace SPEL
     const auto useHoGdet = params.at(
       COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
 
-    cv::Size size;
-    try
-    {
-      size = m_partSize.at(bodyPart.getPartID());
-    }
-    catch (...)
-    {
-      std::stringstream ss;
-      ss << "Can't get partSize for body part " << bodyPart.getPartID();
-      DebugMessage(ss.str(), 1);
-      throw std::out_of_range(ss.str());
-    }
+    const auto &size = m_partSize.at(bodyPart.getPartID());
 
     const auto &generatedPartModel = computeDescriptors(bodyPart, j0, j1,
       frame->getImage(), size);
@@ -277,8 +279,41 @@ namespace SPEL
       useHoGdet, comparer);
   }
 
+  void HogDetector::calculateLabelScore(Frame * workFrame, DetectorHelper*, LimbLabel & label, std::map<std::string, float> params) const
+  {
+    std::stringstream detectorName;
+    detectorName << getID();
+
+    emplaceDefaultParameters(params);
+
+    const auto useHoGdet = params.at(
+      COMMON_DETECTOR_PARAMETERS::USE_HOG_DETECTOR().name());
+
+    const auto &size = m_partSize.at(label.getLimbID());
+
+    const auto &generatedPartModel = computeDescriptors(workFrame->getImage(), 
+      size, label);
+
+    const auto &comparer = [&]()
+    {
+      return compare(label, generatedPartModel, m_nbins);
+    };
+
+    Detector::addLabelScore(label, detectorName.str(), useHoGdet, comparer);
+  }
+
   float HogDetector::compare(const BodyPart &bodyPart, const PartModel &model,
     const uint8_t nbins) const
+  {
+    return compare(model, bodyPart.getPartID(), nbins);
+  }
+
+  float HogDetector::compare(const LimbLabel & label, const PartModel & partModel, const uint8_t nbins) const
+  {
+    return compare(partModel, label.getLimbID(), nbins);
+  }
+
+  float HogDetector::compare(const PartModel & model, const int partId, const uint8_t nbins) const
   {
     auto score = 0.0f;
     auto count = 0.0f;
@@ -287,12 +322,12 @@ namespace SPEL
       PartModel partModel;
       try
       {
-        partModel = framePartModels.second.at(bodyPart.getPartID());
+        partModel = framePartModels.second.at(partId);
       }
       catch (...)
       {
         std::stringstream ss;
-        ss << "Can't find part model for body part " << bodyPart.getPartID();
+        ss << "Can't find part model for body part " << partId;
         DebugMessage(ss.str(), 1);
         throw std::out_of_range(ss.str());
       }

@@ -144,7 +144,7 @@ namespace SPEL
     /// <returns>The map of detected limb labels.</returns>
     std::map <uint32_t, std::vector <LimbLabel> > detect(
       Frame *frame, std::map <std::string, float> params, 
-      const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
+      std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
     /// <summary>Gets the nbins.</summary>
     /// <returns>The nbins.</returns>
     uint8_t getNBins(void) const ;
@@ -205,6 +205,9 @@ namespace SPEL
       Frame *frame, const cv::Point2f &j0, const cv::Point2f &j1, 
       DetectorHelper *detectorHelper, std::map <std::string, 
       float> params) const;
+    void calculateLabelScore(Frame *workFrame,
+      DetectorHelper *detectorHelper, LimbLabel &label, 
+      std::map <std::string, float> params) const;
     /// <summary>Compares the specified body part.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="frame">The frame.</param>
@@ -212,9 +215,13 @@ namespace SPEL
     /// <param name="j0">The first joint identifier.</param>
     /// <param name="j1">The second joint identifier.</param>
     /// <returns>The comparison coefficient.</returns>
+    float compare(Frame *frame, const spelRECT<cv::Point2f> &rect,
+      const cv::Mat &bodyPartPixelLabels) const;
     float compare(const BodyPart &bodyPart, Frame *frame, 
-      const std::map <int32_t, cv::Mat> &pixelLabels, const cv::Point2f &j0, 
-      const cv::Point2f &j1) const;    
+      const std::map <int32_t, cv::Mat> &_pixelLabels, const cv::Point2f &j0, 
+      const cv::Point2f &j1) const;
+    float compare(Frame *frame, const std::map <int32_t, cv::Mat> &_pixelLabels, 
+      const LimbLabel &label) const;
     /// <summary>Trains the specified frame.</summary>
     /// <param name="frame">The frame.</param>
     void train(Frame* frame);

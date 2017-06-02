@@ -84,7 +84,7 @@ namespace SPEL
     /// <returns>The map of detected limb labels.</returns>
     std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, 
       std::map <std::string, float> params, 
-      const std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
+      std::map <uint32_t, std::vector <LimbLabel>> &limbLabels) const;
     /// <summary>Gets the part models.</summary>
     /// <returns>The part models.</returns>
     std::map <uint32_t, std::map <uint32_t, PartModel>> getPartModels(void) 
@@ -120,6 +120,11 @@ namespace SPEL
     PartModel computeDescriptors(const BodyPart &bodyPart, 
       const cv::Point2f &j0, const cv::Point2f &j1, const cv::Mat &imgMat, 
       const std::vector <cv::KeyPoint> &keyPoints) const;
+    PartModel computeDescriptors(const LimbLabel &label, const cv::Mat &imgMat,
+      const std::vector <cv::KeyPoint> &keyPoints) const;
+    PartModel computeDescriptors(const int partId, 
+      const spelRECT <cv::Point2f> &rect, const cv::Mat &imgMat,
+      const std::vector <cv::KeyPoint> &keyPoints) const;
     /// <summary>Generates the label.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="frame">The frame.</param>
@@ -132,6 +137,8 @@ namespace SPEL
       const cv::Point2f &j0, const cv::Point2f &j1, 
       DetectorHelper *detectorHelper, std::map <std::string, float> params) 
       const;
+    void calculateLabelScore(Frame *workFrame, DetectorHelper *detectorHelper, 
+      LimbLabel &label, std::map <std::string, float> params) const;
     /// <summary>Compares the specified body part.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="model">The model.</param>
@@ -142,6 +149,10 @@ namespace SPEL
     float compare(const BodyPart &bodyPart, const PartModel &model, 
       const cv::Point2f &j0, const cv::Point2f &j1, const float knnMatchCoeff) 
       const;
+    float compare(const LimbLabel &label, const PartModel &model,
+      const float knnMatchCoeff) const;
+    float compare(const int &partId, const spelRECT<cv::Point2f> &rect,
+      const PartModel &model, const float knnMatchCoeff) const;
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(

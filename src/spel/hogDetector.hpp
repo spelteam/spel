@@ -103,7 +103,7 @@ namespace SPEL
     /// <param name="limbLabels">The limb labels.</param>
     /// <returns>The map of detected limb labels.</returns>
     std::map <uint32_t, std::vector <LimbLabel> > detect(Frame *frame, 
-      std::map <std::string, float> params, const std::map <uint32_t, 
+      std::map <std::string, float> params, std::map <uint32_t, 
       std::vector <LimbLabel>> &limbLabels) const;
     /// <summary>Gets the part models.</summary>
     /// <returns>The part models.</returns>
@@ -193,12 +193,18 @@ namespace SPEL
       const cv::Point2f &j0, const cv::Point2f &j1, 
       DetectorHelper *detectorHelper, 
       std::map <std::string, float> params) const;
+    void calculateLabelScore(Frame *workFrame, DetectorHelper *detectorHelper, 
+      LimbLabel &label, std::map <std::string, float> params) const;
     /// <summary>Gets the maximum width and height of the body parts.</summary>
     /// <param name="blockSize">Size of the block.</param>
     /// <param name="resizeFactor">The resize factor.</param>
     /// <returns>The maximum width and height of the body parts.</returns>
     std::map <uint32_t, cv::Size> getMaxBodyPartHeightWidth(
       const cv::Size &blockSize, const float resizeFactor) const;
+    PartModel computeDescriptors(const cv::Mat &imgMat,
+      const spelRECT <cv::Point2f> &rect, const cv::Size &wndSize) const;
+    PartModel computeDescriptors(const cv::Mat &imgMat, 
+      const cv::Size &wndSize, LimbLabel &label) const;
     /// <summary>Computes the descriptors.</summary>
     /// <param name="bodyPart">The body part.</param>
     /// <param name="j0">The parent joint.</param>
@@ -220,6 +226,9 @@ namespace SPEL
     /// <returns>The comparison coefficient.</returns>
     float compare(const BodyPart &bodyPart, const PartModel &partModel, 
       const uint8_t nbins) const;
+    float compare(const LimbLabel &label, const PartModel &partModel,
+      const uint8_t nbins) const;
+    float compare(const PartModel &model, const int partId, const uint8_t nbins) const;
     /// <summary>Emplaces the default parameters.</summary>
     /// <param name="params">The parameters.</param>
     void emplaceDefaultParameters(
