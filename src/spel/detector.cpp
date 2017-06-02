@@ -283,9 +283,11 @@ namespace SPEL
       {
         // we need to adjust LimbLabel size so we need to resize it twice:
         // at first before calculating score, then after
-        label.Resize(resizeFactor);
+        if(resizeFactor > 0)
+          label.Resize(resizeFactor);
         calculateLabelScore(workFrame, detectorHelper, label, params);
-        label.Resize(pow(resizeFactor, -1));
+        if (resizeFactor > 0)
+          label.Resize(pow(resizeFactor, -1));
       }
     }
 
