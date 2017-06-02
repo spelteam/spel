@@ -208,8 +208,7 @@ namespace SPEL
     auto sum = 0.0f;
     for (const auto &i : fgSampleSizes)
       sum += i;
-    sum /= static_cast<float>(fgNumSamples);
-    return sum;
+    return sum / fgNumSamples;
   }
 
   float ColorHistDetector::PartModel::getAvgSampleSizeFgBetween(

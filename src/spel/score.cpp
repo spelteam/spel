@@ -1,41 +1,28 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "score.hpp"
+#include "spelHelper.hpp"
 // See Score.hpp for more info
 namespace SPEL
 {
-  Score::Score(void) 
+  Score::Score(void) : Score(0, std::string(""), 1.0f, false)
   {
-    m_score = 0;
-    m_detName = "";
-    m_coeff = 1.0f;
-    m_isWeak = false;
   }
 
   Score::Score(const float score, const std::string & name) 
+    : Score(score, name, 1.0f, false)
   {
-    m_score = score;
-    m_detName = name;
-    m_coeff = 1.0f;
-    m_isWeak = false;
   }
 
   Score::Score(const float score, const std::string &name, const float coeff)
-    
+    : Score(score, name, coeff, false)
   {
-    m_score = score;
-    m_detName = name;
-    m_coeff = coeff;
-    m_isWeak = false;
   }
 
   Score::Score(const float score, const std::string & name, const float coeff,
     const bool isWeak) 
+    : m_score(score), m_detName(name), m_coeff(coeff), m_isWeak (isWeak)    
   {
-    m_score = score;
-    m_detName = name;
-    m_coeff = coeff;
-    m_isWeak = isWeak;
   }
 
   Score::Score(const Score & score) 
@@ -91,17 +78,20 @@ namespace SPEL
 
   bool Score::operator<(const Score &score) const 
   {
-    return (m_score * m_coeff < score.m_score * score.m_coeff);
+    return spelHelper::compareFloat(m_score * m_coeff, 
+      score.m_score * score.m_coeff) < 0;
   }
 
   bool Score::operator>(const Score &score) const 
   {
-    return (m_score * m_coeff > score.m_score * score.m_coeff);
+    return spelHelper::compareFloat(m_score * m_coeff, 
+      score.m_score * score.m_coeff) > 0;
   }
 
   bool Score::operator==(const Score &score) const 
   {
-    return (m_score * m_coeff == score.m_score * score.m_coeff && 
+    return (spelHelper::compareFloat(m_score * m_coeff, 
+      score.m_score * score.m_coeff) == 0 &&
       m_detName == score.m_detName);
   }
 

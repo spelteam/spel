@@ -190,12 +190,8 @@ namespace SPEL
     std::stringstream detectorName;
     detectorName << getID();
 
-    SurfDetectorHelper* helper = 0;
-    try
-    {
-      helper = dynamic_cast<SurfDetectorHelper*> (detectorHelper);
-    }
-    catch (...)
+    auto *helper = dynamic_cast<SurfDetectorHelper*> (detectorHelper);
+    if (helper == nullptr)
     {
       const auto &ss = "Wrong type: detectorHelper is not SurfDetectorHelper";
       throw std::logic_error(ss);
