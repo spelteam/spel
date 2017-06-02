@@ -307,7 +307,7 @@ namespace SPEL
     auto count = 0.0f;
     for (const auto &framePartModels : m_partModels)
     {
-      const auto pm = framePartModels.second.find(bodyPart.getPartID());
+      const auto pm = framePartModels.second.find(partId);
       if (pm == framePartModels.second.end())
       {
         std::stringstream ss;
