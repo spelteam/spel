@@ -222,6 +222,9 @@ namespace SPEL
 
   void LimbLabel::Resize(float factor) 
   {
+    if (spelHelper::compareFloat(factor, 0.0f) <= 0 ||
+      spelHelper::compareFloat(factor, 1.0f) == 0)
+      return;
     m_center.x *= factor;
     m_center.y *= factor;
     for (auto &p : m_polygon)
