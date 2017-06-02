@@ -90,7 +90,7 @@ namespace SPEL
       std::map<uint32_t, std::vector<LimbLabel>> Detect(Frame* frame_, std::map<uint32_t, std::vector<LimbLabel>> &Labels) const;
       std::map<uint32_t, std::vector<LimbLabel>> detect(Frame* frame,
           std::map<std::string, float> params,
-         const std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const;
+         std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const;
 
       std::vector<cv::KeyPoint> getPartKeypoints(int partID) const;
       std::map<uint32_t, std::vector<cv::KeyPoint>> getPartsKeypoints() const;
@@ -121,6 +121,9 @@ namespace SPEL
     LimbLabel generateLabel(const BodyPart &bodyPart,
         Frame *workFrame, const cv::Point2f &parent, const cv::Point2f &child,
         DetectorHelper *detectorHelper, std::map<std::string, float> params) const;  // It is gag
+
+    void calculateLabelScore(Frame* workFrame, DetectorHelper* detectorHelper,
+        LimbLabel &label, std::map<std::string, float> params) const;
   };
 
 }

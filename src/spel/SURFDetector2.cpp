@@ -737,14 +737,15 @@ namespace SPEL
 
   std::map<uint32_t, std::vector<LimbLabel>> SURFDetector2::detect(Frame* frame,
        std::map<std::string, float> params, 
-      const std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const
+      std::map<uint32_t, std::vector<LimbLabel>> &limbLabels) const
   {
     changeParameters(params);
+
     std::map<uint32_t, std::vector<LimbLabel>> NewLabels;
     if (limbLabels.size() == 0)
     {
       Skeleton skeleton = frame->getSkeleton();
-	  NewLabels = generatePartsLabels(skeleton);
+      NewLabels = generatePartsLabels(skeleton);
       //NewLabels = generateLimbLabels(frame, params);
     }
 
@@ -756,7 +757,7 @@ namespace SPEL
     detectorName << getID();
 
     // Apply merge and filter
-    std::map<uint32_t, std::vector<LimbLabel>> filteredLabels;
+    /*std::map<uint32_t, std::vector<LimbLabel>> filteredLabels;
     for (uint32_t i = 0; i < NewLabels.size(); i++)
     {
       std::vector<LimbLabel> partLabels = Detector::filterLimbLabels(NewLabels[i],
@@ -764,11 +765,10 @@ namespace SPEL
       spelHelper::RecalculateScoreIsWeak(partLabels, detectorName.str(),
           parameters.isWeakThreshold);
       filteredLabels.emplace(std::pair<uint32_t, std::vector<LimbLabel>>(i, partLabels));
-    }
+    }*/
 
-    //return NewLabels;
-    return merge(limbLabels, filteredLabels, std::map<uint32_t, std::vector<LimbLabel>>());
-
+    //return merge(limbLabels, filteredLabels, std::map<uint32_t, std::vector<LimbLabel>>());
+    return NewLabels;
   }
 
   // It is gag
@@ -830,6 +830,12 @@ namespace SPEL
     LimbLabel Label(id, center, angle, polygon, scores);
 
     return Label;
+  }
+
+  void SURFDetector2::calculateLabelScore(Frame* workFrame, DetectorHelper* detectorHelper,
+      LimbLabel &label, std::map<std::string, float> params) const
+  {
+
   }
 
   std::vector<cv::KeyPoint> SURFDetector2::getPartKeypoints(int partID) const
