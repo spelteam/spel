@@ -283,10 +283,10 @@ namespace SPEL
       {
         // we need to adjust LimbLabel size so we need to resize it twice:
         // at first before calculating score, then after
-        if(resizeFactor > 0)
+        if(spelHelper::compareFloat(resizeFactor, 0.0f) > 0)
           label.Resize(resizeFactor);
         calculateLabelScore(workFrame, detectorHelper, label, params);
-        if (resizeFactor > 0)
+        if (spelHelper::compareFloat(resizeFactor, 0.0f) > 0)
           label.Resize(pow(resizeFactor, -1));
       }
     }
