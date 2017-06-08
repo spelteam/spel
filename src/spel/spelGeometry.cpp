@@ -1063,6 +1063,7 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
         searchDist = searchDistCoeff * partLenght;
       if (searchDist <= 0)
         searchDist = minStep + 1;
+      searchDist *= 0.5f;
 
       auto mask = frame->getMask();
       auto maskSize = mask.size();
