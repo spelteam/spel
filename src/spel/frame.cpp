@@ -190,8 +190,8 @@ namespace SPEL
 
   float Frame::Resize(uint32_t maxHeight)
   {
-    if (maxHeight == 0U)
-      return 0.0f;
+    if (maxHeight == 0U || maxHeight == getFrameSize().height)
+      return 1.0f;
     if (m_image.empty())
       LoadImage();
     if (m_mask.empty())
