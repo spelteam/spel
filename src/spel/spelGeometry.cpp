@@ -1084,15 +1084,15 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
           for (auto y = -searchDist; y < searchDist; y += minStep)
           {
             const auto labelCenter = partCenter + cv::Point2f(x, y);//Shift label center
-            auto blackPixel = true;
-            if(inside(partCenter, maskSize))
+            /*auto blackPixel = true;
+            if(inside(labelCenter, maskSize))
               blackPixel = (mask.at<uint8_t>(static_cast<int>(labelCenter.y), static_cast<int>(labelCenter.x)) <= Q);
             if (!blackPixel)
-            {		  
+            {*/
               for (auto t = 0U; t < partPolygon.size(); ++t)
                 LabelPolygon[t] = RotatedPolygon[t] + cv::Point2f(x, y);//Shift label polygon
               partLabels.push_back(LimbLabel(partID, labelCenter, labelAngle, LabelPolygon, std::vector<Score>(), false));//Create LimbLabel
-            }         
+            /*}*/
           } 
       }
       //Reinsurance: if part labels is empty -
@@ -1105,6 +1105,8 @@ std::vector<int> interpolate3(std::vector<Frame*> frames, ImagePixelSimilarityMa
             RotatedPolygon[t] = spelHelper::rotatePoint2D(partPolygon[t], partCenter, angleShift);//Part polygon rotation
           partLabels.push_back(LimbLabel(partID, partCenter, labelAngle, LabelPolygon, std::vector<Score>(), false));//Create LimbLabel
         }
+      if (partLabels.size() == 0)
+        LimbLabel(partID, partCenter, partAngle, partPolygon, std::vector<Score>(), false);
       Labels.emplace(std::make_pair(partID, partLabels));
       partLabels.clear();
     }

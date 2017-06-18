@@ -92,6 +92,10 @@ int main (int argc, char **argv)
     params.emplace("defaultScale", 1.0f);   
     params.emplace("maxFrameHeight", seq.getFrame(0)->getMask().size().height);
 
+    /*params.emplace(DETECTOR_DETECT_PARAMETERS::MIN_THETA().name(), 175);
+    params.emplace(DETECTOR_DETECT_PARAMETERS::MAX_THETA().name(), 175);
+    params.emplace(DETECTOR_DETECT_PARAMETERS::STEP_THETA().name(), 15);*/
+
     // Create ISM
     /*
     *logStream << "\nCreate ISM\n";
