@@ -38,7 +38,7 @@ cd ../
 REM HDF5
 mkdir hdf5
 cd hdf5
-powershell.exe -Command [Net.ServicePointManager]::SecurityProtocol = 'Ssl3, Tls, Tls11, Tls12'; (new-object System.Net.WebClient).DownloadFile('https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.14/bin/windows/extra/hdf5-1.8.14-win64-vs2013-shared.zip','C:\projects\dependencies\hdf5\hdf5-1.8.14-win64-vs2013-shared.zip')
+powershell.exe -Command [Net.ServicePointManager]::SecurityProtocol = 'Ssl3, Tls, Tls11, Tls12'; (new-object System.Net.WebClient).DownloadFile('https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.14/bin/windows/extra/hdf5-1.8.14-win64-vs2013-shared.zip','C:\projects\dependencies\hdf5\hdf5-1.8.14-win64-vs2013-shared.zip')
 7z x hdf5-1.8.14-win64-vs2013-shared.zip
 cd hdf5-1.8.14
 mkdir win64
